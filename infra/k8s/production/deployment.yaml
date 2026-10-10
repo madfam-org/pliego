@@ -38,6 +38,10 @@ spec:
         enclii.dev/service: pliego
     spec:
       automountServiceAccountToken: false
+      # Kubernetes injects <SERVICE>_PORT=tcp://<ip>:<port> (and friends) for every Service in the namespace
+      # unless this is false. The Service `pliego` produced PLIEGO_PORT=tcp://…:80, which collided with the
+      # app's own PLIEGO_PORT and crash-looped the first deploy (gunicorn: invalid literal for int()).
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001

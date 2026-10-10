@@ -292,6 +292,8 @@ class Assembly:
     sheet id → (x, y) layout offset. `initial`: None (computed when the spec requires it: joins,
     placements), "flat", a dict sheet id → {"angles": {mark: deg}, "root": (u, v)} (face-tree
     pose, `pliego.kinematics`), or a callable (sheet_id, (u, v)) → world (x, y, z).
+    `min_feature_mm`: the smallest intended feature (spec §5.7) — written to
+    ``pliego:meta.min_feature_mm``; `verify()` then floors face areas at its square.
     """
 
     sheets: list[Sheet]
@@ -304,8 +306,14 @@ class Assembly:
     title: str | None = None
     meta: dict = field(default_factory=dict)
     targets: dict[str, InitialSpec] = field(default_factory=dict)
+    min_feature_mm: float | None = None
 
     def __post_init__(self) -> None:
+        if self.min_feature_mm is not None:
+            mf = float(self.min_feature_mm)
+            if not (math.isfinite(mf) and mf > 0):
+                raise ValueError(f"min_feature_mm must be > 0, got {self.min_feature_mm!r}")
+            self.min_feature_mm = mf
         if isinstance(self.sheets, Sheet):
             self.sheets = [self.sheets]
         self.sheets = list(self.sheets)

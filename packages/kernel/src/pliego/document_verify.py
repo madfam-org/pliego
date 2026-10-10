@@ -8,6 +8,7 @@ silent skip. Rule numbers are recorded in ``rule``.
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 from .document import PER_EDGE, PER_FACE, PER_VERTEX, Document
@@ -29,6 +30,8 @@ REQUIRED = ("file_spec", "file_creator", "file_classes", "frame_classes", "frame
 ALLOWED_TREATMENT = {"none": {"B", "J", "U", "F"}, "crease": {"M", "V", "F"},
                      "score": {"M", "V", "F"}, "perforation": {"M", "V", "F", "C"},
                      "cut": {"C"}, "halfcut": {"F"}}
+EDGE_NAME = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+DEFAULT_MIN_FACE_AREA_MM2 = 1.0
 MECH_CONTROL_KEY = {"hinge": "angle_control", "slide": "control", "rotate": "control",
                     "leaf": "control", "translate": "control"}
 
@@ -48,7 +51,20 @@ def _pt(c: Any) -> Vec2 | None:
     return None
 
 
-def verify_document(doc: Document, min_face_area_mm2: float = 1.0) -> list[dict]:
+def face_area_floor(d: dict, out: _Issues | None = None) -> float:
+    """Rule 3 floor (mm²): ``pliego:meta.min_feature_mm``² when declared (> 0), else 1 mm²."""
+    meta = d.get("pliego:meta")
+    mf = meta.get("min_feature_mm") if isinstance(meta, dict) else None
+    if mf is None:
+        return DEFAULT_MIN_FACE_AREA_MM2
+    if isinstance(mf, bool) or not isinstance(mf, int | float) or not math.isfinite(mf) or mf <= 0:
+        if out is not None:
+            out.err(3, "min_feature", f"pliego:meta.min_feature_mm {mf!r} must be a number > 0")
+        return DEFAULT_MIN_FACE_AREA_MM2
+    return float(mf) * float(mf)
+
+
+def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> list[dict]:
     d = doc.data
     out = _Issues()
     missing = [k for k in REQUIRED if k not in d]
@@ -68,8 +84,10 @@ def verify_document(doc: Document, min_face_area_mm2: float = 1.0) -> list[dict]
         out.err(1, "no_sheets", "document has no sheets (sheets=0 is a failure)")
         return list(out)
     _rule2_sheets(d, out)
-    faces_ok = _rule3_faces(d, coords, out, min_face_area_mm2)
+    floor = face_area_floor(d, out) if min_face_area_mm2 is None else float(min_face_area_mm2)
+    faces_ok = _rule3_faces(d, coords, out, floor)
     _rule4_edges(d, out)
+    _edge_extras(d, out)
     _rule5_overlap(d, coords, out)
     _rule6_stocks(d, out)
     _rule7_refs(d, coords, out)
@@ -174,11 +192,12 @@ def _rule3_faces(d: dict, coords: list, out: _Issues, min_area: float) -> bool:
         if len(set(f)) != len(f) or not is_simple_polygon(ring):
             out.err(3, "face_not_simple", f"face {i} is not a simple polygon", face=i)
             ok = False
-        elif a < 0:
-            out.err(3, "face_orientation", f"face {i} is clockwise (area {a:.4f} mm²)", face=i)
+        elif a <= 0:
+            out.err(3, "face_orientation", f"face {i} is clockwise or empty (area {a:.4f} mm²)",
+                    face=i)
             ok = False
-        elif a < min_area:
-            out.err(3, "face_degenerate", f"face {i} area {a:.6f} mm² < {min_area} mm²", face=i)
+    if ok:
+        _rule3_floor(d, coords, out, min_area)
     # tiling: every half-edge used once; boundary area equals face area
     use: dict[tuple[int, int], list[int]] = {}
     for i, f in enumerate(d["faces_vertices"]):
@@ -210,6 +229,67 @@ def _rule3_faces(d: dict, coords: list, out: _Issues, min_area: float) -> bool:
                     f"encloses {b_area[s]:.4f} mm² (gap or overlap)", sheet=s)
             ok = False
     return ok
+
+
+def _rule3_floor(d: dict, coords: list, out: _Issues, min_area: float) -> None:
+    """Area floor per *material face*: faces joined across `J` edges count as one region.
+
+    A `J` edge is artificial (spec §2: it only splits a face so every face is simply connected),
+    so the physical face is the union of the faces it separates; bridging closely spaced holes
+    may leave a thin J-bounded piece that is not a feature of the design."""
+    jset = {frozenset(e) for e, asg in zip(d["edges_vertices"], d["edges_assignment"],
+                                           strict=True) if asg == "J"}
+    faces = d["faces_vertices"]
+    parent = list(range(len(faces)))
+
+    def find(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    if jset:
+        owner: dict[frozenset, int] = {}
+        for i, f in enumerate(faces):
+            for k in range(len(f)):
+                side = frozenset((f[k], f[(k + 1) % len(f)]))
+                if side not in jset:
+                    continue
+                g = owner.setdefault(side, i)
+                if g != i:
+                    ri, rg = find(i), find(g)
+                    if ri != rg:
+                        parent[max(ri, rg)] = min(ri, rg)
+    area: dict[int, float] = {}
+    members: dict[int, list[int]] = {}
+    for i, f in enumerate(faces):
+        r = find(i)
+        area[r] = area.get(r, 0.0) + polygon_area([coords[v] for v in f])
+        members.setdefault(r, []).append(i)
+    for r in sorted(area):
+        if area[r] < min_area:
+            fs = members[r]
+            what = f"face {fs[0]}" if len(fs) == 1 else f"faces {fs} (joined across J edges)"
+            out.err(3, "face_degenerate", f"{what} area {area[r]:.6f} mm² < {min_area:g} mm²",
+                    face=fs[0], faces=fs)
+
+
+# ── edge names and rest angles (spec §3, optional arrays) ────────────────────
+
+
+def _edge_extras(d: dict, out: _Issues) -> None:
+    for i, name in enumerate(d.get("pliego:edges_name") or []):
+        if name is not None and not (isinstance(name, str) and EDGE_NAME.match(name)
+                                     and len(name) <= 80):
+            out.err(1, "edge_name", f"edge {i} name {name!r} is not a kebab-case slug", edge=i)
+    asg = d["edges_assignment"]
+    for i, r in enumerate(d.get("pliego:edges_restAngle") or []):
+        if isinstance(r, bool) or not isinstance(r, int | float) or not -180 <= r <= 180:
+            out.err(4, "rest_angle_range", f"edge {i} rest angle {r!r} outside [−180, 180]",
+                    edge=i)
+        elif r != 0 and i < len(asg) and asg[i] in ("B", "C", "J"):
+            out.err(4, "rest_angle_assignment", f"edge {i} ({asg[i]}) cannot carry a rest "
+                    f"angle ({r})", edge=i)
 
 
 # ── rule 4: assignment / treatment / fold angle / face incidence ─────────────

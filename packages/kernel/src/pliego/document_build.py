@@ -125,8 +125,12 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
     vs: list[int] = []
     es: list[int] = []
     fs: list[int] = []
+    en: list[str | None] = []
+    er: list[float] = []
     edge_base: list[int] = []
     for si, (arr, off) in enumerate(zip(arrs, offsets, strict=True)):
+        en.extend(sheets[si].edge_names(arr))
+        er.extend(sheets[si].edge_rest_angles(arr))
         vb = len(vc)
         edge_base.append(len(ev))
         vc.extend([v.x + off.x, v.y + off.y] for v in arr.vertices)
@@ -142,17 +146,19 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
             fv.append([i + vb for i in f])
             fs.append(si)
 
+    stock_snaps = {slug: resolve_stock(slug, stocks) for slug in sorted({s.stock for s in sheets})}
     sheet_objs = []
     for s, off in zip(sheets, offsets, strict=True):
         pl = s.placement
+        app = stock_snaps[s.stock].get("appearance") or {}
         sheet_objs.append({
             "id": s.id, "label": dict(s.label), "stock": s.stock,  # type: ignore[arg-type]
             "grain_deg": s.grain_deg, "offset": [off.x, off.y],
             "placement": {"origin": list(pl.origin), "rotation": list(pl.rotation)},  # type: ignore[union-attr]
-            "front": s.front.to_dict(), "back": s.back.to_dict(),  # type: ignore[union-attr]
+            "front": s.front.to_dict(app.get("front")),  # type: ignore[union-attr]
+            "back": s.back.to_dict(app.get("back")),  # type: ignore[union-attr]
             "kinematic": None if s.kinematic is None else {"mechanism": s.kinematic},
         })
-    stock_snaps = {slug: resolve_stock(slug, stocks) for slug in sorted({s.stock for s in sheets})}
 
     def resolve_target(t: Mark | int) -> list[int]:
         if isinstance(t, Mark):
@@ -187,6 +193,10 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         "pliego:sheets": sheet_objs,
         "pliego:stocks": stock_snaps,
     }
+    if any(r != 0.0 for r in er):
+        data["pliego:edges_restAngle"] = er
+    if any(n is not None for n in en):
+        data["pliego:edges_name"] = en
     if assembly.title:
         data["file_title"] = assembly.title
     if assembly.joins:
@@ -228,7 +238,9 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         frames.append(_frame_for(assembly, arrs, spec, f"target:{name}"))
     if frames:
         data["file_frames"] = frames
-    meta = {"kernel": KERNEL_ID}
+    meta: dict[str, Any] = {"kernel": KERNEL_ID}
+    if getattr(assembly, "min_feature_mm", None) is not None:
+        meta["min_feature_mm"] = float(assembly.min_feature_mm)
     meta.update({k: v for k, v in (assembly.meta or {}).items() if v is not None})
     meta.update({k: v for k, v in (meta_overrides or {}).items() if v is not None})
     meta["digest"] = None

@@ -285,7 +285,9 @@ def snapshot(card: dict[str, Any] | str, root: Path | str | None = None) -> dict
 
 
 def materials_dir() -> Path:
-    """Locate ``materials/``: ``$PLIEGO_MATERIALS`` or the nearest ancestor that has one."""
+    """Locate ``materials/``: ``$PLIEGO_MATERIALS``, else the nearest ancestor of this module
+    that has one (source checkout), else ``./materials`` (installed package run from the repo or
+    an image whose working directory holds it)."""
     env = os.environ.get("PLIEGO_MATERIALS")
     if env:
         return Path(env)
@@ -294,6 +296,8 @@ def materials_dir() -> Path:
         candidate = parent / "materials"
         if candidate.is_dir():
             return candidate
+    if (Path.cwd() / "materials").is_dir():
+        return Path.cwd() / "materials"
     raise StockError("materials/ not found (set PLIEGO_MATERIALS)")
 
 

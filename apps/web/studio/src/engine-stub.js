@@ -107,6 +107,9 @@ function newell(pts) {
   return unit(n);
 }
 const ease = (x) => x * x * (3 - 2 * x);
+// Fully folded layers are drawn this far from flat (a 75 mm flap opens ~0.7 mm): coplanar layers
+// would z-fight, and real paper has thickness anyway.
+const FLAT_MAX = 179.5;
 
 export class World {
   /** @param {{source: any}} doc @param {Record<string, any>} [opts] */
@@ -224,24 +227,35 @@ export class World {
     return best;
   }
 
-  /** Fold angle per edge (degrees) from the sequence control. */
+  /**
+   * Fold angle per edge (degrees) from the sequence control. Plasticity is approximated without
+   * rates: a crease driven further than its stock's yield angle from its rest angle drags the rest
+   * angle along, and a released crease (physical mode) returns to that rest angle — fold, open and
+   * let go leaves the crease memory of spec §5.6. Kinematic mode leaves a released crease where it
+   * is. Display angles stop just short of flat (FLAT_MAX) so stacked layers never share a plane.
+   */
   _angles() {
     const j = this._j;
     const theta = [...this._theta0];
     const seq = j['pliego:sequence'];
     const seqId = [...this._controlKind].find(([, k]) => k === 'sequence');
-    if (!seq || !seqId) return theta;
-    const s = Math.max(0, Math.min(seq.steps.length, this._controls.get(seqId[0]) || 0));
-    const esheet = j['pliego:edges_sheet'];
-    const relaxed = (e, x) => { const y = this._yield[esheet[e]]; return Math.sign(x) * Math.max(0, Math.abs(x) - y); };
-    for (let k = 0; k < seq.steps.length && k < s; k++) {
-      const step = seq.steps[k];
-      const frac = Math.min(1, s - k);
-      const t = ease(frac);
-      for (const [e, target] of step.targets) theta[e] = theta[e] + (target - theta[e]) * t;
-      for (const e of step.release || []) theta[e] = theta[e] + (relaxed(e, theta[e]) - theta[e]) * t;
+    if (seq && seqId) {
+      const s = Math.max(0, Math.min(seq.steps.length, this._controls.get(seqId[0]) || 0));
+      const esheet = j['pliego:edges_sheet'];
+      const rest = [...this._theta0];
+      const physical = seq.mode !== 'kinematic';
+      for (let k = 0; k < seq.steps.length && k < s; k++) {
+        const step = seq.steps[k];
+        const t = ease(Math.min(1, s - k));
+        for (const [e, target] of step.targets) {
+          theta[e] = theta[e] + (target - theta[e]) * t;
+          const y = this._yield[esheet[e]], d = theta[e] - rest[e];
+          if (Math.abs(d) > y) rest[e] = theta[e] - Math.sign(d) * y;
+        }
+        if (physical) for (const e of step.release || []) theta[e] = theta[e] + (rest[e] - theta[e]) * t;
+      }
     }
-    return theta;
+    return theta.map((x) => Math.max(-FLAT_MAX, Math.min(FLAT_MAX, x)));
   }
 
   /** Whole-sheet mechanism transforms (world space, applied after the face-tree pose). */

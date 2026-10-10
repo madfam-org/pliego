@@ -84,9 +84,32 @@ test('stub: a valley fold lifts the moving half toward the front (+Y)', () => {
   assert.ok(maxY(w) < 1e-6);
   w.setControl('fold', 1); w.step(1 / 60);                  // end of step 1: 90° valley
   assert.ok(Math.abs(maxY(w) - 100) < 1e-6, `half stands 100 mm tall (got ${maxY(w)})`);
-  w.setControl('fold', 2); w.step(1 / 60);                  // folded flat: 180°
-  assert.ok(maxY(w) < 1e-6 && maxY(w) > -1e-6);
-  assert.ok(Math.abs(minX(w) - -100) < 1e-6, 'folded half lies on top of the left half');
+  w.setControl('fold', 2); w.step(1 / 60);                  // folded flat: 180° (drawn at FLAT_MAX)
+  assert.ok(maxY(w) > 0 && maxY(w) < 1, `folded half lies a hair above the left half (got ${maxY(w)})`);
+  assert.ok(Math.abs(minX(w) - -100) < 0.01, 'folded half lies on top of the left half');
+});
+
+test('stub: released creases keep a plastic memory (fold, open, let go)', () => {
+  const maxX = (w) => { const p = w.render().positions; let m = -Infinity; for (let i = 0; i < p.length; i += 3) m = Math.max(m, p[i]); return m; };
+  const program = (steps) => {
+    const d = JSON.parse(JSON.stringify(byName['pliego-half-fold.fold']));
+    d['pliego:sequence'].steps = steps.map(([targets, release], k) => ({ id: `s${k}`, label: { en: `s${k}` }, duration_ms: 1000, targets, release, note: null }));
+    d['pliego:controls'][0].max = steps.length;
+    const w = new stub.World(stub.loadDocument(d));
+    w.setControl('fold', steps.length); w.step(1 / 60);
+    return w;
+  };
+  const sin = (deg) => Math.sin(deg * Math.PI / 180), cos = (deg) => Math.cos(deg * Math.PI / 180);
+  const TOL = 1e-4;   // render positions are Float32
+  // folded flat and let go: springs back by the yield angle (35° for kami) and rests at 145°
+  const a = program([[[[6, 180]], []], [[], [6]]]);
+  assert.ok(Math.abs(maxY(a) - 100 * sin(145)) < TOL, `rests at 145° (maxY ${maxY(a)})`);
+  // folded flat, opened out by hand, let go: the crease keeps a 35° tent instead of lying flat
+  const b = program([[[[6, 180]], []], [[[6, 0]], []], [[], [6]]]);
+  assert.ok(Math.abs(maxY(b) - 100 * sin(35)) < TOL && Math.abs(maxX(b) - 100 * cos(35)) < TOL, `tents at 35° (maxY ${maxY(b)})`);
+  // within the yield angle nothing sets: a 30° fold let go returns flat
+  const c = program([[[[6, 30]], []], [[], [6]]]);
+  assert.ok(Math.abs(maxY(c)) < TOL, `returns flat (maxY ${maxY(c)})`);
 });
 
 test('stub: the leaf turns from right (0°) to left (180°)', () => {

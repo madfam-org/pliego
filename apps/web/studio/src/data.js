@@ -31,8 +31,22 @@ export function normalizeCatalog(j, base) {
       summary: it.summary || it.description || null,
       document: it.document ? new URL(it.document, base).href : null,
       parameters: Array.isArray(it.parameters) ? it.parameters : [],
+      modes: normalizeModes(it.modes),
       exports: Array.isArray(it.export_formats) ? it.export_formats : DEFAULT_EXPORTS,
     }));
+}
+
+/**
+ * Modes arrive as ids (catalog, `modes` on the object detail) or as manifest entries
+ * ({id, label, ...}); both become [{id, label}].
+ * @param {any} raw
+ * @returns {{id: string, label: any}[]}
+ */
+export function normalizeModes(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((m) => (typeof m === 'string' ? { id: m, label: null } : m && typeof m.id === 'string' ? { id: m.id, label: m.label || null } : null))
+    .filter((m) => m !== null);
 }
 
 /** @returns {Promise<{source: 'api'|'demo', items: ReturnType<typeof normalizeCatalog>}>} */
@@ -48,42 +62,54 @@ export async function loadCatalog(studioBase) {
 }
 
 /** Fetch the item's document; with the API, a slug without a static document is generated. */
-export async function fetchDocument(item, source, params) {
-  if (source === 'api' && (!item.document || params)) return regenerate(item.slug, params || {});
+export async function fetchDocument(item, source, params, mode) {
+  if (source === 'api' && (!item.document || params)) return regenerate(item.slug, params || {}, mode);
   if (!item.document) throw new Error(`no document for ${item.slug}`);
   return fetchJson(item.document);
 }
 
 /**
  * GET /api/v1/objects/<slug> → the object's full manifest. The catalog is a summary (it reports a
- * parameter COUNT); parameters and export formats come from here.
+ * parameter COUNT and bare mode ids); parameters, labelled modes and export formats come from here.
  * @param {string} slug
- * @returns {Promise<{parameters: any[], exports: string[]}>}
+ * @returns {Promise<{parameters: any[], modes: {id: string, label: any}[], exports: string[]}>}
  */
 export async function fetchObject(slug) {
   const j = await fetchJson(`${API}/objects/${encodeURIComponent(slug)}`);
   const manifest = (j && j.manifest) || {};
+  const modes = normalizeModes(manifest.modes);
   return {
     parameters: Array.isArray(manifest.parameters) ? manifest.parameters : [],
+    modes: modes.length ? modes : normalizeModes(j && j.modes),
     exports: Array.isArray(j && j.export_formats) ? j.export_formats : DEFAULT_EXPORTS,
   };
 }
 
-/** POST /api/v1/documents {slug, params} → sheet document. */
-export function regenerate(slug, params) {
+/**
+ * Request body for /documents and /exports. The API requires `mode` when an object has more than
+ * one; it is left out when unknown (single-mode objects resolve it themselves).
+ * @param {string} slug @param {Record<string, any>} params @param {string|null|undefined} mode
+ * @param {Record<string, any>} [extra]
+ */
+export function renderBody(slug, params, mode, extra = {}) {
+  return JSON.stringify({ slug, ...(mode ? { mode } : {}), params, ...extra });
+}
+
+/** POST /api/v1/documents {slug, mode?, params} → sheet document. */
+export function regenerate(slug, params, mode) {
   return fetchJson(`${API}/documents`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slug, params }),
+    body: renderBody(slug, params, mode),
   });
 }
 
-/** POST /api/v1/exports {slug, params, format} → Blob. */
-export async function exportFile(slug, params, format) {
+/** POST /api/v1/exports {slug, mode?, params, format} → Blob. */
+export async function exportFile(slug, params, format, mode) {
   const res = await fetch(`${API}/exports`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slug, params, format }),
+    body: renderBody(slug, params, mode, { format }),
   });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText || 'error'}`);
   return res.blob();

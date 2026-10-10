@@ -209,7 +209,24 @@ def sequence_control(id: str = "sequence", label: str | dict | None = None,
 
 # ── sequence (§5.6) ──────────────────────────────────────────────────────────
 
-Target = Mark | int
+
+@dataclass(frozen=True, eq=False)
+class EdgeRef:
+    """One sheet-local edge of a sheet (a single edge of a mark, by its local index) as a step
+    target; resolved to the document's global edge index at build time."""
+
+    sheet: Sheet
+    edge: int
+
+    def __hash__(self) -> int:
+        return hash((id(self.sheet), self.edge))
+
+    def __eq__(self, other: object) -> bool:
+        return (isinstance(other, EdgeRef) and other.sheet is self.sheet
+                and other.edge == self.edge)
+
+
+Target = Mark | EdgeRef | int
 
 
 @dataclass
@@ -230,7 +247,7 @@ class Step:
         if not 100 <= int(self.duration_ms) <= 60000:
             raise ValueError(f"step '{self.id}': duration_ms must be in [100, 60000]")
         self.duration_ms = int(self.duration_ms)
-        self.targets = [(t, None) if isinstance(t, Mark | int) else (t[0], t[1])
+        self.targets = [(t, None) if isinstance(t, Mark | EdgeRef | int) else (t[0], t[1])
                         for t in self.targets]  # type: ignore[misc]
         if self.note is not None:
             self.note = i18n(self.note, self.id)
@@ -244,6 +261,7 @@ class Sequence_:
     mode: str = "physical"
     auto: bool = False
     auto_duration_ms: int = 1500
+    report: dict = field(default_factory=dict, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if self.mode not in ("physical", "kinematic"):
@@ -256,6 +274,27 @@ class Sequence_:
     def fold_each(cls, mode: str = "physical", duration_ms: int = 1500) -> Sequence_:
         """One step per folding mark (M/V), in authored order across sheets."""
         return cls([], mode, auto=True, auto_duration_ms=duration_ms)
+
+    @classmethod
+    def kinematic_path(cls, system: Any, steps: Seq[Step], *, start: Any = None,
+                       substeps: int | dict[str, int] = 8) -> Sequence_:
+        """A `kinematic` program whose in-between states are exact rigid states.
+
+        `steps` are key poses written as ordinary `Step`s (targets = the creases the step moves;
+        spec §5.6: unlisted creases hold, `release` frees a crease). Each is expanded into
+        `substeps` steps (an int, or a dict step id → count) solved with
+        `pliego.kinematics.solve(..., along="chord")`: the listed creases advance evenly along
+        the chord from the current state to their targets while closure holds, and must arrive
+        at their targets (fail loud otherwise). The program starts from `start`
+        (angles {mark | edge: deg}, or an initial-pose spec {"angles": …}) — pass the initial
+        frame's angles when the assembly has one — else from flat. `system` is the `Sheet`
+        (or a single-sheet `Document`). ``.report`` holds DOF and the worst residual."""
+        from .program import kinematic_steps
+
+        out, report = kinematic_steps(system, list(steps), start, substeps)
+        seq = cls(out, mode="kinematic")
+        seq.report = report
+        return seq
 
     def resolve(self, sheets: Seq[Sheet]) -> list[Step]:
         if not self.auto:

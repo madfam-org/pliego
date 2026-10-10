@@ -160,7 +160,15 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
             "kinematic": None if s.kinematic is None else {"mechanism": s.kinematic},
         })
 
-    def resolve_target(t: Mark | int) -> list[int]:
+    def resolve_target(t) -> list[int]:
+        from .assembly import EdgeRef
+
+        if isinstance(t, EdgeRef):
+            si = next((i for i, s in enumerate(sheets) if s is t.sheet), None)
+            if si is None or not 0 <= t.edge < len(arrs[si].edges):
+                raise ValueError(f"edge reference {t.edge} of sheet '{t.sheet.id}' does not "
+                                 "resolve in this assembly")
+            return [edge_base[si] + t.edge]
         if isinstance(t, Mark):
             si = next((i for i, s in enumerate(sheets) if s is t.sheet), None)
             if si is None:

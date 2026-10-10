@@ -1,0 +1,246 @@
+{
+ "file_spec": 1.2,
+ "file_creator": "pliego-engine test docbuilder",
+ "file_title": "page leaf",
+ "file_classes": [
+  "singleModel"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "noJoins"
+ ],
+ "frame_unit": "mm",
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   148,
+   0
+  ],
+  [
+   148,
+   210
+  ],
+  [
+   0,
+   210
+  ]
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   3,
+   0
+  ]
+ ],
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "faces_vertices": [
+  [
+   0,
+   1,
+   2,
+   3
+  ]
+ ],
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:faces_sheet": [
+  0
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "pliego:edges_restAngle": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:sheets": [
+  {
+   "id": "leaf",
+   "label": {
+    "en": "leaf",
+    "es": "leaf",
+    "fr": "leaf",
+    "pt": "leaf"
+   },
+   "stock": "copy-80",
+   "grain_deg": 90,
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     1,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "back": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "kinematic": null
+  }
+ ],
+ "pliego:stocks": {
+  "copy-80": {
+   "name": {
+    "en": "Copy paper 80 g/m²",
+    "es": "Papel bond 80 g/m²",
+    "fr": "Papier ramette 80 g/m²",
+    "pt": "Papel sulfite 80 g/m²"
+   },
+   "gsm": 80,
+   "caliper_mm": 0.1,
+   "derived": {
+    "areal_density": 0.00007999999999999999,
+    "thickness": 0.1,
+    "E_md": 5500000000,
+    "E_cd": 2500000000,
+    "nu": 0.293,
+    "D_md": 501375.9579471371,
+    "D_cd": 227898.16270324416,
+    "crease_k": 16901.380094516804,
+    "crease_yield_deg": 35,
+    "crease_set_rate": 0.6,
+    "score_factor": 0.35,
+    "perf_factor": 0.2,
+    "tear_strain": 0.02,
+    "friction": 0.4,
+    "collision_thickness": 0.1
+   },
+   "derived_basis": "test fixture (rsE §b)"
+  }
+ },
+ "pliego:meta": {
+  "cartridge": "engine-fixture",
+  "mode": "default",
+  "params": {},
+  "kernel": "pliego-engine test docbuilder",
+  "digest": null
+ },
+ "pliego:mechanisms": [
+  {
+   "id": "turn",
+   "type": "leaf",
+   "sheet": "leaf",
+   "spine": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     210
+    ]
+   ],
+   "control": "turn"
+  }
+ ],
+ "pliego:controls": [
+  {
+   "label": {
+    "en": "turn",
+    "es": "turn",
+    "fr": "turn",
+    "pt": "turn"
+   },
+   "id": "turn",
+   "kind": "angle",
+   "min": 0,
+   "max": 180,
+   "default": 0,
+   "unit": "deg"
+  }
+ ],
+ "file_frames": [
+  {
+   "frame_title": "initial",
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_inherit": true,
+   "frame_parent": 0,
+   "vertices_coords": [
+    [
+     0,
+     1,
+     0
+    ],
+    [
+     148,
+     1,
+     0
+    ],
+    [
+     148,
+     1,
+     -210
+    ],
+    [
+     0,
+     1,
+     -210
+    ]
+   ]
+  }
+ ]
+}

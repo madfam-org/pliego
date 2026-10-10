@@ -178,12 +178,12 @@ export class Contact {
     return active;
   }
 
-  /** Ground plane y = 0 with friction. @param {Float64Array} x @param {Float64Array} xs @param {Float64Array} w */
+  /** Ground plane y ≥ 0 with friction. @param {Float64Array} x @param {Float64Array} xs @param {Float64Array} w */
   ground(x, xs, w) {
     let n = 0;
     for (let v = 0; v < this.mesh.nV; v++) {
       if (w[v] === 0) continue;
-      const r = this.tc[v] / 2;
+      const r = 0; // documents lay sheets on the table at y = 0 (mid-surface on the plane)
       const y = x[3 * v + 1];
       if (y >= r) continue;
       n++;

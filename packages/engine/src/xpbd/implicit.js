@@ -109,7 +109,8 @@ export function assembleAndFactor(w, x) {
     let dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
     const L = Math.hypot(dx, dy, dz) || 1;
     u[0] = dx / L; u[1] = dy / L; u[2] = dz / L;
-    const k = kM[e];
+    // the branch the edge is on (soft in compression): a tension-stiff H would converge 20× slower
+    const k = L < w.mesh.edgeLen[e] ? w.kCompFactor * kM[e] : kM[e];
     addOuter(ch, S.diagSlot[a], k, u, 0, u, 0);
     addOuter(ch, S.diagSlot[b], k, u, 0, u, 0);
     addOuter(ch, S.edgeSlot[e], -k, u, 0, u, 0);
@@ -190,6 +191,7 @@ export function gradient(w, x, g) {
     const L = Math.hypot(dx, dy, dz);
     if (L === 0) continue;
     U[3 * e] = dx / L; U[3 * e + 1] = dy / L; U[3 * e + 2] = dz / L;
+    w.edgeK[e] = L < L0[e] ? w.kCompFactor * kM[e] : kM[e];
     const d = L - L0[e];
     const f = ((d < 0 ? w.kCompFactor * kM[e] : kM[e]) * d) / L;
     g[a] -= f * dx; g[a + 1] -= f * dy; g[a + 2] -= f * dz;

@@ -36,7 +36,7 @@ test('contact-stack: two sheets dropped onto each other and onto the ground', ()
     }
     for (let v = 0; v < m.nV; v++) minGround = Math.min(minGround, w.x[3 * v + 1]);
   }
-  const pass = minGap >= 0.9 * tc && minGround >= 0.45 * tc;
+  const pass = minGap >= 0.9 * tc && minGround >= -1e-9;
   proof('contact-stack', minGap, `≥${(0.9 * tc).toFixed(3)}`, '≥0.9·t_c, no NaN', pass, `t_c=${tc} mm, min height over ground ${minGround.toFixed(4)} mm`);
   assert.ok(pass);
 });

@@ -26,6 +26,9 @@ export const PANEL_YIELD_DEG = 60;
 /** Membrane stretch (tension) limit enforced by the post-solve pass (0.5 %). Test `inextensible`. */
 export const STRAIN_LIMIT = 0.005;
 
+/** Gauss–Seidel passes of the strain-limit guard per substep (it runs after contact and friction). */
+export const STRAIN_PASSES = 4;
+
 /** Compressive guard of the strain-limit pass (compression is soft, see MEMBRANE_COMPRESSION). */
 export const COMPRESSION_LIMIT = 0.01;
 
@@ -56,7 +59,11 @@ export const GRAB_STIFFNESS = 2.0e4;
  */
 export const PCG_MAX_ITER = 12;
 export const PCG_REFACTOR_ITER = 6;
-export const PCG_RTOL = 1e-2;
+export const PCG_RTOL = 1e-3;
+/** After a PCG failure, factor directly for this many substeps before trying PCG again. */
+export const PCG_FAIL_HOLD = 4;
+/** Sleep threshold (mm/s): a world with no drivers and every free vertex slower than this skips frames. */
+export const SLEEP_SPEED = 1e-3;
 export const REFACTOR_ANGLE = 0.3;
 
 /** Defaults for World options. */

@@ -235,8 +235,28 @@ export class Drivers {
     // wind
     for (const [id, c] of this.controls) if (c.kind === 'wind') this.wind = /** @type {number} */(this.value.get(id)) * 1000;
     if (this.seq && this.seq.mode === 'physical') dirty = this.applySequence(w, dt) || dirty;
-    if (this.program) { this.advanceSequence(dt); this.program.apply(w, this.seqPos); }
+    if (this.program && this.kin) {
+      // kinematic program: closure is solved once per frame (beginFrame); substeps interpolate
+      const k = this.kin, f = Math.min(1, ++k.i / k.n);
+      for (const v of k.verts) for (let c = 0; c < 3; c++) w.fixedTarget[3 * v + c] = k.a[3 * v + c] + f * (k.b[3 * v + c] - k.a[3 * v + c]);
+    }
     return dirty;
+  }
+
+  /**
+   * Once per frame: advance a kinematic program over the frame's n substeps, solve its rigid pose
+   * at the frame end and set up the per-substep interpolation.
+   * @param {any} w @param {number} n @param {number} dt
+   */
+  beginFrame(w, n, dt) {
+    if (!this.program) return;
+    const verts = this.kinVerts ?? (this.kinVerts = this.program.ownedVertices(w.mesh));
+    const a = Float64Array.from(w.fixedTarget);
+    for (let i = 0; i < n; i++) this.advanceSequence(dt);
+    this.program.apply(w, this.seqPos);
+    const b = Float64Array.from(w.fixedTarget);
+    w.fixedTarget.set(a);
+    this.kin = { a, b, n, i: 0, verts };
   }
 
   /** Move the sequence position toward the control's goal at one step per duration. @param {number} dt */

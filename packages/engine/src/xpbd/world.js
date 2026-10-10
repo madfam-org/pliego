@@ -78,8 +78,11 @@ export class World {
     this.sys = buildSystem(this);
     this.factorDir = new Float64Array(3 * mesh.nE);
     this.edgeDir = new Float64Array(3 * mesh.nE);
+    this.edgeK = new Float64Array(mesh.nE);
     this.hingeGrad = new Float64Array(12 * mesh.nH);
     this.pcgIterations = 0;
+    this._pcgFail = 0;
+    this._asleep = false;
     // safety cap: refactor when any membrane edge has turned this far since the last factorisation
     // (PCG with the stale factorisation handles smaller rotations; see pcg.js)
     this.refactorAngle = opts.refactorAngle ?? K.REFACTOR_ANGLE;
@@ -169,14 +172,14 @@ export class World {
   get positions() { return this.x; }
 
   /** @param {string} id @param {number|boolean} value */
-  setControl(id, value) { this.drivers.setControl(id, value); }
+  setControl(id, value) { this.drivers.setControl(id, value); this._asleep = false; }
 
   /** Current value of a control (after rate limiting / sequence playback). @param {string} id */
   getControl(id) { return this.drivers.value.get(id); }
 
   /** Constant external force on a vertex (µN = g·mm/s²), e.g. a tip load. @param {number} v @param {number[]} f */
-  setForce(v, f) { this.userForce[3 * v] = f[0]; this.userForce[3 * v + 1] = f[1]; this.userForce[3 * v + 2] = f[2]; }
-  clearForces() { this.userForce.fill(0); }
+  setForce(v, f) { this.userForce[3 * v] = f[0]; this.userForce[3 * v + 1] = f[1]; this.userForce[3 * v + 2] = f[2]; this._asleep = false; }
+  clearForces() { this.userForce.fill(0); this._asleep = false; }
 
   /**
    * Advance by whole substeps covering `frameDt` seconds (default one 60 Hz frame).
@@ -187,15 +190,44 @@ export class World {
     const n = Math.floor(this._acc + 1e-9);
     this._acc -= n;
     if (n <= 0) return 0;
+    this.framesRun++;
+    if (this._asleep) { this.time += n * this.dt; return n; }
     this._frame(n);
     for (let i = 0; i < n; i++) this._substep();
-    this.framesRun++;
+    this._sleepCheck();
     return n;
   }
+
+  /**
+   * Deterministic sleep: when nothing drives the sheet (controls settled, no grab, no wind, no
+   * kinematic program moving) and every free vertex is slower than SLEEP_SPEED, later frames are
+   * skipped until a control, grab, force or restore wakes the world. Decided from state only, so
+   * replays stay bit-identical.
+   */
+  _sleepCheck() {
+    if (!K.SLEEP_SPEED) return;
+    const d = this.drivers;
+    if (d.wind !== 0 || this.terms.active[d.grabTerm]) return;
+    for (const [id, g] of d.goal) if (d.value.get(id) !== g) return;
+    if (d.seq && this.seqControlGoal() !== d.seqPos) return;
+    const v = this.v, w = this.invMass, lim = K.SLEEP_SPEED * K.SLEEP_SPEED;
+    for (let i = 0; i < this.mesh.nV; i++) {
+      if (w[i] === 0) continue;
+      if (v[3 * i] ** 2 + v[3 * i + 1] ** 2 + v[3 * i + 2] ** 2 > lim) return;
+    }
+    this._asleep = true;
+  }
+
+  /** @returns {number} */
+  seqControlGoal() { const d = this.drivers; return d.seqControl ? /** @type {number} */(d.goal.get(d.seqControl)) : 0; }
+
+  /** Wake a sleeping world (any interaction calls this). */
+  wake() { this._asleep = false; }
 
   /** Per-frame work: refactor check, contact broad phase. @param {number} n substeps this frame */
   _frame(n) {
     const x = this.x;
+    this.drivers.beginFrame(this, n, this.dt);
     if (this.contact && this.opts.contact) {
       let vmax = 0;
       for (let i = 0; i < this.v.length; i++) vmax = Math.max(vmax, Math.abs(this.v[i]));
@@ -261,11 +293,12 @@ export class World {
       g.fill(0);
       gradient(this, x, g);
       if (it > 0) for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
-      if (!this.dirty) {
+      if (!this.dirty && !(this._pcgFail > 0)) {
         const r = pcgStep(this, x, g, K.PCG_MAX_ITER, K.PCG_RTOL);
         this.pcgIterations = r.iterations;
         if (r.converged) { if (r.iterations > K.PCG_REFACTOR_ITER) this.dirty = true; continue; }
-      }
+        this._pcgFail = K.PCG_FAIL_HOLD; // the sheet is moving fast: factor directly for a few substeps
+      } else if (this._pcgFail > 0) this._pcgFail--;
       assembleAndFactor(this, x);
       this._saveFactorState(x);
       this.dirty = false;
@@ -285,21 +318,6 @@ export class World {
 
   _projections() {
     const x = this.x, w = this.invMass, E = this.mesh.edges, L0 = this.mesh.edgeLen;
-    // strain limit (guard)
-    const lim = K.STRAIN_LIMIT;
-    for (let e = 0; e < this.mesh.nE; e++) {
-      const a = E[2 * e], b = E[2 * e + 1];
-      const wa = w[a], wb = w[b];
-      if (wa + wb === 0) continue;
-      const dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
-      const L = Math.hypot(dx, dy, dz);
-      const lo = L0[e] * (1 - K.COMPRESSION_LIMIT), hi = L0[e] * (1 + lim);
-      if (L >= lo && L <= hi) continue;
-      const target = L > hi ? hi : lo;
-      const s = (L - target) / (L * (wa + wb));
-      x[3 * a] += wa * s * dx; x[3 * a + 1] += wa * s * dy; x[3 * a + 2] += wa * s * dz;
-      x[3 * b] -= wb * s * dx; x[3 * b + 1] -= wb * s * dy; x[3 * b + 2] -= wb * s * dz;
-    }
     // fold limit on fold hinges
     const H = this.mesh.hinges;
     for (let h = 0; h < this.mesh.nH; h++) {
@@ -322,6 +340,21 @@ export class World {
         if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
         if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
       }
+    }
+    // strain limit (guard) last, so friction or contact never leaves the paper stretched
+    const lim = K.STRAIN_LIMIT;
+    for (let pass = 0; pass < K.STRAIN_PASSES; pass++) for (let e = 0; e < this.mesh.nE; e++) {
+      const a = E[2 * e], b = E[2 * e + 1];
+      const wa = w[a], wb = w[b];
+      if (wa + wb === 0) continue;
+      const dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
+      const L = Math.hypot(dx, dy, dz);
+      const lo = L0[e] * (1 - K.COMPRESSION_LIMIT), hi = L0[e] * (1 + lim);
+      if (L >= lo && L <= hi) continue;
+      const target = L > hi ? hi : lo;
+      const s = (L - target) / (L * (wa + wb));
+      x[3 * a] += wa * s * dx; x[3 * a + 1] += wa * s * dy; x[3 * a + 2] += wa * s * dz;
+      x[3 * b] -= wb * s * dx; x[3 * b + 1] -= wb * s * dy; x[3 * b + 2] -= wb * s * dz;
     }
   }
 
@@ -372,13 +405,15 @@ export class World {
     T.k[t] = this.opts.grabStiffness;
     T.active[t] = 1;
     this.dirty = true;
+    this._asleep = false;
     return true;
   }
   /** @param {number[]} point */
-  moveGrab(point) { const inf = this.terms.info[this.drivers.grabTerm]; inf.target = point.slice(0, 3); }
+  moveGrab(point) { const inf = this.terms.info[this.drivers.grabTerm]; inf.target = point.slice(0, 3); this._asleep = false; }
   release() {
     const T = this.terms, t = this.drivers.grabTerm;
     if (T.active[t]) { T.active[t] = 0; T.k[t] = 0; this.dirty = true; }
+    this._asleep = false;
   }
 
   /**
@@ -416,7 +451,7 @@ export class World {
     for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i])) { nan = true; break; }
     return {
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
-      substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, time: this.time, finite: !nan,
+      substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0,
     };
   }
@@ -429,17 +464,19 @@ export class World {
       restTheta: Float64Array.from(this.restTheta), memory: Uint8Array.from(this.memory),
       driveOn: Uint8Array.from(this.driveOn), driveTarget: Float64Array.from(this.driveTarget),
       fixedTarget: Float64Array.from(this.fixedTarget), userForce: Float64Array.from(this.userForce),
-      time: this.time, acc: this._acc, substepsRun: this.substepsRun, framesRun: this.framesRun, dirty: this.dirty,
+      time: this.time, acc: this._acc, substepsRun: this.substepsRun, framesRun: this.framesRun, dirty: this.dirty, asleep: !!this._asleep, pcgFail: this._pcgFail,
       stringTaut: Uint8Array.from(this._stringTaut),
       terms: { active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode), verts: Int32Array.from(T.verts), info: T.info.map((/** @type {any} */ i) => ({ target: i.target ? i.target.slice() : undefined, s: i.s, driven: i.driven, offset: i.offset })) },
-      drivers: { value: [...this.drivers.value], goal: [...this.drivers.goal], seqPos: this.drivers.seqPos, entry: [...this.drivers.entry], entryStep: this.drivers.entryStep, wind: this.drivers.wind },
+      drivers: { value: [...this.drivers.value], goal: [...this.drivers.goal], seqPos: this.drivers.seqPos, entry: [...this.drivers.entry], entryStep: this.drivers.entryStep, wind: this.drivers.wind,
+        program: this.drivers.program ? { rho: Float64Array.from(this.drivers.program.rho), free: Uint8Array.from(this.drivers.program.free), entry: Float64Array.from(this.drivers.program.entry), entryStep: this.drivers.program.entryStep } : null,
+        kin: this.drivers.kin ? { a: Float64Array.from(this.drivers.kin.a), b: Float64Array.from(this.drivers.kin.b), n: this.drivers.kin.n, i: this.drivers.kin.i } : null },
       contactSide: this.contact ? [...this.contact.side] : [],
       factor: this._factorState,
       factorDir: Float64Array.from(this.factorDir),
     };
   }
 
-  /** @param {ReturnType<World['snapshot']>} s */
+  /** Restore a state captured by snapshot() (bit-exact, including the factorisation). @param {any} s */
   restore(s) {
     this.x.set(s.x); this.v.set(s.v); this.theta.set(s.theta); this.restTheta.set(s.restTheta); this.memory.set(s.memory);
     this.fixedTarget.set(s.fixedTarget); this.userForce.set(s.userForce);
@@ -449,6 +486,9 @@ export class World {
     s.terms.info.forEach((/** @type {any} */ i, /** @type {number} */ t) => { if (i.target) T.info[t].target = i.target.slice(); T.info[t].s = i.s; T.info[t].driven = i.driven; T.info[t].offset = i.offset; });
     this.drivers.value = new Map(s.drivers.value); this.drivers.goal = new Map(s.drivers.goal);
     this.drivers.seqPos = s.drivers.seqPos; this.drivers.entry = new Map(s.drivers.entry); this.drivers.entryStep = s.drivers.entryStep; this.drivers.wind = s.drivers.wind;
+    const pr = this.drivers.program, ps = s.drivers.program;
+    if (pr && ps) { pr.rho.set(ps.rho); pr.free = Uint8Array.from(ps.free); pr.entry = Float64Array.from(ps.entry); pr.entryStep = ps.entryStep; }
+    if (s.drivers.kin) this.drivers.kin = { ...s.drivers.kin, a: Float64Array.from(s.drivers.kin.a), b: Float64Array.from(s.drivers.kin.b), verts: this.drivers.kinVerts ?? this.drivers.program?.ownedVertices(this.mesh) ?? [] };
     if (this.contact) this.contact.side = new Map(s.contactSide);
     // rebuild the factorisation exactly as it was
     if (s.factor && this.sys.ch) {
@@ -461,5 +501,7 @@ export class World {
     T.active.set(s.terms.active); T.k.set(s.terms.k); T.mode.set(s.terms.mode); T.verts.set(s.terms.verts);
     this.factorDir.set(s.factorDir);
     this.dirty = s.dirty;
+    this._asleep = s.asleep;
+    this._pcgFail = s.pcgFail;
   }
 }

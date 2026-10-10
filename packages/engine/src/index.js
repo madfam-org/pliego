@@ -8,6 +8,7 @@ export { loadDocument, DocumentError } from './document.js';
 export { buildMesh, defaultMeshEdge, locatePoint, HINGE_PANEL, HINGE_CREASE, HINGE_SCORE, HINGE_PERF } from './mesh.js';
 export { World } from './xpbd/world.js';
 export { dihedral } from './xpbd/dihedral.js';
+export * as kinematics from './kinematics/index.js';
 export * as materials from './material.js';
 export * as constants from './constants.js';
 

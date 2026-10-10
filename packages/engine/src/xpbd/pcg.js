@@ -20,7 +20,7 @@ const P9 = new Float64Array(9);
 export function hessianTimes(w, x, p, out) {
   const nV = w.mesh.nV, idt2 = 1 / (w.dt * w.dt);
   for (let i = 0; i < nV; i++) { const m = w.mass[i] * idt2; out[3 * i] = m * p[3 * i]; out[3 * i + 1] = m * p[3 * i + 1]; out[3 * i + 2] = m * p[3 * i + 2]; }
-  const E = w.mesh.edges, U = w.edgeDir, kM = w.kMem;
+  const E = w.mesh.edges, U = w.edgeDir, kM = w.edgeK;
   for (let e = 0; e < w.mesh.nE; e++) {
     const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
     const ux = U[3 * e], uy = U[3 * e + 1], uz = U[3 * e + 2];
@@ -85,6 +85,7 @@ export function pcgStep(w, x, g, maxIter, rtol) {
       for (let c = 0; c < 3; c++) { d[3 * k + c] += alpha * p[3 * k + c]; r[3 * k + c] -= alpha * Ap[3 * i + c]; rn += r[3 * k + c] ** 2; }
     }
     if (Math.sqrt(rn) <= rtol * r0) { converged = true; it++; break; }
+    if (it === 3 && Math.sqrt(rn) > 0.1 * r0) { it++; break; } // stagnating: refactor instead
     z.set(r); ch.solve(z);
     let rzn = 0;
     for (let i = 0; i < n3; i++) rzn += r[i] * z[i];

@@ -264,6 +264,15 @@ export class World {
     const x = this.x, v = this.v, xs = this.xs, w = this.invMass, f = this.fext;
     if (this.drivers.apply(this, dt)) this.dirty = true;
     xs.set(x);
+    if (this.sys.nFree === 0) {
+      // every vertex is driven (kinematic program / boards): follow the drivers, nothing to solve
+      x.set(this.fixedTarget);
+      for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
+      this._hingeUpdate();
+      this.time += dt;
+      this.substepsRun++;
+      return;
+    }
     const damp = Math.exp(-this.opts.damping * dt);
     f.set(this.userForce);
     const gs = this.opts.gravity === true ? 1 : this.opts.gravity === false ? 0 : Number(this.opts.gravity);

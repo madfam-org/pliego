@@ -15,21 +15,18 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from .assembly import Assembly, Sequence, Step, control, glue, sequence_control, translate
+from .assembly import Assembly, Sequence, Step, glue, sequence_control
 from .mesh import newell
 from .sheet import Placement, Sheet
-from .space import Vec3, add, cross, norm, scale, sub, unit
+from .space import Vec3, add, cross, scale, sub, unit
 from .unfold_geom import Pt, Rigid2, apply, compose, edge_map, inverse
 from .unfold_layout import page_origins
 
 MODES = ("fold", "glued")
 FOLD_LINES = ("auto", "score", "crease")
-EXPLODE_FRACTION = 0.6
 GLUE_INSET_MM = 0.1   # the glued area stops short of the tab's outline (and of its hinge)
 
 ASSEMBLE = {"en": "Assemble", "es": "Armar", "fr": "Monter", "pt": "Montar"}
-EXPLODE = {"en": "Pull the pieces apart", "es": "Separar las piezas",
-           "fr": "Écarter les pièces", "pt": "Afastar as peças"}
 TABS_STEP = {"en": "Fold the glue tabs in", "es": "Dobla las pestañas hacia dentro",
              "fr": "Rabattez les languettes de collage", "pt": "Dobre as abas para dentro"}
 LET_GO = {"en": "Let go: the glue holds the model",
@@ -204,7 +201,7 @@ def _count(nxt: dict, start: tuple[int, int]) -> int:
 
 def build_assembly(net, mode: str = "fold", *, stock: str = "cardstock-250",
                    fold_lines: str = "auto", front: Any = None, back: Any = None,
-                   explode: bool = True, title: str | None = None) -> Assembly:
+                   title: str | None = None) -> Assembly:
     """Sheets, fold program, controls, mechanisms, joins and pages for a `Net`."""
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}")
@@ -252,7 +249,7 @@ def build_assembly(net, mode: str = "fold", *, stock: str = "cardstock-250",
              "pages": [{"id": f"page-{k + 1}", "origin": list(o)}
                        for k, o in enumerate(page_origins(net))]}
     if mode == "fold":
-        return _fold_assembly(net, sheets, tree_marks, tab_marks, layout, pages, explode, title)
+        return _fold_assembly(net, sheets, tree_marks, tab_marks, layout, pages, title)
     return _glued_assembly(net, sheets, tree_marks, tab_marks, layout, pages, title)
 
 
@@ -281,7 +278,7 @@ def _cuts_of(net, i: int) -> list[int]:
     return sorted({c.number for c in net.cuts if any(s[0] == i for s in c.sides)})
 
 
-def _fold_assembly(net, sheets, tree_marks, tab_marks, layout, pages, explode, title):
+def _fold_assembly(net, sheets, tree_marks, tab_marks, layout, pages, title):
     steps = []
     all_tabs = [m for ms in tab_marks for m in ms]
     if all_tabs:
@@ -296,22 +293,10 @@ def _fold_assembly(net, sheets, tree_marks, tab_marks, layout, pages, explode, t
     if not steps:
         raise ValueError("the net has no fold to program")
     controls = [sequence_control(label=ASSEMBLE)]
-    mechanisms = []
-    if explode and len(sheets) > 1:
-        lo, hi = net.mesh.bounds()
-        size = max(hi[i] - lo[i] for i in range(3))
-        travel = round(EXPLODE_FRACTION * size, 3)
-        centre = tuple((lo[i] + hi[i]) / 2.0 for i in range(3))
-        controls.append(control("explode", "distance", EXPLODE, 0.0, 0.0, travel, "mm"))
-        for s, isl in zip(sheets, net.islands, strict=True):
-            c = [net.mesh.centroid(f) for f in isl.faces]
-            mid = tuple(math.fsum(p[i] for p in c) / len(c) for i in range(3))
-            d = sub(mid, centre)
-            direction = unit(d) if norm(d) > 1e-9 else (0.0, 1.0, 0.0)
-            mechanisms.append(translate(f"explode-{s.id}", "explode",
-                                        [round(x, 9) for x in direction], travel, [s]))
-    return Assembly(sheets, [], mechanisms, controls, Sequence(steps, mode="kinematic"),
-                    layout=layout, title=title, pages=pages)
+    assembled = {s.id: {"angles": {m: m.fold_angle for m in tm + bm}}
+                 for s, tm, bm in zip(sheets, tree_marks, tab_marks, strict=True)}
+    return Assembly(sheets, [], [], controls, Sequence(steps, mode="kinematic"),
+                    layout=layout, title=title, pages=pages, targets={"assembled": assembled})
 
 
 def _glued_assembly(net, sheets, tree_marks, tab_marks, layout, pages, title):

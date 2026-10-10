@@ -20,8 +20,8 @@
 4. **Pages.** Islands are rotated to fit and shelf-packed onto A4 or US Letter pages with margins.
 5. `Net.assembly(mode)` (`unfold_build`) writes one sheet per island. Mode `fold`: a kinematic
    program folds every island from flat into its 3-D pose (tab hinges first, then one step per
-   piece); an `explode` control pulls the pieces apart. Mode `glued`: the assembled model as the
-   initial frame with a glue join under every tab, for the physics engine.
+   piece), with the assembled model as a `target:assembled` frame. Mode `glued`: the assembled
+   model as the initial frame with a glue join under every tab, for the physics engine.
 
 Every island's crease pattern is a tree of hinges with no interior vertex (each mesh vertex inside
 an island keeps at least one cut), so any fold-angle state is rigid and the kinematic program is
@@ -105,8 +105,8 @@ class Net:
     report: dict = field(default_factory=dict)
 
     def assembly(self, mode: str = "fold", **kw: Any):
-        """The `pliego.Assembly` of this net — mode `fold` (kinematic fold-up program, explode
-        control) or `glued` (assembled initial frame, glue joins, physical release)."""
+        """The `pliego.Assembly` of this net — mode `fold` (kinematic fold-up program, assembled
+        target frame) or `glued` (assembled initial frame, glue joins, physical release)."""
         from .unfold_build import build_assembly
 
         return build_assembly(self, mode, **kw)

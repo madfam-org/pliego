@@ -161,8 +161,9 @@ def test_assembly_documents_verify_and_match_the_schema(model, stocks, mode):
         assert data["pliego:sequence"]["mode"] == "physical"
     else:
         assert data["pliego:sequence"]["mode"] == "kinematic"
-        ids = [c["id"] for c in data["pliego:controls"]]
-        assert ids == (["sequence", "explode"] if len(net.islands) > 1 else ["sequence"])
+        assert [c["id"] for c in data["pliego:controls"]] == ["sequence"]
+        assert "pliego:mechanisms" not in data
+        assert [f["frame_title"] for f in data["file_frames"]] == ["initial", "target:assembled"]
     assert doc.to_bytes() == net.assembly(mode).build(stocks=stocks).to_bytes()
 
 

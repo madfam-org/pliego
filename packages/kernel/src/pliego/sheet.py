@@ -39,7 +39,8 @@ from .geometry import (
 
 SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 KINDS = {"valley": "V", "mountain": "M", "flat": "F", "unassigned": "U", "cut": "C"}
-ALLOWED = {  # spec §4: treatment → allowed assignments
+ALLOWED = {  # spec §4: treatment → allowed assignments (B and J are never authored)
+    "none": {"F", "U"},
     "crease": {"M", "V", "F"},
     "score": {"M", "V", "F"},
     "perforation": {"M", "V", "F", "C"},
@@ -265,6 +266,14 @@ class Sheet:
               rest: float | None = None) -> Mark:
         """A scored line (blade/laser at reduced power); folds if `kind` is valley/mountain."""
         return self.crease(a, b, kind, angle, "score", label, name=name, rest=rest)
+
+    def bend(self, a: PointLike, b: PointLike, label: str | dict | None = None, *,
+             name: str | None = None) -> Mark:
+        """An untreated facet line (spec §4: `F` + treatment `none`): plain paper that bends
+        smoothly — the rulings of a rolled cone or cylinder, the facets of a curved surface.
+        It splits faces so a fold program can target it, but nothing scores or creases it, so
+        exporters never draw it. Polylines: `path(points, "flat", treatment="none")`."""
+        return self.crease(a, b, "flat", 0.0, "none", label, name=name)
 
     def perforate(self, a: PointLike, b: PointLike, kind: str = "flat", angle: float = 0.0,
                   label: str | dict | None = None, *, name: str | None = None,

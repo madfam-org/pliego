@@ -40,3 +40,26 @@ def test_tab_adds_region_and_hinge():
     assert pliego.polygon_area(tab.region) > 0
     arr = s.build()
     assert any(arr.assignment[e] == "V" for e in tab.mark.edges())
+
+
+def test_bend_is_an_untreated_facet_line(stocks):
+    """`bend` authors F + treatment none (spec §4): a sequence can drive it, exporters skip it."""
+    from pliego.export.plan import build_plan
+
+    s = pliego.Sheet("cone", pliego.rectangle(120, 60),
+                     label={"en": "Cone", "es": "Cono", "fr": "Cône", "pt": "Cone"})
+    rulings = [s.bend((x, 0), (x, 60), name=f"ruling-{k}") for k, x in enumerate((30, 60, 90))]
+    poly = s.path([(10, 0), (10, 30), (10, 60)], "flat", treatment="none")
+    arr = s.build()
+    for m in rulings + [poly]:
+        assert m.edges()
+        assert {(arr.assignment[e], arr.treatment[e]) for e in m.edges()} == {("F", "none")}
+        assert all(arr.fold_angle[e] == 0 for e in m.edges())
+    steps = [pliego.Step("roll", {"en": "Roll"}, [(m, 30.0) for m in rulings])]
+    doc = pliego.Assembly([s], controls=[pliego.sequence_control()],
+                          sequence=pliego.Sequence(steps)).build(stocks=stocks)
+    assert not [i for i in doc.verify() if i["level"] == "error"]
+    plan = build_plan(doc)
+    assert not [st for st in plan.strokes if st.layer != "cut"]   # nothing scored or creased
+    with pytest.raises(ValueError):
+        s.crease((0, 10), (120, 10), "valley", treatment="none")  # none allows only F / U

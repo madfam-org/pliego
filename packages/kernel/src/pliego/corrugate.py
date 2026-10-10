@@ -214,32 +214,60 @@ def stack(construction: dict) -> list[SectionLayer]:
     return out
 
 
-def section_voids(construction: dict, pitches: int) -> tuple[float, float, list[list[tuple]]]:
+def _clip(pts: Sequence[tuple[float, float]], x0: float, x1: float) -> list[tuple[float, float]]:
+    """The part of an x-monotone polyline between x0 and x1 (end points interpolated)."""
+    def at(x: float) -> tuple[float, float]:
+        for (ax, az), (bx, bz) in zip(pts, pts[1:], strict=False):
+            if ax <= x <= bx and bx > ax:
+                return (x, az + (bz - az) * (x - ax) / (bx - ax))
+        raise ValueError("x outside the polyline")
+    return [at(x0)] + [p for p in pts if x0 < p[0] < x1] + [at(x1)]
+
+
+def section(construction: dict, pitches: int) -> tuple[list[tuple[float, float]],
+                                                        list[list[tuple[float, float]]]]:
     """Cross-section of a corrugated construction seen along the flutes, ``pitches`` flutes of
-    the bottom wall long: (length, caliper, voids). The section runs from mid top-land to mid
-    top-land; each void is the quadrilateral between a liner face and the medium's offset face.
-    Voids crossing the section's ends are left out (the end half-voids stay solid)."""
+    the bottom wall long, from mid top-land to mid top-land: (outline, voids). Each void is the
+    quadrilateral between a liner face and the medium's offset face; voids crossing the ends
+    are left out (the end half-voids stay solid). A medium with no liner on its outer side
+    (single face) shapes the outline instead — its flutes are exposed."""
     slabs = stack(construction)
     layers = list(reversed(board._layers(construction)))      # bottom up, as slabs
-    walls = [(slab, wall(layer["flute"], layer["caliper_um"]))
-             for slab, layer in zip(slabs, layers, strict=True) if slab.role == "medium"]
-    length = pitches * walls[0][1].pitch
+    walls = [(i, slab, wall(layer["flute"], layer["caliper_um"]))
+             for i, (slab, layer) in enumerate(zip(slabs, layers, strict=True))
+             if slab.role == "medium"]
+    length = pitches * walls[0][2].pitch
+    caliper = slabs[-1].z1
+    bottom_edge = [(0.0, 0.0), (length, 0.0)]
+    top_edge = [(0.0, caliper), (length, caliper)]
     voids: list[list[tuple]] = []
-    for slab, w in walls:
-        n = max(1, math.ceil(length / w.pitch))
+    for i, slab, w in walls:
+        n = max(1, math.ceil(length / w.pitch)) + 1
         pts = [(x - w.land / 2.0, z) for x, z in profile(w, n + 1, "trapezoid")]
         mid = (slab.z0 + slab.z1) / 2.0
         top = [(x, mid + z) for x, z in _offset_polyline(pts, w.medium_mm / 2.0)]
         bot = [(x, mid + z) for x, z in _offset_polyline(pts, -w.medium_mm / 2.0)]
+        open_top, open_bottom = i == len(slabs) - 1, i == 0
+        if open_top:
+            top_edge = _clip(top, 0.0, length)
+        if open_bottom:
+            bottom_edge = _clip(bot, 0.0, length)
         for k in range(n + 1):
-            i = 4 * k
-            if i + 4 < len(top):        # above bottom land k, under the upper liner
-                voids.append([top[i + 1], top[i + 2], top[i + 3], top[i + 4]])
-            if i + 6 < len(bot):        # under top land k + 1, over the lower liner
-                voids.append([bot[i + 3], bot[i + 4], bot[i + 5], bot[i + 6]])
-    caliper = slabs[-1].z1
+            j = 4 * k
+            if j + 4 < len(top) and not open_top:
+                voids.append([top[j + 1], top[j + 2], top[j + 3], top[j + 4]])
+            if j + 6 < len(bot) and not open_bottom:
+                voids.append([bot[j + 3], bot[j + 4], bot[j + 5], bot[j + 6]])
     kept = [v for v in voids if all(1e-9 < x < length - 1e-9 for x, _ in v)]
-    return length, caliper, kept
+    outline = bottom_edge + top_edge[::-1]
+    return outline, kept
+
+
+def section_voids(construction: dict, pitches: int) -> tuple[float, float, list[list[tuple]]]:
+    """(length, caliper, voids) of :func:`section` (kept for callers that want the box)."""
+    outline, voids = section(construction, pitches)
+    xs = [p[0] for p in outline]
+    return max(xs) - min(xs), stack(construction)[-1].z1, voids
 
 
 def section_sheet(sheet_id: str, construction: dict, pitches: int, *, scale: float = 1.0,
@@ -248,10 +276,10 @@ def section_sheet(sheet_id: str, construction: dict, pitches: int, *, scale: flo
     cut out, scaled by ``scale`` (5 = five times life size)."""
     if not scale > 0:
         raise ValueError("scale must be positive")
-    length, caliper, voids = section_voids(construction, pitches)
+    outline, voids = section(construction, pitches)
     s = scale
-    sheet = Sheet(sheet_id, [(0.0, 0.0), (length * s, 0.0), (length * s, caliper * s),
-                             (0.0, caliper * s)], stock=stock, grain_deg=0.0, label=label)
+    sheet = Sheet(sheet_id, [(x * s, z * s) for x, z in outline], stock=stock, grain_deg=0.0,
+                  label=label)
     for v in voids:
         sheet.hole([(x * s, z * s) for x, z in v])
     return sheet

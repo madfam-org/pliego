@@ -82,7 +82,7 @@ of the corrugation model; formulas and sources in the module docstring and in th
 ```
 
 - `kind` ∈ `corrugated` (layers alternate `liner` and `medium`, top layer = the board's front;
-  single face = `liner, medium`) · `laminate` (`ply` layers, top first).
+  single face = `liner, medium`, or `medium, liner` with the flutes up) · `laminate` (`ply` layers, top first).
 - A `medium` names its `flute` ∈ `A B C E F` (pitch and flute height from `pliego.board.FLUTES`).
   The flutes run across the machine direction (axes along CD).
 - Each layer is `measured`/`nominal` (needs `source`) or `estimated` (needs `basis`).

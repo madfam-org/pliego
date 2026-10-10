@@ -7,7 +7,8 @@ units exactly as it does for plain paper. This module is the **only** place the 
 model lives (the stock module calls it; the corrugation generator reuses its flute table).
 
 Corrugated board (``kind: "corrugated"``) is modelled as a sandwich, top layer first:
-``liner, medium, liner[, medium, liner…]`` (single face: ``liner, medium``). The flutes run
+``liner, medium, liner[, medium, liner…]`` (single face: ``liner, medium`` or, flutes up,
+``medium, liner``). The flutes run
 across the machine direction (their axes lie along CD), as they leave a corrugator.
 
 - **Flute geometry.** Pitch λ from the flutes-per-metre designation (Foster 1997, as tabled in
@@ -147,11 +148,11 @@ def _layers(c: Any) -> list[dict]:
         out.append(layer)
     if kind == "corrugated":
         roles = [layer["role"] for layer in out]
-        if roles[0] != "liner" or len(roles) < 2:
-            raise BoardError("corrugated layers start with a liner and hold a medium")
         for a, b in zip(roles, roles[1:], strict=False):
             if a == b:
                 raise BoardError("corrugated layers alternate liner and medium")
+        if "liner" not in roles or "medium" not in roles:
+            raise BoardError("corrugated layers hold at least one liner and one medium")
     adhesive = c.get("adhesive_gsm_per_glueline", DEFAULT_ADHESIVE_GSM)
     if not isinstance(adhesive, (int, float)) or adhesive < 0:
         raise BoardError("construction.adhesive_gsm_per_glueline must be ≥ 0")

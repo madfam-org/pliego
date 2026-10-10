@@ -104,7 +104,7 @@ def test_unsymmetric_neutral_axis_shifts():
     ({"kind": "foam"}, "kind"),
     ({"model": "other"}, "model"),
     ({"layers": []}, "layers"),
-    ({"layers": [_layer("medium", flute="B")]}, "start with a liner"),
+    ({"layers": [_layer("medium", flute="B")]}, "one liner and one medium"),
     ({"layers": [_layer("liner"), _layer("liner")]}, "alternate"),
     ({"layers": [_layer("liner"), _layer("medium", flute="Z")]}, "flute"),
     ({"layers": [_layer("liner"), _layer("medium", um=900, flute="F")]}, "below"),

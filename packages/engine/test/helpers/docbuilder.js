@@ -158,15 +158,16 @@ function round(x) { return Math.round(x * 1e6) / 1e6 + 0; }
 // ---------------------------------------------------------------- fixtures
 
 /** Square with one valley diagonal crease and a sequence that folds it to `angle`. */
-export function squareValley({ size = 100, stock = 'copy-80', angle = 180, release = true } = {}) {
+export function squareValley({ size = 100, stock = 'copy-80', angle = 180, release = true, unfold = false } = {}) {
   const b = new DocBuilder('square with one valley crease');
   const s = b.sheet({ id: 'square', stock, width: size, height: size });
   const v0 = b.vertex(s, 0, 0), v1 = b.vertex(s, size, 0), v2 = b.vertex(s, size, size), v3 = b.vertex(s, 0, size);
   b.face([v0, v1, v2]);
   b.face([v0, v2, v3]);
   const crease = b.assign(v0, v2, 'V', angle);
-  b.control({ id: 'sequence', kind: 'sequence', min: 0, max: release ? 2 : 1, default: 0 });
   const steps = [{ id: 'valley-diagonal', label: L4('Valley-fold the diagonal', 'Doblez de valle en la diagonal', 'Pli vallée sur la diagonale', 'Dobra vale na diagonal'), duration_ms: 1500, targets: [[crease, angle]], release: [], note: null }];
+  if (unfold) steps.push({ id: 'unfold', label: L4('Unfold', 'Desdoblar', 'Déplier', 'Desdobrar'), duration_ms: 1500, targets: [[crease, 0]], release: [], note: null });
+  b.control({ id: 'sequence', kind: 'sequence', min: 0, max: steps.length + (release ? 1 : 0), default: 0 });
   if (release) steps.push({ id: 'release', label: L4('Let go', 'Soltar', 'Lâcher', 'Soltar'), duration_ms: 1000, targets: [], release: [crease], note: null });
   b.sequence = { mode: 'physical', steps };
   return { builder: b, doc: b.build(), crease };
@@ -230,4 +231,91 @@ export function twoSheetStack({ size = 80, gap = 6, height = 20, stock = 'copy-8
   b.rect({ id: 'lower', stock, width: size, height: size, placement: { origin: [0, height, size], rotation: [0, 0, 0, 1] } });
   b.rect({ id: 'upper', stock, width: size, height: size, placement: { origin: [10, height + gap, size + 10], rotation: [0, 0, 0, 1] } });
   return b.build();
+}
+
+/**
+ * Square sheet with one interior degree-4 vertex; creases at angles φ₁…φ₄ (CCW) with sector angles
+ * α = (α₁, α₂, α₃, α₄) degrees (α_i between creases i and i+1). Assignments from `signs` (+1 V, −1 M).
+ * Returns {doc, creases: [e1..e4], builder}.
+ */
+export function degree4({ alpha = [70, 80, 110, 100], size = 160, phi0 = 15, signs = [1, -1, 1, 1], stock = 'copy-80' } = {}) {
+  const b = new DocBuilder('degree-4 vertex');
+  const s = b.sheet({ id: 'vertex', stock, width: size, height: size });
+  const c = size / 2;
+  const phis = [phi0];
+  for (let i = 0; i < 3; i++) phis.push(phis[i] + alpha[i]);
+  const ray = (/** @type {number} */ deg) => {
+    const t = (deg * Math.PI) / 180, dx = Math.cos(t), dy = Math.sin(t);
+    let best = Infinity;
+    for (const [nx, ny, off] of [[1, 0, size], [-1, 0, 0], [0, 1, size], [0, -1, 0]]) {
+      const den = nx * dx + ny * dy;
+      if (den <= 1e-12) continue;
+      const tt = (nx > 0 || ny > 0 ? off - (nx * c + ny * c) : -(nx * c + ny * c)) / den;
+      if (tt > 0) best = Math.min(best, tt);
+    }
+    return [c + best * dx, c + best * dy];
+  };
+  // boundary parameter (CCW perimeter position) for sorting
+  const per = (/** @type {number[]} */ p) => {
+    const [x, y] = p, e = 1e-9;
+    if (Math.abs(y) < e) return x; if (Math.abs(x - size) < e) return size + y; if (Math.abs(y - size) < e) return 3 * size - x; return 4 * size - y;
+  };
+  const ends = phis.map(ray);
+  const center = b.vertex(s, c, c);
+  const endV = ends.map((p) => b.vertex(s, p[0], p[1]));
+  const corners = [[0, 0], [size, 0], [size, size], [0, size]].map((p) => ({ p, t: per(p), v: -1 }));
+  const faces = [];
+  for (let i = 0; i < 4; i++) {
+    const ta = per(ends[i]), tb = per(ends[(i + 1) % 4]);
+    const between = corners.filter((k) => { const d = (k.t - ta + 4 * size) % (4 * size), span = (tb - ta + 4 * size) % (4 * size); return d > 1e-9 && d < span - 1e-9; })
+      .sort((x, y) => ((x.t - ta + 4 * size) % (4 * size)) - ((y.t - ta + 4 * size) % (4 * size)));
+    const ring = [center, endV[i]];
+    for (const k of between) { if (k.v < 0) k.v = b.vertex(s, k.p[0], k.p[1]); ring.push(k.v); }
+    ring.push(endV[(i + 1) % 4]);
+    faces.push(ring);
+  }
+  for (const f of faces) b.face(f);
+  const creases = endV.map((ev, i) => b.assign(center, ev, signs[i] > 0 ? 'V' : 'M', 0));
+  return { doc: b.build(), creases, builder: b };
+}
+
+/**
+ * Miura-ori sheet: `nx × ny` parallelogram panels with sides a (zig-zag) and b (straight), angle γ.
+ * Zig-zag rows run along u; straight creases along v. Assignments follow the Miura pattern.
+ * Returns {doc, zig: edge[][], straight: edge[][], grid: vertex[][]}.
+ */
+export function miura({ nx = 4, ny = 4, a = 20, b: bb = 20, gamma = 60, stock = 'copy-80' } = {}) {
+  const B = new DocBuilder('miura-ori');
+  const g = (gamma * Math.PI) / 180;
+  const lx = a * Math.sin(g), dy = a * Math.cos(g);
+  const W = nx * lx, H = ny * bb + dy;
+  const s = B.sheet({ id: 'miura', stock, width: W, height: H });
+  /** @type {number[][]} */
+  const grid = [];
+  for (let i = 0; i <= nx; i++) { grid.push([]); for (let j = 0; j <= ny; j++) grid[i].push(B.vertex(s, i * lx, j * bb + (i % 2 ? dy : 0))); }
+  for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) B.face([grid[i][j], grid[i + 1][j], grid[i + 1][j + 1], grid[i][j + 1]]);
+  const zig = [], straight = [];
+  for (let j = 1; j < ny; j++) { const row = []; for (let i = 0; i < nx; i++) row.push(B.assign(grid[i][j], grid[i + 1][j], j % 2 ? 'M' : 'V', 0)); zig.push(row); }
+  for (let i = 1; i < nx; i++) { const col = []; for (let j = 0; j < ny; j++) col.push(B.assign(grid[i][j], grid[i][j + 1], (i + j) % 2 ? 'M' : 'V', 0)); straight.push(col); }
+  return { doc: B.build(), zig, straight, grid, builder: B };
+}
+
+/**
+ * Attach an `initial` frame posed rigidly by the face tree (fold angle per edge, degrees) — the
+ * kernel does the same kinematically; used to start Tier C on a chosen branch.
+ * @param {any} json @param {Map<number, number>} anglesDeg
+ */
+export async function withInitialPose(json, anglesDeg) {
+  const { loadDocument } = await import('../../src/document.js');
+  const { FaceTree } = await import('../../src/kinematics/facetree.js');
+  const doc = loadDocument(json);
+  const rho = new Float64Array(doc.nE);
+  for (const [e, a] of anglesDeg) rho[e] = (a * Math.PI) / 180;
+  const X = new Float64Array(3 * doc.nV);
+  for (let s = 0; s < doc.sheets.length; s++) new FaceTree(doc, s).pose(rho, X);
+  const out = JSON.parse(JSON.stringify(json));
+  const coords = [];
+  for (let v = 0; v < doc.nV; v++) coords.push([X[3 * v], X[3 * v + 1], X[3 * v + 2]].map(round));
+  out.file_frames = [{ frame_title: 'initial', frame_classes: ['foldedForm'], frame_attributes: ['3D'], frame_inherit: true, frame_parent: 0, vertices_coords: coords }];
+  return out;
 }

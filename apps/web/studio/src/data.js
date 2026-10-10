@@ -145,3 +145,8 @@ export async function loadEngine(prefer) {
   const mod = await import('./engine-stub.js');
   return { mod, kind: 'stub', reason };
 }
+
+/** The preview engine (the stub): rigid poses, no physics. */
+export async function loadPreview() {
+  return { mod: await import('./engine-stub.js'), kind: 'stub', reason: 'preview (no physics)' };
+}

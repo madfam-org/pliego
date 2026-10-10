@@ -278,6 +278,18 @@
     "pliego:sequence": {
       "$ref": "#/$defs/sequence"
     },
+    "pliego:pieces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/piece"
+      }
+    },
+    "pliego:stacks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stack"
+      }
+    },
     "pliego:meta": {
       "$ref": "#/$defs/meta"
     },
@@ -295,21 +307,21 @@
       }
     },
     "pliego:dielines": {
-      "description": "Lane P draft (spec §5.8): packaging dieline blocks.",
+      "description": "Lane P draft (spec §5.9): packaging dieline blocks.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/dielineBlock"
       }
     },
     "pliego:finishes": {
-      "description": "Lane P draft (spec §5.9): pressing and burning regions.",
+      "description": "Lane P draft (spec §5.10): pressing and burning regions.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/finish"
       }
     },
     "pliego:artwork": {
-      "description": "Lane P draft (spec §5.10): brand artwork placed on sheet sides.",
+      "description": "Lane P draft (spec §5.11): brand artwork placed on sheet sides.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/artwork"
@@ -1267,6 +1279,12 @@
                     "$ref": "#/$defs/i18n"
                   }
                 ]
+              },
+              "remove": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/slug"
+                }
               }
             },
             "additionalProperties": false
@@ -1343,6 +1361,102 @@
           "items": {
             "$ref": "#/$defs/vec3"
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "piece": {
+      "description": "Spec §5.8: one separable region of a sheet (faces bounded by outline, cut, perforation or kiss-cut edges), kept or meant to come away.",
+      "type": "object",
+      "required": [
+        "id",
+        "sheet",
+        "role",
+        "faces"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/slug"
+        },
+        "sheet": {
+          "$ref": "#/$defs/slug"
+        },
+        "role": {
+          "enum": [
+            "keep",
+            "excess"
+          ]
+        },
+        "faces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/index"
+          }
+        },
+        "label": {
+          "$ref": "#/$defs/i18n"
+        },
+        "pull": {
+          "$ref": "#/$defs/vec3"
+        }
+      },
+      "additionalProperties": false
+    },
+    "stack": {
+      "description": "Spec §5.8: an ordered pile of congruent sheets, bottom first, pitch_mm apart along the bottom sheet's front normal.",
+      "type": "object",
+      "required": [
+        "id",
+        "sheets",
+        "pitch_mm"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/slug"
+        },
+        "sheets": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/slug"
+          }
+        },
+        "pitch_mm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "represents": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bond": {
+          "enum": [
+            "none",
+            "keep",
+            "all"
+          ]
+        },
+        "binding": {
+          "type": "object",
+          "required": [
+            "kind",
+            "edge"
+          ],
+          "properties": {
+            "kind": {
+              "const": "padding"
+            },
+            "edge": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/$defs/vec2"
+              }
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

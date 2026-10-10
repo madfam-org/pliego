@@ -10,7 +10,7 @@ them. :meth:`Dieline.build` derives everything else:
   through slit (cut);
 - every free outline edge is named after its panel, so interfaces can cite ``glue-flap``,
   ``tuck-flap``…;
-- the ``pliego:dieline`` block (spec §5.8, lane P draft): style, inside dimensions, caliper,
+- the ``pliego:dieline`` block (spec §5.9, lane P draft): style, inside dimensions, caliper,
   panels with their bleed and safe-area polygons, glue zones, dimension lines and the
   grain/flute arrow — the dieline export profile draws it.
 

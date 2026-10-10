@@ -1,4 +1,4 @@
-"""Pressing, burning and brand artwork on a sheet (spec §5.9–§5.10, lane P draft).
+"""Pressing, burning and brand artwork on a sheet (spec §5.10–§5.11, lane P draft).
 
 **Finish regions** (``pliego:finishes``) describe what a press, a die or a hot tool does to an
 area of one side of a sheet. Each is a dict built here and checked by :func:`check_finish`:
@@ -171,7 +171,7 @@ def check_finish(f: Any) -> list[str]:
 def artwork(id: str, sheet: Sheet | str, asset: str, at: tuple[float, float],
             size: tuple[float, float], *, side: str = "front", rotation_deg: float = 0.0,
             panel: str | None = None, clip: str = "bleed") -> dict:
-    """Brand artwork placed on one side of a sheet (spec §5.10)."""
+    """Brand artwork placed on one side of a sheet (spec §5.11)."""
     a = {"id": check_slug(id, "artwork id"), "sheet": _sid(sheet), "side": side,
          "asset": asset, "at": [float(at[0]), float(at[1])],
          "size": [float(size[0]), float(size[1])], "rotation_deg": float(rotation_deg),

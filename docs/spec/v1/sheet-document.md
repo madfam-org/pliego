@@ -99,6 +99,11 @@ fold, a scored fold or a perforated fold, and they behave differently.
 | `pliego:mechanisms` | object[] | no | drivers for kinematic sheets and drive points (§5.4) |
 | `pliego:controls` | object[] | no | what the viewer exposes to the user (§5.5) |
 | `pliego:sequence` | object | no | the fold program (§5.6) |
+| `pliego:pieces` | object[] | no | removable pieces: keep / excess regions of a sheet (§5.8) |
+| `pliego:stacks` | object[] | no | ordered piles of sheets a caliper apart (§5.8) |
+| `pliego:dielines` | object[] | no | *(lane P draft)* packaging dieline blocks: panels, bleed/safe areas, glue zones, inside dimensions (§5.9) |
+| `pliego:finishes` | object[] | no | *(lane P draft)* pressing and burning regions: emboss, deboss, foil, varnish, letterpress, burn (§5.10) |
+| `pliego:artwork` | object[] | no | *(lane P draft)* brand artwork placed on a sheet side (§5.11) |
 | `pliego:meta` | object | yes | provenance of this document (§5.7) |
 
 ---
@@ -269,6 +274,7 @@ declared here; the viewer builds its UI from this list.
   angles (the engine solves closure along the way; a plain linear blend of angles is only an
   approximation); `release` in kinematic mode leaves a crease free at its current angle.
 - The sequence control (`kind: "sequence"`) scrubs the program; step labels are the diagram text.
+- `remove` (optional, string[]): excess pieces taken out of the model during the step (§5.8).
 
 ### 5.7 `pliego:meta`
 
@@ -284,10 +290,78 @@ fine kirigami declare it; nothing else should.
 `digest` is the SHA-256 of the canonical serialisation of the document with `digest` set to
 `null` (GOC-1 compatible).
 
+
+### 5.8 Removable pieces, stacks and tear-away — `pliego:pieces`, `pliego:stacks`, step `remove`
+
+<!-- §5.8 added by wave 2b lane R (reveal blocks). Kept self-contained for the coordinator. -->
+
+Some objects are made by taking paper **away**: a memo-block sculpture whose sheets are cut along
+the cross-sections of a scene and torn off from the top until the scene stands revealed, a
+perforated ticket stub, a kiss-cut sticker, a pop-out card. Three additions describe them; all
+are optional, and a document without them behaves exactly as before.
+
+**Pieces.** A *separable region* of a sheet is a maximal group of its faces connected across
+edges that do not separate material. **Separating edges** are the outline (`B`), cuts and tear-off
+perforations (`C`, treatment `cut` or `perforation`) and kiss cuts (`F` + `halfcut`); faces joined
+across any other edge (`M`, `V`, `F` creases, `U`, `J`) belong together.
+
+```json
+{"id": "layer-012-excess-2", "sheet": "layer-012", "role": "excess", "faces": [301, 302],
+ "label": {"en": "Corner chunk", "es": "Trozo de esquina", "fr": "Morceau d'angle", "pt": "Pedaço de canto"},
+ "pull": [0, 1, 0]}
+```
+
+| Field | Required | Meaning |
+|---|---|---|
+| `id` | yes | kebab case, unique among pieces |
+| `sheet` | yes | the sheet the piece belongs to |
+| `role` | yes | `keep` (part of the object; it stays) · `excess` (meant to come away: torn off, weeded, popped out) |
+| `faces` | yes | global face indices: exactly one separable region of `sheet` |
+| `label` | no | i18n object |
+| `pull` | no | world direction a hand draws the piece away when it is removed; default the sheet's front normal (lifted off the top) |
+
+Faces in no piece are the sheet's body and stay, like `keep`. **How a piece is held until it is
+removed** is read from its separating edges and the stack (below): across a `cut` it is free
+(held only by contact, friction, a stack bond or padding; micro-joints are modelled as a
+perforation); across a `perforation` it hangs on the bridges (`perf_cut_mm` / `perf_bridge_mm`)
+and parts at the stock's `tear_strain`; across a `halfcut` it is held by the ply beneath the kiss
+cut and peels off.
+
+**Stacks.** A stack is an ordered pile of congruent sheets, **bottom → top**:
+
+```json
+{"id": "block", "sheets": ["layer-001", "layer-002", "…", "layer-040"],
+ "pitch_mm": 1.2, "represents": 12, "bond": "keep",
+ "binding": {"kind": "padding", "edge": [[0, 70], [70, 70]]}}
+```
+
+| Field | Required | Meaning |
+|---|---|---|
+| `id` | yes | kebab case, unique among stacks |
+| `sheets` | yes | ≥ 2 sheet ids, bottom first; a sheet belongs to at most one stack |
+| `pitch_mm` | yes | distance between consecutive sheet mid-planes along the stack normal |
+| `represents` | no (default 1) | how many identical physical sheets each document sheet stands for. A preview may show a 480-sheet block as 40 sheets (`represents` 12); a fabrication document uses 1. `pitch_mm` = `represents` × the stock's `caliper_mm`. Exporters draw each document sheet once, so cut files for making the block come from a `represents` = 1 document. |
+| `bond` | no (default `keep`) | `none`: sheets rest on each other (contact and friction only) · `keep`: keep pieces and body faces are bonded to the sheet below where they overlap (adhesive only where the material stays), excess rests by contact · `all`: a fully bonded laminate |
+| `binding` | no | `{"kind": "padding", "edge": [[u, v], [u, v]]}`: a sheet-local segment where the pad is glued (the spine of a memo block); pieces touching it are held by the padding until removed |
+
+The stack normal is the bottom sheet's front normal (its placement rotation applied to +Y);
+sheet *k* (0-based) is placed at the bottom sheet's origin + *k* × `pitch_mm` × normal, with the
+same rotation.
+
+**Tear-away.** A sequence step may list `remove: [piece id, …]`. In `physical` mode the hand
+grips each listed piece and draws it along `pull`: perforation bridges and padding part on the way
+(tear physics: engine wave 3), and at the end of the step the piece is out of the model — no
+longer simulated, collided with or rendered. A removed piece stays removed in later steps (the
+state-between-steps rule of §5.6). Only `excess` pieces are removed, each at most once. A reveal
+block removes the excess layer by layer **from the top** (the top sheet first); the order is the
+author's, and the kernel's `pliego.reveal` emits it top-down. In `kinematic` mode and in the
+studio preview the piece lifts along `pull` and disappears. Perforated tear-offs, kiss-cut
+stickers and pop-outs use the same three fields.
+
 ---
 
-<!-- lane P (wave 2b) draft — begin: packaging blocks (§5.8–§5.10; renumber on integration) -->
-### 5.8 `pliego:dielines` — packaging dielines (lane P draft)
+<!-- lane P (wave 2b) draft — begin: packaging blocks (§5.9–§5.11) -->
+### 5.9 `pliego:dielines` — packaging dielines (lane P draft)
 
 A list of dieline blocks, one per die-cut sheet, written by `pliego.dieline` (box, carton and
 envelope generators). Sheet-local coordinates (mm); the exporters add the sheet's `offset`.
@@ -320,7 +394,7 @@ envelope generators). Sheet-local coordinates (mm); the exporters add the sheet'
   `halfcut`. Box folds are mountain folds with the sheet's front as the print side, and box
   sheets are placed print side down (`placement.rotation = [1, 0, 0, 0]`).
 
-### 5.9 `pliego:finishes` — pressing and burning (lane P draft)
+### 5.10 `pliego:finishes` — pressing and burning (lane P draft)
 
 A list of finish regions on one side of a sheet (`pliego.press`):
 
@@ -346,7 +420,7 @@ engrave vector + raster). **Engine:** embossed/debossed areas are locally stiffe
 areas thinner; v1 records the regions only — the engine does not yet change local stiffness or
 thickness, and the studio does not yet render relief or sheen.
 
-### 5.10 `pliego:artwork` — brand artwork (lane P draft)
+### 5.11 `pliego:artwork` — brand artwork (lane P draft)
 
 ```json
 {"id": "brand", "sheet": "carton", "side": "back", "asset": "assets/brand.svg",
@@ -402,10 +476,18 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
    `collision_thickness`: each vertex of the glue `region` polygon, mapped to sheet *b*, lies within
    `max(collision_thickness(a), collision_thickness(b))` of its image on *b* in the `initial` frame.
 10. `pliego:meta.digest`, when present, matches.
-11. *(lane P draft)* Packaging blocks resolve: every `pliego:dielines` / `pliego:finishes` /
+11. Pieces (§5.8): every piece's sheet exists; its faces lie on that sheet and form exactly one
+    separable region; no face belongs to two pieces; `role` is `keep` or `excess`; `pull`, when
+    present, is a non-zero 3-D vector. Every step `remove` names an existing `excess` piece, and
+    no piece is removed twice in a program.
+12. Stacks (§5.8): every sheet exists and belongs to at most one stack; `pitch_mm` > 0 and equals
+    `represents` × the `caliper_mm` of each member's stock (within 1e-5 mm); the members share one
+    rotation and sit *k* × `pitch_mm` along the bottom sheet's front normal; the `binding` edge
+    lies on every member.
+13. *(lane P draft)* Packaging blocks resolve: every `pliego:dielines` / `pliego:finishes` /
     `pliego:artwork` entry names an existing sheet; panel, safe, glue and finish polygons lie
     on their sheet (within its local bounding box; bleed outlines within the box grown by
-    `bleed_mm`); finish and artwork records satisfy §5.9–§5.10.
+    `bleed_mm`); finish and artwork records satisfy §5.10–§5.11.
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

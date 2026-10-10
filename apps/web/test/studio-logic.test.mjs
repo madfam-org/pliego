@@ -3,12 +3,13 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings } from '../studio/src/share.js';
+import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from '../studio/src/share.js';
 import { normalizeCatalog, normalizeModes, renderBody } from '../studio/src/data.js';
 import { lineKind } from '../studio/src/diagram.js';
 import { stepIndex, paramText } from '../studio/src/panels.js';
 import { triangulate, signedArea } from '../studio/src/geom.js';
 import { rendererOverride } from '../studio/src/render/index.js';
+import { sheetArea, engineOptions, tooSlow, MESH_EDGE_MIN, MESH_EDGE_MAX, estimateVertices, physicsFits, boundaryLength, VERTEX_LIMIT } from '../studio/src/physics.js';
 
 test('share URL round-trips slug, params and view; keeps test overrides', () => {
   const url = buildShare('https://pliego-app.madfam.io/studio/', { slug: 'page-turn', params: { width: 180, curl: true }, view: '2d', keep: new URLSearchParams('renderer=canvas2d&junk=1') });
@@ -17,7 +18,7 @@ test('share URL round-trips slug, params and view; keeps test overrides', () => 
   assert.equal(u.searchParams.get('renderer'), 'canvas2d');
   assert.equal(u.searchParams.get('junk'), null);
   const s = parseShare(u.search, u.hash);
-  assert.deepEqual(s.params, { width: '180', curl: 'true' });
+  assert.deepEqual(Object.fromEntries(s.params), { width: '180', curl: 'true' });
   assert.equal(s.view, '2d');
   assert.equal(s.renderer, 'canvas2d');
   assert.equal(parseShare('', '').view, '3d');
@@ -28,7 +29,7 @@ test('share URL carries the mode in the query only when given', () => {
   const s = parseShare(new URL(url).search, new URL(url).hash);
   assert.equal(s.slug, 'inside-reverse-fold');
   assert.equal(s.mode, 'hand');
-  assert.deepEqual(s.params, { angle: '40' });
+  assert.deepEqual(Object.fromEntries(s.params), { angle: '40' });
   assert.equal(new URL(buildShare('https://x/studio/', { slug: 'valley-fold' })).searchParams.has('mode'), false);
   assert.equal(parseShare('?slug=a', '').mode, null);
 });
@@ -55,6 +56,19 @@ test('modes normalise from ids and manifest entries; the request body names the 
   assert.deepEqual(items[0].modes.map((m) => m.id), ['rigid', 'hand']);
   assert.deepEqual(JSON.parse(renderBody('r', { a: 1 }, 'hand')), { slug: 'r', mode: 'hand', params: { a: 1 } });
   assert.deepEqual(JSON.parse(renderBody('r', {}, null, { format: 'svg' })), { slug: 'r', params: {}, format: 'svg' });
+});
+
+test('URL input never names an object property (prototype pollution guard)', () => {
+  const s = parseShare('?slug=a', '#__proto__=x&constructor=y&width=5&_view=2d');
+  assert.equal(Object.getPrototypeOf({}).x, undefined, 'Object.prototype untouched');
+  assert.ok(s.params instanceof URLSearchParams);
+  assert.equal(s.params.get('width'), '5');
+  assert.equal(s.params.has('_view'), false, 'underscore keys stay studio-only');
+  // only manifest ids are read out
+  assert.deepEqual(coerceParams([{ id: 'width', type: 'slider', min: 0, max: 10, default: 1 }], s.params), { width: 5 });
+  assert.equal(hasParams(s.params), true);
+  assert.equal(hasParams(new URLSearchParams()), false);
+  assert.equal(hasParams(null), false);
 });
 
 test('parameter coercion clamps, validates options and falls back to defaults', () => {
@@ -136,4 +150,32 @@ test('renderer override accepts only known renderers', () => {
   assert.equal(rendererOverride('webgl2'), 'webgl2');
   assert.equal(rendererOverride('x'), null);
   assert.equal(rendererOverride(null), null);
+});
+
+test('paper-engine options size the mesh from the sheet area', () => {
+  const square = (a) => ({ vertices_coords: [[0, 0], [a, 0], [a, a], [0, a]], faces_vertices: [[0, 1, 2, 3]] });
+  assert.equal(sheetArea(square(150)), 22500);
+  assert.deepEqual(engineOptions(square(150)), { seed: 1, meshEdge: 8.7, substeps: 8 });
+  assert.equal(engineOptions(square(20)).meshEdge, MESH_EDGE_MIN);
+  assert.equal(engineOptions(square(2000)).meshEdge, MESH_EDGE_MAX);
+  assert.equal(engineOptions({}).meshEdge, MESH_EDGE_MIN);
+  assert.equal(tooSlow(41), true);
+  assert.equal(tooSlow(39), false);
+  assert.equal(tooSlow(NaN), false);
+});
+
+test('documents too large for interactive physics start in the preview', () => {
+  const square = { vertices_coords: [[0, 0], [150, 0], [150, 150], [0, 150]], faces_vertices: [[0, 1, 2, 3]],
+    edges_vertices: [[0, 1], [1, 2], [2, 3], [3, 0]], edges_assignment: ['B', 'B', 'B', 'B'] };
+  assert.equal(boundaryLength(square), 600);
+  const est = estimateVertices(square, 8.7);
+  assert.ok(est > 300 && est < 600, `150 mm square ≈ the 450-vertex budget (${est})`);
+  assert.equal(physicsFits(square), true);
+  // lace: a long cut boundary with many document vertices
+  const n = 1500;
+  const lace = { vertices_coords: Array.from({ length: n }, (_, i) => [Math.cos(i / n * 2 * Math.PI) * 200, Math.sin(i / n * 2 * Math.PI) * 200]),
+    faces_vertices: [Array.from({ length: n }, (_, i) => i)], edges_vertices: Array.from({ length: n }, (_, i) => [i, (i + 1) % n]),
+    edges_assignment: Array.from({ length: n }, () => 'C') };
+  assert.ok(estimateVertices(lace, engineOptions(lace).meshEdge) > VERTEX_LIMIT);
+  assert.equal(physicsFits(lace), false);
 });

@@ -1,4 +1,4 @@
-"""Spec §8 rule 11 (lane P draft): packaging blocks — dielines, finishes, artwork.
+"""Spec §8 rule 13 (lane P draft): packaging blocks — dielines, finishes, artwork.
 
 Every block names a sheet that exists; dieline panels, glue zones and finish regions are finite
 polygons lying on their sheet (within the sheet's local bounding box, grown by the bleed for
@@ -43,7 +43,7 @@ def _inside(poly: list, box: tuple[float, float, float, float], grow: float) -> 
     return all(x0 - g <= u <= x1 + g and y0 - g <= v <= y1 + g for u, v in poly)
 
 
-def _rule11_packaging(d: dict, coords: list, out: Any) -> None:
+def _rule13_packaging(d: dict, coords: list, out: Any) -> None:
     from .press import check_artwork, check_finish
 
     blocks = {k: d.get(k) for k in ("pliego:dielines", "pliego:finishes", "pliego:artwork")}
@@ -52,32 +52,32 @@ def _rule11_packaging(d: dict, coords: list, out: Any) -> None:
     boxes = _sheet_boxes(d, coords)
     for key, value in blocks.items():
         if value is not None and not isinstance(value, list):
-            out.err(11, "packaging", f"{key} must be a list")
+            out.err(13, "packaging", f"{key} must be a list")
             blocks[key] = []
     for k, dl in enumerate(blocks["pliego:dielines"] or []):
         where = f"pliego:dielines[{k}]"
         if not isinstance(dl, dict) or dl.get("sheet") not in boxes:
-            out.err(11, "dieline_sheet", f"{where}: sheet does not resolve")
+            out.err(13, "dieline_sheet", f"{where}: sheet does not resolve")
             continue
         box = boxes[dl["sheet"]]
         if dl.get("family") not in FAMILIES:
-            out.err(11, "dieline_family", f"{where}: family {dl.get('family')!r}")
+            out.err(13, "dieline_family", f"{where}: family {dl.get('family')!r}")
         bleed = dl.get("bleed_mm", 0)
         for name in ("bleed_mm", "safe_mm", "caliper_mm"):
             v = dl.get(name)
             if not isinstance(v, (int, float)) or v < 0:
-                out.err(11, "dieline_number", f"{where}: {name} must be ≥ 0")
+                out.err(13, "dieline_number", f"{where}: {name} must be ≥ 0")
         for i, pn in enumerate(dl.get("panels") or []):
             for part, grow in (("polygon", 0.0), ("safe", 0.0), ("bleed", float(bleed or 0))):
                 if part not in pn:
                     continue
                 if not _poly_ok(pn[part]) or not _inside(pn[part], box, grow):
-                    out.err(11, "dieline_panel",
+                    out.err(13, "dieline_panel",
                             f"{where}.panels[{i}] ({pn.get('name')}): {part} is not on the sheet")
         for i, g in enumerate(dl.get("glue") or []):
             if g.get("kind") not in GLUE_KINDS or not _poly_ok(g.get("polygon")) \
                     or not _inside(g["polygon"], box, 0.0):
-                out.err(11, "dieline_glue", f"{where}.glue[{i}]: bad kind or polygon off sheet")
+                out.err(13, "dieline_glue", f"{where}.glue[{i}]: bad kind or polygon off sheet")
     for k, f in enumerate(blocks["pliego:finishes"] or []):
         where = f"pliego:finishes[{k}]"
         problems = check_finish(f)
@@ -86,10 +86,10 @@ def _rule11_packaging(d: dict, coords: list, out: Any) -> None:
         elif not problems and not all(_inside(p, boxes[f["sheet"]], 0.0) for p in f["region"]):
             problems.append("region is not on the sheet")
         for pr in problems:
-            out.err(11, "finish", f"{where}: {pr}")
+            out.err(13, "finish", f"{where}: {pr}")
     for k, a in enumerate(blocks["pliego:artwork"] or []):
         problems = check_artwork(a)
         if isinstance(a, dict) and a.get("sheet") not in boxes:
             problems.append("sheet does not resolve")
         for pr in problems:
-            out.err(11, "artwork", f"pliego:artwork[{k}]: {pr}")
+            out.err(13, "artwork", f"pliego:artwork[{k}]: {pr}")

@@ -1,4 +1,4 @@
-"""Finish regions, brand artwork and spec §8 rule 11 (packaging blocks)."""
+"""Finish regions, brand artwork and spec §8 rule 13 (packaging blocks)."""
 
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ def test_plates_per_kind():
     assert len(lines) == 39 and all(a[0] == 20.0 and b[0] == 60.0 for a, b in lines)
 
 
-def test_rule11_accepts_good_blocks_and_rejects_bad_ones():
+def test_rule13_accepts_good_blocks_and_rejects_bad_ones():
     pack = carton()
     good = dieline.assemble([pack], finishes=[press.foil("f", pack.sheet, SQUARE)],
                             artwork=[press.artwork("a", pack.sheet, "assets/brand.svg",
@@ -72,5 +72,5 @@ def test_rule11_accepts_good_blocks_and_rejects_bad_ones():
     data["pliego:dielines"][0]["family"] = "bag"
     kinds = [i["kind"] for i in pliego.Document(data).verify() if i["level"] == "error"]
     assert {"finish", "artwork", "dieline_family"} <= set(kinds)
-    assert all(i["rule"] == 11 for i in pliego.Document(data).verify()
+    assert all(i["rule"] == 13 for i in pliego.Document(data).verify()
                if i["kind"] in ("finish", "artwork", "dieline_family"))

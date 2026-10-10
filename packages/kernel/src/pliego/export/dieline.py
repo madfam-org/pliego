@@ -1,6 +1,6 @@
 """The ``dieline`` export profile: named layers and spot colours for packaging prepress.
 
-A sheet document that carries ``pliego:dielines`` or ``pliego:finishes`` (spec §5.8–§5.10)
+A sheet document that carries ``pliego:dielines`` or ``pliego:finishes`` (spec §5.9–§5.11)
 exports through this profile by default (``to_svg`` / ``to_dxf`` / ``to_pdf`` with
 ``profile=None``); ``profile="default"`` forces the plain fabrication layers. Layers, in drawing
 order, each with a spot colour (name, CMYK alternate, RGB preview, DXF ACI):

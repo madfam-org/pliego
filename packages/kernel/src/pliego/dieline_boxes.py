@@ -30,6 +30,7 @@ import math
 
 from .board import caliper as stock_caliper
 from .dieline import Dieline, Packed
+from .sheet import Placement
 
 
 def L4(en: str, es: str, fr: str, pt: str) -> dict:
@@ -129,13 +130,22 @@ def slotted(L: float, W: float, D: float, stock: str = "corrugated-b-flute", *,
 def telescope(L: float, W: float, D: float, lid_depth: float, stock: str = "corrugated-b-flute",
               *, glue: float = 30.0) -> tuple[Packed, Packed]:
     """Two-piece telescope (tray and lid, both half-slotted): the lid's inside is the base's
-    inside + 2t so it slides over the base."""
+    inside + 2t so it slides over the base.
+
+    Both trays erect lying on their front panels; the lid is placed turned end for end (180°
+    about the vertical) and offset so that, closed, it caps the base's open end, its closed end
+    t above the base's rim and its walls t outside the base's walls."""
     t = stock_caliper(stock)
     base = slotted(L, W, D, stock, flaps="half", glue=glue, sheet_id="base",
                    label=L4("Base tray", "Charola base", "Fond", "Bandeja base"))
     lid = slotted(L + 2 * t, W + 2 * t, lid_depth, stock, flaps="half", glue=glue,
                   sheet_id="lid", label=L4("Lid", "Tapa", "Couvercle", "Tampa"))
     base.block["style"] = lid.block["style"] = "telescope (two half-slotted trays)"
+    rim = (W + t) / 2.0 + (D + t)              # the base's open edge, sheet v
+    lid_fold = (W + 3 * t) / 2.0               # the lid's closed-end fold, sheet v
+    # world = R_z(180°)·(u, 0, −v) + origin  →  x = origin_x − u, y = 0, z = origin_z − v
+    lid.sheet.placement = Placement(origin=(L + 2 * t, -t, rim + t + lid_fold),
+                                    rotation=(0.0, 0.0, -1.0, 0.0))
     return base, lid
 
 

@@ -504,3 +504,11 @@ def _merge_segments(segs: list[tuple[Pt, Pt]]) -> list[tuple[Pt, Pt]]:
 
 def _collinear(a: Pt, b: Pt, c: Pt) -> bool:
     return abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) < 1e-9
+
+
+# public style generators (defined in their own modules for the file-size gate)
+from .dieline_boxes import mailer, slotted, telescope  # noqa: E402
+from .dieline_cartons import carton  # noqa: E402
+
+__all__ = ["Dieline", "Packed", "assemble", "carton", "mailer", "mitre_offset", "slotted",
+           "telescope"]

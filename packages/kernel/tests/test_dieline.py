@@ -75,6 +75,15 @@ def test_telescope_lid_fits_over_base():
     doc = dieline.assemble([base, lid]).build()
     assert not [i for i in doc.verify() if i["level"] == "error"]
     assert len(doc.data["pliego:dielines"]) == 2
+    # placed: the closed lid caps the base's open end from outside
+    def world(pack):                 # posed_extent applies the rotation; add the origin
+        size, lo = posed_extent(pack, pack.closed)
+        o = pack.sheet.placement.origin
+        return ([a + b for a, b in zip(lo, o, strict=True)],
+                [a + s_ + b for a, s_, b in zip(lo, size, o, strict=True)])
+    (_b0, b1), (l0, l1) = world(base), world(lid)
+    assert l0[0] == pytest.approx(-t, abs=1e-5) and l0[1] == pytest.approx(-t, abs=1e-5)
+    assert l0[2] < b1[2] < l1[2]
 
 
 @pytest.mark.parametrize("roll", ["ends", "front"])

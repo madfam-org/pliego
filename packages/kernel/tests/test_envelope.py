@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import pytest
+from test_dieline import posed_extent
 
 from pliego import dieline, envelope
-from test_dieline import posed_extent
 
 
 @pytest.mark.parametrize("style", envelope.STYLES)

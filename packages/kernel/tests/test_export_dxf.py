@@ -57,7 +57,7 @@ def test_inner_cuts_before_outer_outlines():
                 j += 1
             cut_polys.append(xs)
     assert cut_polys[0] == [(120.0, 20.0), (100.0, 20.0), (80.0, 20.0)]   # interior cut first
-    assert len(cut_polys) == 4
+    assert len(cut_polys) == 3                     # the split shares one cut line
 
 
 def test_text_is_seven_bit():

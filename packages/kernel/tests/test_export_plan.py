@@ -85,3 +85,28 @@ def test_perforation_dashes_follow_perf_factor():
 
 def test_fmt_has_no_negative_zero():
     assert P.fmt(-0.0001) == "0" and P.fmt(12.5) == "12.5" and P.fmt(3.0) == "3"
+
+
+def test_sample_is_a_valid_sheet_document():
+    import pliego
+
+    doc = pliego.Document(sample())
+    assert doc.verify() == []
+
+
+def test_every_exporter_accepts_a_built_document():
+    import pliego
+    from pliego.export import EXPORTERS
+
+    s = pliego.Sheet("square", pliego.square(150), stock="kami", label={"en": "Square"})
+    s.valley((0, 0), (150, 150))
+    s.perforate((0, 75), (75, 150))
+    s.hole(pliego.square(20, (100, 20)))
+    doc = pliego.Assembly([s], controls=[pliego.sequence_control()],
+                          sequence=pliego.Sequence.fold_each()).build()
+    assert doc.verify() == []
+    for name, (fn, _ext, _mt) in EXPORTERS.items():
+        out = fn(doc)
+        assert out and out == fn(doc), name
+    plan = P.build_plan(doc)
+    assert [s.inner for s in plan.layer("cut")] == [False, True]   # outline, then the hole

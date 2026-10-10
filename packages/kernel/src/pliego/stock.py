@@ -263,8 +263,14 @@ def derive(card: dict[str, Any]) -> dict[str, float]:
     return {k: _sig(derived[k]) for k in DERIVED_KEYS}
 
 
-def snapshot(card: dict[str, Any]) -> dict[str, Any]:
-    """The sheet-document stock snapshot (spec §5.2) of a card: name, gsm, caliper, derived."""
+def snapshot(card: dict[str, Any] | str, root: Path | str | None = None) -> dict[str, Any]:
+    """The sheet-document stock snapshot (spec §5.2): name, gsm, caliper, derived.
+
+    ``card`` is a stock card dict or a committed stock slug (loaded from ``materials/``; this is
+    the hook ``pliego.document_build.resolve_stock`` calls).
+    """
+    if isinstance(card, str):
+        card = load_card(card, root)
     physical = card["physical"]
     return {
         "name": dict(card["stock"]["name"]),

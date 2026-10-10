@@ -679,7 +679,7 @@
   }
  ],
  "pliego:meta": {
-  "cartridge": "v-fold",
+  "cartridge": "v-fold-popup",
   "mode": "default",
   "params": {
    "alpha_deg": 45,

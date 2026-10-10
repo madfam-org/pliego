@@ -96,8 +96,8 @@
    ]
   },
   {
-   "slug": "v-fold",
-   "document": "demo/v-fold.fold",
+   "slug": "v-fold-popup",
+   "document": "demo/v-fold-popup.fold",
    "title": {
     "en": "V-fold pop-up",
     "es": "Pop-up en V",

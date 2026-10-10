@@ -247,7 +247,7 @@ function vFold() {
     ],
     mechanisms: [{ id: 'spread', type: 'hinge', axis: { origin: [0, 0, 0], direction: [0, 0, -1] }, angle_control: 'open', rest: 180, sheets_moving: ['right-board'] }],
     controls: [{ id: 'open', kind: 'angle', label: { en: 'Open the card', es: 'Abrir la tarjeta', fr: 'Ouvrir la carte', pt: 'Abrir o cartão' }, min: 10, max: 180, default: 180, unit: 'deg' }],
-    meta: { cartridge: 'v-fold', mode: 'default', params: { alpha_deg: 45, beta_deg: 60, offset: pieceOff[0] } },
+    meta: { cartridge: 'v-fold-popup', mode: 'default', params: { alpha_deg: 45, beta_deg: 60, offset: pieceOff[0] } },
     needsInitial: true,
   });
 }
@@ -269,7 +269,7 @@ const CATALOG = {
       title: L4('Page turn', 'Pasar la página', 'Tourner la page', 'Virar a página'),
       summary: L4('The simplest sheet hyperobject: one leaf turning on a spine.', 'El hiperobjeto de hoja más sencillo: una hoja que gira sobre su lomo.', 'L’hyperobjet de feuille le plus simple : un feuillet qui tourne sur son dos.', 'O hiperobjeto de folha mais simples: uma folha que gira sobre a lombada.'),
       parameters: [{ id: 'curl', type: 'checkbox', label: L4('Let the paper curl', 'Dejar que el papel se curve', 'Laisser le papier se courber', 'Deixar o papel curvar'), default: true }] },
-    { slug: 'v-fold', document: 'demo/v-fold.fold',
+    { slug: 'v-fold-popup', document: 'demo/v-fold-popup.fold',
       title: L4('V-fold pop-up', 'Pop-up en V', 'Pop-up en V', 'Pop-up em V'),
       summary: L4('A card with a V-fold piece glued across the gutter: it rises as the card opens.', 'Una tarjeta con una pieza en V pegada sobre el pliegue central: se levanta al abrirla.', 'Une carte avec une pièce en V collée sur la pliure : elle se dresse à l’ouverture.', 'Um cartão com uma peça em V colada sobre a dobra central: ela se ergue ao abrir.'),
       parameters: [{ id: 'alpha', type: 'slider', label: L4('Glue angle', 'Ángulo de pegado', 'Angle de collage', 'Ângulo de colagem'), min: 30, max: 60, step: 5, default: 45, unit: '°' }] },
@@ -279,7 +279,7 @@ const CATALOG = {
 const files = {
   'pliego-half-fold.fold': pliego(),
   'page-turn.fold': pageLeaf(),
-  'v-fold.fold': vFold(),
+  'v-fold-popup.fold': vFold(),
   'catalog.json': CATALOG,
 };
 

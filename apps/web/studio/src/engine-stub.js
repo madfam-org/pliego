@@ -270,8 +270,14 @@ export class World {
         const n = unit(rotOnly(treeRoot[cs], [0, 1, 0]));
         const T = axisRot(o, n, (this._controls.get(m.control) || 0) * DEG);
         for (const id of m.sheets_moving) M[idx.get(id)] = compose(T, M[idx.get(id)]);
+      } else if (m.type === 'translate') {
+        const ctl = (j['pliego:controls'] || []).find((c) => c.id === m.control);
+        const max = ctl && ctl.max ? ctl.max : 1;
+        const d = unit(m.direction), k = ((this._controls.get(m.control) || 0) / max) * m.travel;
+        const T = { r: [1, 0, 0, 0, 1, 0, 0, 0, 1], t: [d[0] * k, d[1] * k, d[2] * k] };
+        for (const id of m.sheets_moving || []) M[idx.get(id)] = compose(T, M[idx.get(id)]);
       }
-      // `slide` needs the physics engine (slider joins); the stub leaves it static.
+      // `slide` and driven pins need the physics engine (joins); the stub leaves them static.
     }
     return M;
   }

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .plan import Point, build_plan, perforation_dashes
+from .plan import Point, build_plan, perforation_dashes, text_origin
 
 # name → (ACI colour, linetype)
 LAYERS: dict[str, tuple[int, str]] = {
@@ -71,6 +71,14 @@ def _text(layer: str, at: Point, value: str) -> str:
             + _tag(30, _n(0)) + _tag(40, _n(TEXT_HEIGHT_MM)) + _tag(1, _ascii(value)))
 
 
+def _note(layer: str, lb) -> str:
+    """An annotation: TEXT at its baseline start, `size` mm tall, rotated by its angle."""
+    at = text_origin(lb, lb.size / 0.72)
+    out = (_tag(0, "TEXT") + _tag(8, layer) + _tag(10, _n(at[0])) + _tag(20, _n(at[1]))
+           + _tag(30, _n(0)) + _tag(40, _n(lb.size)) + _tag(1, _ascii(lb.text)))
+    return out + (_tag(50, _n(lb.angle)) if lb.angle else "")
+
+
 def _tables() -> str:
     ltypes = ""
     for name, (desc, pattern) in LTYPES.items():
@@ -119,6 +127,6 @@ def to_dxf(doc: Any, profile: str | None = None) -> str:
     for g in plan.glue:
         ents += _polyline("GLUE", g.points, True)
     for lb in plan.labels:
-        ents += _text("TEXT", lb.at, lb.text)
+        ents += _text("TEXT", lb.at, lb.text) if lb.size is None else _note("TEXT", lb)
     ents += _tag(0, "ENDSEC")
     return header + _tables() + ents + _tag(0, "EOF")

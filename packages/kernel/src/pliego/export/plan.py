@@ -56,6 +56,8 @@ class Label:
     sheet: int
     at: Point
     text: str
+    angle: float = 0.0           # baseline direction, degrees from +x (annotations)
+    size: float | None = None    # cap height in mm; None = the exporter's sheet-label style
 
 
 @dataclass(frozen=True)
@@ -75,6 +77,9 @@ class Plan:
     art: list[Art] = field(default_factory=list)
     perf_factor: dict[int, float] = field(default_factory=dict)
     bounds: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
+    pages: list[tuple[str, float, float]] = field(default_factory=list)   # (id, x, y) origins
+    page_size: tuple[float, float] = (0.0, 0.0)
+    page_margin: float = 0.0
 
     def layer(self, name: str) -> list[Stroke]:
         return [s for s in self.strokes if s.layer == name]
@@ -302,6 +307,20 @@ def build_plan(doc: Any) -> Plan:
         art = (sheet.get("front") or {}).get("art")
         if art:
             plan.art.append(Art(i, str(art), lo, hi))
+    for note in d.get("pliego:annotations") or []:
+        i = sheet_index[note["sheet"]]
+        ox, oy = sheets[i].get("offset", [0, 0])
+        plan.labels.append(Label(i, (note["at"][0] + ox, note["at"][1] + oy), str(note["text"]),
+                                 float(note.get("angle", 0.0)), float(note["size"])))
+    pages = d.get("pliego:pages")
+    if pages:
+        w, h = (float(x) for x in pages["size"])
+        plan.page_size, plan.page_margin = (w, h), float(pages.get("margin", 0.0))
+        for pg in pages["pages"]:
+            x, y = float(pg["origin"][0]), float(pg["origin"][1])
+            plan.pages.append((str(pg["id"]), x, y))
+            xs_all += [x, x + w]
+            ys_all += [y, y + h]
     if plan.labels:
         ys_all.append(min(lb.at[1] for lb in plan.labels) - 1.0)
     for g in plan.glue:
@@ -327,6 +346,15 @@ def registration_marks(plan: Plan) -> tuple[list[tuple[Point, ...]], list[tuple[
         ((x1 - a, y0), (x1, y0), (x1, y0 + a)),
     ]
     return squares, ls
+
+
+def text_origin(lb: Label, em: float) -> Point:
+    """Baseline start of an annotation centred on ``lb.at`` (Helvetica digit width ≈ 0.556 em,
+    cap height ≈ 0.72 em): shift back half its width along the baseline, down half its cap."""
+    r = math.radians(lb.angle)
+    c, s = math.cos(r), math.sin(r)
+    half_w, half_h = 0.278 * em * len(lb.text), 0.36 * em
+    return (lb.at[0] - c * half_w + s * half_h, lb.at[1] - s * half_w - c * half_h)
 
 
 def fmt(x: float, digits: int = 3) -> str:

@@ -341,6 +341,9 @@ class Assembly:
     spec §5.8), written to ``pliego:pieces`` / ``pliego:stacks``.
     `dielines` / `finishes` / `artwork`: packaging blocks (``pliego.dieline``, ``pliego.press``;
     spec §5.9–§5.11) written as ``pliego:dielines``, ``pliego:finishes`` and ``pliego:artwork``.
+    `pages`: print pages in the layout frame (spec §5.12 ``pliego:pages``) — {"size": [w, h],
+    "margin": mm, "pages": [{"id", "origin": [x, y]}]}; give a dict `layout` that puts every
+    sheet inside a page's printable area.
     """
 
     sheets: list[Sheet]
@@ -356,12 +359,15 @@ class Assembly:
     min_feature_mm: float | None = None
     pieces: list[dict] = field(default_factory=list)
     stacks: list[dict] = field(default_factory=list)
-    # packaging blocks (spec §5.9–§5.11, lane P draft): pliego:dielines / finishes / artwork
+    # packaging blocks (spec §5.9–§5.11, lane P): pliego:dielines / finishes / artwork
     dielines: list[dict] = field(default_factory=list)
     finishes: list[dict] = field(default_factory=list)
     artwork: list[dict] = field(default_factory=list)
+    pages: dict | None = None
 
     def __post_init__(self) -> None:
+        if self.pages is not None:
+            self.pages = check_pages(self.pages)
         if self.min_feature_mm is not None:
             mf = float(self.min_feature_mm)
             if not (math.isfinite(mf) and mf > 0):
@@ -393,6 +399,24 @@ class Assembly:
         from .document_build import build_document
 
         return build_document(self, stocks=stocks, meta_overrides=meta)
+
+
+def check_pages(pages: dict) -> dict:
+    """Validate a print-pages block (spec §5.8) and return a clean copy."""
+    try:
+        w, h = (float(x) for x in pages["size"])
+        margin = float(pages.get("margin", 0.0))
+        items = [{"id": check_slug(p["id"], "page id"),
+                  "origin": [float(p["origin"][0]), float(p["origin"][1])]}
+                 for p in pages["pages"]]
+    except (KeyError, TypeError, ValueError, IndexError) as exc:
+        raise ValueError(f"pages needs size [w, h], margin and pages[{{id, origin}}]: {exc}"
+                         ) from None
+    if not (w > 0 and h > 0 and 0 <= margin < min(w, h) / 2 and items):
+        raise ValueError("pages: size must be positive, margin < half the page, ≥ 1 page")
+    if len({p["id"] for p in items}) != len(items):
+        raise ValueError("pages: duplicate page ids")
+    return {"size": [w, h], "margin": margin, "pages": items}
 
 
 def label_text(value: Label | None) -> str:

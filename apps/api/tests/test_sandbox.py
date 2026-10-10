@@ -207,3 +207,19 @@ def test_runner_environment_is_minimal(tmp_path, monkeypatch):
     env = Renderer._env()
     assert set(env) <= {"PATH", "LANG", "LC_ALL", "HOME", "TMPDIR", "PLIEGO_RUNNER_MAX_AS_MB"}
     assert "do-not-leak" not in json.dumps(env)
+
+
+def test_runner_unfolds_a_mesh_inside_the_sandbox(tmp_path):
+    """Papercraft through the sandbox: the mesh primitives and the unfolder are reachable as
+    pliego sub-modules, and the net exports with its pages and edge numbers."""
+    needs_kernel()
+    src = ("m = pliego.mesh.icosahedron()\n"
+           "m = m.mapped(lambda p: (p[0], p[1] * 1.2, p[2]))\n"
+           "net = pliego.unfold.net(m, size=size, page='letter')\n"
+           "result = net.assembly('fold', stock='cardstock-250')\n")
+    code, stdout, stderr, report, _cart = run_runner(tmp_path, src, {"size": 90.0},
+                                                     formats="svg,pdf,dxf,glb")
+    assert code == 0, stderr
+    assert stdout.startswith("verify: sheets=") and "errors=0" in stdout
+    assert report["formats"] == ["svg", "pdf", "dxf", "glb"]
+    assert b'<g id="pages"' in (tmp_path / "out" / "export.svg").read_bytes()

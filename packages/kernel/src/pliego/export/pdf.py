@@ -15,7 +15,14 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from .plan import Plan, Point, build_plan, perforation_dashes, registration_marks
+from .plan import (
+    Plan,
+    Point,
+    build_plan,
+    perforation_dashes,
+    registration_marks,
+    text_origin,
+)
 
 MM_TO_PT = 72.0 / 25.4
 
@@ -82,7 +89,7 @@ def _hatch(pen: _Pen, pts: tuple[Point, ...]) -> str:
     return (f"q {pen.path(pts, True)} W n " + " ".join(lines) + " S Q\n") if lines else ""
 
 
-def _draw(plan: Plan, pen: _Pen, with_text: bool) -> str:
+def _draw(plan: Plan, pen: _Pen, with_text: bool, marks: bool = True) -> str:
     s: list[str] = []
     if plan.glue:
         s.append(pen.style("glue"))
@@ -104,13 +111,35 @@ def _draw(plan: Plan, pen: _Pen, with_text: bool) -> str:
     if cuts:
         s.append(pen.style("cut"))
         s.extend(pen.path(st.points, st.closed) + " S\n" for st in cuts)
-    squares, corners = registration_marks(plan)
-    s.append("0 0 0 RG 0 0 0 rg 0.9 w [] 0 d\n")
-    s.extend(pen.path(sq, True) + " f\n" for sq in squares)
-    s.extend(pen.path(cr, False) + " S\n" for cr in corners)
+    if marks:
+        squares, corners = registration_marks(plan)
+        s.append("0 0 0 RG 0 0 0 rg 0.9 w [] 0 d\n")
+        s.extend(pen.path(sq, True) + " f\n" for sq in squares)
+        s.extend(pen.path(cr, False) + " S\n" for cr in corners)
     if with_text:
         for lb in plan.labels:
-            s.append(f"BT /F1 8 Tf 0 0 0 rg {pen.xy(lb.at)} Td ({_esc(lb.text)}) Tj ET\n")
+            if lb.size is None:
+                s.append(f"BT /F1 8 Tf 0 0 0 rg {pen.xy(lb.at)} Td ({_esc(lb.text)}) Tj ET\n")
+                continue
+            em = lb.size / 0.72
+            r = math.radians(lb.angle)
+            c, n = math.cos(r), math.sin(r)
+            s.append(f"BT /F1 {_p(em * pen.k)} Tf 0 0 0 rg {_p(c)} {_p(n)} {_p(-n)} {_p(c)} "
+                     f"{pen.xy(text_origin(lb, em))} Tm ({_esc(lb.text)}) Tj ET\n")
+    return "".join(s)
+
+
+def _page_stream(plan: Plan, pid: str, x: float, y: float, label: str) -> str:
+    """One declared print page (spec §5.12) at 1:1, clipped to the page."""
+    w, h = plan.page_size
+    k = MM_TO_PT
+    m = plan.page_margin
+    cx, cy, _w, _h = plan.canvas()
+    s = [f"BT /F1 7 Tf 0.4 0.4 0.4 rg {_p(m * k)} {_p(max(2.0, m / 2 - 1.0) * k)} Td "
+         f"({_esc(label)}) Tj ET\n"]
+    s.append(f"q 0 0 {_p(w * k)} {_p(h * k)} re W n\n")
+    s.append(_draw(plan, _Pen(plan, cx - x, cy - y, k), with_text=True, marks=False))
+    s.append("Q\n")
     return "".join(s)
 
 
@@ -171,6 +200,12 @@ def to_pdf(doc: Any, page: str = "a4", margin_mm: float = 10.0,
     margin = max(5.0, min(margin_mm, 25.0))
     tile_w, tile_h = page_w - 2 * margin, page_h - 2 * margin
     plan = build_plan(doc)
+    if plan.pages:  # the document declares its print pages: one PDF page each, at 1:1
+        page_w, page_h = plan.page_size
+        streams = [_page_stream(plan, pid, x, y, f"{plan.title}  {pid} of {len(plan.pages)}  "
+                                f"(1:1, {_p(page_w)} x {_p(page_h)} mm)")
+                   for pid, x, y in plan.pages]
+        return _assemble(streams, page_w, page_h)
     _cx, _cy, cw, ch = plan.canvas()
     tiles_x = max(1, math.ceil(cw / tile_w - 1e-9))
     tiles_y = max(1, math.ceil(ch / tile_h - 1e-9))
@@ -182,7 +217,11 @@ def to_pdf(doc: Any, page: str = "a4", margin_mm: float = 10.0,
                      f"(1:1, {page_key.upper()})")
             streams.append(_tile_stream(plan, i, j, tile_w, tile_h, page_w, page_h, margin,
                                         label))
+    return _assemble(streams, page_w, page_h)
 
+
+def _assemble(streams: list[str], page_w: float, page_h: float) -> bytes:
+    """PDF 1.4 bytes: catalog, pages tree, Helvetica, then one page + stream per entry."""
     # 1 catalog, 2 pages tree, 3 font, then per page: page object + content stream.
     objects: list[bytes] = []
     kids = " ".join(f"{4 + 2 * k} 0 R" for k in range(len(streams)))

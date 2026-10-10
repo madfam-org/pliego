@@ -101,9 +101,11 @@ fold, a scored fold or a perforated fold, and they behave differently.
 | `pliego:sequence` | object | no | the fold program (§5.6) |
 | `pliego:pieces` | object[] | no | removable pieces: keep / excess regions of a sheet (§5.8) |
 | `pliego:stacks` | object[] | no | ordered piles of sheets a caliper apart (§5.8) |
-| `pliego:dielines` | object[] | no | *(lane P draft)* packaging dieline blocks: panels, bleed/safe areas, glue zones, inside dimensions (§5.9) |
-| `pliego:finishes` | object[] | no | *(lane P draft)* pressing and burning regions: emboss, deboss, foil, varnish, letterpress, burn (§5.10) |
-| `pliego:artwork` | object[] | no | *(lane P draft)* brand artwork placed on a sheet side (§5.11) |
+| `pliego:dielines` | object[] | no | packaging dieline blocks: panels, bleed/safe areas, glue zones, inside dimensions (§5.9) |
+| `pliego:finishes` | object[] | no | pressing and burning regions: emboss, deboss, foil, varnish, letterpress, burn (§5.10) |
+| `pliego:artwork` | object[] | no | brand artwork placed on a sheet side (§5.11) |
+| `pliego:annotations` | object[] | no | short texts printed on a sheet's front: edge numbers, part names (§5.12) |
+| `pliego:pages` | object | no | print pages in the layout frame (§5.12) |
 | `pliego:meta` | object | yes | provenance of this document (§5.7) |
 
 ---
@@ -290,7 +292,6 @@ fine kirigami declare it; nothing else should.
 `digest` is the SHA-256 of the canonical serialisation of the document with `digest` set to
 `null` (GOC-1 compatible).
 
-
 ### 5.8 Removable pieces, stacks and tear-away — `pliego:pieces`, `pliego:stacks`, step `remove`
 
 <!-- §5.8 added by wave 2b lane R (reveal blocks). Kept self-contained for the coordinator. -->
@@ -360,8 +361,7 @@ stickers and pop-outs use the same three fields.
 
 ---
 
-<!-- lane P (wave 2b) draft — begin: packaging blocks (§5.9–§5.11) -->
-### 5.9 `pliego:dielines` — packaging dielines (lane P draft)
+### 5.9 `pliego:dielines` — packaging dielines
 
 A list of dieline blocks, one per die-cut sheet, written by `pliego.dieline` (box, carton and
 envelope generators). Sheet-local coordinates (mm); the exporters add the sheet's `offset`.
@@ -394,7 +394,7 @@ envelope generators). Sheet-local coordinates (mm); the exporters add the sheet'
   `halfcut`. Box folds are mountain folds with the sheet's front as the print side, and box
   sheets are placed print side down (`placement.rotation = [1, 0, 0, 0]`).
 
-### 5.10 `pliego:finishes` — pressing and burning (lane P draft)
+### 5.10 `pliego:finishes` — pressing and burning
 
 A list of finish regions on one side of a sheet (`pliego.press`):
 
@@ -420,7 +420,7 @@ engrave vector + raster). **Engine:** embossed/debossed areas are locally stiffe
 areas thinner; v1 records the regions only — the engine does not yet change local stiffness or
 thickness, and the studio does not yet render relief or sheen.
 
-### 5.11 `pliego:artwork` — brand artwork (lane P draft)
+### 5.11 `pliego:artwork` — brand artwork
 
 ```json
 {"id": "brand", "sheet": "carton", "side": "back", "asset": "assets/brand.svg",
@@ -433,7 +433,23 @@ centre; `clip` ∈ `panel bleed none` (clip to the named panel, to its bleed, or
 Exporters place the image on the Artwork layer (SVG) or draw its frame (PDF, DXF). This
 complements `front.art`/`back.art` (one image over the whole sheet). The studio's texture
 preview of placed artwork is a follow-up.
-<!-- lane P (wave 2b) draft — end -->
+
+### 5.12 `pliego:annotations` and `pliego:pages` — print layout (optional)
+
+Two optional top-level fields for documents meant to be printed and cut by hand, such as the
+papercraft nets `pliego.unfold` writes. Both are print-only: the engine ignores them, and they
+change no physics.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `pliego:annotations` | object[] | short texts printed on a sheet's front: `{"sheet", "at": [u, v], "text", "angle", "size"}`. `at` is the text's centre in sheet-local mm, `angle` the baseline direction in degrees counter-clockwise from +u (default 0), `size` the cap height in mm (0.5–50), `text` 1–32 printable characters. Papercraft prints each cut edge's number on both sides of the cut. |
+| `pliego:pages` | object | print pages in the layout frame: `{"size": [w, h], "margin": m, "pages": [{"id", "origin": [x, y]}]}`. Each page is the rectangle `origin … origin + size`; its printable area is inset by `margin`. Pages do not overlap, and every sheet should lie inside one page's printable area. |
+
+When `pliego:pages` is present, the PDF exporter prints each page once at 1:1 on a sheet of its
+`size`, instead of tiling the whole layout. The SVG exporter draws the page frames on a `pages`
+layer. SVG, PDF and DXF print annotations on their `label` / `TEXT` layers.
+
+Rule 13 (§8) covers both fields.
 
 ## 6. `file_frames` — 3-D states
 
@@ -484,10 +500,14 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     `represents` × the `caliper_mm` of each member's stock (within 1e-5 mm); the members share one
     rotation and sit *k* × `pitch_mm` along the bottom sheet's front normal; the `binding` edge
     lies on every member.
-13. *(lane P draft)* Packaging blocks resolve: every `pliego:dielines` / `pliego:finishes` /
+13. Packaging blocks resolve: every `pliego:dielines` / `pliego:finishes` /
     `pliego:artwork` entry names an existing sheet; panel, safe, glue and finish polygons lie
     on their sheet (within its local bounding box; bleed outlines within the box grown by
     `bleed_mm`); finish and artwork records satisfy §5.10–§5.11.
+14. Print layout (§5.12): every annotation's sheet exists and its `at` lies on that sheet, with
+    `text` 1–32 printable characters and `size` 0.5–50 mm; `pliego:pages` is well formed (size
+    > 0, 0 ≤ margin < half the page, ≥ 1 page, unique ids) and its pages do not overlap. A sheet
+    outside every page's printable area is a warning (`sheet_off_page`).
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

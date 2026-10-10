@@ -4,7 +4,7 @@
  "items": [
   {
    "slug": "pliego-half-fold",
-   "document": "demo/pliego-half-fold.fold",
+   "document": "pliego-half-fold.fold",
    "title": {
     "en": "The pliego",
     "es": "El pliego",
@@ -68,7 +68,7 @@
   },
   {
    "slug": "page-turn",
-   "document": "demo/page-turn.fold",
+   "document": "page-turn.fold",
    "title": {
     "en": "Page turn",
     "es": "Pasar la página",
@@ -97,7 +97,7 @@
   },
   {
    "slug": "v-fold-popup",
-   "document": "demo/v-fold-popup.fold",
+   "document": "v-fold-popup.fold",
    "title": {
     "en": "V-fold pop-up",
     "es": "Pop-up en V",

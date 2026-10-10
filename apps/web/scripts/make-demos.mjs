@@ -257,7 +257,7 @@ const CATALOG = {
   version: 1,
   source: 'demo',
   items: [
-    { slug: 'pliego-half-fold', document: 'demo/pliego-half-fold.fold',
+    { slug: 'pliego-half-fold', document: 'pliego-half-fold.fold',
       title: L4('The pliego', 'El pliego', 'Le pliego', 'O pliego'),
       summary: L4('One sheet, one valley fold: the printer’s sheet that becomes a book signature.', 'Una hoja, un doblez en valle: el pliego de imprenta que se convierte en cuadernillo.', 'Une feuille, un pli vallée : la feuille d’imprimeur qui devient un cahier.', 'Uma folha, uma dobra em vale: a folha de impressão que vira caderno.'),
       parameters: [
@@ -265,11 +265,11 @@ const CATALOG = {
         { id: 'stock', type: 'select', label: L4('Paper', 'Papel', 'Papier', 'Papel'), default: 'kami',
           options: [{ value: 'kami', label: L4('Kami', 'Kami', 'Kami', 'Kami') }, { value: 'cardstock-250', label: L4('Cardstock', 'Cartulina', 'Bristol', 'Cartolina') }] },
       ] },
-    { slug: 'page-turn', document: 'demo/page-turn.fold',
+    { slug: 'page-turn', document: 'page-turn.fold',
       title: L4('Page turn', 'Pasar la página', 'Tourner la page', 'Virar a página'),
       summary: L4('The simplest sheet hyperobject: one leaf turning on a spine.', 'El hiperobjeto de hoja más sencillo: una hoja que gira sobre su lomo.', 'L’hyperobjet de feuille le plus simple : un feuillet qui tourne sur son dos.', 'O hiperobjeto de folha mais simples: uma folha que gira sobre a lombada.'),
       parameters: [{ id: 'curl', type: 'checkbox', label: L4('Let the paper curl', 'Dejar que el papel se curve', 'Laisser le papier se courber', 'Deixar o papel curvar'), default: true }] },
-    { slug: 'v-fold-popup', document: 'demo/v-fold-popup.fold',
+    { slug: 'v-fold-popup', document: 'v-fold-popup.fold',
       title: L4('V-fold pop-up', 'Pop-up en V', 'Pop-up en V', 'Pop-up em V'),
       summary: L4('A card with a V-fold piece glued across the gutter: it rises as the card opens.', 'Una tarjeta con una pieza en V pegada sobre el pliegue central: se levanta al abrirla.', 'Une carte avec une pièce en V collée sur la pliure : elle se dresse à l’ouverture.', 'Um cartão com uma peça em V colada sobre a dobra central: ela se ergue ao abrir.'),
       parameters: [{ id: 'alpha', type: 'slider', label: L4('Glue angle', 'Ángulo de pegado', 'Angle de collage', 'Ângulo de colagem'), min: 30, max: 60, step: 5, default: 45, unit: '°' }] },

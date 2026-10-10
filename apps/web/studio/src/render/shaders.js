@@ -97,7 +97,7 @@ void main() {
   float transmit = max(-ndl, 0.0) * 0.22 * sh;      // paper is translucent: light through the sheet
   vec3 hemi = mix(uGround, uSky, n.y * 0.5 + 0.5);
   float sheen = pow(max(dot(n, normalize(L + V)), 0.0), 28.0) * 0.035 * sh;
-  vec3 col = base * (hemi * 0.55 + vec3(1.0, 0.97, 0.92) * (diffuse * 0.75 + transmit)) + sheen;
+  vec3 col = base * (hemi * 0.62 + vec3(1.0, 0.97, 0.92) * (diffuse * 0.7 + transmit)) + sheen;
   outColor = vec4(pow(col, vec3(1.0 / 2.2)), 1.0);
 }`;
 

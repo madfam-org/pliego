@@ -73,6 +73,7 @@ state (see `docs/strategy/engine.md` §6).
 | `faces_vertices` | yes | counter-clockwise vertex cycles; every face is a simple polygon (no holes — holes are bridged with `J` edges) |
 | `faces_edges` | no | if present must agree with `faces_vertices` |
 | `edges_faces`, `vertices_vertices`, `vertices_faces` | no | derived; readers recompute them |
+| `faceOrders` | no | layer order `[f, g, s]` (FOLD semantics); **may be partial in v1** — the kernel emits only pairs it can decide locally (faces adjacent across a folded M/V crease); a missing pair means "unknown", never "no overlap" |
 | `file_frames` | conditional | 3-D frames (§6) |
 
 `edges_assignment` is the **design** intent. The physical treatment of each line (how it was made)
@@ -253,8 +254,12 @@ declared here; the viewer builds its UI from this list.
 
 ```json
 {"cartridge": "valley-fold", "mode": "default", "params": {"size": 150},
- "kernel": "pliego-kernel 0.1.0", "digest": "sha256:…"}
+ "kernel": "pliego-kernel 0.1.0", "min_feature_mm": 1.0, "digest": "sha256:…"}
 ```
+
+`min_feature_mm` (optional, mm, > 0) declares the smallest intended feature of this document — the
+face-area floor of rule §8.3 becomes `min_feature_mm²` (default 1 mm²). Papercuts in tissue and
+fine kirigami declare it; nothing else should.
 
 `digest` is the SHA-256 of the canonical serialisation of the document with `digest` set to
 `null` (GOC-1 compatible).
@@ -288,8 +293,8 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
 
 1. All per-vertex / per-edge / per-face arrays have matching lengths; every index is in range.
 2. Every edge's two vertices and every face's vertices belong to the edge's / face's sheet.
-3. Faces are simple, counter-clockwise, non-degenerate (area ≥ 1 mm² unless the cartridge
-   declares a smaller minimum feature), and the faces of a sheet tile the sheet (no overlap, no gap).
+3. Faces are simple, counter-clockwise, non-degenerate (area ≥ `pliego:meta.min_feature_mm`², default
+   1 mm²), and the faces of a sheet tile the sheet (no overlap, no gap).
 4. Assignment/treatment pairs are allowed by §4; `C` edges have fold angle 0; `B` edges border
    exactly one face, `C` edges border exactly one face on each side of a split, interior edges two.
 5. Sheets do not overlap in the layout frame.
@@ -299,7 +304,8 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
 8. Every sequence target references an `M`/`V`/`F` edge; angles are in [−180, 180].
 9. If `initial` is present, its edge lengths match the layout lengths within 1e-3 relative error
    (sheets are developable — folding never stretches paper), and every glue weld is satisfied within
-   `collision_thickness`.
+   `collision_thickness`: each vertex of the glue `region` polygon, mapped to sheet *b*, lies within
+   `max(collision_thickness(a), collision_thickness(b))` of its image on *b* in the `initial` frame.
 10. `pliego:meta.digest`, when present, matches.
 
 The kernel prints a read-proof line for every document it verifies:

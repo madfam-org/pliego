@@ -1237,6 +1237,10 @@
             "null"
           ],
           "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "min_feature_mm": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       },
       "additionalProperties": false

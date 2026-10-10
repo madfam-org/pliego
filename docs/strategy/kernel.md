@@ -80,7 +80,10 @@ result = pliego.Assembly([sheet], controls=[pliego.sequence_control()],
 ```
 
 The runner always prints `verify: sheets=N vertices=V edges=E faces=F joins=J errors=E warnings=W`
-and exits 1 on any error.
+and exits 1 on any error. The standalone CLI `python -m pliego.cartridge <dir>` (used by the commons
+CI) prints one line per run: `verify: cartridge=<slug> mode=<mode> …` for defaults and
+`verify: cartridge=<slug> mode=<mode>:<preset> …` for each preset, and exits 1 on any error or when
+zero runs happened.
 
 ---
 

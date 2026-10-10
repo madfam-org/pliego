@@ -199,6 +199,15 @@ class FoldProgram:
         from .flatcut import cut
         return self._add(sid, label, cut(self.state, segment, **select), ms, note)
 
+    def tuck(self, sid: str, label, line, direction: str = "valley", pocket=None,
+             ms: int = 1800, note=None, **select) -> FoldProgram:
+        """Fold a flap into a pocket (`pliego.flattuck.tuck`): `pocket` = (folded point, n
+        layers that stay over it). The step reports the rigid path's crossing of the pocket's
+        wall (`penetration_mm`)."""
+        from .flattuck import tuck
+        return self._add(sid, label, tuck(self.state, line, direction, pocket=pocket,
+                                          **select), ms, note)
+
     def crease(self, sid: str, label, line, direction: str = "valley", ms: int = 600,
                **select) -> FoldProgram:
         """Mark creases on the selected layers without moving them (no step is emitted)."""
@@ -545,6 +554,8 @@ class FoldProgram:
             pen = None
             if start_poses is not None:
                 pen = check_penetration(arr, cands[0], start_poses, ts0, rec.sid)
+            elif rec.move is not None and rec.move.kind == "tuck":
+                pen = check_penetration(arr, cands[0], cands[0](0.0), ts0, rec.sid, fail=False)
             n = len(seq)
             last = cur
             for k, ang in enumerate(seq, 1):
@@ -569,6 +580,8 @@ class FoldProgram:
                          "variant": which})
             if pen is not None:
                 rows[-1]["penetration_mm"] = pen
+            if rec.move is not None and rec.move.kind == "tuck":
+                rows[-1]["pocket_crossings"] = len(rec.move.info["crossed"])
         seq_out = Sequence(steps, mode="physical")
         report = {"operations": len(self.recs), "steps": len(steps), "faces": nf,
                   "creases": len(folds), "exact_steps": exact, "max_tear_mm": worst,

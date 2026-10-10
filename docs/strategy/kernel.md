@@ -270,6 +270,18 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   wall with its tip landing on the floor; every face ends inside the walls (|x|, |z| ≤ q,
   0 ≤ y ≤ q). Fidelity: exact at every sample (tear ~1e-12 mm); the preview's blend between the
   kinematic samples tears about 1 mm after refinement.
+- **Tucks** (`flattuck.py`). `tuck(state, line, direction, pocket=(q, n), at=, layers=,
+  faces=, sheet_points=)` folds a flap like `fold` but into a pocket: at the folded point q of
+  the area it lands on, under (at least) the top n layers (valley) or over the bottom n
+  (mountain); those layers and the paper continuing flat from them are the pocket's near wall,
+  every other order is solved and checked (layers joined to the wall by a folded edge may end
+  over the flap too). The 3-D path is the simple fold's rotation, exact in the preview; with
+  paper of no thickness it crosses nothing on the way (`penetration_mm`, reported) but it
+  arrives on the near side of the wall and ends behind it: `Move.info["crossed"]` lists those
+  wall faces and the step reports `pocket_crossings` — reported, not refused.
+  `FoldProgram.tuck(...)`. Proof: the waterbomb balloon's four points tucked into the side
+  pockets, the paper cup's front flap into the pocket in front, the samurai helmet's back corner
+  tucked inside.
 <!-- FL2 (wave 3, flat operations) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

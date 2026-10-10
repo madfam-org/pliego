@@ -410,3 +410,96 @@ def masu_box(s: float = 200.0):
                        "at": o(0.0, sy * 3.5 * q)})
     return fp, {"q": q, "h": h}
 
+
+def waterbomb_balloon(s: float = 150.0):
+    """The traditional water bomb: the waterbomb base (one collapse), then on each face the
+    bottom corners up to the top point, the side points in to the centre line, and the two top
+    points folded down and tucked into the side pockets."""
+    h, q, big, e = s / 2, s / 4, 3 * s / 4, 3 * s / 8
+    fp = waterbomb_base(s)
+    for tag in ("front", "back"):
+        fp.fold(f"{tag}-corner-l", "corners", ((h, 0.0), (q, q)), "valley", at=(3.0, 1.5),
+                layers=1)
+        fp.fold(f"{tag}-corner-r", "corners", ((big, q), (h, 0.0)), "valley",
+                at=(s - 3.0, 1.5), layers=1)
+        sl, sr = fp.state.preimage((q + 2.0, q)), fp.state.preimage((big - 2.0, q))
+        fp.fold(f"{tag}-side-l", "sides", ((e, -1.0), (e, s)), "valley", sheet_points=[sl])
+        fp.fold(f"{tag}-side-r", "sides", ((s - e, s), (s - e, -1.0)), "valley",
+                sheet_points=[sr])
+        tips = [fp.state.preimage((h - 1.0, h - 4.0)), fp.state.preimage((h + 1.0, h - 4.0))]
+        for side, tip, px in (("l", tips[0], h - 6.0), ("r", tips[1], h + 6.0)):
+            fp.tuck(f"{tag}-tuck-{side}", "tuck", ((-1.0, e), (s + 1.0, e)), "valley",
+                    sheet_points=[tip], pocket=((px, e - 4.0), 1))
+        if tag == "front":
+            fp.turn_over()
+    return fp, {"e": e, "h": h}
+
+
+def paper_cup(s: float = 200.0):
+    """The traditional folded cup: a triangle point up, each side corner across so its top edge
+    lies level, the front top flap down into the pocket in front (a tuck), the back flap down
+    behind."""
+    h, d = s / 2.0, s / math.sqrt(2.0)
+    fp = FoldProgram([(0, 0), (s, 0), (s, s), (0, s)])
+    fp.rotate(45.0, (h, h))
+
+    def o(x, y):
+        return (x + h, y + h)
+    corner = {}
+    for p in fp.state.outline:
+        w = fp.state.to_folded(p)
+        corner[(round((w[0] - h) / d), round((w[1] - h) / d))] = (p[0] + 0.03 * (h - p[0]),
+                                                                 p[1] + 0.03 * (h - p[1]))
+    fp.fold("triangle", "triangle", (o(d + 1.0, 0.0), o(-d - 1.0, 0.0)), "valley")
+    r2 = math.sqrt(2.0)
+    a, b = ((3.0 - 2.0 * r2) * d, 0.0), ((r2 - 1.0) * d, (2.0 - r2) * d)
+    t = 2.0
+    fp.fold("corner-right", "corner", (o(a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])),
+                                       o(a[0] - t * (b[0] - a[0]), a[1] - t * (b[1] - a[1]))),
+            "valley")
+    fp.fold("corner-left", "corner", (o(-a[0] + t * (b[0] - a[0]), a[1] - t * (b[1] - a[1])),
+                                      o(-a[0] - t * (b[0] - a[0]), a[1] + t * (b[1] - a[1]))),
+            "valley")
+    y_top = (2.0 - r2) * d
+    fp.tuck("front-flap", "front flap", (o(-d, y_top), o(d, y_top)), "valley",
+            sheet_points=[corner[(0, -1)]], pocket=(o(0.0, y_top - 0.1 * d), 1))
+    fp.fold("back-flap", "back flap", (o(-d, y_top), o(d, y_top)), "mountain",
+            sheet_points=[corner[(0, 1)]])
+    return fp, {"o": o, "d": d, "y_top": y_top}
+
+
+def samurai_helmet(s: float = 250.0, horn: float = 67.5):
+    """The traditional kabuto (as the commons' samurai-helmet, simple folds) with its back corner
+    tucked inside the helmet instead of folded behind."""
+    h = s / 2.0
+    d = s / math.sqrt(2.0)
+    fp = FoldProgram([(0, 0), (s, 0), (s, s), (0, s)])
+    fp.rotate(45.0, (h, h))
+
+    def o(x, y):
+        return (x + h, y + h)
+    corner = {}
+    for p in fp.state.outline:
+        w = fp.state.to_folded(p)
+        corner[(round((w[0] - h) / d), round((w[1] - h) / d))] = (p[0] + 0.02 * (h - p[0]),
+                                                                 p[1] + 0.02 * (h - p[1]))
+    top, rgt, bot, lft = corner[(0, 1)], corner[(1, 0)], corner[(0, -1)], corner[(-1, 0)]
+    off = s / 125.0
+    rgt, lft = (rgt[0] - off, rgt[1] - off), (lft[0] - off, lft[1] - off)
+    fp.fold("triangle", "triangle", (o(-d - 1.0, 0.0), o(d + 1.0, 0.0)), "valley")
+    fp.fold("corners-down", "corners", (o(-0.1 * d, 0.1 * d), o(1.1 * d, -1.1 * d)), "valley")
+    fp.fold("corners-down-2", "corners", (o(-1.1 * d, -1.1 * d), o(0.1 * d, 0.1 * d)), "valley")
+    for k, sd in enumerate((rgt, lft)):
+        fp.fold("flaps-up" + ("-2" if k else ""), "flaps up", (o(d, -d / 2.0), o(-d, -d / 2.0)),
+                "valley", sheet_points=[sd])
+    c, s_ = math.cos(math.radians(horn)), math.sin(math.radians(horn))
+    fp.fold("horns", "horns", (o(0.0, -d / 2.0), o(c * d, -d / 2.0 + s_ * d)), "valley",
+            sheet_points=[rgt])
+    fp.fold("horns-2", "horns", (o(-c * d, -d / 2.0 + s_ * d), o(0.0, -d / 2.0)), "valley",
+            sheet_points=[lft])
+    fp.fold("brim-1", "brim", (o(d, -0.75 * d), o(-d, -0.75 * d)), "valley", sheet_points=[top])
+    tm = (h + 0.69 * (top[0] - h) + 1.0, h + 0.69 * (top[1] - h))
+    fp.fold("brim-2", "brim", (o(d, -0.62 * d), o(-d, -0.62 * d)), "valley", sheet_points=[tm])
+    fp.tuck("back", "back", (o(d, -0.7 * d), o(-d, -0.7 * d)), "mountain", sheet_points=[bot],
+            pocket=(o(0.0, -0.55 * d), 1))
+    return fp, {"o": o, "d": d, "bot": bot}

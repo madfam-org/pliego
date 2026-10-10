@@ -37,6 +37,7 @@ LANDING_HTML = """<!doctype html>
 <link rel="preconnect" href="https://plausible.madfam.io">
 </head><body>
 <a href="/studio/">Studio</a>
+<a href="/llms.txt">llms.txt</a>
 <img src="data:image/png;base64,AAAA" alt="">
 <img src="/assets/missing.png" alt="">
 <script src="/assets/app.js?v=keep"></script>
@@ -46,6 +47,7 @@ LANDING_HTML = """<!doctype html>
 STUDIO_HTML = """<!doctype html>
 <html lang="en"><head>
 <link rel="stylesheet" href="studio.css">
+<script src="../shared/lang-boot.js"></script>
 <script type="module" src="./studio.js"></script>
 <script type="module" src="/engine/index.js"></script>
 </head><body><main id="studio"></main></body></html>
@@ -65,6 +67,18 @@ def build_tree(root: Path, *, projects: bool = True, materials: bool = True) -> 
     (web / "studio" / "index.html").write_text(STUDIO_HTML, encoding="utf-8")
     (web / "studio" / "studio.css").write_text("main{display:block}\n", encoding="utf-8")
     (web / "studio" / "studio.js").write_text("import '/engine/index.js';\n", encoding="utf-8")
+    (web / "studio" / "demo").mkdir()
+    (web / "studio" / "demo" / "page-turn.fold").write_text('{"file_spec": 1.2}', encoding="utf-8")
+    (web / "shared").mkdir()
+    (web / "shared" / "lang-boot.js").write_text("document.documentElement.lang='en';\n",
+                                                 encoding="utf-8")
+    (web / "scripts").mkdir()
+    (web / "scripts" / "make-og.mjs").write_text("// tooling\n", encoding="utf-8")
+    (web / "test").mkdir()
+    (web / "test" / "csp-lint.test.mjs").write_text("// tooling\n", encoding="utf-8")
+    (web / "dev-server.mjs").write_text("// tooling\n", encoding="utf-8")
+    (web / "llms.txt").write_text("web copy: shadowed by the repository root file\n",
+                                  encoding="utf-8")
     engine = root / "packages" / "engine" / "src"
     (engine / "physics").mkdir(parents=True)
     (engine / "index.js").write_text("export * from './physics/xpbd.js';\n", encoding="utf-8")

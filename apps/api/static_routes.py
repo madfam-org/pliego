@@ -1,8 +1,10 @@
 """Static surfaces: landing, studio, engine modules, schemas, llms files, robots and sitemap.
 
-Every file is resolved through ``safe_file``: no empty, dot or dot-dot segment, no hidden file, no
-backslash or NUL, the real path (symlinks resolved) must stay inside its mount, and the extension
-must be in the MIME table — anything else is a 404, so source files (``.py``) are never served.
+Site files come from apps/web (minus its tooling: ``scripts/``, ``test/``, the dev server), engine
+modules from packages/engine/src, schemas from packages/schemas. Every file is resolved through
+``safe_file``: no empty, dot or dot-dot segment, no hidden file, no backslash or NUL, the real path
+(symlinks resolved) must stay inside its mount, and the extension must be in the MIME table —
+anything else is a 404, so source files (``.py``) are never served.
 
 Cache busting (the Cloudflare-TTL lesson from Fashion Cabinet): served HTML has every same-origin
 asset URL that resolves to a file stamped ``?v=<token>``, where the token is
@@ -84,26 +86,36 @@ def asset_token(url_path: str, path: Path) -> str:
     return digest.hexdigest()[:10]
 
 
+# Files under apps/web that are tooling, not site: never served.
+WEB_PRIVATE_DIRS = frozenset({"scripts", "test", "tests", "node_modules"})
+WEB_PRIVATE_FILES = frozenset({"dev-server.mjs", "package.json", "package-lock.json"})
+
+
 class StaticSite:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
-        web = settings.web_dir
-        # URL prefix → directory. Longest prefix first.
-        self.mounts: tuple[tuple[str, Path], ...] = (
-            ("/assets/", web / "assets"),
-            ("/studio/", web / "studio"),
-            ("/engine/", settings.engine_dir),
-        )
+
+    def web_file(self, rel: str) -> Path | None:
+        """A site file under apps/web (``/assets``, ``/shared``, ``/studio``, root files)."""
+        if rel.endswith("/"):
+            rel += "index.html"
+        parts = rel.split("/")
+        if parts[0] in WEB_PRIVATE_DIRS or parts[-1] in WEB_PRIVATE_FILES:
+            return None
+        return safe_file(self.settings.web_dir, rel)
 
     def resolve_url(self, url_path: str) -> Path | None:
-        for prefix, base in self.mounts:
-            if url_path.startswith(prefix):
-                return safe_file(base, url_path[len(prefix):])
+        """The file a GET of ``url_path`` would serve (mirrors the routes below), or None."""
+        if url_path in ("/llms.txt", "/llms-full.txt"):
+            return safe_file(self.settings.root, url_path[1:])
+        if url_path in ("/robots.txt", "/sitemap.xml"):
+            return None  # generated per host
+        if url_path.startswith("/engine/"):
+            return safe_file(self.settings.engine_dir, url_path[len("/engine/"):])
         if url_path.startswith("/schemas/"):
-            name = url_path[len("/schemas/"):]
-            return self.schema_file(name)
-        if url_path.count("/") == 1 and not url_path.endswith(".html"):
-            return safe_file(self.settings.web_dir, url_path[1:])
+            return self.schema_file(url_path[len("/schemas/"):])
+        if url_path.startswith("/") and not url_path.endswith("/"):
+            return self.web_file(url_path[1:])
         return None
 
     def schema_file(self, name: str) -> Path | None:
@@ -195,23 +207,12 @@ def register(app: Flask, settings: Settings, hosts: HostRouter, api_index) -> St
     def studio():
         return page(web / "studio", "/studio/")
 
-    def mounted(prefix: str, base: Path, rel: str) -> Response:
-        target = safe_file(base, rel)
-        if target is None:
-            abort(404)
-        return site.file_response(target, prefix + rel)
-
-    @app.get("/assets/<path:rel>")
-    def assets(rel: str):
-        return mounted("/assets/", web / "assets", rel)
-
-    @app.get("/studio/<path:rel>")
-    def studio_files(rel: str):
-        return mounted("/studio/", web / "studio", rel)
-
     @app.get("/engine/<path:rel>")
     def engine_files(rel: str):
-        return mounted("/engine/", settings.engine_dir, rel)
+        target = safe_file(settings.engine_dir, rel)
+        if target is None:
+            abort(404)
+        return site.file_response(target, "/engine/" + rel)
 
     @app.get("/schemas/<name>")
     def schemas(name: str):
@@ -245,10 +246,11 @@ def register(app: Flask, settings: Settings, hosts: HostRouter, api_index) -> St
             abort(404)
         return _text(_sitemap(settings), "application/xml")
 
-    @app.get("/<name>")
-    def web_root_file(name: str):
-        if name.endswith(".html"):
+    @app.get("/<path:rel>")
+    def web_files(rel: str):
+        target = site.web_file(rel)
+        if target is None:
             abort(404)
-        return mounted("/", web, name)
+        return site.file_response(target, "/" + rel)
 
     return site

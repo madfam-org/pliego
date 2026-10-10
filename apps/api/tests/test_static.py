@@ -52,6 +52,7 @@ def test_studio(client):
     assert re.search(r'href="studio\.css\?v=[0-9a-f]{10}"', html)
     assert re.search(r'src="\./studio\.js\?v=[0-9a-f]{10}"', html)
     assert re.search(r'src="/engine/index\.js\?v=[0-9a-f]{10}"', html)
+    assert re.search(r'src="\.\./shared/lang-boot\.js\?v=[0-9a-f]{10}"', html)
 
 
 def test_cache_busting_stamps(client, tree):
@@ -88,6 +89,8 @@ def test_html_etag_and_304(client):
     ("/assets/site.css", "text/css; charset=utf-8"),
     ("/studio/studio.js", "text/javascript; charset=utf-8"),
     ("/favicon.svg", "image/svg+xml; charset=utf-8"),
+    ("/shared/lang-boot.js", "text/javascript; charset=utf-8"),
+    ("/studio/demo/page-turn.fold", "application/json"),
 ])
 def test_static_files_and_types(client, path, ctype):
     resp = client.get(path, base_url=APP)
@@ -114,7 +117,10 @@ def test_static_files_and_types(client, path, ctype):
     "/schemas/../llms.txt",
     "/schemas/..%2fllms.txt",
     "/engine/physics",
-    "/index.html",
+    "/scripts/make-og.mjs",
+    "/test/csp-lint.test.mjs",
+    "/dev-server.mjs",
+    "/shared/../../../secret.txt",
 ])
 def test_traversal_and_unsafe_paths_are_404(client, path):
     resp = client.get(path, base_url=LANDING, follow_redirects=True)  # // is merged, then 404
@@ -163,11 +169,16 @@ def test_llms_files(client, path, needle):
         assert resp.status_code == 200
         assert resp.headers["Content-Type"] == "text/plain; charset=utf-8"
         assert resp.data.startswith(needle)
+    html = client.get("/", base_url=LANDING).get_data(as_text=True)
+    assert re.search(r'href="/llms\.txt\?v=[0-9a-f]{10}"', html)
 
 
 def test_llms_missing_is_404_not_empty(make_app, tree):
     (tree / "llms.txt").unlink()
-    assert make_app().test_client().get("/llms.txt").status_code == 404
+    c = make_app().test_client()
+    assert c.get("/llms.txt").status_code == 404  # never the apps/web copy
+    # and the landing page does not stamp a link to a file the route will not serve
+    assert 'href="/llms.txt"' in c.get("/", base_url=LANDING).get_data(as_text=True)
 
 
 def test_schema_served(client):

@@ -509,8 +509,11 @@ JSON it received, whatever number spelling or key order the file used.
   whitespace anywhere.
 - **Numbers:** IEEE-754 doubles printed as ECMAScript `Number.prototype.toString` does — the
   shortest digits that round-trip, plain notation for 1e-7 ≤ |x| < 1e21, exponent form
-  otherwise. So `5.0` → `5`, `5e-06` → `0.000005`, `1e-7` → `1e-7`, `1e21` → `1e+21`, `-0` → `0`.
-  Integers beyond ±2^53, NaN and infinities are not allowed.
+  otherwise. So every integral value is written as an integer (`0.0` → `0`, `90.0` → `90`,
+  `-0` → `0`), `0.000015` stays `0.000015` (not `1.5e-05`), `1e-7` → `1e-7` (not `1e-07`),
+  `1e21` → `1e+21`, `1.5e300` → `1.5e+300`: the exponent is written as `e`, a sign, and its
+  digits without leading zeros. Integers beyond ±2^53, NaN and infinities are not allowed. How a
+  writer spelled a number in its file never matters: readers hash the value.
 - **Strings:** escaped as `JSON.stringify` does: `\"`, `\\`, `\b \f \n \r \t`, other
   characters below U+0020 as `\u00xx` (lower-case hex); everything else, `/`, U+2028 and U+2029
   included, is written as itself. Strings with lone surrogates are not allowed.
@@ -521,7 +524,10 @@ JSON it received, whatever number spelling or key order the file used.
 `packages/kernel/tests/fixtures/digest_vector.json` is a shared test vector (a document, its
 canonical text and its digest, cross-checked against Node's `JSON.stringify`). The engine
 recomputes the digest on load when it is present (rule 10). This is GOC-1 §3.1 made exact
-across languages: GOC-1's integral-float rule falls out of the number rule.
+across languages: GOC-1's integral-float rule falls out of the number rule, but GOC-1's
+Python `repr` spelling of other floats (`1.5e-05`, `1e-07`, `1e+16`) differs from the
+ECMAScript spelling, so a checker built on GOC-1 `canonical_json` agrees with §5.15 only on
+documents whose non-integral numbers lie in 1e-4 ≤ |x| < 1e16.
 <!-- lane H (w3/hardening) §5.15: end -->
 
 <!-- lane H (w3/hardening) §5.16: begin -->

@@ -52,3 +52,11 @@ def test_digest_ignores_number_spelling_and_key_order():
                             ' "y": [1e-07, 5e-06], "x": 5}'))
     assert a.digest() == b.digest()
     assert a.stamp().data["pliego:meta"]["digest"] == a.digest()
+
+
+def test_integral_floats_hash_as_integers():
+    """A fold angle written as 0.0 (or 90.0) hashes like 0 (90): the digest a GOC-1 checker
+    computes for integral numbers matches (the case that failed `pliego-spec check`)."""
+    a = Document({"edges_foldAngle": [0.0, 90.0, -0.0], "pliego:meta": {"kernel": "k"}})
+    b = Document({"edges_foldAngle": [0, 90, 0], "pliego:meta": {"kernel": "k"}})
+    assert a.digest() == b.digest()

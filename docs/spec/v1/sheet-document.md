@@ -73,7 +73,7 @@ state (see `docs/strategy/engine.md` §6).
 | `faces_vertices` | yes | counter-clockwise vertex cycles; every face is a simple polygon (no holes — holes are bridged with `J` edges) |
 | `faces_edges` | no | if present must agree with `faces_vertices` |
 | `edges_faces`, `vertices_vertices`, `vertices_faces` | no | derived; readers recompute them |
-| `faceOrders` | no | layer order `[f, g, s]` (FOLD semantics); **may be partial in v1** — the kernel emits only pairs it can decide locally (faces adjacent across a folded M/V crease); a missing pair means "unknown", never "no overlap" |
+| `faceOrders` | no | layer order `[f, g, s]` (FOLD semantics: face f lies on side s = ±1 of face g's normal; f ≠ g on one sheet); **may be partial** — a missing pair means "unknown", never "no overlap". <!-- lane H (w3/hardening) item 7 --> The kernel writes it when a cartridge supplies a layer order: a fold program's complete flat-state order (`pliego.FoldProgram`, every overlapping pair) or the author's own triples |
 | `file_frames` | conditional | 3-D frames (§6) |
 
 `edges_assignment` is the **design** intent. The physical treatment of each line (how it was made)

@@ -285,6 +285,10 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         er = initial_rest_angles(fv, ev, ea, ef, er, frames[0]["vertices_coords"])
     if any(r != 0.0 for r in er):
         data["pliego:edges_restAngle"] = er
+    if getattr(assembly, "face_orders", None):
+        from .document_pose import resolve_face_orders
+
+        data["faceOrders"] = resolve_face_orders(assembly.face_orders, sheets, arrs, face_base)
     for key, value in (("pliego:dielines", getattr(assembly, "dielines", None)),
                        ("pliego:finishes", getattr(assembly, "finishes", None)),
                        ("pliego:artwork", getattr(assembly, "artwork", None))):

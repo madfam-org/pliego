@@ -91,6 +91,7 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
     faces_ok = _rule3_faces(d, coords, out, floor)
     _rule4_edges(d, out)
     _edge_extras(d, out)
+    _face_orders(d, out)
     _rule5_overlap(d, coords, out)
     _rule6_stocks(d, out)
     _rule7_refs(d, coords, out)
@@ -351,6 +352,27 @@ def _coord_key(d: dict, e: list[int]) -> tuple:
     vc = d["vertices_coords"]
     p, q = (tuple(vc[e[0]][:2]), tuple(vc[e[1]][:2]))
     return (d["pliego:vertices_sheet"][e[0]], min(p, q), max(p, q))
+
+
+def _face_orders(d: dict, out: _Issues) -> None:
+    """Rule 1–2 for FOLD ``faceOrders``: [f, g, s] with f ≠ g in range, on one sheet, s = ±1."""
+    fo = d.get("faceOrders")
+    if fo is None:
+        return
+    nf, fs = len(d["faces_vertices"]), d["pliego:faces_sheet"]
+    if not isinstance(fo, list):
+        out.err(1, "face_orders", "faceOrders must be a list of [f, g, s]")
+        return
+    for k, t in enumerate(fo):
+        ok = (isinstance(t, list) and len(t) == 3
+              and all(isinstance(x, int) and not isinstance(x, bool) for x in t))
+        if not ok or not (0 <= t[0] < nf and 0 <= t[1] < nf) or t[0] == t[1] \
+                or t[2] not in (-1, 1):
+            out.err(1, "face_orders", f"faceOrders[{k}] = {t!r} is not [f, g, ±1] with f ≠ g "
+                    "in range")
+        elif fs[t[0]] != fs[t[1]]:
+            out.err(2, "face_orders_sheet", f"faceOrders[{k}]: faces {t[0]} and {t[1]} lie on "
+                    "different sheets")
 
 
 # ── rule 5: sheets do not overlap in the layout frame ────────────────────────

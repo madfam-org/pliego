@@ -142,3 +142,25 @@ def test_crease_marks_lines_without_a_step():
     assert [s.id for s in b.sequence.steps] == ["diagonal"]
     kinds = sorted(m.assignment for m in b.sheet.marks)
     assert "F" in kinds and "V" in kinds
+
+
+def test_document_carries_complete_face_orders(stocks):
+    """Hardening item 7: `Assembly(face_orders={sheet: built})` writes the fold program's complete
+    layer order as FOLD faceOrders; a sheet edited after build() is refused."""
+    fp = FoldProgram(SQUARE, stock="kami")
+    fp.fold("diagonal", "Diagonal", ((S, 0), (0, S)), "valley", at=(10, 10))
+    fp.fold("half", "Half", ((S / 2, S / 2), (S, S)), "valley", at=(S * 0.9, S * 0.6))
+    b = fp.build()
+    asm = pliego.Assembly([b.sheet], controls=[pliego.sequence_control()], sequence=b.sequence,
+                          face_orders={b.sheet: b})
+    doc = asm.build(stocks=stocks)
+    assert doc.data["faceOrders"] == sorted(b.face_orders())
+    pairs = {frozenset(t[:2]) for t in doc.data["faceOrders"]}
+    local = {frozenset(t[:2]) for t in pliego.flatfold.face_orders_local(b.arr)}
+    assert local < pairs                  # every local pair, plus the non-adjacent layers
+    assert [i for i in doc.verify() if i["level"] == "error"] == []
+    doc.data["faceOrders"].append([0, 0, 1])
+    assert "face_orders" in {i["kind"] for i in doc.verify() if i["level"] == "error"}
+    b.sheet.valley((0, 10), (S, 10))                      # the faces no longer match
+    with pytest.raises(ValueError, match="do not match"):
+        pliego.Assembly([b.sheet], face_orders={b.sheet.id: b}).build(stocks=stocks)

@@ -341,6 +341,8 @@ class Assembly:
     spec §5.8), written to ``pliego:pieces`` / ``pliego:stacks``.
     `dielines` / `finishes` / `artwork`: packaging blocks (``pliego.dieline``, ``pliego.press``;
     spec §5.9–§5.11) written as ``pliego:dielines``, ``pliego:finishes`` and ``pliego:artwork``.
+    `face_orders`: complete layer orders written as FOLD ``faceOrders`` — sheet (or id) →
+    the `Built` of a `pliego.FoldProgram` (`Built.face_orders()`) or sheet-local [f, g, s].
     `pages`: print pages in the layout frame (spec §5.12 ``pliego:pages``) — {"size": [w, h],
     "margin": mm, "pages": [{"id", "origin": [x, y]}]}; give a dict `layout` that puts every
     sheet inside a page's printable area.
@@ -364,6 +366,8 @@ class Assembly:
     finishes: list[dict] = field(default_factory=list)
     artwork: list[dict] = field(default_factory=list)
     pages: dict | None = None
+    # complete layer orders (FOLD faceOrders): sheet → foldprogram.Built or [[f, g, s], …]
+    face_orders: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.pages is not None:

@@ -1,0 +1,22 @@
+# Scrapes the metrics Service only (service-metrics.yaml, port 9090), never the public app's port.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pliego
+  labels:
+    app.kubernetes.io/name: pliego
+    app.kubernetes.io/part-of: madfam-platform
+spec:
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pliego
+      app.kubernetes.io/component: metrics
+  namespaceSelector:
+    matchNames:
+      - pliego
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
+      scrapeTimeout: 10s

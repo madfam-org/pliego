@@ -123,20 +123,24 @@ def pose_arrangement(arr: Arrangement, angles: dict[int, float], root: Vec2 | No
 
 def closure_residual(arr: Arrangement, angles: dict[int, float], root: Vec2 | None = None
                      ) -> float:
-    """Largest disagreement (mm) between faces sharing a vertex — 0 for a consistent pose."""
+    """Loop-closure residual (mm): for every crease between two posed faces, the largest
+    distance between the far face's vertices placed by its tree transform and by rotating the
+    near face's transform about that crease by its angle. 0 for a consistent fold state —
+    this also checks the creases the spanning tree did not cross."""
     tr = face_transforms(arr, angles, root_face(arr, root))
     pts = [unplaced(v.x, v.y) for v in arr.vertices]
-    seen: dict[int, Vec3] = {}
     worst = 0.0
-    for fi, f in enumerate(arr.faces):
-        if tr[fi] is None:
+    for f, nbrs in face_adjacency(arr).items():
+        if tr[f] is None:
             continue
-        for v in f:
-            p = _apply(tr[fi], pts[v])  # type: ignore[arg-type]
-            if v in seen:
-                worst = max(worst, dist(p, seen[v]))
-            else:
-                seen[v] = p
+        for g, e, a, b in nbrs:
+            if tr[g] is None:
+                continue
+            rho = math.radians(angles.get(e, 0.0))
+            step = _rot_about_line(pts[a], unit(sub(pts[b], pts[a])), -rho)
+            expect = _compose(tr[f], step)  # type: ignore[arg-type]
+            for v in arr.faces[g]:
+                worst = max(worst, dist(_apply(expect, pts[v]), _apply(tr[g], pts[v])))  # type: ignore[arg-type]
     return worst
 
 

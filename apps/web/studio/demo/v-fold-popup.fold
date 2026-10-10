@@ -1,0 +1,692 @@
+{
+ "file_spec": 1.2,
+ "file_creator": "pliego-web demo generator 0.1.0",
+ "file_title": "V-fold pop-up card",
+ "file_classes": [
+  "multiModel"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "noJoins"
+ ],
+ "frame_unit": "mm",
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   100,
+   0
+  ],
+  [
+   100,
+   140
+  ],
+  [
+   0,
+   140
+  ],
+  [
+   110,
+   0
+  ],
+  [
+   210,
+   0
+  ],
+  [
+   210,
+   140
+  ],
+  [
+   110,
+   140
+  ],
+  [
+   275.30127,
+   12
+  ],
+  [
+   275.30127,
+   72
+  ],
+  [
+   232,
+   37
+  ],
+  [
+   318.60254,
+   37
+  ],
+  [
+   266.837169,
+   5.339746
+  ],
+  [
+   230.464102,
+   26.339746
+  ],
+  [
+   283.765372,
+   5.339746
+  ],
+  [
+   320.138439,
+   26.339746
+  ]
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   3,
+   0
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   5,
+   6
+  ],
+  [
+   6,
+   7
+  ],
+  [
+   7,
+   4
+  ],
+  [
+   9,
+   10
+  ],
+  [
+   10,
+   13
+  ],
+  [
+   13,
+   12
+  ],
+  [
+   12,
+   8
+  ],
+  [
+   8,
+   14
+  ],
+  [
+   14,
+   15
+  ],
+  [
+   15,
+   11
+  ],
+  [
+   11,
+   9
+  ],
+  [
+   8,
+   9
+  ],
+  [
+   8,
+   10
+  ],
+  [
+   8,
+   11
+  ]
+ ],
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "M",
+  "V",
+  "V"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  -70.528779,
+  54.73561,
+  54.73561
+ ],
+ "faces_vertices": [
+  [
+   0,
+   1,
+   2,
+   3
+  ],
+  [
+   4,
+   5,
+   6,
+   7
+  ],
+  [
+   8,
+   11,
+   9
+  ],
+  [
+   8,
+   9,
+   10
+  ],
+  [
+   8,
+   10,
+   13,
+   12
+  ],
+  [
+   8,
+   14,
+   15,
+   11
+  ]
+ ],
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:faces_sheet": [
+  0,
+  1,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "crease",
+  "crease",
+  "crease"
+ ],
+ "pliego:sheets": [
+  {
+   "id": "left-board",
+   "label": {
+    "en": "Left board",
+    "es": "Tapa izquierda",
+    "fr": "Plat gauche",
+    "pt": "Placa esquerda"
+   },
+   "stock": "cardstock-250",
+   "grain_deg": 90,
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     -100,
+     0,
+     70
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#2f4a6d",
+    "art": null
+   },
+   "back": {
+    "color": "#efe6d2",
+    "art": null
+   },
+   "kinematic": null
+  },
+  {
+   "id": "right-board",
+   "label": {
+    "en": "Right board",
+    "es": "Tapa derecha",
+    "fr": "Plat droit",
+    "pt": "Placa direita"
+   },
+   "stock": "cardstock-250",
+   "grain_deg": 90,
+   "offset": [
+    110,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     70
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#2f4a6d",
+    "art": null
+   },
+   "back": {
+    "color": "#efe6d2",
+    "art": null
+   },
+   "kinematic": {
+    "mechanism": "spread"
+   }
+  },
+  {
+   "id": "v-piece",
+   "label": {
+    "en": "V-fold piece",
+    "es": "Pieza en V",
+    "fr": "Pièce en V",
+    "pt": "Peça em V"
+   },
+   "stock": "cardstock-250",
+   "grain_deg": 90,
+   "offset": [
+    220,
+    0
+   ],
+   "placement": {
+    "origin": [
+     -55.30127018922193,
+     0.3,
+     52
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#c8553d",
+    "art": null
+   },
+   "back": {
+    "color": "#f2d0a4",
+    "art": null
+   },
+   "kinematic": null
+  }
+ ],
+ "pliego:stocks": {
+  "cardstock-250": {
+   "name": {
+    "en": "Cardstock 250 g/m²",
+    "es": "Cartulina 250 g/m²",
+    "fr": "Bristol 250 g/m²",
+    "pt": "Cartolina 250 g/m²"
+   },
+   "gsm": 250,
+   "caliper_mm": 0.3,
+   "derived": {
+    "areal_density": 0.00025,
+    "thickness": 0.3,
+    "E_md": 6000000000,
+    "E_cd": 3000000000,
+    "nu": 0.3,
+    "D_md": 14835200,
+    "D_cd": 7417580,
+    "crease_k": 2967030,
+    "crease_yield_deg": 35,
+    "crease_set_rate": 0.6,
+    "score_factor": 0.35,
+    "perf_factor": 0.2,
+    "tear_strain": 0.015,
+    "friction": 0.45,
+    "collision_thickness": 0.3
+   },
+   "derived_basis": "hand-written demo snapshot (apps/web/scripts/make-demos.mjs); stock-card.md formulas, not pliego.stock.derive output"
+  }
+ },
+ "file_frames": [
+  {
+   "frame_title": "initial",
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_parent": 0,
+   "frame_inherit": true,
+   "vertices_coords": [
+    [
+     -100,
+     0,
+     70
+    ],
+    [
+     0,
+     0,
+     70
+    ],
+    [
+     0,
+     0,
+     -70
+    ],
+    [
+     -100,
+     0,
+     -70
+    ],
+    [
+     0,
+     0,
+     70
+    ],
+    [
+     100,
+     0,
+     70
+    ],
+    [
+     100,
+     0,
+     -70
+    ],
+    [
+     0,
+     0,
+     -70
+    ],
+    [
+     0,
+     0.3,
+     40
+    ],
+    [
+     0,
+     42.726407,
+     -2.426407
+    ],
+    [
+     -35.355339,
+     0.3,
+     4.644661
+    ],
+    [
+     35.355339,
+     0.3,
+     4.644661
+    ],
+    [
+     -9.899495,
+     0.3,
+     44.242641
+    ],
+    [
+     -39.59798,
+     0.3,
+     14.544156
+    ],
+    [
+     9.899495,
+     0.3,
+     44.242641
+    ],
+    [
+     39.59798,
+     0.3,
+     14.544156
+    ]
+   ]
+  }
+ ],
+ "pliego:joins": [
+  {
+   "id": "left-board-pin",
+   "type": "pin",
+   "a": {
+    "sheet": "left-board",
+    "along": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      140
+     ]
+    ]
+   },
+   "world": null
+  },
+  {
+   "id": "tab-left",
+   "type": "glue",
+   "a": {
+    "sheet": "v-piece",
+    "region": [
+     [
+      54.354004,
+      12.320449
+     ],
+     [
+      12.75115,
+      36.339868
+     ],
+     [
+      11.422387,
+      26.053932
+     ],
+     [
+      46.110504,
+      6.026738
+     ]
+    ]
+   },
+   "b": {
+    "sheet": "left-board"
+   },
+   "map": [
+    0.965926,
+    0.258819,
+    -0.258819,
+    0.965926,
+    43.477246,
+    32.721912
+   ],
+   "side": "front"
+  },
+  {
+   "id": "tab-right",
+   "type": "glue",
+   "a": {
+    "sheet": "v-piece",
+    "region": [
+     [
+      56.248536,
+      12.320449
+     ],
+     [
+      64.492036,
+      6.026738
+     ],
+     [
+      99.180154,
+      26.053932
+     ],
+     [
+      97.851391,
+      36.339868
+     ]
+    ]
+   },
+   "b": {
+    "sheet": "right-board"
+   },
+   "map": [
+    0.965926,
+    -0.258819,
+    0.258819,
+    0.965926,
+    -50.311097,
+    4.095868
+   ],
+   "side": "front"
+  }
+ ],
+ "pliego:mechanisms": [
+  {
+   "id": "spread",
+   "type": "hinge",
+   "axis": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "direction": [
+     0,
+     0,
+     -1
+    ]
+   },
+   "angle_control": "open",
+   "rest": 180,
+   "sheets_moving": [
+    "right-board"
+   ]
+  }
+ ],
+ "pliego:controls": [
+  {
+   "id": "open",
+   "kind": "angle",
+   "label": {
+    "en": "Open the card",
+    "es": "Abrir la tarjeta",
+    "fr": "Ouvrir la carte",
+    "pt": "Abrir o cartão"
+   },
+   "min": 10,
+   "max": 180,
+   "default": 180,
+   "unit": "deg"
+  }
+ ],
+ "pliego:meta": {
+  "cartridge": "v-fold-popup",
+  "mode": "default",
+  "params": {
+   "alpha_deg": 45,
+   "beta_deg": 60,
+   "offset": 220
+  },
+  "kernel": "none (hand-authored demo, apps/web)",
+  "digest": null
+ }
+}

@@ -215,7 +215,11 @@ export class World {
         const par = this._parent[f]; if (!par) return;
         const axis = unit(sub(I[par.a], I[par.b]));
         const np = nI[par.face], nc = nI[f];
-        this._theta0[par.edge] = Math.atan2(dot(cross(np, nc), axis), dot(np, nc)) / DEG;
+        const th = Math.atan2(dot(cross(np, nc), axis), dot(np, nc)) / DEG;
+        // a crease folded flat in the initial frame (faces stacked, normals opposite) has no
+        // side of its own there: it takes its design assignment's (valley +, mountain −)
+        const design = j.edges_foldAngle[par.edge];
+        this._theta0[par.edge] = Math.abs(Math.abs(th) - 180) < 1e-3 && design ? 180 * Math.sign(design) : th;
       });
     }
     // Controls and sequence.

@@ -61,6 +61,12 @@ class Built:
     pose_angles: dict[int, float]
     arr: object = None
     face_map: list[int] = field(default_factory=list)
+    start_angles: dict[int, float] = field(default_factory=dict)
+
+    def initial(self, sheet_id: str = "square") -> dict:
+        """An `Assembly(initial=…)` spec for the program's starting pose (`start_angles`): the
+        exact face-tree pose (opening flat-folded creases would break its loop closure)."""
+        return {sheet_id: {"angles": dict(self.start_angles), "root": self.root()}}
 
     def target(self, pose: bool = False) -> dict:
         """A target-frame spec (`Assembly(targets=…)`): the flat-folded state (or the final
@@ -170,27 +176,44 @@ class FoldProgram:
         layer connected to them without crossing the line, which must run along existing
         creases — turns by `turn` degrees about the line (positive lifts it towards the viewer).
         Hinge steps compose: later ones turn about axes carried by the faces they hinge on."""
+        spec = {"line": line, "turn": turn, "at": at, "layers": layers, "from_": from_}
+        return self.hinges(sid, label, [spec], ms, substeps, note)
+
+    def hinges(self, sid: str, label, specs: list[dict], ms: int = 1200, substeps: int = 4,
+               note=None) -> FoldProgram:
+        """Several flaps turning at once (each spec: line, turn, at, layers=None,
+        from_="top"; see `hinge`); the flaps must not share a face."""
         st = self.state
-        p, d = as_line(line)
-        q = pt(at)
-        sgn = 1.0 if side(p, d, q) > 0 else -1.0
-        on = {f for f in range(len(st.faces)) if side(p, d, centroid(st.image(f))) * sgn > 0}
-        stack = flatops._stack_at(st, q, on)
-        if layers is not None:
-            stack = stack[-int(layers):] if from_ == "top" else stack[:int(layers)]
-        grp = flatops.flood(st, set(stack), lambda f: f in on, lambda f, a, b: flatops._on_line(
-            st.faces[f].xf, st.points[a], st.points[b], p, d))
-        for f in grp:
-            vals = [side(p, d, x) for x in st.image(f)]
-            if max(vals) > TOL and min(vals) < -TOL:
-                raise FlatStateError(f"hinge '{sid}': the line crosses face {f}; hinge poses "
-                                     "turn about existing creases only")
-        if len(grp) == len(st.faces):
-            raise FlatStateError(f"hinge '{sid}': the selection is the whole model")
+        out, taken = [], set()
+        for spec in specs:
+            p, d = as_line(spec["line"])
+            q = pt(spec["at"])
+            sgn = 1.0 if side(p, d, q) > 0 else -1.0
+            on = {f for f in range(len(st.faces))
+                  if side(p, d, centroid(st.image(f))) * sgn > 0}
+            stack = flatops._stack_at(st, q, on)
+            layers = spec.get("layers")
+            if layers is not None:
+                stack = stack[-int(layers):] if spec.get("from_", "top") == "top" \
+                    else stack[:int(layers)]
+            grp = flatops.flood(st, set(stack), lambda f, on=on: f in on,
+                                lambda f, a, b, p=p, d=d: flatops._on_line(
+                                    st.faces[f].xf, st.points[a], st.points[b], p, d))
+            for f in grp:
+                vals = [side(p, d, x) for x in st.image(f)]
+                if max(vals) > TOL and min(vals) < -TOL:
+                    raise FlatStateError(f"hinge '{sid}': the line crosses face {f}; hinge poses "
+                                         "turn about existing creases only")
+            if len(grp) == len(st.faces):
+                raise FlatStateError(f"hinge '{sid}': the selection is the whole model")
+            if grp & taken:
+                raise FlatStateError(f"hinge '{sid}': two flaps share a face")
+            taken |= grp
+            out.append({"faces": sorted(grp), "p": p, "d": d, "turn": float(spec["turn"]),
+                        "sense": sgn})
         self._hinges = True
         self.recs.append(_Rec(sid, self._label(label), None, ms,
-                              {"faces": sorted(grp), "p": p, "d": d, "turn": float(turn),
-                               "sense": sgn, "substeps": int(substeps)},
+                              {"specs": out, "substeps": int(substeps)},
                               None if note is None else _l4(note)))
         return self
 
@@ -233,8 +256,11 @@ class FoldProgram:
             ts = sorted(set(ts) | {(t_prev[k] + ts[k]) / 2.0 for k in bad_iv})[:MAX_SAMPLES]
 
     # ── build ──
-    def build(self, id: str = "square") -> Built:
-        """The crease pattern, the fold program and the report (see the module docstring)."""
+    def build(self, id: str = "square", *, start_after: str | None = None) -> Built:
+        """The crease pattern, the fold program and the report (see the module docstring).
+        `start_after` (a step id): the program starts after that operation — the earlier moves
+        only shape the starting pose (`Built.start_angles`, `Built.initial()`), e.g. a finished
+        model whose program is an operating cycle."""
         from .assembly import EdgeRef, Sequence, Step
         from .kinematics import face_adjacency
         from .preview import PreviewTree
@@ -282,6 +308,10 @@ class FoldProgram:
         rows: list[dict] = []
         worst = worst_mid = worst_dev = 0.0
         exact = 0
+        emit = start_after is None
+        if start_after is not None and start_after not in [r.sid for r in self.recs]:
+            raise FlatStateError(f"start_after: no step '{start_after}'")
+        start_angles = dict(cur)
         for rec in self.recs:
             # candidate motions: t ∈ (0, 1] ↦ intended poses of the pattern's faces
             cands: list = []
@@ -300,23 +330,29 @@ class FoldProgram:
                 ts0 = list(mv.samples)
             else:
                 h = rec.hinge
-                grp = {f for f in range(nf) if final_map[f] in set(h["faces"])}
-                ref = next(f for f in range(nf) if f not in grp)
-                for f, g, _, _ in edge_faces.values():
-                    if (f in grp) != (g in grp):
-                        ref = g if f in grp else f
-                        break
-                o = flatmotion.apply(extra[ref], flatmotion.w3(h["p"]))
-                o2 = flatmotion.apply(extra[ref], flatmotion.w3((h["p"][0] + h["d"][0],
-                                                                  h["p"][1] + h["d"][1])))
-                ax = tuple(o2[k] - o[k] for k in range(3))
                 base = [embed3(final.faces[final_map[f]].xf) for f in range(nf)]
                 start_extra = list(extra)
+                turns = []
+                for spec in h["specs"]:
+                    grp = {f for f in range(nf) if final_map[f] in set(spec["faces"])}
+                    ref = next(f for f in range(nf) if f not in grp)
+                    for f, g, _, _ in edge_faces.values():
+                        if (f in grp) != (g in grp):
+                            ref = g if f in grp else f
+                            break
+                    o = flatmotion.apply(extra[ref], flatmotion.w3(spec["p"]))
+                    o2 = flatmotion.apply(extra[ref], flatmotion.w3(
+                        (spec["p"][0] + spec["d"][0], spec["p"][1] + spec["d"][1])))
+                    turns.append((grp, o, tuple(o2[k] - o[k] for k in range(3)),
+                                  spec["sense"] * math.radians(spec["turn"])))
 
-                def hinge_extra(t: float, h=h, o=o, ax=ax, grp=grp, start_extra=start_extra):
-                    g = flatmotion.rot_line(o, ax, h["sense"] * math.radians(h["turn"]) * t)
-                    return [flatmotion.compose(g, start_extra[f]) if f in grp else start_extra[f]
-                            for f in range(nf)]
+                def hinge_extra(t: float, turns=turns, start_extra=start_extra):
+                    ex = list(start_extra)
+                    for grp, o, ax, rad in turns:
+                        g = flatmotion.rot_line(o, ax, rad * t)
+                        for f in grp:
+                            ex[f] = flatmotion.compose(g, start_extra[f])
+                    return ex
 
                 def poses_at(t: float, base=base, hinge_extra=hinge_extra):
                     ex = hinge_extra(t)
@@ -324,6 +360,15 @@ class FoldProgram:
                 cands.append(poses_at)
                 extra = hinge_extra(1.0)
                 ts0 = [k / h["substeps"] for k in range(1, h["substeps"] + 1)]
+            if not emit:
+                if end is not None:
+                    cur = {**cur, **end}
+                else:
+                    poses = cands[0](1.0)
+                    cur = {**cur, **tree.fit(poses, readout(poses, cur))}
+                if rec.sid == start_after:
+                    emit, start_angles = True, dict(cur)
+                continue
             best = None
             for ci, poses_at in enumerate(cands):
                 res = self._sample(tree, readout, poses_at, ts0, cur, end, folds, rec.sid)
@@ -356,7 +401,8 @@ class FoldProgram:
                   "creases": len(folds), "exact_steps": exact, "max_tear_mm": worst,
                   "max_mid_tear_mm": worst_mid, "max_deviation_mm": worst_dev, "rows": rows}
         seq_out.report = report
-        return Built(sheet, seq_out, report, final, final_flat, dict(cur), arr, final_map)
+        return Built(sheet, seq_out, report, final, final_flat, dict(cur), arr, final_map,
+                     start_angles)
 
 
 def _rooted(intended: list, drawn: list) -> list:

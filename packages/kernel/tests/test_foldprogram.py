@@ -93,3 +93,23 @@ def test_preview_tree_matches_the_kernel_face_tree_on_consistent_angles():
             got = tuple(sum(p[0][r][c] * tree.unplaced[v][c] for c in range(3)) + p[1][r]
                         for r in range(3))
             assert got == pytest.approx(ref[v], abs=1e-3)
+
+
+def test_operating_cycle_starts_from_the_finished_model():
+    fp = FoldProgram(SQUARE)
+    fp.fold("diagonal", "Diagonal", ((S, 0), (0, S)), "valley", at=(10, 10))
+    fp.fold("half", "Half", ((S / 2, S / 2), (S, S)), "valley", at=(S * 0.9, S * 0.6))
+    flap = {"line": ((S / 2, S / 2), (S, S)), "at": (S * 0.55, S * 0.9), "layers": 1}
+    fp.hinges("open", "Open", [dict(flap, turn=-120)])
+    fp.hinges("beat", "Beat", [dict(flap, turn=30)])
+    with pytest.raises(FlatStateError, match="share a face"):
+        fp.hinges("twice", "Twice", [dict(flap, turn=5), dict(flap, turn=5)])
+    b = fp.build(start_after="open")
+    assert [s.id.split("-")[0] for s in b.sequence.steps] == ["beat"] * 4
+    assert any(abs(abs(a) - 60.0) < 1e-6 for a in b.start_angles.values())
+    asm = pliego.Assembly([b.sheet], controls=[pliego.sequence_control("beat")],
+                          sequence=b.sequence, initial=b.initial("square"))
+    doc = asm.build(cartridge="test", mode="cycle")
+    assert [i for i in doc.verify() if i["level"] == "error"] == []
+    with pytest.raises(FlatStateError, match="no step"):
+        fp.build(start_after="nope")

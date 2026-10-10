@@ -64,9 +64,6 @@ export const DEFAULT_SEED = 1;
 /** Fraction of the target edge length below which a lattice point is dropped near a boundary. */
 export const LATTICE_MARGIN = 0.55;
 
-/** Score / perforation hinges yield earlier than a hand crease (spec §4 "lower yield"): ratio to crease_yield_deg. */
-export const SCORE_YIELD_RATIO = 0.7;
-
 /**
  * Membrane modulus cap (engine units g/s² = E·t): Y_eff = min(E(φ)·t, MEMBRANE_CAP_LENGTH · ρ_A · g).
  * Paper's physical in-plane stiffness (E·t ≈ 5e8 for copy paper) is 10⁵× its mass-time scale per

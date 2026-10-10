@@ -29,6 +29,8 @@ export const DERIVED_KEYS = /** @type {const} */ ([
  * @property {number} scoreFactor @property {number} perfFactor @property {number} tearStrain
  * @property {number} friction @property {number} contact collision thickness mm
  * @property {number} G12
+ * @property {number} scoreYieldRad yield of scored hinges (derived.score_yield_deg, else crease_yield × score_factor)
+ * @property {number} perfYieldRad yield of perforated hinges (crease_yield × perf_factor)
  * @property {[number, number, number]} dHarm Fourier coefficients of D(φ): D̂0, 2D̂2, 2D̂4 (cos 2φ, cos 4φ)
  */
 
@@ -43,7 +45,7 @@ export function fromDerived(derived) {
   }
   const t = derived.thickness, nu = derived.nu, Emd = derived.E_md, Ecd = derived.E_cd;
   const D11 = derived.D_md, D22 = derived.D_cd;
-  const G12 = 0.387 * Math.sqrt(Emd * Ecd);
+  const G12 = typeof derived.G12 === 'number' ? derived.G12 : 0.387 * Math.sqrt(Emd * Ecd);
   const D12 = nu * Math.sqrt(D11 * D22);
   const D66 = (G12 * t * t * t) / 12;
   const H = D12 + 2 * D66;
@@ -56,6 +58,8 @@ export function fromDerived(derived) {
     creaseK: derived.crease_k, yieldRad: (derived.crease_yield_deg * Math.PI) / 180, setRate: derived.crease_set_rate,
     scoreFactor: derived.score_factor, perfFactor: derived.perf_factor, tearStrain: derived.tear_strain,
     friction: derived.friction, contact: derived.collision_thickness,
+    scoreYieldRad: ((typeof derived.score_yield_deg === 'number' ? derived.score_yield_deg : derived.crease_yield_deg * derived.score_factor) * Math.PI) / 180,
+    perfYieldRad: (derived.crease_yield_deg * derived.perf_factor * Math.PI) / 180,
     dHarm: [a0, a2, a4],
   };
 }

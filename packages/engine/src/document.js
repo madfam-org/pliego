@@ -46,6 +46,7 @@ const JOIN_TYPES = new Set(['glue', 'pivot', 'string', 'pin', 'slider']);
  * @property {Int32Array} edges vertex pairs
  * @property {string[]} assignment @property {Float64Array} foldAngle degrees
  * @property {string[]} treatment @property {Float64Array} restAngle degrees
+ * @property {(string|null)[]|null} edgeNames optional per-edge names (spec §3)
  * @property {number[][]} faces
  * @property {Int32Array} vSheet @property {Int32Array} eSheet @property {Int32Array} fSheet
  * @property {Sheet[]} sheets @property {Map<string, number>} sheetIndex
@@ -177,6 +178,8 @@ function parseCore(d, plainFold, P) {
   const fSheet = Int32Array.from(arr(d['pliego:faces_sheet'], nF, 'pliego:faces_sheet', P));
   const treatment = arr(d['pliego:edges_treatment'], nE, 'pliego:edges_treatment', P);
   treatment.forEach((t, i) => { if (!TREAT.has(t)) P.push(`rule 1: pliego:edges_treatment[${i}] = ${JSON.stringify(t)} is not a treatment`); });
+  const names = d['pliego:edges_name'] === undefined ? null : arr(d['pliego:edges_name'], nE, 'pliego:edges_name', P);
+  if (names) names.forEach((n, i) => { if (n !== null && (typeof n !== 'string' || !SLUG.test(n))) P.push(`pliego:edges_name[${i}] must be kebab case or null`); });
   const restAngle = d['pliego:edges_restAngle'] === undefined ? new Float64Array(nE) : numArr(d['pliego:edges_restAngle'], nE, 'pliego:edges_restAngle', P, -180, 180);
 
   // stocks (rule 6)
@@ -188,6 +191,9 @@ function parseCore(d, plainFold, P) {
       if (!SLUG.test(id)) P.push(`rule 6: stock id ${JSON.stringify(id)} is not kebab case`);
       const der = s && s.derived;
       if (!der || typeof der !== 'object') { P.push(`rule 6: stock ${id} has no derived block`); continue; }
+      for (const k of ['G12', 'score_yield_deg', 'perf_cut_mm', 'perf_bridge_mm']) {
+        if (der[k] !== undefined && !(isNum(der[k]) && der[k] > 0)) P.push(`rule 6: stock ${id} derived.${k} (optional) must be a positive number`);
+      }
       for (const k of DERIVED_KEYS) {
         if (!isNum(der[k])) P.push(`rule 6: stock ${id} derived.${k} missing or not a number`);
         else if (der[k] < 0 || (der[k] === 0 && !['crease_set_rate', 'friction', 'nu', 'crease_yield_deg'].includes(k))) P.push(`rule 6: stock ${id} derived.${k} = ${der[k]} must be positive`);
@@ -265,7 +271,7 @@ function parseCore(d, plainFold, P) {
   if (d['pliego:meta'] && d['pliego:meta'].digest != null && !/^sha256:[0-9a-f]{64}$/.test(d['pliego:meta'].digest)) P.push('rule 10: pliego:meta.digest must be "sha256:<64 hex>" or null');
 
   return {
-    plainFold, nV, nE, nF, coords, edges, assignment, foldAngle, treatment, restAngle, faces,
+    plainFold, nV, nE, nF, coords, edges, assignment, foldAngle, treatment, restAngle, faces, edgeNames: names,
     vSheet, eSheet, fSheet, sheets, sheetIndex, stocks: stocks ?? {}, joins, mechanisms, controls,
     sequence: seq, initial, targets,
     faceOrders: Array.isArray(d.faceOrders) ? d.faceOrders : null,
@@ -357,8 +363,7 @@ function checkRefs(c, P) {
     if (!s.kinematic) continue;
     const m = mech.get(s.kinematic.mechanism);
     if (!m) P.push(`rule 7: sheet ${s.id} is kinematic on mechanism ${JSON.stringify(s.kinematic.mechanism)}, which does not exist`);
-    else if (!['hinge', 'rotate', 'translate'].includes(m.type)) P.push(`rule 7: sheet ${s.id} is kinematic on ${m.type} mechanism ${m.id}; only hinge|rotate|translate move sheets`);
-    else if (!Array.isArray(m.sheets_moving) || !m.sheets_moving.includes(s.id)) P.push(`rule 7: sheet ${s.id} is kinematic on ${m.id} but not listed in its sheets_moving`);
+    // a kinematic sheet that its mechanism does not list in sheets_moving is a fixed board (§5.1)
   }
   const jids = new Set();
   joins.forEach((j, i) => {

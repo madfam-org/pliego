@@ -14,6 +14,7 @@ import { TK_DRIVE, TK_SLIDER, TK_GRAB } from './xpbd/joins.js';
 import { HAND_FACTOR } from './constants.js';
 import { locatePoint } from './mesh.js';
 import { triNormal } from './xpbd/joins.js';
+import { KinematicProgram } from './kinematics/program.js';
 
 const LEAF_STIFFNESS = 2.0e5; // g/s², the hand turning a page
 
@@ -52,7 +53,10 @@ export class Drivers {
       if (!s.kinematic) return;
       const verts = [];
       for (let v = 0; v < nV; v++) if (mesh.vSheet[v] === si) verts.push(v);
-      this.groups.push({ verts, base: gather(this.Xplaced, verts), mech: s.kinematic.mechanism, kind: 'sheet' });
+      // follows its mechanism only if listed in sheets_moving; otherwise a fixed board (spec §5.1)
+      const m = doc.mechanisms.find((/** @type {any} */ q) => q.id === s.kinematic.mechanism);
+      const moving = m && Array.isArray(m.sheets_moving) && m.sheets_moving.includes(s.id);
+      this.groups.push({ verts, base: gather(this.Xplaced, verts), mech: moving ? s.kinematic.mechanism : null, kind: moving ? 'sheet' : 'board' });
       for (const v of verts) fixed[v] = 1;
     });
     for (const p of pins) {
@@ -122,6 +126,13 @@ export class Drivers {
       l.push(h);
     }
     this.wind = 0;
+    // kinematic fold program: its sheets are posed rigidly (Tier R) and fixed for the physics
+    /** @type {KinematicProgram|null} */
+    this.program = null;
+    if (seq && seq.mode === 'kinematic') {
+      this.program = new KinematicProgram(w);
+      for (const v of this.program.ownedVertices(mesh)) fixed[v] = 1;
+    }
   }
 
   /** @param {string} id @param {number|boolean} v */
@@ -215,21 +226,27 @@ export class Drivers {
     // wind
     for (const [id, c] of this.controls) if (c.kind === 'wind') this.wind = /** @type {number} */(this.value.get(id)) * 1000;
     if (this.seq && this.seq.mode === 'physical') dirty = this.applySequence(w, dt) || dirty;
+    if (this.program) { this.advanceSequence(dt); this.program.apply(w, this.seqPos); }
     return dirty;
+  }
+
+  /** Move the sequence position toward the control's goal at one step per duration. @param {number} dt */
+  advanceSequence(dt) {
+    const steps = this.seq.steps, N = steps.length;
+    const goal = this.seqControl ? /** @type {number} */(this.goal.get(this.seqControl)) : 0;
+    const pos = this.seqPos;
+    if (pos === goal) return;
+    const k = Math.max(0, Math.min(N - 1, Math.floor(goal > pos ? pos : pos - 1e-12)));
+    const rate = dt / (steps[k].duration_ms / 1000);
+    this.seqPos = goal > pos ? Math.min(goal, pos + rate) : Math.max(goal, pos - rate);
+    if (this.seqControl) this.value.set(this.seqControl, this.seqPos);
   }
 
   /** @param {any} w @param {number} dt @returns {boolean} drive set changed */
   applySequence(w, dt) {
     const steps = this.seq.steps, N = steps.length;
-    const goal = this.seqControl ? /** @type {number} */(this.goal.get(this.seqControl)) : 0;
-    let pos = this.seqPos;
-    if (pos !== goal) {
-      const k = Math.min(N - 1, Math.floor(goal > pos ? pos : pos - 1e-12));
-      const rate = dt / (steps[Math.max(0, k)].duration_ms / 1000);
-      pos = goal > pos ? Math.min(goal, pos + rate) : Math.max(goal, pos - rate);
-      this.seqPos = pos;
-      if (this.seqControl) this.value.set(this.seqControl, pos);
-    }
+    this.advanceSequence(dt);
+    const pos = this.seqPos;
     const k = Math.min(N, Math.floor(pos + 1e-12));
     const f = k < N ? pos - k : 0;
     /** @type {Map<number, number>} */

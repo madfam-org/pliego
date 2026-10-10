@@ -20,7 +20,7 @@ export class RenderBuffers {
     this.out = { positions: this.positions, normals: this.normals, uvs: this.uvs, sheetIds: this.sheetIds, indices: this.indices, vertexCount: r.nR, triangleCount: w.mesh.nT };
     // crease polylines
     const doc = w.doc;
-    /** @type {number[]} */ const seg = [], kinds = [];
+    /** @type {number[]} */ const seg = [], kinds = [], segEdge = [];
     for (let e = 0; e < doc.nE; e++) {
       const t = doc.treatment[e];
       let k;
@@ -28,10 +28,15 @@ export class RenderBuffers {
       else if (KIND[t] !== undefined) k = KIND[t];
       else continue;
       const chain = w.mesh.docEdgeChain[e];
-      for (let i = 0; i + 1 < chain.length; i++) { seg.push(chain[i], chain[i + 1]); kinds.push(k); }
+      for (let i = 0; i + 1 < chain.length; i++) { seg.push(chain[i], chain[i + 1]); kinds.push(k); segEdge.push(e); }
     }
     this.segVerts = Int32Array.from(seg);
-    this.lines = { positions: new Float32Array(3 * seg.length), kinds: Uint8Array.from(kinds), count: kinds.length };
+    // positions: xyz pairs per segment; kinds: 0 mountain, 1 valley, 2 score, 3 perforation, 4 cut;
+    // edges: document edge of each segment; names: pliego:edges_name of that edge (or null)
+    this.lines = {
+      positions: new Float32Array(3 * seg.length), kinds: Uint8Array.from(kinds), count: kinds.length,
+      edges: Int32Array.from(segEdge), names: segEdge.map((e) => (doc.edgeNames ? doc.edgeNames[e] : null)),
+    };
   }
 
   update() {

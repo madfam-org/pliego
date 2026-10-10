@@ -59,9 +59,9 @@ export class FaceTree {
    * Returns Map face → {R, t} acting on flat coordinates, in the sheet's placed world frame.
    * @param {ArrayLike<number>} rho
    */
-  transforms(rho) {
+  transforms(rho, rootPose) {
     const s = this.doc.sheets[this.sheet];
-    const Rp = quatToMat(s.placement.rotation), tp = s.placement.origin;
+    const Rp = rootPose ? rootPose.R : quatToMat(s.placement.rotation), tp = rootPose ? rootPose.t : s.placement.origin;
     /** @type {Map<number, {R:number[], t:number[]}>} */
     const T = new Map([[this.root, { R: Rp, t: tp.slice() }]]);
     for (const o of this.order) {
@@ -219,6 +219,11 @@ export class LoopClosure {
         for (const e of free) { const j = /** @type {number} */(this.varOf.get(e)); s += J[a * this.m + j] * J[b * this.m + j]; }
         M[a * n + b] = s; M[b * n + a] = s;
       }
+      // damped least squares: λ² scaled to the system so the flat (singular) state stays solvable
+      let tr = 0;
+      for (let a = 0; a < n; a++) tr += M[a * n + a];
+      const damp = Math.max(1e-14, 1e-10 * tr / n);
+      for (let a = 0; a < n; a++) M[a * n + a] += damp;
       const y = solveSPD(M, Array.from(r), n);
       for (let q = 0; q < k; q++) {
         const e = free[q], j = /** @type {number} */(this.varOf.get(e));
@@ -255,6 +260,9 @@ export class LoopClosure {
           for (const e of free) { const c = /** @type {number} */(this.varOf.get(e)); sum += J[p * this.m + c] * J[q * this.m + c]; }
           M[p * n + q] = sum; M[q * n + p] = sum;
         }
+        let tr = 0;
+        for (let p = 0; p < n; p++) tr += M[p * n + p];
+        for (let p = 0; p < n; p++) M[p * n + p] += Math.max(1e-14, 1e-10 * tr / n);
         const rhs = [];
         for (let p = 0; p < n; p++) rhs.push(-J[p * this.m + j] * da);
         const y = solveSPD(M, rhs, n);
@@ -268,3 +276,35 @@ export class LoopClosure {
     return { rho, worstResidual: worst };
   }
 }
+
+/**
+ * Rigid transform of face f from flat coordinates to positions X (3 per document vertex), from its
+ * best-conditioned vertex triangle (orthonormal frames).
+ * @param {any} doc @param {number} f @param {Float64Array} X
+ */
+export function faceRigidPose(doc, f, X) {
+  const fv = doc.faces[f];
+  let best = -1, tri = [fv[0], fv[1], fv[2]];
+  for (let j = 1; j < fv.length; j++) for (let k = j + 1; k < fv.length; k++) {
+    const a = flat3(doc, fv[0]), b = flat3(doc, fv[j]), c = flat3(doc, fv[k]);
+    const ar = Math.abs((b[0] - a[0]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[0] - a[0]));
+    if (ar > best) { best = ar; tri = [fv[0], fv[j], fv[k]]; }
+  }
+  const frame = (/** @type {number[][]} */ p) => {
+    const u = norm([p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]]);
+    const w0 = [p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]];
+    const n = norm(cross(u, w0)), v = cross(n, u);
+    return [u, v, n];
+  };
+  const F = frame(tri.map((v) => flat3(doc, v)));
+  const G = frame(tri.map((v) => [X[3 * v], X[3 * v + 1], X[3 * v + 2]]));
+  const R = new Array(9).fill(0);
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 3; k++) R[3 * i + j] += G[k][i] * F[k][j];
+  const f0 = flat3(doc, tri[0]), r0 = mv3(R, f0);
+  return { R, t: [X[3 * tri[0]] - r0[0], X[3 * tri[0] + 1] - r0[1], X[3 * tri[0] + 2] - r0[2]] };
+}
+
+/** @param {number[]} a */
+function norm(a) { const L = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / L, a[1] / L, a[2] / L]; }
+/** @param {number[]} a @param {number[]} b */
+function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }

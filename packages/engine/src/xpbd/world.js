@@ -138,7 +138,7 @@ export class World {
       } else {
         const f = kind === HINGE_SCORE ? m.scoreFactor : kind === HINGE_PERF ? m.perfFactor : 1;
         this.hingeK[h] = m.creaseK * L * f;
-        this.yieldRad[h] = kind === HINGE_CREASE ? m.yieldRad : m.yieldRad * K.SCORE_YIELD_RATIO;
+        this.yieldRad[h] = kind === HINGE_CREASE ? m.yieldRad : kind === HINGE_SCORE ? m.scoreYieldRad : m.perfYieldRad;
       }
       const d = mesh.hingeDoc[h];
       if (d >= 0 && kind !== HINGE_PANEL) this.restTheta[h] = (doc.restAngle[d] * Math.PI) / 180;
@@ -410,6 +410,7 @@ export class World {
     return {
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
       substepsRun: this.substepsRun, factorizations: this.factorCount, time: this.time, finite: !nan,
+      kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0,
     };
   }
 

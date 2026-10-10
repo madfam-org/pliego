@@ -22,22 +22,12 @@ from typing import Any
 
 from .assembly import Assembly
 from .document import Document
+from .params import clamp, param
 from .sheet import Sheet
 
 RESULT_NAMES = ("result", "document", "assembly", "sheet")
-
-
-def param(get: Any, default: Any) -> Any:
-    """The PARAM accessor (also importable as `pliego.cartridge.param`)."""
-    try:
-        return get()
-    except NameError:
-        return default
-
-
-def clamp(value: float, lo: float, hi: float) -> float:
-    """Clamp a numeric parameter into [lo, hi] (cartridges clamp in-script)."""
-    return max(lo, min(hi, float(value)))
+__all__ = ["ResultCheck", "check_result", "clamp", "execute", "find_result", "main",
+           "param"]
 
 
 @dataclass

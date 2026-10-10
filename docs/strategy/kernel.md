@@ -28,13 +28,17 @@ referenced through `hardware_ref`); the compliance lane enforces it.
 |---|---|
 | `geometry.py` | `Vec2` (frozen), `Line`, cubic `Bezier` with adaptive `flatten(tol)`, arcs, `offset_ring` (per-segment distances: glue tabs, bleed, kerf), polygon area/orientation/point-in-polygon, segment intersection with a tolerance model, polyline simplification. Adapted from FC `geometry.py`. |
 | `exact.py` | rational predicates with `fractions.Fraction`: orientation, intersection, and the **exact local Kawasaki test** (product of rational reflection matrices = identity — rsE §a6) for crease directions with rational slopes. |
-| `arrangement.py` | planar subdivision of a sheet: outline + holes + crease/score/perforation segments + slits → split at intersections with snapping (grid 1e-6 mm), merge overlaps by priority (cut > crease > score > perforation > flat), DCEL, faces, hole bridging with `J` edges so every face is simple; Euler check V − E + F = 1 + components. |
-| `sheet.py` | the authoring API: `Sheet(id, outline, stock, grain_deg, label, front, back)` with `.crease(a, b, kind="valley", angle=180, treatment="crease")`, `.mountain(...)`, `.valley(...)`, `.score(...)`, `.perforate(...)`, `.cut(polyline)`, `.hole(polygon)`, `.tab(edge, width, taper)`, `.art(front=..., back=...)`; `.build()` → arrangement → per-sheet FOLD arrays. |
+| `arrangement.py` | planar subdivision of a sheet: outline + holes + crease/score/perforation segments + slits → split at intersections with snapping (grid `GRID_MM` = 1e-6 mm, a documented constant), merge overlaps by priority (cut > crease > score > perforation > flat), DCEL, faces, hole bridging with `J` edges so every face is simple; Euler check V − E + F = 1 + components. Bridging (`arrangement_dcel`) runs in batched passes: every hole gets two J edges at once (the nearest visible bridge, then one from its farthest vertex to another target) and attaches only to its host face or to holes already attached, so neighbouring holes leave no J-only slivers. Identical sheets share one subdivision (bounded cache keyed on exact geometry). |
+| `sheet.py` | the authoring API: `Sheet(id, outline, stock, grain_deg, label, front, back)` with `.crease(a, b, kind="valley", angle=180, treatment="crease", *, name=None, rest=None)`, `.mountain(...)`, `.valley(...)`, `.score(...)`, `.perforate(...)`, `.cut(polyline, name=)`, `.hole(polygon)`, `.tab(edge, width, taper, name=)`, `.label_edge(name, a, b)`, `.art(front=..., back=...)`, `.copy(new_id)`; `.build()` → arrangement → per-sheet FOLD arrays. `name=` / `label_edge` / `tab(name=)` → `pliego:edges_name` (kebab slugs, shared names allowed, conflicting names fail the build); `rest=` (magnitude, signed by `kind`; signed as given for flat lines) → `pliego:edges_restAngle` (pre-creased sheets). Face colours left unauthored (`Face(color=None)`) inherit the stock snapshot's `appearance`. |
 | `assembly.py` | `Assembly(sheets, joins, mechanisms, controls, sequence, initial_frame)`; join builders `glue(...)`, `pivot(...)`, `string(...)`, `pin(...)`, `slider(...)`; mechanism builders `hinge(...)`, `slide(...)`, `rotate(...)`, `leaf(...)`; layout of sheets side by side in the layout frame. |
 | `document.py` | `Document` — the in-memory sheet document; `to_json()` (canonical, byte-stable), `from_json()`, `digest()` (GOC-1 compatible sha256), `verify()` implementing spec §8, `summary()` (read-proof line + counts). |
 | `foldfile.py` | FOLD 1.2 import/export: plain FOLD files (Origami Simulator, ORIPA exports, flat-folder) load with spec §7 defaults; export strips nothing (pliego: fields are legal FOLD custom fields). |
-| `flatfold.py` | local flat-foldability: Maekawa (|M − V| = 2), Kawasaki–Justin (exact via `exact.py` when slopes are rational, else float with tolerance), big-little-big lemma; flat-folded vertex positions via the face tree (reflections); local layer-order constraints (taco/tortilla) → `faceOrders` for small patterns; issues as verify dicts. |
-| `kinematics.py` | Tier R reference (float64): face-tree pose from fold angles; degree-4 closed forms (Foschi–Hull–Ku); Miura-ori closed form; loop-closure residuals; DOF via a small dense SVD in stdlib. This is the **arbiter** the engine's Tier R tests compare against. |
+| `flatfold.py` | local flat-foldability: Maekawa (|M − V| = 2), Kawasaki–Justin (exact via `exact.py` when slopes are rational, else float within the per-vertex grid bound Σ √2·`GRID_MM`/Lᵢ — `KAWASAKI_TOL_RAD` = 1e-6 rad is that bound for degree-4 creases ≥ 5.7 mm), big-little-big lemma; flat-folded vertex positions via the face tree (reflections); local layer-order constraints (taco/tortilla) → `faceOrders` for small patterns; issues as verify dicts. |
+| `kinematics.py` | Tier R reference (float64): face-tree pose from fold angles; degree-4 closed forms (Foschi–Hull–Ku); Miura-ori closed form; loop-closure residuals (`closure_residual(..., relative=)` in mm or per sheet diagonal, `vertex_residuals` in rad per vertex, `snap_angle_rad` the grid floor); DOF via a small dense SVD in stdlib. Re-exports the motion solver. This is the **arbiter** the engine's Tier R tests compare against. |
+| `motion.py` | the Tier R motion solver `kinematics.solve(system, start, drive, fixed=(), steps=16, along="drive"\|"chord") → KinematicPath` (§4), `vertex_folds(rays, previous=None, sectors=None)` (signed dihedrals from world rays, the kernel's sign convention), `vertex_residuals`, `KinematicsError`. |
+| `program.py` | `Sequence.kinematic_path(sheet, key_steps, start=, substeps=)`: key-pose `Step`s → exact rigid substeps (chord continuation), honouring spec §5.6 step semantics; `EdgeRef(sheet, edge)` step targets. |
+| `linalg.py` | stdlib dense linear algebra for Tier R: Cholesky, damped least squares, one-sided Jacobi SVD with right singular vectors, min-norm solves. |
+| `params.py` | `pliego.param(get, default)` / `pliego.clamp(value, lo, hi)` — the cartridge accessors, at the package top level (sandbox-reachable). |
 | `axioms.py` | Huzita–Justin axioms O1–O7 as constructions returning `Line`s (authoring helpers: "fold this point to that line through that point"). |
 | `simplefold.py` | the simple-fold model: a folded state = stack of layers (polygon of the original sheet + affine transform + order). `fold(line, direction, layers="all"|"top"|n)` splits layers by the fold line's pre-image, reflects the moving part and restacks it; `unfold()`. Produces step-by-step diagram frames and the crease pattern of the folds made. |
 | `foldcut.py` | **fold-and-cut**: after simple folds, `cut(region_in_folded_frame)` removes every point of the sheet whose folded image lies inside the region — computed by mapping the region's boundary back through every layer into the arrangement and classifying faces (kept/removed) by mapping their centroids forward. Exact for polygonal regions. Powers papel picado, jianzhi, snowflakes, kirigami cards. |
@@ -42,14 +46,14 @@ referenced through `hardware_ref`); the compliance lane enforces it.
 | `tessellate.py` | generators: Miura-ori, Yoshimura, Kresling, waterbomb, square twist, hexagonal twist, Resch-type, accordion — each returns a sheet with M/V assignment and target angles, plus the closed-form 1-DOF angle law where one exists. All original geometry (no copied third-party crease patterns). |
 | `popup.py` | paper-engineering generators: V-fold, parallel (box) fold, floating layer, step fold, tent, 90° origamic-architecture cut-fold; each returns an `Assembly` (base spread with gutter + pieces + glue joins + `hinge` mechanism on the spread + `open` control) and its kinematic initial frame; closure checks (lies flat at 0° and 180°, no lock). |
 | `book.py` | book structures: leaf (one page hinged at a spine — the simplest object in the commons), codex of N leaves, accordion/leporello, screenfold codex, tunnel book (two leporello walls + layered frames), carousel; `leaf` mechanisms and page-turn controls. |
-| `stock.py` | paper stock cards: load `materials/<slug>/stock.json`, validate, and `derive(card) -> dict` — the **only** implementation of the measurement → physics mapping (spec §5.2 keys, engine units). Measured values win; documented estimates otherwise (rsE §b formulas: Baum relations, `D = E t³/12(1−ν²)`, `L* = 200 t` hand crease / 50–100 t scored, yield 35°). `derived_basis` names the version. |
+| `stock.py` | paper stock cards: load `materials/<slug>/stock.json`, validate, and `derive(card) -> dict` — the **only** implementation of the measurement → physics mapping (spec §5.2 keys, engine units), plus the optional `G12` (0.387·√(E_md·E_cd), Baum), `score_yield_deg` (crease yield × score factor) and the card's `perf_cut_mm` / `perf_bridge_mm`. Measured values win; documented estimates otherwise (rsE §b formulas: Baum relations, `D = E t³/12(1−ν²)`, `L* = 200 t` hand crease / 50–100 t scored, yield 35°). `snapshot()` adds the card's `appearance {front, back}`. `derived_basis` names the version. `python -m pliego.stock` imports cleanly (kernel-gen modules load lazily, PEP 562). |
 | `export/svg.py` | layered SVG: `cut` (outline + cuts), `mountain`, `valley`, `score`, `perforation` (dash = cut length / bridge), `glue` (tab hatching), `art`, `registration` (print-then-cut corner marks), `label`; laser-friendly colour convention selectable (`--palette lightburn|cricut|diagram`); mm units, viewBox in mm. |
 | `export/dxf.py` | DXF R12, named layers `CUT`, `MOUNTAIN`, `VALLEY`, `SCORE`, `PERF`, `GLUE`, `TEXT`, `$INSUNITS = 4`. Adapted from FC `export/dxf.py`. |
 | `export/pdf.py` | hand-written PDF 1.4 (adapted from FC): 1:1 tiling on A4/Letter/A3/A0 with alignment crosses and tile ids, plus print-then-cut registration marks; mountain/valley line styles per origami diagram convention. |
 | `export/hpgl.py` | HPGL for plotters/cutters: `SP` pen per pass (score pass before cut pass), `PU`/`PD` in plotter units (40 units/mm), path ordering inside-out (cut inner features before outer). |
 | `export/glb.py` | glTF 2.0 binary of a 3-D state (the `initial` frame or a kernel-computed folded state): two-sided materials (front/back colours), per-sheet meshes; optional morph targets for a kinematic fold program. Stdlib only (struct + json). |
 | `export/fold.py` | `.fold` writer (thin wrapper over `document.to_json`). |
-| `cartridge.py` | helpers for cartridge scripts (the sandbox injects `pliego` and `math`): `PARAM`-style accessor docs, `result` contract checks. |
+| `cartridge.py` | the `result` contract checks and the `python -m pliego.cartridge` CLI (re-exports `param` / `clamp`). |
 
 ---
 
@@ -57,9 +61,11 @@ referenced through `hardware_ref`); the compliance lane enforces it.
 
 `<slug>/main.py`, `<slug>/project.json`, `<slug>/docs/README.md`. The runner (in `apps/api`, built
 on the shared `commons_sandbox`) injects `pliego` and `math` as the only importable modules, injects
-parameters and `mode` (the mode id) as bare globals, executes the script, and reads `result` — a `pliego.Sheet`,
-`pliego.Assembly` or `pliego.Document`. Scripts read parameters through a local accessor with a
-default so they also run standalone:
+parameters and `mode` (the mode id) as bare globals — both the API runner and the CLI, the mode
+winning over a parameter of the same name — executes the script, and reads `result` — a
+`pliego.Sheet`, `pliego.Assembly` or `pliego.Document`. Scripts read parameters through an
+accessor with a default so they also run standalone — `pliego.param` / `pliego.clamp`, or a local
+copy:
 
 ```python
 def PARAM(get, default):
@@ -86,6 +92,14 @@ zero runs happened.
 
 ---
 
+Generators (`popup`, `book`, `tessellate`) never write `pliego:meta.cartridge`; the runner and the
+CLI set it. `Assembly(..., min_feature_mm=…)` writes `pliego:meta.min_feature_mm`, and `verify()`
+then floors face areas at its square (spec §8.3; an explicit `verify(min_face_area_mm2=)` wins).
+The floor applies per **material face**: faces joined across `J` edges count as one region, since
+`J` edges are artificial splits (spec §2).
+
+---
+
 ## 3. Tests (`pytest packages/kernel/tests`)
 
 - **Geometry and arrangement:** intersections with tolerance; Euler characteristic on random
@@ -96,6 +110,11 @@ zero runs happened.
 - **Kinematics:** degree-4 closed forms — vertex α = (70, 80, 110, 100)°: mode 1 at ρ1 = 90° gives
   |ρ2| = 29.13°, mode 2 at ρ2 = 90° gives |ρ1| = 10.31° (rsE E5); Miura Poisson ratio
   ν = −cos²θ·tan²γ (E6); face-tree pose preserves edge lengths (developability) to 1e-9.
+- **Motion (`test_motion.py`):** solved degree-4 paths from flat stay on the closure manifold
+  (< 1e-9 rad) and match both Foschi–Hull–Ku modes, the branch picked by drive sign × M/V; a
+  4 × 4 Miura sheet folded from flat matches its closed form (1e-5°); the c2 commons programs
+  (inside reverse fold, rabbit ear, squash) are reproduced; `vertex_folds` inverts a pose; the
+  hex twist passes `flatfold.check` with the grid-derived tolerance.
 - **Simple folds and fold-and-cut:** folding a square in half twice and cutting a disc at the corner
   yields the expected symmetric holes; papel picado wedge symmetry (n-fold) is exact; every kept
   region is connected.
@@ -109,3 +128,38 @@ zero runs happened.
   independent sheets (FC `flats.py` contract).
 - **Exporters:** golden files (byte-exact) for a fixed small document per format; SVG/DXF layer names
   and colours; PDF tiles cover the sheet; GLB parses (header, JSON chunk, BIN chunk, accessor bounds).
+
+---
+
+## 4. Tier R motion (`pliego.kinematics.solve`, kernel 0.2)
+
+`solve(system, start, drive, fixed=(), steps=16, *, along="drive")` — `system` is an
+`Arrangement`, a `Sheet` (keys may be its `Mark`s) or a `Document` (global edge indices); angles
+in degrees; unlisted creases start at 0. Variables are the M/V/U creases (plus any F line a caller
+names). Each interior vertex closes `F_v = R(d₁, ρ₁)⋯R(d_k, ρ_k) = I` (creases met
+counter-clockwise, the `face_transforms` sign convention); residual `vee(log F_v)` in rad,
+Jacobian columns ℓᵢ (rsE §a2). Per substep: the minimum-norm solution of the linearised closure
+(null-space projection of the drive), then Levenberg–Marquardt damped least squares — λ starts at
+1e-3 (C's columns are unit vectors, so its singular values are O(1)) and shrinks ×10 per accepted
+step to 1e-12, which bounds the update at the flat singularity. At planar vertices (flat or
+flat-folded, every ℓᵢ coplanar) the second-order tangent cone (in-plane linear constraint plus
+`n·½Σ_{i<j} vᵢvⱼ(ℓᵢ×ℓⱼ) = 0` per vertex) yields the branches; each is followed by Newton and the
+one whose free creases fold most consistently with σ·(their M/V sign) wins, σ = sign of the
+drive × the drive crease's M/V sign (ties: least motion). `along="chord"` is pseudo-arclength
+continuation toward a known end state (all driven creases free, progress measured along the
+start → target chord) — even sampling where a crease races near a flat-folded end.
+
+The result is a `KinematicPath` (a list of `{edge: deg}`, start excluded) with `dof`, `free_dof`,
+`max_residual_rad` and `branch_steps`. Acceptance: Newton aims for 1e-13 rad; a state is accepted
+below max(1e-10 rad, the worst vertex's snapping floor Σ √2·`GRID_MM`/Lᵢ) — a vertex snapped off
+exact flat-foldability cannot close exactly at its flat-folded state. `KinematicsError` is raised
+when the start does not close, when the drive leaves the rigid configuration space (no closed
+state near the path) or when a crease would pass ±180°. Loops around holes are not constrained
+(vertex loops only).
+
+`Sequence.kinematic_path(sheet, key_steps, start=None, substeps=8)` expands key-pose `Step`s into
+exact rigid substeps: unlisted creases hold (they are `fixed`), released creases become free, the
+listed creases advance by chord continuation and must arrive at their targets (within 1e-5°). The
+program starts from `start` (the initial frame's angles, `{mark: deg}` or `{"angles": …}`) or
+from flat; the returned sequence is `kinematic` and carries `.report`.
+

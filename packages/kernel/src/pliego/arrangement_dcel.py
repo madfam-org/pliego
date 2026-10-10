@@ -5,6 +5,14 @@ faces; clockwise / zero-area cycles are inner boundaries (holes, islands, floati
 bridged to their containing face with ``J`` edges. Faces that are not simple (dangling lines,
 pinch vertices) are split with ``J`` edges from the offending vertex. The loop repeats until
 every material face is a simple CCW polygon; Euler's formula is then checked (fail loud).
+
+Batching (kernel 0.2): one pass bridges *every* inner boundary, each with **two** J edges — the
+nearest visible bridge from its lowest vertex and a second one from the hole vertex farthest from
+the first bridge, to a different target — so a hole splits its face into two simple faces at
+once instead of leaving a pinch for a later pass. New bridges are visibility-checked against the
+bridges already chosen in the pass, so they never cross. Opposite bridges also avoid the thin
+J-bounded slivers that two adjacent bridges create; `verify()` additionally floors face area per
+J-joined region (J edges are artificial). A sheet with 40 holes now needs ~3 passes, not ~80.
 """
 
 from __future__ import annotations
@@ -77,17 +85,25 @@ def _is_material(cyc: list[IPoint], left_of: dict[Key, bool]) -> bool:
 
 
 def _visible(p: IPoint, q: IPoint, keys: list[Key], verts: set[IPoint]) -> bool:
+    """No edge properly crosses pq and no vertex lies on it (exact; bounding-box prefilter —
+    a segment or vertex outside pq's box can neither cross it nor lie on it)."""
+    x0, x1 = (p[0], q[0]) if p[0] <= q[0] else (q[0], p[0])
+    y0, y1 = (p[1], q[1]) if p[1] <= q[1] else (q[1], p[1])
     for a, b in keys:
+        if (a[0] < x0 and b[0] < x0) or (a[0] > x1 and b[0] > x1) \
+                or (a[1] < y0 and b[1] < y0) or (a[1] > y1 and b[1] > y1):
+            continue
         if segments_cross(p, q, a, b):
             return False
     for v in verts:
-        if v != p and v != q and on_segment(v, p, q):
+        if x0 <= v[0] <= x1 and y0 <= v[1] <= y1 and v != p and v != q and on_segment(v, p, q):
             return False
     return True
 
 
 def _choose(start: IPoint, targets: list[IPoint], keys: list[Key], verts: set[IPoint],
-            inside, prefer: tuple[float, float] | None = None) -> IPoint | None:
+            inside, prefer: tuple[float, float] | None = None,
+            avoid: frozenset[IPoint] = frozenset()) -> IPoint | None:
     """Nearest visible target whose connecting segment stays inside the face."""
     existing = set(keys)
 
@@ -100,7 +116,7 @@ def _choose(start: IPoint, targets: list[IPoint], keys: list[Key], verts: set[IP
             bucket = 0 if c >= 0.5 else (1 if c >= -0.5 else 2)
         return (bucket, d2, t)
 
-    for t in sorted({t for t in targets if t != start}, key=score):
+    for t in sorted({t for t in targets if t != start and t not in avoid}, key=score):
         key = (start, t) if start < t else (t, start)
         if key in existing:
             continue
@@ -152,33 +168,19 @@ def finish_faces(kept: dict[Key, dict], warnings: list[dict]):
         for cyc in cycles:
             (outer if polygon_area2(cyc) > 0 else inner).append(cyc)
         material = [c for c in outer if _is_material(c, left_of)]
-        new_edge: Key | None = None
-        # (a) inner boundaries lying inside a material face → bridge
+        new_edges: list[Key] = []
+        work = list(keys)      # visibility sees the bridges already chosen in this pass
+        # (a) inner boundaries lying inside a material face → two bridges each
         hosts: list[list[IPoint] | None] = []
         for cyc in inner:
             probe = min(cyc)
             containers = [c for c in outer if probe not in c and _pip(probe, c)]
             hosts.append(min(containers, key=lambda c: (polygon_area2(c), min(c)))
                          if containers else None)
-        for cyc, host in zip(inner, hosts, strict=True):
-            if host is None or host not in material:
-                continue
-            probe = min(cyc)
-            others = [o for o, h in zip(inner, hosts, strict=True) if h is host and o is not cyc]
-
-            def inside(m, host=host, holes_=(cyc, *others)):
-                if not _pip(m, host):
-                    return False
-                return not any(polygon_area2(o) != 0 and _pip(m, o) for o in holes_)
-
-            targets = list(host) + [v for o in others for v in o]
-            t = _choose(probe, targets, keys, verts, inside)
-            if t is None:
-                raise ArrangementError(f"cannot bridge inner boundary at {_mm(probe)}")
-            new_edge = (probe, t) if probe < t else (t, probe)
-            break
+        new_edges += _bridge_pass(inner, hosts, material, work, verts)
         # (b) non-simple material faces → split from a tip or a repeated vertex
-        if new_edge is None:
+        new_edge: Key | None = None
+        if not new_edges:
             for cyc in material:
                 if len(set(cyc)) == len(cyc):
                     continue
@@ -202,12 +204,81 @@ def finish_faces(kept: dict[Key, dict], warnings: list[dict]):
                 if new_edge is None:
                     raise ArrangementError(f"cannot split non-simple face at {_mm(min(cyc))}")
                 break
-        if new_edge is None:
+        if new_edge is not None:
+            new_edges.append(new_edge)
+        if not new_edges:
             return _canonical(edges, material, len(outer) - len(material), warnings,
                               Arrangement, ArrangementError)
-        edges[new_edge] = {"attrs": (priority("J", "none"), 0.0, 0.0, "J", "none"),
-                           "tags": set(), "left": None}
+        for e in new_edges:
+            edges[e] = {"attrs": (priority("J", "none"), 0.0, 0.0, "J", "none"),
+                        "tags": set(), "left": None}
     raise ArrangementError("J-edge bridging did not converge")
+
+
+def _bridge_pass(inner: list[list[IPoint]], hosts: list, material: list[list[IPoint]],
+                 work: list[Key], verts: set[IPoint]) -> list[Key]:
+    """Bridge every inner boundary of a material face (two J edges each), in one pass.
+
+    A hole may attach only to its host face's boundary or to holes already attached in this
+    pass, never to a pending one: holes cannot bridge to each other twice (no J-only triangles)
+    and each attachment really merges a component. A hole with no visible target yet waits for
+    the next round of the pass; a pass that attaches nothing fails loud."""
+    from .arrangement import ArrangementError
+
+    pending = [(cyc, host) for cyc, host in zip(inner, hosts, strict=True)
+               if host is not None and any(host is m for m in material)]
+    attached: dict[int, list[IPoint]] = {}
+    out: list[Key] = []
+    while pending:
+        waiting = []
+        for cyc, host in pending:
+            probe = min(cyc)
+            others = [o for o, h in zip(inner, hosts, strict=True) if h is host and o is not cyc]
+
+            def inside(m, host=host, holes_=(cyc, *others)):
+                if not _pip(m, host):
+                    return False
+                return not any(polygon_area2(o) != 0 and _pip(m, o) for o in holes_)
+
+            targets = list(host) + attached.get(id(host), [])
+            used = frozenset(v for k in out for v in k)
+            t = _choose(probe, targets, work, verts, inside, avoid=used) \
+                or _choose(probe, targets, work, verts, inside)
+            if t is None:
+                waiting.append((cyc, host))
+                continue
+            first = (probe, t) if probe < t else (t, probe)
+            out.append(first)
+            work.append(first)
+            second = _second_bridge(cyc, probe, t, targets, work, verts, inside,
+                                    used | {t, probe})
+            if second is not None:
+                out.append(second)
+                work.append(second)
+            attached.setdefault(id(host), []).extend(cyc)
+        if len(waiting) == len(pending):
+            raise ArrangementError(
+                f"cannot bridge inner boundary at {_mm(min(waiting[0][0]))}")
+        pending = waiting
+    return out
+
+
+def _second_bridge(cyc: list[IPoint], probe: IPoint, t: IPoint, targets: list[IPoint],
+                   work: list[Key], verts: set[IPoint], inside,
+                   prefer_avoid: frozenset[IPoint]) -> Key | None:
+    """A second bridge from the inner boundary, starting at its vertices farthest from the
+    first bridge's start, to a target other than the first one — preferring targets no bridge
+    of this pass ends at (shared endpoints make thin triangles); None when none is visible."""
+    starts = sorted({v for v in cyc if v != probe},
+                    key=lambda v: (-((v[0] - probe[0]) ** 2 + (v[1] - probe[1]) ** 2), v))
+    for avoid in (prefer_avoid, frozenset((t, probe))):
+        for s in starts:
+            if s in prefer_avoid and avoid is prefer_avoid:
+                continue
+            u = _choose(s, targets, work, verts, inside, avoid=avoid)
+            if u is not None:
+                return (s, u) if s < u else (u, s)
+    return None
 
 
 def _mm(p: IPoint) -> str:

@@ -103,7 +103,11 @@
     "perf_factor": 0.25,
     "tear_strain": 0.03,
     "friction": 0.4,
-    "collision_thickness": 0.08
+    "collision_thickness": 0.08,
+    "G12": 473976000.0,
+    "score_yield_deg": 12.25,
+    "perf_cut_mm": 3.0,
+    "perf_bridge_mm": 1.0
   },
   "derived_basis": "pliego.stock.derive v1",
   "provenance": {

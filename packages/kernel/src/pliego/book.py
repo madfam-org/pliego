@@ -66,8 +66,7 @@ def leaf(width: float = 148.0, height: float = 210.0, stock: str = "copy-80") ->
         "leaf", {"en": "Leaf", "es": "Hoja", "fr": "Feuillet", "pt": "Folha"}, width, height,
         stock, "turn")
     return Assembly([sheet], joins=[spine_pin], mechanisms=[mech], controls=[ctrl],
-                    title="Leaf", meta={"cartridge": "leaf",
-                                        "params": {"width": width, "height": height}})
+                    title="Leaf", meta={"params": {"width": width, "height": height}})
 
 
 def codex(leaves: int = 8, width: float = 148.0, height: float = 210.0,
@@ -87,7 +86,7 @@ def codex(leaves: int = 8, width: float = 148.0, height: float = 210.0,
         ctrls.append(c)
         joins.append(j)
     return Assembly(sheets, joins=joins, mechanisms=mechs, controls=ctrls, title="Codex",
-                    meta={"cartridge": "codex", "params": {"leaves": leaves, "width": width,
+                    meta={"params": {"leaves": leaves, "width": width,
                                                             "height": height}})
 
 
@@ -112,7 +111,7 @@ def leporello(panels: int = 8, width: float = 100.0, height: float = 150.0,
                 [(m, None) for m in marks], duration_ms=4000)
     return Assembly([sheet], controls=[sequence_control()],
                     sequence=Sequence_([step], mode="kinematic"), title=title,
-                    meta=meta or {"cartridge": sheet_id, "params": {"panels": panels,
+                    meta=meta or {"params": {"panels": panels,
                                                                     "width": width,
                                                                     "height": height}})
 
@@ -126,8 +125,7 @@ def screenfold_codex(leaves: int = 39, leaf_width: float = 90.0, height: float =
                      {"en": "Screenfold codex", "es": "Códice biombo",
                       "fr": "Codex en paravent", "pt": "Códice em biombo"},
                      "Screenfold codex",
-                     {"cartridge": "screenfold-codex",
-                      "params": {"leaves": leaves, "leaf_width": leaf_width, "height": height,
+                     {"params": {"leaves": leaves, "leaf_width": leaf_width, "height": height,
                                  "proportions_source": DRESDEN_CODEX_SOURCE}})
 
 
@@ -203,8 +201,7 @@ def tunnel_book(frames: int = 3, width: float = 120.0, height: float = 90.0,
                 [(m, None) for m in collapse], duration_ms=3000)
     return Assembly(sheets, joins=joins, controls=[sequence_control()],
                     sequence=Sequence_([step]), initial=initial, title="Tunnel book",
-                    meta={"cartridge": "tunnel-book",
-                          "params": {"frames": frames, "width": width, "height": height,
+                    meta={"params": {"frames": frames, "width": width, "height": height,
                                      "depth": depth}})
 
 
@@ -245,7 +242,7 @@ def carousel(leaves: int = 6, width: float = 100.0, height: float = 140.0,
     return Assembly(sheets, joins=joins,
                     initial=lambda sid, uv: poses[int(sid.rsplit("-", 1)[1]) - 1](*uv),
                     title="Carousel book",
-                    meta={"cartridge": "carousel", "params": {"leaves": leaves, "width": width,
+                    meta={"params": {"leaves": leaves, "width": width,
                                                               "height": height}})
 
 

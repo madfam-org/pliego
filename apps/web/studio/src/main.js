@@ -3,7 +3,8 @@
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
-import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, fetchObject } from './data.js';
+import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, loadPreview, fetchObject } from './data.js';
+import { engineOptions, estimateVertices, physicsFits, tooSlow } from './physics.js';
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, legendKinds, LINE_STYLE } from './diagram.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
@@ -19,7 +20,11 @@ const STEP = 1 / 60;
 
 const state = {
   share: parseShare(location.search, location.hash),
-  engine: /** @type {{mod: any, kind: 'engine'|'stub', reason: string} | null} */ (null),
+  engine: /** @type {{mod: any, kind: 'engine'|'stub', reason: string} | null} */ (null),   // what runs the world now
+  physics: /** @type {{mod: any, kind: 'engine'|'stub', reason: string} | null} */ (null),  // the paper engine when mounted
+  preview: /** @type {{mod: any, kind: 'engine'|'stub', reason: string} | null} */ (null),  // the preview (no physics)
+  physicsWanted: false,   // run paper physics when it is available
+  physicsForced: false,   // the viewer asked for it (toggle or ?engine=physics): never fall back for speed
   renderer: /** @type {import('./render/index.js').Renderer | null} */ (null),
   input: /** @type {{destroy(): void} | null} */ (null),
   catalog: /** @type {{source: 'api'|'demo', items: any[]} | null} */ (null),
@@ -245,16 +250,65 @@ function fail(key, e) {
   console.error(e);
 }
 
-async function useDocument(json) {
+/**
+ * Wall time of a warmed step (ms). The first step pays for the initial factorisation, and the next
+ * ones may still be settling, so the probe returns the faster of steps two and three. The probe
+ * advances the world by all three steps.
+ */
+function probeStep(world) {
+  world.step(STEP);
+  let best = Infinity;
+  for (let i = 0; i < 2; i++) {
+    const t0 = performance.now();
+    world.step(STEP);
+    best = Math.min(best, performance.now() - t0);
+  }
+  return best;
+}
+
+// Live speed watch: the paper engine sleeps at rest, so only awake steps (≥ 1 ms) are averaged. A
+// sustained average above SLOW_STEP_MS falls back to the preview, unless physics was asked for.
+const speed = { n: 0, avg: 0, fired: false };
+function noteStep(ms) {
+  if (!state.engine || state.engine.kind !== 'engine' || state.physicsForced || ms < 1 || speed.fired) return;
+  speed.n++;
+  speed.avg = speed.n === 1 ? ms : 0.85 * speed.avg + 0.15 * ms;
+  if (speed.n >= 20 && tooSlow(speed.avg)) {
+    speed.fired = true;
+    const avg = speed.avg;
+    setTimeout(async () => {
+      if (!state.json) return;
+      await useDocument(state.json, { preview: true });
+      notice(i18n.t('physics.slow', { ms: Math.round(avg) }));
+    }, 0);
+  }
+}
+
+function syncPhysicsButton() {
+  const btn = $('btn-physics');
+  const available = !!(state.physics && state.physics.kind === 'engine');
+  btn.disabled = !available;
+  btn.title = available ? '' : i18n.t('physics.unavailable');
+  btn.setAttribute('aria-pressed', String(!!(state.engine && state.engine.kind === 'engine')));
+}
+
+async function useDocument(json, opts = {}) {
   state.json = json;
   state.failed = false;
   notice('');
   setPlaying(false);
   state.world = null;
   state.overlay = null;
+  speed.n = 0; speed.avg = 0; speed.fired = false;
+  const physicsOk = !!(state.physics && state.physics.kind === 'engine');
+  const fits = state.physicsForced || physicsFits(json);
+  state.engine = physicsOk && state.physicsWanted && !opts.preview && fits ? state.physics : state.preview;
+  const real = state.engine.kind === 'engine';
+  const heavyNotice = physicsOk && state.physicsWanted && !opts.preview && !fits
+    ? i18n.t('physics.heavy', { n: estimateVertices(json, engineOptions(json).meshEdge) }) : '';
   try {
     const doc = state.engine.mod.loadDocument(json);
-    state.world = new state.engine.mod.World(doc, { seed: 1 });
+    state.world = new state.engine.mod.World(doc, real ? engineOptions(json) : { seed: 1 });
   } catch (e) {
     fail(state.world ? 'error.engine' : 'error.document', e);
   }
@@ -263,9 +317,21 @@ async function useDocument(json) {
     for (const c of json['pliego:controls'] || []) {
       if (!needsEngine(c.id)) { try { state.world.setControl(c.id, c.default); } catch (e) { fail('error.engine', e); } }
     }
+    if (real && !state.physicsForced) {
+      let ms = NaN;
+      try { ms = probeStep(state.world); } catch (e) { fail('error.engine', e); }
+      if (tooSlow(ms)) {
+        await useDocument(json, { preview: true });
+        notice(i18n.t('physics.slow', { ms: Math.round(ms) }));
+        return;
+      }
+    }
     state.overlay = createOverlay(json, state.world);
     if (state.renderer) state.renderer.setSheets(sheetsFromDocument(json), state.item.document || location.href);
   }
+  syncPhysicsButton();
+  renderStatusStatic();
+  if (heavyNotice && !state.failed) notice(heavyNotice);
   const ovBtn = $('btn-overlay');
   const ovOk = !!(state.overlay && state.overlay.available());
   ovBtn.disabled = !ovOk;
@@ -350,9 +416,17 @@ function frame(now) {
   try {
     if (state.playing) advancePlayback(dt);
     acc += dt;
+    // The paper engine takes one fixed step per frame at most: its steps are the expensive part, and
+    // catching up would only make a slow frame slower. The preview may catch up to four.
+    const maxSteps = state.engine && state.engine.kind === 'engine' ? 1 : 4;
     let n = 0;
-    while (acc >= STEP && n < 4) { world.step(STEP); acc -= STEP; n++; }
-    if (n === 4) acc = 0;   // never spiral: drop time rather than run variable steps
+    while (acc >= STEP && n < maxSteps) {
+      const t0 = performance.now();
+      world.step(STEP);
+      noteStep(performance.now() - t0);
+      acc -= STEP; n++;
+    }
+    if (n === maxSteps) acc = 0;   // never spiral: drop time rather than run variable steps
     if (state.view === '3d' && state.renderer) {
       const r = world.render();
       const ov = state.overlayOn && state.overlay ? state.overlay.build() : null;
@@ -388,6 +462,12 @@ function wireStatic() {
   $('btn-reset').addEventListener('click', () => state.renderer && state.renderer.camera.reset());
   $('btn-grab').addEventListener('click', () => { state.grabMode = !state.grabMode; $('btn-grab').setAttribute('aria-pressed', String(state.grabMode)); $('viewer').classList.toggle('grab', state.grabMode); });
   $('btn-overlay').addEventListener('click', () => { state.overlayOn = !state.overlayOn; $('btn-overlay').setAttribute('aria-pressed', String(state.overlayOn)); });
+  $('btn-physics').addEventListener('click', async () => {
+    const on = !(state.engine && state.engine.kind === 'engine');
+    state.physicsWanted = on;
+    state.physicsForced = on;   // an explicit request is honoured even when it is slow
+    if (state.json) await useDocument(state.json);
+  });
   $('btn-copy').addEventListener('click', async () => {
     const input = $('share-url');
     try { await navigator.clipboard.writeText(input.value); status(i18n.t('share.copied')); }
@@ -402,7 +482,11 @@ async function init() {
   i18n.apply();
   document.documentElement.classList.remove('i18n-pending');
   wireStatic();
-  state.engine = await loadEngine(state.share.engine);
+  state.physics = await loadEngine(state.share.engine);   // the paper engine when mounted (the stub when absent or ?engine=stub)
+  state.preview = state.physics.kind === 'stub' ? state.physics : await loadPreview();
+  state.physicsWanted = state.physics.kind === 'engine';
+  state.physicsForced = state.share.engine === 'physics';
+  state.engine = state.physicsWanted ? state.physics : state.preview;
   const canvas = $('view-canvas');
   state.renderer = createRenderer(canvas, { prefer: rendererOverride(state.share.renderer), onWarn: (m) => console.warn(m) });
   if (!state.renderer) notice(i18n.t('viewer.none'));

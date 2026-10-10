@@ -192,6 +192,118 @@ turned as one stack with its back half flipping inside in the last sub-step, rep
 per-vertex Kawasaki tolerance in degrees), so equal sectors built from snapped points (which
 differed by ~1e-6°) are no longer reported as a strictly smallest sector.
 
+<!-- FL2 (wave 3, flat operations) begin -->
+**Wave-3 flat operations (lane FL2).**
+
+- **Preimage.** `FlatState.layers_at(q, faces=None)` lists the layers of paper at a folded point,
+  bottom → top, as (face, sheet point); a point on a crease or an edge counts each layer once.
+  `FlatState.preimage(q, layer="top" | "bottom" | index, faces=None)` is the sheet point under q on
+  that layer (negative indices count from the top), the inverse of `to_folded` for that layer;
+  `layer_index(sheet_point, q=None)` is the converse. Cartridges compute crease seeds and
+  `sheet_points` selections with it instead of copying the placement algebra.
+- **Cuts** (`flatcut.py`). `cut(state, (p0, p1), at=, layers=, faces=, sheet_points=, from_=)`
+  cuts along a folded segment through every layer it crosses, or the layers picked at `at` (and
+  the same layers where they continue flat along the segment); each cut layer's part of the
+  segment is mapped back through its placement (the pre-image mapping of `foldcut`, one segment
+  per layer). `FlatState.cuts` holds the slits (sheet frame): their faces are not joined — no
+  crease, no placement or layer constraint, no flap selection across them — and `unfold()` writes
+  them as `C` cuts. Faces are split along the slit's whole line to stay convex; where a slit ends
+  inside a face the rest of the line is a **seam** (`FlatState.seams`: joined flat, no line on the
+  sheet) until a move folds it (`FlatState.creased`; a crease from then on). `FoldProgram.cut(...)`
+  records it as a step with no targets (the document's slits exist from the first frame).
+  `Built.face_orders()` keeps its meaning; for sheets with slits each pattern face is the union of
+  the state faces inside it. The preview's `tear` ignores slit edges (their sides part).
+  Hinge poses now take the paper joined to the picked layers without crossing the line's creases,
+  even where it lies past the line in the folded image (a wing folded back across the keel); the
+  side-of-line rule remains the fallback when that reaches the whole model. Today a slit's two
+  sides share their end vertices on the flat sheet, so a target frame that opens a slit (a trimmed
+  tab) is drawn with those vertices on one side; when `Sheet.cut` splits cut vertices, it is exact.
+  Cutting along an existing crease is not supported (the segment must cross the paper).
+- **Vertex moves** (`flatvertex.py`). `star(state, center)` reads the linkage at the sheet vertex
+  under a folded point: its rays (counter-clockwise on the flat sheet), the sector each wedge
+  carries (the wedge and every face joined to it without crossing a crease on a ray's folded
+  image; layers stacked at the vertex but hinged only on rays — a blintzed corner whose tip sits
+  on it — join the sector whose wedge they lie in) and the rays' fold angles.
+  `collapse(state, center, folds, fixed=)` folds the listed rays flat at once (`folds`: sheet
+  direction in degrees or a sheet point on the ray → `"valley" | "mountain" | "flat"`, crease-
+  pattern sense; unlisted rays hold): placements compose the reflections across the folded rays
+  (Kawasaki closes them or the move fails), the layer order is solved from the side each face
+  arrives from in the 3-D motion and checked, and every ray must end with its asked sign. The
+  3-D path (`VertexPath`, n − 3 DOF for degree n) is the start → target chord in angle space
+  projected onto the rigid configuration space: `kinematics.solve(..., along="chord")` on the
+  vertex's star picks the branch at the flat or flat-folded start and seeds each sample, which
+  is then the closed state nearest its chord point; poses between samples are the nearest closed
+  state to the chord too. A symmetric start and target therefore give a symmetric path (the
+  waterbomb collapse is mirror- and diagonal-symmetric to 1e-13°). `FoldProgram.collapse(...)`
+  records it; `FoldProgram.vertex_pose(sid, label, center, {ray: deg})` drives the same linkage
+  to fold angles off flat as a 3-D pose step (the fortune teller shaped, opened, closed), from
+  this vertex's previous pose; vertex poses come before `hinge` poses. Fidelity: exact at every
+  sample (tear and deviation ~1e-13 mm); the preview's linear blend between samples tears up to
+  0.5 mm after refinement. Proven on the waterbomb base, the preliminary base (one collapse: the
+  midlines valley, the diagonal through the open corners mountain, the other diagonal flat), the
+  jumping frog's degree-6 head and the fortune teller's degree-8 vertex.
+  `foldpattern.py` holds the pattern-side helpers (`face_points`, `edge_angles`, `face_orders`),
+  re-exported by `foldprogram`.
+- **3-D poses interleaved with flat folds** (`foldpose.py`). While a program is recorded,
+  `Pose3` tracks every face's world pose; `hinge`/`hinges`, `vertex_pose` and the new
+  `FoldProgram.kinematic(sid, label, drive=[(segment, deg)], free=[segment | (segment,
+  "valley" | "mountain")], fixed=)` set it. `kinematic` is a rigid step on the whole crease
+  pattern so far: the creases (in every layer) on the drive segments turn to their angles, those
+  on the free segments follow, the rest hold (`kinematics.solve`, chord continuation); a hinted
+  free crease leaves a start where the rigid paths branch the hinted way first (the masu gusset
+  folding in, not out). After a 3-D step, `fold(..., within=sheet point, hinge=None)` folds the
+  group of faces lying in one plane and joined to the face at `within`: the group is
+  re-flattened in that face's folded frame (a `FlatState(partial=True)` of the group: placement,
+  order, taco/tortilla checked; Kawasaki/Maekawa skipped at its rim, whose creases it does not
+  hold), its layer order read from the side each face approached the plane from late in the 3-D
+  step that brought it there, completed and checked by `flatcheck`, folded with `flatops.fold`
+  and carried back into 3-D; `hinge` turns a flap of the moving paper about an existing crease
+  at the same time. Other flat operations after 3-D steps fail. The flat state keeps the
+  placements faces had before the first 3-D step (later flat folds add creases only), so for such
+  programs `Built.final_angles`/`target()` describe that flat state and `target(pose=True)` the
+  model; creases folded only in 3-D stay `F` in the pattern and are driven by the sequence. At
+  every sampled state of a `kinematic` step and of a flat fold after 3-D steps, the build checks
+  that no moving face crosses paper that does not move with it (`penetration_mm` per row; more
+  than 0.05 mm fails). Hinge poses now read the flap's faces in the state the hinge was recorded
+  on (not the final one). Proof: the masu box — midlines, blintz, edge creases, ends opened,
+  side walls raised, each end wall raised while its corners fold in, each flap folded over its
+  wall with its tip landing on the floor; every face ends inside the walls (|x|, |z| ≤ q,
+  0 ≤ y ≤ q). Fidelity: exact at every sample (tear ~1e-12 mm); the preview's blend between the
+  kinematic samples tears about 1 mm after refinement.
+- **Tucks** (`flattuck.py`). `tuck(state, line, direction, pocket=(q, n), at=, layers=,
+  faces=, sheet_points=)` folds a flap like `fold` but into a pocket: at the folded point q of
+  the area it lands on, under (at least) the top n layers (valley) or over the bottom n
+  (mountain); those layers and the paper continuing flat from them are the pocket's near wall,
+  every other order is solved and checked (layers joined to the wall by a folded edge may end
+  over the flap too). The 3-D path is the simple fold's rotation, exact in the preview; with
+  paper of no thickness it crosses nothing on the way (`penetration_mm`, reported) but it
+  arrives on the near side of the wall and ends behind it: `Move.info["crossed"]` lists those
+  wall faces and the step reports `pocket_crossings` — reported, not refused.
+  `FoldProgram.tuck(...)`. Proof: the waterbomb balloon's four points tucked into the side
+  pockets, the paper cup's front flap into the pocket in front, the samurai helmet's back corner
+  tucked inside.
+- **Crease memory.** A crease folded and opened again used to become `F` with nothing left of
+  its sense. Proposal, implemented on the kernel side with no spec change: the flat state keeps
+  the memory, and a document carries it as the existing **signed rest angle**
+  (`pliego:edges_restAngle`, which the physical engine and the preview already read) where the
+  document's t = 0 is a creased sheet. `FlatState.memory` holds sheet segments of creases opened
+  again with the sign of their last fold (later entries win; every move that opens a folded
+  crease, and `Move.reversed()`, records it); `memory_of(crease)` is the sign while folded or
+  remembered, `memory_segments()` the open remembered segments. `unfold(rest_memory=deg,
+  memory_from=state)` gives every crease that remembers a fold in `memory_from` (default this
+  state) the rest angle ±deg — a crease folded flat and opened by hand springs back to about the
+  stock's yield angle, so `deg` is that yield (`crease_yield_deg`); it fails when a crease
+  remembers the other sign than it folds to. `FoldProgram.build(start_after=, rest_memory=)`
+  writes the memory of the creases open at the program's start (a square creased beforehand);
+  a program from the flat sheet has none (its creases are made, and set by the engine's
+  plasticity, during the program). Without `rest_memory` the pattern is unchanged. The other
+  option, a sign field on the edge, would need a new spec field and gives the engines nothing
+  they do not already get from a signed rest angle. Lane H's emission of rest angles for creases
+  already folded in an initial pose is the complement (folded creases at t = 0); this covers the
+  open ones. Proof: the waterbomb base started after its precreases — diagonals rest +35°
+  (valley), midline −35° (mountain), the program is the collapse alone.
+<!-- FL2 (wave 3, flat operations) end -->
+
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,
 crease parity, four-fold symmetry — and a crane valid at every vertex), `test_foldprogram.py`; sequences in
 `tests/flat_models.py`.

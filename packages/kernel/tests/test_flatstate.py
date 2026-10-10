@@ -158,3 +158,95 @@ def test_crease_and_unfold_adds_flat_creases_only():
     assert check(out) == []
     assert [c.angle for c in out.creases()] == [0.0]
     assert all(not out.flipped(f) for f in range(len(out.faces)))
+
+
+# ── preimage: folded point → sheet point on a chosen layer ──────────────────
+
+def test_preimage_round_trips_every_layer_of_the_bird_base():
+    import flat_models as fm
+
+    fp, (o, b, lft, rgt, kl, kr) = fm.bird_base()
+    st = fp.state
+    checked = 0
+    for f in range(len(st.faces)):
+        poly = st.poly(f)
+        c = (sum(p[0] for p in poly) / len(poly), sum(p[1] for p in poly) / len(poly))
+        q = st.to_folded(c)
+        stack = st.layers_at(q)
+        k = st.layer_index(c)
+        assert stack[k][0] == f
+        assert st.preimage(q, k) == pytest.approx(c, abs=1e-9)
+        assert st.preimage(q, k - len(stack)) == pytest.approx(c, abs=1e-9)   # from the top
+        assert st.to_folded(st.preimage(q, k)) == pytest.approx(q, abs=1e-9)
+        checked += 1
+    assert checked == len(st.faces) >= 24
+    # the top and bottom layers at a point on a flap, and the whole stack's count
+    q = ((kl[0] + kr[0]) / 2 + 3.0, (kl[1] + b[1]) / 2)
+    stack = st.layers_at(q)
+    assert len(stack) == len(st.faces_at(q)) >= 4
+    assert st.preimage(q, "top") == pytest.approx(stack[-1][1])
+    assert st.preimage(q, "bottom") == pytest.approx(stack[0][1])
+    assert st.layer_index(st.preimage(q, "top"), q) == len(stack) - 1
+
+
+def test_preimage_on_a_crease_counts_each_layer_once():
+    st = halved_twice()
+    # the folded edge of the first diagonal fold, seen on the half-folded triangle
+    q = (S * 0.75, S * 0.75)
+    stack = st.layers_at(q)
+    assert len(stack) == len({(round(p[0], 6), round(p[1], 6)) for _, p in stack})
+    for _, p in stack:
+        assert st.to_folded(p) == pytest.approx(q, abs=1e-6)
+
+
+def test_preimage_limits_and_errors():
+    st = halved_twice()
+    q = (S * 0.6, S * 0.9)
+    stack = st.layers_at(q)
+    one = st.layers_at(q, faces=[stack[0][0]])
+    assert one == [stack[0]]
+    with pytest.raises(FlatStateError, match="layer 9 asked"):
+        st.preimage(q, 9)
+    with pytest.raises(FlatStateError, match="no layer"):
+        st.preimage((10 * S, 10 * S))
+
+
+# ── crease memory ───────────────────────────────────────────────────────────
+
+def test_an_opened_crease_remembers_its_fold():
+    st = FlatState.of(SQUARE)
+    for line, kind, at in ((((0, S / 2), (S, S / 2)), "valley", (10, S - 10)),
+                           (((S / 2, 0), (S / 2, S)), "mountain", (10, 10))):
+        m, back = flatops.crease_and_unfold(st, line, kind, at=at)
+        st = back.state
+    assert all(c.angle == 0.0 for c in st.creases())
+    mem = {}
+    for c in st.creases():
+        a, b = st.points[c.a], st.points[c.b]
+        mem["h" if abs(a[1] - b[1]) < 1e-9 else "v"] = st.memory_of(c)
+    assert mem == {"h": 1, "v": -1}
+    # the default crease pattern is unchanged; asked for, the open creases rest signed
+    plain = st.unfold("p")
+    assert all(mk.assignment == "F" and not mk.rest for mk in plain.marks)
+    sheet = st.unfold("m", rest_memory=35.0)
+    assert {mk.rest for mk in sheet.marks} == {-35.0, 35.0}
+    doc = pliego.Assembly([sheet]).build(cartridge="test", mode="default")
+    ra = doc.data["pliego:edges_restAngle"]
+    assert max(ra) == pytest.approx(35.0) and min(ra) == pytest.approx(-35.0)
+
+
+def test_folding_again_overrides_the_memory():
+    st = FlatState.of(SQUARE)
+    line = ((0, S / 2), (S, S / 2))
+    st = flatops.crease_and_unfold(st, line, "valley", at=(10, S - 10))[1].state
+    st = flatops.crease_and_unfold(st, line, "mountain", at=(10, S - 10))[1].state
+    (sg,) = {st.memory_of(c) for c in st.creases()}
+    assert sg == -1
+
+
+def test_unfold_last_keeps_memory_through_a_program():
+    fp = pliego.FoldProgram(SQUARE)
+    fp.fold("half", "half", ((0, S / 2), (S, S / 2)), "valley", at=(10, S - 10))
+    fp.unfold_last("open")
+    (c,) = fp.state.creases()
+    assert c.angle == 0.0 and fp.state.memory_of(c) == 1

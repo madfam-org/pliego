@@ -98,6 +98,7 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
     _rule14_print(d, coords, out)
     _rule15_mechanism_sheets(d, out)
     rule17_presentation(d, out)
+    rule18_art(d, out)
     _rule8_sequence(d, out)
     _rule11_pieces(d, out)
     _rule12_stacks(d, _sheet_tools(d, coords)[1], out)
@@ -450,7 +451,7 @@ from .document_verify_refs import (  # noqa: E402
     _rule15_mechanism_sheets,
     _sheet_tools,
 )
-from .document_verify_view import rule17_presentation  # noqa: E402
+from .document_verify_view import rule17_presentation, rule18_art  # noqa: E402
 from .pieces import rule11_pieces as _rule11_pieces  # noqa: E402
 from .pieces import rule12_stacks as _rule12_stacks  # noqa: E402
 

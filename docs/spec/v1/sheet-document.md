@@ -153,7 +153,8 @@ The sheet outline (`B` edges) is cut by the exporters; `treatment` for `B` is `n
 - `offset`: layout-frame position of the sheet-local origin.
 - `placement`: rigid transform applied after the `(u, v) → (u, 0, −v)` map; quaternion `[x, y, z, w]`.
 - `front` / `back`: render appearance. `art` (optional) is a relative path to an image covering the
-  sheet's local bounding box (front is drawn as seen from +normal; back is mirrored as paper is).
+  sheet's local bounding box (front is drawn as seen from +normal; back is mirrored as paper is),
+  or an image data URI (§5.17). <!-- lane H (w3/hardening) item 10 -->
 - `presentation` (optional, preview only): the root face and end transform a viewer uses to
   present the fold program (§5.16). <!-- lane H (w3/hardening) item 9 -->
 - `kinematic`: `null` for a physical sheet, or `{"mechanism": "<mechanism id>"}` when the sheet is a
@@ -545,6 +546,28 @@ is lifted until its lowest point rests on the table. The physics engine needs no
 with the ground does this). Rule 17 (§8) checks the field.
 <!-- lane H (w3/hardening) §5.16: end -->
 
+<!-- lane H (w3/hardening) §5.17: begin -->
+### 5.17 Printed art sources (`front.art`, `back.art`)
+
+`art` is either a **relative path** inside the cartridge (no scheme, no leading `/`, no `..`
+segment, no backslash) or an **image data URI** — so a cartridge can compute its printed faces
+in `main.py` without shipping files:
+
+- `data:image/svg+xml[;charset=…][;base64],…` (URL-encoded or base64), or
+  `data:image/png;base64,…` (the payload must start with the PNG signature);
+- the decoded payload is at most 1 MiB;
+- an SVG payload is UTF-8, has an `<svg>` element and none of: `<script`, `foreignObject`, a
+  `javascript:` URL, an `on…=` event-handler attribute, a DOCTYPE or ENTITY declaration,
+  `@import`, or a `href` / `src` / `url(…)` reference outside itself (only `#fragment` and
+  inline `data:image/png` / `data:image/jpeg` references are allowed).
+
+Renderers load art **only as images** (an `<img>`, an `Image` decoded into a texture, an SVG
+`<image href>`), never as inline DOM or fetched text, so even an SVG that slipped past the
+sanitiser cannot run script. Rule 18 (§8) enforces the list above. Exporters: the SVG export
+places the front art on its `art` layer; PDF, DXF and HPGL ignore art for now (export parity
+is a backlog item).
+<!-- lane H (w3/hardening) §5.17: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -620,6 +643,12 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
 17. Presentation (§5.16): a sheet's `presentation` has only `root_face` and `end`; `root_face`
     is a face of that sheet; `end` is a placement with a finite origin and a unit quaternion.
 <!-- lane H (w3/hardening) rule 17: end -->
+<!-- lane H (w3/hardening) rule 18: begin -->
+18. Printed art (§5.17): every sheet's `front.art` / `back.art` is null, a relative path inside
+    the cartridge, or an `image/svg+xml` / `image/png` data URI that decodes, is at most 1 MiB
+    and (SVG) carries no script, event handler, foreignObject, `javascript:` URL, DOCTYPE/ENTITY,
+    `@import` or external reference (`art_source`).
+<!-- lane H (w3/hardening) rule 18: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

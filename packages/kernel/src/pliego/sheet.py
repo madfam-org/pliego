@@ -417,7 +417,10 @@ class Sheet:
         return self
 
     def art(self, front: str | None = None, back: str | None = None) -> Sheet:
-        """Attach printed art (relative image paths covering the local bounding box)."""
+        """Attach printed art covering the local bounding box: relative image paths, or
+        `data:image/svg+xml` / `data:image/png` URIs that pass the §5.17 sanitiser."""
+        _check_art(front)
+        _check_art(back)
         if front is not None:
             self.front = Face(self.front.color, front)  # type: ignore[union-attr]
         if back is not None:
@@ -528,7 +531,17 @@ def _face(value: Face | dict | str | None) -> Face:
         raise ValueError(f"face must be a colour, dict or Face, got {value!r}")
     if face.color is not None and not HEX.match(face.color):
         raise ValueError(f"face colour {face.color!r} must be #rrggbb")
+    _check_art(face.art)
     return face
+
+
+def _check_art(src: str | None) -> None:
+    """Fail loud at authoring on art verify would reject (spec §5.17)."""
+    from .document_verify_view import check_art
+
+    why = check_art(src)
+    if why:
+        raise ValueError(why)
 
 
 def _box(ring: Sequence[Vec2], pad: float) -> tuple[float, float, float, float]:

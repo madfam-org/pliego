@@ -61,25 +61,49 @@ arrays, allocated once at load. No per-step allocation.
 
 ## 3. Tier C — XPBD
 
-### 3.1 Integrator (small steps)
+### 3.1 Integrator: an implicit sheet block plus Gauss–Seidel passes (v0.1, as built)
 
-Fixed substep `Δt = 1/(60·S)` with `S` substeps per 60 Hz frame (default 20; settings 8–60).
-`world.step(frameDt)` accumulates real time and runs whole substeps only — **never** a variable Δt.
-Per substep (Macklin, Müller, Chentanez 2016; Macklin et al. 2019):
+Fixed substep `Δt = 1/(60·S)` with `S` substeps per 60 Hz frame (accuracy default 20; settings 4–60).
+`world.step(frameDt)` accumulates real time and runs whole substeps only, **never** a variable Δt.
+Each substep:
 
 ```
-v ← v · exp(−c_air·Δt)                                  (substep-independent damping)
-x̃ = x + Δt·v + Δt²·M⁻¹·f_ext                           (gravity −9810 mm/s², wind, grabs)
-for each constraint j (fixed order, one iteration):
-    α̃ = α_j / Δt²
-    Δλ = (−C_j(x) − α̃·λ_j) / (Σ_i w_i |∇_i C_j|² + α̃)      λ_j reset to 0 at substep start
-    x_i += w_i ∇_i C_j Δλ
+v ← v · exp(−c_air·Δt)                                   (substep-independent damping)
+x̃ = x + Δt·v + Δt²·M⁻¹·f_ext                            (gravity −9810 mm/s², wind, grabs)
+one Gauss–Newton implicit step over the stiff sheet energies:
+    membrane, panel bending, creases (and their drives), glue welds, pivots, strings, sliders, grabs
+    (M/Δt² + H) Δx = −∇E_total     sparse 3×3-block Cholesky; between refactors the stale factor
+                                    preconditions PCG (12 iterations, 6 right after a refactor, rtol 1e-3);
+                                    refactor when the co-rotated frame turns by more than 0.3 rad
+Gauss–Seidel passes for the unilateral constraints: fold limits, layer contact (3 passes), ground,
+    then the strain guard (target 0.45 %, 4 passes; paper must never visibly stretch)
 v = (x − x_prev) / Δt
 ```
 
-`w_i = 1/m_i`; kinematic and pinned vertices have `w = 0` and move along their driver's path.
-After the constraint sweep, a **strain-limit pass** projects any membrane edge whose strain exceeds
-0.5 % back to 0.5 % (paper must never visibly stretch; the pass also guards against divergence).
+`w_i = 1/m_i`. Kinematic and pinned vertices have `w = 0` and move along their driver's path.
+
+**Why it replaced the one-iteration Gauss–Seidel sweep of the first draft (measured by the engine
+lane, 2026-10-10).**
+
+- **Bending saturated.** With λ reset every substep, a single sweep made a cantilever 15× too soft
+  at S = 20 and 5× too soft at S = 40. For copy paper at a 6 mm mesh, the per-substep bending
+  stiffness `k_b·Δt²·|∇θ|²/m` is about 60, so the sweep never converges and every stock ends up
+  looking alike.
+- **Hard membranes stretched,** by about 3 % at a 4 mm mesh and 13 % at 2 mm along tension paths.
+  Warm-started multipliers diverged.
+
+The implicit step's equilibrium (∇E = f_ext) does not depend on how old the factorisation is or on
+S. Test `E12-substeps` holds it to a 0.02 % shift when S doubles, so S trades smoothness for speed
+and not accuracy.
+
+- **Membrane safeguards.** The in-plane modulus is capped at the length `MEMBRANE_CAP_LENGTH`, which
+  keeps the Newton step stable. Membrane compression is softened to 0.05 to avoid locking.
+- **Constants.** All calibrated constants are listed, with the test that fixes each, in
+  `packages/engine/README.md`.
+- **Interactive use (the studio).** The mesh edge is chosen from the sheet area for a budget of about
+  450 simulation vertices (8–25 mm), with `S = 8` and at most one step per frame. Objects estimated
+  above about 1500 vertices, or whose warmed step exceeds 40 ms, start in the preview, and a
+  "Paper physics" toggle forces physics on (`apps/web/studio/src/physics.js`).
 
 ### 3.2 Constraints and stiffness (engine units: mm, g, s)
 
@@ -91,7 +115,7 @@ After the constraint sweep, a **strain-limit pass** projects any membrane edge w
 | **Crease** | `θ − θ_rest` (or `θ − θ_target` while driven) | `k_c = (D(φ)/L*)·|e|`, `L* = D / crease_k` from the stock (`crease_k` is per mm) ⇒ `k_c = crease_k · |e|` | Lechenault et al. 2014 |
 | Score / perforation hinge | as crease | `k_c × score_factor` / `× perf_factor` | stock |
 | **Fold limit** | `|θ| ≤ π − θ_t` (unilateral) | hard | rsE §a3.5 |
-| **Glue weld** | `x_a − Σ β_k x_bk = 0` (vector; point on triangle of sheet b, barycentric β) | hard (α = 0) | doc §5.3 |
+| **Glue weld** | `x_a − Σ β_k x_bk = 0` (vector; point on triangle of sheet b, barycentric β), made at **zero offset**: the join's `side` is a rendering hint, because a thickness offset along a board's normal broke the V-fold linkage (8 % strain) | hard (α = 0) | doc §5.3 |
 | Pivot | `x_a(β) − x_b(β′) = 0` | hard | doc §5.3 |
 | String | `|x_a − x_b| − L ≤ 0` (unilateral) | hard | doc §5.3 |
 | Pin | vertex `w = 0`, position follows the pin | — | doc §5.3 |
@@ -146,13 +170,16 @@ Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle
   forced (a fold made by grabbing produces a soft roll, as real paper does without a bone folder).
 - Slow logarithmic relaxation (Thiria & Adda-Bedia 2011) is a later option (`relaxation: true`), off
   by default until measured stock data exists.
+- The stock card's `crease_set_rate` is **not used** in v0.1, because the plasticity above is
+  rate-independent. A rate model would be a later, measured option.
 
 ### 3.4 Contact
 
-- Broad phase: uniform spatial hash, cell = 2 × max mesh edge, rebuilt each frame (not each substep)
-  with an inflated query radius.
-- Narrow phase: vertex–triangle (point to closest point on triangle), skip triangles that contain the
-  vertex or share a vertex with it. Contact distance `t_c = max(collision_thickness, 0.05 mm)`.
+- Broad phase: an integer spatial hash rebuilt every substep. The cell is the maximum mesh edge,
+  enlarged to twice the contact reach when needed.
+- Narrow phase: vertex–triangle (point to closest point on triangle), skipping triangles that contain
+  the vertex or share a vertex with it, and pairs next to a glue weld. Contact distance
+  `t_c = max(caliper, 0.05 mm)`, so board stacks rest at their caliper (test `board-stack-gap`).
 - Sidedness: each active pair memorises which side the vertex was on; the projection pushes toward
   that side (prevents pass-through when layers are nearly coplanar). When the document has
   `faceOrders`, seed sidedness for pairs of faces that overlap in the flat-folded state.
@@ -167,7 +194,25 @@ Per triangle: `f = −½ ρ_air C_d A (v_rel·n)|v_rel·n| n`, `ρ_air = 1.2e-6 
 `v_rel = v_tri − v_wind`. Wind velocity comes from a `wind` control (m/s) plus deterministic
 turbulence (sum of sines with phases from a seeded PRNG — never `Math.random`). Tissue
 (`papel de china`, ~17 g/m²) is air-dominated; cardstock is not — this is what makes papel picado
-flutter and pop-up cards stand still.
+flutter and pop-up cards stand still. The contract carries only the wind speed (the `wind` control).
+The direction is the World option `windDir` (default +Z) until the contract adds one.
+
+### 3.6 Mechanisms and drivers (semantics as built, v0.1)
+
+- **`hinge`:** rotates its moving sheets by `(value − rest)` about the axis, applied to the placed
+  pose.
+- **`rotate`:** relative to 0.
+- **`slide` and `translate`:** map `control/max × travel`.
+- **`leaf` (page turn):** drives a band of fore-edge vertices, and the page bends as it turns.
+- **The ground:** `y ≥ 0`, with the paper's mid-surface resting on the table.
+- **Board:** works through the same path.
+  - The caliper is the contact gap.
+  - Per-hinge `D(φ)` with `grain_deg` carries 2–5× orthotropy (test `board-orthotropy`).
+  - The `score` treatment with `score_factor` and the optional `score_yield_deg` folds a scored flap
+    to 89.86° of 90° (test `board-scored-flap`).
+  - It is stable up to `D` ≈ 2 N·m.
+  - Not yet resolved: Tier R offset-panel thickness accommodation, and the inner-liner buckling of a
+    thick board folded around its score. Today the score is a soft hinge on the mid-surface.
 
 ---
 
@@ -255,6 +300,21 @@ Calibration constants (`c_b`, default `hand_factor`, panel yield) live in one fi
 
 ## 8. Out of scope for v0.1 (tracked)
 
-WebGPU coloured Gauss–Seidel; quality-mode orthotropic membrane; logarithmic crease relaxation;
-stress-driven tearing (cuts only; perforations may separate at `tear_strain`); developable page
-upsampling; edge–edge contact; Python XPBD reference for cross-implementation parity (E16).
+**Out of scope for v0.1:**
+
+- WebGPU or supernodal factorisation (the block Cholesky in plain JS is today's bottleneck);
+- quality-mode orthotropic membrane;
+- logarithmic crease relaxation;
+- in-plane plasticity, which kirigami ligaments need (`rotating-squares` stretches today);
+- edge–edge contact, which `tab-and-slot` needs;
+- Tier R thickness offsets;
+- developable page upsampling;
+- verifying `meta.digest` (it waits for a canonical serialisation);
+- a Python reference for cross-implementation parity (E16).
+
+**Implemented in v0.1, no longer out of scope:**
+
+- perforation tearing: split line, breakable welds, spanning perforation hinge (test
+  `perforation-tear`).
+
+Stress-driven tearing of uncut paper is still out of scope.

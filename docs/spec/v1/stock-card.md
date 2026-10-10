@@ -5,7 +5,7 @@
 
 A stock card (`materials/<slug>/stock.json`) describes one sheet material once, for every use:
 fabrication (cutting, scoring, folding), physics (the engine), rendering, and the encyclopaedia.
-It keeps Fashion Cabinet's honesty split (`rsC_report.md` §d): **measured** values carry a source and
+It keeps the honesty split of Fashion Cabinet's fabric cards: **measured** values carry a source and
 test method; **estimated** values carry a basis; **derived** values are computed by
 `pliego.stock.derive()` — the only implementation of the mapping — and committed so the engine and
 the studio never re-derive (CI fails if a committed `derived` block drifts from a fresh derivation).

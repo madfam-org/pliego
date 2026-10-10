@@ -10,9 +10,11 @@ It runs unchanged in the browser (the studio) and in Node ≥ 20 (tests, CI benc
 bakes). It is written as **plain ES modules with JSDoc types** (`// @ts-check`), no build step, so the
 studio serves it directly under a strict CSP and Node runs it directly with `node --test`.
 
-Research behind every choice below:
-`claudedocs/pliego-2026-10-10/research/rsE_report.md` (physics memo, citations) and `rsC_report.md`
-§c (why Fashion Cabinet's cloth solver cannot be reused for paper: it diverges at paper stiffness).
+Research behind every choice below: the physics memo
+[`../research/paper-physics-memo.md`](../research/paper-physics-memo.md) (equations, material values,
+benchmarks, licence map, citations). A design review of MADFAM's garment cloth preview also showed
+why a cloth solver cannot simply be reused for paper: at paper stiffness it diverges unless the time
+step is fixed, state is Float64, the mesh follows the real outline and stretch is strain-limited.
 
 ---
 

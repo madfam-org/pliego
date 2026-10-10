@@ -22,6 +22,6 @@ resources:
 # run unpinned before a real pin lands. The workload names the image with a `:latest` decoy that this block
 # rewrites to the digest (the rendered manifest carries no tag at all).
 images:
-- digest: sha256:564844055265bd583c57ba376d00aae71b171038fd89b504007d4b3dda950851
+- digest: sha256:d5faaa08e724633bfb651f3e53c185e2da11647cf736e7737c775bd2584db0f4
   name: ghcr.io/madfam-org/pliego
   newName: ghcr.io/madfam-org/pliego

@@ -9,11 +9,13 @@ export const GRAVITY = 9810;
 
 /**
  * Panel bending discretisation constant: k_b = C_B · D_eff(φ) · |e|² / (A₁ + A₂).
- * Theory for an equilateral lattice with the dihedral lever (h₀+h₁)/3 gives 2 (Grinspun's "6"
- * uses A_e = (A₁+A₂)/3). Calibrated by test `E1-peirce` (MD overhang 172 mm, copy paper 80 g/m²);
- * CD is then checked without recalibration.
+ * Theory for an equilateral lattice with the dihedral lever (h₀+h₁)/3 gives ≈ 2 (Grinspun's "6"
+ * uses A_e = (A₁+A₂)/3); the grain-deconvolved D_eff and the lattice raise the effective stiffness.
+ * Calibrated by test `E1-peirce`: copy paper 80 g/m², 25 mm strip, MD, h = 6 mm, S = 20, overhang
+ * where the tip chord droops 41.5° = 2.0003·(D/q)^⅓ = 172.12 mm (exact heavy elastica).
+ * CD is then checked without recalibration (measured 132.6 vs 132.4 mm).
  */
-export const C_B = 1.0043;
+export const C_B = 1.0244;
 
 /** Default hand factor: a folding hand is this many times stiffer than the crease. Test `crease-drive`. */
 export const HAND_FACTOR = 50;
@@ -21,8 +23,11 @@ export const HAND_FACTOR = 50;
 /** Panel-hinge plastic yield, degrees (paper takes a permanent curl only past this). Test `crease-unfold` (panels stay elastic). */
 export const PANEL_YIELD_DEG = 60;
 
-/** Membrane strain limit enforced by the post-solve pass (0.5 %). Test `inextensible`. */
+/** Membrane stretch (tension) limit enforced by the post-solve pass (0.5 %). Test `inextensible`. */
 export const STRAIN_LIMIT = 0.005;
+
+/** Compressive guard of the strain-limit pass (compression is soft, see MEMBRANE_COMPRESSION). */
+export const COMPRESSION_LIMIT = 0.01;
 
 /** Air density, g/mm³ (1.2 kg/m³). */
 export const RHO_AIR = 1.2e-6;

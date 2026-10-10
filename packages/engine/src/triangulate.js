@@ -60,7 +60,38 @@ export function triangulateFace(poly, interior, hmax = Infinity) {
       T.insert(k);
     }
   }
+  smooth(T, pts, nb, SMOOTH_ITERS);
+  // keep the caller's interior list in sync with smoothed positions
+  for (let k = 0; k < interior.length / 2; k++) { interior[2 * k] = pts[2 * (nb + k)]; interior[2 * k + 1] = pts[2 * (nb + k) + 1]; }
   return T.result();
+}
+
+/** Laplacian smoothing passes over interior points (boundary fixed), each followed by Delaunay flips. */
+export const SMOOTH_ITERS = 6;
+
+/** @param {any} T @param {number[]} pts @param {number} nb @param {number} iters */
+function smooth(T, pts, nb, iters) {
+  const n = pts.length / 2;
+  if (n <= nb) return;
+  for (let it = 0; it < iters; it++) {
+    const sx = new Float64Array(n), sy = new Float64Array(n), cnt = new Int32Array(n);
+    for (let he = 0; he < T.t.length; he++) {
+      const t = Math.floor(he / 3), i = he % 3;
+      const a = T.t[3 * t + i], b = T.t[3 * t + ((i + 1) % 3)];
+      sx[a] += pts[2 * b]; sy[a] += pts[2 * b + 1]; cnt[a]++;
+      if (T.n[he] < 0) { sx[b] += pts[2 * a]; sy[b] += pts[2 * a + 1]; cnt[b]++; }
+    }
+    /** @type {number[][]} */
+    const inc = Array.from({ length: n }, () => []);
+    for (let t = 0; t < T.t.length / 3; t++) for (let i = 0; i < 3; i++) inc[T.t[3 * t + i]].push(t);
+    for (let v = nb; v < n; v++) {
+      if (!cnt[v]) continue;
+      const ox = pts[2 * v], oy = pts[2 * v + 1];
+      pts[2 * v] = sx[v] / cnt[v]; pts[2 * v + 1] = sy[v] / cnt[v];
+      for (const t of inc[v]) if (!T.positive(t)) { pts[2 * v] = ox; pts[2 * v + 1] = oy; break; }
+    }
+    T.legalizeAll();
+  }
 }
 
 /** Ear clipping; collinear vertices are never ears; a vertex on the candidate diagonal blocks it. @param {number[]} P */
@@ -273,6 +304,13 @@ class TriMesh {
     this.link(3 * t, nca); this.link(3 * t + 1, nad); this.link(3 * t + 2, 3 * t2 + 2);
     this.link(3 * t2, ndb); this.link(3 * t2 + 1, nbc);
     return [3 * t + 1, 3 * t2];
+  }
+
+  /** Is triangle t strictly counter-clockwise? @param {number} t */
+  positive(t) {
+    const p = this.p, T = this.t;
+    const a = T[3 * t], b = T[3 * t + 1], c = T[3 * t + 2];
+    return orient(p[2 * a], p[2 * a + 1], p[2 * b], p[2 * b + 1], p[2 * c], p[2 * c + 1]) > 0;
   }
 
   result() { return this.t.slice(); }

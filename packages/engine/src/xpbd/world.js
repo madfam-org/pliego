@@ -288,7 +288,7 @@ export class World {
       if (wa + wb === 0) continue;
       const dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
       const L = Math.hypot(dx, dy, dz);
-      const lo = L0[e] * (1 - lim), hi = L0[e] * (1 + lim);
+      const lo = L0[e] * (1 - K.COMPRESSION_LIMIT), hi = L0[e] * (1 + lim);
       if (L >= lo && L <= hi) continue;
       const target = L > hi ? hi : lo;
       const s = (L - target) / (L * (wa + wb));
@@ -392,12 +392,13 @@ export class World {
   /** Diagnostics. */
   stats() {
     const x = this.x, E = this.mesh.edges, L0 = this.mesh.edgeLen;
-    let maxStrain = 0, stretch = 0, bend = 0, crease = 0;
+    let maxStrain = 0, maxCompression = 0, stretch = 0, bend = 0, crease = 0;
     for (let e = 0; e < this.mesh.nE; e++) {
       const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
       const L = Math.hypot(x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]);
-      const s = Math.abs(L - L0[e]) / L0[e];
+      const s = (L - L0[e]) / L0[e];
       if (s > maxStrain) maxStrain = s;
+      if (-s > maxCompression) maxCompression = -s;
       stretch += 0.5 * (L < L0[e] ? this.kCompFactor : 1) * this.kMem[e] * (L - L0[e]) ** 2;
     }
     for (let h = 0; h < this.mesh.nH; h++) {
@@ -407,7 +408,7 @@ export class World {
     let nan = false;
     for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i])) { nan = true; break; }
     return {
-      maxStrain, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
+      maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
       substepsRun: this.substepsRun, factorizations: this.factorCount, time: this.time, finite: !nan,
     };
   }

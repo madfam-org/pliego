@@ -128,11 +128,13 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
     en: list[str | None] = []
     er: list[float] = []
     edge_base: list[int] = []
+    face_base: list[int] = []
     for si, (arr, off) in enumerate(zip(arrs, offsets, strict=True)):
         en.extend(sheets[si].edge_names(arr))
         er.extend(sheets[si].edge_rest_angles(arr))
         vb = len(vc)
         edge_base.append(len(ev))
+        face_base.append(len(fv))
         vc.extend([v.x + off.x, v.y + off.y] for v in arr.vertices)
         vs.extend([si] * len(arr.grid))
         for (a, b), asg, ang, trt in zip(arr.edges, arr.assignment, arr.fold_angle,
@@ -217,6 +219,12 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         data["pliego:joins"] = [copy.deepcopy(j) for j in assembly.joins]
     if assembly.mechanisms:
         data["pliego:mechanisms"] = [copy.deepcopy(m) for m in assembly.mechanisms]
+    if getattr(assembly, "pieces", None):
+        from .pieces import resolve_pieces
+
+        data["pliego:pieces"] = resolve_pieces(assembly.pieces, sheets, arrs, face_base)
+    if getattr(assembly, "stacks", None):
+        data["pliego:stacks"] = [copy.deepcopy(s) for s in assembly.stacks]
     seq: Sequence_ | None = assembly.sequence
     if seq is not None:
         steps: list[Step] = seq.resolve(sheets)
@@ -232,6 +240,8 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
                               "duration_ms": st.duration_ms, "targets": targets,
                               "release": [e for r in st.release for e in resolve_target(r)],
                               "note": st.note})
+            if st.remove:
+                out_steps[-1]["remove"] = list(st.remove)
         data["pliego:sequence"] = {"mode": seq.mode, "steps": out_steps}
         if not any(c.get("kind") == "sequence" for c in controls):
             controls.append(sequence_control())

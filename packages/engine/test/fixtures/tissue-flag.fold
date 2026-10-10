@@ -1,0 +1,248 @@
+{
+ "file_spec": 1.2,
+ "file_creator": "pliego-engine test docbuilder",
+ "file_title": "tissue flag",
+ "file_classes": [
+  "singleModel"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "joins"
+ ],
+ "frame_unit": "mm",
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   120,
+   0
+  ],
+  [
+   120,
+   80
+  ],
+  [
+   0,
+   80
+  ]
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   3,
+   0
+  ]
+ ],
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "faces_vertices": [
+  [
+   0,
+   1,
+   2,
+   3
+  ]
+ ],
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:faces_sheet": [
+  0
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "pliego:edges_restAngle": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:sheets": [
+  {
+   "id": "flag",
+   "label": {
+    "en": "flag",
+    "es": "flag",
+    "fr": "flag",
+    "pt": "flag"
+   },
+   "stock": "tissue-17",
+   "grain_deg": 90,
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     300,
+     0
+    ],
+    "rotation": [
+     0.7071067811865476,
+     0,
+     0,
+     0.7071067811865476
+    ]
+   },
+   "front": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "back": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "kinematic": null
+  }
+ ],
+ "pliego:stocks": {
+  "tissue-17": {
+   "name": {
+    "en": "Tissue 17 g/m²",
+    "es": "Papel de china 17 g/m²",
+    "fr": "Papier de soie 17 g/m²",
+    "pt": "Papel de seda 17 g/m²"
+   },
+   "gsm": 17,
+   "caliper_mm": 0.04,
+   "derived": {
+    "areal_density": 0.000017,
+    "thickness": 0.04,
+    "E_md": 2000000000,
+    "E_cd": 900000000,
+    "nu": 0.293,
+    "D_md": 11668.3859304061,
+    "D_cd": 5250.773668682745,
+    "crease_k": 978.4239048033814,
+    "crease_yield_deg": 35,
+    "crease_set_rate": 0.6,
+    "score_factor": 0.35,
+    "perf_factor": 0.2,
+    "tear_strain": 0.01,
+    "friction": 0.35,
+    "collision_thickness": 0.04
+   },
+   "derived_basis": "test fixture (rsE §b)"
+  }
+ },
+ "pliego:meta": {
+  "cartridge": "engine-fixture",
+  "mode": "default",
+  "params": {},
+  "kernel": "pliego-engine test docbuilder",
+  "digest": null
+ },
+ "pliego:joins": [
+  {
+   "id": "top-edge",
+   "type": "pin",
+   "a": {
+    "sheet": "flag",
+    "along": [
+     [
+      0,
+      80
+     ],
+     [
+      120,
+      80
+     ]
+    ]
+   },
+   "world": null
+  }
+ ],
+ "pliego:controls": [
+  {
+   "label": {
+    "en": "wind",
+    "es": "wind",
+    "fr": "wind",
+    "pt": "wind"
+   },
+   "id": "wind",
+   "kind": "wind",
+   "min": 0,
+   "max": 5,
+   "default": 0,
+   "unit": "m/s"
+  }
+ ],
+ "file_frames": [
+  {
+   "frame_title": "initial",
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_inherit": true,
+   "frame_parent": 0,
+   "vertices_coords": [
+    [
+     0,
+     300,
+     0
+    ],
+    [
+     120,
+     300,
+     0
+    ],
+    [
+     120,
+     380,
+     0
+    ],
+    [
+     0,
+     380,
+     0
+    ]
+   ]
+  }
+ ]
+}

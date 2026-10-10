@@ -130,7 +130,7 @@ def _draw(plan: Plan, pen: _Pen, with_text: bool, marks: bool = True) -> str:
 
 
 def _page_stream(plan: Plan, pid: str, x: float, y: float, label: str) -> str:
-    """One declared print page (spec §5.8) at 1:1, clipped to the page."""
+    """One declared print page (spec §5.9) at 1:1, clipped to the page."""
     w, h = plan.page_size
     k = MM_TO_PT
     m = plan.page_margin

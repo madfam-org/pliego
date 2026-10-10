@@ -232,7 +232,8 @@ Target = Mark | EdgeRef | int
 @dataclass
 class Step:
     """One fold-program step. Targets are (mark | global edge index, angle | None) pairs; a
-    `None` angle uses the mark's own fold angle. Releases hand hinges back to the paper."""
+    `None` angle uses the mark's own fold angle. Releases hand hinges back to the paper.
+    `remove` takes excess pieces (ids or `pliego.piece` dicts) out of the model (spec §5.8)."""
 
     id: str
     label: str | dict
@@ -240,6 +241,7 @@ class Step:
     release: list[Target] = field(default_factory=list)
     duration_ms: int = 1500
     note: str | dict | None = None
+    remove: list[str | dict] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         check_slug(self.id, "step id")
@@ -251,6 +253,8 @@ class Step:
                         for t in self.targets]  # type: ignore[misc]
         if self.note is not None:
             self.note = i18n(self.note, self.id)
+        self.remove = [check_slug(r["id"] if isinstance(r, dict) else r, "removed piece")
+                       for r in self.remove]
 
 
 @dataclass
@@ -333,7 +337,9 @@ class Assembly:
     pose, `pliego.kinematics`), or a callable (sheet_id, (u, v)) → world (x, y, z).
     `min_feature_mm`: the smallest intended feature (spec §5.7) — written to
     ``pliego:meta.min_feature_mm``; `verify()` then floors face areas at its square.
-    `pages`: print pages in the layout frame (spec §5.8 ``pliego:pages``) — {"size": [w, h],
+    `pieces` / `stacks`: removable pieces and sheet stacks (`pliego.piece`, `pliego.stack`;
+    spec §5.8), written to ``pliego:pieces`` / ``pliego:stacks``.
+    `pages`: print pages in the layout frame (spec §5.9 ``pliego:pages``) — {"size": [w, h],
     "margin": mm, "pages": [{"id", "origin": [x, y]}]}; give a dict `layout` that puts every
     sheet inside a page's printable area.
     """
@@ -349,6 +355,8 @@ class Assembly:
     meta: dict = field(default_factory=dict)
     targets: dict[str, InitialSpec] = field(default_factory=dict)
     min_feature_mm: float | None = None
+    pieces: list[dict] = field(default_factory=list)
+    stacks: list[dict] = field(default_factory=list)
     pages: dict | None = None
 
     def __post_init__(self) -> None:
@@ -368,7 +376,8 @@ class Assembly:
         if len(set(ids)) != len(ids):
             raise ValueError(f"duplicate sheet ids {ids}")
         for group, what in ((self.joins, "join"), (self.mechanisms, "mechanism"),
-                            (self.controls, "control")):
+                            (self.controls, "control"), (self.pieces, "piece"),
+                            (self.stacks, "stack")):
             gids = [x["id"] for x in group]
             if len(set(gids)) != len(gids):
                 raise ValueError(f"duplicate {what} ids {gids}")

@@ -99,6 +99,8 @@ fold, a scored fold or a perforated fold, and they behave differently.
 | `pliego:mechanisms` | object[] | no | drivers for kinematic sheets and drive points (§5.4) |
 | `pliego:controls` | object[] | no | what the viewer exposes to the user (§5.5) |
 | `pliego:sequence` | object | no | the fold program (§5.6) |
+| `pliego:pieces` | object[] | no | removable pieces: keep / excess regions of a sheet (§5.8) |
+| `pliego:stacks` | object[] | no | ordered piles of sheets a caliper apart (§5.8) |
 | `pliego:meta` | object | yes | provenance of this document (§5.7) |
 
 ---
@@ -269,6 +271,7 @@ declared here; the viewer builds its UI from this list.
   angles (the engine solves closure along the way; a plain linear blend of angles is only an
   approximation); `release` in kinematic mode leaves a crease free at its current angle.
 - The sequence control (`kind: "sequence"`) scrubs the program; step labels are the diagram text.
+- `remove` (optional, string[]): excess pieces taken out of the model during the step (§5.8).
 
 ### 5.7 `pliego:meta`
 
@@ -284,8 +287,75 @@ fine kirigami declare it; nothing else should.
 `digest` is the SHA-256 of the canonical serialisation of the document with `digest` set to
 `null` (GOC-1 compatible).
 
+### 5.8 Removable pieces, stacks and tear-away — `pliego:pieces`, `pliego:stacks`, step `remove`
+
+<!-- §5.8 added by wave 2b lane R (reveal blocks). Kept self-contained for the coordinator. -->
+
+Some objects are made by taking paper **away**: a memo-block sculpture whose sheets are cut along
+the cross-sections of a scene and torn off from the top until the scene stands revealed, a
+perforated ticket stub, a kiss-cut sticker, a pop-out card. Three additions describe them; all
+are optional, and a document without them behaves exactly as before.
+
+**Pieces.** A *separable region* of a sheet is a maximal group of its faces connected across
+edges that do not separate material. **Separating edges** are the outline (`B`), cuts and tear-off
+perforations (`C`, treatment `cut` or `perforation`) and kiss cuts (`F` + `halfcut`); faces joined
+across any other edge (`M`, `V`, `F` creases, `U`, `J`) belong together.
+
+```json
+{"id": "layer-012-excess-2", "sheet": "layer-012", "role": "excess", "faces": [301, 302],
+ "label": {"en": "Corner chunk", "es": "Trozo de esquina", "fr": "Morceau d'angle", "pt": "Pedaço de canto"},
+ "pull": [0, 1, 0]}
+```
+
+| Field | Required | Meaning |
+|---|---|---|
+| `id` | yes | kebab case, unique among pieces |
+| `sheet` | yes | the sheet the piece belongs to |
+| `role` | yes | `keep` (part of the object; it stays) · `excess` (meant to come away: torn off, weeded, popped out) |
+| `faces` | yes | global face indices: exactly one separable region of `sheet` |
+| `label` | no | i18n object |
+| `pull` | no | world direction a hand draws the piece away when it is removed; default the sheet's front normal (lifted off the top) |
+
+Faces in no piece are the sheet's body and stay, like `keep`. **How a piece is held until it is
+removed** is read from its separating edges and the stack (below): across a `cut` it is free
+(held only by contact, friction, a stack bond or padding; micro-joints are modelled as a
+perforation); across a `perforation` it hangs on the bridges (`perf_cut_mm` / `perf_bridge_mm`)
+and parts at the stock's `tear_strain`; across a `halfcut` it is held by the ply beneath the kiss
+cut and peels off.
+
+**Stacks.** A stack is an ordered pile of congruent sheets, **bottom → top**:
+
+```json
+{"id": "block", "sheets": ["layer-001", "layer-002", "…", "layer-040"],
+ "pitch_mm": 1.2, "represents": 12, "bond": "keep",
+ "binding": {"kind": "padding", "edge": [[0, 70], [70, 70]]}}
+```
+
+| Field | Required | Meaning |
+|---|---|---|
+| `id` | yes | kebab case, unique among stacks |
+| `sheets` | yes | ≥ 2 sheet ids, bottom first; a sheet belongs to at most one stack |
+| `pitch_mm` | yes | distance between consecutive sheet mid-planes along the stack normal |
+| `represents` | no (default 1) | how many identical physical sheets each document sheet stands for. A preview may show a 480-sheet block as 40 sheets (`represents` 12); a fabrication document uses 1. `pitch_mm` = `represents` × the stock's `caliper_mm`. Exporters draw each document sheet once, so cut files for making the block come from a `represents` = 1 document. |
+| `bond` | no (default `keep`) | `none`: sheets rest on each other (contact and friction only) · `keep`: keep pieces and body faces are bonded to the sheet below where they overlap (adhesive only where the material stays), excess rests by contact · `all`: a fully bonded laminate |
+| `binding` | no | `{"kind": "padding", "edge": [[u, v], [u, v]]}`: a sheet-local segment where the pad is glued (the spine of a memo block); pieces touching it are held by the padding until removed |
+
+The stack normal is the bottom sheet's front normal (its placement rotation applied to +Y);
+sheet *k* (0-based) is placed at the bottom sheet's origin + *k* × `pitch_mm` × normal, with the
+same rotation.
+
+**Tear-away.** A sequence step may list `remove: [piece id, …]`. In `physical` mode the hand
+grips each listed piece and draws it along `pull`: perforation bridges and padding part on the way
+(tear physics: engine wave 3), and at the end of the step the piece is out of the model — no
+longer simulated, collided with or rendered. A removed piece stays removed in later steps (the
+state-between-steps rule of §5.6). Only `excess` pieces are removed, each at most once. A reveal
+block removes the excess layer by layer **from the top** (the top sheet first); the order is the
+author's, and the kernel's `pliego.reveal` emits it top-down. In `kinematic` mode and in the
+studio preview the piece lifts along `pull` and disappears. Perforated tear-offs, kiss-cut
+stickers and pop-outs use the same three fields.
+
 <!-- BEGIN w2b lane PC (papercraft): print annotations and pages — coordinator-owned contract addition -->
-### 5.8 `pliego:annotations` and `pliego:pages` — print layout (optional)
+### 5.9 `pliego:annotations` and `pliego:pages` — print layout (optional)
 
 Two optional top-level fields for documents meant to be printed and cut by hand, such as the
 papercraft nets `pliego.unfold` writes. Both are print-only: the engine ignores them, and they
@@ -300,9 +370,7 @@ When `pliego:pages` is present, the PDF exporter prints each page once at 1:1 on
 `size`, instead of tiling the whole layout. The SVG exporter draws the page frames on a `pages`
 layer. SVG, PDF and DXF print annotations on their `label` / `TEXT` layers.
 
-Rule 7 (§8) covers both fields. An annotation's sheet must resolve and its `at` must lie on that
-sheet. Pages must be well formed and must not overlap. A sheet outside every page's printable area
-is a warning (`sheet_off_page`).
+Rule 13 (§8) covers both fields.
 <!-- END w2b lane PC -->
 
 ---
@@ -348,6 +416,20 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
    `collision_thickness`: each vertex of the glue `region` polygon, mapped to sheet *b*, lies within
    `max(collision_thickness(a), collision_thickness(b))` of its image on *b* in the `initial` frame.
 10. `pliego:meta.digest`, when present, matches.
+11. Pieces (§5.8): every piece's sheet exists; its faces lie on that sheet and form exactly one
+    separable region; no face belongs to two pieces; `role` is `keep` or `excess`; `pull`, when
+    present, is a non-zero 3-D vector. Every step `remove` names an existing `excess` piece, and
+    no piece is removed twice in a program.
+12. Stacks (§5.8): every sheet exists and belongs to at most one stack; `pitch_mm` > 0 and equals
+    `represents` × the `caliper_mm` of each member's stock (within 1e-5 mm); the members share one
+    rotation and sit *k* × `pitch_mm` along the bottom sheet's front normal; the `binding` edge
+    lies on every member.
+<!-- BEGIN w2b lane PC (papercraft): rule 13 -->
+13. Print layout (§5.9): every annotation's sheet exists and its `at` lies on that sheet, with
+    `text` 1–32 printable characters and `size` 0.5–50 mm; `pliego:pages` is well formed (size
+    > 0, 0 ≤ margin < half the page, ≥ 1 page, unique ids) and its pages do not overlap. A sheet
+    outside every page's printable area is a warning (`sheet_off_page`).
+<!-- END w2b lane PC -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

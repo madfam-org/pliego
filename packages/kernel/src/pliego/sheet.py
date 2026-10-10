@@ -367,7 +367,7 @@ class Sheet:
 
     def text(self, at: PointLike, text: str, angle: float = 0.0, size: float = 3.0) -> Sheet:
         """Print a short text on the front, centred at `at` (sheet-local), its baseline
-        `angle`° from +u, `size` mm tall — edge numbers, part names (spec §5.8,
+        `angle`° from +u, `size` mm tall — edge numbers, part names (spec §5.9,
         `pliego:annotations`). Print only: no physics."""
         p = as_vec(at)
         if not isinstance(text, str) or not 1 <= len(text) <= 32 or not text.isprintable():

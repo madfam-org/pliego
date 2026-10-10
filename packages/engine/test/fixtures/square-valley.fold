@@ -1,0 +1,244 @@
+{
+ "file_spec": 1.2,
+ "file_creator": "pliego-engine test docbuilder",
+ "file_title": "square with one valley crease",
+ "file_classes": [
+  "singleModel"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "noJoins"
+ ],
+ "frame_unit": "mm",
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   150,
+   0
+  ],
+  [
+   150,
+   150
+  ],
+  [
+   0,
+   150
+  ]
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   0
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   3,
+   0
+  ]
+ ],
+ "edges_assignment": [
+  "B",
+  "B",
+  "V",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  180,
+  0,
+  0
+ ],
+ "faces_vertices": [
+  [
+   0,
+   1,
+   2
+  ],
+  [
+   0,
+   2,
+   3
+  ]
+ ],
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:faces_sheet": [
+  0,
+  0
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "crease",
+  "none",
+  "none"
+ ],
+ "pliego:edges_restAngle": [
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:sheets": [
+  {
+   "id": "square",
+   "label": {
+    "en": "square",
+    "es": "square",
+    "fr": "square",
+    "pt": "square"
+   },
+   "stock": "kami",
+   "grain_deg": 90,
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "back": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "kinematic": null
+  }
+ ],
+ "pliego:stocks": {
+  "kami": {
+   "name": {
+    "en": "Kami 63 g/m²",
+    "es": "Kami 63 g/m²",
+    "fr": "Kami 63 g/m²",
+    "pt": "Kami 63 g/m²"
+   },
+   "gsm": 63,
+   "caliper_mm": 0.072,
+   "derived": {
+    "areal_density": 0.000063,
+    "thickness": 0.072,
+    "E_md": 5000000000,
+    "E_cd": 2300000000,
+    "nu": 0.293,
+    "D_md": 170125.06686532087,
+    "D_cd": 78257.53075804761,
+    "crease_k": 8012.807929735118,
+    "crease_yield_deg": 35,
+    "crease_set_rate": 0.6,
+    "score_factor": 0.35,
+    "perf_factor": 0.2,
+    "tear_strain": 0.02,
+    "friction": 0.4,
+    "collision_thickness": 0.072
+   },
+   "derived_basis": "pliego-engine builtin (rsE §b formulas; kernel derive() is authoritative)"
+  }
+ },
+ "pliego:meta": {
+  "cartridge": "engine-fixture",
+  "mode": "default",
+  "params": {},
+  "kernel": "pliego-engine test docbuilder",
+  "digest": null
+ },
+ "pliego:controls": [
+  {
+   "label": {
+    "en": "sequence",
+    "es": "sequence",
+    "fr": "sequence",
+    "pt": "sequence"
+   },
+   "id": "sequence",
+   "kind": "sequence",
+   "min": 0,
+   "max": 2,
+   "default": 0
+  }
+ ],
+ "pliego:sequence": {
+  "mode": "physical",
+  "steps": [
+   {
+    "id": "valley-diagonal",
+    "label": {
+     "en": "Valley-fold the diagonal",
+     "es": "Doblez de valle en la diagonal",
+     "fr": "Pli vallée sur la diagonale",
+     "pt": "Dobra vale na diagonal"
+    },
+    "duration_ms": 1500,
+    "targets": [
+     [
+      2,
+      180
+     ]
+    ],
+    "release": [],
+    "note": null
+   },
+   {
+    "id": "release",
+    "label": {
+     "en": "Let go",
+     "es": "Soltar",
+     "fr": "Lâcher",
+     "pt": "Soltar"
+    },
+    "duration_ms": 1000,
+    "targets": [],
+    "release": [
+     2
+    ],
+    "note": null
+   }
+  ]
+ }
+}

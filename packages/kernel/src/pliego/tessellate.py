@@ -125,7 +125,7 @@ class Tessellation:
                     [(m, None) for m in marks], duration_ms=3000)
         return Assembly([self.sheet], controls=[sequence_control()],
                         sequence=Sequence_([step], mode=self.mode), title=self.name,
-                        meta={"cartridge": self.sheet.id, "params": dict(self.meta)},
+                        meta={"params": dict(self.meta)},
                         targets=dict(self.targets))
 
     def document(self, stocks: dict | None = None):

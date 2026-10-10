@@ -38,7 +38,8 @@ def run(tmp_path, mode: str | None, params: dict):
            "--kernel-path", str(KERNEL_SRC), "--cartridge", "mode-probe"]
     if mode is not None:
         cmd += ["--mode", mode]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60, cwd=cart,
+    proc = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60,
+                          cwd=cart,
                           env={"PATH": "/usr/bin:/bin", "HOME": str(tmp_path)},
                           stdin=subprocess.DEVNULL)
     doc = json.loads((out / "document.fold").read_text()) if (out / "document.fold").exists() \

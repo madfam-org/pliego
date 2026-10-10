@@ -5,14 +5,15 @@
  * ranged control, then report per document: loads / steps without NaN / max stretch and compression
  * / ms per frame. Generate the documents with the kernel first, e.g.
  *   PYTHONPATH=packages/kernel/src PLIEGO_MATERIALS=materials python -m pliego.cartridge <dir> --out <out>
- * Usage: node packages/engine/test/helpers/smoke-cartridges.js <out-root> [frames=60] [regex]
+ * Usage: node packages/engine/test/helpers/smoke-cartridges.js <out-root> [frames=60] [filter]
+ * `filter` keeps the documents whose path contains it (a plain substring, not a pattern).
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { World, loadDocument } from '../../src/index.js';
 
 const [root, framesArg, only] = process.argv.slice(2);
-if (!root) { console.error('usage: smoke-cartridges.js <root> [frames] [regex]'); process.exit(2); }
+if (!root) { console.error('usage: smoke-cartridges.js <root> [frames] [filter]'); process.exit(2); }
 const frames = Number(framesArg ?? 60);
 const files = [];
 for (const d of fs.readdirSync(root).sort()) {
@@ -22,7 +23,7 @@ for (const d of fs.readdirSync(root).sort()) {
 }
 let ok = 0, ran = 0;
 for (const f of files) {
-  if (only && !new RegExp(only).test(f)) continue;
+  if (only && !f.includes(only)) continue;
   ran++;
   const name = path.relative(root, f);
   let doc;

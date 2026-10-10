@@ -208,3 +208,31 @@ def test_collinear_lace_holes_bridge_clear(monkeypatch):
     assert _faces_simple(arr)
     monkeypatch.setattr(arrangement_dcel, "CLEARANCE", 0)
     assert not _faces_simple(build_arrangement(list(s.outline), list(s.holes), []))
+
+
+def _rot(p, a):
+    return (math.cos(a) * p[0] - math.sin(a) * p[1], math.sin(a) * p[0] + math.cos(a) * p[1])
+
+
+def _rect(x, y, w, h):
+    return [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+
+
+@pytest.mark.parametrize("deg", [35, *range(0, 180, 7)])
+def test_rotated_window_grid_bridges_clear(deg, monkeypatch):
+    """A 2 × 2 grid of square holes (a townhouse's windows) on a turned wall: grid rounding left
+    a hole corner a hair off a bridge running along the next hole's side (35°: J (15,10)→(22.5,10)
+    over the hole edge (17.5,10)→(22.5,10)), a sliver face rule 3 rejects."""
+    from pliego import arrangement_dcel
+
+    a = math.radians(deg)
+    s = pliego.Sheet("wall", [_rot(p, a) for p in _rect(0, 0, 80, 40)])
+    for r in (_rect(10, 10, 5, 5), _rect(17.5, 10, 5, 5), _rect(10, 17.5, 5, 5),
+              _rect(17.5, 17.5, 5, 5)):
+        s.hole([_rot(p, a) for p in r])
+    arr = s.build()
+    _check(arr)
+    assert _faces_simple(arr)
+    if deg == 35:   # the reported case still fails on exact visibility alone
+        monkeypatch.setattr(arrangement_dcel, "CLEARANCE", 0)
+        assert not _faces_simple(build_arrangement(list(s.outline), list(s.holes), []))

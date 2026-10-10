@@ -377,3 +377,24 @@ export async function vfoldCard({ W = 100, H = 140, alpha = 60, beta = 25, R = 5
   flat.file_frames = [{ frame_title: 'initial', frame_classes: ['foldedForm'], frame_attributes: ['3D'], frame_inherit: true, frame_parent: 0, vertices_coords: coords.map((p) => p.map(round)) }];
   return { doc: flat, centre, glueR, glueL, alpha };
 }
+
+/** A5 sheet hanging in the XY plane from pins at its two top corners. */
+export function hangingSheet({ width = 148, height = 210, stock = 'copy-80' } = {}) {
+  const b = new DocBuilder('hanging A5');
+  b.rect({ id: 'sheet', stock, width, height, placement: { origin: [0, 50, 0], rotation: [Math.SQRT1_2, 0, 0, Math.SQRT1_2] } });
+  b.joins.push({ id: 'corner-left', type: 'pin', a: { sheet: 'sheet', at: [0, height] }, world: null });
+  b.joins.push({ id: 'corner-right', type: 'pin', a: { sheet: 'sheet', at: [width, height] }, world: null });
+  return b.build();
+}
+
+/** Square sheet with a degree-4 vertex and a fold program on all four creases (perf / determinism). */
+export function foldingSquare({ size = 200, stock = 'copy-80' } = {}) {
+  const r = degree4({ size, stock });
+  const json = r.doc;
+  json['pliego:controls'] = [{ id: 'sequence', kind: 'sequence', label: { en: 'Step', es: 'Paso', fr: 'Étape', pt: 'Passo' }, min: 0, max: 2, default: 0 }];
+  json['pliego:sequence'] = { mode: 'physical', steps: [
+    { id: 'fold', label: { en: 'Fold', es: 'Doblar', fr: 'Plier', pt: 'Dobrar' }, duration_ms: 1500, targets: [[r.creases[0], 60], [r.creases[2], 60]], release: [], note: null },
+    { id: 'release', label: { en: 'Let go', es: 'Soltar', fr: 'Lâcher', pt: 'Soltar' }, duration_ms: 1000, targets: [], release: [r.creases[0], r.creases[2]], note: null },
+  ] };
+  return { doc: json, creases: r.creases };
+}

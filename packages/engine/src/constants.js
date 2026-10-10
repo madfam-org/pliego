@@ -48,14 +48,16 @@ export const HARD_FACTOR = 100;
 export const GRAB_STIFFNESS = 2.0e4;
 
 /**
- * Refactor the implicit-step matrix when any membrane edge has rotated more than this since the
- * last factorisation (radians). The gradient is always exact, so the equilibrium never depends on
- * this value — only how closely the dynamics follow a full Newton step. Test `E12-substeps`.
+ * Implicit step between refactorisations: PCG on the current Gauss–Newton matrix, preconditioned by
+ * the last factorisation. Refactor when PCG does not converge in PCG_MAX_ITER iterations, when it
+ * needed more than PCG_REFACTOR_ITER (cheaper to refactor next substep), when the stiffness set
+ * changes (drives, grabs, strings) or when an edge turned more than REFACTOR_ANGLE (safety cap).
+ * The gradient is always exact, so none of these change the equilibrium. Test `E12-substeps`.
  */
-export const REFACTOR_ANGLE = 0.05;
-
-/** Spurious stiffness a stale factorisation may add to rotation modes, as a fraction of m/Δt². */
-export const REFACTOR_FRACTION = 0.05;
+export const PCG_MAX_ITER = 12;
+export const PCG_REFACTOR_ITER = 6;
+export const PCG_RTOL = 1e-2;
+export const REFACTOR_ANGLE = 0.3;
 
 /** Defaults for World options. */
 export const DEFAULT_SUBSTEPS = 20;
@@ -83,3 +85,6 @@ export const MEMBRANE_CAP_LENGTH = 1.0e7;
  * The implicit matrix keeps the tension stiffness (conservative, stable). Test `E1-peirce`.
  */
 export const MEMBRANE_COMPRESSION = 0.05;
+
+/** Gauss–Seidel passes of the contact + ground projection per substep. Test `contact-stack`. */
+export const CONTACT_PASSES = 3;

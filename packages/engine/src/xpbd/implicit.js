@@ -178,16 +178,18 @@ export function termResidual(T, t, x, r) {
 }
 
 /**
- * Accumulate ∇E(x) into g (3·nV, zeroed by the caller). Also refreshes `w.theta` (unwrapped).
+ * Accumulate ∇E(x) into g (3·nV, zeroed by the caller). Also caches the unwrapped hinge angles
+ * (`w.thetaPred`), membrane directions (`w.edgeDir`) and hinge gradients (`w.hingeGrad`) for PCG.
  * @param {any} w World @param {Float64Array} x @param {Float64Array} g
  */
 export function gradient(w, x, g) {
-  const E = w.mesh.edges, kM = w.kMem, L0 = w.mesh.edgeLen;
+  const E = w.mesh.edges, kM = w.kMem, L0 = w.mesh.edgeLen, U = w.edgeDir, HG = w.hingeGrad;
   for (let e = 0; e < w.mesh.nE; e++) {
     const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
     const dx = x[b] - x[a], dy = x[b + 1] - x[a + 1], dz = x[b + 2] - x[a + 2];
     const L = Math.hypot(dx, dy, dz);
     if (L === 0) continue;
+    U[3 * e] = dx / L; U[3 * e + 1] = dy / L; U[3 * e + 2] = dz / L;
     const d = L - L0[e];
     const f = ((d < 0 ? w.kCompFactor * kM[e] : kM[e]) * d) / L;
     g[a] -= f * dx; g[a + 1] -= f * dy; g[a + 2] -= f * dz;
@@ -198,6 +200,7 @@ export function gradient(w, x, g) {
     const raw = dihedral(x, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
     const th = unwrap(w.theta[h], raw);
     w.thetaPred[h] = th;
+    HG.set(G12, 12 * h);
     let f = w.hingeK[h] * (th - w.restTheta[h]);
     if (w.driveOn[h]) f += w.driveK[h] * (th - w.driveTarget[h]);
     if (f === 0) continue;

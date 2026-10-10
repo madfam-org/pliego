@@ -88,22 +88,29 @@ export class Drivers {
       }
       this.groups.push({ verts: spine, base: gather(w.X0, spine), mech: null, kind: 'spine' });
       for (const v of spine) fixed[v] = 1;
-      // drive point: the free-edge point opposite the spine midpoint
-      const mid = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
-      const nrm = [side * dy / L, -side * dx / L];
-      const tgt = [mid[0] + W * nrm[0], mid[1] + W * nrm[1]];
-      let dv = -1, bd = Infinity;
-      for (let v = 0; v < nV; v++) if (mesh.vSheet[v] === s) { const d = Math.hypot(mesh.uv[2 * v] - tgt[0], mesh.uv[2 * v + 1] - tgt[1]); if (d < bd) { bd = d; dv = v; } }
+      // drive band: the free-edge vertices over the middle half of the page (a hand holding the
+      // fore-edge), each following its own arc about the spine; the radius shrinks mid-turn so the
+      // page bows. Spreading the hand over the edge keeps the drive force from stretching the paper.
       const a0 = locatePoint(mesh, s, p[0], p[1]), a1 = locatePoint(mesh, s, q[0], q[1]);
       const P0 = bary(w.X0, a0), P1 = bary(w.X0, a1);
       const axis = norm3([P1[0] - P0[0], P1[1] - P0[1], P1[2] - P0[2]]);
-      const M = [(P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2, (P0[2] + P1[2]) / 2];
-      const D0 = [w.X0[3 * dv] - M[0], w.X0[3 * dv + 1] - M[1], w.X0[3 * dv + 2] - M[2]];
-      const r0 = Math.hypot(...D0);
-      const out = norm3(D0);
       const up = triNormal(mesh, w.X0, /** @type {any} */(a0).tri);
-      const term = termList.add(TK_DRIVE, 0, [dv], [1], { target: [w.X0[3 * dv], w.X0[3 * dv + 1], w.X0[3 * dv + 2]], k: LEAF_STIFFNESS });
-      this.leaves.push({ m, term, dv, M, out, up, r0, axis });
+      const band = [];
+      for (let v = 0; v < nV; v++) {
+        if (mesh.vSheet[v] !== s) continue;
+        const rx = mesh.uv[2 * v] - p[0], ry = mesh.uv[2 * v + 1] - p[1];
+        const dist = Math.abs((rx * dy - ry * dx) / L), along = (rx * dx + ry * dy) / L;
+        if (Math.abs(dist - W) <= tol + 1e-6 && along >= 0.25 * L && along <= 0.75 * L) band.push(v);
+      }
+      const drivers = band.map((dv) => {
+        const X = [w.X0[3 * dv], w.X0[3 * dv + 1], w.X0[3 * dv + 2]];
+        const t = (X[0] - P0[0]) * axis[0] + (X[1] - P0[1]) * axis[1] + (X[2] - P0[2]) * axis[2];
+        const M = [P0[0] + t * axis[0], P0[1] + t * axis[1], P0[2] + t * axis[2]];
+        const D0 = [X[0] - M[0], X[1] - M[1], X[2] - M[2]];
+        const term = termList.add(TK_DRIVE, 0, [dv], [1], { target: X.slice(), k: LEAF_STIFFNESS / Math.max(1, band.length) });
+        return { dv, term, M, out: norm3(D0), r0: Math.hypot(...D0) };
+      });
+      this.leaves.push({ m, up, drivers });
     }
     this.grabTerm = termList.add(TK_GRAB, 0, [0], [1], { target: [0, 0, 0], k: 0 });
     this.fixed = fixed;
@@ -202,13 +209,15 @@ export class Drivers {
         X[3 * v] = p[0] + t[0]; X[3 * v + 1] = p[1] + t[1]; X[3 * v + 2] = p[2] + t[2];
       }
     }
-    // leaf page turn: drive point on an arc that bows the page (radius shrinks mid-turn)
+    // leaf page turn: each band vertex on an arc about the spine (radius shrinks mid-turn)
     const T = w.terms;
     for (const lf of this.leaves) {
       const a = /** @type {number} */(this.value.get(lf.m.control)) * DEG;
-      const r = lf.r0 * (1 - 0.18 * Math.sin(a));
-      const tgt = T.info[lf.term].target;
-      for (let c = 0; c < 3; c++) tgt[c] = lf.M[c] + r * (Math.cos(a) * lf.out[c] + Math.sin(a) * lf.up[c]) + (lf.up[c] * 0.5 * (1 - Math.cos(a)) * 0);
+      for (const d of lf.drivers) {
+        const r = d.r0 * (1 - 0.18 * Math.sin(a));
+        const tgt = T.info[d.term].target;
+        for (let c = 0; c < 3; c++) tgt[c] = d.M[c] + r * (Math.cos(a) * d.out[c] + Math.sin(a) * lf.up[c]);
+      }
     }
     // sliders driven by slide mechanisms
     for (let t = 0; t < T.count; t++) {

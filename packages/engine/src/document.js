@@ -378,7 +378,6 @@ function checkRefs(c, P) {
       if (!j.b || !needSheet(j.b.sheet, `${w}.b`)) P.push(`${w}.b.sheet is required`);
       if (!isVec(j.map, 6)) P.push(`${w}.map must be [a, b, c, d, tx, ty]`);
       if (j.side !== 'front' && j.side !== 'back') P.push(`${w}.side must be front|back`);
-      if (j.a && j.b && j.a.sheet === j.b.sheet) P.push(`${w} glues sheet ${j.a.sheet} to itself`);
     }
     if (j.type === 'pivot') { pt(j.a, `${w}.a`); pt(j.b, `${w}.b`); }
     if (j.type === 'string') {

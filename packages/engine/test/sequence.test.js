@@ -44,10 +44,14 @@ test('fixed board: a kinematic sheet not listed in sheets_moving keeps its place
   doc['pliego:sheets'][0].kinematic = { mechanism: 'open' }; // left board references the spread hinge, not moved by it
   doc['pliego:controls'] = doc['pliego:controls'].filter((/** @type {any} */ c) => c.id === 'open');
   const w = new World(doc, { meshEdge: 8, gravity: false, ground: false });
-  const before = Float64Array.from(w.x.subarray(0, 30));
+  const before = Float64Array.from(w.x);
   w.setControl('open', 120);
   for (let f = 0; f < 30; f++) w.step();
-  let moved = 0;
-  for (let i = 0; i < 30; i++) moved = Math.max(moved, Math.abs(w.x[i] - before[i]));
+  let moved = 0, turned = 0;
+  for (let v = 0; v < w.mesh.nV; v++) for (let c = 0; c < 3; c++) {
+    const d = Math.abs(w.x[3 * v + c] - before[3 * v + c]);
+    if (w.mesh.vSheet[v] === 0) moved = Math.max(moved, d); else if (w.mesh.vSheet[v] === 1) turned = Math.max(turned, d);
+  }
   assert.ok(moved < 1e-12, `fixed board moved by ${moved}`);
+  assert.ok(turned > 1, 'the listed board turns');
 });

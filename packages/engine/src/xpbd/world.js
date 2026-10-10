@@ -21,6 +21,7 @@ import { Drivers } from '../drivers.js';
 import { Contact } from './contact.js';
 import { Wind, addAirForces } from './air.js';
 import { RenderBuffers } from './render.js';
+import { pcgStep } from './pcg.js';
 import * as K from '../constants.js';
 
 const G12 = new Float64Array(12);
@@ -76,15 +77,12 @@ export class World {
     this._clampCorrection();
     this.sys = buildSystem(this);
     this.factorDir = new Float64Array(3 * mesh.nE);
-    // A stale factorisation adds k·sin²α of membrane stiffness to rotation modes (α = rotation since
-    // factorisation). Keep it below REFACTOR_FRACTION of the inertia term m/Δt²: α ≤ √(f·m/(k·Δt²)).
-    let ratio = 0;
-    for (let e = 0; e < mesh.nE; e++) {
-      const a = mesh.edges[2 * e], b = mesh.edges[2 * e + 1];
-      const m = Math.min(this.mass[a], this.mass[b]);
-      ratio = Math.max(ratio, (this.kMem[e] * this.dt * this.dt) / m);
-    }
-    this.refactorAngle = opts.refactorAngle ?? Math.min(K.REFACTOR_ANGLE, Math.sqrt(K.REFACTOR_FRACTION / Math.max(ratio, 1e-12)));
+    this.edgeDir = new Float64Array(3 * mesh.nE);
+    this.hingeGrad = new Float64Array(12 * mesh.nH);
+    this.pcgIterations = 0;
+    // safety cap: refactor when any membrane edge has turned this far since the last factorisation
+    // (PCG with the stale factorisation handles smaller rotations; see pcg.js)
+    this.refactorAngle = opts.refactorAngle ?? K.REFACTOR_ANGLE;
     this.factorCount = 0;
     this.dirty = true;
     this.contact = this.opts.contact || this.opts.ground ? new Contact(this) : null;
@@ -246,7 +244,6 @@ export class World {
     updateTerms(this, x);
     this._checkStrings(x);
     this._checkRotation();
-    if (this.dirty) { assembleAndFactor(this, x); this._saveFactorState(x); this.dirty = false; }
     this._newton();
     this._projections();
     for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
@@ -264,6 +261,14 @@ export class World {
       g.fill(0);
       gradient(this, x, g);
       if (it > 0) for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
+      if (!this.dirty) {
+        const r = pcgStep(this, x, g, K.PCG_MAX_ITER, K.PCG_RTOL);
+        this.pcgIterations = r.iterations;
+        if (r.converged) { if (r.iterations > K.PCG_REFACTOR_ITER) this.dirty = true; continue; }
+      }
+      assembleAndFactor(this, x);
+      this._saveFactorState(x);
+      this.dirty = false;
       for (let i = 0; i < nV; i++) {
         const k = fi[i];
         if (k < 0) continue;
@@ -313,8 +318,10 @@ export class World {
       }
     }
     if (this.contact) {
-      if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
-      if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
+      for (let pass = 0; pass < K.CONTACT_PASSES; pass++) {
+        if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
+        if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
+      }
     }
   }
 
@@ -409,7 +416,7 @@ export class World {
     for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i])) { nan = true; break; }
     return {
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
-      substepsRun: this.substepsRun, factorizations: this.factorCount, time: this.time, finite: !nan,
+      substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, time: this.time, finite: !nan,
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0,
     };
   }

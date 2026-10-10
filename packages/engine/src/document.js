@@ -401,7 +401,7 @@ function checkRefs(c, P) {
       if (j.mechanism !== undefined) { const m = mech.get(j.mechanism); if (!m || m.type !== 'slide') P.push(`rule 7: ${w}.mechanism ${JSON.stringify(j.mechanism)} is not a slide mechanism`); }
     }
   });
-  checkJoinGates(joins, seq, P); // spec §5.21, rule 21
+  checkJoinGates(joins, seq, P); // spec §5.21–§5.22, rules 21–22
   if (seq !== null) {
     if (typeof seq !== 'object' || (seq.mode !== 'physical' && seq.mode !== 'kinematic')) P.push('pliego:sequence.mode must be physical|kinematic');
     if (!Array.isArray(seq.steps) || !seq.steps.length) P.push('pliego:sequence.steps must be a non-empty array');

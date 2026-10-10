@@ -107,6 +107,8 @@ zone, paper that lies on its zone but slid along it is welded where it lies, and
 zone does not take hold (`stats().unheldWelds`). A gated pin is a stiff anchor term rather than a
 fixed vertex, so the free-vertex set (and the symbolic factorisation) never changes. Switching
 refactorises; contact exclusion around welds follows the gates. Test `step-joins`.
+A step's `release_joins` (spec §5.22) unties joins from that step on, through the same gates
+(test `untie-joins`).
 
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force

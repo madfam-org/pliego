@@ -1414,6 +1414,13 @@
                 "items": {
                   "$ref": "#/$defs/slug"
                 }
+              },
+              "release_joins": {
+                "description": "Spec §5.22: join ids this step unties.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/slug"
+                }
               }
             },
             "additionalProperties": false

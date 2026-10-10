@@ -363,7 +363,8 @@ export class World {
    * the creases on the face-tree path between the tab's face and its zone's face close a loop
    * once the glue holds: a `release` of one of them while the glue holds leaves it where it is
    * (the stub has no physics to let the loop spring). A glue holds from the start, or from its
-   * `active_from` step. Glue between two sheets changes nothing in the preview.
+   * `active_from` step, until a step that lists it in `release_joins` (spec §5.22). Glue between
+   * two sheets changes nothing in the preview.
    */
   _locks(j) {
     const steps = ((j['pliego:sequence'] || {}).steps) || [];
@@ -391,7 +392,9 @@ export class World {
       }
       const from = jn.active_from === undefined ? -1
         : Number.isInteger(jn.active_from) ? jn.active_from : steps.findIndex((st) => st.id === jn.active_from);
-      if (edges.size) locks.push({ from, until: Infinity, edges });
+      // a step's `release_joins` unties the glue from that step on (spec §5.22)
+      const r = steps.findIndex((st) => (st.release_joins || []).includes(jn.id));
+      if (edges.size) locks.push({ from, until: r >= 0 ? r : Infinity, edges });
     }
     return locks;
   }

@@ -26,7 +26,7 @@ node packages/engine/test/helpers/write-fixtures.js   # regenerate test/fixtures
 ```js
 import { loadDocument, buildMesh, World, kinematics, materials, constants } from '@pliego/engine';
 
-const doc = loadDocument(json);        // validates spec §8; throws DocumentError listing EVERY problem
+const doc = loadDocument(json);        // validates spec §8 (incl. meta.digest); throws DocumentError listing EVERY problem
 const world = new World(doc, {
   meshEdge: 6,        // mm target edge length (default: largest sheet span / 30, clamped to 3–8 mm)
   substeps: 20,       // fixed substeps per 60 Hz frame; step() runs whole substeps only
@@ -123,6 +123,13 @@ free backing by friction). Test `start-pose`.
 plasticity of its kirigami ligaments (46–218 % stretch today), and `tab-and-slot` needs
 edge–edge contact (10–13 % stretch, 1.5 % in `low-cross`), because vertex–triangle contact lets a
 tab's edge pass a slot's edge.
+
+**Digest** (spec §5.7 and rule 10, canonical serialisation per lane H's §5.15, `src/digest.js`).
+When `pliego:meta.digest` is present, `loadDocument` recomputes "sha256:" + SHA-256 of the RFC 8785
+canonical text of the document (keys sorted as UTF-16 code units, ECMAScript number spelling,
+digest set to null) and rejects a mismatch. SHA-256 is implemented here (synchronous; WebCrypto's
+digest is asynchronous). About 7 ms for a 250 kB document. Test `digest` (the kernel's shared
+vector, node:crypto parity, tamper rejection).
 
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force

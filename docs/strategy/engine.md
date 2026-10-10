@@ -316,7 +316,8 @@ Calibration constants (`c_b`, default `hand_factor`, panel yield) live in one fi
 - edge–edge contact, which `tab-and-slot` needs;
 - Tier R thickness offsets;
 - developable page upsampling;
-- verifying `meta.digest` (it waits for a canonical serialisation);
+- ~~verifying `meta.digest`~~ <!-- lane E (wave 3) --> done: the engine recomputes it over the
+  canonical serialisation (spec §5.15 from lane H, RFC 8785) on load (rule 10, test `digest`);
 - a Python reference for cross-implementation parity (E16).
 
 **Implemented in v0.1, no longer out of scope:**

@@ -8,6 +8,7 @@ import { BUILTIN_STOCKS, DERIVED_KEYS } from './material.js';
 import { checkGeometry, checkJoinsAndFrames } from './docrules.js';
 import { checkKeyedMechanisms } from './keyed.js';
 import { checkJoinGates } from './gates.js';
+import { documentDigest } from './digest.js';
 
 export class DocumentError extends Error {
   /** @param {string[]} problems */
@@ -270,7 +271,15 @@ function parseCore(d, plainFold, P) {
   const seq = d['pliego:sequence'] ?? null;
   checkRefs({ joins, mechanisms, controls, seq, sheets, sheetIndex, assignment, nE }, P);
   if (d['pliego:meta'] && d['pliego:meta'].min_feature_mm !== undefined && !(isNum(d['pliego:meta'].min_feature_mm) && d['pliego:meta'].min_feature_mm > 0)) P.push('pliego:meta.min_feature_mm must be a number > 0');
-  if (d['pliego:meta'] && d['pliego:meta'].digest != null && !/^sha256:[0-9a-f]{64}$/.test(d['pliego:meta'].digest)) P.push('rule 10: pliego:meta.digest must be "sha256:<64 hex>" or null');
+  if (d['pliego:meta'] && d['pliego:meta'].digest != null) {
+    if (!/^sha256:[0-9a-f]{64}$/.test(d['pliego:meta'].digest)) P.push('rule 10: pliego:meta.digest must be "sha256:<64 hex>" or null');
+    else if (!plainFold) {
+      // rule 10: recompute over the canonical serialisation (spec §5.15, RFC 8785) with digest null
+      let got = null;
+      try { got = documentDigest(d); } catch (e) { P.push(`rule 10: the document has no canonical serialisation (${/** @type {Error} */(e).message})`); }
+      if (got && got !== d['pliego:meta'].digest) P.push(`rule 10: pliego:meta.digest ${d['pliego:meta'].digest} does not match the document (canonical digest ${got})`);
+    }
+  }
 
   return {
     plainFold, nV, nE, nF, coords, edges, assignment, foldAngle, treatment, restAngle, faces, edgeNames: names,

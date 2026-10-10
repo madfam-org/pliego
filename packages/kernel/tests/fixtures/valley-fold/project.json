@@ -1,0 +1,6 @@
+{
+  "project": {"name": "Valley fold", "slug": "valley-fold", "version": "0.1.0", "engine": "pliego"},
+  "modes": [{"id": "default", "label": {"en": "Valley fold"}, "script_file": "main.py"}],
+  "parameters": [{"id": "size", "type": "slider", "default": 150, "min": 50, "max": 300}],
+  "presets": [{"id": "small", "label": {"en": "Small"}, "values": {"size": 75}}]
+}

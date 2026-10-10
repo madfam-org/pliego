@@ -34,6 +34,9 @@ export function checkGeometry(doc, P) {
   const edgeFaces = new Int32Array(2 * nE).fill(-1);
   const edgeFaceDir = new Int8Array(2 * nE);
   const facePolys = [];
+  const mf = doc.meta && typeof doc.meta.min_feature_mm === 'number' ? doc.meta.min_feature_mm : 1;
+  if (!(mf > 0)) P.push('pliego:meta.min_feature_mm must be > 0');
+  const minArea = mf > 0 ? mf * mf : 1;
   for (let f = 0; f < nF; f++) {
     const fv = faces[f];
     const poly = [];
@@ -43,7 +46,7 @@ export function checkGeometry(doc, P) {
     if (new Set(fv).size !== fv.length) P.push(`rule 3: face ${f} repeats a vertex`);
     else if (!polygonIsSimple(poly)) P.push(`rule 3: face ${f} is not simple`);
     if (A < 0) P.push(`rule 3: face ${f} is clockwise (area ${A.toFixed(3)} mm²)`);
-    else if (A < 1) P.push(`rule 3: face ${f} area ${A.toFixed(4)} mm² is below 1 mm²`);
+    else if (A < minArea) P.push(`rule 3: face ${f} area ${A.toFixed(4)} mm² is below the ${minArea} mm² floor (min_feature_mm²)`);
     const fe = [];
     for (let i = 0; i < fv.length; i++) {
       const a = fv[i], b = fv[(i + 1) % fv.length];
@@ -200,24 +203,22 @@ export function checkJoinsAndFrames(doc, P) {
     const L3 = Math.hypot(X[3 * a] - X[3 * b], X[3 * a + 1] - X[3 * b + 1], X[3 * a + 2] - X[3 * b + 2]);
     if (L2 > 0 && Math.abs(L3 - L2) / L2 > 1e-3) P.push(`rule 9: initial frame stretches edge ${e} by ${((L3 / L2 - 1) * 100).toFixed(3)} %`);
   }
-  // glue welds satisfied within collision thickness
-  doc.joins.forEach((j, i) => {
+  // glue welds: every vertex of the region polygon, mapped to sheet b, lies within
+  // max(collision_thickness a, b) of its image on b (spec §8.9, sampled at the region vertices)
+  doc.joins.forEach((j) => {
     if (j.type !== 'glue') return;
     const sa = si(j.a.sheet), sb = si(j.b.sheet);
-    const tol = Math.max(doc.sheets[sa].derived.collision_thickness, doc.sheets[sb].derived.collision_thickness) * 1.001 + 1e-6;
-    const reg = j.a.region.flatMap((/** @type {number[]} */ p) => p);
+    const tol = Math.max(doc.sheets[sa].derived.collision_thickness, doc.sheets[sb].derived.collision_thickness) * (1 + 1e-6) + 1e-6;
     const [ma, mb, mc, md, tx, ty] = j.map;
-    const [oax, oay] = doc.sheets[sa].offset;
     let worst = 0;
-    for (let v = 0; v < doc.nV; v++) {
-      if (doc.vSheet[v] !== sa) continue;
-      const u = C[2 * v] - oax, w = C[2 * v + 1] - oay;
-      if (!pointInPolygon(u, w, reg, 1e-6)) continue;
+    for (const [u, w] of j.a.region) {
+      const fa = faceAt(doc, sa, u, w);
       const bu = ma * u + mb * w + tx, bv = mc * u + md * w + ty;
-      const f = faceAt(doc, sb, bu, bv);
-      if (f < 0) continue;
-      const pb = faceMap3(doc, f, bu + doc.sheets[sb].offset[0], bv + doc.sheets[sb].offset[1]);
-      worst = Math.max(worst, Math.hypot(X[3 * v] - pb[0], X[3 * v + 1] - pb[1], X[3 * v + 2] - pb[2]));
+      const fb = faceAt(doc, sb, bu, bv);
+      if (fa < 0 || fb < 0) continue; // reported by rule 7
+      const pa = faceMap3(doc, fa, u + doc.sheets[sa].offset[0], w + doc.sheets[sa].offset[1]);
+      const pb = faceMap3(doc, fb, bu + doc.sheets[sb].offset[0], bv + doc.sheets[sb].offset[1]);
+      worst = Math.max(worst, Math.hypot(pa[0] - pb[0], pa[1] - pb[1], pa[2] - pb[2]));
     }
     if (worst > tol) P.push(`rule 9: glue join ${j.id} is off its zone by ${worst.toFixed(4)} mm in the initial frame (tolerance ${tol.toFixed(4)})`);
   });

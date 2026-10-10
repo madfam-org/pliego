@@ -261,6 +261,7 @@ function parseCore(d, plainFold, P) {
   const controls = Array.isArray(d['pliego:controls']) ? d['pliego:controls'] : (d['pliego:controls'] === undefined ? [] : (P.push('pliego:controls must be an array'), []));
   const seq = d['pliego:sequence'] ?? null;
   checkRefs({ joins, mechanisms, controls, seq, sheets, sheetIndex, assignment, nE }, P);
+  if (d['pliego:meta'] && d['pliego:meta'].min_feature_mm !== undefined && !(isNum(d['pliego:meta'].min_feature_mm) && d['pliego:meta'].min_feature_mm > 0)) P.push('pliego:meta.min_feature_mm must be a number > 0');
   if (d['pliego:meta'] && d['pliego:meta'].digest != null && !/^sha256:[0-9a-f]{64}$/.test(d['pliego:meta'].digest)) P.push('rule 10: pliego:meta.digest must be "sha256:<64 hex>" or null');
 
   return {

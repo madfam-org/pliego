@@ -27,91 +27,91 @@ demonstrates it. Until then, its row names the wave that will.
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| A1 | Flat folding: bases and traditional models | C K E S | rung 1 techniques; `preliminary-base` … `windmill-base`; `paper-crane`, `lily`, `tulip`, … | ✅ rung 1 · 🟡 W2b L1/L2 |
-| A2 | Rigid folding (rigid origami, kinematics, loop closure) | K (motion solver) S | `miura-ori`, `squash-fold`, `petal-fold`, `rabbit-ear`, reverse folds | ✅ |
-| A3 | Curved-crease folding | K (polyline curves) E | `curved-crease-sculpture`, `pleated-hypar` (circular) | 🟡 W2b L3 |
-| A4 | Tessellations and twists | K (`tessellate`) | `square-twist`, `hexagonal-twist`, `waterbomb-tessellation`, `yoshimura`, `kresling-tower` | 🟡 W2b L3 |
-| A5 | Modular origami: interlocking units | C (multi-sheet, contact) K | `ninja-star`, `kusudama`, `modular-origami` | 🟡 W2b L2 · W2c |
-| A6 | Action models: flapping, jumping, snapping | C (controls) E | `flapping-bird`, `jumping-frog`, `paper-popper`, `fortune-teller` | 🟡 W2b L1/L2 · 🔬 bounce and snap |
-| A7 | Pleating, crimping, accordion | K | `pleat-and-crimp`, `accordion-fan`, `leporello` | ✅ · 🟡 |
-| A8 | Fold-and-cut | K (`foldcut`) | `paper-snowflake`, `papel-picado-banner`, `jianzhi-window-flower`, `paper-doll-chain`, `paper-doily` | ✅ · 🟡 W2b L4 |
+| A1 | Flat folding: bases and traditional models | C K E S | rung 1 techniques; `preliminary-base` … `windmill-base`; `paper-crane`, `lily`, `tulip`, … | ✅ landed |
+| A2 | Rigid folding (rigid origami, kinematics, loop closure) | K (motion solver) S | `miura-ori`, `squash-fold`, `petal-fold`, `rabbit-ear`, reverse folds | ✅ landed |
+| A3 | Curved-crease folding | K (polyline curves) E | `curved-crease-sculpture`, `pleated-hypar` (circular) | ✅ landed |
+| A4 | Tessellations and twists | K (`tessellate`) | `square-twist`, `hexagonal-twist`, `waterbomb-tessellation`, `yoshimura`, `kresling-tower` | ✅ landed |
+| A5 | Modular origami: interlocking units | C (multi-sheet, contact) K | `ninja-star`, `kusudama`, `modular-origami` | ✅ landed |
+| A6 | Action models: flapping, jumping, snapping | C (controls) E | `flapping-bird`, `jumping-frog`, `paper-popper`, `fortune-teller` | ✅ landed · 🔬 bounce and snap |
+| A7 | Pleating, crimping, accordion | K | `pleat-and-crimp`, `accordion-fan`, `leporello` | ✅ landed |
+| A8 | Fold-and-cut | K (`foldcut`) | `paper-snowflake`, `papel-picado-banner`, `jianzhi-window-flower`, `paper-doll-chain`, `paper-doily` | ✅ landed |
 | A9 | Wet-folding: moisture-softened stock, sculptural curves | C (moisture state) E (moisture → stiffness, drying sets rest) | `wet-folded-sculpture` | 🔬 W3 |
-| A10 | Engineering and deployable origami: stents, deployable arrays, metamaterials | K E | `miura-ori`, `kresling-tower`, `waterbomb-tessellation` (tube), `rotating-squares` | ✅ · 🟡 |
+| A10 | Engineering and deployable origami: stents, deployable arrays, metamaterials | K E | `miura-ori`, `kresling-tower`, `waterbomb-tessellation` (tube), `rotating-squares` | ✅ landed |
 | A11 | Actuated and self-folding sheets: heat-shrink pre-stress, 4-D prints, pneumatic | C (laminate B-term, trigger) E | `self-folding-sheet` (cross-commons with Yantra4D, RFC 0045) | 🔬 W3 |
 
 ## B. Cutting
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| B1 | Papercut: knife and scissors, negative space, bridges | K (`papercut.analyze`, min feature) X | `papel-picado-banner`, `stencil`, `mirror-silhouette` | ✅ · 🟡 W2b L4 |
-| B2 | Kirigami: cut plus fold | K E | `rotating-squares`, `lattice-kirigami`, `kirigami-spring`, `kirigami-cube`, `origamic-architecture`, `paper-lantern` | ✅ · 🟡 W2b L4 |
-| B3 | Fabrication cutting: die, laser, plotter, cut/crease rules | X (SVG/DXF/PDF/HPGL, dieline profile) | every cut object; `corrugated-shipper`, `folding-carton` | ✅ exporters · 🟡 W2b P |
-| B4 | Perforation, kiss-cut, half-cut, slits | C (treatments) K E (tear) | `perforated-tear`, `reveal-block`, dielines | ✅ · 🟡 W2b P/R · 🔬 tear |
-| B5 | Stack cutting (N sheets, one cut) | K | `stack-cut-panel` | 🟡 W2b L4 |
-| B6 | Tearing and deckle edges | K (procedural deckle outline) E (fracture) | `deckle-tear` | 🟡 W2c · 🔬 |
+| B1 | Papercut: knife and scissors, negative space, bridges | K (`papercut.analyze`, min feature) X | `papel-picado-banner`, `stencil`, `mirror-silhouette` | ✅ landed |
+| B2 | Kirigami: cut plus fold | K E | `rotating-squares`, `lattice-kirigami`, `kirigami-spring`, `kirigami-cube`, `origamic-architecture`, `paper-lantern` | ✅ landed |
+| B3 | Fabrication cutting: die, laser, plotter, cut/crease rules | X (SVG/DXF/PDF/HPGL, dieline profile) | every cut object; `corrugated-shipper`, `folding-carton` | ✅ landed |
+| B4 | Perforation, kiss-cut, half-cut, slits | C (treatments) K E (tear) | `perforated-tear`, `reveal-block`, dielines | ✅ landed · 🔬 tear |
+| B5 | Stack cutting (N sheets, one cut) | K | `stack-cut-panel` | ✅ landed |
+| B6 | Tearing and deckle edges | K (procedural deckle outline) E (fracture) | `deckle-tear` | ✅ landed · 🔬 |
 
 ## C. Pop-ups and movables (paper engineering proper)
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| C1 | V-fold, parallel fold, tent, step, floating layer, spiral, mouth | C (joins, mechanisms) K (closure) E | `v-fold-popup`, `parallel-fold-popup`, `tent-popup`, `step-popup`, `floating-layer-popup`, `spiral-popup`, `mouth-popup` | ✅ · 🟡 W2b L5 |
-| C2 | Rotation: volvelles, wheels | C (`rotate`) | `volvelle` | 🟡 W2b L5 |
-| C3 | Sliding: pull tabs, sliders | C (`translate`, `slide`) | `pull-tab-slider` | 🟡 W2b L5 |
-| C4 | Flaps, gatefolds, lift-the-flap | C (`hinge`, `leaf`) | `lift-the-flap`, `greeting-card`, `print-folds` | 🟡 W2b L5 · W2c |
-| C5 | Transformations: dissolves, venetian blinds | C K | `dissolve-scene` | 🟡 W2b L5 |
-| C6 | Linkages and levers: four-bar, scissor and lazy-tongs extenders | C (pivots) K (closure) | `card-linkages` | 🟡 W2c |
-| C7 | Automata: cams, cranks, followers, gears in card | C (rotate + follower) K E | `paper-automaton` | 🟡 W2c |
-| C8 | Tunnel, carousel and peepshow structures | C (spine, gutter) | `tunnel-book`, `carousel-book`, `tunnel-book-forest`, `carousel-village` | 🟡 W2c |
+| C1 | V-fold, parallel fold, tent, step, floating layer, spiral, mouth | C (joins, mechanisms) K (closure) E | `v-fold-popup`, `parallel-fold-popup`, `tent-popup`, `step-popup`, `floating-layer-popup`, `spiral-popup`, `mouth-popup` | ✅ landed |
+| C2 | Rotation: volvelles, wheels | C (`rotate`) | `volvelle` | ✅ landed |
+| C3 | Sliding: pull tabs, sliders | C (`translate`, `slide`) | `pull-tab-slider` | ✅ landed |
+| C4 | Flaps, gatefolds, lift-the-flap | C (`hinge`, `leaf`) | `lift-the-flap`, `greeting-card`, `print-folds` | ✅ landed |
+| C5 | Transformations: dissolves, venetian blinds | C K | `dissolve-scene` | ✅ landed |
+| C6 | Linkages and levers: four-bar, scissor and lazy-tongs extenders | C (pivots) K (closure) | `card-linkages` | ✅ landed |
+| C7 | Automata: cams, cranks, followers, gears in card | C (rotate + follower) K E | `paper-automaton` | ✅ landed |
+| C8 | Tunnel, carousel and peepshow structures | C (spine, gutter) | `tunnel-book`, `carousel-book`, `tunnel-book-forest`, `carousel-village` | ✅ partly (2/4) · 🟡 W2c |
 
 ## D. Bending, rolling, curling, twisting
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| D1 | Rolling: cones, tubes, beads, coils | K (developable rolls) E | `party-hat`, `paper-beads`, `quilling`, `paper-rose`, `paper-chain` | 🟡 W2c |
-| D2 | Curved scoring and curling | K (curved score) E | `pillow-box`, `quilling` (curl) | 🟡 W2c |
+| D1 | Rolling: cones, tubes, beads, coils | K (developable rolls) E | `party-hat`, `paper-beads`, `quilling`, `paper-rose`, `paper-chain` | ✅ landed |
+| D2 | Curved scoring and curling | K (curved score) E | `pillow-box`, `quilling` (curl) | ✅ partly (1/2) · 🟡 W2c |
 | D3 | Bending-active structures: strip gridshells, bent plates | E (large deflection) | `bending-active-shell` | 🔬 W3 |
 | D4 | Crumpling | E (contact, plasticity) | `crumpled-sheet` | 🔬 W3 |
-| D5 | Springs and twisting: witch's ladder, paper yarn and rope | K E | `paper-spring`, `paper-yarn` (paper textiles link to Fashion Cabinet, RFC 0045) | 🟡 W2b L3 · W2c |
+| D5 | Springs and twisting: witch's ladder, paper yarn and rope | K E | `paper-spring`, `paper-yarn` (paper textiles link to Fashion Cabinet, RFC 0045) | ✅ landed |
 
 ## E. Corrugation and structural board
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| E1 | Corrugation: fluted medium between liners (A/B/C/E/F; single face to triple wall) | K (`pliego.corrugate`) stock (corrugation model) E (orthotropy, caliper) | `corrugated-board` | 🟡 W2b P |
-| E2 | Paper honeycomb: decorative and structural cores | K E | `honeycomb-decoration`, `honeycomb-panel` | 🟡 W2b L4 · W2c |
-| E3 | Slotted and interlocking structures: dividers, furniture | C (slot contact) K | `slotted-dividers`, `cardboard-furniture`, `tab-and-slot` | ✅ · 🟡 W2c |
-| E4 | Load-bearing paper: bridges, columns, box compression | E (load, buckling) | `paper-bridge`, `corrugated-shipper` (stacking) | 🔬 W3 |
+| E1 | Corrugation: fluted medium between liners (A/B/C/E/F; single face to triple wall) | K (`pliego.corrugate`) stock (corrugation model) E (orthotropy, caliper) | `corrugated-board` | ✅ landed |
+| E2 | Paper honeycomb: decorative and structural cores | K E | `honeycomb-decoration`, `honeycomb-panel` | ✅ partly (1/2) · 🟡 W2b L4 · W2c |
+| E3 | Slotted and interlocking structures: dividers, furniture | C (slot contact) K | `slotted-dividers`, `cardboard-furniture`, `tab-and-slot` | ✅ partly (1/3) · ✅ · 🟡 W2c |
+| E4 | Load-bearing paper: bridges, columns, box compression | E (load, buckling) | `paper-bridge`, `corrugated-shipper` (stacking) | ✅ partly (1/2) · 🔬 W3 |
 
 ## F. Packaging and print finishing
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| F1 | Dielines and box styles, thickness-compensated | K (`pliego.dieline`) X (dieline profile) | `corrugated-shipper`, `folding-carton`, `mailer-box`, `pillow-box`, `gable-box`, `sleeve-and-tray`, `presentation-folder`, `display-stand`, `paper-bag` | 🟡 W2b P · W2c |
-| F2 | Envelopes | K (`pliego.envelope`) | `envelope` | 🟡 W2b P |
-| F3 | Print folds and imposition | K | `print-folds`, `codex-signatures`, `pocket-zine` | 🟡 W2c |
-| F4 | Pressing: emboss, deboss, foil, letterpress | C (finish regions) X (plates) S (relief) | `embossed-stationery` | 🟡 W2b P |
-| F5 | Branding: artwork on dielines, pressed marks, heat and burn branding (RFC 0045 S4) | C X S | `embossed-stationery`, `branded-tag`, `folding-carton` (artwork preset) | 🟡 W2b P · W2c |
-| F6 | Coatings and laminates: varnish, spot UV, film, bookcloth | C (finishes, laminates; RFC 0045 §5.3) | `case-binding`, `embossed-stationery` | 🟡 W2c |
-| F7 | Wrapping a solid: gift wrap, furoshiki-like paper wraps | E (contact with a body) | `gift-wrap` | 🟡 W2c |
+| F1 | Dielines and box styles, thickness-compensated | K (`pliego.dieline`) X (dieline profile) | `corrugated-shipper`, `folding-carton`, `mailer-box`, `pillow-box`, `gable-box`, `sleeve-and-tray`, `presentation-folder`, `display-stand`, `paper-bag` | ✅ partly (4/9) · 🟡 W2b P · W2c |
+| F2 | Envelopes | K (`pliego.envelope`) | `envelope` | ✅ landed |
+| F3 | Print folds and imposition | K | `print-folds`, `codex-signatures`, `pocket-zine` | ✅ landed |
+| F4 | Pressing: emboss, deboss, foil, letterpress | C (finish regions) X (plates) S (relief) | `embossed-stationery` | ✅ landed |
+| F5 | Branding: artwork on dielines, pressed marks, heat and burn branding (RFC 0045 S4) | C X S | `embossed-stationery`, `branded-tag`, `folding-carton` (artwork preset) | ✅ partly (2/3) · 🟡 W2b P · W2c |
+| F6 | Coatings and laminates: varnish, spot UV, film, bookcloth | C (finishes, laminates; RFC 0045 §5.3) | `case-binding`, `embossed-stationery` | ✅ partly (1/2) · 🟡 W2c |
+| F7 | Wrapping a solid: gift wrap, furoshiki-like paper wraps | E (contact with a body) | `gift-wrap` | ✅ landed |
 
 ## G. Joining and assembly
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| G1 | Glue: flaps, zones, lamination | C (`glue` join) E | `glue-flap` and most assemblies | ✅ |
-| G2 | Tabs, slots, friction and crash locks | C (contact) | `tab-and-slot`, `folding-carton` (tuck, crash lock) | ✅ · 🟡 |
-| G3 | Mechanical fasteners: brads, eyelets, rivets, staples, split pins | C (`pin`, hardware via the keystone's standard parts) | `fastener-joins`, `volvelle` | 🟡 W2c |
-| G4 | Sewing and binding: pamphlet, stab, Coptic, case binding | C (string joins) K | `saddle-stitch`, `stab-binding`, `codex-signatures`, `case-binding` | 🟡 W2c |
-| G5 | Weaving and lacing: strip weaving, woven heart baskets, paper basketry | C (contact) K | `paper-weaving` | 🟡 W2c |
-| G6 | String, thread and balance: mobiles, hanging works | C (`string`) E (balance) | `paper-mobile`, `papel-picado-banner` | ✅ · 🟡 W2c |
+| G1 | Glue: flaps, zones, lamination | C (`glue` join) E | `glue-flap` and most assemblies | ✅ landed |
+| G2 | Tabs, slots, friction and crash locks | C (contact) | `tab-and-slot`, `folding-carton` (tuck, crash lock) | ✅ landed |
+| G3 | Mechanical fasteners: brads, eyelets, rivets, staples, split pins | C (`pin`, hardware via the keystone's standard parts) | `fastener-joins`, `volvelle` | ✅ landed |
+| G4 | Sewing and binding: pamphlet, stab, Coptic, case binding | C (string joins) K | `saddle-stitch`, `stab-binding`, `codex-signatures`, `case-binding` | ✅ partly (3/4) · 🟡 W2c |
+| G5 | Weaving and lacing: strip weaving, woven heart baskets, paper basketry | C (contact) K | `paper-weaving` | ✅ landed |
+| G6 | String, thread and balance: mobiles, hanging works | C (`string`) E (balance) | `paper-mobile`, `papel-picado-banner` | ✅ landed |
 
 ## H. Layering and stacking
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| H1 | Layered scenes: shadow boxes, tunnel books, theatres | C (offsets, spacers) | `shadow-box`, `paper-theater`, `tunnel-book` | 🟡 W2c |
-| H2 | Reveal blocks: pre-cut layers torn away top-down | C (pieces, tear-away) K (stack slicer) S | `reveal-block` | 🟡 W2b R |
-| H3 | Pads, stacks and flip-books | C (stack contact) | `flip-book`, `stack-cut-panel` | 🟡 |
+| H1 | Layered scenes: shadow boxes, tunnel books, theatres | C (offsets, spacers) | `shadow-box`, `paper-theater`, `tunnel-book` | ✅ landed |
+| H2 | Reveal blocks: pre-cut layers torn away top-down | C (pieces, tear-away) K (stack slicer) S | `reveal-block` | ✅ landed |
+| H3 | Pads, stacks and flip-books | C (stack contact) | `flip-book`, `stack-cut-panel` | ✅ landed |
 | H4 | Laminated composites across materials | C (laminates, `material_ref`; RFC 0045) | `case-binding`, `self-folding-sheet` | 🟡 W2c · 🔬 |
 
 ## I. Forming (3-D shape without creases)
@@ -128,9 +128,9 @@ demonstrates it. Until then, its row names the wave that will.
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
 | J1 | Polyhedral nets with glue tabs | K (unfolder) | `platonic-solids` | 🟡 W2c |
-| J2 | **Low-poly papercraft**: any mesh unfolded into tabbed, numbered nets laid out on pages, with an assembly program that folds the net into the model | K (`pliego.unfold`: cut tree, overlap splitting, tabs, edge numbers, page layout) C (cartridge mesh assets) S (net-to-model animation) X | `low-poly-papercraft` (original models), `papercraft-unfold` (any mesh, including Yantra4D solids) | 🟡 W2b (unfolder lane) |
-| J3 | Gores: globes and balloons | K | `paper-globe` | 🟡 W2c |
-| J4 | Paper models: architecture and vehicles | K | `paper-house`, `low-poly-papercraft` (designs) | 🟡 W2c |
+| J2 | **Low-poly papercraft**: any mesh unfolded into tabbed, numbered nets laid out on pages, with an assembly program that folds the net into the model | K (`pliego.unfold`: cut tree, overlap splitting, tabs, edge numbers, page layout) C (cartridge mesh assets) S (net-to-model animation) X | `low-poly-papercraft` (original models), `papercraft-unfold` (any mesh, including Yantra4D solids) | ✅ landed |
+| J3 | Gores: globes and balloons | K | `paper-globe` | ✅ landed |
+| J4 | Paper models: architecture and vehicles | K | `paper-house`, `low-poly-papercraft` (designs) | ✅ partly (1/2) · 🟡 W2c |
 
 ## K. Paper electronics and interaction
 

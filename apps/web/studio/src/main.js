@@ -3,7 +3,7 @@
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
-import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine } from './data.js';
+import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, fetchObject } from './data.js';
 import { parseShare, buildShare, coerceParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, legendKinds, LINE_STYLE } from './diagram.js';
 import { renderCatalog, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
@@ -258,6 +258,16 @@ async function selectItem(slug, rawParams) {
   const item = state.catalog.items.find((it) => it.slug === slug) || state.catalog.items[0];
   if (!item) return;
   state.item = item;
+  if (state.catalog.source === 'api' && !item.detailsLoaded) {
+    try {
+      const details = await fetchObject(item.slug);
+      item.parameters = details.parameters;
+      item.exports = details.exports;
+      item.detailsLoaded = true;
+    } catch (e) {
+      fail('error.document', e);
+    }
+  }
   state.params = coerceParams(item.parameters, rawParams || {});
   renderAll();
   try {

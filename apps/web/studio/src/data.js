@@ -54,6 +54,21 @@ export async function fetchDocument(item, source, params) {
   return fetchJson(item.document);
 }
 
+/**
+ * GET /api/v1/objects/<slug> → the object's full manifest. The catalog is a summary (it reports a
+ * parameter COUNT); parameters and export formats come from here.
+ * @param {string} slug
+ * @returns {Promise<{parameters: any[], exports: string[]}>}
+ */
+export async function fetchObject(slug) {
+  const j = await fetchJson(`${API}/objects/${encodeURIComponent(slug)}`);
+  const manifest = (j && j.manifest) || {};
+  return {
+    parameters: Array.isArray(manifest.parameters) ? manifest.parameters : [],
+    exports: Array.isArray(j && j.export_formats) ? j.export_formats : DEFAULT_EXPORTS,
+  };
+}
+
 /** POST /api/v1/documents {slug, params} → sheet document. */
 export function regenerate(slug, params) {
   return fetchJson(`${API}/documents`, {

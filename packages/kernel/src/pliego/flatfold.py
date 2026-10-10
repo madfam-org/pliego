@@ -91,8 +91,11 @@ def vertex_report(arr: Arrangement, v: int) -> VertexReport:
     if "U" not in asg and len(sectors) >= 4:
         blb = True
         n = len(sectors)
+        # "strictly smaller" beyond the grid-snapping bound: equal sectors built from snapped end
+        # points differ by up to Σ √2·GRID_MM/Lᵢ (the Kawasaki tolerance), ~1e-5° in practice
+        tol = max(1e-9, math.degrees(kawasaki_tol(arr, v)))
         for i in range(n):
-            if sectors[i] < sectors[i - 1] - 1e-9 and sectors[i] < sectors[(i + 1) % n] - 1e-9:
+            if sectors[i] < sectors[i - 1] - tol and sectors[i] < sectors[(i + 1) % n] - tol:
                 # sector i lies between creases i and i+1: they must differ (one M, one V)
                 if asg[i] == asg[(i + 1) % n]:
                     blb = False

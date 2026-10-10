@@ -7,7 +7,7 @@ default-src 'none'`): no inline scripts or handlers, no `style=` attributes, no 
 | Path | What |
 |---|---|
 | `index.html`, `assets/` | Landing (en/es/fr/pt), CSS-only paper-fold hero, OG/hreflang/JSON-LD, `<!-- ecosystem-banner slot -->` |
-| `llms.txt`, `robots.txt`, `sitemap.xml` | Served at the site root |
+| (none) | `llms.txt`/`llms-full.txt` live at the repo root (single source; the dev server and the API both serve them); `robots.txt` and `sitemap.xml` are generated per host by the API |
 | `shared/` | i18n runtime (`data-i18n`, `data-i18n-attr`, `pliego:lang` event), guarded storage, pre-paint `lang-boot.js` |
 | `studio/` | Studio: catalog, parameters, controls from `pliego:controls`, fold-program scrubber, 3-D view, SVG crease-pattern view, exports, share URL, status bar |
 | `studio/src/render/` | Self-contained renderers: WebGL2 (two-sided paper, grain, PCF shadow map, ground, crease overlay) and a Canvas 2D 3-D fallback; shared orbit/pan/zoom/grab input |

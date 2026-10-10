@@ -106,12 +106,12 @@ only through [`docs/licenses/CARVE-OUTS.md`](docs/licenses/CARVE-OUTS.md). See
 
 ## Rulings
 
-Ruled 2026-10-10 by the owner (record kept in MADFAM's private ops repository): commons object licence
-CERN-OHL-W-2.0 for `materials/*` and the `sheet-hyperobjects` cartridges; hosts `pliego.madfam.io`,
-`pliego-app.madfam.io`, `pliego-api.madfam.io` on one service.
+Ruled 2026-10-10 by the owner (records kept in MADFAM's private ops repository): the platform name
+**Pliego**; the commons **`sheet-hyperobjects`** — a third commons beside the solid and soft commons,
+split by kernel; commons object licence CERN-OHL-W-2.0 for `materials/*` and the commons cartridges;
+hosts `pliego.madfam.io`, `pliego-app.madfam.io`, `pliego-api.madfam.io` on one service.
 
 ### Still pending
 
-Agents prepare to these points and stop: product brand (beyond the working name); the commons topology (a third commons kernel beside solid and soft);
-CLA vs DCO for third-party contributions; tiers and prices (none in this repo until ruled through
-Tulana and Dhanam).
+Agents prepare to these points and stop: CLA vs DCO for third-party contributions; tiers and prices
+(none in this repo until ruled through Tulana and Dhanam); an apex domain; the trademark screen.

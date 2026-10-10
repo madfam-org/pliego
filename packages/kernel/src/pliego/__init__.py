@@ -59,6 +59,7 @@ from .geometry import (
     square,
 )
 from .params import clamp, param
+from .pieces import piece, stack
 from .sheet import Face, Mark, Placement, Sheet, Tab
 from .simplefold import FoldedState
 
@@ -68,7 +69,7 @@ __version__ = KERNEL_VERSION
 # on first access, so `python -m pliego.stock` runs without runpy's "found in sys.modules"
 # warning. A module that is absent is simply not offered; an import error *inside* a present
 # module still fails loud on access.
-OPTIONAL_MODULES = ("stock", "tessellate", "popup", "book", "export")
+OPTIONAL_MODULES = ("stock", "tessellate", "popup", "book", "export", "reveal")
 AVAILABLE_MODULES: list[str] = [
     _n for _n in OPTIONAL_MODULES if _importlib_util.find_spec(f"{__name__}.{_n}") is not None
 ]
@@ -95,5 +96,5 @@ __all__ = [
     "regular_polygon", "resolve_stock", "rotate", "sequence_control", "slide", "slider",
     "square", "string", "translate", "FoldedState", "load_fold", "axioms",
     "exact", "flatfold", "foldcut", "foldfile", "kinematics", "papercut", "simplefold",
-    "clamp", "param",
+    "clamp", "param", "piece", "stack",
 ]

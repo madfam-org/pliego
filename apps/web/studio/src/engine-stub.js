@@ -3,7 +3,8 @@
 //
 // Same public surface as the real engine (loadDocument, World with setControl/step/render/grab/
 // moveGrab/release/pick/stats/snapshot/restore) but NO physics: a rigid face-tree pose driven by
-// the fold program and by hinge / leaf / rotate mechanisms. The studio uses it only when
+// the fold program and by hinge / leaf / rotate mechanisms; excess pieces a step removes (spec §5.8)
+// lift away and disappear. The studio uses it only when
 // /engine/index.js is absent or has no World, and says so in the status bar. Node tests use it as
 // the WebGL-less contract double.
 
@@ -56,8 +57,42 @@ export function loadDocument(json) {
   for (const m of json['pliego:mechanisms'] || []) {
     for (const s of [m.sheet, ...(m.sheets_moving || [])].filter(Boolean)) if (!ids.has(s)) p.push(`mechanism ${m.id} sheet "${s}" unresolved`);
   }
+  checkPieces(json, sheets, F, p);
   if (p.length) throw new DocumentError(p);
   return { source: json, counts: { sheets: sheets.length, vertices: V, edges: E, faces: F } };
+}
+
+/** Spec §5.8 references: pieces on existing sheets and faces, no shared face, removals of excess pieces once. */
+function checkPieces(json, sheets, F, p) {
+  const pieces = json['pliego:pieces'];
+  const steps = (json['pliego:sequence'] || {}).steps || [];
+  const sheetIndex = new Map(sheets.map((s, i) => [s.id, i]));
+  const byId = new Map(), owner = new Map();
+  if (pieces !== undefined && !Array.isArray(pieces)) { p.push('pliego:pieces is not an array'); return; }
+  for (const pc of pieces || []) {
+    if (!pc || typeof pc.id !== 'string' || byId.has(pc.id)) { p.push(`piece ${pc && pc.id} id missing or duplicate`); continue; }
+    byId.set(pc.id, pc);
+    const s = sheetIndex.get(pc.sheet);
+    if (s === undefined) { p.push(`piece ${pc.id} sheet "${pc.sheet}" unresolved`); continue; }
+    if (pc.role !== 'keep' && pc.role !== 'excess') p.push(`piece ${pc.id} role "${pc.role}" is not keep/excess`);
+    if (!Array.isArray(pc.faces) || !pc.faces.length) { p.push(`piece ${pc.id} has no faces`); continue; }
+    for (const f of pc.faces) {
+      if (!(Number.isInteger(f) && f >= 0 && f < F)) p.push(`piece ${pc.id} face ${f} out of range`);
+      else if (json['pliego:faces_sheet'][f] !== s) p.push(`piece ${pc.id} face ${f} is not on sheet "${pc.sheet}"`);
+      else if (owner.has(f)) p.push(`face ${f} is in pieces ${owner.get(f)} and ${pc.id}`);
+      else owner.set(f, pc.id);
+    }
+  }
+  const removed = new Set();
+  for (const st of steps) {
+    for (const id of st.remove || []) {
+      const pc = byId.get(id);
+      if (!pc) p.push(`step ${st.id} removes unknown piece "${id}"`);
+      else if (pc.role !== 'excess') p.push(`step ${st.id} removes "${id}", a ${pc.role} piece`);
+      else if (removed.has(id)) p.push(`step ${st.id} removes "${id}" twice`);
+      else removed.add(id);
+    }
+  }
 }
 
 // ---------- rigid transforms: {r: 3×3 row-major (9), t: [3]} ----------
@@ -107,6 +142,8 @@ function newell(pts) {
   return unit(n);
 }
 const ease = (x) => x * x * (3 - 2 * x);
+// A removed piece lifts through the first LIFT_END of its step, then disappears.
+const LIFT_END = 0.75;
 // Fully folded layers are drawn this far from flat (a 75 mm flap opens ~0.7 mm): coplanar layers
 // would z-fight, and real paper has thickness anyway.
 const FLAT_MAX = 179.5;
@@ -116,7 +153,7 @@ export class World {
   constructor(doc, opts = {}) {
     const j = doc.source;
     this.opts = { substeps: 20, ...opts };
-    this.capabilities = { physics: false, grab: false, kind: ENGINE_KIND };
+    this.capabilities = { physics: false, grab: false, pieces: true, kind: ENGINE_KIND };
     this._j = j;
     this._substepsRun = 0;
     this._grab = null;
@@ -188,6 +225,7 @@ export class World {
     this._yield = sheets.map((sh) => (j['pliego:stocks'][sh.stock].derived.crease_yield_deg ?? 35));
     // Render mesh: per-face vertices (flat shading), triangulated in layout space.
     const sheetBox = sheets.map((_, s) => bbox2(j.vertices_coords.filter((__, v) => vsheet[v] === s)));
+    this._removal(j, sheetBox);
     let nr = 0, nt = 0;
     const faceTris = j.faces_vertices.map((f) => { const t = triangulate(f.map((v) => j.vertices_coords[v])); nr += f.length; nt += t.length; return t; });
     this._buf = {
@@ -196,7 +234,7 @@ export class World {
     };
     this._renderSim = new Int32Array(nr);
     this._faceBase = new Int32Array(F);
-    let rv = 0, ti = 0;
+    let rv = 0;
     j.faces_vertices.forEach((f, fi) => {
       this._faceBase[fi] = rv;
       const s = fsheet[fi], bb = sheetBox[s];
@@ -207,12 +245,68 @@ export class World {
         this._buf.sheetIds[rv + k] = s;
         this._renderSim[rv + k] = v;
       });
-      for (const t of faceTris[fi]) { this._buf.indices[ti++] = rv + t[0]; this._buf.indices[ti++] = rv + t[1]; this._buf.indices[ti++] = rv + t[2]; }
       rv += f.length;
     });
+    // Triangles of faces that stay come first, then faces removed by the last step … the first, so
+    // the visible triangles are always a prefix of the index buffer.
+    let ti = 0;
+    const nS = this._nRemoveSteps, groupEnd = new Int32Array(nS + 1).fill(-1);   // groupEnd[nS]: faces that stay
+    for (const fi of this._faceOrder) {
+      const base = this._faceBase[fi];
+      for (const t of faceTris[fi]) { this._buf.indices[ti++] = base + t[0]; this._buf.indices[ti++] = base + t[1]; this._buf.indices[ti++] = base + t[2]; }
+      const k = this._faceStep[fi];
+      groupEnd[k < 0 ? nS : k] = ti;
+    }
+    // visibleEnd[h]: end of the visible prefix once the first h steps' pieces are gone.
+    this._visibleEnd = new Int32Array(nS + 1);
+    this._visibleEnd[nS] = Math.max(0, groupEnd[nS]);
+    for (let k = nS - 1; k >= 0; k--) this._visibleEnd[k] = groupEnd[k] >= 0 ? groupEnd[k] : this._visibleEnd[k + 1];
+    this._allIndices = this._buf.indices;
+    this._hiddenSteps = 0;
+    this.hiddenEdges = new Uint8Array(j.edges_vertices.length);
     this.positions = new Float64Array(V * 3);
     this._faceT = new Array(F);
     this._pose();
+  }
+
+  /** Removal schedule (spec §5.8): the sequence step that takes each face's piece away, or −1. */
+  _removal(j, sheetBox) {
+    const F = j.faces_vertices.length;
+    const seq = j['pliego:sequence'];
+    const steps = seq ? seq.steps : [];
+    const stepOf = new Map();
+    steps.forEach((st, k) => { for (const id of st.remove || []) stepOf.set(id, k); });
+    this._faceStep = new Int32Array(F).fill(-1);
+    this._facePull = new Array(F).fill(null);
+    for (const pc of j['pliego:pieces'] || []) {
+      const k = stepOf.get(pc.id);
+      if (k === undefined) continue;
+      for (const f of pc.faces) { this._faceStep[f] = k; this._facePull[f] = pc.pull ? unit(pc.pull) : null; }
+    }
+    this._nRemoveSteps = steps.length;
+    const removes = this._faceStep.some((k) => k >= 0);
+    const order = [...Array(F).keys()];
+    const rank = (f) => (this._faceStep[f] < 0 ? Infinity : this._faceStep[f]);
+    if (removes) order.sort((a, b) => (rank(a) === rank(b) ? a - b : rank(a) > rank(b) ? -1 : 1));
+    this._faceOrder = order;
+    this._lift = Math.max(10, 0.25 * Math.max(...sheetBox.map((b) => Math.hypot(b.w, b.h))));
+    // An overlay edge disappears once every face along it is gone.
+    const key = (a, b) => (a < b ? `${a},${b}` : `${b},${a}`);
+    const edgeOf = new Map();
+    j.edges_vertices.forEach(([a, b], e) => edgeOf.set(key(a, b), e));
+    this._edgeStep = new Float64Array(j.edges_vertices.length).fill(-2);   // −2: no face yet; ∞: a face stays
+    j.faces_vertices.forEach((f, fi) => f.forEach((a, k) => {
+      const e = edgeOf.get(key(a, f[(k + 1) % f.length]));
+      if (e === undefined) return;
+      const s = this._faceStep[fi] < 0 ? Infinity : this._faceStep[fi], cur = this._edgeStep[e];
+      this._edgeStep[e] = cur === -2 ? s : Math.max(cur, s);
+    }));
+  }
+
+  /** Sequence position (0…N steps) or 0 when the document has no program. */
+  _seqValue() {
+    const seqId = [...this._controlKind].find(([, k]) => k === 'sequence');
+    return seqId ? (this._controls.get(seqId[0]) || 0) : 0;
   }
 
   _wellShaped(f) {
@@ -310,8 +404,22 @@ export class World {
     const M = this._mechanisms(this._rootPose);
     const { positions: P, normals: N } = this._buf;
     const written = new Uint8Array(U.length);
-    j.faces_vertices.forEach((f, fi) => {
-      const T = compose(M[fsheet[fi]], this._faceT[fi] || this._rootPose[fsheet[fi]]);
+    const sv = this._seqValue();
+    const hidden = this._nRemoveSteps ? Math.max(0, Math.min(this._nRemoveSteps, Math.floor(sv - LIFT_END) + 1)) : 0;
+    if (hidden !== this._hiddenSteps || this._buf.indices.length !== this._visibleEnd[hidden]) {
+      this._hiddenSteps = hidden;
+      this._buf.indices = this._allIndices.subarray(0, this._visibleEnd[hidden]);
+      for (let e = 0; e < this.hiddenEdges.length; e++) this.hiddenEdges[e] = this._edgeStep[e] >= 0 && this._edgeStep[e] < hidden ? 1 : 0;
+    }
+    for (const fi of this._faceOrder) {
+      const f = j.faces_vertices[fi];
+      let T = compose(M[fsheet[fi]], this._faceT[fi] || this._rootPose[fsheet[fi]]);
+      const k = this._faceStep[fi];
+      if (k >= 0 && sv > k && sv - k < LIFT_END) {   // hidden pieces keep their rest pose (stable bounds)
+        const lift = this._lift * ease(Math.min(1, (sv - k) / LIFT_END));
+        const d = this._facePull[fi] || unit(rotOnly(this._rootPose[fsheet[fi]], [0, 1, 0]));
+        T = compose({ r: [1, 0, 0, 0, 1, 0, 0, 0, 1], t: [d[0] * lift, d[1] * lift, d[2] * lift] }, T);
+      }
       const n = rotOnly(T, [0, 1, 0]);
       const base = this._faceBase[fi];
       f.forEach((v, k) => {
@@ -321,7 +429,7 @@ export class World {
         N[r] = n[0]; N[r + 1] = n[1]; N[r + 2] = n[2];
         if (!written[v]) { written[v] = 1; this.positions[v * 3] = w[0]; this.positions[v * 3 + 1] = w[1]; this.positions[v * 3 + 2] = w[2]; }
       });
-    });
+    }
     this._dirty = false;
   }
 

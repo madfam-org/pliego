@@ -215,6 +215,29 @@ Two limits apply:
 | folding a 726-vertex sheet | about 170–240 ms/frame |
 | folding an 1838-vertex sheet | about 680–820 ms/frame |
 
+**Studio interactive options** (mesh edge from the sheet area, 8 substeps; backlog item 22,
+`node packages/engine/test/helpers/perf-docs.js <docs>`; best mean of 5 interleaved runs per side,
+this Mac, Node 20, under load from other jobs, so treat ±10 % as noise):
+
+| document | V | before (origin/main) | after | change |
+|---|---|---|---|---|
+| page-turn (default) | 424 | 24.8 ms/frame | 24.2 | ≈ 0 |
+| valley-fold (default) | 449 | 37.1 | 34.5 | −7 % |
+| v-fold-popup (spread) | 477 | 13.6 | 11.6 | −15 % |
+| papel-picado-banner (default, in wind) | 1955 | 248.3 | 127.9 | −48 % |
+
+What was measured first (CPU profiles): the triangular solves inside PCG (≈ 25 %) and the
+numeric factorisation (≈ 18 %) lead on single sheets; on the banner the contact broad phase led
+(44 % in the per-candidate sphere test alone). The change: triangle bounding spheres once per
+broad phase and a typed-array cell table (same candidates in the same order, so results are
+bit-identical), and no allocation inside the factorisation's inner loop (bit-identical). What did
+not pay: minimum-fill ordering is within 2 % of the current minimum-degree fill on these meshes
+(so AMD or nested dissection would not either); the symbolic analysis is already done once per
+World; the solve and factorisation already run at about 1.3 and 2.3 GFLOP/s, the scalar limit of
+plain JavaScript, so a supernodal layout would add little without SIMD; raising or lowering the PCG
+refactor threshold (3–12 iterations) was slower than today's 6. The next step is WASM SIMD or
+WebGPU (out of scope here).
+
 The < 8 ms/frame target is not met for moving sheets above a few hundred vertices. The
 factorisation and the triangular solves dominate (block Cholesky in plain JavaScript). Ways to
 get interactive rates:

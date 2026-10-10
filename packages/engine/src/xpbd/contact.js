@@ -73,13 +73,26 @@ export class Contact {
   broadPhase(x, fixed, reach) {
     const m = this.mesh, T = m.tris;
     const cell = Math.max(this.cell, reach * 2, 1e-3);
-    /** @type {Map<number, number[]>} */
-    const grid = new Map();
-    // integer spatial hash (collisions only add candidates; the distance test filters them)
+    // integer spatial hash of cells; the table is typed-array CSR rebuilt each call (no Map, no
+    // per-cell arrays: backlog item 22). Entries keep their full 32-bit cell key, so a query sees
+    // exactly its own cell's triangles, in ascending order — the same candidates, in the same
+    // order, as a Map keyed by the cell.
     const key = (/** @type {number} */ i, /** @type {number} */ j, /** @type {number} */ k) => ((Math.imul(i, 73856093) ^ Math.imul(j, 19349663) ^ Math.imul(k, 83492791)) >>> 0);
     let rmax = 0;
     for (let v = 0; v < m.nV; v++) rmax = Math.max(rmax, this.tc[v]);
     const R = rmax + reach;
+    // bounding sphere of every triangle (centroid + farthest vertex), once per broad phase: the
+    // narrow filter below is then one squared distance per candidate
+    const S = this._sph ?? (this._sph = new Float64Array(4 * m.nT));
+    for (let t = 0; t < m.nT; t++) {
+      const a = 3 * T[3 * t], b = 3 * T[3 * t + 1], c = 3 * T[3 * t + 2];
+      const cx = (x[a] + x[b] + x[c]) / 3, cy = (x[a + 1] + x[b + 1] + x[c + 1]) / 3, cz = (x[a + 2] + x[b + 2] + x[c + 2]) / 3;
+      const ra = Math.hypot(x[a] - cx, x[a + 1] - cy, x[a + 2] - cz), rb = Math.hypot(x[b] - cx, x[b + 1] - cy, x[b + 2] - cz), rc = Math.hypot(x[c] - cx, x[c + 1] - cy, x[c + 2] - cz);
+      S[4 * t] = cx; S[4 * t + 1] = cy; S[4 * t + 2] = cz; S[4 * t + 3] = Math.max(ra, rb, rc) + R;
+    }
+    // pass 1: (cell key, triangle) entries, triangles ascending
+    let ek = this._ek ?? new Uint32Array(8 * m.nT), et = this._et ?? new Int32Array(8 * m.nT);
+    let ne = 0;
     for (let t = 0; t < m.nT; t++) {
       let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
       for (let i = 0; i < 3; i++) { const v = 3 * T[3 * t + i]; x0 = Math.min(x0, x[v]); x1 = Math.max(x1, x[v]); y0 = Math.min(y0, x[v + 1]); y1 = Math.max(y1, x[v + 1]); z0 = Math.min(z0, x[v + 2]); z1 = Math.max(z1, x[v + 2]); }
@@ -87,20 +100,39 @@ export class Contact {
       const j0 = Math.floor((y0 - R) / cell), j1 = Math.floor((y1 + R) / cell);
       const k0 = Math.floor((z0 - R) / cell), k1 = Math.floor((z1 + R) / cell);
       for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) for (let k = k0; k <= k1; k++) {
-        const kk = key(i, j, k);
-        let l = grid.get(kk);
-        if (!l) { l = []; grid.set(kk, l); }
-        l.push(t);
+        if (ne === ek.length) { const k2 = new Uint32Array(2 * ne); k2.set(ek); ek = k2; const t2 = new Int32Array(2 * ne); t2.set(et); et = t2; }
+        ek[ne] = key(i, j, k); et[ne] = t; ne++;
       }
     }
-    /** @type {number[]} */ const PV = [], PT = [];
+    this._ek = ek; this._et = et;
+    // pass 2: counting sort of the entries by bucket (stable: triangles stay ascending)
+    let B = 1;
+    while (B < 2 * ne) B <<= 1;
+    const mask = B - 1;
+    let start = this._bs;
+    if (!start || start.length < B + 1) start = this._bs = new Int32Array(B + 1);
+    start.fill(0, 0, B + 1);
+    for (let e = 0; e < ne; e++) start[(ek[e] & mask) + 1]++;
+    for (let b = 0; b < B; b++) start[b + 1] += start[b];
+    let fill = this._bf;
+    if (!fill || fill.length < B) fill = this._bf = new Int32Array(B);
+    fill.set(start.subarray(0, B));
+    let items = this._bi;
+    if (!items || items.length < ne) items = this._bi = new Int32Array(ek.length);
+    for (let e = 0; e < ne; e++) items[fill[ek[e] & mask]++] = e;
+    let PV = this._pvBuf ?? new Int32Array(1024), PT = this._ptBuf ?? new Int32Array(1024);
+    let np = 0;
     const mark = this.mark;
     for (let v = 0; v < m.nV; v++) {
-      const l = grid.get(key(Math.floor(x[3 * v] / cell), Math.floor(x[3 * v + 1] / cell), Math.floor(x[3 * v + 2] / cell)));
-      if (!l) continue;
+      const kv = key(Math.floor(x[3 * v] / cell), Math.floor(x[3 * v + 1] / cell), Math.floor(x[3 * v + 2] / cell));
+      const b = kv & mask, q0 = start[b], q1 = start[b + 1];
+      if (q0 === q1) continue;
       mark[v] = v;
       for (let q = this.adjStart[v]; q < this.adjStart[v + 1]; q++) mark[this.adj[q]] = v;
-      for (const t of l) {
+      for (let q = q0; q < q1; q++) {
+        const e = items[q];
+        if (ek[e] !== kv) continue;
+        const t = et[e];
         const a = T[3 * t], b = T[3 * t + 1], c = T[3 * t + 2];
         if (mark[a] === v || mark[b] === v || mark[c] === v) continue;
         const g = m.vGroup[v];
@@ -110,12 +142,16 @@ export class Contact {
         if (ws >= 0 && m.triSheet[t] === ws) continue;
         const sv = m.vSheet[v];
         if (this.weldSheet[a] === sv && this.weldSheet[b] === sv && this.weldSheet[c] === sv) continue;
-        if (pointTriDist(x, v, a, b, c) > R) continue;
-        PV.push(v); PT.push(t);
+        // outside the triangle's bounding sphere grown by R (same test as distance − radius > R)
+        const dx = x[3 * v] - S[4 * t], dy = x[3 * v + 1] - S[4 * t + 1], dz = x[3 * v + 2] - S[4 * t + 2], rr = S[4 * t + 3];
+        if (dx * dx + dy * dy + dz * dz > rr * rr) continue;
+        if (np === PV.length) { const a2 = new Int32Array(2 * np); a2.set(PV); PV = a2; const b2 = new Int32Array(2 * np); b2.set(PT); PT = b2; }
+        PV[np] = v; PT[np] = t; np++;
       }
     }
+    this._pvBuf = PV; this._ptBuf = PT;
     for (let v = 0; v < m.nV; v++) mark[v] = -1;
-    this.pv = Int32Array.from(PV); this.pt = Int32Array.from(PT); this.nPairs = PV.length;
+    this.pv = PV.slice(0, np); this.pt = PT.slice(0, np); this.nPairs = np;
     this._tuReady = false;
     // forget sidedness of pairs that are no longer candidates
     const keep = new Map();
@@ -232,14 +268,4 @@ export class Contact {
     }
     return n;
   }
-}
-
-/** Distance from vertex v to triangle (a, b, c) (clamped to the triangle). */
-function pointTriDist(/** @type {Float64Array} */ x, /** @type {number} */ v, /** @type {number} */ a, /** @type {number} */ b, /** @type {number} */ c) {
-  const px = x[3 * v], py = x[3 * v + 1], pz = x[3 * v + 2];
-  // cheap bound: distance to the triangle's bounding sphere (centroid + max vertex radius)
-  const cx = (x[3 * a] + x[3 * b] + x[3 * c]) / 3, cy = (x[3 * a + 1] + x[3 * b + 1] + x[3 * c + 1]) / 3, cz = (x[3 * a + 2] + x[3 * b + 2] + x[3 * c + 2]) / 3;
-  let r = 0;
-  for (const q of [a, b, c]) r = Math.max(r, Math.hypot(x[3 * q] - cx, x[3 * q + 1] - cy, x[3 * q + 2] - cz));
-  return Math.max(0, Math.hypot(px - cx, py - cy, pz - cz) - r);
 }

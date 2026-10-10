@@ -167,3 +167,57 @@ def frog_base(s: float = 150.0):
     fp.fold("page-4", "page", (o, b), "valley", at=(o[0] - 6, t[1] + 10), layers=7)
     fp.petal("petal-4", "petal", (kl, kr), t, at=seed)
     return fp, (o, b, kl, kr, t)
+
+
+def canard_plane(trim: float = 10.0, dihedral: float = 6.0, W: float = 210.0, H: float = 297.0):
+    """The canard paper airplane (an original MADFAM design in the commons, folded by traditional
+    dart-family moves): fold in half and open, roll the nose once, fold in half, cut a slit through
+    both layers between the foreplane and the main wing, cut two short slits into each trailing
+    edge (the elevator tabs) and crease the tab hinges, fold the wings and then the foreplanes
+    down, then open the plane in 3-D: fuselage spread, wings to their dihedral, tabs trimmed."""
+    c = W / 2.0
+    k = 0.10 * W
+    depth = 0.06 * H
+    top = H - depth
+    fp = FoldProgram([(0, 0), (W, 0), (W, H), (0, H)])
+    fp.fold("fold-in-half", "fold in half", ((c, -10.0), (c, H + 10.0)), "valley")
+    fp.unfold_last("unfold")
+    fp.fold("nose", "nose", ((-10.0, top), (W + 10.0, top)), "valley")
+    fp.fold("fold-half", "fold half", ((c, -10.0), (c, H + 10.0)), "valley")
+    y_slit, kc = 0.62 * top, k + 0.42 * (c - k)
+    fp.cut("slit", "slit", ((W + 10.0, y_slit), (c + k, y_slit)))
+    x2 = W - 6.0
+    x1, e = max(c + k + 4.0, x2 - 0.22 * (c - k)), 0.05 * H
+    xm = (x1 + x2) / 2.0
+    fp.cut("elevator-slit-1", "elevator slits", ((x1, -10.0), (x1, e)))
+    fp.cut("elevator-slit-2", "elevator slits", ((x2, -10.0), (x2, e)))
+    fp.crease("tab-hinges", "tab hinges", ((x2 + 5.0, e), (x1 - 5.0, e)), "valley",
+              sheet_points=[(xm, e / 2.0), (2 * c - xm, e / 2.0)])
+    seed_r = (c + k + 3.0, 1.5)
+    wing = ((c + k, H + 10.0), (c + k, -10.0))
+    fp.fold("wing-r", "wings", wing, "mountain", sheet_points=[seed_r])
+    fp.fold("wing-l", "wings", wing, "valley", sheet_points=[(2 * c - seed_r[0], seed_r[1])])
+    cs = (W - 2.0, (y_slit + top) / 2.0)
+    fore = ((c + kc, H + 10.0), (c + kc, -10.0))
+    fp.fold("fore-r", "foreplanes", fore, "mountain", sheet_points=[cs])
+    fp.fold("fore-l", "foreplanes", fore, "valley", sheet_points=[(2 * c - cs[0], cs[1])])
+    # 3-D: the top half (the sheet's left half) lifts about the keel, then each wing and
+    # foreplane opens to its dihedral, then the tabs turn by the trim
+    spread = 16.0
+    keel = ((c, -10.0), (c, H + 10.0))
+    fp.hinge("open-fuselage", "open", keel, spread, at=(c + k / 2, H / 3), layers=1)
+    wing_fold = 90.0 - spread / 2.0 - dihedral
+    out = 180.0 - wing_fold
+    low = (c + k - (W - c - k) / 2, y_slit / 2)
+    fore_at = (c + kc - (W - c - kc) / 2, (y_slit + top) / 2)
+    fp.hinges("open-wings", "dihedral", [
+        {"line": wing, "turn": -out, "at": low, "layers": 1},
+        {"line": wing, "turn": out, "at": low, "layers": 1, "from_": "bottom"},
+        {"line": fore, "turn": -out, "at": fore_at, "layers": 1},
+        {"line": fore, "turn": out, "at": fore_at, "layers": 1, "from_": "bottom"}])
+    tab = ((x1 - 5.0, e), (x2 + 5.0, e))
+    tab_at = (2 * (c + k) - xm, e / 2.0)
+    fp.hinges("trim", "trim", [
+        {"line": tab, "turn": trim, "at": tab_at, "layers": 1},
+        {"line": tab, "turn": -trim, "at": tab_at, "layers": 1, "from_": "bottom"}])
+    return fp, {"c": c, "k": k, "y_slit": y_slit, "x1": x1, "x2": x2, "e": e, "kc": kc}

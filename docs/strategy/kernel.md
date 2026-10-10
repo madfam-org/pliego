@@ -201,6 +201,24 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   that layer (negative indices count from the top), the inverse of `to_folded` for that layer;
   `layer_index(sheet_point, q=None)` is the converse. Cartridges compute crease seeds and
   `sheet_points` selections with it instead of copying the placement algebra.
+- **Cuts** (`flatcut.py`). `cut(state, (p0, p1), at=, layers=, faces=, sheet_points=, from_=)`
+  cuts along a folded segment through every layer it crosses, or the layers picked at `at` (and
+  the same layers where they continue flat along the segment); each cut layer's part of the
+  segment is mapped back through its placement (the pre-image mapping of `foldcut`, one segment
+  per layer). `FlatState.cuts` holds the slits (sheet frame): their faces are not joined — no
+  crease, no placement or layer constraint, no flap selection across them — and `unfold()` writes
+  them as `C` cuts. Faces are split along the slit's whole line to stay convex; where a slit ends
+  inside a face the rest of the line is a **seam** (`FlatState.seams`: joined flat, no line on the
+  sheet) until a move folds it (`FlatState.creased`; a crease from then on). `FoldProgram.cut(...)`
+  records it as a step with no targets (the document's slits exist from the first frame).
+  `Built.face_orders()` keeps its meaning; for sheets with slits each pattern face is the union of
+  the state faces inside it. The preview's `tear` ignores slit edges (their sides part).
+  Hinge poses now take the paper joined to the picked layers without crossing the line's creases,
+  even where it lies past the line in the folded image (a wing folded back across the keel); the
+  side-of-line rule remains the fallback when that reaches the whole model. Today a slit's two
+  sides share their end vertices on the flat sheet, so a target frame that opens a slit (a trimmed
+  tab) is drawn with those vertices on one side; when `Sheet.cut` splits cut vertices, it is exact.
+  Cutting along an existing crease is not supported (the segment must cross the paper).
 <!-- FL2 (wave 3, flat operations) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

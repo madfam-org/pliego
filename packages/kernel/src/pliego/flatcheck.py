@@ -342,8 +342,7 @@ def solve(state: FlatState, hint: dict[tuple[int, int], int],
     unknown = [k for k in pairs if k not in fixed]
     index = {k: i for i, k in enumerate(unknown)}
     rows: list[tuple[int, int]] = []   # (bitmask over unknowns, parity)
-    for lits, kind in constraints(FlatState(state.outline, state.points, state.faces,
-                                            {**fixed, **{k: 1 for k in unknown}})):
+    for lits, kind in constraints(state.derive(order={**fixed, **{k: 1 for k in unknown}})):
         mask, par = 0, 0
         for lit in lits:
             key, neg = _var(lit)
@@ -399,7 +398,7 @@ def solve(state: FlatState, hint: dict[tuple[int, int], int],
     while queue and tried < SEARCH_LIMIT:
         choice = queue.pop(0)
         tried += 1
-        cand = FlatState(state.outline, state.points, state.faces, {**fixed, **assign(choice)})
+        cand = state.derive(order={**fixed, **assign(choice)})
         if all(_transitive(cand, s)[0] for _, s in cs):
             return cand
         if tried == len(order_try) and len(free) <= 12:

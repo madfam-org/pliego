@@ -32,6 +32,7 @@ from .flatstate import (
     as_line,
     centroid,
     embed3,
+    inside_convex,
     overlap,
     pt,
     side,
@@ -91,8 +92,7 @@ class Built:
         return face_orders(self.state, self.arr)
 
     def root(self) -> tuple[float, float]:
-        verts = self.arr.vertices
-        return centroid([(verts[v].x, verts[v].y) for v in self.arr.faces[0]])
+        return face_points(self.arr)[0]
 
     def summary(self) -> str:
         r = self.report
@@ -164,6 +164,14 @@ class FoldProgram:
         self._add(sid, label, m, ms)
         return self._add(f"{sid}-open", UNFOLD, back, max(100, ms * 3 // 4))
 
+    def cut(self, sid: str, label, segment, ms: int = 1200, note=None,
+            **select) -> FoldProgram:
+        """Cut along a folded segment through every layer it crosses, or the chosen layers
+        (`pliego.flatcut.cut`); the sheet gets slits. The step is a pause in the program (the
+        paper does not move; a document's slits exist from the first frame)."""
+        from .flatcut import cut
+        return self._add(sid, label, cut(self.state, segment, **select), ms, note)
+
     def crease(self, sid: str, label, line, direction: str = "valley", ms: int = 600,
                **select) -> FoldProgram:
         """Mark creases on the selected layers without moving them (no step is emitted)."""
@@ -217,9 +225,20 @@ class FoldProgram:
             stack = flatops._stack_at(st, q, on)
 
             def flap(seeds, on=on, p=p, d=d):
-                return flatops.flood(st, set(seeds), on.__contains__,
-                                     lambda face, a, b: flatops._on_line(
-                                         st.faces[face].xf, st.points[a], st.points[b], p, d))
+                # the paper joined to the seeds without crossing the line's creases — it may
+                # reach past the line in the folded image (a flap folded back across it); a
+                # flap still joined to the rest round the line's end keeps to its side
+                def blocked(face, a, b):
+                    return flatops._on_line(st.faces[face].xf, st.points[a], st.points[b], p, d)
+                grp = flatops.flood(st, set(seeds), lambda f: True, blocked)
+                if len(grp) == len(st.faces):
+                    grp = flatops.flood(st, set(seeds), on.__contains__, blocked)
+                    for f in grp:
+                        vals = [side(p, d, x) for x in st.image(f)]
+                        if max(vals) > TOL and min(vals) < -TOL:
+                            raise FlatStateError(f"hinge '{sid}': the line crosses face {f}; "
+                                                 "hinge poses turn about existing creases only")
+                return grp
             if spec.get("leaf") is not None:
                 # the n-th flap from the top (bottom with from_="bottom"): the layers at `at`
                 # split into flaps that meet only along the line
@@ -241,11 +260,11 @@ class FoldProgram:
                     stack = stack[-int(layers):] if spec.get("from_", "top") == "top" \
                         else stack[:int(layers)]
                 grp = flap(stack)
-            for f in grp:
-                vals = [side(p, d, x) for x in st.image(f)]
-                if max(vals) > TOL and min(vals) < -TOL:
-                    raise FlatStateError(f"hinge '{sid}': the line crosses face {f}; hinge poses "
-                                         "turn about existing creases only")
+            for c in st.creases():
+                if (c.f in grp) != (c.g in grp) and not flatops._on_line(
+                        st.faces[c.f].xf, st.points[c.a], st.points[c.b], p, d):
+                    raise FlatStateError(f"hinge '{sid}': the flap is joined to the rest off the "
+                                         "line; hinge poses turn about existing creases only")
             if len(grp) == len(st.faces):
                 raise FlatStateError(f"hinge '{sid}': the selection is the whole model")
             if grp & taken:
@@ -312,7 +331,7 @@ class FoldProgram:
         sheet = final.unfold(id, **self.sheet_kwargs)
         arr = sheet.build()
         nf = len(arr.faces)
-        cents = [centroid([(arr.vertices[v].x, arr.vertices[v].y) for v in f]) for f in arr.faces]
+        cents = face_points(arr)
         edge_faces: dict[int, tuple[int, int, int, int]] = {}
         for f, lst in face_adjacency(arr).items():
             for g, e, a, b in lst:
@@ -325,8 +344,7 @@ class FoldProgram:
             return [state.face_at(c) for c in cents]
 
         def flat_angles(state: FlatState, m: list[int]) -> dict[int, float]:
-            return {e: (0.0 if m[f] == m[g] else state.crease_angle(m[f], m[g]))
-                    for e, (f, g, _, _) in edge_faces.items()}
+            return edge_angles_mapped(state, arr, m, edge_faces)
 
         def readout(poses: list, prev: dict[int, float]) -> dict[int, float]:
             out = {}
@@ -425,7 +443,7 @@ class FoldProgram:
                 full = {**last, **ang}
                 tg = [(EdgeRef(sheet, e), round(full[e], 6)) for e in folds
                       if abs(full[e] - last[e]) > SAME_TOL_DEG]
-                if tg:
+                if tg or (rec.move is not None and rec.move.kind == "cut"):
                     lab = rec.label if n == 1 else {lg: f"{tx} ({k}/{n})"
                                                     for lg, tx in rec.label.items()}
                     steps.append(Step(rec.sid if n == 1 else f"{rec.sid}-{k}", lab, tg,
@@ -460,14 +478,55 @@ def edge_angles(state: FlatState, arr, edges: Sequence[int] | None = None) -> di
     creases, or any finer one) in this flat state."""
     from .kinematics import face_adjacency
 
-    cents = [centroid([(arr.vertices[v].x, arr.vertices[v].y) for v in f]) for f in arr.faces]
-    m = [state.face_at(c) for c in cents]
-    out = {}
+    m = [state.face_at(c) for c in face_points(arr)]
+    ef: dict[int, tuple[int, int, int, int]] = {}
     for f, lst in face_adjacency(arr).items():
-        for g, e, _, _ in lst:
-            if e in out or (edges is not None and e not in edges):
-                continue
-            out[e] = 0.0 if m[f] == m[g] else state.crease_angle(m[f], m[g])
+        for g, e, a, b in lst:
+            if e not in ef and (edges is None or e in edges):
+                ef[e] = (f, g, a, b)
+    return edge_angles_mapped(state, arr, m, ef)
+
+
+def face_points(arr) -> list[tuple[float, float]]:
+    """A point inside every face of an arrangement: its centroid, or (a face that is not convex
+    or that a slit enters) an interior point."""
+    from .foldcut import interior_point
+    from .geometry import Vec2, point_in_polygon
+
+    out = []
+    for f in arr.faces:
+        ring = [arr.vertices[v] for v in f]
+        c = centroid([(v.x, v.y) for v in ring])
+        if point_in_polygon(Vec2(*c), ring) != 1:
+            q = interior_point(ring)
+            c = (q.x, q.y)
+        out.append(c)
+    return out
+
+
+def edge_angles_mapped(state: FlatState, arr, m: list[int],
+                       edge_faces: dict[int, tuple[int, int, int, int]]) -> dict[int, float]:
+    """Fold angle of each arrangement edge (`edge_faces`: e → (f, g, a, b), f on the left of
+    a→b) in a flat state, `m[f]` the state face holding face f's interior point. Where an
+    arrangement face spans several state faces (joined flat across a slit's seam), each side of
+    the edge is read on the state face that touches it."""
+    out = {}
+    for e, (f, g, a, b) in edge_faces.items():
+        fa, fb = m[f], m[g]
+        if state.seams:
+            pa, pb = arr.vertices[a], arr.vertices[b]
+            mid = ((pa.x + pb.x) / 2, (pa.y + pb.y) / 2)
+            ln = math.hypot(pb.x - pa.x, pb.y - pa.y)
+            nrm = (-(pb.y - pa.y) / ln, (pb.x - pa.x) / ln)      # towards f
+            for k, sgn in ((0, 1.0), (1, -1.0)):
+                fc = (fa, fb)[k]
+                if not inside_convex(mid, state.poly(fc), -1e-4):
+                    probe = (mid[0] + sgn * 1e-3 * nrm[0], mid[1] + sgn * 1e-3 * nrm[1])
+                    if k == 0:
+                        fa = state.face_at(probe)
+                    else:
+                        fb = state.face_at(probe)
+        out[e] = 0.0 if fa == fb else state.crease_angle(fa, fb)
     return out
 
 
@@ -475,6 +534,8 @@ def face_orders(state: FlatState, arr) -> list[list[int]]:
     """The complete layer order of a flat state on a kernel arrangement's faces, as FOLD
     ``faceOrders`` triples [f, g, s]: s = +1 when face f lies on the side of face g's normal
     (its front), −1 behind it. Every pair of overlapping faces on different layers is listed."""
+    if state.cuts or state.seams:
+        return _face_orders_covered(state, arr)
     cents = [centroid([(arr.vertices[v].x, arr.vertices[v].y) for v in f]) for f in arr.faces]
     m = [state.face_at(c) for c in cents]
     out: list[list[int]] = []
@@ -492,4 +553,33 @@ def face_orders(state: FlatState, arr) -> list[list[int]]:
                 continue
             s_ij = 1 if up == (not state.flipped(m[j])) else -1
             out.append([i, j, s_ij])
+    return out
+
+
+def _face_orders_covered(state: FlatState, arr) -> list[list[int]]:
+    """`face_orders` where arrangement faces need not be convex (slits) and may span several
+    state faces (seams): each arrangement face is the union of the state faces inside it; two
+    overlap where any of their state faces do, ordered as those state faces are."""
+    from .geometry import Vec2, point_in_polygon
+
+    rings = [[arr.vertices[v] for v in f] for f in arr.faces]
+    cover: list[list[int]] = [[] for _ in arr.faces]
+    for sf in range(len(state.faces)):
+        c = Vec2(*centroid(state.poly(sf)))
+        for i, ring in enumerate(rings):
+            if point_in_polygon(c, ring) == 1:
+                cover[i].append(sf)
+                break
+        else:
+            raise FlatStateError(f"face_orders: state face {sf} lies in no arrangement face")
+    out: list[list[int]] = []
+    for i in range(len(arr.faces)):
+        for j in range(i + 1, len(arr.faces)):
+            for a in cover[i]:
+                hit = next((b for b in cover[j] if a != b and state.above(a, b) is not None),
+                           None)
+                if hit is not None:
+                    up = state.above(a, hit)
+                    out.append([i, j, 1 if up == (not state.flipped(hit)) else -1])
+                    break
     return out

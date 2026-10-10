@@ -110,11 +110,12 @@ class PreviewTree:
         return out
 
     def tear(self, poses: Sequence[flatmotion.Rigid]) -> float:
-        """Largest distance between the images of a vertex shared by two adjacent faces."""
+        """Largest distance between the images of a vertex shared by two faces joined at an
+        edge (a hinge: not across a slit, whose sides part when the paper opens there)."""
         worst = 0.0
         u = self.unplaced
         for e, fs in enumerate(self.edge_faces):
-            if len(fs) < 2:
+            if len(fs) < 2 or self.arr.assignment[e] not in HINGE:
                 continue
             f, g = fs[0], fs[1]
             for v in self.arr.edges[e]:

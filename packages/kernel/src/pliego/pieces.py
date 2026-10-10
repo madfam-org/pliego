@@ -76,7 +76,7 @@ def stack(id: str, sheets: Seq[Sheet | str], pitch_mm: float, *, represents: int
 
     `represents`: physical sheets each document sheet stands for (1 for fabrication).
     `bond`: none (contact and friction only) | keep (keep pieces and uncut faces bonded to the
-    sheet below where they overlap — selective adhesive, as in laminated-object manufacturing) |
+    sheet below where they overlap — adhesive only where the material stays) |
     all (a fully bonded laminate). `binding`: a sheet-local segment where the stack is padded
     (the glued spine of a memo block); pieces touching it are held by the padding."""
     ids = [_sid(s) for s in sheets]

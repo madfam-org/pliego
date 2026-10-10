@@ -159,3 +159,14 @@ def test_slicer_fails_loud():
         R.slice_block(s, tear_grid=0)
     with pytest.raises(TypeError):
         R.heightfield(3)
+
+
+def test_union_of_towers_is_evaluated_exactly_near_every_part():
+    towers = R.union(R.box((8, 8, 0), (20, 20, 10)), R.box((26, 8, 0), (38, 22, 16)),
+                     R.box((8, 28, 0), (24, 40, 6)))
+    block, doc = build(towers, size=(46, 48), height=16, layers=8, tear_grid=1)
+    for layer in range(8):
+        z = (layer + 0.5) * block.report["pitch_mm"] * 16 / block.report["height_mm"]
+        want = sum(a for top, a in ((10, 144), (16, 168), (6, 192)) if z < top)
+        got = keep_area(block, doc, layer)
+        assert abs(got - want) <= 0.03 * want + 1e-9, (layer, got, want)

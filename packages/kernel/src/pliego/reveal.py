@@ -42,6 +42,7 @@ from .pieces import arrangement_regions, interior_point, piece, stack
 from .reveal_scene import (  # noqa: F401 - re-exported: pliego.reveal.sphere(...)
     Heightfield,
     Scene,
+    _union_value,
     box,
     cone,
     cylinder,
@@ -79,21 +80,23 @@ def _axis(length: float, step: float) -> list[float]:
 
 
 def _shift(rows: list[int], full: int, grow: bool) -> list[int]:
-    """One plus-shaped dilation (grow) or erosion of a bit-row mask."""
+    """One dilation (grow) or erosion of a bit-row mask by a 3 × 3 square of nodes (a square
+    keeps the corners of axis-aligned shapes — towers, terraces — instead of chamfering them)."""
+    if grow:
+        h = [(m | (m << 1) | (m >> 1)) & full for m in rows]
+    else:
+        h = [m & (m << 1) & (m >> 1) & full for m in rows]
     out = []
-    n = len(rows)
-    for r, m in enumerate(rows):
-        up = rows[r + 1] if r + 1 < n else 0
-        dn = rows[r - 1] if r > 0 else 0
-        if grow:
-            out.append((m | (m << 1) | (m >> 1) | up | dn) & full)
-        else:
-            out.append(m & (m << 1) & (m >> 1) & up & dn & full)
+    n = len(h)
+    for r, m in enumerate(h):
+        up = h[r + 1] if r + 1 < n else 0
+        dn = h[r - 1] if r > 0 else 0
+        out.append((m | up | dn) if grow else (m & up & dn))
     return out
 
 
 def _clean(rows: list[int], full: int, k: int) -> list[int]:
-    """Opening then closing by a diamond of radius k nodes (removes features under ~2k nodes)."""
+    """Opening then closing by a square of 2k + 1 nodes (removes features under ~2k nodes)."""
     for grow_first in (False, True):
         for _ in range(k):
             rows = _shift(rows, full, grow_first)
@@ -313,6 +316,10 @@ def slice_block(scene: Scene, *, size: tuple[float, float] = (70.0, 70.0),
     k_morph = max(1, round(mf / (2.0 * step)))
     edge_room = [[margin - min(x, w - x, y, d - y) for x in xs] for y in ys]
     hf = [[scene.height(x, y) for x in xs] for y in ys] if isinstance(scene, Heightfield) else None
+    # far from every part a node is simply outside; within `pad` of a part it is evaluated
+    # exactly, so every crossing next to material is interpolated from true values
+    pad, far = 2.0 * step, 2.0 * step
+    parts = scene.parts if getattr(scene, "op", None) == "union" else None
     b = scene.bounds
     tol = 0.2 * step
     cols = max(1, math.ceil(math.sqrt(n)))
@@ -324,17 +331,26 @@ def slice_block(scene: Scene, *, size: tuple[float, float] = (70.0, 70.0),
     overhang = dropped_loops = dropped_tears = small_regions = 0
     for i in range(n):
         z = (i + 0.5) * pitch * z_scale
-        empty = b is not None and not (b[2] <= z <= b[5])
+        empty = b is not None and not (b[2] - pad <= z <= b[5] + pad)
+        active = None if parts is None else [p for p in parts if p.bounds is None or (
+            p.bounds[2] - pad <= z <= p.bounds[5] + pad)]
         val: list[list[float]] = []
         rows: list[int] = []
         for r, y in enumerate(ys):
             row_v, bits = [], 0
             room = edge_room[r]
+            near = None if active is None else [p for p in active if p.bounds is None or (
+                p.bounds[1] - pad <= y <= p.bounds[4] + pad)]
             for c, x in enumerate(xs):
-                if empty or (b is not None and not (b[0] <= x <= b[3] and b[1] <= y <= b[4])):
-                    v = step
+                if empty or (b is not None and not (b[0] - pad <= x <= b[3] + pad
+                                                    and b[1] - pad <= y <= b[4] + pad)):
+                    v = far
                 elif hf is not None:
                     v = z - hf[r][c]
+                elif near is not None:
+                    here = [p for p in near if p.bounds is None or (
+                        p.bounds[0] - pad <= x <= p.bounds[3] + pad)]
+                    v = _union_value(here, x, y, z) if here else far
                 else:
                     v = scene.value(x, y, z)
                 v = max(v, room[c])
@@ -360,10 +376,13 @@ def slice_block(scene: Scene, *, size: tuple[float, float] = (70.0, 70.0),
         raw = _contours(xs, ys, val, clean) if any(clean) else []
         loops = []
         for ring in raw:
-            if abs(polygon_area(ring)) < mf * mf:
+            simple = _simplify_ring(ring, tol)
+            # specks at the minimum feature: a little room over mf² so no face lands under the
+            # document's area floor (spec §8.3) after simplification
+            if min(abs(polygon_area(ring)), abs(polygon_area(simple))) < 1.5 * mf * mf:
                 dropped_loops += 1
                 continue
-            loops.append((ring, _simplify_ring(ring, tol)))
+            loops.append((ring, simple))
         final = [s for _, s in loops]
         for a in range(len(final)):
             for c2 in range(a + 1, len(final)):

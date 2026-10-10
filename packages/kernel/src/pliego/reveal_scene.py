@@ -132,13 +132,37 @@ class _Combine(Scene):
         else:  # subtract: the first scene's bounds
             self.bounds = bs[0]
 
+    def _union(self, x: float, y: float, z: float) -> float:
+        return _union_value(self.parts, x, y, z)
+
     def value(self, x: float, y: float, z: float) -> float:
         if self.op == "union":
-            return min(p.value(x, y, z) for p in self.parts)
+            return self._union(x, y, z)
         if self.op == "intersect":
             return max(p.value(x, y, z) for p in self.parts)
         first = self.parts[0].value(x, y, z)
         return max(first, *(-p.value(x, y, z) for p in self.parts[1:]))
+
+
+def _outside(b: Bounds, x: float, y: float, z: float) -> float:
+    """How far (x, y, z) lies outside box `b` along its farthest axis — a lower bound of every
+    primitive's value here (each primitive's value ≥ that distance outside its own bounds)."""
+    if b is None:
+        return 0.0
+    return max(b[0] - x, x - b[3], b[1] - y, y - b[4], b[2] - z, z - b[5], 0.0)
+
+
+def _union_value(parts: list[Scene], x: float, y: float, z: float) -> float:
+    """min over parts, skipping parts whose bounds already prove they cannot be the minimum."""
+    gaps = [_outside(p.bounds, x, y, z) for p in parts]
+    best = math.inf
+    for p, g in zip(parts, gaps, strict=True):
+        if g == 0.0:
+            best = min(best, p.value(x, y, z))
+    for p, g in zip(parts, gaps, strict=True):
+        if 0.0 < g < best:
+            best = min(best, p.value(x, y, z))
+    return best
 
 
 # ── public constructors ──────────────────────────────────────────────────────

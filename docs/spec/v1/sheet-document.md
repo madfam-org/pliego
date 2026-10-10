@@ -337,8 +337,8 @@ cut and peels off.
 | `id` | yes | kebab case, unique among stacks |
 | `sheets` | yes | ≥ 2 sheet ids, bottom first; a sheet belongs to at most one stack |
 | `pitch_mm` | yes | distance between consecutive sheet mid-planes along the stack normal |
-| `represents` | no (default 1) | how many identical physical sheets each document sheet stands for. A preview may show a 480-sheet block as 40 sheets (`represents` 12); a fabrication document uses 1. `pitch_mm` = `represents` × the stock's `caliper_mm`. Exporters emit each sheet's cut file once, with a count of `represents`. |
-| `bond` | no (default `keep`) | `none`: sheets rest on each other (contact and friction only) · `keep`: keep pieces and body faces are bonded to the sheet below where they overlap (selective adhesive, as in laminated-object manufacturing), excess rests by contact · `all`: a fully bonded laminate |
+| `represents` | no (default 1) | how many identical physical sheets each document sheet stands for. A preview may show a 480-sheet block as 40 sheets (`represents` 12); a fabrication document uses 1. `pitch_mm` = `represents` × the stock's `caliper_mm`. Exporters draw each document sheet once, so cut files for making the block come from a `represents` = 1 document. |
+| `bond` | no (default `keep`) | `none`: sheets rest on each other (contact and friction only) · `keep`: keep pieces and body faces are bonded to the sheet below where they overlap (adhesive only where the material stays), excess rests by contact · `all`: a fully bonded laminate |
 | `binding` | no | `{"kind": "padding", "edge": [[u, v], [u, v]]}`: a sheet-local segment where the pad is glued (the spine of a memo block); pieces touching it are held by the padding until removed |
 
 The stack normal is the bottom sheet's front normal (its placement rotation applied to +Y);

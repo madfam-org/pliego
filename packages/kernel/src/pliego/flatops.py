@@ -73,7 +73,9 @@ class Move:
             gt = fwd(1.0 - t)
             return {f: flatmotion.compose(gt.get(f, flatmotion.ID_RIGID), flatmotion.invert(g))
                     for f, g in g1.items()}
-        return Move(self.kind + "-back", self.state, self.before_split(),
+        opened = self.before_split()
+        opened = opened.derive(memory=opened.memory + remember(self.state, opened))
+        return Move(self.kind + "-back", self.state, opened,
                     list(range(len(self.state.faces))), back, list(self.samples), self.info)
 
     def before_split(self) -> FlatState:
@@ -338,7 +340,20 @@ def _move(state: FlatState, group: dict[int, str], xf: dict[str, Affine], rule: 
     if issues:
         raise FlatStateError(f"{what}: the result is not a valid flat folding — "
                              + "; ".join(i["detail"] for i in issues[:4]))
-    return out
+    opened = remember(state, out)
+    return out.derive(memory=out.memory + opened) if opened else out
+
+
+def remember(before: FlatState, after: FlatState) -> tuple:
+    """Memory entries for the creases folded in `before` and open in `after` (the same faces):
+    each keeps the sign of its last fold."""
+    was = {(min(c.a, c.b), max(c.a, c.b)): c.angle for c in before.creases() if c.angle}
+    out = []
+    for c in after.creases():
+        a = was.get((min(c.a, c.b), max(c.a, c.b)))
+        if a and c.angle == 0.0:
+            out.append((after.points[c.a], after.points[c.b], 1 if a > 0 else -1))
+    return tuple(out)
 
 
 def _require_top(state: FlatState, moving: set[int], up: bool, what: str) -> None:

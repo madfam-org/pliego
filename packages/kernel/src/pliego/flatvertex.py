@@ -466,4 +466,27 @@ def collapse(state: FlatState, center, folds: Mapping, *, fixed=None, sheet_poin
                  "groups": [sorted(g) for g in st.groups]})
 
 
-__all__ = ["Star", "VertexPath", "collapse", "star"]
+def pose_path(state: FlatState, center, angles: Mapping, fixed=None,
+              previous: Sequence[VertexPath] = ()) -> VertexPath:
+    """The path of a 3-D vertex pose (`FoldProgram.vertex_pose`): from this vertex's previous
+    pose (or its angles in `state`) to `angles` ({ray: deg}; unnamed rays hold)."""
+    st = star(state, center)
+    prev = [p for p in previous if p.star.vertex == st.vertex]
+    start = list(prev[-1].target) if prev else list(st.angles)
+    target = list(start)
+    named = set()
+    for key, val in angles.items():
+        i = st.ray_index(key)
+        target[i] = float(val)
+        named.add(i)
+    n = len(st.dirs)
+    if fixed is None:
+        k0 = max(range(n), key=lambda i: (len(st.groups[i]), -i))
+    else:
+        f0 = state.face_at(fixed)
+        k0 = next(i for i in range(n) if f0 in st.groups[i])
+    return VertexPath(st, start, target, {w: state.faces[w].xf for w in st.wedges},
+                      fixed=k0, hold=[i for i in range(n) if i not in named])
+
+
+__all__ = ["Star", "VertexPath", "collapse", "pose_path", "star"]

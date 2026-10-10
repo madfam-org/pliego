@@ -119,3 +119,23 @@ def test_collapse_rejects_what_does_not_fold_flat():
 def fm_doc(b):
     asm = pliego.Assembly([b.sheet], controls=[pliego.sequence_control()], sequence=b.sequence)
     return asm.build(cartridge="test", mode="default")
+
+
+def test_a_precreased_square_starts_with_its_crease_memory():
+    fp = fm.waterbomb_base(S)
+    b = fp.build(start_after="midline-open", rest_memory=35.0)
+    assert [s.id.split("-")[0] for s in b.sequence.steps] == ["collapse"] * len(b.sequence.steps)
+    rest = {}
+    for m in b.sheet.marks:
+        (a, c) = m.points[0], m.points[-1]
+        key = "midline" if abs(a.y - c.y) < 1e-9 else "diagonal"
+        rest.setdefault(key, set()).add(m.rest)
+    assert rest == {"diagonal": {35.0}, "midline": {-35.0}}    # valley / mountain precreases
+    asm = pliego.Assembly([b.sheet], controls=[pliego.sequence_control()], sequence=b.sequence,
+                          initial=b.initial("square"))
+    doc = asm.build(cartridge="test", mode="precreased")
+    assert [i for i in doc.verify() if i["level"] == "error"] == []
+    ra = doc.data["pliego:edges_restAngle"]
+    assert sorted({round(x, 6) for x in ra} - {0}) == [-35.0, 35.0]
+    with pytest.raises(FlatStateError, match="start_after"):
+        fp.build(rest_memory=35.0)

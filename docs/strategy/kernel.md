@@ -282,6 +282,26 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   `FoldProgram.tuck(...)`. Proof: the waterbomb balloon's four points tucked into the side
   pockets, the paper cup's front flap into the pocket in front, the samurai helmet's back corner
   tucked inside.
+- **Crease memory.** A crease folded and opened again used to become `F` with nothing left of
+  its sense. Proposal, implemented on the kernel side with no spec change: the flat state keeps
+  the memory, and a document carries it as the existing **signed rest angle**
+  (`pliego:edges_restAngle`, which the physical engine and the preview already read) where the
+  document's t = 0 is a creased sheet. `FlatState.memory` holds sheet segments of creases opened
+  again with the sign of their last fold (later entries win; every move that opens a folded
+  crease, and `Move.reversed()`, records it); `memory_of(crease)` is the sign while folded or
+  remembered, `memory_segments()` the open remembered segments. `unfold(rest_memory=deg,
+  memory_from=state)` gives every crease that remembers a fold in `memory_from` (default this
+  state) the rest angle ±deg — a crease folded flat and opened by hand springs back to about the
+  stock's yield angle, so `deg` is that yield (`crease_yield_deg`); it fails when a crease
+  remembers the other sign than it folds to. `FoldProgram.build(start_after=, rest_memory=)`
+  writes the memory of the creases open at the program's start (a square creased beforehand);
+  a program from the flat sheet has none (its creases are made, and set by the engine's
+  plasticity, during the program). Without `rest_memory` the pattern is unchanged. The other
+  option, a sign field on the edge, would need a new spec field and gives the engines nothing
+  they do not already get from a signed rest angle. Lane H's emission of rest angles for creases
+  already folded in an initial pose is the complement (folded creases at t = 0); this covers the
+  open ones. Proof: the waterbomb base started after its precreases — diagonals rest +35°
+  (valley), midline −35° (mountain), the program is the collapse alone.
 <!-- FL2 (wave 3, flat operations) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

@@ -356,30 +356,13 @@ class FoldProgram:
         `flatvertex.collapse`; unnamed rays hold), from the previous pose of this vertex (or
         the flat state) along the projected chord (`flatvertex.VertexPath`). Vertex poses come
         before `hinge` poses."""
-        from .flatvertex import VertexPath, star
+        from .flatvertex import pose_path
 
         if any((r.hinge is not None and "vertex" not in r.hinge)
                or (r.move is not None and r.fn is not None) for r in self.recs):
             raise FlatStateError(f"vertex pose '{sid}': vertex poses must come before hinges")
-        st = star(self.state, center)
-        prev = [r.hinge["vertex"] for r in self.recs
-                if r.hinge is not None and "vertex" in r.hinge
-                and r.hinge["vertex"].star.vertex == st.vertex]
-        start = list(prev[-1].target) if prev else list(st.angles)
-        target = list(start)
-        named = set()
-        for key, val in angles.items():
-            i = st.ray_index(key)
-            target[i] = float(val)
-            named.add(i)
-        n = len(st.dirs)
-        if fixed is None:
-            k0 = max(range(n), key=lambda i: (len(st.groups[i]), -i))
-        else:
-            f0 = self.state.face_at(fixed)
-            k0 = next(i for i in range(n) if f0 in st.groups[i])
-        path = VertexPath(st, start, target, {w: self.state.faces[w].xf for w in st.wedges},
-                          fixed=k0, hold=[i for i in range(n) if i not in named])
+        prev = [r.hinge["vertex"] for r in self.recs if r.hinge and "vertex" in r.hinge]
+        path = pose_path(self.state, center, angles, fixed, prev)
         self._hinges = True
         fn = self.pose.vertex(self.state, path)
         self.recs.append(_Rec(sid, self._label(label), None, ms,
@@ -388,18 +371,31 @@ class FoldProgram:
         return self
 
     # ── build ──
-    def build(self, id: str = "square", *, start_after: str | None = None) -> Built:
+    def build(self, id: str = "square", *, start_after: str | None = None,
+              rest_memory: float | None = None) -> Built:
         """The crease pattern, the fold program and the report (see the module docstring).
         `start_after` (a step id): the program starts after that operation — the earlier moves
         only shape the starting pose (`Built.start_angles`, `Built.initial()`), e.g. a finished
-        model whose program is an operating cycle."""
+        model whose program is an operating cycle, or a sheet creased beforehand. With
+        `rest_memory` (deg) the creases open at the start that remember a fold get that rest
+        angle, signed by their last fold (a pre-creased sheet: `pliego:edges_restAngle`)."""
         from .assembly import EdgeRef, Sequence, Step
         from .foldpose import check_penetration
         from .kinematics import face_adjacency
         from .preview import PreviewTree, sample_step
 
         final = self.state
-        sheet = final.unfold(id, **self.sheet_kwargs)
+        start_state = None
+        if rest_memory is not None:
+            if start_after is None:
+                raise FlatStateError("rest_memory: a program from the flat sheet has no crease "
+                                     "memory at its start (give start_after)")
+            rec0 = next((r for r in self.recs if r.sid == start_after), None)
+            if rec0 is None or rec0.move is None:
+                raise FlatStateError(f"rest_memory: no flat step '{start_after}'")
+            start_state = rec0.move.state
+        sheet = final.unfold(id, rest_memory=rest_memory, memory_from=start_state,
+                             **self.sheet_kwargs)
         arr = sheet.build()
         nf = len(arr.faces)
         cents = face_points(arr)

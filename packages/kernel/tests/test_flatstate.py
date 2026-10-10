@@ -209,3 +209,44 @@ def test_preimage_limits_and_errors():
         st.preimage(q, 9)
     with pytest.raises(FlatStateError, match="no layer"):
         st.preimage((10 * S, 10 * S))
+
+
+# ── crease memory ───────────────────────────────────────────────────────────
+
+def test_an_opened_crease_remembers_its_fold():
+    st = FlatState.of(SQUARE)
+    for line, kind, at in ((((0, S / 2), (S, S / 2)), "valley", (10, S - 10)),
+                           (((S / 2, 0), (S / 2, S)), "mountain", (10, 10))):
+        m, back = flatops.crease_and_unfold(st, line, kind, at=at)
+        st = back.state
+    assert all(c.angle == 0.0 for c in st.creases())
+    mem = {}
+    for c in st.creases():
+        a, b = st.points[c.a], st.points[c.b]
+        mem["h" if abs(a[1] - b[1]) < 1e-9 else "v"] = st.memory_of(c)
+    assert mem == {"h": 1, "v": -1}
+    # the default crease pattern is unchanged; asked for, the open creases rest signed
+    plain = st.unfold("p")
+    assert all(mk.assignment == "F" and not mk.rest for mk in plain.marks)
+    sheet = st.unfold("m", rest_memory=35.0)
+    assert {mk.rest for mk in sheet.marks} == {-35.0, 35.0}
+    doc = pliego.Assembly([sheet]).build(cartridge="test", mode="default")
+    ra = doc.data["pliego:edges_restAngle"]
+    assert max(ra) == pytest.approx(35.0) and min(ra) == pytest.approx(-35.0)
+
+
+def test_folding_again_overrides_the_memory():
+    st = FlatState.of(SQUARE)
+    line = ((0, S / 2), (S, S / 2))
+    st = flatops.crease_and_unfold(st, line, "valley", at=(10, S - 10))[1].state
+    st = flatops.crease_and_unfold(st, line, "mountain", at=(10, S - 10))[1].state
+    (sg,) = {st.memory_of(c) for c in st.creases()}
+    assert sg == -1
+
+
+def test_unfold_last_keeps_memory_through_a_program():
+    fp = pliego.FoldProgram(SQUARE)
+    fp.fold("half", "half", ((0, S / 2), (S, S / 2)), "valley", at=(10, S - 10))
+    fp.unfold_last("open")
+    (c,) = fp.state.creases()
+    assert c.angle == 0.0 and fp.state.memory_of(c) == 1

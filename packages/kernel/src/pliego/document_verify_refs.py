@@ -181,25 +181,25 @@ def _rule14_print(d: dict, coords: list, out) -> None:
     ids, inside, _ = _sheet_tools(d, coords)
     notes = d.get("pliego:annotations")
     if notes is not None and not isinstance(notes, list):
-        out.err(13, "annotations", "pliego:annotations must be a list")
+        out.err(14, "annotations", "pliego:annotations must be a list")
         notes = []
     for k, a in enumerate(notes or []):
         where = f"annotation {k}"
         if not isinstance(a, dict) or a.get("sheet") not in ids:
             sid = a.get("sheet") if isinstance(a, dict) else a
-            out.err(13, "sheet_reference", f"{where}: sheet {sid!r} does not exist")
+            out.err(14, "sheet_reference", f"{where}: sheet {sid!r} does not exist")
             continue
         if not inside(ids[a["sheet"]], a.get("at")):
-            out.err(13, "point_outside", f"{where}: point {a.get('at')!r} is not inside sheet "
+            out.err(14, "point_outside", f"{where}: point {a.get('at')!r} is not inside sheet "
                     f"{a['sheet']!r}")
         text = a.get("text")
         if not (isinstance(text, str) and 1 <= len(text) <= 32 and text.isprintable()):
-            out.err(13, "annotation_text", f"{where}: text must be 1–32 printable characters")
+            out.err(14, "annotation_text", f"{where}: text must be 1–32 printable characters")
         size, ang = a.get("size"), a.get("angle", 0)
         if not (isinstance(size, int | float) and 0.5 <= size <= 50):
-            out.err(13, "annotation_size", f"{where}: size {size!r} outside [0.5, 50] mm")
+            out.err(14, "annotation_size", f"{where}: size {size!r} outside [0.5, 50] mm")
         if not (isinstance(ang, int | float) and math.isfinite(ang)):
-            out.err(13, "annotation_angle", f"{where}: angle must be a finite number")
+            out.err(14, "annotation_angle", f"{where}: angle must be a finite number")
     pages = d.get("pliego:pages")
     if pages is None:
         return
@@ -208,19 +208,19 @@ def _rule14_print(d: dict, coords: list, out) -> None:
         margin = float(pages.get("margin", 0))
         rects = [(p["id"], float(p["origin"][0]), float(p["origin"][1])) for p in pages["pages"]]
     except (KeyError, TypeError, ValueError, IndexError):
-        out.err(13, "pages", "pliego:pages needs size [w, h], margin and pages[{id, origin}]")
+        out.err(14, "pages", "pliego:pages needs size [w, h], margin and pages[{id, origin}]")
         return
     if not (w > 0 and h > 0 and 0 <= margin < min(w, h) / 2 and rects):
-        out.err(13, "pages", "pliego:pages: size > 0, 0 ≤ margin < half the page, ≥ 1 page")
+        out.err(14, "pages", "pliego:pages: size > 0, 0 ≤ margin < half the page, ≥ 1 page")
         return
     pids = [r[0] for r in rects]
     if len(set(pids)) != len(pids):
-        out.err(13, "duplicate_id", f"duplicate page ids {sorted(set(pids), key=str)}")
+        out.err(14, "duplicate_id", f"duplicate page ids {sorted(set(pids), key=str)}")
     for i, (a, ax, ay) in enumerate(rects):
         for b, bx, by in rects[i + 1:]:
             if ax < bx + w - 1e-9 and bx < ax + w - 1e-9 and ay < by + h - 1e-9 \
                     and by < ay + h - 1e-9:
-                out.err(13, "pages_overlap", f"pages {a!r} and {b!r} overlap")
+                out.err(14, "pages_overlap", f"pages {a!r} and {b!r} overlap")
     vs = d["pliego:vertices_sheet"]
     for si, sheet in enumerate(d["pliego:sheets"]):
         pts = [coords[v] for v in range(len(coords)) if vs[v] == si and coords[v] is not None]
@@ -231,7 +231,7 @@ def _rule14_print(d: dict, coords: list, out) -> None:
         if not any(px + margin - 1e-6 <= x0 and x1 <= px + w - margin + 1e-6
                    and py + margin - 1e-6 <= y0 and y1 <= py + h - margin + 1e-6
                    for _pid, px, py in rects):
-            out.warn(13, "sheet_off_page", f"sheet {sheet.get('id')!r} is not inside any "
+            out.warn(14, "sheet_off_page", f"sheet {sheet.get('id')!r} is not inside any "
                      "page's printable area", sheet=si)
 
 

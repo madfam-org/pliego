@@ -449,7 +449,7 @@ When `pliego:pages` is present, the PDF exporter prints each page once at 1:1 on
 `size`, instead of tiling the whole layout. The SVG exporter draws the page frames on a `pages`
 layer. SVG, PDF and DXF print annotations on their `label` / `TEXT` layers.
 
-Rule 13 (§8) covers both fields.
+Rule 14 (§8) covers both fields.
 
 ## 6. `file_frames` — 3-D states
 

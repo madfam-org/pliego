@@ -1,0 +1,18 @@
+# Build context is the repository root; the Dockerfile COPYs an explicit allowlist, this file only
+# keeps the context small and keeps local junk out of it.
+.git
+**/.git
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.ruff_cache
+**/node_modules
+.venv
+venv
+.env
+.env.*
+!.env.example
+out
+dist
+build
+*.log

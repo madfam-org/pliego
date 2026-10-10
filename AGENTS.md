@@ -63,8 +63,8 @@ never run git in another lane's clone.
 
 ```bash
 python3 -m pytest packages/kernel/tests -q          # kernel
-node --test packages/engine/test/                    # engine (Node ≥ 20, no install step)
-node --test apps/web/test/                           # web (static studio, no install step)
+node --test packages/engine/test/*.test.js                    # engine (Node ≥ 20, no install step)
+node --test apps/web/test/*.test.mjs                           # web (static studio, no install step)
 python3 -m pytest apps/api/tests -q                  # api (once apps/api exists)
 python3 -m pliego.stock --check materials            # stock cards: derived physics is up to date
 python3 scripts/qa/verify_commons_pin.py             # projects/ is a populated, pinned commons

@@ -50,7 +50,7 @@ PROVIDER_KEYS = re.compile(
 JS_IMPORT = re.compile(
     r"""(?:\bimport\s+(?:[^'"]*?\sfrom\s+)?|\bimport\s*\(\s*|\brequire\s*\(\s*)['"]([^'"]+)['"]"""
 )
-PRICE_KEY = re.compile(r"(price|msrp|retail|wholesale)", re.I)
+PRICE_KEY = re.compile(r"(price|msrp|retail|wholesale)", re.IGNORECASE)
 PRICE_EXACT = {"cost", "unit_cost", "currency", "mxn", "usd", "amount"}
 TEXT_EXTS = {".py", ".js", ".mjs", ".cjs", ".ts", ".json", ".yaml", ".yml", ".toml", ".txt", ".html", ".env", ".example"}
 
@@ -78,9 +78,14 @@ def py_imports(source: str) -> set[str]:
             mods = [alias.name for alias in node.names]
         elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
             mods = [node.module] + [f"{node.module}.{a.name}" for a in node.names]
-        elif isinstance(node, ast.Call) and getattr(node.func, "id", None) == "__import__":
-            if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
-                mods = [node.args[0].value]
+        elif (
+            isinstance(node, ast.Call)
+            and getattr(node.func, "id", None) == "__import__"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+            and isinstance(node.args[0].value, str)
+        ):
+            mods = [node.args[0].value]
         for mod in mods:
             parts = mod.split(".")
             names.update(".".join(parts[: i + 1]) for i in range(len(parts)))

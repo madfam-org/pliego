@@ -153,6 +153,7 @@ class Sheet:
     holes: list[list[Vec2]] = field(default_factory=list, init=False)
     tabs: list[Tab] = field(default_factory=list, init=False)
     edge_labels: list[tuple[str, Vec2, Vec2]] = field(default_factory=list, init=False)
+    annotations: list[dict] = field(default_factory=list, init=False)
     _hole_boxes: list[tuple[float, float, float, float]] = field(default_factory=list,
                                                                  init=False, repr=False)
     _built: Arrangement | None = field(default=None, init=False, repr=False)
@@ -364,6 +365,22 @@ class Sheet:
         self._touch()
         return tab
 
+    def text(self, at: PointLike, text: str, angle: float = 0.0, size: float = 3.0) -> Sheet:
+        """Print a short text on the front, centred at `at` (sheet-local), its baseline
+        `angle`° from +u, `size` mm tall — edge numbers, part names (spec §5.8,
+        `pliego:annotations`). Print only: no physics."""
+        p = as_vec(at)
+        if not isinstance(text, str) or not 1 <= len(text) <= 32 or not text.isprintable():
+            raise ValueError(f"sheet '{self.id}': annotation text must be 1–32 printable "
+                             "characters")
+        if not (math.isfinite(angle) and math.isfinite(size) and 0.5 <= size <= 50.0):
+            raise ValueError(f"sheet '{self.id}': annotation size must be 0.5–50 mm")
+        if not self.region_contains(p):
+            raise ValueError(f"sheet '{self.id}': annotation at ({p.x}, {p.y}) is off the sheet")
+        self.annotations.append({"at": p, "text": text, "angle": float(angle),
+                                 "size": float(size)})
+        return self
+
     def art(self, front: str | None = None, back: str | None = None) -> Sheet:
         """Attach printed art (relative image paths covering the local bounding box)."""
         if front is not None:
@@ -413,6 +430,7 @@ class Sheet:
                      for m in self.marks]
         out.tabs = [Tab(out.marks[t.mark.index], list(t.region), t.name) for t in self.tabs]
         out.edge_labels = list(self.edge_labels)
+        out.annotations = [dict(a) for a in self.annotations]
         out._built = self._built
         return out
 

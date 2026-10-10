@@ -35,6 +35,7 @@ PALETTES: dict[str, dict[str, tuple[str, float, str | None]]] = {
         "glue": ("#27ae60", 0.2, "1 1"),
         "registration": ("#000000", 0.5, None),
         "label": ("#1a1a1a", 0.0, None),
+        "pages": ("#9e9e9e", 0.2, "4 3"),
     },
     "lightburn": {
         "cut": ("#000000", 0.1, None),
@@ -45,6 +46,7 @@ PALETTES: dict[str, dict[str, tuple[str, float, str | None]]] = {
         "glue": ("#00e0e0", 0.1, None),
         "registration": ("#ff00ff", 0.1, None),
         "label": ("#d0d000", 0.0, None),
+        "pages": ("#808080", 0.1, "4 3"),
     },
     "cricut": {
         "cut": ("#000000", 0.25, None),
@@ -55,10 +57,11 @@ PALETTES: dict[str, dict[str, tuple[str, float, str | None]]] = {
         "glue": ("#9e9e9e", 0.25, None),
         "registration": ("#000000", 0.25, None),
         "label": ("#616161", 0.0, None),
+        "pages": ("#bdbdbd", 0.25, "4 3"),
     },
 }
 
-LAYER_ORDER = ("art", "glue", "score", "perforation", "mountain", "valley", "cut",
+LAYER_ORDER = ("pages", "art", "glue", "score", "perforation", "mountain", "valley", "cut",
                "registration", "label")
 
 
@@ -137,9 +140,22 @@ def to_svg(doc: Any, palette: str = "diagram", registration: bool = True,
             layers["registration"].append(_poly(c, corner, False))
     if labels:
         for lb in plan.labels:
+            if lb.size is None:
+                layers["label"].append(
+                    f'<text x="{c.x(lb.at[0])}" y="{c.y(lb.at[1])}">{_esc(lb.text)}</text>'
+                )
+                continue
+            x, y = c.x(lb.at[0]), c.y(lb.at[1])
+            turn = f' transform="rotate({fmt(-lb.angle)} {x} {y})"' if lb.angle else ""
             layers["label"].append(
-                f'<text x="{c.x(lb.at[0])}" y="{c.y(lb.at[1])}">{_esc(lb.text)}</text>'
+                f'<text x="{x}" y="{y}" font-size="{fmt(lb.size / 0.72)}" '
+                f'text-anchor="middle" dominant-baseline="central"{turn}>{_esc(lb.text)}</text>'
             )
+    if plan.pages:
+        w, h = plan.page_size
+        for _pid, x, y in plan.pages:
+            layers["pages"].append(_poly(c, ((x, y), (x + w, y), (x + w, y + h), (x, y + h)),
+                                         True))
 
     defs = ""
     glue_fill = "none"

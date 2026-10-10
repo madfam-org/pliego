@@ -284,6 +284,27 @@ fine kirigami declare it; nothing else should.
 `digest` is the SHA-256 of the canonical serialisation of the document with `digest` set to
 `null` (GOC-1 compatible).
 
+<!-- BEGIN w2b lane PC (papercraft): print annotations and pages — coordinator-owned contract addition -->
+### 5.8 `pliego:annotations` and `pliego:pages` — print layout (optional)
+
+Two optional top-level fields for documents meant to be printed and cut by hand, such as the
+papercraft nets `pliego.unfold` writes. Both are print-only: the engine ignores them, and they
+change no physics.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `pliego:annotations` | object[] | short texts printed on a sheet's front: `{"sheet", "at": [u, v], "text", "angle", "size"}`. `at` is the text's centre in sheet-local mm, `angle` the baseline direction in degrees counter-clockwise from +u (default 0), `size` the cap height in mm (0.5–50), `text` 1–32 printable characters. Papercraft prints each cut edge's number on both sides of the cut. |
+| `pliego:pages` | object | print pages in the layout frame: `{"size": [w, h], "margin": m, "pages": [{"id", "origin": [x, y]}]}`. Each page is the rectangle `origin … origin + size`; its printable area is inset by `margin`. Pages do not overlap, and every sheet should lie inside one page's printable area. |
+
+When `pliego:pages` is present, the PDF exporter prints each page once at 1:1 on a sheet of its
+`size`, instead of tiling the whole layout. The SVG exporter draws the page frames on a `pages`
+layer. SVG, PDF and DXF print annotations on their `label` / `TEXT` layers.
+
+Rule 7 (§8) covers both fields. An annotation's sheet must resolve and its `at` must lie on that
+sheet. Pages must be well formed and must not overlap. A sheet outside every page's printable area
+is a warning (`sheet_off_page`).
+<!-- END w2b lane PC -->
+
 ---
 
 ## 6. `file_frames` — 3-D states

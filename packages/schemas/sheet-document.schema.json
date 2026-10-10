@@ -293,6 +293,16 @@
           }
         ]
       }
+    },
+    "pliego:annotations": {
+      "description": "§5.8 print annotations (edge numbers, part names): text printed on a sheet's front; no physics",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/annotation"
+      }
+    },
+    "pliego:pages": {
+      "$ref": "#/$defs/pages"
     }
   },
   "patternProperties": {
@@ -1321,6 +1331,82 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/vec3"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotation": {
+      "description": "§5.8: centred at `at` (sheet-local mm), baseline `angle` degrees from +u, `size` mm cap height",
+      "type": "object",
+      "required": [
+        "sheet",
+        "at",
+        "text",
+        "size"
+      ],
+      "properties": {
+        "sheet": {
+          "$ref": "#/$defs/slug"
+        },
+        "at": {
+          "$ref": "#/$defs/vec2"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "angle": {
+          "type": "number"
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 50
+        }
+      },
+      "additionalProperties": false
+    },
+    "pages": {
+      "description": "§5.8 print pages in the layout frame: rectangles of `size` mm at each `origin`; sheets lie inside a page's printable area (inset by `margin`)",
+      "type": "object",
+      "required": [
+        "size",
+        "pages"
+      ],
+      "properties": {
+        "size": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "origin"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/slug"
+              },
+              "origin": {
+                "$ref": "#/$defs/vec2"
+              }
+            },
+            "additionalProperties": false
           }
         }
       },

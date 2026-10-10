@@ -207,6 +207,12 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         data["pliego:edges_name"] = en
     if assembly.title:
         data["file_title"] = assembly.title
+    notes = [{"sheet": s.id, "at": [a["at"].x, a["at"].y], "text": a["text"],
+              "angle": a["angle"], "size": a["size"]} for s in sheets for a in s.annotations]
+    if notes:
+        data["pliego:annotations"] = notes
+    if getattr(assembly, "pages", None):
+        data["pliego:pages"] = copy.deepcopy(assembly.pages)
     if assembly.joins:
         data["pliego:joins"] = [copy.deepcopy(j) for j in assembly.joins]
     if assembly.mechanisms:

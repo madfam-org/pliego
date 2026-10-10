@@ -62,8 +62,9 @@ export const PCG_REFACTOR_ITER = 6;
 export const PCG_RTOL = 1e-3;
 /** After a PCG failure, factor directly for this many substeps before trying PCG again. */
 export const PCG_FAIL_HOLD = 4;
-/** Sleep threshold (mm/s): a world with no drivers and every free vertex slower than this skips frames. */
-export const SLEEP_SPEED = 1e-3;
+/** Sleep: a world with no drivers whose free vertices stay slower than SLEEP_SPEED (mm/s) for SLEEP_FRAMES frames skips frames. Test `E2-cantilever` (µm deflections settle first). */
+export const SLEEP_SPEED = 1e-5;
+export const SLEEP_FRAMES = 30;
 export const REFACTOR_ANGLE = 0.3;
 
 /** Defaults for World options. */

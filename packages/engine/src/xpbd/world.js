@@ -93,6 +93,7 @@ export class World {
     this.torn = 0;
     this._pcgFail = 0;
     this._asleep = false;
+    this._quiet = 0;
     // safety cap: refactor when any membrane edge has turned this far since the last factorisation
     // (PCG with the stale factorisation handles smaller rotations; see pcg.js)
     this.refactorAngle = opts.refactorAngle ?? K.REFACTOR_ANGLE;
@@ -219,22 +220,23 @@ export class World {
   _sleepCheck() {
     if (!K.SLEEP_SPEED) return;
     const d = this.drivers;
-    if (d.wind !== 0 || this.terms.active[d.grabTerm]) return;
-    for (const [id, g] of d.goal) if (d.value.get(id) !== g) return;
-    if (d.seq && this.seqControlGoal() !== d.seqPos) return;
+    if (d.wind !== 0 || this.terms.active[d.grabTerm]) { this._quiet = 0; return; }
+    for (const [id, g] of d.goal) if (d.value.get(id) !== g) { this._quiet = 0; return; }
+    if (d.seq && this.seqControlGoal() !== d.seqPos) { this._quiet = 0; return; }
     const v = this.v, w = this.invMass, lim = K.SLEEP_SPEED * K.SLEEP_SPEED;
     for (let i = 0; i < this.mesh.nV; i++) {
       if (w[i] === 0) continue;
-      if (v[3 * i] ** 2 + v[3 * i + 1] ** 2 + v[3 * i + 2] ** 2 > lim) return;
+      if (v[3 * i] ** 2 + v[3 * i + 1] ** 2 + v[3 * i + 2] ** 2 > lim) { this._quiet = 0; return; }
     }
-    this._asleep = true;
+    // quiet for SLEEP_FRAMES consecutive frames (a single slow frame may be an oscillation's turning point)
+    if (++this._quiet >= K.SLEEP_FRAMES) this._asleep = true;
   }
 
   /** @returns {number} */
   seqControlGoal() { const d = this.drivers; return d.seqControl ? /** @type {number} */(d.goal.get(d.seqControl)) : 0; }
 
   /** Wake a sleeping world (any interaction calls this). */
-  wake() { this._asleep = false; }
+  wake() { this._asleep = false; this._quiet = 0; }
 
   /** Per-frame work: kinematic program pose for the frame. @param {number} n substeps this frame */
   _frame(n) {
@@ -520,7 +522,7 @@ export class World {
       restTheta: Float64Array.from(this.restTheta), memory: Uint8Array.from(this.memory), hingeK: Float64Array.from(this.hingeK), driveK: Float64Array.from(this.driveK), torn: this.torn, edgeComp: Uint8Array.from(this.edgeComp),
       driveOn: Uint8Array.from(this.driveOn), driveTarget: Float64Array.from(this.driveTarget),
       fixedTarget: Float64Array.from(this.fixedTarget), userForce: Float64Array.from(this.userForce),
-      time: this.time, acc: this._acc, substepsRun: this.substepsRun, framesRun: this.framesRun, dirty: this.dirty, asleep: !!this._asleep, pcgFail: this._pcgFail,
+      time: this.time, acc: this._acc, substepsRun: this.substepsRun, framesRun: this.framesRun, dirty: this.dirty, asleep: !!this._asleep, quiet: this._quiet, pcgFail: this._pcgFail,
       stringTaut: Uint8Array.from(this._stringTaut),
       terms: { active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode), verts: Int32Array.from(T.verts), info: T.info.map((/** @type {any} */ i) => ({ target: i.target ? i.target.slice() : undefined, s: i.s, driven: i.driven, offset: i.offset })) },
       drivers: { value: [...this.drivers.value], goal: [...this.drivers.goal], seqPos: this.drivers.seqPos, entry: [...this.drivers.entry], entryStep: this.drivers.entryStep, wind: this.drivers.wind,
@@ -561,6 +563,7 @@ export class World {
     this.edgeComp.set(s.edgeComp);
     this.dirty = s.dirty;
     this._asleep = s.asleep;
+    this._quiet = s.quiet;
     this._pcgFail = s.pcgFail;
   }
 }

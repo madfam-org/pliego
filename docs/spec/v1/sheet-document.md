@@ -541,6 +541,12 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     (`mechanism_moves_physical`, `leaf_on_kinematic`) until every landed cartridge is clean, then
     as an error.
 <!-- lane H (w3/hardening) rule 15: end -->
+<!-- lane H (w3/hardening) rule 16: begin -->
+16. `pliego:meta` carries only the §5.7 keys (`cartridge`, `mode`, `params`, `kernel`,
+    `min_feature_mm`, `digest`); the schema closes the object. Cartridge data belongs in
+    `params` or in step notes. The kernel reports extra keys as a warning (`meta_unknown_key`)
+    until the commons is clean, then as an error.
+<!-- lane H (w3/hardening) rule 16: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

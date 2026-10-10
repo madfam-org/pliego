@@ -50,15 +50,14 @@ lanes; nothing is deployed. docs/HONEST_STATUS.md is authoritative.
 - **Service:** one container; gunicorn `apps.api.app:app` on 8000; `/health` liveness, `/ready`
   readiness; `/metrics` on 9090 (internal). Landing `/`, studio `/studio/`, engine modules
   `/engine/`, API `/api/v1/`, `/llms.txt`.
-- **Hosts (proposed, pending the owner's word):** `pliego.madfam.io` (landing),
+- **Hosts (ruled 2026-10-10):** `pliego.madfam.io` (landing),
   `pliego-app.madfam.io` (studio), `pliego-api.madfam.io` (API). Flat labels, one Service.
 - **Auth:** Janua issuer `https://auth.madfam.io`, audience `pliego-api`, RS256 via JWKS. OAuth
   callback `https://pliego-app.madfam.io/auth/callback` (exact match).
 
 ## Commons
 
-`madfam-org/sheet-hyperobjects` (public; objects CERN-OHL-W-2.0 pending the owner's licence
-ruling) is mounted at `projects/` as one git submodule pinned by SHA. One `<slug>/` per object
+`madfam-org/sheet-hyperobjects` (public; objects CERN-OHL-W-2.0, ruled 2026-10-10) is mounted at `projects/` as one git submodule pinned by SHA. One `<slug>/` per object
 (`main.py`, `project.json`, `docs/README.md`), strict kebab-case slugs, born quadrilingual
 (en/es/fr/pt). Classes: techniques, bases, traditional models, tessellations and engineering
 origami, kirigami, papercut traditions, paper engineering, book structures, flexagons and toys,

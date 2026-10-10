@@ -4,7 +4,7 @@
 # landing (pliego.madfam.io), the studio (pliego-app.madfam.io) and the API (pliego-api.madfam.io) from the SAME
 # pod; the app tells the three apart by host.
 #
-# HOSTS ARE PROPOSED, PENDING THE OWNER'S WORD. "pliego" is the working name; the brand is not ruled. Hostnames
+# Hosts ruled by the owner on 2026-10-10; onboarding is still pending, so autoDeploy stays false. Hostnames
 # are flat labels only (pliego-api.madfam.io, never api.pliego.madfam.io). scripts/qa/verify_canonical_host.py
 # keeps every host here in lockstep with the CORS and host env in infra/k8s/production/deployment.yaml and with
 # the redirect URIs in janua.client.yaml.
@@ -41,7 +41,7 @@ metadata:
   description: Pliego, the sheet-hyperobject platform; landing, studio and API from one container
 spec:
   # Three hostnames, ONE pod: every route goes to Service pliego on port 80 (runtime.port is the container's
-  # 8000). Proposed hosts, pending the owner's word.
+  # 8000). Hosts ruled 2026-10-10.
   domains:
     - name: pliego.madfam.io
       environment: production

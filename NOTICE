@@ -6,8 +6,8 @@ License, version 3 only (AGPL-3.0-only). See the LICENSE file for the full text.
 
 Documentation (docs/, README.md and the other Markdown files) is licensed under the MIT licence.
 
-Commons objects (materials/*, and the sheet-hyperobjects commons mounted at projects/) are proposed
-under CERN-OHL-W-2.0, pending the owner's licence ruling. See docs/licenses/README.md.
+Commons objects (materials/*, and the sheet-hyperobjects commons mounted at projects/) are licensed
+under CERN-OHL-W-2.0 (owner ruling, 2026-10-10). See docs/licenses/README.md.
 
 If you modify this program and make it available to users over a network, the AGPL (section 13)
 requires you to offer those users the Corresponding Source of your modified version.

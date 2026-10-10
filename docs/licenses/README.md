@@ -1,29 +1,28 @@
 # Licences
 
 > Last Updated: 2026-10-10
-> Boundary: public. This file reports licence rulings and pending rulings; it does not make any.
+> Boundary: public. This file reports licence rulings; it does not make any.
 > No agent and no maintainer chooses a licence — licences are owner rulings.
 
 | What | Paths | Licence | State |
 |---|---|---|---|
 | Platform code | `packages/`, `apps/`, `scripts/`, `infra/`, workflows | **AGPL-3.0-only** ([`../../LICENSE`](../../LICENSE)) | ruled |
 | Documentation | `docs/`, `README.md` and the other Markdown files | **MIT** ([`MIT-docs.txt`](MIT-docs.txt)), ruling R72 | ruled |
-| Commons objects | `materials/*` (stock cards); `projects/*` (the `sheet-hyperobjects` commons) | **CERN-OHL-W-2.0** ([`CERN-OHL-W-2.0.txt`](CERN-OHL-W-2.0.txt)) | **pending the owner's licence ruling** (proposed value) |
+| Commons objects | `materials/*` (stock cards); `projects/*` (the `sheet-hyperobjects` commons) | **CERN-OHL-W-2.0** ([`CERN-OHL-W-2.0.txt`](CERN-OHL-W-2.0.txt)) | ruled 2026-10-10 |
 | Schemas consumed from the keystone | `hyperobjects-spec` | Apache-2.0 (in that repository) | ruled there |
 
 Copyright holder for everything MADFAM-authored: Innovaciones MADFAM S.A.S. de C.V., Cuernavaca,
 Morelos, México.
 
-## The commons licence (pending)
+## The commons licence (ruled 2026-10-10)
 
-CERN-OHL-W-2.0 is the value the sibling commons carry (the FC1 ruling for Fashion Cabinet's
-commons objects). Whether it extends to sheet objects is an owner ruling that has **not** been
-made. Until it is:
+The owner ruled on 2026-10-10 that sheet commons objects — Pliego's `materials/*` stock cards and
+every cartridge in `sheet-hyperobjects` — are **CERN-OHL-W-2.0**, the same licence the sibling
+commons carry. The dated decision record is kept in MADFAM's private ops repository. Any deviation
+for a single object requires its own owner ruling, recorded as a carve-out below.
 
-- objects and stock cards may declare `CERN-OHL-W-2.0` as the proposed value, and nothing else;
-- the commons does not accept third-party objects (the CLA-vs-DCO ruling is also pending);
-- if the owner rules a different licence, every declaration changes in one pull request before
-  object number one is published — the licence is a one-way door.
+Still pending: how third-party contributions are signed off (CLA vs DCO). Until that is ruled, the
+commons does not merge third-party objects.
 
 The text in [`CERN-OHL-W-2.0.txt`](CERN-OHL-W-2.0.txt) is the canonical CERN text as published
 in GitHub's licence catalogue (the text GitHub's detector matches), checked word for word against

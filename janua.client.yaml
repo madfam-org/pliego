@@ -2,7 +2,7 @@
 # by Enclii's OIDC provisioner and land in the secret store, from which the pod's Secret pliego-secrets is
 # written (infra/k8s/production/secrets-template.yaml lists the key names).
 #
-# Hosts are proposed, pending the owner's word (enclii.yaml). scripts/qa/verify_canonical_host.py fails CI when
+# Hosts were ruled by the owner on 2026-10-10 (enclii.yaml). scripts/qa/verify_canonical_host.py fails CI when
 # a redirect URI here names a host enclii.yaml does not declare.
 #
 # Two registrations:

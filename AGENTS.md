@@ -93,20 +93,25 @@ reusable `build-publish.yml` pinned to a full commit SHA on Enclii `main`, with 
 One container (root `Dockerfile`) serves everything: landing at `/`, studio at `/studio/`, engine
 modules at `/engine/`, API at `/api/v1/`, `llms.txt` at `/llms.txt`. gunicorn `apps.api.app:app` on
 8000; liveness `/health`, readiness `/ready`; `/metrics` on 9090, internal only. uid 1001, read-only
-root filesystem (only `/tmp` is writable), drop ALL, seccomp RuntimeDefault. Hosts (proposed,
-pending the owner's word): `pliego.madfam.io`, `pliego-app.madfam.io`, `pliego-api.madfam.io`.
+root filesystem (only `/tmp` is writable), drop ALL, seccomp RuntimeDefault. Hosts (owner ruling
+2026-10-10; onboarding pending): `pliego.madfam.io`, `pliego-app.madfam.io`, `pliego-api.madfam.io`.
 Env names are in [`.env.example`](.env.example) and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Licences
 
 Platform code AGPL-3.0-only; docs MIT (ruling R72); commons objects (`materials/*`, `projects/*`)
-CERN-OHL-W-2.0 **pending the owner's licence ruling** — declared in two agreeing fields, exceptions
+CERN-OHL-W-2.0 (owner ruling, 2026-10-10) — declared in two agreeing fields, exceptions
 only through [`docs/licenses/CARVE-OUTS.md`](docs/licenses/CARVE-OUTS.md). See
 [`docs/licenses/README.md`](docs/licenses/README.md).
 
-## Rulings this repository is waiting on
+## Rulings
 
-Agents prepare to these points and stop: product name and brand; working hosts; the commons licence
-scope (CERN-OHL-W-2.0 proposed); the commons topology (a third commons kernel beside solid and soft);
+Ruled 2026-10-10 by the owner (record kept in MADFAM's private ops repository): commons object licence
+CERN-OHL-W-2.0 for `materials/*` and the `sheet-hyperobjects` cartridges; hosts `pliego.madfam.io`,
+`pliego-app.madfam.io`, `pliego-api.madfam.io` on one service.
+
+### Still pending
+
+Agents prepare to these points and stop: product brand (beyond the working name); the commons topology (a third commons kernel beside solid and soft);
 CLA vs DCO for third-party contributions; tiers and prices (none in this repo until ruled through
 Tulana and Dhanam).

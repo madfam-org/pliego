@@ -70,7 +70,7 @@ spec:
               value: "1"
             - name: PYTHONUNBUFFERED
               value: "1"
-            # Hosts: proposed, pending the owner's word; scripts/qa/verify_canonical_host.py keeps these, the CORS
+            # Hosts (owner ruling 2026-10-10); scripts/qa/verify_canonical_host.py keeps these, the CORS
             # list below and enclii.yaml's domains in lockstep.
             - name: PLIEGO_PUBLIC_LANDING_HOST
               value: pliego.madfam.io

@@ -43,5 +43,5 @@ reporting ([`SECURITY.md`](SECURITY.md)). Which MADFAM service owns which capabi
 
 - Platform code: AGPL-3.0-only © Innovaciones MADFAM S.A.S. de C.V. ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)).
 - Documentation: MIT.
-- Commons objects (`materials/*`, `projects/*`): CERN-OHL-W-2.0, **pending the owner's licence
-  ruling** ([`docs/licenses/`](docs/licenses/README.md)).
+- Commons objects (`materials/*`, `projects/*`): CERN-OHL-W-2.0 (owner ruling,
+  2026-10-10) ([`docs/licenses/`](docs/licenses/README.md)).

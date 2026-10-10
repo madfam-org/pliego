@@ -20,9 +20,10 @@ for (const d of fs.readdirSync(root).sort()) {
   if (!fs.statSync(dir).isDirectory()) continue;
   for (const f of fs.readdirSync(dir).sort()) if (f.endsWith('.fold')) files.push(path.join(dir, f));
 }
-let ok = 0;
+let ok = 0, ran = 0;
 for (const f of files) {
   if (only && !new RegExp(only).test(f)) continue;
+  ran++;
   const name = path.relative(root, f);
   let doc;
   try { doc = loadDocument(fs.readFileSync(f, 'utf8')); } catch (e) { console.log(`smoke ${name}: loads=no ${String(/** @type {Error} */(e).message).split('\n').slice(0, 3).join(' | ')}`); continue; }
@@ -41,4 +42,4 @@ for (const f of files) {
     console.log(`smoke ${name}: loads=yes V=${w.mesh.nV} steps=${finite ? 'no-NaN' : 'NaN'} maxStretch=${(maxS * 100).toFixed(3)}% maxCompression=${(maxC * 100).toFixed(2)}% ms/frame=${ms.toFixed(1)}`);
   } catch (e) { console.log(`smoke ${name}: loads=yes error=${/** @type {Error} */(e).message}`); }
 }
-console.log(`smoke: documents=${files.length} ran-clean=${ok}`);
+console.log(`smoke: documents=${ran} ran-clean=${ok}`);

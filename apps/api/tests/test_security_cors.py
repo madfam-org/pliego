@@ -115,13 +115,18 @@ def test_app_refuses_to_boot_without_allowlist(make_app):
     assert make_app(cors_origins_raw="", dev=True) is not None
 
 
-def test_settings_from_env_accepts_scaffold_names():
+def test_settings_from_env_uses_the_scaffold_env_contract():
     s = Settings.from_env({"PLIEGO_PUBLIC_API_HOST": "API.example.test",
                            "PLIEGO_TRUSTED_PROXY_HEADER": "X-Real-Client",
                            "PLIEGO_CORS_ORIGINS": "https://a.example"})
     assert s.host_api == "api.example.test"
     assert s.trusted_ip_header == "X-Real-Client"
     assert Settings.from_env({}).trusted_ip_header == "CF-Connecting-IP"
-    assert Settings.from_env({"PLIEGO_TRUSTED_IP_HEADER": ""}).trusted_ip_header == ""
+    assert Settings.from_env({"PLIEGO_TRUSTED_PROXY_HEADER": ""}).trusted_ip_header == ""
+    hosts = Settings.from_env({"PLIEGO_PUBLIC_LANDING_HOST": "localhost:8000",
+                               "PLIEGO_PUBLIC_APP_HOST": "app.localhost:8000"})
+    assert (hosts.host_landing, hosts.host_app, hosts.host_api) == \
+        ("localhost:8000", "app.localhost:8000", "pliego-api.madfam.io")
+    assert Settings.from_env({"PLIEGO_METRICS_PORT": "9191"}).metrics_port == 9191
     with pytest.raises(RuntimeError):
         Settings.from_env({"PLIEGO_RATE_LIMIT": "lots"})

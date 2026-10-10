@@ -1,0 +1,747 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Pliego API",
+    "version": "0.1.0",
+    "summary": "Sheet hyperobjects (origami, kirigami, papercut, pop-ups, books) as sheet documents and fabrication files.",
+    "description": "Public, anonymous, read-mostly API of the Pliego platform. Every route is also served on the\nlanding and studio hosts (same container); the canonical host is pliego-api.madfam.io.\n\nStrictness: unknown body keys, unknown query keys, unknown modes and out-of-contract parameter\nvalues are rejected with 400. POST bodies must be `application/json` objects of at most\n256 KiB (413 above), without NaN/Infinity or duplicate keys. Requests carrying an\n`Authorization` header are refused (401) until Janua verification is wired.\n\nRenders run the cartridge in a sandboxed subprocess (30 s timeout → 504). Each worker renders\none cartridge at a time (503 + `Retry-After: 1` when busy) and the render routes are\nrate-limited per client address (429 + `Retry-After`); the client address is the tunnel's\n`CF-Connecting-IP`, never `X-Forwarded-For`.\n\nThis file is checked against the Flask URL map by apps/api/tests/test_openapi.py and scripts/qa/verify_openapi.py.\n",
+    "license": {
+      "name": "AGPL-3.0-only",
+      "identifier": "AGPL-3.0-only"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://pliego-api.madfam.io"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Liveness, with commons, kernel and stock counts.",
+        "responses": {
+          "200": {
+            "description": "The process is alive. `kernel` is null when the kernel cannot be imported.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "ready",
+        "summary": "Readiness — the catalog loaded (non-empty unless PLIEGO_REQUIRE_COMMONS=0) and the kernel imports.",
+        "responses": {
+          "200": {
+            "description": "Ready.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ready"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Not ready; `reasons` says why.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ready"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog": {
+      "get": {
+        "operationId": "catalog",
+        "summary": "Search the commons, with facet counts over the filtered result.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Substring over slug, names, tags and descriptions."
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "class",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Commons class (technique, base, traditional, tessellation, kirigami, papercut, paper-engineering, book, toy, diorama)."
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching objects and facets.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/objects/{slug}": {
+      "get": {
+        "operationId": "object",
+        "summary": "One cartridge manifest with its modes and published export formats.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Slug"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/documents": {
+      "post": {
+        "operationId": "createDocument",
+        "summary": "Run a cartridge and return its sheet document (FOLD 1.2 + pliego:, canonical bytes).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The sheet document (docs/spec/v1/sheet-document.md), byte-stable for the same request.",
+            "headers": {
+              "X-Pliego-Verify": {
+                "$ref": "#/components/headers/Verify"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://pliego.madfam.io/schemas/sheet-document.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/RenderFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/Retry"
+          },
+          "503": {
+            "$ref": "#/components/responses/Retry"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/exports": {
+      "post": {
+        "operationId": "createExport",
+        "summary": "Run a cartridge and return one fabrication or interchange file.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The file, as an attachment named `<slug>-<mode>.<ext>`.",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=\"valley-fold-default.svg\""
+                }
+              },
+              "X-Pliego-Verify": {
+                "$ref": "#/components/headers/Verify"
+              }
+            },
+            "content": {
+              "image/svg+xml": {},
+              "image/vnd.dxf": {},
+              "application/pdf": {},
+              "application/vnd.hp-hpgl": {},
+              "model/gltf-binary": {},
+              "application/json": {}
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          },
+          "415": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/RenderFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/Retry"
+          },
+          "503": {
+            "$ref": "#/components/responses/Retry"
+          },
+          "504": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/api/v1/stocks": {
+      "get": {
+        "operationId": "stocks",
+        "summary": "Every paper stock card, as committed (including the kernel-derived physics).",
+        "responses": {
+          "200": {
+            "description": "Stock cards (docs/spec/v1/stock-card.md).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "total",
+                    "items"
+                  ],
+                  "properties": {
+                    "total": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "https://pliego.madfam.io/schemas/stock-card.schema.json"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/stocks/{slug}": {
+      "get": {
+        "operationId": "stock",
+        "summary": "One paper stock card.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Slug"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The stock card.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://pliego.madfam.io/schemas/stock-card.schema.json"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Slug": {
+        "name": "slug",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        }
+      }
+    },
+    "headers": {
+      "Verify": {
+        "description": "The runner's read-proof line, e.g. `verify: sheets=1 vertices=4 edges=5 faces=2 joins=0 errors=0 warnings=0`.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error",
+          "status"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "retry_after": {
+            "type": "integer"
+          },
+          "verify": {
+            "type": "string"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "level": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning"
+                  ]
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "commons",
+          "kernel",
+          "stocks"
+        ],
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "service": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "commons": {
+            "type": "integer",
+            "description": "Valid cartridges in projects/."
+          },
+          "commons_invalid": {
+            "type": "integer",
+            "description": "Manifests excluded because they failed validation."
+          },
+          "kernel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "stocks": {
+            "type": "integer"
+          },
+          "stocks_invalid": {
+            "type": "integer"
+          }
+        }
+      },
+      "Ready": {
+        "type": "object",
+        "required": [
+          "status",
+          "commons",
+          "kernel"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ]
+          },
+          "commons": {
+            "type": "integer"
+          },
+          "commons_invalid": {
+            "type": "integer"
+          },
+          "kernel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CatalogItem": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "summary": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "domain": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "class": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parameters": {
+            "type": "integer"
+          },
+          "export_formats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Format"
+            }
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CatalogPage": {
+        "type": "object",
+        "required": [
+          "total",
+          "items",
+          "facets"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogItem"
+            }
+          },
+          "facets": {
+            "type": "object",
+            "properties": {
+              "domain": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              "class": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              "difficulty": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              },
+              "tag": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ObjectDetail": {
+        "type": "object",
+        "required": [
+          "slug",
+          "manifest",
+          "modes",
+          "export_formats"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "manifest": {
+            "type": "object",
+            "description": "The cartridge's project.json as committed."
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "export_formats": {
+            "type": "array",
+            "description": "The manifest's export_formats intersected with what the runner can write (an absent list publishes nothing).",
+            "items": {
+              "$ref": "#/components/schemas/Format"
+            }
+          }
+        }
+      },
+      "Format": {
+        "type": "string",
+        "enum": [
+          "fold",
+          "svg",
+          "dxf",
+          "pdf",
+          "hpgl",
+          "glb"
+        ]
+      },
+      "DocumentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slug",
+          "params"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "description": "Required when the cartridge declares more than one mode."
+          },
+          "params": {
+            "type": "object",
+            "description": "Values checked against the manifest's parameters (type, range, step, options, modes); omitted parameters take the manifest default; unknown keys are rejected."
+          }
+        }
+      },
+      "ExportRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slug",
+          "params",
+          "format"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          },
+          "format": {
+            "$ref": "#/components/schemas/Format"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "The request breaks the contract (strict payload / query).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Unknown object or stock.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "RenderFailed": {
+        "description": "The cartridge failed (exception, sandbox policy, verify errors, zero sheets); carries the verify line and issues.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Retry": {
+        "description": "Rate limited (429) or this worker is busy rendering (503).",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}

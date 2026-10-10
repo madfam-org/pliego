@@ -89,7 +89,8 @@ class Renderer:
         with tempfile.TemporaryDirectory(prefix="pliego-render-") as tmp:
             out = Path(tmp)
             # -I: isolated mode (no PYTHON* variables, no user site, no cwd on sys.path); -B: no
-            # bytecode writes. A source checkout's kernel is passed explicitly (the image installs it).
+            # bytecode writes. A source checkout's kernel is passed explicitly (the image
+            # installs it).
             cmd = [sys.executable, "-I", "-B", str(RUNNER), str(mode.script), str(out),
                    "--params-stdin", "--formats", ",".join(formats),
                    "--cartridge", cart.slug, "--mode", mode.id, "--timeout", str(timeout)]

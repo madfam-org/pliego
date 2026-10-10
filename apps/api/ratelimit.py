@@ -2,8 +2,8 @@
 
 Key selection (the fix for Fashion Cabinet's spoofable limiter):
 
-1. the trusted client-IP header — ``CF-Connecting-IP`` by default (``PLIEGO_TRUSTED_IP_HEADER``) —
-   when present and a valid IP address;
+1. the trusted client-IP header — ``CF-Connecting-IP`` by default
+   (``PLIEGO_TRUSTED_PROXY_HEADER``) — when present and a valid IP address;
 2. otherwise the socket peer (``REMOTE_ADDR``).
 
 ``X-Forwarded-For`` is never read: its first hop is whatever the client wrote. The trusted header is

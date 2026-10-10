@@ -5,8 +5,8 @@ submodule trap). Parsing happens once per change, memoized behind a stat-walk si
 (name, mtime_ns, size of every manifest and script) — a stat walk, not a parse walk.
 
 Fail closed: a manifest that does not parse or validate is logged, excluded and counted
-(``invalid`` in /health and /ready). A missing or empty ``projects/`` is a catalog of 0, which /ready
-reports (and refuses while ``PLIEGO_REQUIRE_COMMONS`` is on).
+(``invalid`` in /health and /ready). A missing or empty ``projects/`` is a catalog of 0, which
+/ready reports (and refuses while ``PLIEGO_REQUIRE_COMMONS`` is on).
 """
 
 from __future__ import annotations
@@ -176,7 +176,7 @@ class Catalog:
 
 
 class StockLibrary:
-    """``materials/<slug>/stock.json`` cards as committed (``derived`` included, never re-derived)."""
+    """``materials/<slug>/stock.json`` cards as committed (``derived`` kept, never re-derived)."""
 
     def __init__(self, materials_dir: Path):
         self.materials_dir = materials_dir

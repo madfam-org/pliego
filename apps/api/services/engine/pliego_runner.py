@@ -110,7 +110,7 @@ def import_kernel():
 
 
 def load_stocks(pliego, assembly, materials: str) -> dict:
-    """Stock snapshots for every sheet, from the committed cards (``materials/<slug>/stock.json``)."""
+    """Stock snapshots for every sheet, from the committed ``materials/<slug>/stock.json``."""
     import pliego.stock as stock_mod
 
     stocks: dict = {}

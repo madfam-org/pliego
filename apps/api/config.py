@@ -1,9 +1,10 @@
 """Runtime settings for the Pliego web service, read once from the environment.
 
-Every path is derived from one repository root (``PLIEGO_ROOT``, default: the checkout or ``/app`` in
-the image), so tests point the whole service at a temporary tree. Host names default to the owner's
-2026-10-10 ruling (docs/strategy/architecture.md §3). Where the scaffold's deployment uses a different
-variable name for the same setting, both are accepted and the name listed first wins.
+Every path is derived from one repository root (``PLIEGO_ROOT``, default: the checkout or
+``/app`` in the image), so tests point the whole service at a temporary tree. Host names default
+to the owner's 2026-10-10 ruling (docs/strategy/architecture.md §3). Variable names are the scaffold's env contract
+(enclii.yaml, infra/k8s, .env.example): PLIEGO_PUBLIC_{LANDING,APP,API}_HOST, PLIEGO_CORS_ORIGINS,
+PLIEGO_TRUSTED_PROXY_HEADER, PLIEGO_METRICS_PORT; PLIEGO_DEV=1 is the local-development switch.
 """
 
 from __future__ import annotations
@@ -22,14 +23,6 @@ HOST_API = "pliego-api.madfam.io"
 MAX_CONTENT_LENGTH = 256 * 1024  # bytes; POST bodies are small JSON objects
 RENDER_TIMEOUT_S = 30.0
 DEFAULT_RATE_LIMIT = (30, 60.0)  # requests per window (seconds) per client, per worker
-
-
-def _first(env: Mapping[str, str], *names: str) -> str | None:
-    """The value of the first variable in ``names`` that is set (even to an empty string)."""
-    for name in names:
-        if name in env:
-            return env[name]
-    return None
 
 
 def _truthy(value: str | None) -> bool:
@@ -98,18 +91,15 @@ class Settings:
         root = Path(env.get("PLIEGO_ROOT") or DEFAULT_ROOT)
         projects = env.get("PLIEGO_PROJECTS_DIR")
         materials = env.get("PLIEGO_MATERIALS_DIR")
-        header = _first(env, "PLIEGO_TRUSTED_IP_HEADER", "PLIEGO_TRUSTED_PROXY_HEADER")
+        header = env.get("PLIEGO_TRUSTED_PROXY_HEADER")
         timeout = env.get("PLIEGO_RENDER_TIMEOUT_S")
         return cls(
             root=root,
             projects_dir=Path(projects) if projects else None,
             materials_dir=Path(materials) if materials else None,
-            host_landing=(_first(env, "PLIEGO_HOST_LANDING", "PLIEGO_PUBLIC_LANDING_HOST")
-                          or HOST_LANDING).strip().lower(),
-            host_app=(_first(env, "PLIEGO_HOST_APP", "PLIEGO_PUBLIC_APP_HOST")
-                      or HOST_APP).strip().lower(),
-            host_api=(_first(env, "PLIEGO_HOST_API", "PLIEGO_PUBLIC_API_HOST")
-                      or HOST_API).strip().lower(),
+            host_landing=(env.get("PLIEGO_PUBLIC_LANDING_HOST") or HOST_LANDING).strip().lower(),
+            host_app=(env.get("PLIEGO_PUBLIC_APP_HOST") or HOST_APP).strip().lower(),
+            host_api=(env.get("PLIEGO_PUBLIC_API_HOST") or HOST_API).strip().lower(),
             cors_origins_raw=env.get("PLIEGO_CORS_ORIGINS", ""),
             dev=_truthy(env.get("PLIEGO_DEV")),
             # Unset → the tunnel's header; set to "" → no trusted header (remote address only).

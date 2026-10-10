@@ -6,9 +6,9 @@ arrived on is ``SERVER_PORT``, which gunicorn takes from the bound socket (``get
 from the client's Host header, so it cannot be spoofed. On the app listener ``/metrics`` is a 404;
 on the metrics listener everything except ``/metrics`` is a 404.
 
-Counters are PER WORKER PROCESS (no shared store, no multiprocess mode): a scrape reaches one worker,
-so every series carries a ``worker`` label (the pid) and must be summed across workers; a worker
-restart resets its counters (use ``rate()``/``increase()``).
+Counters are PER WORKER PROCESS (no shared store, no multiprocess mode): a scrape reaches one
+worker, so every series carries a ``worker`` label (the pid) and must be summed across workers;
+a worker restart resets its counters (use ``rate()``/``increase()``).
 """
 
 from __future__ import annotations

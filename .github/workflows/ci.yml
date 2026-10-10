@@ -166,7 +166,8 @@ jobs:
         run: python -m pytest packages/kernel/tests -q
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
-        run: echo "skip: packages/kernel/pyproject.toml or packages/kernel/tests does not exist yet"
+        run: |
+          echo "skip: packages/kernel/pyproject.toml or packages/kernel/tests does not exist yet"
 
   stocks:
     name: Stock cards (derived physics up to date)
@@ -195,7 +196,8 @@ jobs:
           python -m pliego.stock --check materials
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
-        run: echo "skip: packages/kernel or materials/*/stock.json does not exist yet"
+        run: |
+          echo "skip: packages/kernel or materials/*/stock.json does not exist yet"
 
   engine:
     name: Engine (node --test, JSDoc type check)
@@ -231,7 +233,8 @@ jobs:
             --skipLibCheck "${files[@]}"
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
-        run: echo "skip: packages/engine/src or packages/engine/test does not exist yet"
+        run: |
+          echo "skip: packages/engine/src or packages/engine/test does not exist yet"
 
   web:
     name: Web (node --test)
@@ -253,7 +256,8 @@ jobs:
         run: node --test apps/web/test/
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
-        run: echo "skip: apps/web/test does not exist yet"
+        run: |
+          echo "skip: apps/web/test does not exist yet"
 
   api:
     name: API (pytest, OpenAPI drift)
@@ -292,7 +296,8 @@ jobs:
         run: python scripts/qa/verify_openapi.py
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
-        run: echo "skip: apps/api/app.py or apps/api/requirements.txt does not exist yet (api lane, wave 2)"
+        run: |
+          echo "skip: apps/api/app.py or apps/api/requirements.txt does not exist yet (api lane, wave 2)"
 
   secrets:
     name: Secret scan (full history)

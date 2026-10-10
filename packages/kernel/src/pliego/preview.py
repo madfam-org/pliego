@@ -19,6 +19,8 @@ from . import flatmotion
 from .space import axis_rotation, sub, unit
 
 HINGE = frozenset("MVFUJ")
+MID_TEAR_MM = 0.5    # refine a step's samples until the preview's blend tears less than this
+MAX_SAMPLES = 24
 
 
 class PreviewTree:
@@ -110,11 +112,12 @@ class PreviewTree:
         return out
 
     def tear(self, poses: Sequence[flatmotion.Rigid]) -> float:
-        """Largest distance between the images of a vertex shared by two adjacent faces."""
+        """Largest distance between the images of a vertex shared by two faces joined at an
+        edge (a hinge: not across a slit, whose sides part when the paper opens there)."""
         worst = 0.0
         u = self.unplaced
         for e, fs in enumerate(self.edge_faces):
-            if len(fs) < 2:
+            if len(fs) < 2 or self.arr.assignment[e] not in HINGE:
                 continue
             f, g = fs[0], fs[1]
             for v in self.arr.edges[e]:
@@ -147,3 +150,50 @@ def _dot(a, b) -> float:
 
 def _cross(a, b):
     return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+
+def sample_step(tree, readout, poses_at, ts0, cur, end, folds, sid):
+    from .flatstate import FlatStateError
+
+    """Angles at the sample times, refined (midpoints inserted) wherever the preview's
+    linear blend between two samples tears more than MID_TEAR_MM, up to MAX_SAMPLES."""
+    ts = sorted(set(ts0))
+    done = None
+    while True:
+        prev, seq, tears, mids, devs = dict(cur), [], [], [], []
+        last = cur
+        for t in ts:
+            poses = poses_at(min(t, 1.0))
+            ang = readout(poses, end if (end is not None and t >= 1.0) else prev)
+            if end is not None and t >= 1.0:
+                bad = max((min(abs(ang[e] - end[e]), 360.0 - abs(ang[e] - end[e]))
+                           for e in folds), default=0.0)
+                if bad > 1e-5:
+                    raise FlatStateError(f"step '{sid}': the motion does not end in the "
+                                         f"folded state ({bad:.3g}° off)")
+                ang = dict(end)
+            else:
+                ang = tree.fit(poses, ang)
+            full = {**last, **ang}
+            drawn = tree.pose(full)
+            tears.append(tree.tear(drawn))
+            devs.append(tree.deviation(drawn, _rooted(poses, drawn)))
+            mids.append(tree.tear(tree.pose({e: (last[e] + full[e]) / 2.0 for e in folds})))
+            seq.append(ang)
+            prev, last = ang, full
+        if done is not None and max(mids) > 0.75 * max(done[2]):
+            return done           # refining does not help: a jump the blend cannot follow
+        done = (seq, tears, mids, devs)
+        bad_iv = [k for k, m in enumerate(mids) if m > MID_TEAR_MM and m > 2.0 * tears[k]
+                  and (k == 0 or m > 2.0 * tears[k - 1])]
+        if not bad_iv or len(ts) >= MAX_SAMPLES:
+            return done
+        t_prev = [0.0] + ts[:-1]
+        ts = sorted(set(ts) | {(t_prev[k] + ts[k]) / 2.0 for k in bad_iv})[:MAX_SAMPLES]
+
+
+def _rooted(intended: list, drawn: list) -> list:
+    """Intended poses moved so face 0 sits where the preview draws it (the preview keeps face 0
+    fixed; the intended motion may move it)."""
+    fix = flatmotion.compose(drawn[0], flatmotion.invert(intended[0]))
+    return [flatmotion.compose(fix, p) for p in intended]

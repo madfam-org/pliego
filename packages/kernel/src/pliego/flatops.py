@@ -73,7 +73,9 @@ class Move:
             gt = fwd(1.0 - t)
             return {f: flatmotion.compose(gt.get(f, flatmotion.ID_RIGID), flatmotion.invert(g))
                     for f, g in g1.items()}
-        return Move(self.kind + "-back", self.state, self.before_split(),
+        opened = self.before_split()
+        opened = opened.derive(memory=opened.memory + remember(self.state, opened))
+        return Move(self.kind + "-back", self.state, opened,
                     list(range(len(self.state.faces))), back, list(self.samples), self.info)
 
     def before_split(self) -> FlatState:
@@ -81,7 +83,7 @@ class Move:
         st = self.state
         faces = [Face(f.verts, self.before.faces[self.parent[i]].xf)
                  for i, f in enumerate(st.faces)]
-        out = FlatState(st.outline, st.points, faces, {})
+        out = st.derive(faces=faces, order={})
         return _inherit(out, self.before, self.parent, "unfold")
 
 
@@ -161,13 +163,14 @@ def subdivide(state: FlatState, line, faces: Iterable[int] | None = None, *,
         for cyc in cut:
             new_faces.append(Face(cyc, face.xf))
             parent.append(f)
-    out = FlatState(state.outline, pool.points, _repair(new_faces, pool.points), {})
+    out = state.derive(points=pool.points, faces=_repair(new_faces, pool.points), order={})
     return _inherit(out, state, parent, "subdivide"), parent
 
 
-def _repair(faces: list[Face], points: Sequence[Pt]) -> list[Face]:
-    """Insert into each face cycle the vertices that lie on its edges (no T-junctions)."""
-    used = sorted({v for f in faces for v in f.verts})
+def _repair(faces: list[Face], points: Sequence[Pt], extra: Iterable[int] = ()) -> list[Face]:
+    """Insert into each face cycle the vertices that lie on its edges (no T-junctions); `extra`
+    vertices (no face's corner yet, e.g. a slit's end inside a face) are inserted too."""
+    used = sorted({v for f in faces for v in f.verts} | set(extra))
     out: list[Face] = []
     for face in faces:
         vs = list(face.verts)
@@ -207,17 +210,34 @@ def _inherit(new: FlatState, old: FlatState, parent: list[int], what: str) -> Fl
                 if overlap(imgs[i], imgs[j]):
                     key = (i, j) if i < j else (j, i)
                     order[key] = (1 if up else -1) * (1 if i < j else -1)
-    return FlatState(new.outline, new.points, new.faces, order)
+    return new.derive(order=order)
 
 
 def _adjacency(state: FlatState) -> dict[int, list[tuple[int, int, int]]]:
+    """face → [(neighbour, a, b)] across creases (not across slits)."""
     half = state.half_edges()
+    cut = state.cut_edges()
     adj: dict[int, list[tuple[int, int, int]]] = {f: [] for f in range(len(state.faces))}
     for (a, b), f in sorted(half.items()):
         g = half.get((b, a))
-        if g is not None:
+        if g is not None and (min(a, b), max(a, b)) not in cut:
             adj[f].append((g, a, b))
     return adj
+
+
+def _fold_seams(state: FlatState, faces: Sequence[Face]) -> tuple:
+    """`state.creased` plus every seam edge the move folds (it is a crease from now on)."""
+    if not state.seams:
+        return state.creased
+    half = state.half_edges()
+    out = list(state.creased)
+    for (a, b), f in sorted(half.items()):
+        g = half.get((b, a))
+        if g is None or a > b or not state.seam_only(a, b):
+            continue
+        if (xf_det(faces[f].xf) < 0) != (xf_det(faces[g].xf) < 0):
+            out.append((state.points[a], state.points[b]))
+    return tuple(out)
 
 
 def flood(state: FlatState, seeds: Iterable[int], allowed: Callable[[int], bool],
@@ -275,7 +295,7 @@ def _move(state: FlatState, group: dict[int, str], xf: dict[str, Affine], rule: 
     lands, else `hint`). Checked before it is returned."""
     faces = [Face(f.verts, xf_compose(xf[group[i]], f.xf) if i in group else f.xf)
              for i, f in enumerate(state.faces)]
-    tmp = FlatState(state.outline, state.points, faces, {})
+    tmp = state.derive(faces=faces, order={})
     cs = cells(tmp)
     witness: dict[tuple[int, int], Pt] = {}
     for q, stack in cs:
@@ -313,14 +333,27 @@ def _move(state: FlatState, group: dict[int, str], xf: dict[str, Affine], rule: 
             if h is None:
                 h = hint(i, j)
             hints[(i, j)] = 1 if (h or 1) > 0 else -1
-    out = FlatState(state.outline, state.points, faces, order)
+    out = state.derive(faces=faces, order=order, creased=_fold_seams(state, faces))
     if hints:
         out = solve(out, hints, cs)
     issues = check(out, cs=cs)
     if issues:
         raise FlatStateError(f"{what}: the result is not a valid flat folding — "
                              + "; ".join(i["detail"] for i in issues[:4]))
-    return out
+    opened = remember(state, out)
+    return out.derive(memory=out.memory + opened) if opened else out
+
+
+def remember(before: FlatState, after: FlatState) -> tuple:
+    """Memory entries for the creases folded in `before` and open in `after` (the same faces):
+    each keeps the sign of its last fold."""
+    was = {(min(c.a, c.b), max(c.a, c.b)): c.angle for c in before.creases() if c.angle}
+    out = []
+    for c in after.creases():
+        a = was.get((min(c.a, c.b), max(c.a, c.b)))
+        if a and c.angle == 0.0:
+            out.append((after.points[c.a], after.points[c.b], 1 if a > 0 else -1))
+    return tuple(out)
 
 
 def _require_top(state: FlatState, moving: set[int], up: bool, what: str) -> None:

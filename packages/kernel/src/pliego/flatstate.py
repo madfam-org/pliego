@@ -27,136 +27,30 @@ import math
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 
-TOL = 1e-6           # mm: points closer than this are one vertex; side tests use it
-LINE_TOL = 1e-5      # mm: an edge lies on a line when both end images are this close to it
-
-Pt = tuple[float, float]
-Affine = tuple[float, float, float, float, float, float]  # x' = a x + b y + tx, y' = c x + d y + ty
-IDENTITY: Affine = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-
-
-class FlatStateError(ValueError):
-    """An operation or a state that is not a valid flat folding (fail loud)."""
-
-
-# ── plane isometries ─────────────────────────────────────────────────────────
-
-def xf_apply(m: Affine, p: Sequence[float]) -> Pt:
-    return (m[0] * p[0] + m[1] * p[1] + m[4], m[2] * p[0] + m[3] * p[1] + m[5])
-
-
-def xf_compose(m: Affine, n: Affine) -> Affine:
-    """m ∘ n."""
-    return (m[0] * n[0] + m[1] * n[2], m[0] * n[1] + m[1] * n[3],
-            m[2] * n[0] + m[3] * n[2], m[2] * n[1] + m[3] * n[3],
-            m[0] * n[4] + m[1] * n[5] + m[4], m[2] * n[4] + m[3] * n[5] + m[5])
-
-
-def xf_invert(m: Affine) -> Affine:
-    det = m[0] * m[3] - m[1] * m[2]
-    a, b, c, d = m[3] / det, -m[1] / det, -m[2] / det, m[0] / det
-    return (a, b, c, d, -(a * m[4] + b * m[5]), -(c * m[4] + d * m[5]))
-
-
-def xf_det(m: Affine) -> float:
-    return m[0] * m[3] - m[1] * m[2]
-
-
-def reflect_xf(p: Sequence[float], d: Sequence[float]) -> Affine:
-    """Reflection across the line through p with unit direction d."""
-    c2, s2 = d[0] * d[0] - d[1] * d[1], 2.0 * d[0] * d[1]
-    return (c2, s2, s2, -c2, p[0] - (c2 * p[0] + s2 * p[1]), p[1] - (s2 * p[0] - c2 * p[1]))
-
-
-def mirror_x(cx: float) -> Affine:
-    """Mirror of the folded frame across the vertical line x = cx (turning the model over)."""
-    return (-1.0, 0.0, 0.0, 1.0, 2.0 * cx, 0.0)
-
-
-# ── small planar helpers ─────────────────────────────────────────────────────
-
-def area(poly: Sequence[Pt]) -> float:
-    n = len(poly)
-    return 0.5 * math.fsum(poly[i - 1][0] * poly[i][1] - poly[i][0] * poly[i - 1][1]
-                           for i in range(n))
-
-
-def centroid(poly: Sequence[Pt]) -> Pt:
-    a = area(poly)
-    if abs(a) < 1e-12:
-        n = len(poly)
-        return (sum(p[0] for p in poly) / n, sum(p[1] for p in poly) / n)
-    cx = cy = 0.0
-    n = len(poly)
-    for i in range(n):
-        x0, y0 = poly[i - 1]
-        x1, y1 = poly[i]
-        w = x0 * y1 - x1 * y0
-        cx += (x0 + x1) * w
-        cy += (y0 + y1) * w
-    return (cx / (6.0 * a), cy / (6.0 * a))
-
-
-def inside_convex(q: Sequence[float], poly: Sequence[Pt], tol: float = TOL) -> bool:
-    """Strictly inside a CCW convex polygon, by at least `tol` (negative tol: closed, padded)."""
-    n = len(poly)
-    for i in range(n):
-        a, b = poly[i], poly[(i + 1) % n]
-        dx, dy = b[0] - a[0], b[1] - a[1]
-        ln = math.hypot(dx, dy)
-        if ln < 1e-12:
-            continue
-        if (dx * (q[1] - a[1]) - dy * (q[0] - a[0])) / ln < tol:
-            return False
-    return True
-
-
-def bbox(poly: Iterable[Pt]) -> tuple[float, float, float, float]:
-    xs, ys = zip(*poly, strict=True)
-    return (min(xs), min(ys), max(xs), max(ys))
-
-
-def overlap(p: Sequence[Pt], q: Sequence[Pt], tol: float = TOL) -> bool:
-    """Positive-area overlap of two convex polygons (separating-axis test with a margin)."""
-    for poly in (p, q):
-        n = len(poly)
-        for i in range(n):
-            a, b = poly[i], poly[(i + 1) % n]
-            nx, ny = a[1] - b[1], b[0] - a[0]
-            ln = math.hypot(nx, ny)
-            if ln < 1e-12:
-                continue
-            nx, ny = nx / ln, ny / ln
-            pa = [nx * x + ny * y for x, y in p]
-            pb = [nx * x + ny * y for x, y in q]
-            if max(pa) <= min(pb) + tol or max(pb) <= min(pa) + tol:
-                return False
-    return True
-
-
-def side(p: Sequence[float], d: Sequence[float], q: Sequence[float]) -> float:
-    """Signed distance of q from the directed line (p, d); > 0 on the left."""
-    return d[0] * (q[1] - p[1]) - d[1] * (q[0] - p[0])
-
-
-def as_line(line) -> tuple[Pt, Pt]:
-    """(point, unit direction) of a line given as two points (or a pliego `Line`)."""
-    if hasattr(line, "p0") and hasattr(line, "p1"):
-        a, b = (line.p0.x, line.p0.y), (line.p1.x, line.p1.y)
-    else:
-        a, b = (float(line[0][0]), float(line[0][1])), (float(line[1][0]), float(line[1][1]))
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    ln = math.hypot(dx, dy)
-    if ln < 1e-9:
-        raise FlatStateError("a fold line needs two distinct points")
-    return a, (dx / ln, dy / ln)
-
-
-def pt(p) -> Pt:
-    if hasattr(p, "x"):
-        return (float(p.x), float(p.y))
-    return (float(p[0]), float(p[1]))
-
+from .flatgeom import (  # noqa: F401 - re-exported: the flat modules import them from here
+    IDENTITY,
+    LINE_TOL,
+    TOL,
+    Affine,
+    FlatStateError,
+    Pt,
+    area,
+    as_line,
+    bbox,
+    centroid,
+    inside_convex,
+    merge_segments,
+    mirror_x,
+    on_segments,
+    overlap,
+    pt,
+    reflect_xf,
+    side,
+    xf_apply,
+    xf_compose,
+    xf_det,
+    xf_invert,
+)
 
 # ── the state ────────────────────────────────────────────────────────────────
 
@@ -186,13 +80,37 @@ class FlatState:
     """One flat-folded state (see the module docstring). Build with `FlatState.of(outline)`."""
 
     def __init__(self, outline: Sequence[Pt], points: Sequence[Pt], faces: Sequence[Face],
-                 order: dict[tuple[int, int], int]):
+                 order: dict[tuple[int, int], int], *, cuts: Sequence[tuple[Pt, Pt]] = (),
+                 seams: Sequence[tuple[Pt, Pt]] = (), creased: Sequence[tuple[Pt, Pt]] = (),
+                 partial: bool = False, memory: Sequence[tuple[Pt, Pt, int]] = ()):
         self.outline = tuple(outline)
         self.points = tuple(points)
         self.faces = tuple(faces)
         self.order = dict(order)       # (i, j), i < j, overlapping: +1 → i above j, −1 → below
+        # sheet-frame segments: slits (the faces either side are not joined there), seams (faces
+        # joined flat where a slit's line was extended to keep faces convex — not a crease), and
+        # the parts of seams that have been folded since (creases after all)
+        self.cuts = tuple(cuts)
+        self.seams = tuple(seams)
+        self.creased = tuple(creased)
+        # a group of faces taken out of a larger folding (`pliego.foldpose`): vertices on its
+        # rim meet creases it does not hold, so the local Kawasaki / Maekawa test does not apply
+        self.partial = partial
+        # crease memory: sheet segments of creases folded and opened again, with the sign of
+        # their last fold (+1 valley, −1 mountain); later entries win
+        self.memory = tuple(memory)
         self._img: list[list[Pt] | None] = [None] * len(self.faces)
         self._half: dict[tuple[int, int], int] | None = None
+        self._cut: set[tuple[int, int]] | None = None
+
+    def derive(self, *, points: Sequence[Pt] | None = None, faces: Sequence[Face] | None = None,
+               order: dict[tuple[int, int], int] | None = None, **extra) -> FlatState:
+        """A state with the same sheet (outline, slits, seams) and the given changes."""
+        kw = {"cuts": self.cuts, "seams": self.seams, "creased": self.creased,
+              "partial": self.partial, "memory": self.memory, **extra}
+        return FlatState(self.outline, self.points if points is None else points,
+                         self.faces if faces is None else faces,
+                         self.order if order is None else order, **kw)
 
     # ── construction ──
     @classmethod
@@ -271,6 +189,83 @@ class FlatState:
         hit = [f for f in range(len(self.faces)) if inside_convex(q, self.image(f))]
         return sort_stack(self, hit)
 
+    def layers_at(self, q, faces: Iterable[int] | None = None) -> list[tuple[int, Pt]]:
+        """The layers of paper at the folded point q, bottom → top: (face, sheet point) — where
+        each layer's paper lies on the flat sheet. A point on a crease or a face edge counts each
+        layer once (the faces of one layer meeting there map it to one sheet point). `faces`
+        limits the stack to those faces (e.g. one flap)."""
+        q = pt(q)
+        cand = range(len(self.faces)) if faces is None else sorted(set(faces))
+        hit = [f for f in cand if inside_convex(q, self.image(f))]
+        if hit:
+            st = sort_stack(self, hit)
+            return [(f, xf_apply(xf_invert(self.faces[f].xf), q)) for f in st]
+        # on an edge or a vertex: group the faces touching q by the sheet point they map it to
+        groups: list[tuple[list[int], Pt]] = []
+        for f in cand:
+            if not inside_convex(q, self.image(f), -TOL):
+                continue
+            s = xf_apply(xf_invert(self.faces[f].xf), q)
+            for fs, s0 in groups:
+                if abs(s[0] - s0[0]) <= 10 * TOL and abs(s[1] - s0[1]) <= 10 * TOL:
+                    fs.append(f)
+                    break
+            else:
+                groups.append(([f], s))
+        if not groups:
+            raise FlatStateError(f"no layer at folded point ({q[0]:.3f}, {q[1]:.3f})")
+
+        def rel(a: list[int], b: list[int]) -> bool | None:
+            for f in a:
+                for g in b:
+                    up = self.above(f, g)
+                    if up is not None:
+                        return up
+            return None
+        below = [0] * len(groups)
+        for i in range(len(groups)):
+            for j in range(i + 1, len(groups)):
+                up = rel(groups[i][0], groups[j][0])
+                if up is None:
+                    raise FlatStateError(f"layers touching ({q[0]:.3f}, {q[1]:.3f}) are not "
+                                         "ordered there: pick a point inside the paper")
+                below[i if up else j] += 1
+        order = sorted(range(len(groups)), key=lambda k: below[k])
+        if [below[k] for k in order] != list(range(len(groups))):
+            raise FlatStateError(f"layer order at ({q[0]:.3f}, {q[1]:.3f}) is cyclic")
+        return [(min(groups[k][0]), groups[k][1]) for k in order]
+
+    def preimage(self, q, layer: str | int = "top", faces: Iterable[int] | None = None) -> Pt:
+        """The sheet point (flat-sheet coordinates) that lies at the folded point q on the chosen
+        layer: "top" (nearest the viewer), "bottom", or an index into the stack bottom → top
+        (negative indices count from the top, as in Python). `faces` limits the stack to those
+        faces. The inverse of `to_folded` for that layer: cartridges compute crease seeds and
+        `sheet_points` selections with it."""
+        stack = self.layers_at(q, faces)
+        if layer == "top":
+            k = len(stack) - 1
+        elif layer == "bottom":
+            k = 0
+        elif isinstance(layer, int) and -len(stack) <= layer < len(stack):
+            k = layer % len(stack)
+        else:
+            raise FlatStateError(f"layer {layer!r} asked, {len(stack)} layer(s) at "
+                                 f"({pt(q)[0]:.3f}, {pt(q)[1]:.3f})")
+        return stack[k][1]
+
+    def layer_index(self, sheet_point, q=None) -> int:
+        """The index (bottom → top, from 0) of the layer a sheet point's paper occupies in the
+        stack at the folded point q (default: its own folded image)."""
+        f = self.face_at(sheet_point)
+        img = xf_apply(self.faces[f].xf, pt(sheet_point)) if q is None else pt(q)
+        s = pt(sheet_point)
+        for k, (g, p) in enumerate(self.layers_at(img)):
+            if g == f or (self.faces[g].xf == self.faces[f].xf
+                          and math.hypot(p[0] - s[0], p[1] - s[1]) <= 10 * TOL):
+                return k
+        raise FlatStateError(f"sheet point ({s[0]:.3f}, {s[1]:.3f}) is not in the stack at "
+                             f"({img[0]:.3f}, {img[1]:.3f})")
+
     def bbox(self) -> tuple[float, float, float, float]:
         return bbox([p for f in range(len(self.faces)) for p in self.image(f)])
 
@@ -295,19 +290,66 @@ class FlatState:
             raise FlatStateError(f"faces {f} and {g} are folded onto each other but unordered")
         return 180.0 if up == (not self.faces[f].flipped) else -180.0
 
+    def cut_edges(self) -> set[tuple[int, int]]:
+        """Interior edges (a, b), a < b, that lie on a slit: their faces are not joined."""
+        if self._cut is None:
+            out: set[tuple[int, int]] = set()
+            if self.cuts:
+                half = self.half_edges()
+                for (a, b) in half:
+                    if a < b and (b, a) in half and on_segments(self.points[a], self.points[b],
+                                                                self.cuts):
+                        out.add((a, b))
+            self._cut = out
+        return self._cut
+
+    def joined(self, a: int, b: int) -> bool:
+        """Is the interior edge a–b a crease (not a slit)?"""
+        return (min(a, b), max(a, b)) not in self.cut_edges()
+
     def creases(self) -> list[Crease]:
         out: list[Crease] = []
         half = self.half_edges()
+        cut = self.cut_edges()
         for (a, b), f in half.items():
             g = half.get((b, a))
-            if g is None or (a, b) > (b, a):
+            if g is None or (a, b) > (b, a) or (min(a, b), max(a, b)) in cut:
                 continue
             out.append(Crease(a, b, f, g, self.crease_angle(f, g)))
         return out
 
     def boundary_edges(self) -> list[tuple[int, int, int]]:
+        """Edges with paper on one side only: the outline and both sides of every slit."""
         half = self.half_edges()
-        return [(a, b, f) for (a, b), f in half.items() if (b, a) not in half]
+        cut = self.cut_edges()
+        return [(a, b, f) for (a, b), f in half.items()
+                if (b, a) not in half or (min(a, b), max(a, b)) in cut]
+
+    def memory_of(self, c: Crease) -> int:
+        """A crease's valley (+1) / mountain (−1) memory: its sign while folded, the sign of its
+        last fold once opened (0: never folded)."""
+        if c.angle:
+            return 1 if c.angle > 0 else -1
+        pa, pb = self.points[c.a], self.points[c.b]
+        for a, b, sg in reversed(self.memory):
+            if on_segments(pa, pb, [(a, b)]):
+                return sg
+        return 0
+
+    def memory_segments(self) -> list[tuple[tuple[Pt, Pt], int]]:
+        """Maximal straight segments of open creases that remember a fold, with its sign."""
+        out = []
+        for sg in (1, -1):
+            segs = [(self.points[c.a], self.points[c.b]) for c in self.creases()
+                    if c.angle == 0.0 and not self.seam_only(c.a, c.b) and self.memory_of(c) == sg]
+            out += [(seg, sg) for seg in merge_segments(segs)]
+        return out
+
+    def seam_only(self, a: int, b: int) -> bool:
+        """Is the edge a–b a seam that has never been folded (no crease on the flat sheet)?"""
+        pa, pb = self.points[a], self.points[b]
+        return bool(self.seams) and on_segments(pa, pb, self.seams) \
+            and not on_segments(pa, pb, self.creased)
 
     def segment_image(self, f: int, a: int, b: int) -> tuple[Pt, Pt]:
         xf = self.faces[f].xf
@@ -320,7 +362,7 @@ class FlatState:
         x0, _, x1, _ = self.bbox()
         m = mirror_x((x0 + x1) / 2.0)
         faces = [Face(f.verts, xf_compose(m, f.xf)) for f in self.faces]
-        return FlatState(self.outline, self.points, faces, {k: -s for k, s in self.order.items()})
+        return self.derive(faces=faces, order={k: -s for k, s in self.order.items()})
 
     def rotate(self, deg: float, center=(0.0, 0.0)) -> FlatState:
         """Rotate the folded model in its plane (diagram convenience; no crease moves)."""
@@ -328,7 +370,7 @@ class FlatState:
         cx, cy = pt(center)
         m = (c, -s, s, c, cx - (c * cx - s * cy), cy - (s * cx + c * cy))
         faces = [Face(f.verts, xf_compose(m, f.xf)) for f in self.faces]
-        return FlatState(self.outline, self.points, faces, self.order)
+        return self.derive(faces=faces)
 
     def fold(self, line, direction: str = "valley", **kw) -> FlatState:
         from .flatops import fold
@@ -338,25 +380,42 @@ class FlatState:
         from .flatcheck import check
         return check(self, local=local)
 
-    def unfold(self, id: str = "folded", *, folded_only: bool = False, **sheet_kwargs):
+    def unfold(self, id: str = "folded", *, folded_only: bool = False,
+               rest_memory: float | None = None, memory_from: FlatState | None = None,
+               **sheet_kwargs):
         """The crease pattern on the flat sheet: a `pliego.Sheet` with every crease of this
-        state, valley/mountain from the state (±180°) and flat (`F`) for creases left open."""
+        state, valley/mountain from the state (±180°) and flat (`F`) for creases left open.
+        `rest_memory` (deg): creases that remember a fold — open ones in `memory_from` (default
+        this state) — get that rest angle with the sign of their last fold
+        (`pliego:edges_restAngle`: a pre-creased sheet; a crease folded flat and opened by hand
+        springs back to about the stock's yield angle)."""
         from .sheet import Sheet
 
         sheet = Sheet(id, [list(p) for p in self.outline], **sheet_kwargs)
+        for a, b in merge_segments(self.cuts):
+            sheet.cut([a, b])
+        src = self if memory_from is None else memory_from
+        remembered = src.memory_segments() if rest_memory is not None else []
         for seg, ang in self.crease_segments():
-            if ang == 0.0:
-                if not folded_only:
-                    sheet.crease(seg[0], seg[1], "flat", 0.0)
-            else:
-                sheet.crease(seg[0], seg[1], "valley" if ang > 0 else "mountain", 180.0)
+            if ang == 0.0 and folded_only:
+                continue
+            kind = "flat" if ang == 0.0 else ("valley" if ang > 0 else "mountain")
+            angle = 0.0 if ang == 0.0 else 180.0
+            for piece, sg in _pieces(seg, remembered):
+                rest = None
+                if sg:
+                    if kind != "flat" and (sg > 0) != (kind == "valley"):
+                        raise FlatStateError("crease memory: a crease remembers the other "
+                                             "sign than it folds to (no signed rest for it)")
+                    rest = sg * float(rest_memory)
+                sheet.crease(piece[0], piece[1], kind, angle, rest=rest)
         return sheet
 
     crease_pattern = unfold
 
     def crease_segments(self) -> list[tuple[tuple[Pt, Pt], float]]:
         """Maximal straight crease segments with one fold angle, sheet frame, authored order."""
-        cr = self.creases()
+        cr = [c for c in self.creases() if c.angle != 0.0 or not self.seam_only(c.a, c.b)]
         lines: dict[tuple[int, int, float], list[tuple[float, float, Pt, Pt]]] = {}
         for c in cr:
             a, b = self.points[c.a], self.points[c.b]
@@ -389,6 +448,40 @@ class FlatState:
         folded = sum(1 for c in cr if c.angle != 0.0)
         return (f"flatstate: faces={len(self.faces)} creases={len(cr)} folded={folded} "
                 f"ordered_pairs={len(self.order)}")
+
+
+def _pieces(seg: tuple[Pt, Pt], marks: Sequence[tuple[tuple[Pt, Pt], int]]
+            ) -> list[tuple[tuple[Pt, Pt], int]]:
+    """A crease segment split where collinear remembered segments start or end, each piece with
+    the sign of the memory covering it (0: none)."""
+    a, b = seg
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    ln = math.hypot(dx, dy)
+    ux, uy = dx / ln, dy / ln
+    spans = []
+    for (c, d), sg in marks:
+        if any(abs(ux * (p[1] - a[1]) - uy * (p[0] - a[0])) > 10 * TOL for p in (c, d)):
+            continue
+        tc, td = sorted((ux * (c[0] - a[0]) + uy * (c[1] - a[1]),
+                         ux * (d[0] - a[0]) + uy * (d[1] - a[1])))
+        if min(td, ln) - max(tc, 0.0) > 10 * TOL:
+            spans.append((max(tc, 0.0), min(td, ln), sg))
+    if not spans:
+        return [(seg, 0)]
+    cuts = sorted({0.0, ln} | {t for s0, s1, _ in spans for t in (s0, s1)})
+    out = []
+    for t0, t1 in zip(cuts, cuts[1:], strict=False):
+        if t1 - t0 <= 10 * TOL:
+            continue
+        tm = (t0 + t1) / 2
+        sg = next((g for s0, s1, g in reversed(spans) if s0 <= tm <= s1), 0)
+        p0 = a if t0 == 0.0 else (a[0] + t0 * ux, a[1] + t0 * uy)
+        p1 = b if t1 == ln else (a[0] + t1 * ux, a[1] + t1 * uy)
+        if out and out[-1][1] == sg:
+            out[-1] = ((out[-1][0][0], p1), sg)
+        else:
+            out.append(((p0, p1), sg))
+    return out
 
 
 def sort_stack(state: FlatState, faces: Iterable[int]) -> list[int]:

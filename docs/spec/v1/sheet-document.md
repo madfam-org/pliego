@@ -286,6 +286,81 @@ fine kirigami declare it; nothing else should.
 
 ---
 
+<!-- lane P (wave 2b) draft — begin: packaging blocks (§5.8–§5.10; renumber on integration) -->
+### 5.8 `pliego:dielines` — packaging dielines (lane P draft)
+
+A list of dieline blocks, one per die-cut sheet, written by `pliego.dieline` (box, carton and
+envelope generators). Sheet-local coordinates (mm); the exporters add the sheet's `offset`.
+
+```json
+{"style": "reverse-tuck carton", "family": "folding-carton", "sheet": "carton",
+ "inside": {"length": 120, "width": 60, "depth": 180}, "caliper_mm": 0.47,
+ "bleed_mm": 3, "safe_mm": 3,
+ "panels": [{"name": "front", "kind": "panel", "label": {"en": "Front", "es": "Frente", "fr": "Face avant", "pt": "Frente"},
+             "polygon": [[0, 125], [120.47, 125], [120.47, 305.47], [0, 305.47]], "print": true,
+             "safe": [[3, 128], "…"], "bleed": [[-3, 125], "…"]}],
+ "glue": [{"id": "manufacturers-joint", "kind": "glue", "panel": "glue-flap", "polygon": [[…]]}],
+ "dimensions": [{"from": [0, 125], "to": [120.47, 125], "offset": -6, "text": "L 120 (inside)"}],
+ "grain": {"kind": "grain", "angle_deg": 90, "at": [300, 40]}}
+```
+
+- `family` ∈ `corrugated` · `folding-carton` · `envelope` · `rigid` · `board`.
+- `inside`: the inside dimensions the generator compensated for (`length`/`width`/`depth`, or
+  the insert's `width`/`height` for envelopes); `caliper_mm`: the stock caliper it used.
+- `panels[]`: `name` (kebab, also the `pliego:edges_name` of the panel's free cut edges),
+  `kind` ∈ `panel flap dust-flap tuck lid glue-flap lock bottom pocket window-frame`, i18n
+  `label`, `polygon`; printed panels (`print: true`) carry `safe` (the panel inset by
+  `safe_mm`) and `bleed` (the panel grown by `bleed_mm` along its cut edges only).
+- `glue[]`: `kind` ∈ `glue gum peel-and-seal tape hot-melt` — fabrication zones (the
+  manufacturer's joint, gummed and peel-and-seal flaps). Welding them is the engine's job; a
+  generator only writes `pliego:joins` glue when its initial frame satisfies the weld.
+- `grain.kind` is `flute` for corrugated board (the arrow follows the flute axes, across MD).
+- **Fold lines** of a dieline are ordinary `M`/`V` edges with treatment `score` (creasing
+  rule); slits are `C` edges; tear lines are `perforation` (assignment `F`); kiss cuts
+  `halfcut`. Box folds are mountain folds with the sheet's front as the print side, and box
+  sheets are placed print side down (`placement.rotation = [1, 0, 0, 0]`).
+
+### 5.9 `pliego:finishes` — pressing and burning (lane P draft)
+
+A list of finish regions on one side of a sheet (`pliego.press`):
+
+```json
+{"id": "logo", "kind": "emboss", "sheet": "card", "side": "front",
+ "region": [[[20, 100], [60, 100], [60, 140], [20, 140]]],
+ "depth_mm": 0.4, "profile": "dome", "registered": false}
+```
+
+| `kind` | `depth_mm` | required fields |
+|---|---|---|
+| `emboss` | relief height, (0, 5] | `profile` ∈ `flat dome bevel sculpted`, `registered` (bool) |
+| `deboss` | recess depth, (0, 5] | `profile` |
+| `foil` | 0 | `color` (#rrggbb), `finish` ∈ `metallic matte gloss holographic` |
+| `varnish` | 0 | `finish` ∈ `gloss matte soft-touch spot-uv` |
+| `letterpress` | impression depth, (0, 5] | `color` (ink) |
+| `burn` | char depth, [0, 5] | `process` ∈ `iron laser`, `char` ∈ [0, 1] (darkness), `color` (char tone) |
+
+`region` is a list of polygons (even-odd). The dieline export profile draws each finish as
+plates on their own layers (emboss die female + counter male inset by the caliper; deboss die
+male + counter female; foil, varnish and letterpress plates; branding-iron face, or laser
+engrave vector + raster). **Engine:** embossed/debossed areas are locally stiffer and burned
+areas thinner; v1 records the regions only — the engine does not yet change local stiffness or
+thickness, and the studio does not yet render relief or sheen.
+
+### 5.10 `pliego:artwork` — brand artwork (lane P draft)
+
+```json
+{"id": "brand", "sheet": "carton", "side": "back", "asset": "assets/brand.svg",
+ "at": [10, 90], "size": [60, 60], "rotation_deg": 0, "panel": "front", "clip": "bleed"}
+```
+
+`asset` is a relative path inside the cartridge directory (svg/png/jpg/webp, no `..`, no
+scheme); `at` is the artwork's lower-left corner in sheet-local mm, before rotation about its
+centre; `clip` ∈ `panel bleed none` (clip to the named panel, to its bleed, or not at all).
+Exporters place the image on the Artwork layer (SVG) or draw its frame (PDF, DXF). This
+complements `front.art`/`back.art` (one image over the whole sheet). The studio's texture
+preview of placed artwork is a follow-up.
+<!-- lane P (wave 2b) draft — end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -327,6 +402,10 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
    `collision_thickness`: each vertex of the glue `region` polygon, mapped to sheet *b*, lies within
    `max(collision_thickness(a), collision_thickness(b))` of its image on *b* in the `initial` frame.
 10. `pliego:meta.digest`, when present, matches.
+11. *(lane P draft)* Packaging blocks resolve: every `pliego:dielines` / `pliego:finishes` /
+    `pliego:artwork` entry names an existing sheet; panel, safe, glue and finish polygons lie
+    on their sheet (within its local bounding box; bleed outlines within the box grown by
+    `bleed_mm`); finish and artwork records satisfy §5.9–§5.10.
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

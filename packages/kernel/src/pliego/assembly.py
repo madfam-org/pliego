@@ -333,6 +333,8 @@ class Assembly:
     pose, `pliego.kinematics`), or a callable (sheet_id, (u, v)) → world (x, y, z).
     `min_feature_mm`: the smallest intended feature (spec §5.7) — written to
     ``pliego:meta.min_feature_mm``; `verify()` then floors face areas at its square.
+    `dielines` / `finishes` / `artwork`: packaging blocks (``pliego.dieline``, ``pliego.press``)
+    written as ``pliego:dielines``, ``pliego:finishes`` and ``pliego:artwork``.
     """
 
     sheets: list[Sheet]
@@ -346,6 +348,10 @@ class Assembly:
     meta: dict = field(default_factory=dict)
     targets: dict[str, InitialSpec] = field(default_factory=dict)
     min_feature_mm: float | None = None
+    # packaging blocks (spec §5.8–§5.10, lane P draft): pliego:dielines / finishes / artwork
+    dielines: list[dict] = field(default_factory=list)
+    finishes: list[dict] = field(default_factory=list)
+    artwork: list[dict] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.min_feature_mm is not None:

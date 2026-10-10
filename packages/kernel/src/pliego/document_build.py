@@ -246,6 +246,11 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         frames.append(_frame_for(assembly, arrs, spec, f"target:{name}"))
     if frames:
         data["file_frames"] = frames
+    for key, value in (("pliego:dielines", getattr(assembly, "dielines", None)),
+                       ("pliego:finishes", getattr(assembly, "finishes", None)),
+                       ("pliego:artwork", getattr(assembly, "artwork", None))):
+        if value:
+            data[key] = [copy.deepcopy(v) for v in value]
     meta: dict[str, Any] = {"kernel": KERNEL_ID}
     if getattr(assembly, "min_feature_mm", None) is not None:
         meta["min_feature_mm"] = float(assembly.min_feature_mm)

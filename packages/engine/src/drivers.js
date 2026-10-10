@@ -1,0 +1,290 @@
+// @ts-check
+/**
+ * Controls → mechanisms and the sequence player (spec §5.4–5.6, engine.md §3.3).
+ *
+ * Mechanisms move kinematic sheets and pinned points exactly (Dirichlet vertices), drive the leaf
+ * page-turn point (a soft hand constraint, so the paper bends physically) and slider joins.
+ * Control changes are rate-limited (`mechanismRate`, deg/s or mm/s) so a slider jump in the studio
+ * does not teleport a board that has paper glued to it. The sequence player eases each step's hinge
+ * targets from the measured angle at step entry to the target over `duration_ms` (smoothstep), keeps
+ * targets held until a later step releases them, and accepts fractional step positions.
+ */
+import { axisAngleMatrix, mat3Vec, quatRotate, DEG } from './geom.js';
+import { TK_DRIVE, TK_SLIDER, TK_GRAB } from './xpbd/joins.js';
+import { HAND_FACTOR } from './constants.js';
+import { locatePoint } from './mesh.js';
+import { triNormal } from './xpbd/joins.js';
+
+const LEAF_STIFFNESS = 2.0e5; // g/s², the hand turning a page
+
+export class Drivers {
+  /**
+   * @param {any} w World (mesh, doc, X0 set; terms still a TermList)
+   * @param {import('./xpbd/joins.js').TermList} termList
+   * @param {{verts:number[], world:number[]|null, mechanism:string|null, id:string}[]} pins
+   * @param {{mechanismRate?: number}} opts
+   */
+  constructor(w, termList, pins, opts) {
+    const doc = w.doc, mesh = w.mesh;
+    this.rate = opts.mechanismRate ?? 180;
+    /** @type {Map<string, any>} */ this.controls = new Map();
+    /** @type {Map<string, number>} */ this.value = new Map();
+    /** @type {Map<string, number>} */ this.goal = new Map();
+    for (const c of doc.controls) {
+      this.controls.set(c.id, c);
+      const v = typeof c.default === 'boolean' ? (c.default ? 1 : 0) : c.default;
+      this.value.set(c.id, v); this.goal.set(c.id, v);
+    }
+    /** @type {Map<string, any>} */ this.mech = new Map(doc.mechanisms.map((/** @type {any} */ m) => [m.id, m]));
+    // placed (un-initial) positions for kinematic sheets: placement applied to (u, 0, −v)
+    const nV = mesh.nV;
+    this.Xplaced = new Float64Array(3 * nV);
+    for (let v = 0; v < nV; v++) {
+      const s = doc.sheets[mesh.vSheet[v]];
+      const r = quatRotate(s.placement.rotation, [mesh.uv[2 * v], 0, -mesh.uv[2 * v + 1]]);
+      this.Xplaced[3 * v] = r[0] + s.placement.origin[0]; this.Xplaced[3 * v + 1] = r[1] + s.placement.origin[1]; this.Xplaced[3 * v + 2] = r[2] + s.placement.origin[2];
+    }
+    /** fixed vertex groups: {verts, base: Float64Array, mech: string|null, kind} */
+    /** @type {{verts:number[], base:Float64Array, mech:string|null, kind:string}[]} */
+    this.groups = [];
+    const fixed = new Uint8Array(nV);
+    doc.sheets.forEach((/** @type {any} */ s, /** @type {number} */ si) => {
+      if (!s.kinematic) return;
+      const verts = [];
+      for (let v = 0; v < nV; v++) if (mesh.vSheet[v] === si) verts.push(v);
+      this.groups.push({ verts, base: gather(this.Xplaced, verts), mech: s.kinematic.mechanism, kind: 'sheet' });
+      for (const v of verts) fixed[v] = 1;
+    });
+    for (const p of pins) {
+      const base = gather(w.X0, p.verts);
+      if (p.world) {
+        const d = [p.world[0] - base[0], p.world[1] - base[1], p.world[2] - base[2]];
+        for (let i = 0; i < p.verts.length; i++) for (let c = 0; c < 3; c++) base[3 * i + c] += d[c];
+      }
+      this.groups.push({ verts: p.verts, base, mech: p.mechanism, kind: 'pin' });
+      for (const v of p.verts) fixed[v] = 1;
+    }
+    // leaf mechanisms: pin the spine, add a drive-point term
+    /** @type {any[]} */ this.leaves = [];
+    for (const m of doc.mechanisms) {
+      if (m.type !== 'leaf') continue;
+      const s = /** @type {number} */(doc.sheetIndex.get(m.sheet));
+      const [p, q] = m.spine;
+      const dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy);
+      const tol = Math.max(doc.sheets[s].derived.collision_thickness, 1e-3 * mesh.h);
+      const spine = [];
+      let W = 0, side = 0;
+      for (let v = 0; v < nV; v++) {
+        if (mesh.vSheet[v] !== s) continue;
+        const rx = mesh.uv[2 * v] - p[0], ry = mesh.uv[2 * v + 1] - p[1];
+        const dist = (rx * dy - ry * dx) / L; // signed distance from the spine line
+        const along = (rx * dx + ry * dy) / L;
+        if (Math.abs(dist) <= tol && along >= -tol && along <= L + tol) spine.push(v);
+        if (Math.abs(dist) > W) { W = Math.abs(dist); side = Math.sign(dist); }
+      }
+      this.groups.push({ verts: spine, base: gather(w.X0, spine), mech: null, kind: 'spine' });
+      for (const v of spine) fixed[v] = 1;
+      // drive point: the free-edge point opposite the spine midpoint
+      const mid = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+      const nrm = [side * dy / L, -side * dx / L];
+      const tgt = [mid[0] + W * nrm[0], mid[1] + W * nrm[1]];
+      let dv = -1, bd = Infinity;
+      for (let v = 0; v < nV; v++) if (mesh.vSheet[v] === s) { const d = Math.hypot(mesh.uv[2 * v] - tgt[0], mesh.uv[2 * v + 1] - tgt[1]); if (d < bd) { bd = d; dv = v; } }
+      const a0 = locatePoint(mesh, s, p[0], p[1]), a1 = locatePoint(mesh, s, q[0], q[1]);
+      const P0 = bary(w.X0, a0), P1 = bary(w.X0, a1);
+      const axis = norm3([P1[0] - P0[0], P1[1] - P0[1], P1[2] - P0[2]]);
+      const M = [(P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2, (P0[2] + P1[2]) / 2];
+      const D0 = [w.X0[3 * dv] - M[0], w.X0[3 * dv + 1] - M[1], w.X0[3 * dv + 2] - M[2]];
+      const r0 = Math.hypot(...D0);
+      const out = norm3(D0);
+      const up = triNormal(mesh, w.X0, /** @type {any} */(a0).tri);
+      const term = termList.add(TK_DRIVE, 0, [dv], [1], { target: [w.X0[3 * dv], w.X0[3 * dv + 1], w.X0[3 * dv + 2]], k: LEAF_STIFFNESS });
+      this.leaves.push({ m, term, dv, M, out, up, r0, axis });
+    }
+    this.grabTerm = termList.add(TK_GRAB, 0, [0], [1], { target: [0, 0, 0], k: 0 });
+    this.fixed = fixed;
+    // sequence
+    const seq = doc.sequence;
+    this.seq = seq;
+    this.seqControl = doc.controls.find((/** @type {any} */ c) => c.kind === 'sequence')?.id ?? null;
+    this.seqPos = 0;
+    /** @type {Map<number, number>} start angle (rad) per document edge at step entry */
+    this.entry = new Map();
+    this.entryStep = -1;
+    /** document edge → hinge indices */
+    /** @type {Map<number, number[]>} */
+    this.edgeHinges = new Map();
+    for (let h = 0; h < mesh.nH; h++) {
+      const d = mesh.hingeDoc[h];
+      if (d < 0) continue;
+      let l = this.edgeHinges.get(d);
+      if (!l) { l = []; this.edgeHinges.set(d, l); }
+      l.push(h);
+    }
+    this.wind = 0;
+  }
+
+  /** @param {string} id @param {number|boolean} v */
+  setControl(id, v) {
+    const c = this.controls.get(id);
+    if (!c) throw new Error(`setControl: unknown control ${JSON.stringify(id)}`);
+    let x = typeof v === 'boolean' ? (v ? 1 : 0) : Number(v);
+    if (!Number.isFinite(x)) throw new Error(`setControl: ${id} value must be a number`);
+    if (typeof c.min === 'number') x = Math.max(c.min, x);
+    if (typeof c.max === 'number') x = Math.min(c.max, x);
+    if (c.kind === 'sequence' && this.seq) x = Math.max(0, Math.min(this.seq.steps.length, x));
+    this.goal.set(id, x);
+    if (c.kind === 'wind' || c.kind === 'toggle') this.value.set(id, x);
+  }
+
+  /** Mean measured angle (rad) of a document edge's hinges. @param {any} w @param {number} e */
+  edgeAngle(w, e) {
+    const hs = this.edgeHinges.get(e);
+    if (!hs || !hs.length) return 0;
+    let s = 0;
+    for (const h of hs) s += w.theta[h];
+    return s / hs.length;
+  }
+
+  /**
+   * Advance controls and mechanisms to the end of a substep and write fixed targets, hinge drives,
+   * leaf/slider drives into the world. Returns true when the implicit matrix must be refactored.
+   * @param {any} w @param {number} dt
+   */
+  apply(w, dt) {
+    let dirty = false;
+    for (const [id, c] of this.controls) {
+      if (c.kind === 'sequence' || c.kind === 'wind' || c.kind === 'toggle') continue;
+      const g = /** @type {number} */(this.goal.get(id)), v = /** @type {number} */(this.value.get(id));
+      if (g !== v) {
+        const step = this.rate * dt;
+        this.value.set(id, Math.abs(g - v) <= step ? g : v + Math.sign(g - v) * step);
+      }
+    }
+    // fixed vertices
+    const X = w.fixedTarget;
+    for (const grp of this.groups) {
+      const m = grp.mech ? this.mech.get(grp.mech) : null;
+      let R = null, o = [0, 0, 0], t = [0, 0, 0];
+      if (m && m.type === 'hinge') {
+        R = axisAngleMatrix(m.axis.direction, (/** @type {number} */(this.value.get(m.angle_control)) - m.rest) * DEG);
+        o = m.axis.origin;
+      } else if (m && m.type === 'rotate') {
+        if (!m._c) {
+          const s = /** @type {number} */(w.doc.sheetIndex.get(m.center.sheet));
+          const r = locatePoint(w.mesh, s, m.center.at[0], m.center.at[1]);
+          m._c = bary(this.Xplaced, r); m._n = triNormal(w.mesh, this.Xplaced, /** @type {any} */(r).tri);
+        }
+        R = axisAngleMatrix(m._n, /** @type {number} */(this.value.get(m.control)) * DEG);
+        o = m._c;
+      } else if (m && m.type === 'translate') {
+        const c = this.controls.get(m.control);
+        const val = /** @type {number} */(this.value.get(m.control));
+        const frac = typeof c.max === 'number' && c.max !== 0 ? val / c.max : val / m.travel;
+        const d = norm3(m.direction);
+        t = [d[0] * m.travel * frac, d[1] * m.travel * frac, d[2] * m.travel * frac];
+      }
+      for (let i = 0; i < grp.verts.length; i++) {
+        const v = grp.verts[i];
+        let p = [grp.base[3 * i], grp.base[3 * i + 1], grp.base[3 * i + 2]];
+        if (R) { const q = mat3Vec(R, [p[0] - o[0], p[1] - o[1], p[2] - o[2]]); p = [q[0] + o[0], q[1] + o[1], q[2] + o[2]]; }
+        X[3 * v] = p[0] + t[0]; X[3 * v + 1] = p[1] + t[1]; X[3 * v + 2] = p[2] + t[2];
+      }
+    }
+    // leaf page turn: drive point on an arc that bows the page (radius shrinks mid-turn)
+    const T = w.terms;
+    for (const lf of this.leaves) {
+      const a = /** @type {number} */(this.value.get(lf.m.control)) * DEG;
+      const r = lf.r0 * (1 - 0.18 * Math.sin(a));
+      const tgt = T.info[lf.term].target;
+      for (let c = 0; c < 3; c++) tgt[c] = lf.M[c] + r * (Math.cos(a) * lf.out[c] + Math.sin(a) * lf.up[c]) + (lf.up[c] * 0.5 * (1 - Math.cos(a)) * 0);
+    }
+    // sliders driven by slide mechanisms
+    for (let t = 0; t < T.count; t++) {
+      const inf = T.info[t];
+      if (inf.kind !== TK_SLIDER || !inf.mechanism) continue;
+      const m = this.mech.get(inf.mechanism);
+      const c = this.controls.get(m.control);
+      const val = /** @type {number} */(this.value.get(m.control));
+      const frac = typeof c.max === 'number' && c.max !== 0 ? val / c.max : val / m.travel;
+      const was = !!inf.driven;
+      inf.driven = true;
+      inf.s = Math.max(0, Math.min(inf.trackLen, m.travel * frac));
+      if (!was) dirty = true;
+    }
+    // wind
+    for (const [id, c] of this.controls) if (c.kind === 'wind') this.wind = /** @type {number} */(this.value.get(id)) * 1000;
+    if (this.seq && this.seq.mode === 'physical') dirty = this.applySequence(w, dt) || dirty;
+    return dirty;
+  }
+
+  /** @param {any} w @param {number} dt @returns {boolean} drive set changed */
+  applySequence(w, dt) {
+    const steps = this.seq.steps, N = steps.length;
+    const goal = this.seqControl ? /** @type {number} */(this.goal.get(this.seqControl)) : 0;
+    let pos = this.seqPos;
+    if (pos !== goal) {
+      const k = Math.min(N - 1, Math.floor(goal > pos ? pos : pos - 1e-12));
+      const rate = dt / (steps[Math.max(0, k)].duration_ms / 1000);
+      pos = goal > pos ? Math.min(goal, pos + rate) : Math.max(goal, pos - rate);
+      this.seqPos = pos;
+      if (this.seqControl) this.value.set(this.seqControl, pos);
+    }
+    const k = Math.min(N, Math.floor(pos + 1e-12));
+    const f = k < N ? pos - k : 0;
+    /** @type {Map<number, number>} */
+    const held = new Map();
+    for (let i = 0; i < k; i++) {
+      for (const e of steps[i].release ?? []) held.delete(e);
+      for (const [e, ang] of steps[i].targets) held.set(e, ang * DEG);
+    }
+    /** @type {Map<number, number>} */
+    const drive = new Map(held);
+    if (k < N && f > 0) {
+      const st = steps[k];
+      if (this.entryStep !== k) {
+        this.entry.clear();
+        for (const [e] of st.targets) this.entry.set(e, this.edgeAngle(w, e));
+        this.entryStep = k;
+      }
+      for (const e of st.release ?? []) drive.delete(e);
+      const s = f * f * (3 - 2 * f);
+      for (const [e, ang] of st.targets) {
+        const a0 = /** @type {number} */(this.entry.get(e));
+        drive.set(e, a0 + s * (ang * DEG - a0));
+      }
+    } else if (f === 0) this.entryStep = -1;
+    let changed = false;
+    const on = w.driveOn, tg = w.driveTarget;
+    const want = new Uint8Array(on.length);
+    for (const [e, a] of drive) {
+      const hs = this.edgeHinges.get(e);
+      if (!hs) continue;
+      for (const h of hs) { want[h] = 1; tg[h] = a; }
+    }
+    for (let h = 0; h < on.length; h++) if (want[h] !== on[h]) { on[h] = want[h]; changed = true; }
+    return changed;
+  }
+
+  /** Drive stiffness per hinge (hand factor × the hinge's own stiffness). @param {Float64Array} hingeK */
+  static driveStiffness(hingeK) {
+    const k = new Float64Array(hingeK.length);
+    for (let h = 0; h < k.length; h++) k[h] = hingeK[h] * HAND_FACTOR;
+    return k;
+  }
+}
+
+/** @param {Float64Array} X @param {number[]} verts */
+function gather(X, verts) {
+  const out = new Float64Array(3 * verts.length);
+  verts.forEach((v, i) => { out[3 * i] = X[3 * v]; out[3 * i + 1] = X[3 * v + 1]; out[3 * i + 2] = X[3 * v + 2]; });
+  return out;
+}
+/** @param {Float64Array} X @param {any} r */
+function bary(X, r) {
+  const p = [0, 0, 0];
+  for (let i = 0; i < 3; i++) { const v = 3 * r.verts[i]; p[0] += r.w[i] * X[v]; p[1] += r.w[i] * X[v + 1]; p[2] += r.w[i] * X[v + 2]; }
+  return p;
+}
+/** @param {number[]} a */
+function norm3(a) { const L = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / L, a[1] / L, a[2] / L]; }

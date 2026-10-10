@@ -13,7 +13,7 @@ export const GRAVITY = 9810;
  * uses A_e = (A₁+A₂)/3). Calibrated by test `E1-peirce` (MD overhang 172 mm, copy paper 80 g/m²);
  * CD is then checked without recalibration.
  */
-export const C_B = 1.8962;
+export const C_B = 1.0043;
 
 /** Default hand factor: a folding hand is this many times stiffer than the crease. Test `crease-drive`. */
 export const HAND_FACTOR = 50;
@@ -49,9 +49,35 @@ export const GRAB_STIFFNESS = 2.0e4;
  */
 export const REFACTOR_ANGLE = 0.05;
 
+/** Spurious stiffness a stale factorisation may add to rotation modes, as a fraction of m/Δt². */
+export const REFACTOR_FRACTION = 0.05;
+
 /** Defaults for World options. */
 export const DEFAULT_SUBSTEPS = 20;
 export const DEFAULT_SEED = 1;
 
 /** Fraction of the target edge length below which a lattice point is dropped near a boundary. */
 export const LATTICE_MARGIN = 0.55;
+
+/** Score / perforation hinges yield earlier than a hand crease (spec §4 "lower yield"): ratio to crease_yield_deg. */
+export const SCORE_YIELD_RATIO = 0.7;
+
+/**
+ * Membrane modulus cap (engine units g/s² = E·t): Y_eff = min(E(φ)·t, MEMBRANE_CAP_LENGTH · ρ_A · g).
+ * Paper's physical in-plane stiffness (E·t ≈ 5e8 for copy paper) is 10⁵× its mass-time scale per
+ * substep; the quadratic stretch of a rotating stiff edge then produces forces far above gravity that
+ * one Newton step cannot resolve (measured: divergence of a resting cantilever). The cap gives a strain
+ * of 1e-4 per metre of hanging paper of the same stock — 50× below the 0.5 % inextensibility limit
+ * even at pin corners — and keeps k·Δt²/m ≈ 1. Bending is unaffected; membrane energy still exceeds
+ * bending energy by > 10² for any developable-breaking deformation. Test `inextensible`.
+ */
+export const MEMBRANE_CAP_LENGTH = 1.0e7;
+
+/**
+ * Membrane compression stiffness as a fraction of tension stiffness. A triangle mesh cannot bend
+ * isometrically: chords shorten by (κh)²/24, and a stiff compressive membrane then stiffens large
+ * deflections ("membrane locking"; measured +6 % in E1 with a symmetric membrane). Paper buckles
+ * at the fibre scale under in-plane compression, so a soft compressive branch is also physical.
+ * The implicit matrix keeps the tension stiffness (conservative, stable). Test `E1-peirce`.
+ */
+export const MEMBRANE_COMPRESSION = 0.05;

@@ -180,6 +180,31 @@ export function strip({ length = 172, width = 25, stock = 'copy-80', grain = 90,
   return b.build();
 }
 
+/**
+ * Cantilever strip: a rigidly clamped platform band of length `platform` (F edges every
+ * `spacing` ≤ h/2 across the strip, each pinned, so every platform vertex is fixed) and an overhang
+ * of `length`. The strip lies flat at height `y0`, running along sheet v (MD when grain = 90) or
+ * along u (`alongU`, CD). The overhang root is at sheet coordinate `platform`.
+ */
+export function cantilever({ length = 172, width = 25, platform = 12, stock = 'copy-80', grain = 90, alongU = false, y0 = 200, spacing = 3 } = {}) {
+  const b = new DocBuilder('cantilever strip');
+  const L = platform + length;
+  const W = alongU ? L : width, H = alongU ? width : L;
+  const s = b.sheet({ id: 'strip', stock, grain, width: W, height: H });
+  const P = (/** @type {number} */ a, /** @type {number} */ c) => (alongU ? b.vertex(s, a, c) : b.vertex(s, c, a));
+  const nb = Math.max(1, Math.ceil(platform / spacing - 1e-9));
+  const st = [];
+  for (let i = 0; i <= nb; i++) st.push((platform * i) / nb);
+  st.push(L);
+  const lo = st.map((a) => P(a, 0)), hi = st.map((a) => P(a, width));
+  for (let i = 0; i + 1 < st.length; i++) b.face(alongU ? [lo[i], lo[i + 1], hi[i + 1], hi[i]] : [lo[i], hi[i], hi[i + 1], lo[i + 1]]);
+  for (let i = 1; i <= nb; i++) b.assign(lo[i], hi[i], 'F', 0, 'none');
+  const seg = (/** @type {number} */ a) => (alongU ? [[a, 0], [a, width]] : [[0, a], [width, a]]);
+  for (let i = 0; i <= nb; i++) b.joins.push({ id: `clamp-${i}`, type: 'pin', a: { sheet: 'strip', along: seg(st[i]) }, world: null });
+  b.sheets[s].placement = { origin: [0, y0, 0], rotation: [0, 0, 0, 1] };
+  return { doc: b.build(), root: platform, alongU };
+}
+
 /** Tissue flag: rectangle pinned along its top edge, with a wind control. */
 export function tissueFlag({ width = 120, height = 80 } = {}) {
   const b = new DocBuilder('tissue flag');

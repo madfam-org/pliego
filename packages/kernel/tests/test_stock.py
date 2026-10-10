@@ -19,6 +19,11 @@ EXPECTED_SLUGS = {
     "papel-de-china", "washi-kozo-30", "kami", "tant", "copy-80", "elephant-hide-110",
     "kraft-120", "amate", "cardstock-160", "cardstock-250", "cardstock-300", "foil-paper",
     "pet-125", "pp-300",
+    # board and foam stocks (lane P, wave 2b): pliego.board constructions and plain cards
+    "corrugated-e-flute", "corrugated-b-flute", "corrugated-c-flute", "corrugated-f-flute",
+    "corrugated-bc-double-wall", "corrugated-aac-triple-wall", "corrugated-single-face-b",
+    "folding-boxboard-300", "sbs-board-350", "greyboard-1500", "kraftliner-150",
+    "eva-foam-2mm", "eva-foam-5mm", "eva-foam-hd-6mm",
 }
 
 

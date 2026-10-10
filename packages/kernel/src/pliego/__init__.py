@@ -69,7 +69,8 @@ __version__ = KERNEL_VERSION
 # on first access, so `python -m pliego.stock` runs without runpy's "found in sys.modules"
 # warning. A module that is absent is simply not offered; an import error *inside* a present
 # module still fails loud on access.
-OPTIONAL_MODULES = ("stock", "tessellate", "popup", "book", "export", "reveal")
+OPTIONAL_MODULES = ("stock", "tessellate", "popup", "book", "export", "reveal", "board",
+                    "corrugate", "dieline", "envelope", "press")
 AVAILABLE_MODULES: list[str] = [
     _n for _n in OPTIONAL_MODULES if _importlib_util.find_spec(f"{__name__}.{_n}") is not None
 ]

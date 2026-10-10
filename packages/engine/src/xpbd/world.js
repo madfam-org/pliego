@@ -58,6 +58,7 @@ export class World {
     this.userForce = new Float64Array(3 * nV);
     this.mass = mesh.mass;
     this.kCompFactor = opts.membraneCompression ?? K.MEMBRANE_COMPRESSION;
+    this.kCompModel = Math.max(this.kCompFactor, K.MODEL_COMPRESSION);
     this.dt = 1 / (60 * this.opts.substeps);
     this._initElements();
     // joins and drivers
@@ -231,7 +232,9 @@ export class World {
     if (this.contact && this.opts.contact) {
       let vmax = 0;
       for (let i = 0; i < this.v.length; i++) vmax = Math.max(vmax, Math.abs(this.v[i]));
-      const reach = Math.min(50, 2 * vmax * n * this.dt + 0.5);
+      // relative displacement bound over the frame: both sides move, plus free-fall gain
+      const T = n * this.dt;
+      const reach = Math.min(50, 2 * (vmax * T + 0.5 * K.GRAVITY * T * T) + 0.5);
       this.contact.broadPhase(x, this.fixed, reach);
     }
   }
@@ -341,7 +344,7 @@ export class World {
         if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
       }
     }
-    // strain limit (guard) last, so friction or contact never leaves the paper stretched
+    // stretch guard after contact and friction, so they never leave the paper stretched
     const lim = K.STRAIN_LIMIT;
     for (let pass = 0; pass < K.STRAIN_PASSES; pass++) for (let e = 0; e < this.mesh.nE; e++) {
       const a = E[2 * e], b = E[2 * e + 1];
@@ -355,6 +358,11 @@ export class World {
       const s = (L - target) / (L * (wa + wb));
       x[3 * a] += wa * s * dx; x[3 * a + 1] += wa * s * dy; x[3 * a + 2] += wa * s * dz;
       x[3 * b] -= wb * s * dx; x[3 * b + 1] -= wb * s * dy; x[3 * b + 2] -= wb * s * dz;
+    }
+    // a final contact + ground pass: the stretch guard must not push layers through each other
+    if (this.contact) {
+      if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
+      if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
     }
   }
 

@@ -23,8 +23,8 @@ export const HAND_FACTOR = 50;
 /** Panel-hinge plastic yield, degrees (paper takes a permanent curl only past this). Test `crease-unfold` (panels stay elastic). */
 export const PANEL_YIELD_DEG = 60;
 
-/** Membrane stretch (tension) limit enforced by the post-solve pass (0.5 %). Test `inextensible`. */
-export const STRAIN_LIMIT = 0.005;
+/** Stretch guard target of the post-solve pass: 0.45 %, so measured stretch stays below the 0.5 % inextensibility limit even when the guard is active. Test `inextensible`, `mesh-sweep`. */
+export const STRAIN_LIMIT = 0.0045;
 
 /** Gauss–Seidel passes of the strain-limit guard per substep (it runs after contact and friction). */
 export const STRAIN_PASSES = 4;
@@ -92,6 +92,9 @@ export const MEMBRANE_CAP_LENGTH = 1.0e7;
  * The implicit matrix keeps the tension stiffness (conservative, stable). Test `E1-peirce`.
  */
 export const MEMBRANE_COMPRESSION = 0.05;
+
+/** Compression stiffness used in the Newton model (≥ MEMBRANE_COMPRESSION, see implicit.js). Tests `E12-substeps`, `contact-stack`. */
+export const MODEL_COMPRESSION = 0.25;
 
 /** Gauss–Seidel passes of the contact + ground projection per substep. Test `contact-stack`. */
 export const CONTACT_PASSES = 3;

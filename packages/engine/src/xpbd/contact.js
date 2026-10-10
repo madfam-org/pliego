@@ -99,6 +99,7 @@ export class Contact {
     }
     for (let v = 0; v < m.nV; v++) mark[v] = -1;
     this.pv = Int32Array.from(PV); this.pt = Int32Array.from(PT); this.nPairs = PV.length;
+    this._tuReady = false;
     // forget sidedness of pairs that are no longer candidates
     const keep = new Map();
     for (let p = 0; p < this.nPairs; p++) { const k = this.pv[p] * m.nT + this.pt[p]; const s = this.side.get(k); if (s !== undefined) keep.set(k, s); }
@@ -111,23 +112,34 @@ export class Contact {
    */
   project(x, xs, w) {
     const m = this.mesh, T = m.tris;
+    if (!this.nPairs) { this.active = 0; return 0; }
+    // unit normals of the triangles in play, once per pass (cheap rejection by signed distance)
+    const N = this._tn ?? (this._tn = new Float64Array(3 * m.nT));
+    const used = this._tu ?? (this._tu = new Uint8Array(m.nT));
+    if (!this._tuReady) { used.fill(0); for (let p = 0; p < this.nPairs; p++) used[this.pt[p]] = 1; this._tuReady = true; }
+    for (let t = 0; t < m.nT; t++) {
+      if (!used[t]) continue;
+      const a = 3 * T[3 * t], b = 3 * T[3 * t + 1], c = 3 * T[3 * t + 2];
+      const e1x = x[b] - x[a], e1y = x[b + 1] - x[a + 1], e1z = x[b + 2] - x[a + 2];
+      const e2x = x[c] - x[a], e2y = x[c + 1] - x[a + 1], e2z = x[c + 2] - x[a + 2];
+      const nx = e1y * e2z - e1z * e2y, ny = e1z * e2x - e1x * e2z, nz = e1x * e2y - e1y * e2x;
+      const L = Math.sqrt(nx * nx + ny * ny + nz * nz);
+      const il = L > 0 ? 1 / L : 0;
+      N[3 * t] = nx * il; N[3 * t + 1] = ny * il; N[3 * t + 2] = nz * il;
+    }
     let active = 0;
     for (let p = 0; p < this.nPairs; p++) {
       const v = this.pv[p], t = this.pt[p];
       const a = T[3 * t], b = T[3 * t + 1], c = T[3 * t + 2];
       const tc = Math.max(this.tc[v], this.tc[a]);
-      // triangle frame at current positions
+      const nx = N[3 * t], ny = N[3 * t + 1], nz = N[3 * t + 2];
+      if (nx === 0 && ny === 0 && nz === 0) continue;
       const ax = x[3 * a], ay = x[3 * a + 1], az = x[3 * a + 2];
-      const e1x = x[3 * b] - ax, e1y = x[3 * b + 1] - ay, e1z = x[3 * b + 2] - az;
-      const e2x = x[3 * c] - ax, e2y = x[3 * c + 1] - ay, e2z = x[3 * c + 2] - az;
-      let nx = e1y * e2z - e1z * e2y, ny = e1z * e2x - e1x * e2z, nz = e1x * e2y - e1y * e2x;
-      const n2 = nx * nx + ny * ny + nz * nz;
-      if (n2 === 0) continue;
-      const inl = 1 / Math.sqrt(n2);
-      nx *= inl; ny *= inl; nz *= inl;
       const px = x[3 * v] - ax, py = x[3 * v + 1] - ay, pz = x[3 * v + 2] - az;
       const d = px * nx + py * ny + pz * nz;
       if (Math.abs(d) > 2 * tc) continue;
+      const e1x = x[3 * b] - ax, e1y = x[3 * b + 1] - ay, e1z = x[3 * b + 2] - az;
+      const e2x = x[3 * c] - ax, e2y = x[3 * c + 1] - ay, e2z = x[3 * c + 2] - az;
       // barycentric of the projection
       const d11 = e1x * e1x + e1y * e1y + e1z * e1z, d12 = e1x * e2x + e1y * e2y + e1z * e2z, d22 = e2x * e2x + e2y * e2y + e2z * e2z;
       const p1 = px * e1x + py * e1y + pz * e1z, p2 = px * e2x + py * e2y + pz * e2z;

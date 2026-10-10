@@ -70,7 +70,8 @@ def kinematic_steps(system: Any, steps: list, start: Any, substeps: int | Mappin
         moving = {e: a for e, a in targets.items() if abs(a - cur.get(e, 0.0)) > MOVE_TOL_DEG}
         if not moving or n < 1:
             out.append(Step(st.id, st.label, [(ref(e), a) for e, a in targets.items()],
-                            [ref(e) for e in freed], st.duration_ms, st.note))
+                            [ref(e) for e in freed], st.duration_ms, st.note,
+                            list(st.remove)))
         else:
             var = [e for e, a in enumerate(asg) if a in ("M", "V", "U")]
             fixed = [e for e in var if e not in targets and e not in released]
@@ -94,7 +95,8 @@ def kinematic_steps(system: Any, steps: list, start: Any, substeps: int | Mappin
                                  for e in moved],
                                 [ref(e) for e in freed] if k == 1 else [],
                                 max(100, round(st.duration_ms / n)),
-                                st.note if k == 1 else None))
+                                st.note if k == 1 else None,
+                                list(st.remove) if k == n else []))
                 prev = state
             if path.branch_steps:
                 branch_steps.append(st.id)

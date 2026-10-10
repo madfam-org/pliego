@@ -1,0 +1,727 @@
+{
+ "file_spec": 1.2,
+ "file_creator": "pliego-kernel 0.1.0",
+ "file_title": "Export sample",
+ "file_classes": [
+  "multiModel"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_attributes": [
+  "2D",
+  "cuts",
+  "joins"
+ ],
+ "frame_unit": "mm",
+ "vertices_coords": [
+  [
+   0.0,
+   0.0
+  ],
+  [
+   20.0,
+   0.0
+  ],
+  [
+   40.0,
+   0.0
+  ],
+  [
+   60.0,
+   0.0
+  ],
+  [
+   60.0,
+   40.0
+  ],
+  [
+   40.0,
+   40.0
+  ],
+  [
+   20.0,
+   40.0
+  ],
+  [
+   0.0,
+   40.0
+  ],
+  [
+   80.0,
+   0.0
+  ],
+  [
+   100.0,
+   0.0
+  ],
+  [
+   120.0,
+   0.0
+  ],
+  [
+   120.0,
+   20.0
+  ],
+  [
+   100.0,
+   20.0
+  ],
+  [
+   80.0,
+   20.0
+  ],
+  [
+   80.0,
+   20.0
+  ],
+  [
+   120.0,
+   20.0
+  ],
+  [
+   120.0,
+   30.0
+  ],
+  [
+   120.0,
+   40.0
+  ],
+  [
+   80.0,
+   40.0
+  ],
+  [
+   80.0,
+   30.0
+  ]
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   3,
+   4
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   5,
+   6
+  ],
+  [
+   6,
+   7
+  ],
+  [
+   7,
+   0
+  ],
+  [
+   1,
+   6
+  ],
+  [
+   2,
+   5
+  ],
+  [
+   8,
+   9
+  ],
+  [
+   9,
+   10
+  ],
+  [
+   10,
+   11
+  ],
+  [
+   11,
+   12
+  ],
+  [
+   12,
+   13
+  ],
+  [
+   13,
+   8
+  ],
+  [
+   9,
+   12
+  ],
+  [
+   14,
+   15
+  ],
+  [
+   15,
+   16
+  ],
+  [
+   16,
+   17
+  ],
+  [
+   17,
+   18
+  ],
+  [
+   18,
+   19
+  ],
+  [
+   19,
+   14
+  ],
+  [
+   19,
+   16
+  ]
+ ],
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "V",
+  "M",
+  "B",
+  "B",
+  "B",
+  "C",
+  "C",
+  "B",
+  "F",
+  "C",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "F"
+ ],
+ "edges_foldAngle": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  90.0,
+  -90.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "faces_vertices": [
+  [
+   0,
+   1,
+   6,
+   7
+  ],
+  [
+   1,
+   2,
+   5,
+   6
+  ],
+  [
+   2,
+   3,
+   4,
+   5
+  ],
+  [
+   8,
+   9,
+   12,
+   13
+  ],
+  [
+   9,
+   10,
+   11,
+   12
+  ],
+  [
+   14,
+   15,
+   16,
+   19
+  ],
+  [
+   19,
+   16,
+   17,
+   18
+  ]
+ ],
+ "file_frames": [
+  {
+   "frame_title": "initial",
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_inherit": true,
+   "frame_parent": 0,
+   "vertices_coords": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     20.0,
+     0.0,
+     0.0
+    ],
+    [
+     40.0,
+     0.0,
+     0.0
+    ],
+    [
+     60.0,
+     0.0,
+     0.0
+    ],
+    [
+     60.0,
+     0.0,
+     -40.0
+    ],
+    [
+     40.0,
+     0.0,
+     -40.0
+    ],
+    [
+     20.0,
+     0.0,
+     -40.0
+    ],
+    [
+     0.0,
+     0.0,
+     -40.0
+    ],
+    [
+     10.0,
+     0.1,
+     20.0
+    ],
+    [
+     30.0,
+     0.1,
+     20.0
+    ],
+    [
+     50.0,
+     0.1,
+     20.0
+    ],
+    [
+     50.0,
+     0.1,
+     -0.0
+    ],
+    [
+     30.0,
+     0.1,
+     -0.0
+    ],
+    [
+     10.0,
+     0.1,
+     -0.0
+    ],
+    [
+     10.0,
+     0.1,
+     -0.0
+    ],
+    [
+     50.0,
+     0.1,
+     -0.0
+    ],
+    [
+     50.0,
+     0.1,
+     -10.0
+    ],
+    [
+     50.0,
+     0.1,
+     -20.0
+    ],
+    [
+     10.0,
+     0.1,
+     -20.0
+    ],
+    [
+     10.0,
+     0.1,
+     -10.0
+    ]
+   ]
+  }
+ ],
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "pliego:faces_sheet": [
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "crease",
+  "crease",
+  "none",
+  "none",
+  "none",
+  "cut",
+  "cut",
+  "none",
+  "perforation",
+  "cut",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "score"
+ ],
+ "pliego:sheets": [
+  {
+   "id": "panel",
+   "label": {
+    "en": "Panel",
+    "es": "Panel",
+    "fr": "Panneau",
+    "pt": "Painel"
+   },
+   "stock": "copy-80",
+   "grain_deg": 90,
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#f7f7f2",
+    "art": "art/panel.png"
+   },
+   "back": {
+    "color": "#e9e4d8",
+    "art": null
+   },
+   "kinematic": null
+  },
+  {
+   "id": "tab",
+   "label": {
+    "en": "Tab",
+    "es": "Pestaña",
+    "fr": "Languette",
+    "pt": "Aba"
+   },
+   "stock": "cardstock-250",
+   "grain_deg": 0,
+   "offset": [
+    80,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#d9382b",
+    "art": null
+   },
+   "back": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "kinematic": null
+  }
+ ],
+ "pliego:stocks": {
+  "copy-80": {
+   "name": {
+    "en": "Copy paper 80 g/m²",
+    "es": "Papel bond 80 g/m²",
+    "fr": "Papier ramette 80 g/m²",
+    "pt": "Papel sulfite 80 g/m²"
+   },
+   "gsm": 80.0,
+   "caliper_mm": 0.1,
+   "derived": {
+    "areal_density": 8e-05,
+    "thickness": 0.1,
+    "E_md": 5500000000.0,
+    "E_cd": 2500000000.0,
+    "nu": 0.293,
+    "D_md": 501376.0,
+    "D_cd": 227898.0,
+    "crease_k": 16901.4,
+    "crease_yield_deg": 35.0,
+    "crease_set_rate": 0.5,
+    "score_factor": 0.35,
+    "perf_factor": 0.25,
+    "tear_strain": 0.02,
+    "friction": 0.4,
+    "collision_thickness": 0.1
+   },
+   "derived_basis": "pliego.stock.derive v1"
+  },
+  "cardstock-250": {
+   "name": {
+    "en": "Cardstock 250 g/m²",
+    "es": "Cartulina 250 g/m²",
+    "fr": "Bristol 250 g/m²",
+    "pt": "Cartolina 250 g/m²"
+   },
+   "gsm": 250.0,
+   "caliper_mm": 0.3,
+   "derived": {
+    "areal_density": 0.00025,
+    "thickness": 0.3,
+    "E_md": 4500000000.0,
+    "E_cd": 2000000000.0,
+    "nu": 0.293,
+    "D_md": 11075900.0,
+    "D_cd": 4922600.0,
+    "crease_k": 123065.0,
+    "crease_yield_deg": 35.0,
+    "crease_set_rate": 0.5,
+    "score_factor": 0.35,
+    "perf_factor": 0.25,
+    "tear_strain": 0.015,
+    "friction": 0.4,
+    "collision_thickness": 0.3
+   },
+   "derived_basis": "pliego.stock.derive v1"
+  }
+ },
+ "pliego:joins": [
+  {
+   "id": "tab-glue",
+   "type": "glue",
+   "a": {
+    "sheet": "tab",
+    "region": [
+     [
+      5,
+      25
+     ],
+     [
+      35,
+      25
+     ],
+     [
+      35,
+      35
+     ],
+     [
+      5,
+      35
+     ]
+    ]
+   },
+   "b": {
+    "sheet": "panel"
+   },
+   "map": [
+    1,
+    0,
+    0,
+    1,
+    10,
+    -20
+   ],
+   "side": "front"
+  }
+ ],
+ "pliego:controls": [
+  {
+   "id": "sequence",
+   "kind": "sequence",
+   "label": {
+    "en": "Steps",
+    "es": "Pasos",
+    "fr": "Étapes",
+    "pt": "Passos"
+   },
+   "min": 0,
+   "max": 2,
+   "default": 0
+  }
+ ],
+ "pliego:sequence": {
+  "mode": "physical",
+  "steps": [
+   {
+    "id": "valley",
+    "label": {
+     "en": "Valley-fold the panel",
+     "es": "Pliega en valle el panel",
+     "fr": "Pli vallée du panneau",
+     "pt": "Dobra em vale o painel"
+    },
+    "duration_ms": 1000,
+    "targets": [
+     [
+      8,
+      90
+     ]
+    ],
+    "release": [],
+    "note": null
+   },
+   {
+    "id": "mountain",
+    "label": {
+     "en": "Mountain-fold the panel",
+     "es": "Pliega en monte el panel",
+     "fr": "Pli montagne du panneau",
+     "pt": "Dobra em montanha o painel"
+    },
+    "duration_ms": 1000,
+    "targets": [
+     [
+      9,
+      -90
+     ]
+    ],
+    "release": [],
+    "note": null
+   }
+  ]
+ },
+ "pliego:meta": {
+  "cartridge": "export-sample",
+  "mode": "default",
+  "params": {},
+  "kernel": "pliego-kernel 0.1.0"
+ }
+}

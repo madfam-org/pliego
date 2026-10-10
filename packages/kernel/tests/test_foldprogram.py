@@ -102,7 +102,7 @@ def test_operating_cycle_starts_from_the_finished_model():
     flap = {"line": ((S / 2, S / 2), (S, S)), "at": (S * 0.55, S * 0.9), "layers": 1}
     fp.hinges("open", "Open", [dict(flap, turn=-120)])
     fp.hinges("beat", "Beat", [dict(flap, turn=30)])
-    with pytest.raises(FlatStateError, match="share a face"):
+    with pytest.raises(FlatStateError, match="share faces"):
         fp.hinges("twice", "Twice", [dict(flap, turn=5), dict(flap, turn=5)])
     b = fp.build(start_after="open")
     assert [s.id.split("-")[0] for s in b.sequence.steps] == ["beat"] * 4

@@ -299,6 +299,46 @@ jobs:
         run: |
           echo "skip: apps/api/app.py or apps/api/requirements.txt does not exist yet (api lane, wave 2)"
 
+  manifests:
+    name: Production manifests (kustomize render, schema validation)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      KUSTOMIZE_VERSION: v5.4.3
+      # sha256 of kustomize_v5.4.3_linux_amd64.tar.gz (release checksums.txt).
+      KUSTOMIZE_SHA256: 3669470b454d865c8184d6bce78df05e977c9aea31c30df3c669317d43bcc7a7
+      KUBECONFORM_VERSION: v0.7.0
+      # sha256 of kubeconform-linux-amd64.tar.gz (release CHECKSUMS).
+      KUBECONFORM_SHA256: c31518ddd122663b3f3aa874cfe8178cb0988de944f29c74a0b9260920d115d3
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install kustomize and kubeconform (pinned, checksum-verified)
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/k8s-tools" && mkdir -p "$work" "$HOME/.local/bin" && cd "$work"
+          curl -fsSL -o kustomize.tgz "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+          echo "${KUSTOMIZE_SHA256}  kustomize.tgz" | sha256sum -c -
+          tar -xzf kustomize.tgz kustomize
+          curl -fsSL -o kubeconform.tgz "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
+          echo "${KUBECONFORM_SHA256}  kubeconform.tgz" | sha256sum -c -
+          tar -xzf kubeconform.tgz kubeconform
+          install -m 0755 kustomize kubeconform "$HOME/.local/bin/"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Render and validate (Deployment hardening asserted on the rendered output)
+        run: |
+          set -euo pipefail
+          kustomize build infra/k8s/production > "$RUNNER_TEMP/rendered.yaml"
+          kubeconform -strict -ignore-missing-schemas -summary "$RUNNER_TEMP/rendered.yaml"
+          for needle in 'runAsNonRoot: true' 'readOnlyRootFilesystem: true' 'allowPrivilegeEscalation: false' \
+                        'automountServiceAccountToken: false' 'type: RuntimeDefault' '- ALL' 'mountPath: /tmp' \
+                        'image: ghcr.io/madfam-org/pliego@sha256:'; do
+            grep -qF -- "$needle" "$RUNNER_TEMP/rendered.yaml" || { echo "manifests: FAIL missing \`$needle\`"; exit 1; }
+          done
+          if grep -qE '^kind: (Ingress|Namespace)$' "$RUNNER_TEMP/rendered.yaml"; then echo "manifests: FAIL Ingress/Namespace in base"; exit 1; fi
+          echo "manifests: objects=$(grep -c '^kind:' "$RUNNER_TEMP/rendered.yaml") hardening=8 OK"
+
   secrets:
     name: Secret scan (full history)
     runs-on: ubuntu-24.04

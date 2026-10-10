@@ -192,6 +192,17 @@ turned as one stack with its back half flipping inside in the last sub-step, rep
 per-vertex Kawasaki tolerance in degrees), so equal sectors built from snapped points (which
 differed by ~1e-6°) are no longer reported as a strictly smallest sector.
 
+<!-- FL2 (wave 3, flat operations) begin -->
+**Wave-3 flat operations (lane FL2).**
+
+- **Preimage.** `FlatState.layers_at(q, faces=None)` lists the layers of paper at a folded point,
+  bottom → top, as (face, sheet point); a point on a crease or an edge counts each layer once.
+  `FlatState.preimage(q, layer="top" | "bottom" | index, faces=None)` is the sheet point under q on
+  that layer (negative indices count from the top), the inverse of `to_folded` for that layer;
+  `layer_index(sheet_point, q=None)` is the converse. Cartridges compute crease seeds and
+  `sheet_points` selections with it instead of copying the placement algebra.
+<!-- FL2 (wave 3, flat operations) end -->
+
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,
 crease parity, four-fold symmetry — and a crane valid at every vertex), `test_foldprogram.py`; sequences in
 `tests/flat_models.py`.

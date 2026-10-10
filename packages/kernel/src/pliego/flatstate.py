@@ -271,6 +271,83 @@ class FlatState:
         hit = [f for f in range(len(self.faces)) if inside_convex(q, self.image(f))]
         return sort_stack(self, hit)
 
+    def layers_at(self, q, faces: Iterable[int] | None = None) -> list[tuple[int, Pt]]:
+        """The layers of paper at the folded point q, bottom → top: (face, sheet point) — where
+        each layer's paper lies on the flat sheet. A point on a crease or a face edge counts each
+        layer once (the faces of one layer meeting there map it to one sheet point). `faces`
+        limits the stack to those faces (e.g. one flap)."""
+        q = pt(q)
+        cand = range(len(self.faces)) if faces is None else sorted(set(faces))
+        hit = [f for f in cand if inside_convex(q, self.image(f))]
+        if hit:
+            st = sort_stack(self, hit)
+            return [(f, xf_apply(xf_invert(self.faces[f].xf), q)) for f in st]
+        # on an edge or a vertex: group the faces touching q by the sheet point they map it to
+        groups: list[tuple[list[int], Pt]] = []
+        for f in cand:
+            if not inside_convex(q, self.image(f), -TOL):
+                continue
+            s = xf_apply(xf_invert(self.faces[f].xf), q)
+            for fs, s0 in groups:
+                if abs(s[0] - s0[0]) <= 10 * TOL and abs(s[1] - s0[1]) <= 10 * TOL:
+                    fs.append(f)
+                    break
+            else:
+                groups.append(([f], s))
+        if not groups:
+            raise FlatStateError(f"no layer at folded point ({q[0]:.3f}, {q[1]:.3f})")
+
+        def rel(a: list[int], b: list[int]) -> bool | None:
+            for f in a:
+                for g in b:
+                    up = self.above(f, g)
+                    if up is not None:
+                        return up
+            return None
+        below = [0] * len(groups)
+        for i in range(len(groups)):
+            for j in range(i + 1, len(groups)):
+                up = rel(groups[i][0], groups[j][0])
+                if up is None:
+                    raise FlatStateError(f"layers touching ({q[0]:.3f}, {q[1]:.3f}) are not "
+                                         "ordered there: pick a point inside the paper")
+                below[i if up else j] += 1
+        order = sorted(range(len(groups)), key=lambda k: below[k])
+        if [below[k] for k in order] != list(range(len(groups))):
+            raise FlatStateError(f"layer order at ({q[0]:.3f}, {q[1]:.3f}) is cyclic")
+        return [(min(groups[k][0]), groups[k][1]) for k in order]
+
+    def preimage(self, q, layer: str | int = "top", faces: Iterable[int] | None = None) -> Pt:
+        """The sheet point (flat-sheet coordinates) that lies at the folded point q on the chosen
+        layer: "top" (nearest the viewer), "bottom", or an index into the stack bottom → top
+        (negative indices count from the top, as in Python). `faces` limits the stack to those
+        faces. The inverse of `to_folded` for that layer: cartridges compute crease seeds and
+        `sheet_points` selections with it."""
+        stack = self.layers_at(q, faces)
+        if layer == "top":
+            k = len(stack) - 1
+        elif layer == "bottom":
+            k = 0
+        elif isinstance(layer, int) and -len(stack) <= layer < len(stack):
+            k = layer % len(stack)
+        else:
+            raise FlatStateError(f"layer {layer!r} asked, {len(stack)} layer(s) at "
+                                 f"({pt(q)[0]:.3f}, {pt(q)[1]:.3f})")
+        return stack[k][1]
+
+    def layer_index(self, sheet_point, q=None) -> int:
+        """The index (bottom → top, from 0) of the layer a sheet point's paper occupies in the
+        stack at the folded point q (default: its own folded image)."""
+        f = self.face_at(sheet_point)
+        img = xf_apply(self.faces[f].xf, pt(sheet_point)) if q is None else pt(q)
+        s = pt(sheet_point)
+        for k, (g, p) in enumerate(self.layers_at(img)):
+            if g == f or (self.faces[g].xf == self.faces[f].xf
+                          and math.hypot(p[0] - s[0], p[1] - s[1]) <= 10 * TOL):
+                return k
+        raise FlatStateError(f"sheet point ({s[0]:.3f}, {s[1]:.3f}) is not in the stack at "
+                             f"({img[0]:.3f}, {img[1]:.3f})")
+
     def bbox(self) -> tuple[float, float, float, float]:
         return bbox([p for f in range(len(self.faces)) for p in self.image(f)])
 

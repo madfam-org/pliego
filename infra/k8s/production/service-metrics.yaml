@@ -1,0 +1,18 @@
+# The metrics listener (container port `metrics`, 9090) on a Service of its own: the tunnel-routable Service
+# pliego exposes the app only. ServiceMonitor pliego selects this Service by `app.kubernetes.io/component:
+# metrics`. NetworkPolicy allow-monitoring-ingress admits 9090 from the scraper's namespace only.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pliego-metrics
+  labels:
+    app.kubernetes.io/name: pliego
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: madfam-platform
+spec:
+  selector:
+    app.kubernetes.io/name: pliego
+  ports:
+    - name: metrics
+      port: 9090
+      targetPort: metrics

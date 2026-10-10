@@ -1,0 +1,18 @@
+# Named after the Enclii service (enclii.yaml `pliego`) on port 80: the tunnel routes for all three hosts are
+# this Service on port 80 (enclii.yaml pins each domain's port to 80). It exposes ONLY the app; /metrics is on
+# Service pliego-metrics, so no route can ever name it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pliego
+  labels:
+    app: pliego
+    app.kubernetes.io/name: pliego
+    app.kubernetes.io/part-of: madfam-platform
+spec:
+  selector:
+    app.kubernetes.io/name: pliego
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

@@ -4,6 +4,12 @@
 
 <!-- MADFAM-AGENTS-CANONICAL v1 -->
 
+> **Boundary checkpoint (2026-10-10, platform ops):** public repository. Operational detail
+> (cluster topology, secret paths, break-glass procedures, operator runbooks, people) lives in
+> MADFAM's private ops repository and is only pointed to from here — the rules are the
+> repo-boundary contract, summarised in [`docs/PUBLIC_REPO_BOUNDARY.md`](docs/PUBLIC_REPO_BOUNDARY.md).
+> Never copy that detail in.
+
 This is the canonical instruction file for Claude, Codex and any other LLM agent working in this
 repository. `CLAUDE.md` is only a compatibility redirect. Public repository: follow the
 repo-boundary contract summarised in [`docs/PUBLIC_REPO_BOUNDARY.md`](docs/PUBLIC_REPO_BOUNDARY.md) —
@@ -14,7 +20,8 @@ no secrets, no node or network identity, no private runbooks, no prices, no clie
 The platform for **sheet hyperobjects** — origami, kirigami, papercut, pop-up and paper engineering,
 book structures and interactive paper dioramas — with real paper physics. Sibling of Yantra4D
 (solids) and Fashion Cabinet (garments). Commons: `madfam-org/sheet-hyperobjects`, mounted at
-`projects/`. Status: **incubating** (built, not deployed).
+`projects/`. Status: **incubating** (built, not deployed). [`docs/HONEST_STATUS.md`](docs/HONEST_STATUS.md)
+says what works today; keep it true when you change behaviour.
 
 Read first: [`docs/strategy/architecture.md`](docs/strategy/architecture.md) →
 [`docs/spec/v1/sheet-document.md`](docs/spec/v1/sheet-document.md) (the contract every component
@@ -57,4 +64,54 @@ never run git in another lane's clone.
 ```bash
 python3 -m pytest packages/kernel/tests -q          # kernel
 node --test packages/engine/test/                    # engine (Node ≥ 20, no install step)
+node --test apps/web/test/                           # web (static studio, no install step)
+python3 -m pytest apps/api/tests -q                  # api (once apps/api exists)
+python3 -m pliego.stock --check materials            # stock cards: derived physics is up to date
+python3 scripts/qa/verify_commons_pin.py             # projects/ is a populated, pinned commons
+python3 scripts/qa/verify_compliance.py              # doctrine gates (AST level)
+python3 scripts/qa/verify_deploy_paths.py            # deploy path filter == Dockerfile COPYs
+python3 scripts/qa/verify_canonical_host.py          # enclii.yaml hosts == CORS / host env
+python3 -m unittest discover -s scripts/qa/tests -v  # tests for the lanes above
 ```
+
+## CI lanes (`.github/workflows/ci.yml`)
+
+GitHub-hosted `ubuntu-24.04` only (fork PRs must never reach self-hosted runners), top-level
+`permissions: contents: read`, every action pinned to a full 40-hex commit SHA with its tag in a
+comment, no `secrets: inherit`. A lane whose code does not exist yet prints `skip: <reason>` and
+exits 0 — that line is the read-proof, never a silent pass. Jobs: `agent-docs`, `quality-gates`
+(byte gate + file-size gate 600/800 against `scripts/size-limit-baseline.json`), `guards` (the
+`scripts/qa` tests and lanes), `kernel`, `engine`, `web`, `api`, `stocks`, `secrets` (gitleaks over
+the full history). `codeql.yml` scans Python and JavaScript. Any job that reads `projects/` runs
+`verify_commons_pin.py --require` first.
+
+`build-deploy.yml` is **dispatch-only** until the project is onboarded to Enclii; it calls Enclii's
+reusable `build-publish.yml` pinned to a full commit SHA on Enclii `main`, with named secrets only.
+
+## Runtime contract
+
+One container (root `Dockerfile`) serves everything: landing at `/`, studio at `/studio/`, engine
+modules at `/engine/`, API at `/api/v1/`, `llms.txt` at `/llms.txt`. gunicorn `apps.api.app:app` on
+8000; liveness `/health`, readiness `/ready`; `/metrics` on 9090, internal only. uid 1001, read-only
+root filesystem (only `/tmp` is writable), drop ALL, seccomp RuntimeDefault. Hosts (owner ruling
+2026-10-10; onboarding pending): `pliego.madfam.io`, `pliego-app.madfam.io`, `pliego-api.madfam.io`.
+Env names are in [`.env.example`](.env.example) and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+## Licences
+
+Platform code AGPL-3.0-only; docs MIT (ruling R72); commons objects (`materials/*`, `projects/*`)
+CERN-OHL-W-2.0 (owner ruling, 2026-10-10) — declared in two agreeing fields, exceptions
+only through [`docs/licenses/CARVE-OUTS.md`](docs/licenses/CARVE-OUTS.md). See
+[`docs/licenses/README.md`](docs/licenses/README.md).
+
+## Rulings
+
+Ruled 2026-10-10 by the owner (record kept in MADFAM's private ops repository): commons object licence
+CERN-OHL-W-2.0 for `materials/*` and the `sheet-hyperobjects` cartridges; hosts `pliego.madfam.io`,
+`pliego-app.madfam.io`, `pliego-api.madfam.io` on one service.
+
+### Still pending
+
+Agents prepare to these points and stop: product brand (beyond the working name); the commons topology (a third commons kernel beside solid and soft);
+CLA vs DCO for third-party contributions; tiers and prices (none in this repo until ruled through
+Tulana and Dhanam).

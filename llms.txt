@@ -1,0 +1,36 @@
+# Pliego
+
+> MADFAM's open-source (AGPL-3.0-only) platform for sheet hyperobjects: origami, kirigami,
+> papercut, pop-up and paper engineering, book structures and interactive paper dioramas.
+> Parametric and fabricable (cut, score and fold files), simulated with real paper physics.
+> Status: incubating; built in the open, not deployed; see docs/HONEST_STATUS.md.
+
+Boundary: public repository. Operational detail lives in MADFAM's private ops repository under the
+repo-boundary contract (docs/PUBLIC_REPO_BOUNDARY.md).
+
+## Invariants
+
+- The crease pattern is the source; every 3-D state is derived from the flat sheet and its fold program.
+- Sheet documents are FOLD 1.2 plus a `pliego:` namespace; the kernel writes them byte-stable.
+- The engine replays bit-exactly with a pinned time step; paper physics comes from stock cards.
+- Units: mm, degrees, grams, seconds. No solid modeling here: hardware is a `hardware_ref` to Yantra4D.
+- Identity is Janua (RS256 via JWKS, audience `pliego-api`). LLMs only through the Selva gateway.
+- No prices, no direct machine dispatch: quotes through Cotiza, fabrication through Pravara MES.
+
+## Docs
+
+- [AGENTS.md](AGENTS.md): canonical instructions, doctrine, ownership, CI lanes
+- [docs/strategy/architecture.md](docs/strategy/architecture.md): platform architecture and commons classes
+- [docs/spec/v1/sheet-document.md](docs/spec/v1/sheet-document.md): the sheet-document contract
+- [docs/spec/v1/stock-card.md](docs/spec/v1/stock-card.md): paper stock cards and derived physics
+- [docs/HONEST_STATUS.md](docs/HONEST_STATUS.md): what works today
+- [ECOSYSTEM.md](ECOSYSTEM.md): which MADFAM service owns which capability
+- [docs/licenses/README.md](docs/licenses/README.md): licence split (code, docs, commons objects)
+
+## Code
+
+- `packages/kernel/`: pliego-kernel, Python standard library only
+- `packages/engine/`: the physics engine, JavaScript ES modules, zero dependencies
+- `packages/schemas/`: sheet-document and stock-card JSON Schemas
+- `apps/web/`, `apps/api/`: landing and studio; Flask API (`/api/v1`, `/health`, `/ready`)
+- `projects/`: the sheet-hyperobjects commons (git submodule, pinned)

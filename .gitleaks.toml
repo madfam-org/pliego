@@ -1,0 +1,47 @@
+# gitleaks configuration for Pliego (CI job `secrets`, over the FULL git history, with --redact so a finding
+# never prints the value). The default ruleset (private keys, JWTs, cloud keys, generic high-entropy
+# assignments and about 200 vendor formats) plus the token shapes of the MADFAM seams this service touches.
+# A hit in history means the value was exposed: rotate it first, then decide whether the history needs
+# rewriting. Never "fix" a finding by widening an allowlist.
+
+title = "pliego"
+
+[extend]
+useDefault = true
+
+# Janua OAuth client ids are names only in this public repository; the literal ids live in the platform's
+# secret store and must never be committed (repo-boundary contract).
+[[rules]]
+id = "janua-client-id-literal"
+description = "Janua OAuth client id literal (jnc_...)"
+regex = '''\b(jnc_[A-Za-z0-9_-]{8,})\b'''
+secretGroup = 1
+keywords = ["jnc_"]
+
+# Janua OAuth client secrets: "jns_" + secrets.token_urlsafe(48), i.e. 64 URL-safe characters.
+[[rules]]
+id = "janua-client-secret"
+description = "Janua OAuth client secret (AUTH_JANUA_CLIENT_SECRET)"
+regex = '''\b(jns_[A-Za-z0-9_-]{64})(?:[^A-Za-z0-9_-]|$)'''
+secretGroup = 1
+entropy = 3.5
+keywords = ["jns_"]
+
+# The Selva gateway accepts a Janua RS256 JWT (the default `jwt` rule covers that shape) or a shared service
+# token with no fixed shape, so this one is anchored on the variable name.
+[[rules]]
+id = "selva-api-token"
+description = "Selva gateway token assigned to SELVA_API_TOKEN"
+regex = '''(?i)selva_api_token['"]?\s*[:=]\s*['"]?([A-Za-z0-9_\-.]{20,})'''
+secretGroup = 1
+entropy = 3.5
+keywords = ["selva_api_token"]
+
+# The studio's session-signing key assigned to its variable name.
+[[rules]]
+id = "pliego-session-secret"
+description = "Session-signing key assigned to PLIEGO_SESSION_SECRET"
+regex = '''(?i)pliego_session_secret['"]?\s*[:=]\s*['"]?([A-Za-z0-9_\-.+/=]{16,})'''
+secretGroup = 1
+entropy = 3.0
+keywords = ["pliego_session_secret"]

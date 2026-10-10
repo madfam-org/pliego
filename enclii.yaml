@@ -1,0 +1,135 @@
+# Enclii manifest: pliego.
+#
+# One project, ONE service, one image (docs/strategy/architecture.md §3): the container serves the public
+# landing (pliego.madfam.io), the studio (pliego-app.madfam.io) and the API (pliego-api.madfam.io) from the SAME
+# pod; the app tells the three apart by host.
+#
+# Hosts ruled by the owner on 2026-10-10; onboarding is still pending, so autoDeploy stays false. Hostnames
+# are flat labels only (pliego-api.madfam.io, never api.pliego.madfam.io). scripts/qa/verify_canonical_host.py
+# keeps every host here in lockstep with the CORS and host env in infra/k8s/production/deployment.yaml and with
+# the redirect URIs in janua.client.yaml.
+#
+# Tunnel routes. Enclii derives each declared domain's route from the Service DOCUMENT that declares it:
+# <metadata.name> in the project namespace, on the domain's own `port:` or, when absent, `runtime.port`.
+# runtime.port is the CONTAINER port (8000), but the Kubernetes Service publishes 80, so every domain pins
+# `port: 80`; without it the tunnel would dial a port no Service exposes. So metadata.name IS the Kubernetes
+# Service name (infra/k8s/production/service.yaml).
+#
+# Secrets are referenced by NAME only (infra/k8s/production/secrets-template.yaml) and reach the store only
+# through `enclii secrets intake`. Never `enclii secrets set`.
+#
+# Network blocks: `label: app.kubernetes.io/name` makes Enclii's generated policies select exactly one
+# workload. The repository's own policies are the full picture (infra/k8s/production/network-policy.yaml).
+#
+# Builds: .github/workflows/build-deploy.yml (Enclii's reusable build-publish, pinned by full SHA) builds the
+# image and commits its digest pin. It is dispatch-only until the project is onboarded (docs/DEPLOYMENT.md).
+apiVersion: enclii.dev/v1
+kind: Project
+metadata:
+  name: pliego
+spec:
+  promotion:
+    pattern: manual
+    min_soak_minutes: 15
+    require_smoke_pass: true
+---
+apiVersion: enclii.dev/v1
+kind: Service
+metadata:
+  name: pliego
+  project: pliego
+  description: Pliego, the sheet-hyperobject platform; landing, studio and API from one container
+spec:
+  # Three hostnames, ONE pod: every route goes to Service pliego on port 80 (runtime.port is the container's
+  # 8000). Hosts ruled 2026-10-10.
+  domains:
+    - name: pliego.madfam.io
+      environment: production
+      port: 80
+    - name: pliego-app.madfam.io
+      environment: production
+      port: 80
+    - name: pliego-api.madfam.io
+      environment: production
+      port: 80
+
+  # Every probe asserts the health body AND that no host leaks a local development origin into a response.
+  status:
+    enabled: true
+    entries:
+      - name: pliego
+        url: https://pliego.madfam.io/health
+        href: https://pliego.madfam.io
+        group: pliego
+        family: MADFAM Platform
+        description: Public landing (no sign-in)
+        assertContains: '"status": "ok"'
+        assertNotContains: "localhost:"
+      - name: pliego studio
+        url: https://pliego-app.madfam.io/health
+        href: https://pliego-app.madfam.io
+        group: pliego
+        family: MADFAM Platform
+        description: Studio (sheet documents, folding and physics in the browser)
+        assertContains: '"status": "ok"'
+        assertNotContains: "localhost:"
+      - name: pliego API
+        # Readiness, not liveness: it proves the catalog and the commons loaded.
+        url: https://pliego-api.madfam.io/ready
+        href: https://pliego-api.madfam.io
+        group: pliego
+        family: MADFAM Platform
+        description: API (/api/v1 catalog, documents, exports)
+        assertContains: '"status": "ok"'
+        assertNotContains: "localhost:"
+
+  # The root Dockerfile builds the single service; the build context is the repository root.
+  build:
+    type: dockerfile
+    dockerfile: Dockerfile
+    context: .
+    source:
+      git:
+        repository: https://github.com/madfam-org/pliego
+        branch: main
+        autoDeploy: false
+
+  runtime:
+    port: 8000
+    replicas: 1
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "384Mi"
+    healthCheck: /health
+    healthCheckTimeoutSeconds: 3
+
+  # Runtime configuration lives in the kustomize base (infra/k8s/production/deployment.yaml):
+  #   env:     PLIEGO_ENV=production, PLIEGO_PUBLIC_LANDING_HOST, PLIEGO_PUBLIC_APP_HOST, PLIEGO_PUBLIC_API_HOST,
+  #            PLIEGO_CORS_ORIGINS, PLIEGO_JANUA_ISSUER, PLIEGO_JANUA_AUDIENCE=pliego-api, PLIEGO_JANUA_JWKS_URL,
+  #            PLIEGO_TRUSTED_PROXY_HEADER, PLIEGO_METRICS_PORT=9090
+  #   secrets: Secret pliego-secrets (AUTH_JANUA_CLIENT_ID, AUTH_JANUA_CLIENT_SECRET, PLIEGO_SESSION_SECRET;
+  #            SELVA_API_TOKEN once AI is enabled), all optional until the intake writes them: the app fails
+  #            closed (sign-in and AI answer 503) while a key is absent. No database, no bucket in wave 1.
+  slo:
+    availability: 99.5
+    latencyP99Ms: 2000
+
+  # Tunnel ingress on the app port (8000) ONLY; /metrics is on 9090, for the scraper only. Egress: DNS and 443
+  # (Janua's JWKS and token endpoint; the Selva gateway once enabled).
+  network:
+    services:
+      - name: pliego
+        label: app.kubernetes.io/name
+        port: 8000
+        ingress: [cloudflare-tunnel]
+        egress: [dns, https]
+
+  dependencies:
+    - platform: janua
+      reason: identity; the studio signs people in (authorization code with PKCE) and the API verifies RS256 tokens of audience pliego-api
+    - platform: enclii
+      reason: deploy, domains (pliego.madfam.io, pliego-app.madfam.io, pliego-api.madfam.io), secrets intake

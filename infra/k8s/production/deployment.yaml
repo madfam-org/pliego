@@ -1,0 +1,131 @@
+# Pliego: one pod serves the landing (pliego.madfam.io), the studio (pliego-app.madfam.io) and the API
+# (pliego-api.madfam.io) behind the Cloudflare tunnel (enclii.yaml; no Ingress object). The tunnel reaches
+# Service pliego on port 80, i.e. this pod's port 8000 (NetworkPolicy allow-tunnel-ingress).
+# Two listeners: http on 8000 (the app) and metrics on 9090 (/metrics, never routed through the tunnel;
+# Service pliego-metrics, the scraper's namespace only).
+# The process is the image's own command (gunicorn apps.api.app:app on 8000; root Dockerfile).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pliego
+  labels:
+    app.kubernetes.io/name: pliego
+    app.kubernetes.io/component: app
+    # Required for the platform's NetworkPolicy admission.
+    app.kubernetes.io/part-of: madfam-platform
+  annotations:
+    # A Secret change (intake or rotation) does not restart pods on its own.
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pliego
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pliego
+        app.kubernetes.io/component: app
+        app.kubernetes.io/part-of: madfam-platform
+        # Enclii convention labels (the platform selects the service's pods by these).
+        app: pliego
+        enclii.dev/service: pliego
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: pliego
+          # DECOY: the real pin is the images: block in kustomization.yaml.
+          image: ghcr.io/madfam-org/pliego:latest
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: http
+              containerPort: 8000
+            - name: metrics
+              containerPort: 9090
+          env:
+            - name: PLIEGO_ENV
+              value: production
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            # Hosts (owner ruling 2026-10-10); scripts/qa/verify_canonical_host.py keeps these, the CORS
+            # list below and enclii.yaml's domains in lockstep.
+            - name: PLIEGO_PUBLIC_LANDING_HOST
+              value: pliego.madfam.io
+            - name: PLIEGO_PUBLIC_APP_HOST
+              value: pliego-app.madfam.io
+            - name: PLIEGO_PUBLIC_API_HOST
+              value: pliego-api.madfam.io
+            # Explicit allowlist; wildcards are banned. The landing and the studio call the API cross-origin.
+            - name: PLIEGO_CORS_ORIGINS
+              value: https://pliego.madfam.io,https://pliego-app.madfam.io
+            # Janua: tokens carry the public issuer; the JWKS is fetched over 443 (allow-https-egress).
+            - name: PLIEGO_JANUA_ISSUER
+              value: https://auth.madfam.io
+            - name: PLIEGO_JANUA_AUDIENCE
+              value: pliego-api
+            - name: PLIEGO_JANUA_JWKS_URL
+              value: https://auth.madfam.io/.well-known/jwks.json
+            # Rate limits key on the tunnel's client-IP header, never on the first X-Forwarded-For hop.
+            - name: PLIEGO_TRUSTED_PROXY_HEADER
+              value: CF-Connecting-IP
+            - name: PLIEGO_METRICS_PORT
+              value: "9090"
+            # From the intake (Secret pliego-secrets; names in secrets-template.yaml). Optional until the intake
+            # writes them: the app fails closed (sign-in answers 503) while a key is absent.
+            - name: AUTH_JANUA_CLIENT_ID
+              valueFrom:
+                secretKeyRef: { name: pliego-secrets, key: AUTH_JANUA_CLIENT_ID, optional: true }
+            - name: AUTH_JANUA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef: { name: pliego-secrets, key: AUTH_JANUA_CLIENT_SECRET, optional: true }
+            - name: PLIEGO_SESSION_SECRET
+              valueFrom:
+                secretKeyRef: { name: pliego-secrets, key: PLIEGO_SESSION_SECRET, optional: true }
+            # AI stays inert: SELVA_BASE_URL is unset in wave 1, so every AI route answers 503.
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 384Mi }
+          # Liveness is a static 200 with no dependency checks.
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Readiness proves the catalog, the stock cards and the commons loaded (503 until they do).
+          readinessProbe:
+            httpGet: { path: /ready, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 128Mi

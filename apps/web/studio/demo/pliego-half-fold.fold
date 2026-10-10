@@ -1,0 +1,276 @@
+{
+ "file_spec": 1.2,
+ "file_creator": "pliego-web demo generator 0.1.0",
+ "file_title": "Pliego — a sheet folded in the middle",
+ "file_classes": [
+  "singleModel"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "noJoins"
+ ],
+ "frame_unit": "mm",
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   100,
+   0
+  ],
+  [
+   200,
+   0
+  ],
+  [
+   200,
+   140
+  ],
+  [
+   100,
+   140
+  ],
+  [
+   0,
+   140
+  ]
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   3,
+   4
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   5,
+   0
+  ],
+  [
+   1,
+   4
+  ]
+ ],
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "V"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  180
+ ],
+ "faces_vertices": [
+  [
+   0,
+   1,
+   4,
+   5
+  ],
+  [
+   1,
+   2,
+   3,
+   4
+  ]
+ ],
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:faces_sheet": [
+  0,
+  0
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "crease"
+ ],
+ "pliego:sheets": [
+  {
+   "id": "sheet",
+   "label": {
+    "en": "Sheet",
+    "es": "Pliego",
+    "fr": "Feuille",
+    "pt": "Folha"
+   },
+   "stock": "kami",
+   "grain_deg": 90,
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     -100,
+     0,
+     70
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "back": {
+    "color": "#d9c9a8",
+    "art": null
+   },
+   "kinematic": null
+  }
+ ],
+ "pliego:stocks": {
+  "kami": {
+   "name": {
+    "en": "Kami 63 g/m²",
+    "es": "Papel kami 63 g/m²",
+    "fr": "Papier kami 63 g/m²",
+    "pt": "Papel kami 63 g/m²"
+   },
+   "gsm": 63,
+   "caliper_mm": 0.08,
+   "derived": {
+    "areal_density": 0.000063,
+    "thickness": 0.08,
+    "E_md": 5000000000,
+    "E_cd": 2500000000,
+    "nu": 0.3,
+    "D_md": 234432,
+    "D_cd": 117216,
+    "crease_k": 46886.4,
+    "crease_yield_deg": 35,
+    "crease_set_rate": 0.6,
+    "score_factor": 0.35,
+    "perf_factor": 0.2,
+    "tear_strain": 0.015,
+    "friction": 0.4,
+    "collision_thickness": 0.08
+   },
+   "derived_basis": "hand-written demo snapshot (apps/web/scripts/make-demos.mjs); stock-card.md formulas, not pliego.stock.derive output"
+  }
+ },
+ "pliego:controls": [
+  {
+   "id": "fold",
+   "kind": "sequence",
+   "label": {
+    "en": "Fold program",
+    "es": "Secuencia de plegado",
+    "fr": "Séquence de pliage",
+    "pt": "Sequência de dobra"
+   },
+   "min": 0,
+   "max": 2,
+   "default": 0
+  }
+ ],
+ "pliego:sequence": {
+  "mode": "physical",
+  "steps": [
+   {
+    "id": "lift-half",
+    "label": {
+     "en": "Lift the right half over the crease",
+     "es": "Levanta la mitad derecha sobre el doblez",
+     "fr": "Relevez la moitié droite au-dessus du pli",
+     "pt": "Levante a metade direita sobre o vinco"
+    },
+    "duration_ms": 1500,
+    "targets": [
+     [
+      6,
+      90
+     ]
+    ],
+    "release": [],
+    "note": null
+   },
+   {
+    "id": "fold-flat",
+    "label": {
+     "en": "Bring the edges together and press the fold flat",
+     "es": "Junta los bordes y asienta el doblez",
+     "fr": "Joignez les bords et marquez le pli à plat",
+     "pt": "Junte as bordas e assente a dobra"
+    },
+    "duration_ms": 1500,
+    "targets": [
+     [
+      6,
+      180
+     ]
+    ],
+    "release": [],
+    "note": {
+     "en": "This is a pliego: one fold, four pages.",
+     "es": "Esto es un pliego: un doblez, cuatro páginas.",
+     "fr": "Voici un pliego : un pli, quatre pages.",
+     "pt": "Isto é um pliego: uma dobra, quatro páginas."
+    }
+   }
+  ]
+ },
+ "pliego:meta": {
+  "cartridge": "pliego-half-fold",
+  "mode": "default",
+  "params": {
+   "width": 200,
+   "height": 140
+  },
+  "kernel": "none (hand-authored demo, apps/web)",
+  "digest": null
+ }
+}

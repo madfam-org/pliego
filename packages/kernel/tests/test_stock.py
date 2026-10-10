@@ -135,9 +135,37 @@ def test_measured_bending_overrides_plate_formula():
 def test_derive_returns_exactly_the_spec_keys():
     schema = json.loads((SCHEMAS / "sheet-document.schema.json").read_text(encoding="utf-8"))
     required = schema["$defs"]["stockSnapshot"]["properties"]["derived"]["required"]
+    optional = set(schema["$defs"]["stockSnapshot"]["properties"]["derived"]["properties"]) \
+        - set(required)
     for slug in EXPECTED_SLUGS:
-        assert list(stock.derive(_card(slug))) == list(stock.DERIVED_KEYS)
+        keys = list(stock.derive(_card(slug)))
+        assert keys[:len(stock.DERIVED_KEYS)] == list(stock.DERIVED_KEYS)
+        assert set(keys[len(stock.DERIVED_KEYS):]) <= set(stock.OPTIONAL_DERIVED_KEYS)
     assert set(stock.DERIVED_KEYS) == set(required)
+    assert set(stock.OPTIONAL_DERIVED_KEYS) == optional
+
+
+def test_optional_derived_keys_from_existing_card_fields():
+    card = _card("copy-80")
+    d = stock.derive(card)
+    assert math.isclose(d["G12"], 0.387 * math.sqrt(d["E_md"] * d["E_cd"]), rel_tol=1e-5)
+    assert math.isclose(d["score_yield_deg"], d["crease_yield_deg"] * d["score_factor"],
+                        rel_tol=1e-5)
+    perf = card["fabrication"]["perforation"]
+    assert (d["perf_cut_mm"], d["perf_bridge_mm"]) == (perf["cut_mm"], perf["bridge_mm"])
+    assert math.isclose(d["perf_factor"], d["perf_bridge_mm"] / (d["perf_cut_mm"]
+                                                                 + d["perf_bridge_mm"]))
+    bare = copy.deepcopy(card)
+    del bare["fabrication"]["perforation"]
+    d2 = stock.derive(bare)
+    assert "perf_cut_mm" not in d2 and "perf_bridge_mm" not in d2 and "G12" in d2
+
+
+def test_snapshot_carries_the_card_appearance():
+    card = _card("kami")
+    snap = stock.snapshot(card)
+    assert snap["appearance"] == {"front": card["appearance"]["front"],
+                                  "back": card["appearance"]["back"]}
 
 
 def test_stock_card_schema_derived_mirrors_sheet_document():

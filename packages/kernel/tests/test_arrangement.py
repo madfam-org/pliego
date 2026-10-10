@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 
 import pytest
+from conftest import KAMI
 
 import pliego
 from pliego.arrangement import SegmentInput, build_arrangement
@@ -86,3 +87,47 @@ def test_canonical_under_shuffled_authoring():
         return (arr.grid, arr.edges, arr.assignment, arr.fold_angle, arr.faces)
 
     assert build([0, 1, 2, 3]) == build([3, 1, 0, 2]) == build([2, 3, 1, 0])
+
+
+# ── J-edge bridging (kernel 0.2): batched, two bridges per hole, no slivers ──
+
+
+def _close_holes(gap: float, n: int = 3, size: float = 10.0) -> pliego.Sheet:
+    s = pliego.Sheet("holes", pliego.rectangle(80, 60))
+    x = 10.0
+    for k in range(n):
+        s.hole(pliego.square(size, (x, 20 + (k % 2) * 0.7)))
+        x += size + gap
+    return s
+
+
+@pytest.mark.parametrize("gap", [0.6, 1.0, 1.5, 3.0])
+def test_closely_spaced_holes_bridge_without_slivers(gap):
+    """Holes attach to the host or to holes already attached, two bridges each, so the J edges
+    never form thin pieces between neighbouring holes (kernel 0.1 left 6–30 mm² slivers)."""
+    arr = _close_holes(gap).build()
+    areas = [pliego.polygon_area([arr.vertices[v] for v in f]) for f in arr.faces]
+    assert len(arr.faces) == 4 and min(areas) > 100.0
+    assert arr.assignment.count("J") == 6
+    doc = pliego.Assembly([_close_holes(gap)]).build(stocks={"kami": KAMI})
+    assert doc.verify() == []
+
+
+def test_many_holes_need_few_bridging_passes():
+    s = pliego.Sheet("grid", pliego.rectangle(200, 200))
+    for i in range(7):
+        for j in range(7):
+            s.hole(pliego.square(12, (10 + 26 * i, 10 + 26 * j)))
+    arr = s.build()
+    assert arr.assignment.count("J") == 2 * 49 and len(arr.faces) == 50
+    assert all(pliego.polygon_area([arr.vertices[v] for v in f]) > 0 for f in arr.faces)
+
+
+def test_j_joined_faces_share_one_area_floor():
+    """verify(): a thin J-bounded piece counts with the faces across its J edges."""
+    s = pliego.Sheet("j", pliego.rectangle(60, 40))
+    s.hole(pliego.square(10, (20, 15)))
+    doc = pliego.Assembly([s]).build(stocks={"kami": KAMI})
+    assert doc.verify(min_face_area_mm2=1500.0) == []          # union 2400 − 100 = 2300 mm²
+    kinds = [i["kind"] for i in doc.verify(min_face_area_mm2=2400.0)]
+    assert kinds == ["face_degenerate"]

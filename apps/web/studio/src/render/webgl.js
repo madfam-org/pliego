@@ -217,7 +217,8 @@ export function createWebGLRenderer(canvas) {
 
     resize() {
       const dpr = Math.min(globalThis.devicePixelRatio || 1, 2);
-      const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), h = Math.max(1, Math.round(canvas.clientHeight * dpr));
+      // Capped: a runaway layout must never allocate a giant backing buffer.
+      const w = Math.min(4096, Math.max(1, Math.round(canvas.clientWidth * dpr))), h = Math.min(4096, Math.max(1, Math.round(canvas.clientHeight * dpr)));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     },
 

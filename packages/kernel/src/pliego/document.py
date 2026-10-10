@@ -13,11 +13,12 @@ import hashlib
 import json
 from typing import Any
 
-KERNEL_VERSION = "0.1.0"
+KERNEL_VERSION = "0.2.0"
 KERNEL_ID = f"pliego-kernel {KERNEL_VERSION}"
 PER_VERTEX = ("vertices_coords", "pliego:vertices_sheet")
 PER_EDGE = ("edges_vertices", "edges_assignment", "edges_foldAngle", "pliego:edges_sheet",
-            "pliego:edges_treatment", "pliego:edges_restAngle", "edges_length")
+            "pliego:edges_treatment", "pliego:edges_restAngle", "pliego:edges_name",
+            "edges_length")
 PER_FACE = ("faces_vertices", "pliego:faces_sheet", "faces_edges")
 
 
@@ -115,8 +116,11 @@ class Document:
 
     # ── verification ────────────────────────────────────────────────────────
 
-    def verify(self, min_face_area_mm2: float = 1.0) -> list[dict]:
-        """All semantic rules of spec §8 → issue dicts ``{level, kind, detail, …}``; [] = OK."""
+    def verify(self, min_face_area_mm2: float | None = None) -> list[dict]:
+        """All semantic rules of spec §8 → issue dicts ``{level, kind, detail, …}``; [] = OK.
+
+        The face-area floor of rule 3 is `min_face_area_mm2` when given, else
+        ``pliego:meta.min_feature_mm``² when the document declares it, else 1 mm²."""
         from .document_verify import verify_document
 
         return verify_document(self, min_face_area_mm2=min_face_area_mm2)

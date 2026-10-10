@@ -8,7 +8,8 @@ Invoked by the API as a killable subprocess (apps/api/render.py) and by authors 
 Contract (docs/strategy/kernel.md §2):
 
 - the cartridge may import only ``pliego``, ``math`` and ``__future__`` (sandbox_policy.py on top
-  of the vendored ``commons_sandbox`` core); parameters arrive as bare globals;
+  of the vendored ``commons_sandbox`` core); parameters and ``mode`` (the mode id) arrive as
+  bare globals;
 - it assigns ``result`` — a ``pliego.Sheet``, ``pliego.Assembly`` or ``pliego.Document``;
 - the runner ALWAYS prints exactly one read-proof line on stdout,
   ``verify: sheets=N vertices=V edges=E faces=F joins=J errors=E warnings=W``,
@@ -195,6 +196,9 @@ def execute(script_path: str, params: dict, meta: dict, materials: str = ""):
         if not key.isidentifier() or key.startswith("_") or key in env or key == "result":
             raise CartridgeError("params", f"parameter name {key!r} is not allowed")
         env[key] = value
+    # the mode id is a bare global exactly as `python -m pliego.cartridge` injects it (after the
+    # parameters, so it wins over a parameter of the same name, as in the CLI)
+    env["mode"] = meta.get("mode") or "default"
     try:
         code = compile(source, real, "exec", dont_inherit=True)
         with contextlib.redirect_stdout(sys.stderr):

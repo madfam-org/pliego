@@ -7,6 +7,7 @@ Writes sheet documents (FOLD 1.2 + ``pliego:``; docs/spec/v1/sheet-document.md).
 from __future__ import annotations
 
 import importlib as _importlib
+import importlib.util as _importlib_util
 
 # submodules double as namespaces: pliego.flatfold.check(...), pliego.kinematics.dof(...);
 # pliego.cartridge is imported on demand (it is also the `python -m pliego.cartridge` CLI)
@@ -57,22 +58,33 @@ from .geometry import (
     regular_polygon,
     square,
 )
+from .params import clamp, param
 from .sheet import Face, Mark, Placement, Sheet, Tab
 from .simplefold import FoldedState
 
 __version__ = KERNEL_VERSION
 
-# kernel-gen modules (stock, generators, exporters) — guarded: absent modules are skipped, but an
-# import error *inside* a present module still fails loud.
+# kernel-gen modules (stock, generators, exporters) load lazily (PEP 562): `pliego.popup` imports
+# on first access, so `python -m pliego.stock` runs without runpy's "found in sys.modules"
+# warning. A module that is absent is simply not offered; an import error *inside* a present
+# module still fails loud on access.
 OPTIONAL_MODULES = ("stock", "tessellate", "popup", "book", "export")
-AVAILABLE_MODULES: list[str] = []
-for _name in OPTIONAL_MODULES:
-    try:
-        globals()[_name] = _importlib.import_module(f".{_name}", __name__)
-        AVAILABLE_MODULES.append(_name)
-    except ModuleNotFoundError as _exc:
-        if _exc.name != f"{__name__}.{_name}":
-            raise
+AVAILABLE_MODULES: list[str] = [
+    _n for _n in OPTIONAL_MODULES if _importlib_util.find_spec(f"{__name__}.{_n}") is not None
+]
+
+
+def __getattr__(name: str):
+    if name in AVAILABLE_MODULES:
+        module = _importlib.import_module(f".{name}", __name__)
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(AVAILABLE_MODULES))
+
 
 __all__ = [
     "EPS", "KERNEL_ID", "KERNEL_VERSION", "STOCK_DERIVED_KEYS", "Arc", "Arrangement",
@@ -83,4 +95,5 @@ __all__ = [
     "regular_polygon", "resolve_stock", "rotate", "sequence_control", "slide", "slider",
     "square", "string", "translate", "FoldedState", "load_fold", "axioms",
     "exact", "flatfold", "foldcut", "foldfile", "kinematics", "papercut", "simplefold",
+    "clamp", "param",
 ]

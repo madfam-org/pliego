@@ -3,10 +3,10 @@
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
-import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine } from './data.js';
-import { parseShare, buildShare, coerceParams } from './share.js';
+import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, fetchObject } from './data.js';
+import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, legendKinds, LINE_STYLE } from './diagram.js';
-import { renderCatalog, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
+import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
 import { createRenderer, rendererOverride } from './render/index.js';
 import { attachInput } from './render/input.js';
 import { sheetsFromDocument } from './render/scene.js';
@@ -24,6 +24,7 @@ const state = {
   input: /** @type {{destroy(): void} | null} */ (null),
   catalog: /** @type {{source: 'api'|'demo', items: any[]} | null} */ (null),
   item: /** @type {any} */ (null),
+  mode: /** @type {string|null} */ (null),
   params: /** @type {Record<string, any>} */ ({}),
   json: /** @type {any} */ (null),
   world: /** @type {any} */ (null),
@@ -68,11 +69,12 @@ function needsEngine(id) {
 function renderAll() {
   const items = state.catalog ? state.catalog.items : [];
   $('catalog-source').textContent = state.catalog ? i18n.t(state.catalog.source === 'api' ? 'catalog.source.api' : 'catalog.source.demo') : '';
-  renderCatalog($('catalog-list'), items, state.item && state.item.slug, i18n, (slug) => selectItem(slug, null));
+  renderCatalog($('catalog-list'), items, state.item && state.item.slug, i18n, (slug) => selectItem(slug, null, null));
   if (!state.item) return;
   $('object-title').textContent = i18n.loc(state.item.title);
   document.title = `${i18n.loc(state.item.title)} — ${i18n.t('app.title')}`;
-  renderParams($('params-form'), $('params-note'), state.item.parameters, state.params, state.catalog?.source === 'api', i18n, onParam);
+  renderModes($('mode-field'), state.item.modes, state.mode, state.catalog?.source === 'api', i18n, onMode);
+  renderParams($('params-form'), $('params-note'), activeParams(), state.params, state.catalog?.source === 'api', i18n, onParam);
   renderExports($('exports'), $('export-note'), state.item.exports, state.catalog?.source === 'api', i18n, onExport, onLocalSvg);
   if (state.json) buildDiagramView();
   if (state.controls) state.controls.relabel();
@@ -122,7 +124,8 @@ function syncSteps() {
 function updateShare() {
   if (!state.item) return;
   const base = `${location.origin}${location.pathname}`;
-  const url = buildShare(base, { slug: state.item.slug, params: state.params, view: state.view, keep: new URLSearchParams(location.search) });
+  const mode = (state.item.modes || []).length > 1 ? state.mode : null;
+  const url = buildShare(base, { slug: state.item.slug, mode, params: state.params, view: state.view, keep: new URLSearchParams(location.search) });
   $('share-url').value = url;
   try { history.replaceState(null, '', url); } catch { /* sandboxed */ }
 }
@@ -187,14 +190,17 @@ function stepButton(dir) {
   else setPrimary(dir > 0 ? hi : lo, true);
 }
 
-// ---------- parameters, exports ----------
-async function onParam(id, value) {
-  state.params = { ...state.params, [id]: value };
-  updateShare();
+// ---------- modes, parameters, exports ----------
+/** The manifest parameters that apply to the current mode. */
+function activeParams() {
+  return state.item ? paramsForMode(state.item.parameters, state.mode) : [];
+}
+
+async function regenerateCurrent() {
   if (state.catalog?.source !== 'api') return;
   status(i18n.t('params.regenerating'));
   try {
-    const json = await regenerate(state.item.slug, state.params);
+    const json = await regenerate(state.item.slug, state.params, state.mode);
     await useDocument(json);
     status('');
   } catch (e) {
@@ -202,10 +208,25 @@ async function onParam(id, value) {
   }
 }
 
+async function onMode(id) {
+  if (!state.item || id === state.mode) return;
+  state.mode = id;
+  state.params = coerceParams(activeParams(), paramStrings(state.params));
+  updateShare();
+  renderAll();
+  await regenerateCurrent();
+}
+
+async function onParam(id, value) {
+  state.params = { ...state.params, [id]: value };
+  updateShare();
+  await regenerateCurrent();
+}
+
 async function onExport(format) {
   const name = `${state.item.slug}.${format}`;
   status(i18n.t('export.started', { name }));
-  try { downloadBlob(await exportFile(state.item.slug, state.params, format), name); }
+  try { downloadBlob(await exportFile(state.item.slug, state.params, format, state.mode), name); }
   catch (e) { status(i18n.t('export.failed', { error: e instanceof Error ? e.message : String(e) })); }
 }
 
@@ -254,15 +275,28 @@ async function useDocument(json) {
   if (!state.renderer || !state.world) setView('2d', false);
 }
 
-async function selectItem(slug, rawParams) {
+async function selectItem(slug, rawParams, rawMode) {
   const item = state.catalog.items.find((it) => it.slug === slug) || state.catalog.items[0];
   if (!item) return;
   state.item = item;
-  state.params = coerceParams(item.parameters, rawParams || {});
+  if (state.catalog.source === 'api' && !item.detailsLoaded) {
+    try {
+      const details = await fetchObject(item.slug);
+      item.parameters = details.parameters;
+      if (details.modes.length) item.modes = details.modes;
+      item.exports = details.exports;
+      item.detailsLoaded = true;
+    } catch (e) {
+      fail('error.document', e);
+    }
+  }
+  const modes = item.modes || [];
+  state.mode = modes.some((m) => m.id === rawMode) ? rawMode : modes.length ? modes[0].id : null;
+  state.params = coerceParams(activeParams(), rawParams || {});
   renderAll();
   try {
-    const custom = rawParams && Object.keys(rawParams).length ? state.params : null;
-    await useDocument(await fetchDocument(item, state.catalog.source, custom));
+    const custom = hasParams(rawParams) ? state.params : null;
+    await useDocument(await fetchDocument(item, state.catalog.source, custom, state.mode));
   } catch (e) {
     fail('error.document', e);
   }
@@ -384,7 +418,7 @@ async function init() {
     fail('error.document', e);
     return;
   }
-  await selectItem(state.share.slug || state.catalog.items[0]?.slug, state.share.params);
+  await selectItem(state.share.slug || state.catalog.items[0]?.slug, state.share.params, state.share.mode);
   if (!$('viewer-notice').textContent && noticeText) notice(noticeText);
   setView(state.share.view, false);
   requestAnimationFrame(frame);

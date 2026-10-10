@@ -16,7 +16,7 @@ const read = (p) => readFileSync(join(WEB, p), 'utf8');
 
 // Reviewed: these strings are the same word in that language (cognates, proper nouns, units).
 const COGNATES = {
-  studio: { es: ['status.fps'], fr: ['play.pause', 'diagram.perforation', 'status.contacts'], pt: [] },
+  studio: { es: ['status.fps'], fr: ['play.pause', 'diagram.perforation', 'status.contacts', 'mode.label'], pt: [] },
   landing: { es: ['rung.2.t', 'rung.7.t'], fr: ['nav.label', 'rung.1.t', 'rung.2.t', 'rung.7.t', 'fact.contact.k'], pt: ['rung.2.t', 'rung.7.t'] },
 };
 

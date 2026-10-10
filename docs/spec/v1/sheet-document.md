@@ -244,6 +244,8 @@ declared here; the viewer builds its UI from this list.
     {"id": "valley-diagonal", "label": {"en": "Valley-fold the diagonal", "es": "…", "fr": "…", "pt": "…"},
      "duration_ms": 1500, "targets": [[12, 180]], "release": [], "note": null},
     {"id": "unfold", "label": {"en": "Unfold", "es": "…", "fr": "…", "pt": "…"},
+     "duration_ms": 1000, "targets": [[12, 0]], "release": [], "note": null},
+    {"id": "let-go", "label": {"en": "Let go", "es": "…", "fr": "…", "pt": "…"},
      "duration_ms": 1000, "targets": [], "release": [12], "note": null}
   ]
 }
@@ -253,7 +255,10 @@ declared here; the viewer builds its UI from this list.
   toward its target with the stock's crease stiffness raised by the **hand factor** (a folding hand
   is far stiffer than paper). Plasticity applies (the crease takes a set).
 - `release`: hinges handed back to the paper: their target is removed and they relax toward their
-  plastic rest angle — "crease and unfold" leaves a crease memory, as real paper does.
+  plastic rest angle — "crease and unfold" leaves a crease memory, as real paper does. A release
+  does not unfold: a crease folded flat and let go springs back only by about the stock's yield
+  angle and stays mostly folded. Unfolding is a target (the hand opens the paper); letting go
+  after it leaves the crease standing open instead of flat, as in the example above.
 - `mode`: `physical` (engine physics follows the drive) or `kinematic` (rigid origami: faces stay
   rigid and the folded state is computed exactly — valid for rigid-foldable patterns such as
   Miura-ori; the kernel guarantees consistency).

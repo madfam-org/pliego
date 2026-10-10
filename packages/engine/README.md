@@ -9,8 +9,9 @@ The Pliego paper engine. It loads a **sheet document** (FOLD 1.2 + `pliego:`) an
   DOF report, closed forms (degree-4 vertex, Miura-ori, V-fold, four-bar) and the kinematic fold
   program.
 - **Tier C** (compliant): real paper stiffness. Membrane, grain-anisotropic bending, creases with
-  plastic memory, glue welds, pivots, strings, sliders, pins, mechanisms, layer contact with
-  friction, the ground plane, air drag and deterministic wind.
+  plastic memory, perforations that tear, glue welds, pivots, strings, sliders, pins, mechanisms,
+  layer contact with friction (sidedness seeded from `faceOrders`), the ground plane, air drag and
+  deterministic wind.
 
 The package is plain ES modules with JSDoc (`// @ts-check`). It has zero dependencies and no build
 step, and runs in the browser (the studio loads `/engine/index.js`) and in Node 20 or later.
@@ -82,11 +83,24 @@ Each fixed substep, of length Δt = 1/(60·S), runs these stages in order:
    membrane springs, panel and crease hinges with their drives, and point terms (welds, pivots,
    sliders, strings, grabs). It solves `H δ = −∇E(x̃)` with `H = M/Δt² + Σ k∇C∇Cᵀ`, using a sparse
    3×3-block Cholesky factorisation (minimum-degree ordering, symbolic analysis once). Between
-   refactorisations it uses PCG preconditioned by the last factorisation.
+   refactorisations it uses PCG preconditioned by the last factorisation. The preconditioner is
+   co-rotated by the sheet's best-fit rotation since factorisation (Horn's quaternion method), so
+   page turns keep converging. The engine refactorises when PCG stalls, when the stiffness set
+   changes (drives, grabs, strings, torn perforations) or past a 0.3 rad rotation safety cap.
 4. **Gauss–Seidel projections.** Fold limits, layer contact and the ground (3 passes, Coulomb
    friction, remembered sidedness), then the 0.5 % stretch limiter last.
 5. **Bookkeeping.** `v = (x − x_start)/Δt`, unwrapped hinge angles, and rate-independent crease
    plasticity (Narain et al. 2013): `θ_rest ← θ − sign·θ_y`.
+
+**Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
+re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force
+exceeds `perf_factor·Y·tear_strain·(length it carries)`. Only the most loaded weld breaks in each
+substep, so a tear runs along the line. Test `perforation-tear`.
+
+**Sleep.** When nothing drives the world (controls settled, no grab, no wind) and every free
+vertex stays slower than 1e-5 mm/s for 30 frames, the world skips frames. Any `setControl`,
+`grab`, `setForce` or `restore` wakes it. The decision depends only on state, so replays stay
+bit-identical.
 
 **Why stage 3 departs from engine.md §3.1 (one Gauss–Seidel iteration for every constraint).**
 Each finding below was measured in this lane's prototypes (all numbers are in the lane report):
@@ -141,11 +155,55 @@ Tests: `determinism-replay` and `determinism-snapshot`.
 | `C_B` (bending discretisation) | 1.0244 | `E1-peirce` MD (copy paper 80 g/m², 25 mm strip, h = 6 mm). CD then checked without recalibration |
 | `HAND_FACTOR` | 50 | `crease-drive` |
 | `PANEL_YIELD_DEG` | 60 | `crease-unfold` (panels stay elastic) |
-| `STRAIN_LIMIT` / `STRAIN_PASSES` | 0.5 % / 4 | `inextensible` |
+| `STRAIN_LIMIT` / `STRAIN_PASSES` | 0.45 % guard target (keeps measured stretch below 0.5 %) / 4 | `inextensible`, `mesh-sweep` |
 | `MEMBRANE_CAP_LENGTH` | 1e7 mm | `inextensible`, E1 (stability of the Newton step) |
 | `MEMBRANE_COMPRESSION` | 0.05 | `E1-peirce` (membrane locking) |
 | `CONTACT_PASSES` | 3 | `contact-stack` |
+| `MODEL_COMPRESSION` | 0.25 | `E12-substeps`, `contact-stack` (Newton model never underestimates a stretched edge) |
+| `SLEEP_SPEED` / `SLEEP_FRAMES` | 1e-5 mm/s / 30 | `E2-cantilever` (µm deflections settle before sleeping) |
 | `PCG_MAX_ITER` / `PCG_REFACTOR_ITER` / `PCG_RTOL` / `REFACTOR_ANGLE` | 12 / 6 / 1e-3 / 0.3 rad | `E12-substeps` (equilibrium independent of these) |
+
+## Board (corrugated and folding boxboard)
+
+Board needs nothing the paper path lacks:
+
+- **Caliper** sets the contact gap (`collision_thickness`).
+- **Strong orthotropy** comes through the per-hinge D(φ) with `grain_deg`.
+- **Machine scores** use the `score` treatment with `score_factor` and `score_yield_deg`.
+
+Test `board` checks a 4 mm corrugated-like stock (D 2 / 0.67 N·m):
+
+- the cantilever drop is within 1.4 % (MD) and 4 % (CD) of small-deflection theory, and the
+  CD/MD ratio is 2.92 against an expected 3;
+- a scored flap folds to 89.86° for a 90° target;
+- a stack rests at a 3.99 mm gap for a 4 mm caliper.
+
+Two limits apply:
+
+- Tier R uses zero-thickness kinematics. Offset-panel thickness accommodation (Tachi 2011;
+  Chen, Peng & You 2015) is not implemented, so thick-board rigid folds close with an overlap of
+  about one caliper at 180°.
+- Tier C hinges sit on the mid-surface. A 7 mm board's fold-around-a-score geometry (the inner
+  liner buckling, the outer liner wrapping a radius of about t) is not resolved; the score acts as
+  a soft hinge.
+
+## Performance (this Mac, Node 20, S = 20)
+
+| case | measured |
+|---|---|
+| any world at rest | about 0 ms/frame (asleep) |
+| A5 page turn, 1138 vertices | about 320 ms/frame while turning |
+| kinematic Miura, 1285 vertices | 21 ms/frame |
+| folding a 726-vertex sheet | about 170–240 ms/frame |
+| folding an 1838-vertex sheet | about 680–820 ms/frame |
+
+The < 8 ms/frame target is not met for moving sheets above a few hundred vertices. The
+factorisation and the triangular solves dominate (block Cholesky in plain JavaScript). Ways to
+get interactive rates:
+
+- `meshEdge` 8–10 mm;
+- `substeps` 8 (equilibria do not depend on S, test `E12-substeps`);
+- later, a supernodal factorisation or a WebGPU path.
 
 ## Verification (engine.md §7)
 

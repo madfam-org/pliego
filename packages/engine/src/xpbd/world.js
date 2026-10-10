@@ -22,6 +22,7 @@ import { Contact } from './contact.js';
 import { Wind, addAirForces } from './air.js';
 import { RenderBuffers } from './render.js';
 import { pcgStep } from './pcg.js';
+import { snapshotWorld, restoreWorld } from './state.js';
 import * as K from '../constants.js';
 
 const G12 = new Float64Array(12);
@@ -523,56 +524,9 @@ export class World {
     };
   }
 
-  /** Bit-exact state capture. */
-  snapshot() {
-    const T = this.terms;
-    return {
-      x: Float64Array.from(this.x), v: Float64Array.from(this.v), theta: Float64Array.from(this.theta),
-      restTheta: Float64Array.from(this.restTheta), memory: Uint8Array.from(this.memory), hingeK: Float64Array.from(this.hingeK), driveK: Float64Array.from(this.driveK), torn: this.torn, edgeComp: Uint8Array.from(this.edgeComp),
-      driveOn: Uint8Array.from(this.driveOn), driveTarget: Float64Array.from(this.driveTarget),
-      fixedTarget: Float64Array.from(this.fixedTarget), userForce: Float64Array.from(this.userForce),
-      time: this.time, acc: this._acc, substepsRun: this.substepsRun, framesRun: this.framesRun, dirty: this.dirty, asleep: !!this._asleep, quiet: this._quiet, pcgFail: this._pcgFail,
-      stringTaut: Uint8Array.from(this._stringTaut),
-      terms: { active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode), verts: Int32Array.from(T.verts), info: T.info.map((/** @type {any} */ i) => ({ target: i.target ? i.target.slice() : undefined, s: i.s, driven: i.driven, offset: i.offset })) },
-      drivers: { value: [...this.drivers.value], goal: [...this.drivers.goal], seqPos: this.drivers.seqPos, entry: [...this.drivers.entry], entryStep: this.drivers.entryStep, wind: this.drivers.wind,
-        program: this.drivers.program ? { rho: Float64Array.from(this.drivers.program.rho), free: Uint8Array.from(this.drivers.program.free), entry: Float64Array.from(this.drivers.program.entry), entryStep: this.drivers.program.entryStep } : null,
-        kin: this.drivers.kin ? { a: Float64Array.from(this.drivers.kin.a), b: Float64Array.from(this.drivers.kin.b), n: this.drivers.kin.n, i: this.drivers.kin.i } : null },
-      contactSide: this.contact ? [...this.contact.side] : [],
-      factor: this._factorState,
-      factorDir: Float64Array.from(this.factorDir),
-    };
-  }
+  /** Bit-exact state capture (see state.js). */
+  snapshot() { return snapshotWorld(this); }
 
-  /** Restore a state captured by snapshot() (bit-exact, including the factorisation). @param {any} s */
-  restore(s) {
-    this.x.set(s.x); this.v.set(s.v); this.theta.set(s.theta); this.restTheta.set(s.restTheta); this.memory.set(s.memory);
-    this.hingeK.set(s.hingeK); this.driveK.set(s.driveK); this.torn = s.torn;
-    this.fixedTarget.set(s.fixedTarget); this.userForce.set(s.userForce);
-    this.time = s.time; this._acc = s.acc; this.substepsRun = s.substepsRun; this.framesRun = s.framesRun;
-    this._stringTaut.set(s.stringTaut);
-    const T = this.terms;
-    s.terms.info.forEach((/** @type {any} */ i, /** @type {number} */ t) => { if (i.target) T.info[t].target = i.target.slice(); T.info[t].s = i.s; T.info[t].driven = i.driven; T.info[t].offset = i.offset; });
-    this.drivers.value = new Map(s.drivers.value); this.drivers.goal = new Map(s.drivers.goal);
-    this.drivers.seqPos = s.drivers.seqPos; this.drivers.entry = new Map(s.drivers.entry); this.drivers.entryStep = s.drivers.entryStep; this.drivers.wind = s.drivers.wind;
-    const pr = this.drivers.program, ps = s.drivers.program;
-    if (pr && ps) { pr.rho.set(ps.rho); pr.free = Uint8Array.from(ps.free); pr.entry = Float64Array.from(ps.entry); pr.entryStep = ps.entryStep; }
-    if (s.drivers.kin) this.drivers.kin = { ...s.drivers.kin, a: Float64Array.from(s.drivers.kin.a), b: Float64Array.from(s.drivers.kin.b), verts: this.drivers.kinVerts ?? this.drivers.program?.ownedVertices(this.mesh) ?? [] };
-    if (this.contact) this.contact.side = new Map(s.contactSide);
-    // rebuild the factorisation exactly as it was
-    if (s.factor && this.sys.ch) {
-      this.edgeComp.set(s.factor.edgeComp);
-      const f = s.factor;
-      this.driveOn.set(f.driveOn); T.active.set(f.active); T.k.set(f.k); T.mode.set(f.mode); T.verts.set(f.verts); T.c.set(f.c); T.dir.set(f.dir); T.len.set(f.len);
-      assembleAndFactor(this, f.x);
-      this._factorState = f;
-    }
-    this.driveOn.set(s.driveOn); this.driveTarget.set(s.driveTarget);
-    T.active.set(s.terms.active); T.k.set(s.terms.k); T.mode.set(s.terms.mode); T.verts.set(s.terms.verts);
-    this.factorDir.set(s.factorDir);
-    this.edgeComp.set(s.edgeComp);
-    this.dirty = s.dirty;
-    this._asleep = s.asleep;
-    this._quiet = s.quiet;
-    this._pcgFail = s.pcgFail;
-  }
+  /** Restore a snapshot (bit-exact, including the factorisation). @param {any} s */
+  restore(s) { restoreWorld(this, s); }
 }

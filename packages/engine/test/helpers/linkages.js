@@ -104,3 +104,32 @@ export function eccentricCam({ keyed = true, step = 5, e = 10, R = 30 } = {}) {
   }
   return { doc: b.build(), e, R, cx, cy, camCentre: ['cam', [R, R]], foot: ['follower', [0, 5]] };
 }
+
+const L4 = (/** @type {string} */ en, /** @type {string} */ es, /** @type {string} */ fr, /** @type {string} */ pt) => ({ en, es, fr, pt });
+
+/**
+ * A 100 × 40 strip with a valley crease at u = 50 whose right half folds onto the left half, a
+ * glue tab on the far end welded to the mirrored zone (spec §5.21), and a program: fold to
+ * `angle`, glue (the join's `active_from` step), let go. `gate: false` leaves the glue out
+ * (the unglued baseline).
+ * `shift` draws the zone that many mm off where the fold lands.
+ * @param {{angle?: number, gate?: boolean, glueAt?: string|number, extra?: any[], shift?: number}} [o]
+ */
+export function gluedFold({ angle = 180, gate = true, glueAt = 'glue', extra = [], shift = 0 } = {}) {
+  const b = new DocBuilder('glued fold (step-activated)');
+  const s = b.sheet({ id: 'strip', width: 100, height: 40 });
+  const v = [[0, 0], [50, 0], [100, 0], [100, 40], [50, 40], [0, 40]].map(([u, w]) => b.vertex(s, u, w));
+  b.face([v[0], v[1], v[4], v[5]]);
+  b.face([v[1], v[2], v[3], v[4]]);
+  const crease = b.assign(v[1], v[4], 'V', angle);
+  if (gate) b.joins.push({ id: 'tab', type: 'glue', a: { sheet: 'strip', region: [[86, 6], [96, 6], [96, 34], [86, 34]] }, b: { sheet: 'strip' }, map: [-1, 0, 0, 1, 100 + shift, 0], side: 'front', active_from: glueAt });
+  const steps = [
+    { id: 'fold', label: L4('Fold the flap over', 'Dobla la solapa', 'Rabattez le rabat', 'Dobre a aba'), duration_ms: 1500, targets: [[crease, angle]], release: [], note: null },
+    { id: 'glue', label: L4('Glue the tab', 'Pega la pestaña', 'Collez la patte', 'Cole a aba'), duration_ms: 500, targets: [], release: [], note: null },
+    { id: 'let-go', label: L4('Let go', 'Suelta', 'Lâchez', 'Solte'), duration_ms: 1500, targets: [], release: [crease], note: null },
+    ...extra,
+  ];
+  b.control({ id: 'sequence', kind: 'sequence', min: 0, max: steps.length, default: 0 });
+  b.sequence = { mode: 'physical', steps };
+  return { doc: b.build(), crease };
+}

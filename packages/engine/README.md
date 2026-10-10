@@ -45,7 +45,8 @@ world.grab(v, [x, y, z]); world.moveGrab([x, y, z]); world.release();
 world.pick(origin, dir);         // { vertex, triangle, point, sheet } | null
 world.setForce(v, [fx, fy, fz]); // constant external force (µN), for tests and tools
 world.stats();                   // { maxStrain, maxCompression, energy{stretch,bend,crease}, contacts, grounded,
-                                 //   substepsRun, factorizations, pcgIterations, kinematicResidual, finite, time }
+                                 //   substepsRun, factorizations, pcgIterations, kinematicResidual, finite, time,
+                                 //   tornWelds, unheldWelds }
 world.snapshot(); world.restore(s);   // bit-exact, including the factorisation state
 ```
 
@@ -98,6 +99,14 @@ its usual formula, and a `hinge`/`rotate`/`translate` with `ride` is carried by 
 (T = T_ride ∘ T_own). One control then drives a crank-rocker four-bar (the coupler rides the crank)
 or a cam follower exactly; the studio's preview stub evaluates the same table. Test
 `keyed-mechanisms`.
+
+**Step-activated joins** (spec §5.21, `src/gates.js`, `src/xpbd/gates.js`). A glue, pivot, string
+or pin with `active_from` is off until its step begins. When it switches on it is created from the
+current geometry: weld points within the snap distance (max(1 mm, 4 × caliper)) snap onto their
+zone, paper that lies on its zone but slid along it is welded where it lies, and paper off its
+zone does not take hold (`stats().unheldWelds`). A gated pin is a stiff anchor term rather than a
+fixed vertex, so the free-vertex set (and the symbolic factorisation) never changes. Switching
+refactorises; contact exclusion around welds follows the gates. Test `step-joins`.
 
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force

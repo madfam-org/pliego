@@ -592,7 +592,33 @@ The engine and the studio preview evaluate the same table; between keys the moti
 blend of the outputs, so authors sample the closed form finely enough for the linkage to stay
 within tolerance (5° keys keep a 76 mm coupler within 0.04 mm of its rocker pin).
 
-<!-- end of lane E §5.20 block (§5.21–§5.22 follow when added) -->
+### 5.21 Step-activated joins — `active_from`
+
+A `glue`, `pivot`, `string` or `pin` join may carry `active_from`: a step id of the fold program
+(§5.6), or its 0-based index. The join does not hold until that step has begun (sequence position
+p > k) and holds from then on; scrubbing the program back before the step lets go again (a join's
+state is a function of p, like every other part of the program). A fold program can then show the
+making — flat at t = 0 — and still end glued.
+
+- **Rule 9 does not apply** to a step-activated glue: the `initial` frame shows the paper before
+  it is glued. (Rule 9 still asks for an `initial` frame when joins exist.)
+- **Created from the current geometry.** When the join switches on, the engine welds what the
+  paper is doing at that moment. The snap distance is max(1 mm, 4 × the larger
+  `collision_thickness` of the two sheets).
+  - glue and pivot: a weld point within the snap distance of its authored point snaps onto it.
+    Otherwise, if the paper lies on its zone (the gap across sheet *b*'s surface is within the
+    snap distance) but has slid along it, it is welded where it lies. Otherwise the paper does
+    not touch its zone and that weld point does not take hold (the engine counts it, and holds
+    it only if the join switches off and on again). Glue closes the gap across *b*; a pivot
+    keeps it (two layers riveted).
+  - string: holds from then on, slack or taut as the geometry is.
+  - pin: grips the point where it is (`world: null`), or moves it to `world` when it is within
+    the snap distance; a pin's `mechanism` moves it by the mechanism's motion since activation.
+- **Preview.** The studio's preview has no welds. It applies the same rule to what it can show:
+  while a glue within one sheet holds, a `release` of a crease on the face-tree path between the
+  tab's face and its zone's face (the loop the glue closes) leaves that crease where it is.
+
+<!-- end of lane E §5.20–§5.21 block (§5.22 follows when added) -->
 
 ## 6. `file_frames` — 3-D states
 
@@ -631,7 +657,8 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
    points lie inside their sheets.
 8. Every sequence target references an `M`/`V`/`F` edge; angles are in [−180, 180].
 9. If `initial` is present, its edge lengths match the layout lengths within 1e-3 relative error
-   (sheets are developable — folding never stretches paper), and every glue weld is satisfied within
+   (sheets are developable — folding never stretches paper), and every glue weld (except a
+   step-activated one, §5.21) is satisfied within
    `collision_thickness`: each vertex of the glue `region` polygon, mapped to sheet *b*, lies within
    `max(collision_thickness(a), collision_thickness(b))` of its image on *b* in the `initial` frame.
 10. `pliego:meta.digest`, when present, matches.
@@ -681,6 +708,8 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     within ±`travel` and `slide` outputs within [0, `travel`]; `period` > 0, only with `keys`, and
     the keys span at most one period; `ride` names a `hinge`, `rotate` or `translate` mechanism,
     appears only on those types, and rides form no cycle.
+21. Step-activated joins (§5.21): `active_from` appears only on `glue`, `pivot`, `string` and
+    `pin` joins of a document with a fold program, and names a step id or a step index of it.
 <!-- end of lane E rules -->
 
 The kernel prints a read-proof line for every document it verifies:

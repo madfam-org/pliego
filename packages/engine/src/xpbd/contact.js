@@ -39,17 +39,8 @@ export class Contact {
     /** @type {Map<number, number>} memorised sidedness, key v·nT + t */
     this.side = new Map();
     this.active = 0;
-    // contact exclusion around welds: a vertex within two mesh rings of a vertex glued to sheet b
-    // does not collide with b (the hinge at a glue line lies on b; its side is undetermined there)
-    const near = Int32Array.from(w.weldSheet);
-    for (let ring = 0; ring < 2; ring++) {
-      const prev = Int32Array.from(near);
-      for (let v = 0; v < mesh.nV; v++) {
-        if (prev[v] >= 0) continue;
-        for (let q = deg[v]; q < deg[v + 1]; q++) { const u = adj[q]; if (prev[u] >= 0) { near[v] = prev[u]; break; } }
-      }
-    }
-    this.weldSheet = near;
+    this.weldSheet = new Int32Array(mesh.nV);
+    this.setWeldExclusion(w.weldSheet);
     this.mark = new Int32Array(mesh.nV).fill(-1);
     // faceOrders [f, g, s] (FOLD: f lies on side s of g's normal; partial in v1 — a missing pair is
     // "unknown"): seeds the sidedness of a vertex of face f against a triangle of face g
@@ -57,6 +48,25 @@ export class Contact {
     this.faceSide = new Map();
     this.nF = w.doc.nF;
     for (const fo of w.doc.faceOrders ?? []) if (Array.isArray(fo) && fo.length === 3 && fo[2] !== 0) this.faceSide.set(fo[0] * this.nF + fo[1], fo[2] > 0 ? 1 : -1);
+  }
+
+  /**
+   * Contact exclusion around welds: a vertex within two mesh rings of a vertex glued to sheet b
+   * does not collide with b (the hinge at a glue line lies on b; its side is undetermined there).
+   * Step-gated glue (spec §5.21) calls this again when it switches.
+   * @param {Int32Array} weldSheet per vertex: the sheet it is welded to, or −1
+   */
+  setWeldExclusion(weldSheet) {
+    const n = this.mesh.nV, deg = this.adjStart, adj = this.adj;
+    const near = Int32Array.from(weldSheet);
+    for (let ring = 0; ring < 2; ring++) {
+      const prev = Int32Array.from(near);
+      for (let v = 0; v < n; v++) {
+        if (prev[v] >= 0) continue;
+        for (let q = deg[v]; q < deg[v + 1]; q++) { const u = adj[q]; if (prev[u] >= 0) { near[v] = prev[u]; break; } }
+      }
+    }
+    this.weldSheet = near;
   }
 
   /** Rebuild candidate pairs. @param {Float64Array} x @param {Uint8Array} fixed @param {number} reach extra radius (mm) */

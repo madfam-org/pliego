@@ -766,6 +766,17 @@
                   "front",
                   "back"
                 ]
+              },
+              "active_from": {
+                "description": "Spec §5.21: the step (id or 0-based index) from which the join holds.",
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/slug"
+                  },
+                  {
+                    "$ref": "#/$defs/index"
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -795,6 +806,17 @@
               },
               "hardware_ref": {
                 "$ref": "#/$defs/hardwareRef"
+              },
+              "active_from": {
+                "description": "Spec §5.21: the step (id or 0-based index) from which the join holds.",
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/slug"
+                  },
+                  {
+                    "$ref": "#/$defs/index"
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -842,6 +864,17 @@
               "length": {
                 "type": "number",
                 "exclusiveMinimum": 0
+              },
+              "active_from": {
+                "description": "Spec §5.21: the step (id or 0-based index) from which the join holds.",
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/slug"
+                  },
+                  {
+                    "$ref": "#/$defs/index"
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -903,6 +936,17 @@
               },
               "mechanism": {
                 "$ref": "#/$defs/slug"
+              },
+              "active_from": {
+                "description": "Spec §5.21: the step (id or 0-based index) from which the join holds.",
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/slug"
+                  },
+                  {
+                    "$ref": "#/$defs/index"
+                  }
+                ]
               }
             },
             "additionalProperties": false

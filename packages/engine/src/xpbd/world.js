@@ -23,6 +23,7 @@ import { Wind, addAirForces } from './air.js';
 import { RenderBuffers } from './render.js';
 import { pcgStep } from './pcg.js';
 import { snapshotWorld, restoreWorld } from './state.js';
+import { JoinGates } from './gates.js';
 import * as K from '../constants.js';
 
 const G12 = new Float64Array(12);
@@ -82,6 +83,7 @@ export class World {
     this.fixed = this.drivers.fixed;
     this.invMass = new Float64Array(nV);
     for (let v = 0; v < nV; v++) this.invMass[v] = this.fixed[v] ? 0 : 1 / this.mass[v];
+    this.gates = new JoinGates(this); // step-gated joins (spec §5.21): all off until their step
     this.fixedTarget = Float64Array.from(this.x);
     this._clampCorrection();
     this.sys = buildSystem(this);
@@ -264,6 +266,7 @@ export class World {
     const dt = this.dt, nV = this.mesh.nV;
     const x = this.x, v = this.v, xs = this.xs, w = this.invMass, f = this.fext;
     if (this.drivers.apply(this, dt)) this.dirty = true;
+    if (this.gates.count) { if (this.gates.update(this)) this.dirty = true; this.gates.follow(this); }
     xs.set(x);
     if (this.sys.nFree === 0) {
       // every vertex is driven (kinematic program / boards): follow the drivers, nothing to solve
@@ -445,7 +448,7 @@ export class World {
     for (let t = 0; t < T.count; t++) {
       if (T.kind[t] !== TK_STRING) continue;
       termResidual(T, t, x, r);
-      const taut = Math.hypot(r[0], r[1], r[2]) > T.len[t] ? 1 : 0;
+      const taut = Math.hypot(r[0], r[1], r[2]) > T.len[t] && !(T.gateOff && T.gateOff[t]) ? 1 : 0;
       T.active[t] = taut;
       if (taut !== this._stringTaut[t]) { this._stringTaut[t] = taut; this.dirty = true; }
     }
@@ -521,6 +524,7 @@ export class World {
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
       substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
+      unheldWelds: this.gates.unheld(this),
     };
   }
 

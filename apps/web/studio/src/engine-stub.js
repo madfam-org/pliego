@@ -158,6 +158,15 @@ function rootFace(j, s) {
   return Number.isInteger(f) && f >= 0 && f < fs.length && fs[f] === s ? f : fs.indexOf(s);
 }
 const ease = (x) => x * x * (3 - 2 * x);
+/** Even–odd point-in-polygon test (2-D). */
+function inside(poly, x, y) {
+  let c = false;
+  for (let i = 0, k = poly.length - 1; i < poly.length; k = i++) {
+    const [xi, yi] = poly[i], [xk, yk] = poly[k];
+    if ((yi > y) !== (yk > y) && x < ((xk - xi) * (y - yi)) / (yk - yi) + xi) c = !c;
+  }
+  return c;
+}
 
 /**
  * Keyed mechanism output (spec §5.20; the engine's keyed.js): linear between [control, output]
@@ -237,6 +246,7 @@ export class World {
         });
       }
     }
+    this._glueLocks = this._locks(j);
     // Root poses and initial fold angles.
     this._rootPose = sheets.map((sh) => ({ r: quatToR(sh.placement.rotation), t: [...sh.placement.origin] }));
     const restAngle = j['pliego:edges_restAngle'] || [];
@@ -348,6 +358,49 @@ export class World {
     }));
   }
 
+  /**
+   * Glue holds a folded loop shut (spec §5.21, preview rule). For a glue join within one sheet,
+   * the creases on the face-tree path between the tab's face and its zone's face close a loop
+   * once the glue holds: a `release` of one of them while the glue holds leaves it where it is
+   * (the stub has no physics to let the loop spring). A glue holds from the start, or from its
+   * `active_from` step. Glue between two sheets changes nothing in the preview.
+   */
+  _locks(j) {
+    const steps = ((j['pliego:sequence'] || {}).steps) || [];
+    const sheets = j['pliego:sheets'], V = j.vertices_coords;
+    const faceAt = (s, p) => {
+      const off = sheets[s].offset, x = p[0] + off[0], y = p[1] + off[1];
+      return j.faces_vertices.findIndex((f, fi) => j['pliego:faces_sheet'][fi] === s && inside(f.map((v) => V[v]), x, y));
+    };
+    const depth = (f) => { let d = 0; for (let q = f; this._parent[q]; q = this._parent[q].face) d++; return d; };
+    const locks = [];
+    for (const jn of j['pliego:joins'] || []) {
+      if (jn.type !== 'glue' || !jn.a || !jn.b || jn.a.sheet !== jn.b.sheet) continue;
+      const s = sheets.findIndex((sh) => sh.id === jn.a.sheet);
+      const reg = jn.a.region || [];
+      if (s < 0 || !reg.length || !Array.isArray(jn.map)) continue;
+      const c = reg.reduce((a, p) => [a[0] + p[0] / reg.length, a[1] + p[1] / reg.length], [0, 0]);
+      const [ma, mb, mc, md, tx, ty] = jn.map;
+      let fa = faceAt(s, c), fb = faceAt(s, [ma * c[0] + mb * c[1] + tx, mc * c[0] + md * c[1] + ty]);
+      if (fa < 0 || fb < 0) continue;
+      const edges = new Set();
+      let da = depth(fa), db = depth(fb);
+      while (fa !== fb) {
+        if (da >= db) { edges.add(this._parent[fa].edge); fa = this._parent[fa].face; da--; }
+        else { edges.add(this._parent[fb].edge); fb = this._parent[fb].face; db--; }
+      }
+      const from = jn.active_from === undefined ? -1
+        : Number.isInteger(jn.active_from) ? jn.active_from : steps.findIndex((st) => st.id === jn.active_from);
+      if (edges.size) locks.push({ from, until: Infinity, edges });
+    }
+    return locks;
+  }
+
+  /** Is crease e held by a glue that holds during step k? */
+  _locked(e, k) {
+    return this._glueLocks.some((L) => k >= L.from && k < L.until && L.edges.has(e));
+  }
+
   /** Sequence position (0…N steps) or 0 when the document has no program. */
   _seqValue() {
     const seqId = [...this._controlKind].find(([, k]) => k === 'sequence');
@@ -391,7 +444,7 @@ export class World {
           const y = this._yield[esheet[e]], d = theta[e] - rest[e];
           if (Math.abs(d) > y) rest[e] = theta[e] - Math.sign(d) * y;
         }
-        if (physical) for (const e of step.release || []) theta[e] = theta[e] + (rest[e] - theta[e]) * t;
+        if (physical) for (const e of step.release || []) if (!this._locked(e, k)) theta[e] = theta[e] + (rest[e] - theta[e]) * t;
       }
     }
     return theta.map((x) => Math.max(-FLAT_MAX, Math.min(FLAT_MAX, x)));

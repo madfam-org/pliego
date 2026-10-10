@@ -201,7 +201,7 @@ independent of mesh resolution.
 | `glue` | `a: {sheet, region: [[u,v]…]}`, `b: {sheet}`, `map: [a, b, c, d, tx, ty]`, `side: "front"\|"back"` | every engine vertex of sheet *a* inside `region` is welded to the point `M·(u,v)+t` on sheet *b* (2×2 matrix `[[a,b],[c,d]]` row-major, translation `[tx,ty]`); `side` says which face of *b* the tab lies on |
 | `pivot` | `a: {sheet, at: [u,v]}`, `b: {sheet, at: [u,v]}`, `hardware_ref?` | the two points coincide; rotation is free (a brad / split pin). `hardware_ref` follows the bridge contract to yantra4d (§9) |
 | `string` | `a: {sheet, at}`, `b: {sheet, at} \| {world: [x,y,z]}`, `length` | unilateral distance ≤ `length` (thread, ribbon, the line a papel picado banner hangs from) |
-| `pin` | `a: {sheet, at} \| {sheet, along: [[u,v],[u,v]]}`, `world: [x,y,z] \| null` | the point (or every vertex within `collision_thickness` of the segment) is fixed in the world (`world: null` means "where it starts") |
+| `pin` | `a: {sheet, at} \| {sheet, along: [[u,v],[u,v]]}`, `world: [x,y,z] \| null`, `mechanism?` | the point (or every vertex within `collision_thickness` of the segment) is fixed in the world (`world: null` means "where it starts"); with `mechanism` naming a `translate` driver, the pinned points move with it (kirigami pulled open, a banner line raised) |
 | `slider` | `a: {sheet, at}`, `track: {sheet, from: [u,v], to: [u,v]}`, `mechanism?` | the point stays on the track segment of the track sheet; if `mechanism` names a `slide` driver, the point's position along the track is driven |
 
 ### 5.4 `pliego:mechanisms[m]`
@@ -212,6 +212,7 @@ independent of mesh resolution.
 | `slide` | `id`, `control`, `travel: mm` | drives the `slider` joins that reference it from 0 to `travel` |
 | `rotate` | `id`, `center: {sheet, at}`, `control`, `sheets_moving: [sheet…]` | rotates kinematic sheets about the pivot normal (volvelles, wheels) |
 | `leaf` | `id`, `sheet`, `spine: [[u,v],[u,v]]`, `control` | a book leaf hinged at its spine edge; the control drives a page turn (0 = lying right, 180 = turned to the left) by moving a drive point along the leaf's free edge — the paper bends physically |
+| `translate` | `id`, `control`, `direction: [x,y,z]`, `travel: mm`, `sheets_moving?: [sheet…]` | moves kinematic sheets and every `pin` join that names it along `direction` by `control/max × travel` (control 0 = start) |
 
 ### 5.5 `pliego:controls[c]`
 

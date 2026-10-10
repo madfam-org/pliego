@@ -57,5 +57,5 @@ Schema: [`packages/schemas/stock-card.schema.json`](../../../packages/schemas/st
 - Heritage stocks (amate, papel de china, washi) record their tradition and makers in `provenance`
   with cited sources; no uncited cultural claims (RFC 0039 citation bar).
 - `name` is quadrilingual (en/es/fr/pt), Spanish register is the quality bar.
-- The commons licence of a stock card is the commons licence (two agreeing fields as for cartridges,
-  once ruled).
+- Stock cards are commons objects licensed **CERN-OHL-W-2.0** (owner ruling 2026-10-10, symmetric
+  with the solid and soft commons); `provenance.license` must say so.

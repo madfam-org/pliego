@@ -92,6 +92,7 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
     _rule6_stocks(d, out)
     _rule7_refs(d, coords, out)
     _rule14_print(d, coords, out)
+    _rule15_mechanism_sheets(d, out)
     _rule8_sequence(d, out)
     _rule11_pieces(d, out)
     _rule12_stacks(d, _sheet_tools(d, coords)[1], out)
@@ -416,6 +417,7 @@ from .document_verify_refs import (  # noqa: E402
     _rule8_sequence,
     _rule9_initial,
     _rule14_print,
+    _rule15_mechanism_sheets,
     _sheet_tools,
 )
 from .pieces import rule11_pieces as _rule11_pieces  # noqa: E402

@@ -175,6 +175,35 @@ def _rule7_refs(d: dict, coords: list, out) -> None:
                 "declared")
 
 
+# Rule 15 (§5.4) is a warning until every landed cartridge is clean, then an error: the engine
+# already refuses such documents.
+RULE15_LEVEL = "warning"
+
+
+def _rule15_mechanism_sheets(d: dict, out) -> None:
+    """Rule 15 (§5.4): mechanisms move only rigid sheets. A hinge, rotate or translate moves each
+    sheet in `sheets_moving` as a rigid board, so that sheet must be kinematic on that very
+    mechanism; a leaf bends its page physically, so its sheet must not be kinematic."""
+    level = out.err if RULE15_LEVEL == "error" else out.warn
+    sheets = {s.get("id"): s for s in d["pliego:sheets"] if isinstance(s, dict)}
+    for m in d.get("pliego:mechanisms") or []:
+        if not isinstance(m, dict):
+            continue
+        mid, t = m.get("id"), m.get("type")
+        if t in ("hinge", "rotate", "translate"):
+            for sid in m.get("sheets_moving") or []:
+                kin = (sheets.get(sid) or {}).get("kinematic")
+                if sid in sheets and not (isinstance(kin, dict) and kin.get("mechanism") == mid):
+                    level(15, "mechanism_moves_physical", f"mechanism {mid!r} ({t}) moves sheet "
+                          f"{sid!r}, which is not kinematic on it (spec §5.4)", sheet=sid)
+        elif t == "leaf":
+            s = sheets.get(m.get("sheet"))
+            if s is not None and s.get("kinematic"):
+                level(15, "leaf_on_kinematic", f"mechanism {mid!r} (leaf) turns sheet "
+                      f"{s.get('id')!r}, which is kinematic: a leaf bends a physical page "
+                      "(spec §5.4)", sheet=s.get("id"))
+
+
 def _rule14_print(d: dict, coords: list, out) -> None:
     """Spec §5.12, rule 14: annotations resolve and lie on their sheet; pages are well formed,
     do not overlap, and every sheet lies inside a page's printable area (else a warning)."""

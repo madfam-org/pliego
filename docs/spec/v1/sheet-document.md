@@ -508,6 +508,14 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     `text` 1–32 printable characters and `size` 0.5–50 mm; `pliego:pages` is well formed (size
     > 0, 0 ≤ margin < half the page, ≥ 1 page, unique ids) and its pages do not overlap. A sheet
     outside every page's printable area is a warning (`sheet_off_page`).
+<!-- lane H (w3/hardening) rule 15: begin -->
+15. Mechanisms move only rigid sheets (§5.4): every sheet a `hinge`, `rotate` or `translate`
+    lists in `sheets_moving` is kinematic on that mechanism (`kinematic.mechanism` = its id),
+    and the sheet a `leaf` turns is physical (`kinematic: null`) — a leaf bends its page. The
+    engine refuses both mistakes; the kernel reports them as a warning
+    (`mechanism_moves_physical`, `leaf_on_kinematic`) until every landed cartridge is clean, then
+    as an error.
+<!-- lane H (w3/hardening) rule 15: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

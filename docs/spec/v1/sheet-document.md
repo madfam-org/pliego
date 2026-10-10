@@ -476,6 +476,16 @@ is what rule 4's "one face on each side of a split" means.
 A reader that needs the unsplit topology merges the vertices of one sheet that share coordinates.
 <!-- lane H (w3/hardening) §5.13: end -->
 
+<!-- lane H (w3/hardening) §5.14: begin -->
+### 5.14 The initial state: set creases and world placement
+
+- **Set creases.** A foldable edge (`M`, `V`, `F`, `U`) folded in the `initial` frame is a set
+  crease: its `pliego:edges_restAngle` is the signed dihedral it has in that frame (§1 signs; a
+  crease folded flat takes its design sign), unless the author gave it a rest angle. Without it
+  the engine would read the pose as elastic and spring a standing pop-up or a rolled tube back
+  toward flat at the first step. The kernel writes it; `B`, `C` and `J` edges keep 0.
+<!-- lane H (w3/hardening) §5.14: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any

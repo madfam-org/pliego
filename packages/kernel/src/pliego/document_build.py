@@ -203,8 +203,6 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         "pliego:sheets": sheet_objs,
         "pliego:stocks": stock_snaps,
     }
-    if any(r != 0.0 for r in er):
-        data["pliego:edges_restAngle"] = er
     if any(n is not None for n in en):
         data["pliego:edges_name"] = en
     if assembly.title:
@@ -262,6 +260,12 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
         frames.append(_frame_for(assembly, arrs, spec, f"target:{name}"))
     if frames:
         data["file_frames"] = frames
+    if need_initial:  # creases set in the initial pose keep it (spec §3 edges_restAngle)
+        from .document_pose import initial_rest_angles
+
+        er = initial_rest_angles(fv, ev, ea, ef, er, frames[0]["vertices_coords"])
+    if any(r != 0.0 for r in er):
+        data["pliego:edges_restAngle"] = er
     for key, value in (("pliego:dielines", getattr(assembly, "dielines", None)),
                        ("pliego:finishes", getattr(assembly, "finishes", None)),
                        ("pliego:artwork", getattr(assembly, "artwork", None))):

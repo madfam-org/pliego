@@ -110,6 +110,20 @@ refactorises; contact exclusion around welds follows the gates. Test `step-joins
 A step's `release_joins` (spec §5.22) unties joins from that step on, through the same gates
 (test `untie-joins`).
 
+**Start pose** (backlog item 21). A mechanism control starts at its `default` unless the
+mechanism's neutral value (0, or a hinge's `rest`) reproduces the document's initial pose better;
+then it starts there and glides to the default at `mechanismRate`, and `world.warnings` says so.
+Before, such a document teleported its kinematic sheets on the first substep and smashed the
+paper around them: `pull-tab-slider` `straight` stretched 8–16 % and `dissolve-scene` 5–13 %; now
+0.45–2.4 % and < 0.5 % (the rest in `pull-tab-slider` comes from the document stacking its strip
+0.3 mm above the backing where 0.33 mm is the contact distance, so the sliding strip drags the
+free backing by friction). Test `start-pose`.
+
+**Next engine milestones** (measured, not implemented): `rotating-squares` needs in-plane
+plasticity of its kirigami ligaments (46–218 % stretch today), and `tab-and-slot` needs
+edge–edge contact (10–13 % stretch, 1.5 % in `low-cross`), because vertex–triangle contact lets a
+tab's edge pass a slot's edge.
+
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force
 exceeds `perf_factor·Y·tear_strain·(length it carries)`. Only the most loaded weld breaks in each
@@ -185,7 +199,8 @@ Tests: `determinism-replay` and `determinism-snapshot`.
 
 Board needs nothing the paper path lacks:
 
-- **Caliper** sets the contact gap (`collision_thickness`).
+- **Caliper** sets the contact gap (`collision_thickness`; two different stocks touch at the mean
+  of theirs).
 - **Strong orthotropy** comes through the per-hinge D(φ) with `grain_deg`.
 - **Machine scores** use the `score` treatment with `score_factor` and `score_yield_deg`.
 

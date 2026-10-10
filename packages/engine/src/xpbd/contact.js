@@ -184,7 +184,7 @@ export class Contact {
     for (let p = 0; p < this.nPairs; p++) {
       const v = this.pv[p], t = this.pt[p];
       const a = T[3 * t], b = T[3 * t + 1], c = T[3 * t + 2];
-      const tc = Math.max(this.tc[v], this.tc[a]);
+      const tc = 0.5 * (this.tc[v] + this.tc[a]);
       const nx = N[3 * t], ny = N[3 * t + 1], nz = N[3 * t + 2];
       if (nx === 0 && ny === 0 && nz === 0) continue;
       const ax = x[3 * a], ay = x[3 * a + 1], az = x[3 * a + 2];

@@ -180,6 +180,8 @@ Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle
 - Narrow phase: vertex–triangle (point to closest point on triangle), skipping triangles that contain
   the vertex or share a vertex with it, and pairs next to a glue weld. Contact distance
   `t_c = max(caliper, 0.05 mm)`, so board stacks rest at their caliper (test `board-stack-gap`).
+  <!-- lane E (wave 3): --> Two different stocks touch at the mean of their `t_c` (mid-surface to
+  mid-surface), not the larger one (test `contact-mean-thickness`).
 - Sidedness: each active pair memorises which side the vertex was on; the projection pushes toward
   that side (prevents pass-through when layers are nearly coplanar). When the document has
   `faceOrders`, seed sidedness for pairs of faces that overlap in the flat-folded state.
@@ -204,6 +206,11 @@ The direction is the World option `windDir` (default +Z) until the contract adds
 - **`rotate`:** relative to 0.
 - **`slide` and `translate`:** map `control/max × travel`.
 - **`leaf` (page turn):** drives a band of fore-edge vertices, and the page bends as it turns.
+- <!-- lane E (wave 3) --> **Start pose:** a mechanism control starts at its `default`, unless the
+  mechanism's neutral value (0; a hinge's `rest`) reproduces the document's initial pose better;
+  then it starts there and moves to the default at `mechanismRate` (no first-substep teleport;
+  `World.warnings` says so). Keyed mechanisms, `ride`, step-activated joins and untying: spec
+  §5.20–§5.22.
 - **The ground:** `y ≥ 0`, with the paper's mid-surface resting on the table.
 - **Board:** works through the same path.
   - The caliper is the contact gap.

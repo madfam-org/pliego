@@ -115,6 +115,8 @@ export class Drivers {
     }
     this.grabTerm = termList.add(TK_GRAB, 0, [0], [1], { target: [0, 0, 0], k: 0 });
     this.fixed = fixed;
+    /** @type {string[]} */ this.warnings = [];
+    this.startFromInitialPose(w);
     // sequence
     const seq = doc.sequence;
     this.seq = seq;
@@ -140,6 +142,60 @@ export class Drivers {
     if (seq && seq.mode === 'kinematic') {
       this.program = new KinematicProgram(w);
       for (const v of this.program.ownedVertices(mesh)) fixed[v] = 1;
+    }
+  }
+
+  /**
+   * A mechanism control starts where the document's pose is (backlog item 21). Each control starts
+   * at its `default`, but a document may place its kinematic sheets (and lay its leaves) at the
+   * mechanism's neutral value instead (0; a hinge's `rest`). Starting at the default would then
+   * teleport them on the first substep and smash the paper around them. So when the neutral
+   * value reproduces the initial pose better than the default, the control starts there and moves
+   * to its default at `mechanismRate`, like any other control change; World.warnings says so.
+   * Documents whose initial pose matches the default are unchanged.
+   * @param {any} w
+   */
+  startFromInitialPose(w) {
+    const X0 = w.X0;
+    for (const [id, c] of this.controls) {
+      if (c.kind === 'sequence' || c.kind === 'wind' || c.kind === 'toggle') continue;
+      const mechs = [...this.mech.values()].filter((m) => (m.control ?? m.angle_control) === id);
+      if (!mechs.length) continue;
+      const neutral = mechs[0].type === 'hinge' ? mechs[0].rest : 0;
+      if (mechs.some((m) => (m.type === 'hinge' ? m.rest : 0) !== neutral)) continue;
+      const def = /** @type {number} */(this.value.get(id));
+      if (def === neutral) continue;
+      const err = (/** @type {number} */ val) => {
+        this.value.set(id, val);
+        const memo = new Map();
+        let e = 0;
+        for (const grp of this.groups) {
+          if (!grp.mech) continue;
+          const tf = this.transformOf(w, grp.mech, memo);
+          for (let i = 0; i < grp.verts.length; i++) {
+            const v = grp.verts[i];
+            let p = [grp.base[3 * i], grp.base[3 * i + 1], grp.base[3 * i + 2]];
+            if (tf.R) p = mat3Vec(tf.R, p);
+            e += Math.hypot(p[0] + tf.T[0] - X0[3 * v], p[1] + tf.T[1] - X0[3 * v + 1], p[2] + tf.T[2] - X0[3 * v + 2]);
+          }
+        }
+        for (const lf of this.leaves) {
+          if (lf.m.control !== id) continue;
+          const a = keyedOutput(lf.m, val) * DEG;
+          for (const d of lf.drivers) {
+            const r = d.r0 * (1 - 0.18 * Math.sin(a));
+            let q = 0;
+            for (let k = 0; k < 3; k++) q += (d.M[k] + r * (Math.cos(a) * d.out[k] + Math.sin(a) * lf.up[k]) - X0[3 * d.dv + k]) ** 2;
+            e += Math.sqrt(q);
+          }
+        }
+        return e;
+      };
+      const eDef = err(def), eNeu = err(neutral);
+      if (eNeu + 1e-6 < eDef) {
+        this.value.set(id, neutral);
+        this.warnings.push(`control ${id} starts at ${neutral} (where the document's initial pose puts its mechanisms), not at its default ${def}; it moves to the default at mechanismRate`);
+      } else this.value.set(id, def);
     }
   }
 

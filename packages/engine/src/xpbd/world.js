@@ -77,6 +77,7 @@ export class World {
       terms.add(TK_PERF, 0, [a, b], [1, -1], { k: this.kHard, pair: i, fBreak: m.perfFactor * Y * m.tearStrain * mesh.perfPairLen[i] });
     }
     this.drivers = new Drivers(this, terms, pins, opts);
+    this.warnings = this.drivers.warnings;
     this.terms = terms.finish();
     for (let t = 0; t < this.terms.count; t++) this.terms.k[t] = this.terms.info[t].k ?? 0;
     this.terms.active[this.drivers.grabTerm] = 0;

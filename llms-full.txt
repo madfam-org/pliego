@@ -1,0 +1,92 @@
+# Pliego: full context for coding agents
+
+> Last Updated: 2026-10-10
+>
+> Boundary checkpoint (2026-10-10): public repository. Operational detail (topology, secrets,
+> runbooks, people) lives in MADFAM's private ops repository under the repo-boundary contract
+> (docs/PUBLIC_REPO_BOUNDARY.md). Never copy it here.
+
+## Product
+
+Pliego (Spanish: a sheet folded in the middle, the printer's sheet that becomes a book's
+signature) is the platform for **sheet hyperobjects**: origami, kirigami, papercut traditions,
+pop-up and paper engineering, book structures, flexagons and whole interactive paper dioramas.
+
+Three things make a sheet object here:
+
+1. **The flat sheet** — outline, cuts, creases (mountain, valley, score, perforation), glue tabs.
+   This is the source of truth.
+2. **The fold program** — the ordered, timed folds that take the flat sheet to its 3-D states.
+3. **The stock** — the actual paper (grammage, caliper, grain, stiffness, crease memory,
+   springback), described by a stock card whose physics is derived in exactly one place.
+
+The motion is the product: a page turn, a pop-up rising as the book opens, a papel picado banner
+in the wind. So the physics engine is a first-class, verified package, not a preview.
+
+Status (2026-10-10): incubating. Contract, kernel, engine and studio are being built in parallel
+lanes; nothing is deployed. docs/HONEST_STATUS.md is authoritative.
+
+## Hard rules
+
+- **Determinism:** the kernel emits byte-stable sheet documents; the engine replays bit-exactly
+  with a pinned time step.
+- **No solid modeling:** no OCCT, CadQuery, build123d or trimesh anywhere in packages/ or apps/.
+  Brads, eyelets, magnets and stands are Yantra4D objects referenced through `hardware_ref`.
+- **No prices:** no price fields in manifests or stock cards; quotes come from Cotiza.
+- **No direct machine dispatch:** cut/score/fold jobs go through Pravara MES.
+- **AI:** only through the Selva gateway (`SELVA_BASE_URL`, `SELVA_API_TOKEN`); inert until
+  configured, fail closed; no provider keys in this repository.
+- **Heritage:** traditional models and papercut traditions cite sources and credit their
+  communities (for example papel picado and San Salvador Huixcolotla, Puebla). Never copy a modern
+  designer's crease pattern.
+- **Read-proof lanes:** every check prints what it scanned; scanning zero is a failure.
+
+## Contracts
+
+- **Sheet document:** FOLD 1.2 plus `pliego:` keys (`docs/spec/v1/sheet-document.md`, schema in
+  `packages/schemas/sheet-document.schema.json`).
+- **Stock card:** `materials/<slug>/stock.json` (`docs/spec/v1/stock-card.md`); derived physics is
+  written by `pliego.stock.derive()` and checked with `python -m pliego.stock --check materials`.
+- **Service:** one container; gunicorn `apps.api.app:app` on 8000; `/health` liveness, `/ready`
+  readiness; `/metrics` on 9090 (internal). Landing `/`, studio `/studio/`, engine modules
+  `/engine/`, API `/api/v1/`, `/llms.txt`.
+- **Hosts (proposed, pending the owner's word):** `pliego.madfam.io` (landing),
+  `pliego-app.madfam.io` (studio), `pliego-api.madfam.io` (API). Flat labels, one Service.
+- **Auth:** Janua issuer `https://auth.madfam.io`, audience `pliego-api`, RS256 via JWKS. OAuth
+  callback `https://pliego-app.madfam.io/auth/callback` (exact match).
+
+## Commons
+
+`madfam-org/sheet-hyperobjects` (public; objects CERN-OHL-W-2.0 pending the owner's licence
+ruling) is mounted at `projects/` as one git submodule pinned by SHA. One `<slug>/` per object
+(`main.py`, `project.json`, `docs/README.md`), strict kebab-case slugs, born quadrilingual
+(en/es/fr/pt). Classes: techniques, bases, traditional models, tessellations and engineering
+origami, kirigami, papercut traditions, paper engineering, book structures, flexagons and toys,
+dioramas. Interfaces (`spine`/`gutter`, `glue_flap` ↔ `glue_zone`, `tab` ↔ `slot`, `hinge`,
+`page_edge`, `pivot`, `track`) let objects compose, checked before anything is cut.
+
+## Ecosystem (consume, never rebuild)
+
+| Service | Role |
+|---|---|
+| Yantra4D | Solid hardware (brads, eyelets, magnets, stands) through `hardware_ref` |
+| Fashion Cabinet | Textiles (book cloth, ribbon, thread) through `material_ref` |
+| hyperobjects-spec | Validation of every commons object (`pliego-spec`) |
+| Janua | Identity |
+| Dhanam | Catalog, checkout, entitlements (later) |
+| Tulana | Pricing evidence (later) |
+| Karafiel | CFDI (later) |
+| Selva | LLM gateway |
+| Cotiza | Quotes for printed, laser-cut and die-cut runs |
+| Pravara MES | Fabrication dispatch |
+| ceq | Generative printed art for sheets |
+| Angelia Courier | Messaging and email |
+| Enclii | Deploy, domains, secrets, status |
+| Plausible | Analytics (self-hosted) |
+
+## Conventions
+
+- Code, identifiers, commits and PRs in English; user-facing copy es/en/fr/pt.
+- Source files stay under 600 lines; 800 fails CI.
+- GitHub Actions pinned by SHA; GitHub-hosted runners only (`ubuntu-24.04`).
+- Agents never merge their own PRs. Every agent commit carries its `Co-Authored-By` trailer.

@@ -24,11 +24,12 @@ from flask import Flask, Response, abort, redirect, request, send_file
 from .config import Settings
 from .hosts import HostRouter
 
+# Bare media types: send_file appends "; charset=utf-8" to the textual ones.
 MIME: dict[str, str] = {
-    ".html": "text/html; charset=utf-8",
-    ".js": "text/javascript; charset=utf-8",
-    ".mjs": "text/javascript; charset=utf-8",
-    ".css": "text/css; charset=utf-8",
+    ".html": "text/html",
+    ".js": "text/javascript",
+    ".mjs": "text/javascript",
+    ".css": "text/css",
     ".json": "application/json",
     ".map": "application/json",
     ".fold": "application/json",
@@ -44,10 +45,11 @@ MIME: dict[str, str] = {
     ".glb": "model/gltf-binary",
     ".gltf": "model/gltf+json",
     ".wasm": "application/wasm",
-    ".txt": "text/plain; charset=utf-8",
+    ".txt": "text/plain",
     ".xml": "application/xml",
 }
 TEXT_PLAIN = "text/plain; charset=utf-8"
+HTML = "text/html; charset=utf-8"
 
 AI_CRAWLERS = (
     "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot",
@@ -129,7 +131,7 @@ class StaticSite:
 
     def html_response(self, path: Path, page_url: str) -> Response:
         html = path.read_text(encoding="utf-8")
-        resp = Response(self.stamp(html, page_url), content_type=MIME[".html"])
+        resp = Response(self.stamp(html, page_url), content_type=HTML)
         resp.add_etag()
         return resp.make_conditional(request)
 
@@ -223,7 +225,7 @@ def register(app: Flask, settings: Settings, hosts: HostRouter, api_index) -> St
         target = safe_file(settings.root, name)
         if target is None:
             abort(404)
-        return send_file(target, mimetype=TEXT_PLAIN, conditional=True, etag=True, max_age=None)
+        return send_file(target, mimetype="text/plain", conditional=True, etag=True, max_age=None)
 
     @app.get("/llms.txt")
     def llms_txt():

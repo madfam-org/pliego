@@ -25,12 +25,14 @@ RUNNER = Path(__file__).resolve().parent / "services" / "engine" / "pliego_runne
 sys.path.insert(0, str(RUNNER.parent))
 from pliego_runner import RUNNER_FORMATS, available_formats  # noqa: E402
 
+# format → (media type, file extension). Mirrors pliego.export.EXPORTERS (kernel-gen); a test fails
+# when the two drift, and ``fold`` is the sheet document itself.
 TRANSPORT: dict[str, tuple[str, str]] = {
     "fold": ("application/json", "fold"),
     "svg": ("image/svg+xml", "svg"),
-    "dxf": ("application/dxf", "dxf"),
+    "dxf": ("image/vnd.dxf", "dxf"),
     "pdf": ("application/pdf", "pdf"),
-    "hpgl": ("application/vnd.hp-hpgl", "hpgl"),
+    "hpgl": ("application/vnd.hp-hpgl", "plt"),
     "glb": ("model/gltf-binary", "glb"),
 }
 _MISSING = [f for f in RUNNER_FORMATS if f not in TRANSPORT]
@@ -91,6 +93,8 @@ class Renderer:
             cmd = [sys.executable, "-I", "-B", str(RUNNER), str(mode.script), str(out),
                    "--params-stdin", "--formats", ",".join(formats),
                    "--cartridge", cart.slug, "--mode", mode.id, "--timeout", str(timeout)]
+            if self.settings.materials.is_dir():
+                cmd += ["--materials", str(self.settings.materials)]
             if self.settings.kernel_src.is_dir():
                 cmd += ["--kernel-path", str(self.settings.kernel_src)]
             env = self._env()

@@ -1,0 +1,38 @@
+{
+  "project": {
+    "slug": "valley-fold",
+    "name": {"en": "Valley fold", "es": "Pliegue valle", "fr": "Pli vallée", "pt": "Dobra vale"},
+    "version": "0.1.0",
+    "engine": "pliego",
+    "description": {
+      "en": "A square folded once along its diagonal (API test fixture).",
+      "es": "Un cuadrado plegado una vez por su diagonal (fixture de pruebas de la API).",
+      "fr": "Un carré plié une fois selon sa diagonale (fixture de test de l'API).",
+      "pt": "Um quadrado dobrado uma vez na diagonal (fixture de teste da API)."
+    },
+    "difficulty": "beginner",
+    "tags": ["technique", "fold", "valley"],
+    "attribution": {"author": "Innovaciones MADFAM", "license": "CERN-OHL-W-2.0"}
+  },
+  "modes": [
+    {"id": "default", "label": {"en": "Folded square", "es": "Cuadrado plegado", "fr": "Carré plié", "pt": "Quadrado dobrado"}, "script_file": "main.py"}
+  ],
+  "parameters": [
+    {"id": "size", "type": "slider", "default": 150, "min": 50, "max": 300, "step": 1,
+     "label": {"en": "Side (mm)", "es": "Lado (mm)", "fr": "Côté (mm)", "pt": "Lado (mm)"}},
+    {"id": "stock", "type": "select", "default": "kami",
+     "options": [
+       {"value": "kami", "label": {"en": "Kami", "es": "Kami", "fr": "Kami", "pt": "Kami"}},
+       {"value": "copy-80", "label": {"en": "Copy paper", "es": "Papel bond", "fr": "Papier ramette", "pt": "Papel sulfite"}}
+     ],
+     "label": {"en": "Paper", "es": "Papel", "fr": "Papier", "pt": "Papel"}}
+  ],
+  "export_formats": ["fold", "svg", "dxf", "pdf", "hpgl", "glb"],
+  "hyperobject": {
+    "is_hyperobject": true,
+    "domain": "sheet",
+    "class": "technique",
+    "interfaces": [],
+    "commons_license": "CERN-OHL-W-2.0"
+  }
+}

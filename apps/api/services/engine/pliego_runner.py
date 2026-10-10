@@ -53,7 +53,6 @@ LABEL = "Pliego cartridges"
 # kernel module ``pliego.export.<format>``; a format whose module is not importable is not offered
 # (``available_formats``), so the API can never advertise what the kernel cannot write.
 RUNNER_FORMATS = ("fold", "svg", "dxf", "pdf", "hpgl", "glb")
-_EXPORT_FUNCS = ("export", "write_bytes", "to_bytes", "render", "dumps")
 
 
 class CartridgeError(Exception):
@@ -110,27 +109,43 @@ def import_kernel():
     return pliego
 
 
-def to_document(pliego, result, meta: dict):
-    """Turn the cartridge's ``result`` into a ``pliego.Document`` (with ``pliego:meta``)."""
-    document_cls = getattr(pliego, "Document", None)
-    if document_cls is None:
-        raise CartridgeError("kernel-api", "pliego.Document is missing from the kernel")
-    allowed = tuple(c for c in (getattr(pliego, "Sheet", None), getattr(pliego, "Assembly", None),
-                                document_cls) if isinstance(c, type))
+def load_stocks(pliego, assembly, materials: str) -> dict:
+    """Stock snapshots for every sheet, from the committed cards (``materials/<slug>/stock.json``)."""
+    import pliego.stock as stock_mod
+
+    stocks: dict = {}
+    for sheet in assembly.sheets:
+        slug = getattr(sheet, "stock", None)
+        if not isinstance(slug, str):
+            raise CartridgeError("stock", f"sheet {getattr(sheet, 'id', '?')!r} has no stock id")
+        if slug not in stocks:
+            try:
+                stocks[slug] = stock_mod.load_snapshot(slug, materials or None)
+            except Exception as exc:  # noqa: BLE001 — StockError, a missing materials dir …
+                raise CartridgeError("stock", f"stock {slug!r}: {exc}") from None
+    return stocks
+
+
+def to_document(pliego, result, meta: dict, materials: str = ""):
+    """Turn the cartridge's ``result`` into a stamped ``pliego.Document`` carrying ``meta``.
+
+    A Sheet becomes a one-sheet Assembly; an Assembly is built with the committed stock snapshots;
+    a Document gets the runner's cartridge/mode/params written into ``pliego:meta`` and re-stamped
+    (the runner, not the script, is the authority on provenance)."""
+    document_cls, sheet_cls, assembly_cls = pliego.Document, pliego.Sheet, pliego.Assembly
     if result is None:
         raise CartridgeError("no-result", "the cartridge did not assign `result`")
-    if not isinstance(result, allowed):
+    if not isinstance(result, (sheet_cls, assembly_cls, document_cls)):
         raise CartridgeError("bad-result", "`result` must be a pliego.Sheet, pliego.Assembly or "
                              f"pliego.Document, got {type(result).__name__}")
     if isinstance(result, document_cls):
-        doc = result
-        if hasattr(doc, "with_meta"):
-            doc = doc.with_meta(**meta)
-        return doc
-    builder = getattr(document_cls, "from_result", None)
-    if builder is None:
-        raise CartridgeError("kernel-api", "pliego.Document.from_result is missing")
-    return builder(result, **meta)
+        doc = result.copy()
+        current = doc.data.get("pliego:meta")
+        doc.data["pliego:meta"] = {**(current if isinstance(current, dict) else {}), **meta}
+        return doc.stamp()
+    if isinstance(result, sheet_cls):
+        result = assembly_cls([result])
+    return result.build(stocks=load_stocks(pliego, result, materials), **meta)
 
 
 def doc_counts(doc_json: dict) -> dict:
@@ -155,15 +170,14 @@ def export_bytes(pliego, doc, fmt: str, doc_text: str) -> bytes:
     import importlib
 
     module = importlib.import_module(f"pliego.export.{fmt}")
-    for name in (f"to_{fmt}", *_EXPORT_FUNCS):
-        func = getattr(module, name, None)
-        if callable(func):
-            out = func(doc)
-            return out.encode("utf-8") if isinstance(out, str) else bytes(out)
-    raise CartridgeError("kernel-api", f"pliego.export.{fmt} exposes no to_{fmt}(document)")
+    func = getattr(module, f"to_{fmt}", None)
+    if not callable(func):
+        raise CartridgeError("kernel-api", f"pliego.export.{fmt} exposes no to_{fmt}(document)")
+    out = func(doc)
+    return out.encode("utf-8") if isinstance(out, str) else bytes(out)
 
 
-def execute(script_path: str, params: dict, meta: dict):
+def execute(script_path: str, params: dict, meta: dict, materials: str = ""):
     """Run the cartridge in the sandbox and return the kernel Document."""
     pliego = import_kernel()
     try:
@@ -192,14 +206,15 @@ def execute(script_path: str, params: dict, meta: dict):
             raise CartridgeError("cartridge", f"cartridge tried to exit: {exc!r}") from None
         raise CartridgeError("cartridge", f"{type(exc).__name__}: {exc}") from None
     try:
-        return pliego, to_document(pliego, env.get("result"), meta)
+        return pliego, to_document(pliego, env.get("result"), meta, materials)
     except CartridgeError:
         raise
     except Exception as exc:  # noqa: BLE001
         raise CartridgeError("document", f"{type(exc).__name__}: {exc}") from None
 
 
-def run(script: str, out_dir: Path, params: dict, formats: list[str], meta: dict) -> int:
+def run(script: str, out_dir: Path, params: dict, formats: list[str], meta: dict,
+        materials: str = "") -> int:
     counts = {"sheets": 0, "vertices": 0, "edges": 0, "faces": 0, "joins": 0}
     issues: list[dict] = []
     doc = doc_text = pliego = None
@@ -208,7 +223,7 @@ def run(script: str, out_dir: Path, params: dict, formats: list[str], meta: dict
         issues.append({"level": "error", "kind": "format", "detail": f"unsupported {unknown}"})
     else:
         try:
-            pliego, doc = execute(script, params, meta)
+            pliego, doc = execute(script, params, meta, materials)
             raw_issues = list(doc.verify())
             issues.extend(i if isinstance(i, dict) else {"level": "error", "kind": "verify",
                                                           "detail": str(i)} for i in raw_issues)
@@ -262,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--mode", default="default")
     ap.add_argument("--timeout", type=float, default=30.0)
     ap.add_argument("--kernel-path", default="", help="a source checkout's packages/kernel/src")
+    ap.add_argument("--materials", default="", help="the materials/ directory (stock cards)")
     args = ap.parse_args(argv)
     harden(args.timeout)
     if args.kernel_path:
@@ -284,7 +300,9 @@ def main(argv: list[str] | None = None) -> int:
     formats = [f for f in args.formats.split(",") if f]
     meta = {"cartridge": args.cartridge or Path(args.script).resolve().parent.name,
             "mode": args.mode, "params": params}
-    return run(args.script, out_dir, params, formats, meta)
+    if args.materials:
+        os.environ["PLIEGO_MATERIALS"] = args.materials
+    return run(args.script, out_dir, params, formats, meta, args.materials)
 
 
 if __name__ == "__main__":

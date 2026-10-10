@@ -1,0 +1,107 @@
+# Default-deny for every pod in the pliego namespace, then explicit allows.
+#
+# Ingress:
+#   - the app (8000): the Cloudflare tunnel ONLY (pliego, pliego-app and pliego-api hosts);
+#   - metrics (9090): the scraper's namespace ONLY.
+# Egress:
+#   - DNS;
+#   - TCP 443 to public addresses only (Janua's JWKS and token endpoint at their public origin; the Selva gateway
+#     once AI is enabled). A NetworkPolicy cannot name hosts, so 443 is "any public address"; the private ranges,
+#     the carrier-grade NAT range and link-local (cloud metadata) are excluded, so these rules never reach another
+#     in-cluster service. A default-deny without this rule once broke a sibling's Janua token mint.
+#
+# One selector per peer entry: an entry combining a namespaceSelector AND a podSelector has rendered as
+# deny-everything on this estate's policy controller, so every peer names a single selector; the tunnel peer is
+# the whole cloudflare-tunnel namespace, the shape Enclii's own generated tunnel policy uses.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-tunnel-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pliego
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflare-tunnel
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pliego
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pliego
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-https-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pliego
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 100.64.0.0/10
+              - 169.254.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

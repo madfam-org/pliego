@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pliego Studio</title>
+  <meta name="description" content="Pliego Studio: view, fold and simulate sheet hyperobjects — origami, kirigami, pop-ups and page turns with real paper physics.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://pliego-app.madfam.io/studio/">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="studio.css">
+  <script src="../shared/lang-boot.js"></script>
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <a class="skip" href="#viewer" data-i18n="nav.skip">Skip to the viewer</a>
+  <header class="topbar">
+    <a class="brand" href="../" data-i18n-attr="title:nav.home">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path class="mark-a" d="M4 6 16 10v18L4 24Z"/><path class="mark-b" d="M28 6 16 10v18l12-4Z"/></svg>
+      <span data-i18n="app.title">Pliego Studio</span>
+    </a>
+    <span class="badge" data-i18n="app.badge">incubating</span>
+    <div class="topbar-end">
+      <label class="lang">
+        <span data-i18n="lang.label">Language</span>
+        <select id="lang-select">
+          <option value="en" lang="en">English</option>
+          <option value="es" lang="es">Español</option>
+          <option value="fr" lang="fr">Français</option>
+          <option value="pt" lang="pt">Português</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main class="studio">
+    <aside class="panel panel-left">
+      <section class="card" aria-labelledby="catalog-h">
+        <h2 id="catalog-h" data-i18n="catalog.heading">Catalog</h2>
+        <p class="note" id="catalog-source"></p>
+        <ul class="catalog" id="catalog-list"></ul>
+      </section>
+      <section class="card" aria-labelledby="params-h">
+        <h2 id="params-h" data-i18n="params.heading">Parameters</h2>
+        <p class="note" id="params-note"></p>
+        <form id="params-form" class="fields" novalidate></form>
+      </section>
+    </aside>
+
+    <section class="viewer-col" aria-labelledby="object-title">
+      <div class="viewer-head">
+        <h1 id="object-title" data-i18n="loading">Loading…</h1>
+        <div class="segmented" role="group" data-i18n-attr="aria-label:view.group">
+          <button type="button" id="view-3d" aria-pressed="true" data-i18n="view.3d">3-D</button>
+          <button type="button" id="view-2d" aria-pressed="false" data-i18n="view.2d">Crease pattern</button>
+        </div>
+      </div>
+      <p class="notice" id="viewer-notice" hidden></p>
+      <div class="viewer" id="viewer">
+        <canvas id="view-canvas" class="view-canvas" tabindex="0" role="img" data-i18n-attr="aria-label:viewer.label"></canvas>
+        <div id="diagram" class="diagram" hidden></div>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-group" id="transport">
+          <button type="button" class="icon-btn" id="btn-restart" data-i18n-attr="aria-label:play.restart;title:play.restart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+          <button type="button" class="icon-btn" id="btn-back" data-i18n-attr="aria-label:play.back;title:play.back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14L7 12z"/></svg></button>
+          <button type="button" class="icon-btn primary" id="btn-play" aria-pressed="false" data-i18n-attr="aria-label:play.play;title:play.play"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic-play" d="M7 5v14l12-7z"/><path class="ic-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+          <button type="button" class="icon-btn" id="btn-forward" data-i18n-attr="aria-label:play.forward;title:play.forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="toolbar-group">
+          <button type="button" class="chip" id="btn-grab" aria-pressed="false" data-i18n="tool.grab">Grab paper</button>
+          <button type="button" class="chip" id="btn-overlay" aria-pressed="false" data-i18n="tool.overlay">Crease lines</button>
+          <button type="button" class="chip" id="btn-reset" data-i18n="tool.reset">Reset view</button>
+        </div>
+      </div>
+      <p class="hint" data-i18n="tool.hint">Drag to orbit · right-drag to pan · wheel or pinch to zoom · Shift-drag to grab the paper</p>
+    </section>
+
+    <aside class="panel panel-right">
+      <section class="card" aria-labelledby="controls-h">
+        <h2 id="controls-h" data-i18n="controls.heading">Controls</h2>
+        <div id="controls" class="fields"></div>
+      </section>
+      <section class="card" aria-labelledby="steps-h" id="steps-card" hidden>
+        <h2 id="steps-h" data-i18n="steps.heading">Steps</h2>
+        <ol id="steps" class="steps"></ol>
+      </section>
+      <section class="card" aria-labelledby="export-h">
+        <h2 id="export-h" data-i18n="export.heading">Export</h2>
+        <p class="note" id="export-note"></p>
+        <div id="exports" class="exports"></div>
+      </section>
+      <section class="card" aria-labelledby="share-h">
+        <h2 id="share-h" data-i18n="share.heading">Share</h2>
+        <label class="field">
+          <span data-i18n="share.label">Link to this object</span>
+          <input id="share-url" type="text" readonly>
+        </label>
+        <button type="button" class="chip" id="btn-copy" data-i18n="share.copy">Copy link</button>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="statusbar">
+    <span id="st-engine"></span>
+    <span id="st-renderer"></span>
+    <span id="st-fps"></span>
+    <span id="st-strain"></span>
+    <span id="st-contacts"></span>
+    <span class="st-msg" id="st-msg" role="status" aria-live="polite"></span>
+    <span class="st-end" data-i18n="footer.status">Pliego is incubating — in development, not yet a product.</span>
+  </footer>
+</body>
+</html>

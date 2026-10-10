@@ -1,0 +1,6 @@
+{
+  "_comment": "File-size gate baseline (madfam-org/.github check-file-size.ts). Empty on purpose: Pliego grandfathers no file. Over 600 lines warns, over 800 fails; split a module before it gets there.",
+  "warnAt": 600,
+  "failAt": 800,
+  "files": {}
+}

@@ -1,0 +1,70 @@
+# CodeQL code scanning for Python and JavaScript/TypeScript (build-mode none: no build needed for either).
+# A language is analysed only when the repository holds its source, so the scaffold does not fail on an
+# empty JavaScript tree. GitHub-hosted runners only; every action pinned to a full commit SHA.
+name: CodeQL
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 9 * * 1" # Mondays, 03:17 in Mexico City
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  languages:
+    name: Detect languages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Languages present in the tree
+        id: detect
+        run: |
+          set -euo pipefail
+          langs=()
+          if git ls-files '*.py' | grep -q .; then langs+=('"python"'); fi
+          if git ls-files '*.ts' '*.tsx' '*.js' '*.mjs' '*.cjs' | grep -q .; then langs+=('"javascript-typescript"'); fi
+          matrix="[$(IFS=,; echo "${langs[*]}")]"
+          echo "languages: $matrix"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    needs: languages
+    if: needs.languages.outputs.matrix != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(needs.languages.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-extended
+      - name: Analyze
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:${{ matrix.language }}

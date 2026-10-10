@@ -98,6 +98,21 @@ test('slider values show the step\'s decimals and readable units', () => {
   assert.equal(paramText(3, {}), '3');
 });
 
+test('triangulation drops collinear runs along a crease (paper-snowflake delicate, face 3)', () => {
+  // A face bounded by a crease that cut notches meet: vertices 8, 9, 12, 13, 15 and 16 lie on one
+  // line and become consecutive while clipping. Before the fix this threw "polygon is not simple".
+  const face = [[18.246743, 117.948799], [55.129433, 81.066109], [60.316768, 79.769276], [61.613602, 74.58194],
+    [65.179895, 71.015647], [66.034521, 71.671425], [67.029754, 72.083664], [61.24644, 93.667286],
+    [53.301562, 85.722408], [46.844135, 92.179834], [54.244569, 119.798626], [52.588127, 125.980552],
+    [44.231346, 94.792623], [34.562447, 104.461523], [37.563564, 119.677125], [32.86539, 106.158579],
+    [23.19649, 115.827479]];
+  const tris = triangulate(face);
+  const covered = tris.reduce((s, t) => s + Math.abs(signedArea(t.map((k) => face[k]))), 0);
+  assert.ok(Math.abs(covered - signedArea(face)) < 1e-6, `triangles cover the face (${covered} vs ${signedArea(face)})`);
+  // a polygon that really self-intersects still fails loudly
+  assert.throws(() => triangulate([[0, 0], [10, 10], [10, 0], [0, 10]]), /not simple/);
+});
+
 test('step index for sequence values', () => {
   assert.equal(stepIndex(0, 2), -1);
   assert.equal(stepIndex(0.01, 2), 0);

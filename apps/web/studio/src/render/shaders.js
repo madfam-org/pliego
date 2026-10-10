@@ -50,8 +50,8 @@ in vec4 vLightPos;
 flat in int vSheet;
 uniform vec3 uFront[${MAX_SHEETS}];
 uniform vec3 uBack[${MAX_SHEETS}];
-uniform vec4 uSheetInfo[${MAX_SHEETS}];   // xy: sheet size (mm), z: grain (rad), w: art flags (1 front, 2 back)
-uniform sampler2DArray uArt;
+uniform vec4 uSheetInfo[${MAX_SHEETS}];   // xy: sheet size (mm), z: grain (rad), w: printed-layer flags (1 front, 2 back)
+uniform sampler2DArray uArt;               // layer 2s: front, 2s+1: back (back view, sampled at 1 − u); premultiplied sRGB
 uniform vec3 uLightDir;                    // unit, toward the light
 uniform vec3 uEye;
 uniform vec3 uSky;
@@ -85,7 +85,7 @@ void main() {
   if ((front && (flags & 1) != 0) || (!front && (flags & 2) != 0)) {
     vec2 uv = front ? vUv : vec2(1.0 - vUv.x, vUv.y);
     vec4 art = texture(uArt, vec3(uv.x, 1.0 - uv.y, float(s * 2 + (front ? 0 : 1))));
-    base = mix(base, art.rgb, art.a);
+    if (art.a > 0.0) base = mix(base, pow(min(art.rgb / art.a, vec3(1.0)), vec3(2.2)), art.a);   // un-premultiply, to linear
   }
   float g = grain(vUv * info.xy, info.z);
   base *= 0.965 + 0.07 * g;

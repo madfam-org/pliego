@@ -1,15 +1,15 @@
 // @ts-check
-// WebGL2 paper renderer: two-sided paper (front/back colour, optional art via sheet UVs,
-// gl_FrontFacing), hemisphere + key light with translucency and procedural grain, one directional
-// PCF shadow map (pop-ups cast shadows), a ground plane, and an optional crease overlay.
+// WebGL2 paper renderer: two-sided paper (front/back colour, printed content via sheet UVs and
+// gl_FrontFacing — `art`, placed artwork and annotations composited per side by printed.js),
+// hemisphere + key light with translucency and procedural grain, one directional PCF shadow map
+// (pop-ups cast shadows), a ground plane, and an optional crease overlay.
 // Buffers are allocated once per mesh size and refreshed with bufferSubData every frame.
 
 import { OrbitCamera } from './camera.js';
 import { hexToLinear, DEG } from './math.js';
 import { MAX_SHEETS, PAPER_VS, PAPER_FS, GROUND_VS, GROUND_FS, DEPTH_VS, DEPTH_FS, LINE_VS, LINE_FS } from './shaders.js';
 import { computeBounds, lightViewProj, computeNormals, normalsMissing, readTheme, LIGHT_DIR } from './scene.js';
-
-const ART_SIZE = 512;
+import { artLayerSize, drawLayer, hasPrinted, planSheet } from './printed.js';
 
 /** @param {HTMLCanvasElement} [canvas] */
 export function hasWebGL2(canvas) {
@@ -52,9 +52,11 @@ function program(gl, vs, fs) {
 
 /**
  * @param {HTMLCanvasElement} canvas
+ * @param {{onWarn?: (msg: string) => void}} [opts]
  * @returns {import('./index.js').Renderer}
  */
-export function createWebGLRenderer(canvas) {
+export function createWebGLRenderer(canvas, opts = {}) {
+  const warn = opts.onWarn || (() => {});
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false, preserveDrawingBuffer: false });
   if (!gl) throw new Error('WebGL2 unavailable');
   const camera = new OrbitCamera();
@@ -80,20 +82,22 @@ export function createWebGLRenderer(canvas) {
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, shadowTex, 0);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-  // --- art texture array (1×1 placeholder until a document declares art) ---
+  // --- art texture array: two layers per sheet (front, back), all the same square size, sized by
+  // artLayerSize (≤ 2048 px, ≤ 64 MB in all); a 1×1 placeholder until a document prints anything.
   let artTex = gl.createTexture();
-  function allocArt(layers) {
+  const maxTexture = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+  function allocArt(layers, size) {
     gl.deleteTexture(artTex);
     artTex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, artTex);
-    const size = layers > 0 ? ART_SIZE : 1;
-    gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, size, size, Math.max(1, layers));
-    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    // Mipmapped: annotation text stays clean when a large sheet is seen small.
+    gl.texStorage3D(gl.TEXTURE_2D_ARRAY, Math.floor(Math.log2(size)) + 1, gl.RGBA8, size, size, Math.max(1, layers));
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, size > 1 ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   }
-  allocArt(0);
+  allocArt(0, 1);
 
   // --- paper mesh buffers ---
   const vao = gl.createVertexArray();
@@ -130,6 +134,7 @@ export function createWebGLRenderer(canvas) {
   const front = new Float32Array(MAX_SHEETS * 3), back = new Float32Array(MAX_SHEETS * 3), info = new Float32Array(MAX_SHEETS * 4);
   const lightMat = new Float32Array(16);
   let destroyed = false;
+  let generation = 0;   // bumps on every setSheets: late image loads of an older document are ignored
 
   function uploadMesh(r) {
     const nv = r.positions.length / 3;
@@ -187,30 +192,66 @@ export function createWebGLRenderer(canvas) {
 
     /** @param {ReturnType<typeof import('./scene.js').sheetsFromDocument>} sheets @param {string} [baseUrl] */
     setSheets(sheets, baseUrl) {
+      const gen = ++generation;
       front.fill(0); back.fill(0); info.fill(0);
-      sheets.slice(0, MAX_SHEETS).forEach((s, i) => {
+      const list = sheets.slice(0, MAX_SHEETS);
+      list.forEach((s, i) => {
         front.set(hexToLinear(s.front), i * 3); back.set(hexToLinear(s.back), i * 3);
         info.set([s.size[0], s.size[1], s.grainDeg * DEG, 0], i * 4);
       });
-      const wantsArt = sheets.some((s) => s.artFront || s.artBack);
-      allocArt(wantsArt ? Math.min(sheets.length, MAX_SHEETS) * 2 : 0);
+      const wantsArt = list.some((s) => hasPrinted(s, 'front') || hasPrinted(s, 'back'));
+      const size = wantsArt ? artLayerSize(list.length * 2, maxTexture) : 1;
+      allocArt(wantsArt ? list.length * 2 : 0, size);
       if (!wantsArt) return;
-      sheets.slice(0, MAX_SHEETS).forEach((s, i) => {
-        [[s.artFront, 0, 1], [s.artBack, 1, 2]].forEach(([src, side, bit]) => {
-          if (!src) return;
-          const img = new Image();
-          img.onload = () => {
-            if (destroyed) return;
-            const c = document.createElement('canvas'); c.width = c.height = ART_SIZE;
-            const ctx = c.getContext('2d'); if (!ctx) return;
-            ctx.drawImage(img, 0, 0, ART_SIZE, ART_SIZE);
-            gl.bindTexture(gl.TEXTURE_2D_ARRAY, artTex);
-            gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, i * 2 + side, ART_SIZE, ART_SIZE, 1, gl.RGBA, gl.UNSIGNED_BYTE, c);
-            info[i * 4 + 3] = info[i * 4 + 3] + bit;
-          };
-          img.src = new URL(src, baseUrl || location.href).href;
-        });
+      const base = baseUrl || location.href;
+      const plans = list.map((s) => planSheet(s, size, base));
+      const rejected = plans.reduce((n, p) => n + p.rejected.length, 0);
+      if (rejected) warn(`Skipped ${rejected} printed image(s) with a disallowed URL (allowed: relative paths, data:image/svg+xml, data:image/png).`);
+      /** @type {{layer: number, sheet: number, bit: number, ops: import('./printed.js').DrawOp[]}[]} */
+      const layers = [];
+      plans.forEach((p, i) => {
+        if (p.front.length) layers.push({ layer: i * 2, sheet: i, bit: 1, ops: p.front });
+        if (p.back.length) layers.push({ layer: i * 2 + 1, sheet: i, bit: 2, ops: p.back });
       });
+      const scratch = document.createElement('canvas');
+      scratch.width = scratch.height = size;
+      const ctx = scratch.getContext('2d');
+      if (!ctx) { warn('Printed content skipped: no 2-D canvas for compositing.'); return; }
+      /** @type {Map<string, HTMLImageElement>} */
+      const images = new Map();
+      let uploadWarned = false, loadWarned = false;   // one warning each per document, no spam
+      const upload = (L) => {
+        if (gen !== generation || destroyed) return;
+        try {
+          drawLayer(ctx, L.ops, images, size);
+          gl.bindTexture(gl.TEXTURE_2D_ARRAY, artTex);
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);   // clean edges under LINEAR filtering
+          gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, L.layer, size, size, 1, gl.RGBA, gl.UNSIGNED_BYTE, scratch);
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
+          info[L.sheet * 4 + 3] = (info[L.sheet * 4 + 3] | L.bit);
+        } catch (e) {
+          if (!uploadWarned) warn(`Printed content upload failed: ${e instanceof Error ? e.message : e}`);
+          uploadWarned = true;
+        }
+      };
+      layers.forEach(upload);      // texts (and the transparent background) show at once
+      const srcs = new Set(layers.flatMap((L) => L.ops.filter((op) => op.kind !== 'text').map((op) => /** @type {any} */ (op).src)));
+      for (const src of srcs) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.onload = () => {
+          if (gen !== generation || destroyed) return;
+          images.set(src, img);
+          layers.filter((L) => L.ops.some((op) => op.kind !== 'text' && /** @type {any} */ (op).src === src)).forEach(upload);
+        };
+        img.onerror = () => {
+          if (gen !== generation || destroyed || loadWarned) return;
+          loadWarned = true;
+          warn('A printed image failed to load; the sheet shows without it.');
+        };
+        img.src = src;
+      }
     },
 
     refreshTheme() { theme = readTheme(canvas); },

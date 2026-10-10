@@ -26,6 +26,11 @@ Formulas and defaults come from the rsE research memo §a3–§b:
   yield ``score_yield_deg = crease_yield_deg · score_factor``, and the card's perforation pattern
   ``perf_cut_mm`` / ``perf_bridge_mm`` (only when ``fabrication.perforation`` is present).
 
+Board cards (lane P): a card with a ``construction`` block (corrugated sandwich or laminated
+plies) takes grammage, caliper, effective moduli and bending stiffness from ``pliego.board`` —
+its ``physical`` gsm/caliper/E values must equal the ones the construction implies
+(``construction_mismatch``), and ``--write`` syncs them. The derived keys are unchanged.
+
 CLI (drift gate, read-proof line ``stock: cards=N drift=D``)::
 
     python -m pliego.stock --check materials    # exit 1 if any committed derived block drifts
@@ -220,7 +225,31 @@ def validate(card: dict[str, Any], slug: str | None = None) -> list[dict[str, st
 
     if card.get("derived_basis") not in (None, DERIVE_BASIS):
         issues.append(_issue("error", "derived_basis", f"unknown {card.get('derived_basis')!r}"))
+    if "construction" in card:
+        issues.extend(_construction_issues(card, physical))
     return issues
+
+
+def _construction_issues(card: dict[str, Any], physical: dict[str, Any]) -> list[dict[str, str]]:
+    """A board card's construction must evaluate, and its ``physical`` gsm/caliper/E values
+    must be the ones the construction implies (one source of truth; ``--write`` syncs them)."""
+    from . import board
+
+    problems = board.validate(card["construction"])
+    if problems:
+        return [_issue("error", "construction", p) for p in problems]
+    try:
+        implied = board.physical_values(board.evaluate(card["construction"],
+                                                       _value(physical, "nu", 0.293)))
+    except (board.BoardError, StockError, ZeroDivisionError) as exc:
+        return [_issue("error", "construction", str(exc))]
+    out = []
+    for key, want in implied.items():
+        have = (physical.get(key) or {}).get("value")
+        if not isinstance(have, (int, float)) or abs(have - want) > 1e-9 + 1e-6 * abs(want):
+            out.append(_issue("error", "construction_mismatch",
+                              f"physical.{key} = {have!r}, the construction implies {want}"))
+    return out
 
 
 # ---------------------------------------------------------------- derivation
@@ -239,13 +268,21 @@ def derive(card: dict[str, Any]) -> dict[str, float]:
     """Map a stock card's measurements to engine physics (spec §5.2 keys, engine units)."""
     physical = card.get("physical") or {}
     fab = card.get("fabrication") or {}
-    gsm = _value(physical, "gsm")
-    t = _value(physical, "caliper_um") / 1000.0                    # mm
-    e_md = _value(physical, "E_md_gpa") * GPA                       # g/(mm·s²)
-    e_cd = _value(physical, "E_cd_gpa") * GPA
     nu = _value(physical, "nu")
-    plate = t ** 3 / (12.0 * (1.0 - nu * nu))
-    d_md, d_cd = e_md * plate, e_cd * plate                         # g·mm²/s²
+    if isinstance(card.get("construction"), dict):                  # board: pliego.board model
+        from . import board
+
+        model = board.evaluate(card["construction"], nu)
+        gsm, t = model.gsm, model.caliper_mm
+        e_md, e_cd = model.E_md_gpa * GPA, model.E_cd_gpa * GPA
+        d_md, d_cd = model.D_md_mNm * MNM, model.D_cd_mNm * MNM
+    else:
+        gsm = _value(physical, "gsm")
+        t = _value(physical, "caliper_um") / 1000.0                # mm
+        e_md = _value(physical, "E_md_gpa") * GPA                   # g/(mm·s²)
+        e_cd = _value(physical, "E_cd_gpa") * GPA
+        plate = t ** 3 / (12.0 * (1.0 - nu * nu))
+        d_md, d_cd = e_md * plate, e_cd * plate                     # g·mm²/s²
     bend = physical.get("bending_stiffness_mNm") or {}
     if isinstance(bend.get("md"), (int, float)) and isinstance(bend.get("cd"), (int, float)):
         d_md, d_cd = float(bend["md"]) * MNM, float(bend["cd"]) * MNM   # measured wins
@@ -373,6 +410,8 @@ def check(root: Path | str, write: bool = False) -> tuple[int, int, list[str]]:
     for slug in slugs:
         path = base / slug / "stock.json"
         card = json.loads(path.read_text(encoding="utf-8"))
+        if write and _sync_construction(card):
+            path.write_text(dump_card(card), encoding="utf-8")
         for issue in validate(card, slug):
             if issue["level"] == "error":
                 problems.append(f"{slug}: {issue['kind']}: {issue['detail']}")
@@ -394,6 +433,25 @@ def check(root: Path | str, write: bool = False) -> tuple[int, int, list[str]]:
                               or committed.get(k) != fresh.get(k))
                 problems.append(f"{slug}: derived drift in {', '.join(keys) or 'derived_basis'}")
     return len(slugs), drift, problems
+
+
+def _sync_construction(card: dict[str, Any]) -> bool:
+    """Rewrite a board card's physical gsm/caliper/E from its construction; True if changed."""
+    if not isinstance(card.get("construction"), dict):
+        return False
+    from . import board
+
+    physical = card.setdefault("physical", {})
+    model = board.evaluate(card["construction"], _value(physical, "nu", 0.293))
+    changed = False
+    for key, value in board.physical_values(model).items():
+        entry = physical.get(key) if isinstance(physical.get(key), dict) else {}
+        if entry.get("value") != value:
+            entry = {"value": value, "status": "estimated",
+                     "basis": f"implied by the construction block ({board.MODEL})"}
+            physical[key] = entry
+            changed = True
+    return changed
 
 
 def main(argv: list[str] | None = None) -> int:

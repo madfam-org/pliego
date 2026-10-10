@@ -166,17 +166,16 @@ program starts from `start` (the initial frame's angles, `{mark: deg}` or `{"ang
 from flat; the returned sequence is `kinematic` and carries `.report`.
 
 
-<!-- BEGIN w2b lane PC (papercraft): pliego.mesh and pliego.unfold — coordinator-owned contract addition -->
 ---
 
-## 5. Papercraft: `pliego.mesh` and `pliego.unfold` (mode J2)
+## 6. Papercraft: `pliego.mesh` and `pliego.unfold` (mode J2)
 
 | Module | Responsibility |
 |---|---|
 | `mesh.py` | `Mesh(vertices, faces)`: counter-clockwise faces seen from outside, a consistently oriented 2-manifold that may be open (`check()` fails loud otherwise, and `net()` refuses an inside-out closed mesh). Primitives: `box`, `icosahedron`, `icosphere(n)`, `uv_sphere`, `lathe(profile, segments, closed=…)` (vases, gems, rings; a closed profile makes a torus-like ring), `torus`, `prism(profile, depth)`. Operations: `extrude(mesh, face, distance, shrink)` (0 makes a pyramid), the affine maps `scaled`/`moved`/`rotated`, `mapped(fn)` for any deformation (`net()` triangulates faces it bends), and `merged` for disjoint parts. No booleans and no volumes: these are polyhedral surfaces, not a solid modeler (§1). |
 | `unfold.py` | `net(mesh, size, page, margin, method, tabs, tab_height, tab_angle, label_size) → Net`. It scales the mesh to `size` mm on the ground, then builds the cut tree greedily: Kruskal over the dual graph in `min-perimeter` order (long edges first) or `steepest-edge` order (Schlickenrieder's steepest-edge cut tree, with its cuts tried last). A join is accepted only if the joined piece stays overlap-free (inset-triangle separating axes plus a pinch test), keeps a tab zone free beside every open edge, and still fits the printable page. Edges never joined are cuts, so nets that would overlap split into islands. |
 | `unfold_layout.py` | Cut numbering (island order), one glue tab per cut, alternating sides by number: a trapezoid or triangle within the side-angle limit, inside the footprint of the face it glues under, never overlapping its net or its other tabs. Edge numbers on both sides of each cut. Pages: each island is rotated to fit, preferring a turn that makes its root face the arrangement's face 0, then shelf-packed onto A4 or US Letter pages. |
-| `unfold_build.py` | `Net.assembly(mode)` writes one sheet per island, laid out on its page (`pliego:pages`) and carrying its numbers (`pliego:annotations`, spec §5.9). Fold lines are the tree edges and the tab hinges; their mountain or valley assignment and angle come from the signed 3-D dihedral, with the printed side outside. Fold lines are `score` on card stock and `crease` otherwise (`fold_lines=`). Mode `fold` is a kinematic program (the tabs, then one step per piece) with the assembled model as a `target:assembled` frame. Mode `glued` puts the assembled model in the initial frame, adds a glue join under every tab, gives every crease its fold angle as rest angle (the card is pre-folded before gluing), and lets go of every crease in a physical program. |
+| `unfold_build.py` | `Net.assembly(mode)` writes one sheet per island, laid out on its page (`pliego:pages`) and carrying its numbers (`pliego:annotations`, spec §5.12). Fold lines are the tree edges and the tab hinges; their mountain or valley assignment and angle come from the signed 3-D dihedral, with the printed side outside. Fold lines are `score` on card stock and `crease` otherwise (`fold_lines=`). Mode `fold` is a kinematic program (the tabs, then one step per piece) with the assembled model as a `target:assembled` frame. Mode `glued` puts the assembled model in the initial frame, adds a glue join under every tab, gives every crease its fold angle as rest angle (the card is pre-folded before gluing), and lets go of every crease in a physical program. |
 
 **Exactness.** An island's crease pattern is a tree of hinges with no interior vertex: each mesh
 vertex inside an island keeps at least one cut. Any assignment of fold angles is therefore rigid
@@ -190,4 +189,3 @@ starts flat in that face's plane. There is no control that carries flat pieces i
 `translate`/`hinge` move only rigid (kinematic) sheets (§5.4), and a folding piece is not rigid.
 The glue welds, the paper's springback against them, and settling need the physics
 engine. In the preview, the glued mode shows the finished model standing still.
-<!-- END w2b lane PC -->

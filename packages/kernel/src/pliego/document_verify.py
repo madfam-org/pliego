@@ -91,12 +91,13 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
     _rule5_overlap(d, coords, out)
     _rule6_stocks(d, out)
     _rule7_refs(d, coords, out)
-    _rule13_print(d, coords, out)
+    _rule14_print(d, coords, out)
     _rule8_sequence(d, out)
     _rule11_pieces(d, out)
     _rule12_stacks(d, _sheet_tools(d, coords)[1], out)
     if faces_ok:
         _rule9_initial(d, coords, out)
+    _rule13_packaging(d, coords, out)
     meta = d.get("pliego:meta") or {}
     if meta.get("digest") is not None and meta["digest"] != doc.digest():
         out.err(10, "digest_mismatch", f"meta.digest {meta['digest']} != {doc.digest()}")
@@ -395,11 +396,12 @@ def _rule6_stocks(d: dict, out: _Issues) -> None:
 
 
 # rules 7–9 live in document_verify_refs (file-size gate)
+from .document_verify_pack import _rule13_packaging  # noqa: E402
 from .document_verify_refs import (  # noqa: E402
     _rule7_refs,
     _rule8_sequence,
     _rule9_initial,
-    _rule13_print,
+    _rule14_print,
     _sheet_tools,
 )
 from .pieces import rule11_pieces as _rule11_pieces  # noqa: E402

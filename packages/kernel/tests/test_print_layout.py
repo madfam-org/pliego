@@ -1,4 +1,4 @@
-"""Spec §5.9 print layout: sheet annotations and print pages (authoring, verify, exporters)."""
+"""Spec §5.12 print layout: sheet annotations and print pages (authoring, verify, exporters)."""
 
 from __future__ import annotations
 

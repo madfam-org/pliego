@@ -339,7 +339,9 @@ class Assembly:
     ``pliego:meta.min_feature_mm``; `verify()` then floors face areas at its square.
     `pieces` / `stacks`: removable pieces and sheet stacks (`pliego.piece`, `pliego.stack`;
     spec §5.8), written to ``pliego:pieces`` / ``pliego:stacks``.
-    `pages`: print pages in the layout frame (spec §5.9 ``pliego:pages``) — {"size": [w, h],
+    `dielines` / `finishes` / `artwork`: packaging blocks (``pliego.dieline``, ``pliego.press``;
+    spec §5.9–§5.11) written as ``pliego:dielines``, ``pliego:finishes`` and ``pliego:artwork``.
+    `pages`: print pages in the layout frame (spec §5.12 ``pliego:pages``) — {"size": [w, h],
     "margin": mm, "pages": [{"id", "origin": [x, y]}]}; give a dict `layout` that puts every
     sheet inside a page's printable area.
     """
@@ -357,6 +359,10 @@ class Assembly:
     min_feature_mm: float | None = None
     pieces: list[dict] = field(default_factory=list)
     stacks: list[dict] = field(default_factory=list)
+    # packaging blocks (spec §5.9–§5.11, lane P): pliego:dielines / finishes / artwork
+    dielines: list[dict] = field(default_factory=list)
+    finishes: list[dict] = field(default_factory=list)
+    artwork: list[dict] = field(default_factory=list)
     pages: dict | None = None
 
     def __post_init__(self) -> None:

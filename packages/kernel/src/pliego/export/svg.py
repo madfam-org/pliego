@@ -104,8 +104,16 @@ def _poly(c: _Canvas, pts: tuple[tuple[float, float], ...], closed: bool, extra:
 
 
 def to_svg(doc: Any, palette: str = "diagram", registration: bool = True,
-           labels: bool = True) -> str:
-    """Render a sheet document to a standalone layered SVG (mm)."""
+           labels: bool = True, profile: str | None = None) -> str:
+    """Render a sheet document to a standalone layered SVG (mm). ``profile``: ``None`` picks
+    the dieline profile for documents with packaging blocks (``export.dieline``), else these
+    fabrication layers; ``"default"`` / ``"dieline"`` force one."""
+    from .dieline import resolve_profile
+
+    if resolve_profile(doc, profile) == "dieline":
+        from .dieline import to_svg as dieline_svg
+
+        return dieline_svg(doc)
     if palette not in PALETTES:
         raise ValueError(f"unknown palette '{palette}' ({' | '.join(PALETTES)})")
     pal = PALETTES[palette]

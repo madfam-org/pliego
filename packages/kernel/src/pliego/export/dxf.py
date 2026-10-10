@@ -97,8 +97,15 @@ def _tables() -> str:
             + _tag(0, "ENDTAB") + _tag(0, "ENDSEC"))
 
 
-def to_dxf(doc: Any) -> str:
-    """Render a sheet document to DXF R12 text (mm, layout frame)."""
+def to_dxf(doc: Any, profile: str | None = None) -> str:
+    """Render a sheet document to DXF R12 text (mm, layout frame); ``profile`` as in
+    :func:`pliego.export.svg.to_svg` (dieline profile for packaging documents)."""
+    from .dieline import resolve_profile
+
+    if resolve_profile(doc, profile) == "dieline":
+        from .dieline import to_dxf as dieline_dxf
+
+        return dieline_dxf(doc)
     plan = build_plan(doc)
     x0, y0, x1, y1 = plan.bounds
     header = (_tag(0, "SECTION") + _tag(2, "HEADER")

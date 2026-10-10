@@ -101,6 +101,11 @@ fold, a scored fold or a perforated fold, and they behave differently.
 | `pliego:sequence` | object | no | the fold program (§5.6) |
 | `pliego:pieces` | object[] | no | removable pieces: keep / excess regions of a sheet (§5.8) |
 | `pliego:stacks` | object[] | no | ordered piles of sheets a caliper apart (§5.8) |
+| `pliego:dielines` | object[] | no | packaging dieline blocks: panels, bleed/safe areas, glue zones, inside dimensions (§5.9) |
+| `pliego:finishes` | object[] | no | pressing and burning regions: emboss, deboss, foil, varnish, letterpress, burn (§5.10) |
+| `pliego:artwork` | object[] | no | brand artwork placed on a sheet side (§5.11) |
+| `pliego:annotations` | object[] | no | short texts printed on a sheet's front: edge numbers, part names (§5.12) |
+| `pliego:pages` | object | no | print pages in the layout frame (§5.12) |
 | `pliego:meta` | object | yes | provenance of this document (§5.7) |
 
 ---
@@ -354,8 +359,82 @@ author's, and the kernel's `pliego.reveal` emits it top-down. In `kinematic` mod
 studio preview the piece lifts along `pull` and disappears. Perforated tear-offs, kiss-cut
 stickers and pop-outs use the same three fields.
 
-<!-- BEGIN w2b lane PC (papercraft): print annotations and pages — coordinator-owned contract addition -->
-### 5.9 `pliego:annotations` and `pliego:pages` — print layout (optional)
+---
+
+### 5.9 `pliego:dielines` — packaging dielines
+
+A list of dieline blocks, one per die-cut sheet, written by `pliego.dieline` (box, carton and
+envelope generators). Sheet-local coordinates (mm); the exporters add the sheet's `offset`.
+
+```json
+{"style": "reverse-tuck carton", "family": "folding-carton", "sheet": "carton",
+ "inside": {"length": 120, "width": 60, "depth": 180}, "caliper_mm": 0.47,
+ "bleed_mm": 3, "safe_mm": 3,
+ "panels": [{"name": "front", "kind": "panel", "label": {"en": "Front", "es": "Frente", "fr": "Face avant", "pt": "Frente"},
+             "polygon": [[0, 125], [120.47, 125], [120.47, 305.47], [0, 305.47]], "print": true,
+             "safe": [[3, 128], "…"], "bleed": [[-3, 125], "…"]}],
+ "glue": [{"id": "manufacturers-joint", "kind": "glue", "panel": "glue-flap", "polygon": [[…]]}],
+ "dimensions": [{"from": [0, 125], "to": [120.47, 125], "offset": -6, "text": "L 120 (inside)"}],
+ "grain": {"kind": "grain", "angle_deg": 90, "at": [300, 40]}}
+```
+
+- `family` ∈ `corrugated` · `folding-carton` · `envelope` · `rigid` · `board`.
+- `inside`: the inside dimensions the generator compensated for (`length`/`width`/`depth`, or
+  the insert's `width`/`height` for envelopes); `caliper_mm`: the stock caliper it used.
+- `panels[]`: `name` (kebab, also the `pliego:edges_name` of the panel's free cut edges),
+  `kind` ∈ `panel flap dust-flap tuck lid glue-flap lock bottom pocket window-frame`, i18n
+  `label`, `polygon`; printed panels (`print: true`) carry `safe` (the panel inset by
+  `safe_mm`) and `bleed` (the panel grown by `bleed_mm` along its cut edges only).
+- `glue[]`: `kind` ∈ `glue gum peel-and-seal tape hot-melt` — fabrication zones (the
+  manufacturer's joint, gummed and peel-and-seal flaps). Welding them is the engine's job; a
+  generator only writes `pliego:joins` glue when its initial frame satisfies the weld.
+- `grain.kind` is `flute` for corrugated board (the arrow follows the flute axes, across MD).
+- **Fold lines** of a dieline are ordinary `M`/`V` edges with treatment `score` (creasing
+  rule); slits are `C` edges; tear lines are `perforation` (assignment `F`); kiss cuts
+  `halfcut`. Box folds are mountain folds with the sheet's front as the print side, and box
+  sheets are placed print side down (`placement.rotation = [1, 0, 0, 0]`).
+
+### 5.10 `pliego:finishes` — pressing and burning
+
+A list of finish regions on one side of a sheet (`pliego.press`):
+
+```json
+{"id": "logo", "kind": "emboss", "sheet": "card", "side": "front",
+ "region": [[[20, 100], [60, 100], [60, 140], [20, 140]]],
+ "depth_mm": 0.4, "profile": "dome", "registered": false}
+```
+
+| `kind` | `depth_mm` | required fields |
+|---|---|---|
+| `emboss` | relief height, (0, 5] | `profile` ∈ `flat dome bevel sculpted`, `registered` (bool) |
+| `deboss` | recess depth, (0, 5] | `profile` |
+| `foil` | 0 | `color` (#rrggbb), `finish` ∈ `metallic matte gloss holographic` |
+| `varnish` | 0 | `finish` ∈ `gloss matte soft-touch spot-uv` |
+| `letterpress` | impression depth, (0, 5] | `color` (ink) |
+| `burn` | char depth, [0, 5] | `process` ∈ `iron laser`, `char` ∈ [0, 1] (darkness), `color` (char tone) |
+
+`region` is a list of polygons (even-odd). The dieline export profile draws each finish as
+plates on their own layers (emboss die female + counter male inset by the caliper; deboss die
+male + counter female; foil, varnish and letterpress plates; branding-iron face, or laser
+engrave vector + raster). **Engine:** embossed/debossed areas are locally stiffer and burned
+areas thinner; v1 records the regions only — the engine does not yet change local stiffness or
+thickness, and the studio does not yet render relief or sheen.
+
+### 5.11 `pliego:artwork` — brand artwork
+
+```json
+{"id": "brand", "sheet": "carton", "side": "back", "asset": "assets/brand.svg",
+ "at": [10, 90], "size": [60, 60], "rotation_deg": 0, "panel": "front", "clip": "bleed"}
+```
+
+`asset` is a relative path inside the cartridge directory (svg/png/jpg/webp, no `..`, no
+scheme); `at` is the artwork's lower-left corner in sheet-local mm, before rotation about its
+centre; `clip` ∈ `panel bleed none` (clip to the named panel, to its bleed, or not at all).
+Exporters place the image on the Artwork layer (SVG) or draw its frame (PDF, DXF). This
+complements `front.art`/`back.art` (one image over the whole sheet). The studio's texture
+preview of placed artwork is a follow-up.
+
+### 5.12 `pliego:annotations` and `pliego:pages` — print layout (optional)
 
 Two optional top-level fields for documents meant to be printed and cut by hand, such as the
 papercraft nets `pliego.unfold` writes. Both are print-only: the engine ignores them, and they
@@ -371,9 +450,6 @@ When `pliego:pages` is present, the PDF exporter prints each page once at 1:1 on
 layer. SVG, PDF and DXF print annotations on their `label` / `TEXT` layers.
 
 Rule 13 (§8) covers both fields.
-<!-- END w2b lane PC -->
-
----
 
 ## 6. `file_frames` — 3-D states
 
@@ -424,12 +500,14 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     `represents` × the `caliper_mm` of each member's stock (within 1e-5 mm); the members share one
     rotation and sit *k* × `pitch_mm` along the bottom sheet's front normal; the `binding` edge
     lies on every member.
-<!-- BEGIN w2b lane PC (papercraft): rule 13 -->
-13. Print layout (§5.9): every annotation's sheet exists and its `at` lies on that sheet, with
+13. Packaging blocks resolve: every `pliego:dielines` / `pliego:finishes` /
+    `pliego:artwork` entry names an existing sheet; panel, safe, glue and finish polygons lie
+    on their sheet (within its local bounding box; bleed outlines within the box grown by
+    `bleed_mm`); finish and artwork records satisfy §5.10–§5.11.
+14. Print layout (§5.12): every annotation's sheet exists and its `at` lies on that sheet, with
     `text` 1–32 printable characters and `size` 0.5–50 mm; `pliego:pages` is well formed (size
     > 0, 0 ≤ margin < half the page, ≥ 1 page, unique ids) and its pages do not overlap. A sheet
     outside every page's printable area is a warning (`sheet_off_page`).
-<!-- END w2b lane PC -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

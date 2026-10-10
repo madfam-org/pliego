@@ -175,8 +175,8 @@ def _rule7_refs(d: dict, coords: list, out) -> None:
                 "declared")
 
 
-def _rule13_print(d: dict, coords: list, out) -> None:
-    """Spec §5.9, rule 13: annotations resolve and lie on their sheet; pages are well formed,
+def _rule14_print(d: dict, coords: list, out) -> None:
+    """Spec §5.12, rule 14: annotations resolve and lie on their sheet; pages are well formed,
     do not overlap, and every sheet lies inside a page's printable area (else a warning)."""
     ids, inside, _ = _sheet_tools(d, coords)
     notes = d.get("pliego:annotations")

@@ -59,3 +59,38 @@ Schema: [`packages/schemas/stock-card.schema.json`](../../../packages/schemas/st
 - `name` is quadrilingual (en/es/fr/pt), Spanish register is the quality bar.
 - Stock cards are commons objects licensed **CERN-OHL-W-2.0** (owner ruling 2026-10-10, symmetric
   with the solid and soft commons); `provenance.license` must say so.
+
+<!-- lane P (wave 2b) draft — begin: board constructions -->
+## Board constructions (lane P draft, wave 2b)
+
+A card for a **built-up board** — corrugated board, or a laminated board such as folding boxboard
+— carries an optional `construction` block, evaluated by `pliego.board` (the only implementation
+of the corrugation model; formulas and sources in the module docstring and in the physics memo,
+§(h) "Board and corrugation"):
+
+```json
+"construction": {
+  "kind": "corrugated",
+  "model": "pliego.board v1",
+  "layers": [
+    {"role": "liner",  "gsm": 125, "caliper_um": 180, "E_md_gpa": 6.5, "E_cd_gpa": 2.8, "status": "estimated", "basis": "…"},
+    {"role": "medium", "flute": "B", "gsm": 112, "caliper_um": 170, "E_md_gpa": 5.0, "E_cd_gpa": 2.2, "status": "estimated", "basis": "…"},
+    {"role": "liner",  "gsm": 125, "caliper_um": 180, "E_md_gpa": 6.5, "E_cd_gpa": 2.8, "status": "estimated", "basis": "…"}
+  ],
+  "adhesive_gsm_per_glueline": 5
+}
+```
+
+- `kind` ∈ `corrugated` (layers alternate `liner` and `medium`, top layer = the board's front;
+  single face = `liner, medium`, or `medium, liner` with the flutes up) · `laminate` (`ply` layers, top first).
+- A `medium` names its `flute` ∈ `A B C E F` (pitch and flute height from `pliego.board.FLUTES`).
+  The flutes run across the machine direction (axes along CD).
+- Each layer is `measured`/`nominal` (needs `source`) or `estimated` (needs `basis`).
+- With a construction present, `derive()` computes grammage, caliper, effective moduli
+  (membrane stiffness ÷ caliper) and orthotropic bending stiffness from it — a measured
+  `bending_stiffness_mNm` still wins. The card's `physical.gsm`, `caliper_um`, `E_md_gpa` and
+  `E_cd_gpa` must equal the values the construction implies (`validate()` error
+  `construction_mismatch`); `python -m pliego.stock --write materials` rewrites them.
+- The `derived` block keeps exactly the §5.2 keys: the engine needs nothing new to load a board.
+- Scored board cards use `crease_length_scale_t` 50–100 (physics memo §a3).
+<!-- lane P (wave 2b) draft — end -->

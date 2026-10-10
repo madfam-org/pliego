@@ -130,7 +130,7 @@ def _draw(plan: Plan, pen: _Pen, with_text: bool, marks: bool = True) -> str:
 
 
 def _page_stream(plan: Plan, pid: str, x: float, y: float, label: str) -> str:
-    """One declared print page (spec §5.9) at 1:1, clipped to the page."""
+    """One declared print page (spec §5.12) at 1:1, clipped to the page."""
     w, h = plan.page_size
     k = MM_TO_PT
     m = plan.page_margin
@@ -182,8 +182,17 @@ def _overview_stream(plan: Plan, page_w: float, page_h: float, margin: float, ti
     return "".join(s)
 
 
-def to_pdf(doc: Any, page: str = "a4", margin_mm: float = 10.0) -> bytes:
-    """Render a sheet document to a tiled multi-page PDF (bytes): overview + 1:1 tiles."""
+def to_pdf(doc: Any, page: str = "a4", margin_mm: float = 10.0,
+           profile: str | None = None) -> bytes:
+    """Render a sheet document to a tiled multi-page PDF (bytes): overview + 1:1 tiles. With
+    the dieline profile (packaging documents, or ``profile="dieline"``) it is one 1:1 page of
+    named layers in spot colours instead (``export.dieline_pdf``)."""
+    from .dieline import resolve_profile
+
+    if resolve_profile(doc, profile) == "dieline":
+        from .dieline_pdf import to_pdf as dieline_pdf
+
+        return dieline_pdf(doc)
     page_key = page.lower()
     if page_key not in PAGE_SIZES_MM:
         raise ValueError(f"unknown page size '{page}' ({' | '.join(PAGE_SIZES_MM)})")

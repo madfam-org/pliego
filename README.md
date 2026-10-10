@@ -30,7 +30,7 @@ Start with [`docs/strategy/architecture.md`](docs/strategy/architecture.md) and 
 ```bash
 git clone --recurse-submodules https://github.com/madfam-org/pliego   # projects/ is the commons
 python3 -m pytest packages/kernel/tests -q                             # kernel (stdlib only)
-node --test packages/engine/test/                                      # engine (Node >= 20)
+node --test packages/engine/test/*.test.js                                      # engine (Node >= 20)
 python3 -m unittest discover -s scripts/qa/tests -v                    # compliance lanes
 ```
 

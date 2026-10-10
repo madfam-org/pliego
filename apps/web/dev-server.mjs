@@ -19,6 +19,9 @@ const args = process.argv.slice(2);
 const arg = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(arg('--port') || process.env.PORT || 8090);
 const ENGINE_DIR = resolve(arg('--engine') || process.env.PLIEGO_ENGINE_DIR || join(HERE, '..', '..', 'packages', 'engine', 'src'));
+// The repo-root llms files are the single source (the API and the image serve them too).
+const REPO_ROOT = resolve(join(HERE, '..', '..'));
+const ROOT_FILES = { '/llms.txt': join(REPO_ROOT, 'llms.txt'), '/llms-full.txt': join(REPO_ROOT, 'llms-full.txt') };
 
 export const CSP = [
   "default-src 'none'",
@@ -68,7 +71,8 @@ const server = createServer((req, res) => {
     return;
   }
   if (path === '/studio') { res.writeHead(301, { ...HEADERS, Location: '/studio/' }).end(); return; }
-  const file = path.startsWith('/engine/') ? (existsSync(ENGINE_DIR) ? inside(ENGINE_DIR, path.slice('/engine/'.length)) : null) : inside(HERE, path.slice(1));
+  const rootFile = ROOT_FILES[path] && existsSync(ROOT_FILES[path]) ? ROOT_FILES[path] : null;
+  const file = rootFile || (path.startsWith('/engine/') ? (existsSync(ENGINE_DIR) ? inside(ENGINE_DIR, path.slice('/engine/'.length)) : null) : inside(HERE, path.slice(1)));
   const dotted = path.split('/').some((seg) => seg.startsWith('.'));   // never serve dot-dirs (.engine-tmp, .shots)
   if (!file || dotted) {
     res.writeHead(404, { ...HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }).end('not found');

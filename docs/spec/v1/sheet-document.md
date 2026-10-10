@@ -69,7 +69,7 @@ state (see `docs/strategy/engine.md` §6).
 | `vertices_coords` | yes | 2-D layout coordinates `[[x, y], …]` |
 | `edges_vertices` | yes | `[[a, b], …]` |
 | `edges_assignment` | yes | `B` boundary · `M` mountain · `V` valley · `F` flat (a line that is drawn/scored but not folded in the target state) · `U` unassigned · `C` cut (both sides are boundary; the sheet is separated along it) · `J` join (an artificial edge that splits a face so every face is simply connected — never drawn, never folded) |
-| `edges_foldAngle` | yes | target fold angle in the **final** state of the fold program; `0` for `B`/`F`/`C`/`J`/`U` |
+| `edges_foldAngle` | yes | the **design** fold angle of each crease — the angle the fold program folds it to (for a crease the program later releases, the angle it was folded to before release; its resting angle afterwards comes from plasticity, not from this field); `0` for `B`/`F`/`C`/`J`/`U` |
 | `faces_vertices` | yes | counter-clockwise vertex cycles; every face is a simple polygon (no holes — holes are bridged with `J` edges) |
 | `faces_edges` | no | if present must agree with `faces_vertices` |
 | `edges_faces`, `vertices_vertices`, `vertices_faces` | no | derived; readers recompute them |
@@ -92,6 +92,7 @@ fold, a scored fold or a perforated fold, and they behave differently.
 | `pliego:faces_sheet` | int[F] | yes | sheet index of each face |
 | `pliego:edges_treatment` | string[E] | yes | §4 |
 | `pliego:edges_restAngle` | number[E] | no | plastic rest angle at t = 0 (crease memory), degrees; default 0 |
+| `pliego:edges_name` | (string\|null)[E] | no | stable kebab-case name per edge (or `null`): the names manifest interfaces cite in `edges[].edge` (`spine`, `gutter`, `fore-edge`, `slot`…). Several edges may share a name (a polyline). |
 | `pliego:sheets` | object[] | yes | §5.1 |
 | `pliego:stocks` | object | yes | stock snapshots keyed by stock id, each with its kernel-derived physics (§5.2) |
 | `pliego:joins` | object[] | no | glue, pivots, strings, pins, sliders (§5.3) |
@@ -147,8 +148,10 @@ The sheet outline (`B` edges) is cut by the exporters; `treatment` for `B` is `n
 - `front` / `back`: render appearance. `art` (optional) is a relative path to an image covering the
   sheet's local bounding box (front is drawn as seen from +normal; back is mirrored as paper is).
 - `kinematic`: `null` for a physical sheet, or `{"mechanism": "<mechanism id>"}` when the sheet is a
-  rigid board moved by a driver (book boards, the base page halves of a pop-up spread). A kinematic
-  sheet's vertices have infinite mass and follow the mechanism's transform exactly.
+  rigid board (book boards, the base page halves of a pop-up spread). A kinematic sheet's vertices
+  have infinite mass. It follows its mechanism's transform **only if the mechanism lists it in
+  `sheets_moving`**; a kinematic sheet that its mechanism does not move is a **fixed board** and keeps
+  its placement (the stationary half of a spread references the spread's hinge this way).
 
 ### 5.2 `pliego:stocks[id]` — stock snapshot
 
@@ -190,6 +193,12 @@ mapping from paper measurements to physics exists in exactly one place (`pliego.
 | `tear_strain` | — | strain at which a perforation (and, later, plain paper) separates |
 | `friction` | — | Coulomb coefficient, paper on paper |
 | `collision_thickness` | mm | contact distance between layers (≥ caliper) |
+| `G12` (optional) | g/(mm·s²) | in-plane shear modulus; when absent the engine uses 0.387·√(E_md·E_cd) (Baum et al.) |
+| `score_yield_deg` (optional) | deg | yield angle of a scored hinge; when absent the engine uses `crease_yield_deg × score_factor` |
+| `perf_cut_mm`, `perf_bridge_mm` (optional) | mm | perforation pattern (cut length and bridge length); `perf_factor` = bridge / (cut + bridge) |
+
+A snapshot may also carry `appearance: {"front": "#rrggbb", "back": "#rrggbb"}` (from the stock card)
+— the default face colours a sheet inherits when its `front`/`back` are not authored.
 
 ### 5.3 `pliego:joins[k]`
 
@@ -248,6 +257,12 @@ declared here; the viewer builds its UI from this list.
 - `mode`: `physical` (engine physics follows the drive) or `kinematic` (rigid origami: faces stay
   rigid and the folded state is computed exactly — valid for rigid-foldable patterns such as
   Miura-ori; the kernel guarantees consistency).
+- **State between steps.** A step lists only the creases it moves; every crease it does not list
+  **holds its current angle**. The program starts from the angles of the `initial` frame (the signed
+  dihedral of each crease measured on that frame) when one is present, else from flat (0). In
+  `kinematic` mode a step's in-between states are the rigid motion between its start and target
+  angles (the engine solves closure along the way; a plain linear blend of angles is only an
+  approximation); `release` in kinematic mode leaves a crease free at its current angle.
 - The sequence control (`kind: "sequence"`) scrubs the program; step labels are the diagram text.
 
 ### 5.7 `pliego:meta`

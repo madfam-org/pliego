@@ -74,5 +74,6 @@ USER 1001:1001
 EXPOSE 8000 9090
 
 # apps/api/app.py exposes the Flask `app` (api lane). gunicorn's heartbeat files go to /tmp.
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "60", \
-     "--worker-tmp-dir", "/tmp", "--access-logfile", "-", "apps.api.app:app"]
+# apps/api/gunicorn.conf.py binds 8000 (app) and PLIEGO_METRICS_PORT (9090, /metrics only), sets the
+# worker tmp dir to /tmp, disables the control socket and marks workers non-dumpable on Linux.
+CMD ["gunicorn", "-c", "apps/api/gunicorn.conf.py", "apps.api.app:app"]

@@ -9,8 +9,7 @@
 patterns, cuts, assemblies and fold programs; it writes [sheet documents](../spec/v1/sheet-document.md)
 and fabrication files, and it is the **single source of truth** for the paper-stock → physics mapping.
 
-It follows Fashion Cabinet's `fc` kernel style (`claudedocs/pliego-2026-10-10/research/rsC_report.md`
-"The fc kernel in depth"): `from __future__ import annotations`, full type hints, `@dataclass` value
+It follows the style of Fashion Cabinet's `fc` pattern kernel (MADFAM's 2-D garment kernel): `from __future__ import annotations`, full type hints, `@dataclass` value
 types, mm / degrees / y-up, `EPS = 1e-4` mm, ruff line length 100 (`E,F,W,I,UP,B`), fail-loud
 construction, verify-issue dicts `{level, kind, detail}`, a read-proof summary line, and a hard
 **byte-determinism contract** (authored order, fixed rounding, `math.fsum`, explicit tie-breaks, no
@@ -58,7 +57,7 @@ referenced through `hardware_ref`); the compliance lane enforces it.
 
 `<slug>/main.py`, `<slug>/project.json`, `<slug>/docs/README.md`. The runner (in `apps/api`, built
 on the shared `commons_sandbox`) injects `pliego` and `math` as the only importable modules, injects
-parameters as bare globals, executes the script, and reads `result` — a `pliego.Sheet`,
+parameters and `mode` (the mode id) as bare globals, executes the script, and reads `result` — a `pliego.Sheet`,
 `pliego.Assembly` or `pliego.Document`. Scripts read parameters through a local accessor with a
 default so they also run standalone:
 

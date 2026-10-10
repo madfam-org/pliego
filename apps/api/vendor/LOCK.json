@@ -1,0 +1,17 @@
+{
+  "vendored": [
+    {
+      "name": "commons_sandbox",
+      "source_repo": "madfam-org/hyperobjects-spec",
+      "source_path": "src/commons_sandbox",
+      "commit": "20b636e766685afdca438f8b2e54059119708977",
+      "version": "1.0.0",
+      "license": "AGPL-3.0-only (same owner)",
+      "files": {
+        "commons_sandbox/__init__.py": "3bd97b51871572e3dd8d0435286b582d8c7646059f2ce019c102ce9f20262471",
+        "commons_sandbox/core.py": "26854223dfedf88e2cf1f78a6203c38a52dc3584dd8e9256011a311dc44b7ab3"
+      },
+      "refresh": "gh api -H 'Accept: application/vnd.github.raw' 'repos/madfam-org/hyperobjects-spec/contents/src/commons_sandbox/<file>?ref=<commit>' > apps/api/vendor/commons_sandbox/<file>; then update commit and sha256 here (apps/api/tests/test_sandbox.py fails on any drift)"
+    }
+  ]
+}

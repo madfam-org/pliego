@@ -15,8 +15,11 @@ from . import (
     axioms,
     exact,
     flatfold,
+    flatops,
+    flatstate,
     foldcut,
     foldfile,
+    foldprogram,
     kinematics,
     papercut,
     simplefold,
@@ -42,7 +45,9 @@ from .assembly import (
 )
 from .document import KERNEL_ID, KERNEL_VERSION, Document, canonical_json
 from .document_build import STOCK_DERIVED_KEYS, StockUnavailable, resolve_stock
+from .flatstate import FlatState, FlatStateError
 from .foldfile import load as load_fold
+from .foldprogram import FoldProgram
 from .geometry import (
     EPS,
     Arc,
@@ -97,5 +102,6 @@ __all__ = [
     "regular_polygon", "resolve_stock", "rotate", "sequence_control", "slide", "slider",
     "square", "string", "translate", "FoldedState", "load_fold", "axioms",
     "exact", "flatfold", "foldcut", "foldfile", "kinematics", "papercut", "simplefold",
-    "clamp", "param", "piece", "stack",
+    "clamp", "param", "piece", "stack", "FlatState", "FlatStateError", "FoldProgram",
+    "flatops", "flatstate", "foldprogram",
 ]

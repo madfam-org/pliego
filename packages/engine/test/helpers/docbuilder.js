@@ -10,12 +10,20 @@ import { quatRotate } from '../../src/geom.js';
 const L4 = (/** @type {string} */ en, /** @type {string} */ es, /** @type {string} */ fr, /** @type {string} */ pt) => ({ en, es, fr, pt });
 
 /** Stock snapshots used by the fixtures (rsE §b estimates; the kernel's derive() is authoritative). */
+/** Corrugated C-flute-like board estimate (4 mm caliper, D 2 / 0.67 N·m across / along flutes, machine score L* = 75 t). */
+const BOARD = (() => {
+  const t = 4, Dmd = 2e9, Dcd = 2e9 / 3;
+  return { name: L4('C-flute board (estimate)', 'Cartón corrugado flauta C (estimado)', 'Carton cannelure C (estimé)', 'Papelão onda C (estimado)'), gsm: 540, caliper_mm: t, derived_basis: 'engine test estimate (board lane derives the real cards)',
+    derived: { areal_density: 540e-6, thickness: t, E_md: (12 * Dmd) / t ** 3, E_cd: (12 * Dcd) / t ** 3, nu: 0.3, D_md: Dmd, D_cd: Dcd, crease_k: Math.sqrt(Dmd * Dcd) / (75 * t), crease_yield_deg: 20, crease_set_rate: 0.6, score_factor: 0.35, perf_factor: 0.2, tear_strain: 0.015, friction: 0.5, collision_thickness: t } };
+})();
+
 export const STOCKS = {
   'copy-80': { name: L4('Copy paper 80 g/m²', 'Papel bond 80 g/m²', 'Papier ramette 80 g/m²', 'Papel sulfite 80 g/m²'), gsm: 80, caliper_mm: 0.1,
     derived: deriveEstimate({ gsm: 80, t: 0.1, Emd: 5.5e9, Ecd: 2.5e9, nu: 0.293, yieldDeg: 35, friction: 0.4, tear: 0.02, lstar: 20 }), derived_basis: 'test fixture (rsE §b)' },
   kami: BUILTIN_STOCKS.kami,
   'tissue-17': { name: L4('Tissue 17 g/m²', 'Papel de china 17 g/m²', 'Papier de soie 17 g/m²', 'Papel de seda 17 g/m²'), gsm: 17, caliper_mm: 0.04,
     derived: deriveEstimate({ gsm: 17, t: 0.04, Emd: 2.0e9, Ecd: 0.9e9, nu: 0.293, yieldDeg: 35, friction: 0.35, tear: 0.01 }), derived_basis: 'test fixture (rsE §b)' },
+  'board-c': BOARD,
   'cardstock-250': { name: L4('Cardstock 250 g/m²', 'Cartulina 250 g/m²', 'Bristol 250 g/m²', 'Cartolina 250 g/m²'), gsm: 250, caliper_mm: 0.3,
     derived: deriveEstimate({ gsm: 250, t: 0.3, Emd: 4.5e9, Ecd: 2.0e9, nu: 0.293, yieldDeg: 25, friction: 0.45, tear: 0.015, lstar: 60 }), derived_basis: 'test fixture (rsE §b)' },
 };

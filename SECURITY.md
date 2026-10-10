@@ -4,7 +4,8 @@
 > a public issue.
 
 Please report vulnerabilities through GitHub's private vulnerability reporting for this repository:
-the "Report a vulnerability" button under the Security tab. We acknowledge reports within three
+<https://github.com/madfam-org/pliego/security/advisories/new> (the "Report a vulnerability" button
+under the Security tab). We acknowledge reports within three
 business days.
 
 What we treat as highest severity:

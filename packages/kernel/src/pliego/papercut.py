@@ -104,7 +104,7 @@ def analyze(sheet: Sheet, min_feature_mm: float = 1.0, cutter_min_mm: float | No
                        "detail": f"kept material falls apart into {len(comps)} pieces; smallest "
                        f"{sizes[0][0]:.2f} mm²"})
     cutter = min_feature_mm if cutter_min_mm is None else cutter_min_mm
-    reach = search_mm if search_mm is not None else 3.0 * max(min_feature_mm, cutter)
+    reach = search_mm if search_mm is not None else max(10.0, 5.0 * max(min_feature_mm, cutter))
     segs = [(verts[a], verts[b]) for (a, b), asg in zip(arr.edges, arr.assignment, strict=True)
             if asg in ("B", "C")]
     vid = [(a, b) for (a, b), asg in zip(arr.edges, arr.assignment, strict=True)

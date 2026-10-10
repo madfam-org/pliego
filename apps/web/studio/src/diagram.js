@@ -129,7 +129,7 @@ export function createOverlay(json, world) {
   const edges = [];
   json.edges_vertices.forEach(([a, b], e) => {
     const kind = lineKind(json.edges_assignment[e], json['pliego:edges_treatment'][e]);
-    if (kind && kind !== 'outline') edges.push([a, b, OVERLAY_RGB[kind]]);
+    if (kind && kind !== 'outline') edges.push([a, b, OVERLAY_RGB[kind], e]);
   });
   if (!edges.length) return null;
   const positions = new Float32Array(edges.length * 6), colors = new Float32Array(edges.length * 6);
@@ -139,9 +139,11 @@ export function createOverlay(json, world) {
     build() {
       const P = world.positions;
       if (!P || P.length !== V * 3) return null;
-      edges.forEach(([a, b], i) => {
+      const gone = world.hiddenEdges;   // edges of removed pieces (spec §5.8) collapse to a point
+      edges.forEach(([a, b, , e], i) => {
+        const q = gone && gone[e] ? a : b;
         positions[i * 6] = P[a * 3]; positions[i * 6 + 1] = P[a * 3 + 1]; positions[i * 6 + 2] = P[a * 3 + 2];
-        positions[i * 6 + 3] = P[b * 3]; positions[i * 6 + 4] = P[b * 3 + 1]; positions[i * 6 + 5] = P[b * 3 + 2];
+        positions[i * 6 + 3] = P[q * 3]; positions[i * 6 + 4] = P[q * 3 + 1]; positions[i * 6 + 5] = P[q * 3 + 2];
       });
       return { positions, colors };
     },

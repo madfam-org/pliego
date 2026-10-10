@@ -219,6 +219,31 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   sides share their end vertices on the flat sheet, so a target frame that opens a slit (a trimmed
   tab) is drawn with those vertices on one side; when `Sheet.cut` splits cut vertices, it is exact.
   Cutting along an existing crease is not supported (the segment must cross the paper).
+- **Vertex moves** (`flatvertex.py`). `star(state, center)` reads the linkage at the sheet vertex
+  under a folded point: its rays (counter-clockwise on the flat sheet), the sector each wedge
+  carries (the wedge and every face joined to it without crossing a crease on a ray's folded
+  image; layers stacked at the vertex but hinged only on rays — a blintzed corner whose tip sits
+  on it — join the sector whose wedge they lie in) and the rays' fold angles.
+  `collapse(state, center, folds, fixed=)` folds the listed rays flat at once (`folds`: sheet
+  direction in degrees or a sheet point on the ray → `"valley" | "mountain" | "flat"`, crease-
+  pattern sense; unlisted rays hold): placements compose the reflections across the folded rays
+  (Kawasaki closes them or the move fails), the layer order is solved from the side each face
+  arrives from in the 3-D motion and checked, and every ray must end with its asked sign. The
+  3-D path (`VertexPath`, n − 3 DOF for degree n) is the start → target chord in angle space
+  projected onto the rigid configuration space: `kinematics.solve(..., along="chord")` on the
+  vertex's star picks the branch at the flat or flat-folded start and seeds each sample, which
+  is then the closed state nearest its chord point; poses between samples are the nearest closed
+  state to the chord too. A symmetric start and target therefore give a symmetric path (the
+  waterbomb collapse is mirror- and diagonal-symmetric to 1e-13°). `FoldProgram.collapse(...)`
+  records it; `FoldProgram.vertex_pose(sid, label, center, {ray: deg})` drives the same linkage
+  to fold angles off flat as a 3-D pose step (the fortune teller shaped, opened, closed), from
+  this vertex's previous pose; vertex poses come before `hinge` poses. Fidelity: exact at every
+  sample (tear and deviation ~1e-13 mm); the preview's linear blend between samples tears up to
+  0.5 mm after refinement. Proven on the waterbomb base, the preliminary base (one collapse: the
+  midlines valley, the diagonal through the open corners mountain, the other diagonal flat), the
+  jumping frog's degree-6 head and the fortune teller's degree-8 vertex.
+  `foldpattern.py` holds the pattern-side helpers (`face_points`, `edge_angles`, `face_orders`),
+  re-exported by `foldprogram`.
 <!-- FL2 (wave 3, flat operations) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

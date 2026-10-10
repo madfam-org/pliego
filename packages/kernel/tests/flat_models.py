@@ -221,3 +221,140 @@ def canard_plane(trim: float = 10.0, dihedral: float = 6.0, W: float = 210.0, H:
         {"line": tab, "turn": trim, "at": tab_at, "layers": 1},
         {"line": tab, "turn": -trim, "at": tab_at, "layers": 1, "from_": "bottom"}])
     return fp, {"c": c, "k": k, "y_slit": y_slit, "x1": x1, "x2": x2, "e": e, "kc": kc}
+
+
+def waterbomb_base(s: float = 150.0) -> FoldProgram:
+    """Crease both diagonals (valley) and the horizontal midline (mountain), then collapse the
+    degree-6 vertex at the centre at once: sides in, top down behind — the waterbomb base,
+    point up, standing on the square's bottom edge."""
+    h = s / 2
+    fp = FoldProgram([(0, 0), (s, 0), (s, s), (0, s)])
+    fp.crease_and_unfold("diagonal-1", "diagonal", ((0, s), (s, 0)), "valley")
+    fp.crease_and_unfold("diagonal-2", "diagonal", ((0, 0), (s, s)), "valley", at=(1, s - 6))
+    fp.crease_and_unfold("midline", "midline", ((-1, h), (s + 1, h)), "mountain")
+    fp.collapse("collapse", "collapse", (h, h), {0: "mountain", 180: "mountain", 45: "valley",
+                                                  135: "valley", 225: "valley", 315: "valley"})
+    return fp
+
+
+def preliminary_by_collapse(s: float = 150.0) -> FoldProgram:
+    """The preliminary base as one collapse of a square creased along both diagonals and both
+    midlines: midlines valley, the diagonal through the open corners mountain, the other diagonal
+    left flat inside (Maekawa: 4 − 2 = 2)."""
+    h = s / 2
+    fp = FoldProgram([(0, 0), (s, 0), (s, s), (0, s)])
+    fp.crease_and_unfold("diagonal-1", "diagonal", ((0, s), (s, 0)), "valley")
+    fp.crease_and_unfold("diagonal-2", "diagonal", ((0, 0), (s, s)), "valley", at=(1, s - 6))
+    fp.crease_and_unfold("midline-1", "midline", ((-1, h), (s + 1, h)), "valley")
+    fp.crease_and_unfold("midline-2", "midline", ((h, -1), (h, s + 1)), "valley", at=(1, 1))
+    fp.collapse("collapse", "collapse", (h, h), {0: "valley", 90: "valley", 180: "valley",
+                                                  270: "valley", 45: "mountain",
+                                                  225: "mountain", 135: "flat", 315: "flat"})
+    return fp
+
+
+def jumping_frog(card=(76.2, 127.0), spring: float = 35.0):
+    """The traditional index-card frog: an X and a horizontal crease at the top, the head
+    collapsed as one degree-6 vertex (a waterbomb half-base), the front legs up, the long sides
+    to the middle, the bottom up and back down in half (the spring pleat); then the pleat opens
+    in 3-D so the frog sits on its spring, and is pressed."""
+    w, hgt = card
+    o = (w / 2.0, hgt - w / 2.0)
+    yb = hgt - w
+    fp = FoldProgram([(0, 0), (w, 0), (w, hgt), (0, hgt)])
+    fp.crease_and_unfold("corner-right", "corner", ((0.0, hgt), (w, yb)), "valley")
+    fp.crease_and_unfold("corner-left", "corner", ((0.0, yb), (w, hgt)), "valley",
+                         at=(1.0, hgt - 6.0))
+    fp.crease_and_unfold("fold-back", "fold back", ((-10.0, o[1]), (w + 10.0, o[1])), "mountain")
+    fp.collapse("head", "head", o, {0: "mountain", 180: "mountain", 45: "valley", 135: "valley",
+                                    225: "valley", 315: "valley"})
+    m = (w / 4.0, yb + w / 4.0)
+    fp.fold("front-leg-l", "front legs", ((m[0] + 40.0, m[1] - 40.0), (m[0] - 40.0, m[1] + 40.0)),
+            "valley", sheet_points=[(6.0, hgt - 2.0)])
+    m = (3.0 * w / 4.0, yb + w / 4.0)
+    fp.fold("front-leg-r", "front legs", ((m[0] + 40.0, m[1] + 40.0), (m[0] - 40.0, m[1] - 40.0)),
+            "valley", sheet_points=[(w - 6.0, hgt - 2.0)])
+    fp.fold("side-l", "sides", ((w / 4.0, -10.0), (w / 4.0, hgt + 10.0)), "valley",
+            sheet_points=[(2.0, 2.0)])
+    fp.fold("side-r", "sides", ((3.0 * w / 4.0, hgt + 10.0), (3.0 * w / 4.0, -10.0)), "valley",
+            sheet_points=[(w - 2.0, 2.0)])
+    fp.fold("bottom-up", "bottom up", ((w + 10.0, yb / 2.0), (-10.0, yb / 2.0)), "valley",
+            sheet_points=[(w / 2.0, 1.0)])
+    fp.fold("pleat", "pleat", ((-10.0, 3.0 * yb / 4.0), (w + 10.0, 3.0 * yb / 4.0)), "valley",
+            sheet_points=[(w / 2.0, 1.0)])
+    return fp, {"o": o, "yb": yb}
+
+
+def fortune_teller(s: float = 200.0):
+    """Two blintzes (the second turned over), four creases through every layer, then the toy's
+    degree-8 vertex in 3-D: shaped so the four points meet, opened one way, closed, opened the
+    other way — rigid vertex poses along the projected chord between those key poses."""
+    from pliego.motion import vertex_folds
+
+    h, q, big = s / 2.0, s / 4.0, 3.0 * s / 4.0
+    fp = FoldProgram([(0, 0), (s, 0), (s, s), (0, s)])
+    for k, (p0, p1) in enumerate((((h, 0.0), (0.0, h)), ((s, h), (h, 0.0)), ((h, s), (s, h)),
+                                  ((0.0, h), (h, s)))):
+        fp.fold(f"blintz-{k}", "blintz", (p0, p1), "valley")
+    for k, (p0, p1) in enumerate((((big, q), (q, q)), ((big, big), (big, q)),
+                                  ((q, big), (big, big)), ((q, q), (q, big)))):
+        fp.fold(f"blintz-again-{k}", "blintz again", (p0, p1), "mountain")
+    for sid, p0, p1 in (("mid-ns", (h, -1.0), (h, s + 1.0)), ("mid-ew", (s + 1.0, h), (-1.0, h)),
+                        ("diag-1", (s, 0.0), (0.0, s)), ("diag-2", (0.0, 0.0), (s, s))):
+        fp.crease_and_unfold(sid, sid, (p0, p1), "valley")
+    up = (0.0, -1.0, 0.0)
+
+    def ray(az, polar):
+        a, p = math.radians(az), math.radians(polar)
+        return (math.sin(p) * math.cos(a), math.cos(p) * up[1], -math.sin(p) * math.sin(a))
+
+    def shaped(alpha):
+        sa, ca, c45 = math.sqrt(0.5) * math.sin(math.radians(alpha)), \
+            math.cos(math.radians(alpha)), math.sqrt(0.5)
+        beta = math.degrees(math.atan2(sa, ca) + math.acos(min(1.0, c45 / math.hypot(sa, ca))))
+        return {az: ray(az, alpha if az % 90 else beta) for az in range(0, 360, 45)}
+
+    def opened(tau):
+        t, c45 = math.radians(tau), math.sqrt(0.5)
+        be = math.degrees(math.acos(c45 / math.cos(t)))
+        r = {0: ray(0.0, be), 90: ray(90.0, tau + 45.0), 180: ray(180.0, be),
+             270: ray(270.0, tau + 45.0)}
+        for az in (45, 135, 225, 315):
+            north = 1.0 if az < 180 else -1.0
+            r[az] = (0.0, math.cos(t) * up[1], -north * math.sin(t))
+        return r
+
+    st = fp.state
+    from pliego.flatvertex import star
+    stv = star(st, (h, h))
+    order = [round(math.degrees(math.atan2(d[1], d[0]))) % 360 for d in stv.dirs]
+    prev = [None]
+
+    def angles_of(rays):
+        out = vertex_folds([rays[az] for az in order], prev[0])
+        prev[0] = out
+        return {az: a for az, a in zip(order, out, strict=True)}
+    angles_of(shaped(1.0))              # the signs the toy approaches its closed pose with
+    fp.vertex_pose("shape", "shape", (h, h), angles_of(shaped(0.0)), substeps=6)
+    fp.vertex_pose("open-ns", "open", (h, h), angles_of(opened(24.0)), substeps=3)
+    fp.vertex_pose("close-ns", "close", (h, h), angles_of(shaped(0.0)), substeps=3)
+    return fp
+
+
+def newspaper_hat(w: float = 380.0, h: float = 580.0) -> FoldProgram:
+    """The traditional newspaper hat (as in the commons' paper-hat): fold the sheet in half top
+    down, crease the centre line, fold the two top corners down to it, fold each brim strip up
+    twice (the front one up, the back one up behind)."""
+    hc, w2 = h / 2.0, w / 2.0
+    b = hc - w2
+    fp = FoldProgram([(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)])
+    fp.fold("fold-down", "fold down", ((-1.0, hc), (w + 1.0, hc)), "valley")
+    fp.crease_and_unfold("crease", "crease", ((w2, -1.0), (w2, hc + 1.0)), "valley")
+    fp.fold("corners", "corners", ((-10.0, b - 10.0), (w2 + 10.0, hc + 10.0)), "valley")
+    fp.fold("corners-2", "corners", ((w2 - 10.0, hc + 10.0), (w + 10.0, b - 10.0)), "valley")
+    for kind, seed, side in (("valley", (w2 + 7.0, h - 2.0), "front"),
+                             ("mountain", (w2 + 7.0, 2.0), "back")):
+        fp.fold(f"brim-{side}", "brim", ((w + 1.0, b / 2.0), (-1.0, b / 2.0)), kind,
+                sheet_points=[seed])
+        fp.fold(f"brim-{side}-2", "brim", ((w + 1.0, b), (-1.0, b)), kind, sheet_points=[seed])
+    return fp

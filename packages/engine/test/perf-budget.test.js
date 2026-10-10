@@ -10,14 +10,18 @@ test('perf-budget: ~1500-vertex creased sheet, S = 20 (report, do not fail)', ()
     const nV = w.mesh.nV;
     for (let f = 0; f < 5; f++) w.step(); // warm up the JIT
     let t0 = performance.now();
-    for (let f = 0; f < 30; f++) w.step();
-    const idle = (performance.now() - t0) / 30; // asleep after settling (deterministic sleep)
+    for (let f = 0; f < 10; f++) w.step();
+    const idle = (performance.now() - t0) / 10; // awake, nothing moving (before sleep)
+    for (let f = 0; f < 40 && !w.stats().asleep; f++) w.step();
+    t0 = performance.now();
+    for (let f = 0; f < 10; f++) w.step();
+    const asleep = (performance.now() - t0) / 10;
     w.setControl('sequence', 1);
     const f0 = w.factorCount;
     t0 = performance.now();
     for (let f = 0; f < 12; f++) w.step();
     const moving = (performance.now() - t0) / 12;
     const facts = (w.factorCount - f0) / 12;
-    proof(`perf-budget-S${S}-h${h}`, `${idle.toFixed(1)} ms/frame at rest, ${moving.toFixed(1)} ms/frame folding`, '<8 ms', 'report only', idle < 8 && moving < 8, `V=${nV}, ${facts.toFixed(1)} refactorisations/frame while folding, Node ${process.version}`);
+    proof(`perf-budget-S${S}-h${h}`, `${asleep.toFixed(1)} ms/frame asleep, ${idle.toFixed(1)} awake idle, ${moving.toFixed(1)} folding`, '<8 ms', 'report only', asleep < 8 && moving < 8, `V=${nV}, ${facts.toFixed(1)} refactorisations/frame while folding, Node ${process.version}`);
   }
 });

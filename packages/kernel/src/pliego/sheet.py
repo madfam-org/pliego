@@ -155,6 +155,7 @@ class Sheet:
     tabs: list[Tab] = field(default_factory=list, init=False)
     edge_labels: list[tuple[str, Vec2, Vec2]] = field(default_factory=list, init=False)
     annotations: list[dict] = field(default_factory=list, init=False)
+    presentation: dict | None = field(default=None, init=False)  # spec §5.16 (preview only)
     _hole_boxes: list[tuple[float, float, float, float]] = field(default_factory=list,
                                                                  init=False, repr=False)
     _built: Arrangement | None = field(default=None, init=False, repr=False)
@@ -390,6 +391,31 @@ class Sheet:
                                  "size": float(size)})
         return self
 
+    def present(self, root: PointLike | None = None, end: Placement | None = None) -> Sheet:
+        """How viewers present this sheet (spec §5.16, preview only — no physics): `root` is a
+        sheet-local point inside the face the preview holds still while the program folds the
+        rest about it (default: the sheet's first face); `end` is a rigid transform the viewer
+        blends in over the program — identity at its start, `end` at its last step — rotating
+        about the root face's t = 0 centroid, so a finished model can stand upright without
+        tilting the flat sheet at t = 0."""
+        pr: dict = {}
+        if root is not None:
+            q = as_vec(root)
+            if not self.region_contains(q):
+                raise ValueError(f"sheet '{self.id}': presentation root ({q.x}, {q.y}) is off "
+                                 "the sheet")
+            pr["root"] = q
+        if end is not None:
+            if not isinstance(end, Placement):
+                raise ValueError("presentation end must be a pliego.Placement")
+            n = math.sqrt(sum(c * c for c in end.rotation))
+            if not (all(math.isfinite(c) for c in (*end.origin, *end.rotation))
+                    and abs(n - 1.0) < 1e-6):
+                raise ValueError("presentation end needs a finite origin and a unit quaternion")
+            pr["end"] = end
+        self.presentation = pr or None
+        return self
+
     def art(self, front: str | None = None, back: str | None = None) -> Sheet:
         """Attach printed art (relative image paths covering the local bounding box)."""
         if front is not None:
@@ -440,6 +466,7 @@ class Sheet:
         out.tabs = [Tab(out.marks[t.mark.index], list(t.region), t.name) for t in self.tabs]
         out.edge_labels = list(self.edge_labels)
         out.annotations = [dict(a) for a in self.annotations]
+        out.presentation = None if self.presentation is None else dict(self.presentation)
         out._built = self._built
         return out
 

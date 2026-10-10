@@ -154,6 +154,8 @@ The sheet outline (`B` edges) is cut by the exporters; `treatment` for `B` is `n
 - `placement`: rigid transform applied after the `(u, v) → (u, 0, −v)` map; quaternion `[x, y, z, w]`.
 - `front` / `back`: render appearance. `art` (optional) is a relative path to an image covering the
   sheet's local bounding box (front is drawn as seen from +normal; back is mirrored as paper is).
+- `presentation` (optional, preview only): the root face and end transform a viewer uses to
+  present the fold program (§5.16). <!-- lane H (w3/hardening) item 9 -->
 - `kinematic`: `null` for a physical sheet, or `{"mechanism": "<mechanism id>"}` when the sheet is a
   rigid board (book boards, the base page halves of a pop-up spread). A kinematic sheet's vertices
   have infinite mass. It follows its mechanism's transform **only if the mechanism lists it in
@@ -521,6 +523,28 @@ recomputes the digest on load when it is present (rule 10). This is GOC-1 §3.1 
 across languages: GOC-1's integral-float rule falls out of the number rule.
 <!-- lane H (w3/hardening) §5.15: end -->
 
+<!-- lane H (w3/hardening) §5.16: begin -->
+### 5.16 `presentation` — how a viewer presents a sheet (optional, preview only)
+
+A sheet may carry `"presentation": {"root_face": f, "end": {"origin": [x, y, z], "rotation":
+[x, y, z, w]}}`, both members optional. It changes no physics and no frame; it tells a viewer
+how to show the fold program, so a finished model can stand upright without the cartridge
+tilting the flat sheet at t = 0.
+
+- `root_face` (global face index, on this sheet): the face the preview holds still while the
+  program folds the rest of the sheet about it. Default: the sheet's first face. Its pose is its
+  t = 0 pose (the `initial` frame, else the placement).
+- `end`: a rigid transform the viewer blends in over the program — identity at sequence position
+  0, `end` at the last step, linearly in between (rotation by slerp, translation by lerp). It
+  rotates about the root face's t = 0 centroid, then translates by `origin`. Mechanisms apply
+  before it.
+
+The studio stub implements both. **Ground:** the preview also keeps the posed paper above the
+table (`y = 0`, §1): when a rigid preview would swing any visible point below it, the whole scene
+is lifted until its lowest point rests on the table. The physics engine needs no clamp (contact
+with the ground does this). Rule 17 (§8) checks the field.
+<!-- lane H (w3/hardening) §5.16: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -592,6 +616,10 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     `params` or in step notes. The kernel reports extra keys as a warning (`meta_unknown_key`)
     until the commons is clean, then as an error.
 <!-- lane H (w3/hardening) rule 16: end -->
+<!-- lane H (w3/hardening) rule 17: begin -->
+17. Presentation (§5.16): a sheet's `presentation` has only `root_face` and `end`; `root_face`
+    is a face of that sheet; `end` is a placement with a finite origin and a unit quaternion.
+<!-- lane H (w3/hardening) rule 17: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

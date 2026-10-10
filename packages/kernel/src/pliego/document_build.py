@@ -180,6 +180,9 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
             "back": s.back.to_dict(app.get("back")),  # type: ignore[union-attr]
             "kinematic": None if s.kinematic is None else {"mechanism": s.kinematic},
         })
+        if s.presentation:
+            sheet_objs[-1]["presentation"] = _presentation(s, arrs[len(sheet_objs) - 1],
+                                                           face_base[len(sheet_objs) - 1])
 
     def resolve_target(t) -> list[int]:
         from .assembly import EdgeRef
@@ -304,6 +307,19 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
     doc = Document(_emit_tree(data))
     doc.data["file_spec"] = 1.2
     return doc.stamp()
+
+
+def _presentation(sheet: Sheet, arr: Arrangement, base: int) -> dict:
+    """Spec §5.16: the sheet's preview root face (global index) and end transform."""
+    from .kinematics import root_face
+
+    pr = sheet.presentation or {}
+    out: dict[str, Any] = {}
+    if "root" in pr:
+        out["root_face"] = base + root_face(arr, pr["root"])
+    if "end" in pr:
+        out["end"] = {"origin": list(pr["end"].origin), "rotation": list(pr["end"].rotation)}
+    return out
 
 
 def sequence_targets(doc: Document) -> list[tuple[int, float]]:

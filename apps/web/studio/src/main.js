@@ -376,6 +376,7 @@ async function init() {
   const noticeText = $('viewer-notice').textContent;
   setupInput();
   renderStatusStatic();
+  state.view = state.share.view;
   try {
     state.catalog = await loadCatalog(location.href);
   } catch (e) {

@@ -1,0 +1,326 @@
+# CI for Pliego (public repository).
+#
+# GitHub-hosted runners only, pinned to ubuntu-24.04 (ruling R116): fork pull requests must never reach MADFAM's
+# self-hosted runners, and `ubuntu-latest` moves to a new image on 2026-10-19. Every action is pinned to a full
+# commit SHA (tag in the comment), every downloaded tool to a version and a checksum. Top-level permissions are
+# read-only; no job passes `secrets: inherit`. scripts/qa/verify_supply_chain.py enforces these rules on every
+# workflow here.
+#
+# Read-proof, fail-closed: every lane prints what it scanned and fails on an empty read. A lane whose code does not
+# exist yet prints `skip: <reason>` and exits 0 — that printed line is the proof, never a silent pass.
+# Every job that reads projects/ (the commons submodule) checks out with submodules and runs the commons pin guard
+# FIRST: an uninitialised submodule is an empty directory, which would make every glob green.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUFF_VERSION: 0.17.0
+  PYTEST_VERSION: 8.4.2
+  TYPESCRIPT_VERSION: 5.9.3
+
+jobs:
+  agent-docs:
+    name: Agent docs and boundary markers
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Required files and markers
+        run: |
+          set -euo pipefail
+          for f in AGENTS.md CLAUDE.md llms.txt llms-full.txt LICENSE NOTICE docs/PUBLIC_REPO_BOUNDARY.md; do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+          done
+          grep -q '<!-- MADFAM-AGENTS-CANONICAL v1 -->' AGENTS.md
+          head -c 2000 AGENTS.md | grep -Eq '^>[[:space:]]*Last Updated:[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}[[:space:]]*$'
+          grep -q 'docs/PUBLIC_REPO_BOUNDARY.md' AGENTS.md
+          grep -qi 'canonical agent instructions' CLAUDE.md
+          grep -q 'AGENTS.md' CLAUDE.md
+          grep -qi 'compatibility' CLAUDE.md
+          grep -q 'GNU AFFERO GENERAL PUBLIC LICENSE' LICENSE
+          grep -q 'Weakly Reciprocal' docs/licenses/CERN-OHL-W-2.0.txt
+          echo "agent-docs: files=7 markers=9 OK"
+
+  quality-gates:
+    name: Org quality gates (byte and file-size)
+    # The org reusable workflow (madfam-org/.github madfam-quality-gates.yml) cannot be CALLED from here: it uses
+    # tag-pinned actions, which this repository's SHA-pinning policy refuses before any job starts. This job runs
+    # the SAME gate scripts from a pinned commit of madfam-org/.github, with the same thresholds.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GATES_SHA: 2085b34de1268f4c4351d2af7a60b38de9297b64 # madfam-org/.github main (2026-10-04)
+      TSX_VERSION: 4.23.15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: madfam-org/.github
+          ref: ${{ env.GATES_SHA }}
+          path: .madfam-gates
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - name: Byte gate (control bytes, BOM, U+2028/U+2029)
+        run: |
+          node .madfam-gates/scripts/check-source-bytes.mjs \
+            --text-exts ".ts,.js,.mjs,.cjs,.css,.html,.md,.json,.yml,.yaml,.sh,.py,.toml,.txt,.svg" \
+            --code-exts ".ts,.js,.mjs,.cjs"
+      - name: File-size gate (warn over 600 lines, fail over 800; empty baseline)
+        run: |
+          npx --yes "tsx@${TSX_VERSION}" .madfam-gates/scripts/check-file-size.ts \
+            --baseline scripts/size-limit-baseline.json \
+            --include "packages/:.py:.js:.mjs,apps/:.py:.js:.mjs:.html:.css,scripts/:.py:.sh:.mjs" \
+            --warn-at 600 \
+            --fail-at 800
+
+  guards:
+    name: Repository guards and their tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install PyYAML (hashed)
+        run: python -m pip install --quiet --require-hashes -r scripts/qa/requirements-guards.txt
+      - name: Guard tests
+        run: python -m unittest discover -s scripts/qa/tests -v
+      - name: Supply chain (SHA pins, ubuntu-24.04, timeouts, read-only token, no inherit)
+        run: python scripts/qa/verify_supply_chain.py
+      - name: Deploy paths (build-deploy filter == Dockerfile COPYs)
+        run: python scripts/qa/verify_deploy_paths.py
+      - name: Canonical hosts (enclii.yaml == CORS, host env, Janua redirects)
+        run: python scripts/qa/verify_canonical_host.py
+
+  compliance:
+    name: Doctrine compliance (AST level, commons manifests)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Commons pin guard (first)
+        run: python scripts/qa/verify_commons_pin.py
+      - name: Compliance (no solid modeler, Selva-only AI, no prices, licence fields)
+        run: python scripts/qa/verify_compliance.py
+
+  kernel:
+    name: Kernel (ruff, pytest)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Commons pin guard (first)
+        run: python scripts/qa/verify_commons_pin.py
+      - name: Detect kernel
+        id: detect
+        run: |
+          if [ -f packages/kernel/pyproject.toml ] && [ -d packages/kernel/tests ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install (kernel is stdlib only; ruff and pytest pinned)
+        if: steps.detect.outputs.present == 'true'
+        run: |
+          python -m pip install --quiet "ruff==${RUFF_VERSION}" "pytest==${PYTEST_VERSION}"
+          python -m pip install --quiet -e ./packages/kernel
+      - name: Lint (ruff)
+        if: steps.detect.outputs.present == 'true'
+        run: ruff check packages/kernel
+      - name: Test (pytest)
+        if: steps.detect.outputs.present == 'true'
+        run: python -m pytest packages/kernel/tests -q
+      - name: Skip notice
+        if: steps.detect.outputs.present != 'true'
+        run: echo "skip: packages/kernel/pyproject.toml or packages/kernel/tests does not exist yet"
+
+  stocks:
+    name: Stock cards (derived physics up to date)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Detect stock module and materials
+        id: detect
+        run: |
+          if [ -f packages/kernel/pyproject.toml ] && ls materials/*/stock.json >/dev/null 2>&1; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check every stock card against a fresh derivation
+        if: steps.detect.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet ./packages/kernel
+          python -m pliego.stock --check materials
+      - name: Skip notice
+        if: steps.detect.outputs.present != 'true'
+        run: echo "skip: packages/kernel or materials/*/stock.json does not exist yet"
+
+  engine:
+    name: Engine (node --test, JSDoc type check)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - name: Detect engine
+        id: detect
+        run: |
+          if [ -d packages/engine/test ] && [ -d packages/engine/src ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Test (node --test, zero dependencies)
+        if: steps.detect.outputs.present == 'true'
+        run: node --test packages/engine/test/
+      - name: Type check (JSDoc, @ts-check; TypeScript pinned, no install step in the repo)
+        if: steps.detect.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(git ls-files 'packages/engine/src/*.js')
+          echo "engine-typecheck: files=${#files[@]}"
+          [ "${#files[@]}" -gt 0 ] || { echo "engine-typecheck: FAIL 0 files"; exit 1; }
+          npx -y -p "typescript@${TYPESCRIPT_VERSION}" tsc --noEmit --allowJs --checkJs \
+            --target es2022 --module nodenext --moduleResolution nodenext --lib es2022,dom \
+            --skipLibCheck "${files[@]}"
+      - name: Skip notice
+        if: steps.detect.outputs.present != 'true'
+        run: echo "skip: packages/engine/src or packages/engine/test does not exist yet"
+
+  web:
+    name: Web (node --test)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - name: Detect web
+        id: detect
+        run: |
+          if [ -d apps/web/test ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Test (node --test, zero dependencies)
+        if: steps.detect.outputs.present == 'true'
+        run: node --test apps/web/test/
+      - name: Skip notice
+        if: steps.detect.outputs.present != 'true'
+        run: echo "skip: apps/web/test does not exist yet"
+
+  api:
+    name: API (pytest, OpenAPI drift)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Commons pin guard (first)
+        run: python scripts/qa/verify_commons_pin.py
+      - name: Detect API
+        id: detect
+        run: |
+          if [ -f apps/api/app.py ] && [ -f apps/api/requirements.txt ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install (kernel, API requirements, pytest pinned)
+        if: steps.detect.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet ./packages/kernel
+          python -m pip install --quiet -r apps/api/requirements.txt "pytest==${PYTEST_VERSION}"
+          python -m pip check
+      - name: Test (pytest)
+        if: steps.detect.outputs.present == 'true'
+        run: python -m pytest apps/api/tests -q
+      - name: OpenAPI matches the served routes
+        if: steps.detect.outputs.present == 'true'
+        run: python scripts/qa/verify_openapi.py
+      - name: Skip notice
+        if: steps.detect.outputs.present != 'true'
+        run: echo "skip: apps/api/app.py or apps/api/requirements.txt does not exist yet (api lane, wave 2)"
+
+  secrets:
+    name: Secret scan (full history)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      # sha256 of gitleaks_8.30.1_linux_x64.tar.gz, from the release's checksums file. The step checks the tarball
+      # against this pin AND against the checksums file it downloads.
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install gitleaks (pinned, checksum-verified)
+        run: |
+          set -euo pipefail
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tgz="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          work="$RUNNER_TEMP/gitleaks" && mkdir -p "$work" && cd "$work"
+          curl -fsSL -o "$tgz" "$base/$tgz"
+          curl -fsSL -o checksums.txt "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          echo "${GITLEAKS_SHA256}  $tgz" | sha256sum -c -
+          grep -F "  $tgz" checksums.txt | sha256sum -c -
+          tar -xzf "$tgz" gitleaks
+          mkdir -p "$HOME/.local/bin" && install -m 0755 gitleaks "$HOME/.local/bin/gitleaks"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Scan every commit reachable from any fetched ref (values redacted)
+        # A finding prints the rule, the path and the commit, never the value. Rotate first, then decide on history.
+        run: gitleaks git --config .gitleaks.toml --redact --no-banner --log-opts="--all" .

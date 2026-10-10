@@ -1,0 +1,94 @@
+name: Build & Deploy
+
+# Caller for Enclii's shared reusable workflow (one service: pliego): buildx, push to GHCR as :${SHA}, keyless
+# cosign sign and verify, then the kustomize digest pin committed to main, which the GitOps sync picks up, and
+# the lifecycle callback that registers the Enclii Release.
+#
+# Image name is the contract: image_prefix ghcr.io/madfam-org plus the service name gives ghcr.io/madfam-org/pliego,
+# the exact `images:` entry in infra/k8s/production/kustomization.yaml. Enclii resolves the service from the
+# image's last path segment (pliego, the Service document in enclii.yaml).
+#
+# The ref is a full commit SHA on enclii `main` at or after c8b4647e83 (enclii#671, which pinned every action
+# inside build-publish.yml by SHA, so this repository's `sha_pinning_required` policy accepts the call). No
+# release tag has been cut since that change, so a main SHA is pinned; the reusable workflow's pin job accepts a
+# SHA caller's signer identity when the SHA is on enclii main. To bump: read the diff of
+# .github/workflows/build-publish.yml from the current SHA to the new one, re-check the named secrets below against
+# its `on.workflow_call.secrets`, then change the SHA and its comment together.
+#
+# KNOWN GAP BEFORE THE FIRST REAL DEPLOY: build-publish.yml checks the repository out WITHOUT submodules, so the
+# commons (projects/, a git submodule) would be an empty directory inside the build. The root Dockerfile fails
+# closed on that ("projects/ holds 0 cartridges"), so a dispatch fails visibly instead of shipping an image with
+# no commons. It needs an Enclii change (a `submodules` option on the checkout) — docs/DEPLOYMENT.md.
+#
+# DISPATCH ONLY until the project is onboarded to Enclii. Push-on-main (with the same paths as the service's
+# `paths`) is switched on in its own pull request after onboarding (docs/DEPLOYMENT.md).
+on:
+  workflow_dispatch:
+    inputs:
+      # The reusable workflow reads this from the dispatch event and builds exactly these services, skipping
+      # change detection (a dispatch has no push "before" SHA, so detection could silently build nothing).
+      services:
+        description: Comma-separated services to build
+        required: false
+        default: pliego
+
+concurrency:
+  group: pliego-production-kustomization
+  cancel-in-progress: false
+
+# Read-only unless a job widens it; only the build-publish call does.
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: Preflight (commons pin, deploy paths)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install PyYAML (hashed)
+        run: python -m pip install --quiet --require-hashes -r scripts/qa/requirements-guards.txt
+      - name: Commons pin (mounted, populated, at the pinned SHA)
+        run: python scripts/qa/verify_commons_pin.py --require --min-cartridges 1
+      - name: Deploy paths match the Dockerfile COPYs
+        run: python scripts/qa/verify_deploy_paths.py
+
+  build-publish:
+    needs: preflight
+    uses: madfam-org/enclii/.github/workflows/build-publish.yml@868c56e08c72abb13d1ea7d139f8a402022c4cb1 # enclii main 2026-10-09 (62 commits after c8b4647e83)
+    with:
+      image_prefix: ghcr.io/madfam-org
+      kustomization_path: infra/k8s/production
+      # Public repository: GitHub-hosted builders only (the default routes to the self-hosted pool).
+      build_runner: ubuntu-24.04
+      # `paths` are directories (prefix match) plus exact files, and mirror the root Dockerfile's COPY sources
+      # exactly (scripts/qa/verify_deploy_paths.py). `projects` is the gitlink itself (exact match on a pin bump).
+      services: |
+        [
+          {"name":"pliego", "dockerfile":"Dockerfile", "paths":"Dockerfile .dockerignore packages/kernel apps/api apps/web packages/engine/src packages/schemas docs/spec materials projects llms.txt llms-full.txt"}
+        ]
+    # Named secrets only, never `inherit`: the reusable workflow sees exactly what is listed here. A public
+    # repository sees only the org secrets DOCKER_USERNAME and DOCKER_TOKEN plus its own repository secrets.
+    #   DOCKER_USERNAME, DOCKER_TOKEN  passed (org secrets). Docker Hub login only lifts anonymous pull rate limits
+    #       for the base image; soft-fails when absent.
+    #   ENCLII_CALLBACK_TOKEN  passed. A REPOSITORY secret the operator sets at onboarding. Without it the step
+    #       warns and skips, no Enclii Release is registered, and the service stays at zero replicas.
+    #   GHCR_PAT, ENCLII_COMMIT_TOKEN, ENCLII_DEPLOY_TOKEN, ENCLII_API_URL, NPM_MADFAM_TOKEN  not passed (github.token
+    #       covers GHCR and the pin commit; the image installs nothing from a private registry).
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ENCLII_CALLBACK_TOKEN: ${{ secrets.ENCLII_CALLBACK_TOKEN }}
+    # `contents: write` for the digest-pin commit to main, `packages: write` to push to GHCR, `id-token: write` for
+    # keyless cosign signing and for the pin job to read its own job_workflow_ref claim.
+    permissions:
+      contents: write
+      packages: write
+      id-token: write

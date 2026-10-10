@@ -12,6 +12,7 @@
 | Engine (`packages/engine`) | wave-1 build in progress (engine lane) |
 | Studio and landing (`apps/web`) | wave-1 build in progress (web lane) |
 | API (`apps/api`) | not started (wave 2); the image's `CMD` expects `apps.api.app:app` |
+| Packaging (lane P, wave 2b) | board and EVA foam stock cards (corrugation model, estimates [E]), `pliego.corrugate`, `pliego.dieline` (box and carton styles), `pliego.envelope`, `pliego.press` (finishes, artwork) and the dieline export profile are built and tested; spec §5.9–§5.11 / rule 13 are drafts awaiting the coordinator; the engine does not yet use finish regions, and the studio does not render relief or placed artwork |
 | Commons (`sheet-hyperobjects`, mounted at `projects/`) | repository created, empty of cartridges; not yet mounted here |
 | CI (`.github/workflows/ci.yml`) | lanes written; lanes for code that does not exist print `skip:` |
 | Deploy (`build-deploy.yml`, `enclii.yaml`, `infra/k8s/production`) | written, dispatch-only; Enclii onboarding not done |

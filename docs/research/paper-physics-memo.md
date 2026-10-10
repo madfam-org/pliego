@@ -413,6 +413,60 @@ Tolerances are for the TS GPU solver against the Python reference. The Python re
 10. **Curved-crease and Kresling** need Tier C with fine meshes. They are not rigidly foldable, so Tier R reports 0 DOF. The UX must explain why.
 11. **Unverified citations.** Some citations in this memo are [L] (from recollection; not fetched during this research pass). Before the memo is published as a commons page, a citation pass should verify every [L] entry against DOIs.
 
+<!-- lane P (wave 2b) addition — begin -->
+## (h) Board, corrugation and foam (lane P addition, 2026-10-10)
+
+Implemented in `pliego.board` (constructions) and `pliego.stock.derive` (engine units). Labels
+as above; "this pass" means lane P's session.
+
+**Flute geometry.** Pitch from the flutes-per-metre designation: A 108, B 154, C 128, E 295,
+F 420 /m (±10–13), from Foster 1997 (Wiley Encyclopedia of Packaging Technology) as tabled in
+Wikipedia "Corrugated fiberboard" [V via Wikipedia, this pass]. Flute height (the gap between
+liners): B 2.70, C 3.60, E 1.30 mm, measured on cross-section images by Rogalka, Grabski &
+Garbowski, Sensors 23:6242 (2023), Table 1 [V, this pass]; A ≈ 4.7 and F ≈ 0.6 mm [E]. The same
+table gives liner and medium calipers of 0.34–0.51 mm for those samples, heavier than the
+0.17–0.18 mm papers the default cards assume [V], so board calipers here sit at the low end.
+
+**Take-up.** The medium centre line is modelled as a sinusoid of amplitude (h − t_m)/2; its
+arc-length factor α is computed (B 1.31, C 1.38, E 1.23, A 1.44, F 1.09 with the default
+papers). Handbook take-up factors are commonly quoted somewhat higher, e.g. about 1.44 for C
+and 1.56 for A [L, search snippets only]: real profiles have steeper flanks than a sinusoid.
+Grammage and the medium's CD contribution are therefore slight underestimates [E].
+
+**Sandwich stiffness.** Liners carry the membrane load; the wavy medium contributes in CD only
+(α·E_cd,m·t_m) and nothing in MD. Bending about each direction's neutral axis:
+D = Σ E (t³/12 + t (z − z̄)²) / (1 − ν²), the medium adding α E t (a²/2 + t²/12) in CD —
+classical sandwich theory (Allen 1969) and the homogenisation used across the corrugated-board
+literature (e.g. Nordstrand 2003) [L]. **Not modelled:** transverse shear of the core (short
+spans are softer than D predicts) [L], liner buckling between flute tips, crush. With the
+default papers MD/CD bending ratios come out at 1.7–2.2 for single and multi-wall board, and a
+single-face sheet is about 300 times stiffer in CD than in MD — it rolls around the flutes, as
+craft corrugated paper does [E, consistent with handling].
+
+**Default values.** Liner 125 g/m², 180 µm, E 6.5/2.8 GPa (as `kraft-120`); medium 112 g/m²,
+170 µm, E 5.0/2.2 GPa; starch 5 g/m² per glue line — all [E]. Resulting cards (D_md / D_cd):
+E flute 1.4 / 0.69 N·m, B 5.3 / 2.7, C 9.2 / 4.8, BC 29 / 17, AAC 190 / 114 [E]. Measure them
+before trusting them: four-point bending on board strips in both directions (the §b protocol
+scaled up) turns every [E] into [V].
+
+**Scored creases in board.** L* = 50–100 t (§a3); cards use 75 t [E]. A crease-ruled fold in
+corrugated board crushes the flutes along the score, so the hinge is far softer than the board;
+the crease constant per caliper is unmeasured.
+
+**Laminated board.** Folding boxboard is modelled as three plies (stiff bleached top and back
+on a bulky mechanical-pulp middle): at the same grammage it is stiffer than a homogeneous sheet
+because the stiff plies sit far from the neutral axis [E for the ply split].
+
+**Foam sheets (EVA).** Isotropic, D = E t³ / (12(1 − ν²)), ν ≈ 1/3 for closed-cell foams
+(Gibson & Ashby) [L]. E is the quasi-static compressive initial modulus measured by Chen et al.,
+Polymers 16(1):34 (2023/24): 2.77 MPa at 80 kg/m³, 4.27 at 95, 5.37 at 106, 5.48 at 124,
+6.98 at 180 kg/m³ [V, this pass], interpolated at the card density; using the compressive
+modulus for bending is an estimate [E]. A half-depth score leaves t/2, so `score_factor`
+= (1/2)³ = 0.125 [E]. Cold folds spring back almost fully (yield 150° stands in for that) [E].
+**Heat-forming** (temperature-dependent plasticity: EVA softens and takes a set when heated) is
+an engine follow-up; no card value models it.
+<!-- lane P (wave 2b) addition — end -->
+
 ---
 
 ### Sources I fetched or checked in this session (primary)
@@ -426,3 +480,6 @@ Tolerances are for the TS GPU solver against the Python reference. The Python re
 - Licenses via the GitHub API: the repos listed in §d.
 - Thiria & Adda-Bedia 2011: https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.107.025506.
 - UNESCO: https://ich.unesco.org/en/RL/01001 and https://ich.unesco.org/ar/RL/-00219.
+- (lane P) Wikipedia, Corrugated fiberboard (flute table after Foster 1997): https://en.wikipedia.org/wiki/Corrugated_fiberboard
+- (lane P) Rogalka, Grabski & Garbowski 2023, Sensors 23:6242 (Table 1): https://doi.org/10.3390/s23136242
+- (lane P) Chen, Sun, Gao, Liu & Zhang, Polymers 16(1):34 (EVA foam compression): https://doi.org/10.3390/polym16010034

@@ -32,7 +32,9 @@ const KIND_OF_TREATMENT = /** @type {Record<string, number>} */ ({ crease: HINGE
  * @property {Int32Array} hinges p0 p1 w0 w1 per hinge @property {Uint8Array} hingeKind @property {Int32Array} hingeDoc
  * @property {Int32Array} hingeEdge mesh edge of each hinge @property {Float64Array} hingePhi @property {Float64Array} hingeA areas A₁+A₂
  * @property {Int32Array} docVertex first mesh vertex of each document vertex
- * @property {Int32Array[]} docEdgeChain mesh vertices along each document edge (a→b), per side (cuts have two)
+ * @property {Int32Array[]} docEdgeChain mesh vertices along each document edge (a→b), side 0
+ * @property {Int32Array} perfPairs duplicated vertex pairs along perforations (welded until torn)
+ * @property {Int32Array} perfPairDoc document edge of each pair @property {Float64Array} perfPairLen perforation length each pair carries
  * @property {{nR:number, src:Int32Array, uv:Float32Array, sheet:Int32Array, indices:Uint32Array, triCorner:Int32Array}} render
  */
 
@@ -45,7 +47,9 @@ export function buildMesh(doc, opts = {}) {
   const h = opts.meshEdge ?? defaultMeshEdge(doc);
   if (!(h > 0)) throw new RangeError('buildMesh: meshEdge must be > 0');
   const { nE, coords, edges, assignment, treatment, faces, fSheet, edgeFaces, faceEdges } = doc;
-  const isCut = (/** @type {number} */ e) => assignment[e] === 'C' && treatment[e] === 'cut';
+  // cut edges and perforations are split topologically; perforations are re-joined by breakable
+  // welds and a perforation hinge in the World (they tear at the stock's tear strain)
+  const isCut = (/** @type {number} */ e) => (assignment[e] === 'C' && treatment[e] === 'cut') || treatment[e] === 'perforation';
   /** @type {number[]} */ const U = []; // sheet-local u, v
   /** @type {number[]} */ const vS = [], vG = [], vF = [];
   let groupCounter = 0;
@@ -199,6 +203,37 @@ export function buildMesh(doc, opts = {}) {
     const cosPhi = Math.abs((-ty * Math.cos(grain) + tx * Math.sin(grain)) / L);
     H.push(a, b, w0, w1); HK.push(kind); HD.push(d); HE.push(e); HP.push(Math.acos(Math.min(1, cosPhi))); HA.push(triArea[ta] + triArea[tb]);
   }
+  // perforations: weld pairs along the split and hinges spanning it
+  /** @type {number[]} */ const PP = [], PD = [], PL = [];
+  for (let e = 0; e < nE; e++) {
+    if (treatment[e] !== 'perforation') continue;
+    const a = edges[2 * e], b = edges[2 * e + 1];
+    const f0 = edgeFaces[2 * e], f1 = edgeFaces[2 * e + 1];
+    if (f1 < 0) continue;
+    const cA = [/** @type {number} */(sectorVertex[a].get(f0)), ...split[e][0], /** @type {number} */(sectorVertex[b].get(f0))];
+    const cB = [/** @type {number} */(sectorVertex[a].get(f1)), ...split[e][1], /** @type {number} */(sectorVertex[b].get(f1))];
+    const seg = (/** @type {number} */ i) => Math.hypot(uv[2 * cA[i + 1]] - uv[2 * cA[i]], uv[2 * cA[i + 1] + 1] - uv[2 * cA[i] + 1]);
+    for (let i = 0; i < cA.length; i++) {
+      if (cA[i] === cB[i]) continue;
+      PP.push(cA[i], cB[i]); PD.push(e);
+      PL.push(0.5 * ((i > 0 ? seg(i - 1) : 0) + (i < cA.length - 1 ? seg(i) : 0)));
+    }
+    for (let i = 0; i + 1 < cA.length; i++) {
+      const eA = emap.get(Math.min(cA[i], cA[i + 1]) * NV_BIG + Math.max(cA[i], cA[i + 1]));
+      const eB = emap.get(Math.min(cB[i], cB[i + 1]) * NV_BIG + Math.max(cB[i], cB[i + 1]));
+      if (eA === undefined || eB === undefined) continue;
+      const tA = edgeTris[2 * eA], tB = edgeTris[2 * eB];
+      let p0 = cA[i], p1 = cA[i + 1];
+      if (!hasDirected(tris, tA, p0, p1)) { p0 = cA[i + 1]; p1 = cA[i]; }
+      const w0 = third(tris, tA, cA[i], cA[i + 1]), w1 = third(tris, tB, cB[i], cB[i + 1]);
+      const s = triS[tA];
+      const grain = (doc.sheets[s].grainDeg * Math.PI) / 180;
+      const tx = uv[2 * p1] - uv[2 * p0], ty = uv[2 * p1 + 1] - uv[2 * p0 + 1];
+      const L = Math.hypot(tx, ty);
+      const cosPhi = Math.abs((-ty * Math.cos(grain) + tx * Math.sin(grain)) / L);
+      H.push(p0, p1, w0, w1); HK.push(HINGE_PERF); HD.push(e); HE.push(eA); HP.push(Math.acos(Math.min(1, cosPhi))); HA.push(triArea[tA] + triArea[tB]);
+    }
+  }
   const X0 = initialPositions(doc, uv, vS, vF, nV);
   const render = buildRender(doc, tris, triS, uv, vS, Int32Array.from(H), Uint8Array.from(HK), nV, nT);
   const docEdgeChain = [];
@@ -215,6 +250,7 @@ export function buildMesh(doc, opts = {}) {
     hinges: Int32Array.from(H), hingeKind: Uint8Array.from(HK), hingeDoc: Int32Array.from(HD), hingeEdge: Int32Array.from(HE),
     hingePhi: Float64Array.from(HP), hingeA: Float64Array.from(HA),
     docVertex, docEdgeChain, render,
+    perfPairs: Int32Array.from(PP), perfPairDoc: Int32Array.from(PD), perfPairLen: Float64Array.from(PL),
   };
 }
 

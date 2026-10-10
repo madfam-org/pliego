@@ -144,8 +144,9 @@ export class Contact {
       const d11 = e1x * e1x + e1y * e1y + e1z * e1z, d12 = e1x * e2x + e1y * e2y + e1z * e2z, d22 = e2x * e2x + e2y * e2y + e2z * e2z;
       const p1 = px * e1x + py * e1y + pz * e1z, p2 = px * e2x + py * e2y + pz * e2z;
       const den = d11 * d22 - d12 * d12;
+      if (!(den > 1e-12 * d11 * d22)) continue; // degenerate triangle
       const bb = (d22 * p1 - d12 * p2) / den, bc = (d11 * p2 - d12 * p1) / den, ba = 1 - bb - bc;
-      if (ba < -1e-3 || bb < -1e-3 || bc < -1e-3) continue;
+      if (!(ba >= -1e-3 && bb >= -1e-3 && bc >= -1e-3)) continue;
       const key = v * m.nT + t;
       let s = this.side.get(key);
       if (s === undefined) {

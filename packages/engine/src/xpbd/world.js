@@ -16,7 +16,7 @@ import { buildMesh, HINGE_PANEL, HINGE_CREASE, HINGE_SCORE, HINGE_PERF } from '.
 import { fromDerived, bendingDeff, membraneE } from '../material.js';
 import { dihedral } from './dihedral.js';
 import { buildSystem, assembleAndFactor, gradient, unwrap, TERM_STRING, termResidual } from './implicit.js';
-import { resolveJoins, updateTerms, TK_STRING } from './joins.js';
+import { resolveJoins, updateTerms, TK_STRING, TK_PERF } from './joins.js';
 import { Drivers } from '../drivers.js';
 import { Contact } from './contact.js';
 import { Wind, addAirForces } from './air.js';
@@ -67,6 +67,13 @@ export class World {
     this.kHard = K.HARD_FACTOR * kmax;
     const { terms, pins, weldSheet } = resolveJoins(doc, mesh, this.kHard);
     this.weldSheet = weldSheet;
+    // perforations: breakable welds between the duplicated vertices (tear at the stock's tear strain)
+    for (let i = 0; i < mesh.perfPairs.length / 2; i++) {
+      const a = mesh.perfPairs[2 * i], b = mesh.perfPairs[2 * i + 1];
+      const m = this.materials[mesh.vSheet[a]];
+      const Y = Math.min(m.Emd * m.t, K.MEMBRANE_CAP_LENGTH * m.rhoA * K.GRAVITY);
+      terms.add(TK_PERF, 0, [a, b], [1, -1], { k: this.kHard, pair: i, fBreak: m.perfFactor * Y * m.tearStrain * mesh.perfPairLen[i] });
+    }
     this.drivers = new Drivers(this, terms, pins, opts);
     this.terms = terms.finish();
     for (let t = 0; t < this.terms.count; t++) this.terms.k[t] = this.terms.info[t].k ?? 0;
@@ -82,6 +89,7 @@ export class World {
     this.edgeK = new Float64Array(mesh.nE);
     this.hingeGrad = new Float64Array(12 * mesh.nH);
     this.pcgIterations = 0;
+    this.torn = 0;
     this._pcgFail = 0;
     this._asleep = false;
     // safety cap: refactor when any membrane edge has turned this far since the last factorisation
@@ -146,8 +154,10 @@ export class World {
       if (d >= 0 && kind !== HINGE_PANEL) this.restTheta[h] = (doc.restAngle[d] * Math.PI) / 180;
       this.theta[h] = dihedral(this.x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], null);
       // fold limit |θ| ≤ π − θ_t, θ_t = 2·atan(t_c / (2·min wing height))
-      const t0 = mesh.edgeTris[2 * e], t1 = mesh.edgeTris[2 * e + 1];
-      const hmin = Math.min(2 * mesh.triArea[t0] / L, 2 * mesh.triArea[t1] / L);
+      // wing heights from the hinge's own vertices (perforation hinges span a split edge)
+      const uv = mesh.uv, q0 = H[4 * h], q1 = H[4 * h + 1];
+      const height = (/** @type {number} */ wv) => Math.abs((uv[2 * q1] - uv[2 * q0]) * (uv[2 * wv + 1] - uv[2 * q0 + 1]) - (uv[2 * q1 + 1] - uv[2 * q0 + 1]) * (uv[2 * wv] - uv[2 * q0])) / L;
+      const hmin = Math.min(height(H[4 * h + 2]), height(H[4 * h + 3]));
       this.foldLimit[h] = Math.PI - 2 * Math.atan(Math.max(m.contact, K.MIN_CONTACT) / (2 * hmin));
     }
     this.driveK = new Float64Array(nH);
@@ -280,6 +290,7 @@ export class World {
     this._checkStrings(x);
     this._checkRotation();
     this._newton();
+    this._tear(x);
     this._projections();
     for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
     this._hingeUpdate();
@@ -363,6 +374,42 @@ export class World {
     if (this.contact) {
       if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
       if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
+    }
+  }
+
+  /**
+   * Perforation tearing: a weld whose force exceeds perf_factor·Y·tear_strain·(its length) breaks —
+   * the most loaded one per substep, so a tear runs along the perforation. A perforation hinge
+   * goes slack when the welds at both of its ends are broken.
+   * @param {Float64Array} x
+   */
+  _tear(x) {
+    const T = this.terms;
+    if (!this._perfTerms) {
+      this._perfTerms = [];
+      for (let t = 0; t < T.count; t++) if (T.kind[t] === TK_PERF) this._perfTerms.push(t);
+      /** @type {Map<number, number>} */
+      this._perfOf = new Map();
+      for (const t of this._perfTerms) this._perfOf.set(T.verts[T.start[t]], t);
+    }
+    if (!this._perfTerms.length) return;
+    let worst = -1, ratio = 1;
+    for (const t of this._perfTerms) {
+      if (!T.active[t]) continue;
+      const a = 3 * T.verts[T.start[t]], b = 3 * T.verts[T.start[t] + 1];
+      const f = T.k[t] * Math.hypot(x[a] - x[b], x[a + 1] - x[b + 1], x[a + 2] - x[b + 2]);
+      const r = f / T.info[t].fBreak;
+      if (r > ratio) { ratio = r; worst = t; }
+    }
+    if (worst < 0) return;
+    T.active[worst] = 0; T.k[worst] = 0;
+    this.torn++;
+    this.dirty = true;
+    const H = this.mesh.hinges;
+    const welded = (/** @type {number} */ v) => { const t = this._perfOf.get(v); return t === undefined || T.active[t] === 1; };
+    for (let h = 0; h < this.mesh.nH; h++) {
+      if (this.mesh.hingeKind[h] !== HINGE_PERF || this.hingeK[h] === 0) continue;
+      if (!welded(H[4 * h]) && !welded(H[4 * h + 1])) { this.hingeK[h] = 0; this.driveK[h] = 0; }
     }
   }
 
@@ -460,7 +507,7 @@ export class World {
     return {
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
       substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
-      kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0,
+      kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
     };
   }
 
@@ -469,7 +516,7 @@ export class World {
     const T = this.terms;
     return {
       x: Float64Array.from(this.x), v: Float64Array.from(this.v), theta: Float64Array.from(this.theta),
-      restTheta: Float64Array.from(this.restTheta), memory: Uint8Array.from(this.memory),
+      restTheta: Float64Array.from(this.restTheta), memory: Uint8Array.from(this.memory), hingeK: Float64Array.from(this.hingeK), driveK: Float64Array.from(this.driveK), torn: this.torn,
       driveOn: Uint8Array.from(this.driveOn), driveTarget: Float64Array.from(this.driveTarget),
       fixedTarget: Float64Array.from(this.fixedTarget), userForce: Float64Array.from(this.userForce),
       time: this.time, acc: this._acc, substepsRun: this.substepsRun, framesRun: this.framesRun, dirty: this.dirty, asleep: !!this._asleep, pcgFail: this._pcgFail,
@@ -487,6 +534,7 @@ export class World {
   /** Restore a state captured by snapshot() (bit-exact, including the factorisation). @param {any} s */
   restore(s) {
     this.x.set(s.x); this.v.set(s.v); this.theta.set(s.theta); this.restTheta.set(s.restTheta); this.memory.set(s.memory);
+    this.hingeK.set(s.hingeK); this.driveK.set(s.driveK); this.torn = s.torn;
     this.fixedTarget.set(s.fixedTarget); this.userForce.set(s.userForce);
     this.time = s.time; this._acc = s.acc; this.substepsRun = s.substepsRun; this.framesRun = s.framesRun;
     this._stringTaut.set(s.stringTaut);

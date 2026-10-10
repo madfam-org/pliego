@@ -18,7 +18,7 @@ import { locatePoint } from '../mesh.js';
 import { pointInPolygon, distPointSeg } from '../geom.js';
 import { TERM_FULL, TERM_PERP, TERM_STRING } from './implicit.js';
 
-export const TK_GLUE = 1, TK_PIVOT = 2, TK_STRING = 3, TK_SLIDER = 4, TK_GRAB = 5, TK_DRIVE = 6;
+export const TK_GLUE = 1, TK_PIVOT = 2, TK_STRING = 3, TK_SLIDER = 4, TK_GRAB = 5, TK_DRIVE = 6, TK_PERF = 7;
 
 /** Growable list of point terms, frozen into typed arrays by `finish()`. */
 export class TermList {

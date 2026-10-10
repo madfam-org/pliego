@@ -10,6 +10,58 @@
  */
 import { termProjector, TERM_STRING } from './implicit.js';
 
+/**
+ * Best-fit rotation R (row-major 3×3) taking positions X0 to X over the free vertices (Horn 1987,
+ * unit quaternion = dominant eigenvector of the 4×4 profile matrix, by shifted power iteration).
+ * A sheet that turns rigidly changes H to (I⊗R)·H₀·(I⊗Rᵀ), so the stale factorisation is applied
+ * in the co-rotated frame — page turns and swinging flaps keep converging without refactoring.
+ * @param {Float64Array} X0 @param {Float64Array} X @param {Int32Array} fi
+ */
+export function bestRotation(X0, X, fi) {
+  let n = 0;
+  const c0 = [0, 0, 0], c1 = [0, 0, 0];
+  for (let i = 0; i < fi.length; i++) { if (fi[i] < 0) continue; n++; for (let c = 0; c < 3; c++) { c0[c] += X0[3 * i + c]; c1[c] += X[3 * i + c]; } }
+  if (!n) return [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  for (let c = 0; c < 3; c++) { c0[c] /= n; c1[c] /= n; }
+  const S = new Float64Array(9);
+  for (let i = 0; i < fi.length; i++) {
+    if (fi[i] < 0) continue;
+    const a0 = X0[3 * i] - c0[0], a1 = X0[3 * i + 1] - c0[1], a2 = X0[3 * i + 2] - c0[2];
+    const b0 = X[3 * i] - c1[0], b1 = X[3 * i + 1] - c1[1], b2 = X[3 * i + 2] - c1[2];
+    S[0] += a0 * b0; S[1] += a0 * b1; S[2] += a0 * b2; S[3] += a1 * b0; S[4] += a1 * b1; S[5] += a1 * b2; S[6] += a2 * b0; S[7] += a2 * b1; S[8] += a2 * b2;
+  }
+  const [xx, xy, xz, yx, yy, yz, zx, zy, zz] = S;
+  const N = [xx + yy + zz, yz - zy, zx - xz, xy - yx, yz - zy, xx - yy - zz, xy + yx, zx + xz, zx - xz, xy + yx, -xx + yy - zz, yz + zy, xy - yx, zx + xz, yz + zy, -xx - yy + zz];
+  let shift = 0;
+  for (let i = 0; i < 16; i++) shift += Math.abs(N[i]);
+  let q = [1, 0, 0, 0];
+  for (let it = 0; it < 60; it++) {
+    const r = [0, 0, 0, 0];
+    for (let a = 0; a < 4; a++) { let sum = shift * q[a]; for (let b = 0; b < 4; b++) sum += N[4 * a + b] * q[b]; r[a] = sum; }
+    const L = Math.hypot(r[0], r[1], r[2], r[3]) || 1;
+    let d = 0;
+    for (let a = 0; a < 4; a++) { r[a] /= L; d += Math.abs(r[a] - q[a]); }
+    q = r;
+    if (d < 1e-14) break;
+  }
+  const [w, x, y, z] = q;
+  return [w * w + x * x - y * y - z * z, 2 * (x * y - w * z), 2 * (x * z + w * y), 2 * (x * y + w * z), w * w - x * x + y * y - z * z, 2 * (y * z - w * x), 2 * (x * z - w * y), 2 * (y * z + w * x), w * w - x * x - y * y + z * z];
+}
+
+/** z ← R·P⁻¹·Rᵀ·z per 3-vector block (co-rotated stale preconditioner). */
+function precond(/** @type {any} */ ch, /** @type {Float64Array} */ z, /** @type {number[]|null} */ R) {
+  if (!R) { ch.solve(z); return; }
+  for (let i = 0; i < z.length; i += 3) {
+    const a = z[i], b = z[i + 1], c = z[i + 2];
+    z[i] = R[0] * a + R[3] * b + R[6] * c; z[i + 1] = R[1] * a + R[4] * b + R[7] * c; z[i + 2] = R[2] * a + R[5] * b + R[8] * c;
+  }
+  ch.solve(z);
+  for (let i = 0; i < z.length; i += 3) {
+    const a = z[i], b = z[i + 1], c = z[i + 2];
+    z[i] = R[0] * a + R[1] * b + R[2] * c; z[i + 1] = R[3] * a + R[4] * b + R[5] * c; z[i + 2] = R[6] * a + R[7] * b + R[8] * c;
+  }
+}
+
 const P9 = new Float64Array(9);
 
 /**
@@ -66,7 +118,8 @@ export function pcgStep(w, x, g, maxIter, rtol) {
   for (let i = 0; i < n3; i++) r0 += r[i] * r[i];
   r0 = Math.sqrt(r0);
   if (r0 === 0) return { iterations: 0, converged: true };
-  z.set(r); ch.solve(z);
+  const R = w._factorState ? bestRotation(w._factorState.x, x, fi) : null;
+  z.set(r); precond(ch, z, R);
   p.set(z);
   let rz = 0;
   for (let i = 0; i < n3; i++) rz += r[i] * z[i];
@@ -86,7 +139,7 @@ export function pcgStep(w, x, g, maxIter, rtol) {
     }
     if (Math.sqrt(rn) <= rtol * r0) { converged = true; it++; break; }
     if (it === 3 && Math.sqrt(rn) > 0.1 * r0) { it++; break; } // stagnating: refactor instead
-    z.set(r); ch.solve(z);
+    z.set(r); precond(ch, z, R);
     let rzn = 0;
     for (let i = 0; i < n3; i++) rzn += r[i] * z[i];
     const beta = rzn / rz;

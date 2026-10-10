@@ -3,8 +3,8 @@
  * Layer contact (engine.md §3.4): vertex–triangle, inter-sheet and self, with memorised sidedness
  * and position-level Coulomb friction; plus the ground plane y = 0.
  *
- * Broad phase once per frame: uniform spatial hash (cell = 2 × max mesh edge) of triangle boxes
- * inflated by the query radius (contact distance + the largest displacement possible this frame).
+ * Broad phase every substep: uniform integer spatial hash (cell = max mesh edge, enlarged to 2 × reach when needed) of triangle
+ * boxes inflated by the query radius (contact distance + the largest displacement possible this substep).
  * Narrow phase each substep over the candidate pairs. Pairs skip triangles that contain the vertex,
  * one of its mesh neighbours, a copy of it (cut duplicates), or a tab welded to its sheet.
  * Only projections that fall inside the triangle are handled (edge–edge contact is out of scope
@@ -26,7 +26,7 @@ export class Contact {
     this.adjStart = deg; this.adj = adj;
     let maxE = 0;
     for (let e = 0; e < mesh.nE; e++) maxE = Math.max(maxE, mesh.edgeLen[e]);
-    this.cell = 2 * maxE;
+    this.cell = maxE;
     this.tc = new Float64Array(mesh.nV);
     this.mu = new Float64Array(mesh.nV);
     for (let v = 0; v < mesh.nV; v++) {
@@ -57,9 +57,10 @@ export class Contact {
   broadPhase(x, fixed, reach) {
     const m = this.mesh, T = m.tris;
     const cell = Math.max(this.cell, reach * 2, 1e-3);
-    /** @type {Map<string, number[]>} */
+    /** @type {Map<number, number[]>} */
     const grid = new Map();
-    const key = (/** @type {number} */ i, /** @type {number} */ j, /** @type {number} */ k) => `${i},${j},${k}`;
+    // integer spatial hash (collisions only add candidates; the distance test filters them)
+    const key = (/** @type {number} */ i, /** @type {number} */ j, /** @type {number} */ k) => ((Math.imul(i, 73856093) ^ Math.imul(j, 19349663) ^ Math.imul(k, 83492791)) >>> 0);
     let rmax = 0;
     for (let v = 0; v < m.nV; v++) rmax = Math.max(rmax, this.tc[v]);
     const R = rmax + reach;

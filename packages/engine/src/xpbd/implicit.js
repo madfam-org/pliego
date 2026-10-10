@@ -18,6 +18,9 @@
 import { BlockCholesky } from '../linalg/blockchol.js';
 import { dihedral } from './dihedral.js';
 
+/** Strain below which an edge switches to the compression model (hysteresis, see gradient()). */
+const MODEL_COMP_ENTER = 1e-4;
+
 export const SLOT_NONE = -2147483648;
 
 /** Term projector modes. */
@@ -113,7 +116,7 @@ export function assembleAndFactor(w, x) {
     // max(MEMBRANE_COMPRESSION, MODEL_COMPRESSION)·k: never below the true stiffness (an
     // underestimate overshoots when an edge re-enters tension), and only 4× below tension so the
     // branch switch of edges near zero strain does not wreck the stale preconditioner
-    const k = L < w.mesh.edgeLen[e] ? w.kCompModel * kM[e] : kM[e];
+    const k = w.edgeComp[e] ? w.kCompModel * kM[e] : kM[e];
     addOuter(ch, S.diagSlot[a], k, u, 0, u, 0);
     addOuter(ch, S.diagSlot[b], k, u, 0, u, 0);
     addOuter(ch, S.edgeSlot[e], -k, u, 0, u, 0);
@@ -194,7 +197,11 @@ export function gradient(w, x, g) {
     const L = Math.hypot(dx, dy, dz);
     if (L === 0) continue;
     U[3 * e] = dx / L; U[3 * e + 1] = dy / L; U[3 * e + 2] = dz / L;
-    w.edgeK[e] = L < L0[e] ? w.kCompModel * kM[e] : kM[e];
+    // model branch with hysteresis: enter the compression model below −MODEL_COMP_ENTER strain,
+    // leave it as soon as the edge is in tension (the model never underestimates a stretched edge)
+    const strain = (L - L0[e]) / L0[e];
+    if (w.edgeComp[e]) { if (strain >= 0) w.edgeComp[e] = 0; } else if (strain < -MODEL_COMP_ENTER) w.edgeComp[e] = 1;
+    w.edgeK[e] = w.edgeComp[e] ? w.kCompModel * kM[e] : kM[e];
     const d = L - L0[e];
     const f = ((d < 0 ? w.kCompFactor * kM[e] : kM[e]) * d) / L;
     g[a] -= f * dx; g[a + 1] -= f * dy; g[a + 2] -= f * dz;

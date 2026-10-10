@@ -87,6 +87,7 @@ export class World {
     this.factorDir = new Float64Array(3 * mesh.nE);
     this.edgeDir = new Float64Array(3 * mesh.nE);
     this.edgeK = new Float64Array(mesh.nE);
+    this.edgeComp = new Uint8Array(mesh.nE);
     this.hingeGrad = new Float64Array(12 * mesh.nH);
     this.pcgIterations = 0;
     this.torn = 0;
@@ -235,18 +236,11 @@ export class World {
   /** Wake a sleeping world (any interaction calls this). */
   wake() { this._asleep = false; }
 
-  /** Per-frame work: refactor check, contact broad phase. @param {number} n substeps this frame */
+  /** Per-frame work: kinematic program pose for the frame. @param {number} n substeps this frame */
   _frame(n) {
     const x = this.x;
     this.drivers.beginFrame(this, n, this.dt);
-    if (this.contact && this.opts.contact) {
-      let vmax = 0;
-      for (let i = 0; i < this.v.length; i++) vmax = Math.max(vmax, Math.abs(this.v[i]));
-      // relative displacement bound over the frame: both sides move, plus free-fall gain
-      const T = n * this.dt;
-      const reach = Math.min(50, 2 * (vmax * T + 0.5 * K.GRAVITY * T * T) + 0.5);
-      this.contact.broadPhase(x, this.fixed, reach);
-    }
+    void x; void n;
   }
 
   /** Has any membrane edge rotated more than `refactorAngle` since the last factorisation? */
@@ -291,6 +285,13 @@ export class World {
     this._checkRotation();
     this._newton();
     this._tear(x);
+    if (this.contact && this.opts.contact) {
+      // broad phase every substep with a tight reach: relative motion over the substep (both sides,
+      // inertia + free fall + the Newton step already taken) plus a margin
+      let vmax = 0;
+      for (let i = 0; i < 3 * nV; i++) { const d = Math.abs(x[i] - xs[i]); if (d > vmax) vmax = d; }
+      this.contact.broadPhase(x, this.fixed, Math.min(50, 2 * vmax + 0.5));
+    }
     this._projections();
     for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
     this._hingeUpdate();
@@ -443,7 +444,7 @@ export class World {
   _saveFactorState(x) {
     const T = this.terms;
     this._factorState = {
-      x: Float64Array.from(x), driveOn: Uint8Array.from(this.driveOn),
+      x: Float64Array.from(x), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
       active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode),
       verts: Int32Array.from(T.verts), c: Float64Array.from(T.c), dir: Float64Array.from(T.dir), len: Float64Array.from(T.len),
     };
@@ -516,7 +517,7 @@ export class World {
     const T = this.terms;
     return {
       x: Float64Array.from(this.x), v: Float64Array.from(this.v), theta: Float64Array.from(this.theta),
-      restTheta: Float64Array.from(this.restTheta), memory: Uint8Array.from(this.memory), hingeK: Float64Array.from(this.hingeK), driveK: Float64Array.from(this.driveK), torn: this.torn,
+      restTheta: Float64Array.from(this.restTheta), memory: Uint8Array.from(this.memory), hingeK: Float64Array.from(this.hingeK), driveK: Float64Array.from(this.driveK), torn: this.torn, edgeComp: Uint8Array.from(this.edgeComp),
       driveOn: Uint8Array.from(this.driveOn), driveTarget: Float64Array.from(this.driveTarget),
       fixedTarget: Float64Array.from(this.fixedTarget), userForce: Float64Array.from(this.userForce),
       time: this.time, acc: this._acc, substepsRun: this.substepsRun, framesRun: this.framesRun, dirty: this.dirty, asleep: !!this._asleep, pcgFail: this._pcgFail,
@@ -548,6 +549,7 @@ export class World {
     if (this.contact) this.contact.side = new Map(s.contactSide);
     // rebuild the factorisation exactly as it was
     if (s.factor && this.sys.ch) {
+      this.edgeComp.set(s.factor.edgeComp);
       const f = s.factor;
       this.driveOn.set(f.driveOn); T.active.set(f.active); T.k.set(f.k); T.mode.set(f.mode); T.verts.set(f.verts); T.c.set(f.c); T.dir.set(f.dir); T.len.set(f.len);
       assembleAndFactor(this, f.x);
@@ -556,6 +558,7 @@ export class World {
     this.driveOn.set(s.driveOn); this.driveTarget.set(s.driveTarget);
     T.active.set(s.terms.active); T.k.set(s.terms.k); T.mode.set(s.terms.mode); T.verts.set(s.terms.verts);
     this.factorDir.set(s.factorDir);
+    this.edgeComp.set(s.edgeComp);
     this.dirty = s.dirty;
     this._asleep = s.asleep;
     this._pcgFail = s.pcgFail;

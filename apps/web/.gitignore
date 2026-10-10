@@ -1,0 +1,4 @@
+# Local engine checkout for dev/testing (read from origin/lane/engine; never committed)
+.engine-tmp/
+# Screenshots and scratch output
+.shots/

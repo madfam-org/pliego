@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://pliego.madfam.io/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pliego.madfam.io/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://pliego.madfam.io/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://pliego.madfam.io/?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://pliego.madfam.io/?lang=pt"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pliego.madfam.io/"/>
+  </url>
+</urlset>

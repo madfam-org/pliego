@@ -14,7 +14,7 @@ bridges already chosen in the pass, so they never cross. Opposite bridges also a
 J-bounded slivers that two adjacent bridges create; `verify()` additionally floors face area per
 J-joined region (J edges are artificial). A sheet with 40 holes now needs ~3 passes, not ~80.
 
-Clearance (kernel 0.2.1): exact visibility alone can accept a J edge that passes within the emit
+Clearance (hardening wave 3): exact visibility alone can accept a J edge that passes within the emit
 tolerance of a corner (collinear hole sides, a bridge grazing its own hole), which leaves a face
 that is not simple in floating point (verify rule 3, `face_not_simple`). Every search first looks
 for a bridge that keeps `CLEARANCE` from every vertex it does not end at, over all its candidate
@@ -383,4 +383,6 @@ def _canonical(edges: dict[Key, dict], material: list[list[IPoint]], holes: int,
     lhs, rhs = arr.euler()
     if lhs != rhs:
         raise error_cls(f"Euler check failed: V − E + F + H = {lhs} but 1 + components = {rhs}")
-    return arr
+    from .arrangement_split import split_cuts
+
+    return split_cuts(arr)  # spec §4: the vertices of a cut are split, so a slit can open

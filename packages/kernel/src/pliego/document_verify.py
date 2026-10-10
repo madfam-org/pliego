@@ -305,6 +305,11 @@ def _rule4_edges(d: dict, out: _Issues) -> None:
         for k in range(len(f)):
             sides.setdefault(frozenset((f[k], f[(k + 1) % len(f)])), []).append(i)
     trt = d.get("pliego:edges_treatment") or ["none"] * len(d["edges_vertices"])
+    twins: dict[tuple, int] = {}
+    for e, asg, t in zip(d["edges_vertices"], d["edges_assignment"], trt, strict=True):
+        if asg == "C" and t == "cut" and len(sides.get(frozenset(e), [])) == 1:
+            key = _coord_key(d, e)
+            twins[key] = twins.get(key, 0) + 1
     for i, (e, asg, ang, t) in enumerate(zip(d["edges_vertices"], d["edges_assignment"],
                                              d["edges_foldAngle"], trt, strict=True)):
         if asg not in ("B", "M", "V", "F", "U", "C", "J"):
@@ -326,9 +331,18 @@ def _rule4_edges(d: dict, out: _Issues) -> None:
                     "(valley > 0, mountain < 0)", edge=i)
         n = len(sides.get(frozenset(e), []))
         want = 1 if asg == "B" else 2
+        if asg == "C" and n == 1 and twins.get(_coord_key(d, e), 0) == 2:
+            want = 1  # one side of a split cut (§4): its twin borders the other side
         if n != want:
             out.err(4, "edge_faces", f"edge {i} ({asg}) borders {n} face(s), expected {want}",
                     edge=i)
+
+
+def _coord_key(d: dict, e: list[int]) -> tuple:
+    """Sheet + unordered end coordinates of an edge: the two sides of a split cut share it."""
+    vc = d["vertices_coords"]
+    p, q = (tuple(vc[e[0]][:2]), tuple(vc[e[1]][:2]))
+    return (d["pliego:vertices_sheet"][e[0]], min(p, q), max(p, q))
 
 
 # ── rule 5: sheets do not overlap in the layout frame ────────────────────────

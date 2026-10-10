@@ -57,7 +57,7 @@ referenced through `hardware_ref`); the compliance lane enforces it.
 
 `<slug>/main.py`, `<slug>/project.json`, `<slug>/docs/README.md`. The runner (in `apps/api`, built
 on the shared `commons_sandbox`) injects `pliego` and `math` as the only importable modules, injects
-parameters as bare globals, executes the script, and reads `result` — a `pliego.Sheet`,
+parameters and `mode` (the mode id) as bare globals, executes the script, and reads `result` — a `pliego.Sheet`,
 `pliego.Assembly` or `pliego.Document`. Scripts read parameters through a local accessor with a
 default so they also run standalone:
 

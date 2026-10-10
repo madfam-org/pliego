@@ -280,6 +280,19 @@
     },
     "pliego:meta": {
       "$ref": "#/$defs/meta"
+    },
+    "pliego:edges_name": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "$ref": "#/$defs/slug"
+          }
+        ]
+      }
     }
   },
   "patternProperties": {
@@ -557,6 +570,23 @@
             "collision_thickness": {
               "type": "number",
               "exclusiveMinimum": 0
+            },
+            "G12": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "score_yield_deg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 180
+            },
+            "perf_cut_mm": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "perf_bridge_mm": {
+              "type": "number",
+              "exclusiveMinimum": 0
             }
           },
           "additionalProperties": false
@@ -564,6 +594,18 @@
         "derived_basis": {
           "type": "string",
           "minLength": 1
+        },
+        "appearance": {
+          "type": "object",
+          "properties": {
+            "front": {
+              "$ref": "#/$defs/color"
+            },
+            "back": {
+              "$ref": "#/$defs/color"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

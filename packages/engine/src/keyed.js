@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Keyed mechanisms (spec §5.20). A mechanism may carry `keys`, a table of [control value, output]
+ * Keyed mechanisms (spec §5.18). A mechanism may carry `keys`, a table of [control value, output]
  * pairs: the output is linear between keys and held at the end values outside them. With
  * `period`, the control value is first wrapped into [c₀, c₀ + period) and the segment after the
  * last key runs back to the first key's output, so a cam or a crank-rocker repeats every turn.
@@ -57,7 +57,7 @@ function interp(K, u) {
 /** @param {any} v */ const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
 
 /**
- * Rule 20: `keys`, `period` and `ride` are well formed. Appends problems to P.
+ * Rule 19: `keys`, `period` and `ride` are well formed. Appends problems to P.
  * @param {any[]} mechanisms @param {string[]} P
  */
 export function checkKeyedMechanisms(mechanisms, P) {
@@ -68,31 +68,31 @@ export function checkKeyedMechanisms(mechanisms, P) {
     if (!m || typeof m !== 'object') return;
     const w = `pliego:mechanisms[${i}] (${m.id})`;
     if (m.keys !== undefined) {
-      if (!KEYED_TYPES.has(m.type)) P.push(`rule 20: ${w} type ${m.type} cannot carry keys`);
+      if (!KEYED_TYPES.has(m.type)) P.push(`rule 19: ${w} type ${m.type} cannot carry keys`);
       else if (!Array.isArray(m.keys) || m.keys.length < 2 || !m.keys.every((/** @type {any} */ k) => Array.isArray(k) && k.length === 2 && isNum(k[0]) && isNum(k[1]))) {
-        P.push(`rule 20: ${w}.keys must list ≥ 2 [control value, output] number pairs`);
+        P.push(`rule 19: ${w}.keys must list ≥ 2 [control value, output] number pairs`);
       } else {
-        for (let k = 1; k < m.keys.length; k++) if (!(m.keys[k][0] > m.keys[k - 1][0])) { P.push(`rule 20: ${w}.keys control values must increase strictly (key ${k})`); break; }
+        for (let k = 1; k < m.keys.length; k++) if (!(m.keys[k][0] > m.keys[k - 1][0])) { P.push(`rule 19: ${w}.keys control values must increase strictly (key ${k})`); break; }
         if ((m.type === 'translate' || m.type === 'slide') && isNum(m.travel)) {
           const lo = m.type === 'slide' ? 0 : -m.travel;
-          for (const [, y] of m.keys) if (y < lo - 1e-9 || y > m.travel + 1e-9) { P.push(`rule 20: ${w}.keys output ${y} mm is outside [${lo}, ${m.travel}]`); break; }
+          for (const [, y] of m.keys) if (y < lo - 1e-9 || y > m.travel + 1e-9) { P.push(`rule 19: ${w}.keys output ${y} mm is outside [${lo}, ${m.travel}]`); break; }
         }
       }
     }
     if (m.period !== undefined) {
-      if (!Array.isArray(m.keys)) P.push(`rule 20: ${w}.period needs keys`);
-      else if (!isNum(m.period) || m.period <= 0) P.push(`rule 20: ${w}.period must be > 0`);
-      else if (m.keys.length >= 2 && isNum(m.keys[0][0]) && isNum(m.keys[m.keys.length - 1][0]) && m.keys[m.keys.length - 1][0] - m.keys[0][0] > m.period + 1e-9) P.push(`rule 20: ${w}.keys span more than one period`);
+      if (!Array.isArray(m.keys)) P.push(`rule 19: ${w}.period needs keys`);
+      else if (!isNum(m.period) || m.period <= 0) P.push(`rule 19: ${w}.period must be > 0`);
+      else if (m.keys.length >= 2 && isNum(m.keys[0][0]) && isNum(m.keys[m.keys.length - 1][0]) && m.keys[m.keys.length - 1][0] - m.keys[0][0] > m.period + 1e-9) P.push(`rule 19: ${w}.keys span more than one period`);
     }
     if (m.ride !== undefined) {
       const r = byId.get(m.ride);
-      if (!RIDE_TYPES.has(m.type)) P.push(`rule 20: ${w} type ${m.type} cannot ride another mechanism`);
-      else if (!r || !RIDE_TYPES.has(r.type)) P.push(`rule 20: ${w}.ride ${JSON.stringify(m.ride)} is not a hinge, rotate or translate mechanism`);
+      if (!RIDE_TYPES.has(m.type)) P.push(`rule 19: ${w} type ${m.type} cannot ride another mechanism`);
+      else if (!r || !RIDE_TYPES.has(r.type)) P.push(`rule 19: ${w}.ride ${JSON.stringify(m.ride)} is not a hinge, rotate or translate mechanism`);
       else {
         // acyclic: follow the chain
         const seen = new Set([m.id]);
         for (let q = r; q; q = q.ride !== undefined ? byId.get(q.ride) : null) {
-          if (seen.has(q.id)) { P.push(`rule 20: ${w}.ride forms a cycle`); break; }
+          if (seen.has(q.id)) { P.push(`rule 19: ${w}.ride forms a cycle`); break; }
           seen.add(q.id);
         }
       }

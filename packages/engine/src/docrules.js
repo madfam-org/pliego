@@ -206,7 +206,7 @@ export function checkJoinsAndFrames(doc, P) {
   // glue welds: every vertex of the region polygon, mapped to sheet b, lies within
   // max(collision_thickness a, b) of its image on b (spec §8.9, sampled at the region vertices)
   doc.joins.forEach((j) => {
-    // a step-gated glue (spec §5.21) is created during its step, not in the initial frame
+    // a step-gated glue (spec §5.19) is created during its step, not in the initial frame
     if (j.type !== 'glue' || j.active_from !== undefined) return;
     const sa = si(j.a.sheet), sb = si(j.b.sheet);
     const tol = Math.max(doc.sheets[sa].derived.collision_thickness, doc.sheets[sb].derived.collision_thickness) * (1 + 1e-6) + 1e-6;

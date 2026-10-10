@@ -53,7 +53,7 @@ export class Contact {
   /**
    * Contact exclusion around welds: a vertex within two mesh rings of a vertex glued to sheet b
    * does not collide with b (the hinge at a glue line lies on b; its side is undetermined there).
-   * Step-gated glue (spec §5.21) calls this again when it switches.
+   * Step-gated glue (spec §5.19) calls this again when it switches.
    * @param {Int32Array} weldSheet per vertex: the sheet it is welded to, or −1
    */
   setWeldExclusion(weldSheet) {

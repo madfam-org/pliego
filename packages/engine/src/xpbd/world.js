@@ -84,7 +84,7 @@ export class World {
     this.fixed = this.drivers.fixed;
     this.invMass = new Float64Array(nV);
     for (let v = 0; v < nV; v++) this.invMass[v] = this.fixed[v] ? 0 : 1 / this.mass[v];
-    this.gates = new JoinGates(this); // step-gated joins (spec §5.21): all off until their step
+    this.gates = new JoinGates(this); // step-gated joins (spec §5.19): all off until their step
     this.fixedTarget = Float64Array.from(this.x);
     this._clampCorrection();
     this.sys = buildSystem(this);

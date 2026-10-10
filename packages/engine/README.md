@@ -93,21 +93,21 @@ Each fixed substep, of length Δt = 1/(60·S), runs these stages in order:
 5. **Bookkeeping.** `v = (x − x_start)/Δt`, unwrapped hinge angles, and rate-independent crease
    plasticity (Narain et al. 2013): `θ_rest ← θ − sign·θ_y`.
 
-**Keyed mechanisms** (spec §5.20, `src/keyed.js`). A `hinge`, `rotate`, `leaf`, `translate` or
+**Keyed mechanisms** (spec §5.18, `src/keyed.js`). A `hinge`, `rotate`, `leaf`, `translate` or
 `slide` with `keys` maps its control value through a linear table (optionally `period`ic) before
 its usual formula, and a `hinge`/`rotate`/`translate` with `ride` is carried by another one
 (T = T_ride ∘ T_own). One control then drives a crank-rocker four-bar (the coupler rides the crank)
 or a cam follower exactly; the studio's preview stub evaluates the same table. Test
 `keyed-mechanisms`.
 
-**Step-activated joins** (spec §5.21, `src/gates.js`, `src/xpbd/gates.js`). A glue, pivot, string
+**Step-activated joins** (spec §5.19, `src/gates.js`, `src/xpbd/gates.js`). A glue, pivot, string
 or pin with `active_from` is off until its step begins. When it switches on it is created from the
 current geometry: weld points within the snap distance (max(1 mm, 4 × caliper)) snap onto their
 zone, paper that lies on its zone but slid along it is welded where it lies, and paper off its
 zone does not take hold (`stats().unheldWelds`). A gated pin is a stiff anchor term rather than a
 fixed vertex, so the free-vertex set (and the symbolic factorisation) never changes. Switching
 refactorises; contact exclusion around welds follows the gates. Test `step-joins`.
-A step's `release_joins` (spec §5.22) unties joins from that step on, through the same gates
+A step's `release_joins` (spec §5.20) unties joins from that step on, through the same gates
 (test `untie-joins`).
 
 **Start pose** (backlog item 21). A mechanism control starts at its `default` unless the

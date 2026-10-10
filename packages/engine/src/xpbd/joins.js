@@ -12,7 +12,7 @@
  * - pin: Dirichlet (the vertices are fixed; `world: null` = where they start); a `translate`
  *   mechanism moves them.
  * All of these become point terms of the implicit block (stiffness HARD_FACTOR × stiffest membrane
- * spring) plus, for pins, fixed vertices. A step-gated pin (spec §5.21) is a stiff anchor term per
+ * spring) plus, for pins, fixed vertices. A step-gated pin (spec §5.19) is a stiff anchor term per
  * vertex instead, so it can switch on and off without changing the free-vertex set; gated glue
  * does not mark its vertices welded until it holds (see gates.js).
  */

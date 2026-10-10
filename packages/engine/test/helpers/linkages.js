@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Keyed-mechanism fixtures (spec §5.20), authored here: a crank-rocker four-bar whose rocker and
+ * Keyed-mechanism fixtures (spec §5.18), authored here: a crank-rocker four-bar whose rocker and
  * coupler follow the crank control through keyed `rotate` mechanisms (the coupler rides the
  * crank), and an eccentric plate cam with a translating follower keyed to the cam angle. Plan
  * coordinates (x, y) are sheet-local on the base, world (x, h, −y); every link lies flat.
@@ -57,7 +57,7 @@ export function fourBar({ keyed = true, step = 5, theta0 = 60 } = {}) {
   const cu = unwrapDeg(cpl), ru = unwrapDeg(rck);
   if (keyed) {
     // coupler: total rotation = crank v + own α(v) about its crank pin, carried by the crank.
-    // α runs from 0 to −360 over a turn, so the table keeps its closing key at 360 (spec §5.20:
+    // α runs from 0 to −360 over a turn, so the table keeps its closing key at 360 (spec §5.18:
     // the wrap from −360 back to 0 is a whole turn, invisible in a rotation)
     b.mechanisms.push({ id: 'turn-coupler', type: 'rotate', center: { sheet: 'crank', at: [r + a, r] }, control: 'crank', sheets_moving: ['coupler'],
       ride: 'turn-crank', period: 360, keys: vs.map((v, i) => [v, +(cu[i] - cu[0] - v).toFixed(9)]) });
@@ -109,7 +109,7 @@ const L4 = (/** @type {string} */ en, /** @type {string} */ es, /** @type {strin
 
 /**
  * A 100 × 40 strip with a valley crease at u = 50 whose right half folds onto the left half, a
- * glue tab on the far end welded to the mirrored zone (spec §5.21), and a program: fold to
+ * glue tab on the far end welded to the mirrored zone (spec §5.19), and a program: fold to
  * `angle`, glue (the join's `active_from` step), let go. `gate: false` leaves the glue out
  * (the unglued baseline).
  * `shift` draws the zone that many mm off where the fold lands.

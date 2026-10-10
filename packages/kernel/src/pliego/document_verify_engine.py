@@ -1,4 +1,4 @@
-"""Spec §5.20–§5.22, rules 20–22 (wave 3 lane E): keyed mechanisms, step-activated joins and
+"""Spec §5.18–§5.20, rules 19–21 (wave 3 lane E): keyed mechanisms, step-activated joins and
 untying, checked the way the engine's `loadDocument` checks them (fail closed)."""
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ def _step_index(steps: list, ref: Any) -> int:
     return -2
 
 
-def rules20_22(d: dict, out) -> None:
+def rules19_21(d: dict, out) -> None:
     mechs = [m for m in d.get("pliego:mechanisms") or [] if isinstance(m, dict)]
     by_id = {m.get("id"): m for m in mechs}
     for m in mechs:
@@ -32,43 +32,43 @@ def rules20_22(d: dict, out) -> None:
         keys = m.get("keys")
         if keys is not None:
             if t not in KEYED:
-                out.err(20, "keys_type", f"{where}: type {t!r} cannot carry keys")
+                out.err(19, "keys_type", f"{where}: type {t!r} cannot carry keys")
             elif not (isinstance(keys, list) and len(keys) >= 2 and all(
                     isinstance(k, list) and len(k) == 2 and _num(k[0]) and _num(k[1])
                     for k in keys)):
-                out.err(20, "keys_table", f"{where}: keys must list ≥ 2 [control value, output] "
+                out.err(19, "keys_table", f"{where}: keys must list ≥ 2 [control value, output] "
                         "pairs")
             else:
                 if any(keys[i][0] <= keys[i - 1][0] for i in range(1, len(keys))):
-                    out.err(20, "keys_order", f"{where}: key control values must increase strictly")
+                    out.err(19, "keys_order", f"{where}: key control values must increase strictly")
                 travel = m.get("travel")
                 if t in ("translate", "slide") and _num(travel):
                     lo = 0.0 if t == "slide" else -travel
                     if any(not lo - 1e-9 <= y <= travel + 1e-9 for _, y in keys):
-                        out.err(20, "keys_travel", f"{where}: a key output lies outside "
+                        out.err(19, "keys_travel", f"{where}: a key output lies outside "
                                 f"[{lo:g}, {travel:g}] mm")
         if "period" in m:
             p = m["period"]
             if keys is None:
-                out.err(20, "period", f"{where}: period needs keys")
+                out.err(19, "period", f"{where}: period needs keys")
             elif not (_num(p) and p > 0):
-                out.err(20, "period", f"{where}: period must be > 0")
+                out.err(19, "period", f"{where}: period must be > 0")
             elif isinstance(keys, list) and len(keys) >= 2 and all(
                     isinstance(k, list) and len(k) == 2 and _num(k[0]) for k in keys) \
                     and keys[-1][0] - keys[0][0] > p + 1e-9:
-                out.err(20, "period", f"{where}: keys span more than one period")
+                out.err(19, "period", f"{where}: keys span more than one period")
         if "ride" in m:
             r = by_id.get(m["ride"])
             if t not in RIDE:
-                out.err(20, "ride", f"{where}: type {t!r} cannot ride another mechanism")
+                out.err(19, "ride", f"{where}: type {t!r} cannot ride another mechanism")
             elif r is None or r.get("type") not in RIDE:
-                out.err(20, "ride", f"{where}: ride {m['ride']!r} is not a hinge, rotate or "
+                out.err(19, "ride", f"{where}: ride {m['ride']!r} is not a hinge, rotate or "
                         "translate mechanism")
             else:
                 seen, q = {m.get("id")}, r
                 while q is not None:
                     if q.get("id") in seen:
-                        out.err(20, "ride_cycle", f"{where}: rides form a cycle")
+                        out.err(19, "ride_cycle", f"{where}: rides form a cycle")
                         break
                     seen.add(q.get("id"))
                     q = by_id.get(q["ride"]) if "ride" in q else None
@@ -82,12 +82,12 @@ def rules20_22(d: dict, out) -> None:
             continue
         where = f"join {j.get('id')!r}"
         if j.get("type") not in GATED:
-            out.err(21, "active_from_type", f"{where}: type {j.get('type')!r} cannot carry "
+            out.err(20, "active_from_type", f"{where}: type {j.get('type')!r} cannot carry "
                     "active_from")
         elif not steps:
-            out.err(21, "active_from_program", f"{where}: active_from needs a fold program")
+            out.err(20, "active_from_program", f"{where}: active_from needs a fold program")
         elif _step_index(steps, j["active_from"]) < 0:
-            out.err(21, "active_from_step", f"{where}: active_from {j['active_from']!r} is not "
+            out.err(20, "active_from_step", f"{where}: active_from {j['active_from']!r} is not "
                     "a step id or index of the program")
     released: dict[str, int] = {}
     for r, st in enumerate(steps):
@@ -96,22 +96,22 @@ def rules20_22(d: dict, out) -> None:
         where = f"step {st.get('id')!r}"
         ids = st["release_joins"]
         if not isinstance(ids, list):
-            out.err(22, "release_joins", f"{where}: release_joins must be a list of join ids")
+            out.err(21, "release_joins", f"{where}: release_joins must be a list of join ids")
             continue
         for jid in ids:
             j = joins.get(jid)
             if j is None:
-                out.err(22, "release_joins", f"{where}: release_joins names {jid!r}, which is "
+                out.err(21, "release_joins", f"{where}: release_joins names {jid!r}, which is "
                         "not a join")
             elif j.get("type") not in GATED:
-                out.err(22, "release_joins", f"{where}: join {jid!r} is a {j.get('type')!r}, "
+                out.err(21, "release_joins", f"{where}: join {jid!r} is a {j.get('type')!r}, "
                         "which cannot be released")
             elif jid in released:
-                out.err(22, "release_joins", f"{where}: join {jid!r} is already released at "
+                out.err(21, "release_joins", f"{where}: join {jid!r} is already released at "
                         f"step {released[jid]}")
             else:
                 released[jid] = r
                 k = _step_index(steps, j["active_from"]) if "active_from" in j else -1
                 if k >= 0 and r <= k:
-                    out.err(22, "release_joins", f"{where}: join {jid!r} is released at or "
+                    out.err(21, "release_joins", f"{where}: join {jid!r} is released at or "
                             f"before the step that activates it ({k})")

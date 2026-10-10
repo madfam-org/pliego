@@ -286,7 +286,7 @@ export class Drivers {
 
   /**
    * Rigid transform p ↦ R·p + T of a hinge, rotate or translate mechanism at its current control
-   * value (keys applied, spec §5.20), composed with the mechanism it rides. Memoised per call of
+   * value (keys applied, spec §5.18), composed with the mechanism it rides. Memoised per call of
    * `apply`. R is null for a pure translation.
    * @param {any} w @param {string} id @param {Map<string, {R: number[]|null, T: number[]}>} memo
    * @returns {{R: number[]|null, T: number[]}}

@@ -370,7 +370,7 @@ function checkRefs(c, P) {
       }
     }
   });
-  checkKeyedMechanisms(mechanisms, P); // spec §5.20, rule 20
+  checkKeyedMechanisms(mechanisms, P); // spec §5.18, rule 19
   for (const s of sheets) {
     if (!s.kinematic) continue;
     const m = mech.get(s.kinematic.mechanism);
@@ -410,7 +410,7 @@ function checkRefs(c, P) {
       if (j.mechanism !== undefined) { const m = mech.get(j.mechanism); if (!m || m.type !== 'slide') P.push(`rule 7: ${w}.mechanism ${JSON.stringify(j.mechanism)} is not a slide mechanism`); }
     }
   });
-  checkJoinGates(joins, seq, P); // spec §5.21–§5.22, rules 21–22
+  checkJoinGates(joins, seq, P); // spec §5.19–§5.20, rules 20–21
   if (seq !== null) {
     if (typeof seq !== 'object' || (seq.mode !== 'physical' && seq.mode !== 'kinematic')) P.push('pliego:sequence.mode must be physical|kinematic');
     if (!Array.isArray(seq.steps) || !seq.steps.length) P.push('pliego:sequence.steps must be a non-empty array');

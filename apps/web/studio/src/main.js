@@ -59,7 +59,7 @@ function needsEngine(id) {
   if (!c) return false;
   if (c.kind === 'wind') return true;
   const joins = j['pliego:joins'] || [];
-  // every mechanism this control moves, directly or through `ride` (spec §5.20), moves its sheets
+  // every mechanism this control moves, directly or through `ride` (spec §5.18), moves its sheets
   // in the preview; a join between two of those sheets moves with them
   const mechs = j['pliego:mechanisms'] || [];
   const byId = new Map(mechs.map((m) => [m.id, m]));

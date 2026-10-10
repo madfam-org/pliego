@@ -100,7 +100,7 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
     rule17_presentation(d, out)
     rule18_art(d, out)
     _rule8_sequence(d, out)
-    rules20_22(d, out)  # spec §5.20–§5.22 (wave 3 lane E)
+    rules19_21(d, out)  # spec §5.18–§5.20 (wave 3 lane E)
     _rule11_pieces(d, out)
     _rule12_stacks(d, _sheet_tools(d, coords)[1], out)
     if faces_ok:
@@ -443,7 +443,7 @@ def _rule6_stocks(d: dict, out: _Issues) -> None:
 
 
 # rules 7–9 live in document_verify_refs (file-size gate)
-from .document_verify_engine import rules20_22  # noqa: E402
+from .document_verify_engine import rules19_21  # noqa: E402
 from .document_verify_pack import _rule13_packaging  # noqa: E402
 from .document_verify_refs import (  # noqa: E402
     _rule7_refs,

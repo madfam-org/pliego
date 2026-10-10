@@ -1,5 +1,5 @@
-"""Spec §5.20–§5.22 (wave 3 lane E): keyed mechanisms, step-activated joins and untying are
-accepted and checked by the kernel's verify (rules 20–22) the way the engine checks them."""
+"""Spec §5.18–§5.20 (wave 3 lane E): keyed mechanisms, step-activated joins and untying are
+accepted and checked by the kernel's verify (rules 19–21) the way the engine checks them."""
 
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ def test_step_activated_glue_starts_flat_and_verifies(stocks):
     assert d.verify() == []
     # an ungated glue must hold in the initial frame
     assert (9, "glue_weld") in _codes(_glued_fold(stocks, gate=False))
-    assert (21, "active_from_step") in _codes(_glued_fold(stocks, active_from="nope"))
+    assert (20, "active_from_step") in _codes(_glued_fold(stocks, active_from="nope"))
 
 
 def test_release_joins_is_emitted_and_checked(stocks):
@@ -41,10 +41,10 @@ def test_release_joins_is_emitted_and_checked(stocks):
     assert d.data["pliego:sequence"]["steps"][3]["release_joins"] == ["tab"]
     assert d.verify() == []
     d.data["pliego:sequence"]["steps"][3]["release_joins"] = ["nope"]
-    assert (22, "release_joins") in _codes(d)
+    assert (21, "release_joins") in _codes(d)
     d.data["pliego:sequence"]["steps"][3]["release_joins"] = []
     d.data["pliego:sequence"]["steps"][1]["release_joins"] = ["tab"]  # the step that activates it
-    assert (22, "release_joins") in _codes(d)
+    assert (21, "release_joins") in _codes(d)
 
 
 def test_keyed_mechanism_rules(stocks):
@@ -57,9 +57,9 @@ def test_keyed_mechanism_rules(stocks):
     d = a.build(stocks=stocks)
     assert d.verify() == []
     d.data["pliego:mechanisms"][0]["keys"] = [[0, 0], [0, 1]]
-    assert (20, "keys_order") in _codes(d)
+    assert (19, "keys_order") in _codes(d)
     d.data["pliego:mechanisms"][0]["keys"] = [[0, 0], [400, 1]]
-    assert (20, "period") in _codes(d)
+    assert (19, "period") in _codes(d)
     d.data["pliego:mechanisms"][0]["keys"] = [[0, 0], [90, 1]]
     d.data["pliego:mechanisms"][0]["ride"] = "spin"
-    assert (20, "ride_cycle") in _codes(d)
+    assert (19, "ride_cycle") in _codes(d)

@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Runtime of step-gated joins (spec §5.21, src/gates.js). Each substep, after the drivers have
+ * Runtime of step-gated joins (spec §5.19, src/gates.js). Each substep, after the drivers have
  * moved the sequence position, every gated join is switched on or off by the gate rule. A join
  * that switches on is created **from the current geometry**:
  *

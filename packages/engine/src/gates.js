@@ -1,10 +1,10 @@
 // @ts-check
 /**
- * Step-gated joins (spec §5.21–§5.22): when a join holds, read from the fold program.
+ * Step-gated joins (spec §5.19–§5.20): when a join holds, read from the fold program.
  *
  * - `active_from` (glue, pivot, string, pin): a step id or 0-based index. The join is inactive
  *   until that step has begun (sequence position p > k) and active from then on.
- * - step `release_joins` (§5.22): join ids the step unties. From the moment that step has begun
+ * - step `release_joins` (§5.20): join ids the step unties. From the moment that step has begun
  *   (p > r) the join no longer holds; it stays released in later steps.
  * Scrubbing the program back re-applies the same rule (a join is a function of p).
  *
@@ -56,7 +56,7 @@ export function gateHolds(g, p) {
 }
 
 /**
- * Rules 21 (and 22): `active_from` and `release_joins` are well formed. Appends problems to P.
+ * Rules 20 (and 21): `active_from` and `release_joins` are well formed. Appends problems to P.
  * @param {any[]} joins @param {any} seq @param {string[]} P
  */
 export function checkJoinGates(joins, seq, P) {
@@ -67,25 +67,25 @@ export function checkJoinGates(joins, seq, P) {
   joins.forEach((j, i) => {
     if (!j || j.active_from === undefined) return;
     const w = `pliego:joins[${i}] (${j.id})`;
-    if (!GATED_TYPES.has(j.type)) P.push(`rule 21: ${w} type ${j.type} cannot carry active_from`);
-    else if (!steps.length) P.push(`rule 21: ${w}.active_from needs a pliego:sequence`);
-    else if (stepIndex(steps, j.active_from) < 0) P.push(`rule 21: ${w}.active_from ${JSON.stringify(j.active_from)} is not a step id or index of the program`);
+    if (!GATED_TYPES.has(j.type)) P.push(`rule 20: ${w} type ${j.type} cannot carry active_from`);
+    else if (!steps.length) P.push(`rule 20: ${w}.active_from needs a pliego:sequence`);
+    else if (stepIndex(steps, j.active_from) < 0) P.push(`rule 20: ${w}.active_from ${JSON.stringify(j.active_from)} is not a step id or index of the program`);
   });
   /** @type {Map<string, number>} */
   const released = new Map();
   steps.forEach((/** @type {any} */ st, /** @type {number} */ r) => {
     if (!st || st.release_joins === undefined) return;
     const w = `pliego:sequence.steps[${r}]`;
-    if (!Array.isArray(st.release_joins)) { P.push(`rule 22: ${w}.release_joins must be an array of join ids`); return; }
+    if (!Array.isArray(st.release_joins)) { P.push(`rule 21: ${w}.release_joins must be an array of join ids`); return; }
     for (const id of st.release_joins) {
       const j = byId.get(id);
-      if (!j) { P.push(`rule 22: ${w}.release_joins names ${JSON.stringify(id)}, which is not a join`); continue; }
-      if (!GATED_TYPES.has(j.type)) { P.push(`rule 22: ${w}.release_joins: join ${id} is a ${j.type}, which cannot be released`); continue; }
-      if (released.has(id)) { P.push(`rule 22: ${w}.release_joins: join ${id} is already released at step ${released.get(id)}`); continue; }
+      if (!j) { P.push(`rule 21: ${w}.release_joins names ${JSON.stringify(id)}, which is not a join`); continue; }
+      if (!GATED_TYPES.has(j.type)) { P.push(`rule 21: ${w}.release_joins: join ${id} is a ${j.type}, which cannot be released`); continue; }
+      if (released.has(id)) { P.push(`rule 21: ${w}.release_joins: join ${id} is already released at step ${released.get(id)}`); continue; }
       released.set(id, r);
       if (j.active_from !== undefined) {
         const k = stepIndex(steps, j.active_from);
-        if (k >= 0 && r <= k) P.push(`rule 22: ${w}.release_joins: join ${id} is released at or before the step that activates it (${k})`);
+        if (k >= 0 && r <= k) P.push(`rule 21: ${w}.release_joins: join ${id} is released at or before the step that activates it (${k})`);
       }
     }
   });

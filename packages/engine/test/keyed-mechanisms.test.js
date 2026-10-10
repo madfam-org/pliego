@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Keyed mechanisms (spec §5.20, backlog item 16b): a table maps the control value to a mechanism's
+ * Keyed mechanisms (spec §5.18, backlog item 16b): a table maps the control value to a mechanism's
  * angle or travel, linear between keys, optionally periodic; `ride` carries one mechanism on
  * another. Each test runs the engine AND the studio's preview stub on the same document.
  */
@@ -104,10 +104,10 @@ test('keyed cam follower tracks an eccentric cam over two turns (engine and prev
   assert.ok(off > 5);
 });
 
-test('rule 20: malformed keys, periods and rides fail closed', () => {
+test('rule 19: malformed keys, periods and rides fail closed', () => {
   const bad = (/** @type {(d: any) => void} */ edit) => { const d = fourBar({ keyed: true }).doc; edit(d); return () => loadDocument(d); };
   const turn = (/** @type {any} */ d, /** @type {string} */ id) => d['pliego:mechanisms'].find((/** @type {any} */ m) => m.id === id);
-  assert.throws(bad((d) => { turn(d, 'turn-rocker').keys = [[0, 0]]; }), /rule 20.*≥ 2/);
+  assert.throws(bad((d) => { turn(d, 'turn-rocker').keys = [[0, 0]]; }), /rule 19.*≥ 2/);
   assert.throws(bad((d) => { turn(d, 'turn-rocker').keys = [[0, 0], [0, 1]]; }), /increase strictly/);
   assert.throws(bad((d) => { turn(d, 'turn-rocker').period = -1; }), /period must be > 0/);
   assert.throws(bad((d) => { turn(d, 'turn-rocker').period = 90; }), /span more than one period/);

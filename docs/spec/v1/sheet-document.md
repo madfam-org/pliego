@@ -574,9 +574,9 @@ places the front art on its `art` layer; PDF, DXF and HPGL ignore art for now (e
 is a backlog item).
 <!-- lane H (w3/hardening) §5.17: end -->
 
-<!-- §5.20–§5.22 added by wave 3 lane E (engine). Delimited for the coordinator, who renumbers at integration. -->
+<!-- lane E (wave 3) §5.18–§5.20: begin -->
 
-### 5.20 Keyed mechanisms — `keys`, `period`, `ride`
+### 5.18 Keyed mechanisms — `keys`, `period`, `ride`
 
 A mechanism moves linearly in its control by default (§5.4). Three optional fields let one control
 drive non-linear motion exactly: couplers, crank-rockers and cam followers.
@@ -592,7 +592,7 @@ The engine and the studio preview evaluate the same table; between keys the moti
 blend of the outputs, so authors sample the closed form finely enough for the linkage to stay
 within tolerance (5° keys keep a 76 mm coupler within 0.04 mm of its rocker pin).
 
-### 5.21 Step-activated joins — `active_from`
+### 5.19 Step-activated joins — `active_from`
 
 A `glue`, `pivot`, `string` or `pin` join may carry `active_from`: a step id of the fold program
 (§5.6), or its 0-based index. The join does not hold until that step has begun (sequence position
@@ -618,21 +618,21 @@ making — flat at t = 0 — and still end glued.
   while a glue within one sheet holds, a `release` of a crease on the face-tree path between the
   tab's face and its zone's face (the loop the glue closes) leaves that crease where it is.
 
-### 5.22 Untying joins — step `release_joins`
+### 5.20 Untying joins — step `release_joins`
 
 A step may list `release_joins`: ids of `glue`, `pivot`, `string` or `pin` joins it unties. From the
 moment that step has begun (p > r) the join no longer holds, and it stays released in later steps
 (the state-between-steps rule of §5.6); scrubbing back before the step ties it again. A carousel
 book's ribbons are untied before it opens; a brad comes out; a pinned sheet is let go.
 
-- A join is released at most once, by a step after the one that activates it (§5.21).
+- A join is released at most once, by a step after the one that activates it (§5.19).
 - A released join that has no `active_from` holds from the start; a released glue without
   `active_from` still satisfies rule 9 in the `initial` frame.
 - The engine treats a released pin as a stiff anchor (not a fixed vertex), so letting it go
   changes no simulation topology. In the preview, releasing a glue within one sheet ends the
-  crease lock of §5.21 from that step on.
+  crease lock of §5.19 from that step on.
 
-<!-- end of lane E §5.20–§5.22 block -->
+<!-- lane E (wave 3) §5.18–§5.20: end -->
 
 ## 6. `file_frames` — 3-D states
 
@@ -672,7 +672,7 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
 8. Every sequence target references an `M`/`V`/`F` edge; angles are in [−180, 180].
 9. If `initial` is present, its edge lengths match the layout lengths within 1e-3 relative error
    (sheets are developable — folding never stretches paper), and every glue weld (except a
-   step-activated one, §5.21) is satisfied within
+   step-activated one, §5.19) is satisfied within
    `collision_thickness`: each vertex of the glue `region` polygon, mapped to sheet *b*, lies within
    `max(collision_thickness(a), collision_thickness(b))` of its image on *b* in the `initial` frame.
 10. `pliego:meta.digest`, when present, matches.
@@ -716,18 +716,18 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     and (SVG) carries no script, event handler, foreignObject, `javascript:` URL, DOCTYPE/ENTITY,
     `@import` or external reference (`art_source`).
 <!-- lane H (w3/hardening) rule 18: end -->
-<!-- rules 20–22 added by wave 3 lane E (engine); the coordinator renumbers at integration. -->
-20. Keyed mechanisms (§5.20): `keys` appear only on `hinge`, `rotate`, `leaf`, `translate` and
+<!-- lane E (wave 3) rules 19–21: begin -->
+19. Keyed mechanisms (§5.18): `keys` appear only on `hinge`, `rotate`, `leaf`, `translate` and
     `slide`, as ≥ 2 number pairs with strictly increasing control values; `translate` outputs lie
     within ±`travel` and `slide` outputs within [0, `travel`]; `period` > 0, only with `keys`, and
     the keys span at most one period; `ride` names a `hinge`, `rotate` or `translate` mechanism,
     appears only on those types, and rides form no cycle.
-21. Step-activated joins (§5.21): `active_from` appears only on `glue`, `pivot`, `string` and
+20. Step-activated joins (§5.19): `active_from` appears only on `glue`, `pivot`, `string` and
     `pin` joins of a document with a fold program, and names a step id or a step index of it.
-22. Untying (§5.22): every `release_joins` entry names an existing `glue`, `pivot`, `string` or
+21. Untying (§5.20): every `release_joins` entry names an existing `glue`, `pivot`, `string` or
     `pin` join; no join is released twice; a join with `active_from` is released only by a later
     step.
-<!-- end of lane E rules -->
+<!-- lane E (wave 3) rules 19–21: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

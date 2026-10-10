@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Step-activated joins (spec §5.21, backlog item 16d): a glue that holds from a chosen step, so a
+ * Step-activated joins (spec §5.19, backlog item 16d): a glue that holds from a chosen step, so a
  * fold program shows the making and still ends glued. Engine and preview stub on one document.
  */
 import test from 'node:test';
@@ -120,12 +120,12 @@ test('preview stub: a crease on the glued loop does not spring back after the gl
   assert.ok(pass);
 });
 
-test('rule 21: active_from must resolve to a step of the program and suits glue, pivot, string, pin', () => {
+test('rule 20: active_from must resolve to a step of the program and suits glue, pivot, string, pin', () => {
   const g = gluedFold();
   g.doc['pliego:joins'][0].active_from = 'nope';
-  assert.throws(() => loadDocument(g.doc), /rule 21.*not a step id or index/);
+  assert.throws(() => loadDocument(g.doc), /rule 20.*not a step id or index/);
   g.doc['pliego:joins'][0].active_from = 7;
-  assert.throws(() => loadDocument(g.doc), /rule 21/);
+  assert.throws(() => loadDocument(g.doc), /rule 20/);
   g.doc['pliego:joins'][0].active_from = 1;
   assert.doesNotThrow(() => loadDocument(g.doc));
   const h = gluedFold();

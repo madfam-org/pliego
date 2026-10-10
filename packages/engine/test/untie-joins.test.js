@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Untie and release joins (spec §5.22, backlog item 12): a step lists `release_joins`, and from
+ * Untie and release joins (spec §5.20, backlog item 12): a step lists `release_joins`, and from
  * that step on the joins no longer hold — a carousel book's tie ribbons are untied before it opens.
  */
 import test from 'node:test';
@@ -59,16 +59,16 @@ test('preview stub: glue released by a later step stops holding its loop', () =>
   assert.ok(pass);
 });
 
-test('rule 22: release_joins names existing gateable joins once, after they take hold', () => {
+test('rule 21: release_joins names existing gateable joins once, after they take hold', () => {
   const base = () => tiedFold();
   const steps = (/** @type {any} */ g) => g.doc['pliego:sequence'].steps;
   let g = base(); steps(g)[3].release_joins = ['nope'];
-  assert.throws(() => loadDocument(g.doc), /rule 22.*not a join/);
+  assert.throws(() => loadDocument(g.doc), /rule 21.*not a join/);
   g = base(); steps(g)[2].release_joins = ['tie'];
-  assert.throws(() => loadDocument(g.doc), /rule 22.*already released/);
+  assert.throws(() => loadDocument(g.doc), /rule 21.*already released/);
   g = base(); steps(g)[3].release_joins = []; steps(g)[1].release_joins = ['tie'];
-  assert.throws(() => loadDocument(g.doc), /rule 22.*at or before the step that activates it/);
+  assert.throws(() => loadDocument(g.doc), /rule 21.*at or before the step that activates it/);
   g = base(); steps(g)[3].release_joins = 'tie';
-  assert.throws(() => loadDocument(g.doc), /rule 22.*must be an array/);
+  assert.throws(() => loadDocument(g.doc), /rule 21.*must be an array/);
   assert.doesNotThrow(() => loadDocument(base().doc));
 });

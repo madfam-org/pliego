@@ -210,7 +210,7 @@ The direction is the World option `windDir` (default +Z) until the contract adds
   mechanism's neutral value (0; a hinge's `rest`) reproduces the document's initial pose better;
   then it starts there and moves to the default at `mechanismRate` (no first-substep teleport;
   `World.warnings` says so). Keyed mechanisms, `ride`, step-activated joins and untying: spec
-  §5.20–§5.22.
+  §5.18–§5.20.
 - **The ground:** `y ≥ 0`, with the paper's mid-surface resting on the table.
 - **Board:** works through the same path.
   - The caliper is the contact gap.

@@ -39,7 +39,17 @@ export class Contact {
     /** @type {Map<number, number>} memorised sidedness, key v·nT + t */
     this.side = new Map();
     this.active = 0;
-    this.weldSheet = w.weldSheet;
+    // contact exclusion around welds: a vertex within two mesh rings of a vertex glued to sheet b
+    // does not collide with b (the hinge at a glue line lies on b; its side is undetermined there)
+    const near = Int32Array.from(w.weldSheet);
+    for (let ring = 0; ring < 2; ring++) {
+      const prev = Int32Array.from(near);
+      for (let v = 0; v < mesh.nV; v++) {
+        if (prev[v] >= 0) continue;
+        for (let q = deg[v]; q < deg[v + 1]; q++) { const u = adj[q]; if (prev[u] >= 0) { near[v] = prev[u]; break; } }
+      }
+    }
+    this.weldSheet = near;
     this.mark = new Int32Array(mesh.nV).fill(-1);
   }
 

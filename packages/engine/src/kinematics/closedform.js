@@ -56,20 +56,13 @@ export function miuraPoisson(gamma, theta) {
 }
 
 /**
- * Miura fold angles for facet angle θ: the zig-zag creases (ρ_z) and the straight creases (ρ_s).
- * From the degree-4 mode-1 relation with sectors (γ, γ, π−γ, π−γ) and the facet geometry:
- * the straight crease dihedral is π − 2·ψ where sin ψ = sinθ·sinγ… solved here numerically-free:
- * cos(ρ_s) and ρ_z follow from the unit cell (returns radians, valley-positive for ρ_s).
+ * Miura fold angles for facet angle θ (radians): zig-zag creases |ρ_z| = 2θ, straight creases
+ * |ρ_s| = 2·atan(cos γ · tan θ) (degree-4 mode 1 at every vertex with sectors γ, γ, π−γ, π−γ).
+ * Verified against the face-tree pose (facet angle measured = θ) by test `E6-miura`.
  * @param {number} gamma @param {number} theta
  */
 export function miuraFoldAngles(gamma, theta) {
-  // the straight (collinear) creases: two facets meeting along a straight crease, each tilted θ to
-  // the base plane in the cross section → dihedral fold angle 2θ.
-  const rs = 2 * theta;
-  // zig-zag creases from mode 1 of the vertex (ρ_s plays ρ₂, the zig-zags ρ₁ = ρ₃)
-  const m = -Math.cos(gamma); // degree4Multipliers(γ, γ).mode1
-  const rz = 2 * Math.atan(Math.tan(rs / 2) / m);
-  return { straight: rs, zigzag: rz };
+  return { zigzag: 2 * theta, straight: 2 * Math.atan(Math.cos(gamma) * Math.tan(theta)) };
 }
 
 /**

@@ -3,8 +3,8 @@
  * Joins (spec §5.3) resolved against the simulation mesh. Points are sheet-local; each is located
  * on the mesh (triangle + barycentric weights), so joins do not depend on mesh resolution.
  *
- * - glue: every mesh vertex of sheet a inside `region` is welded to the mapped point on sheet b,
- *   offset by the contact distance along b's normal on the `side` the tab lies on.
+ * - glue: every mesh vertex of sheet a inside `region` is welded to the mapped point on sheet b
+ *   (zero offset; `side` only tells the renderer which face of b the tab lies on).
  * - pivot: the two points coincide (offset kept along b's normal as at t = 0: two layers).
  * - string: unilateral |p_a − p_b| ≤ length.
  * - slider: the point stays on the track line (0 ≤ s ≤ |track| enforced by projection); driven by a
@@ -69,7 +69,10 @@ export function resolveJoins(doc, mesh, kHard) {
       const sa = si(j.a.sheet), sb = si(j.b.sheet);
       const reg = j.a.region.flatMap((/** @type {number[]} */ p) => p);
       const [ma, mb, mc, md, tx, ty] = j.map;
-      const off = (j.side === 'back' ? -1 : 1) * Math.max(doc.sheets[sa].derived.collision_thickness, doc.sheets[sb].derived.collision_thickness, 0.05) * 1.01;
+      // the weld point is on b's surface (zero offset): a thickness offset applied along b's normal
+      // breaks the zero-thickness linkage at hinges between glued panels (measured: 8 % local strain
+      // at a V-fold vertex). Contact between the tab and b is skipped; `side` is a render hint.
+      const off = 0;
       for (let v = 0; v < mesh.nV; v++) {
         if (mesh.vSheet[v] !== sa) continue;
         const u = mesh.uv[2 * v], w = mesh.uv[2 * v + 1];

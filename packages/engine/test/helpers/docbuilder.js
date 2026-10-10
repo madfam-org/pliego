@@ -21,8 +21,9 @@ export const STOCKS = {
 };
 
 export class DocBuilder {
-  constructor(title = 'test document') {
+  constructor(title = 'test document', { exact = false } = {}) {
     this.title = title;
+    this.exact = exact;
     /** @type {any[]} */ this.sheets = [];
     /** @type {number[][]} */ this.V = [];
     /** @type {number[]} */ this.vSheet = [];
@@ -112,7 +113,7 @@ export class DocBuilder {
       frame_classes: ['creasePattern'],
       frame_attributes: ['2D', this.E.some((e) => e.assignment === 'C') ? 'cuts' : 'noCuts', hasJoins ? 'joins' : 'noJoins'],
       frame_unit: 'mm',
-      vertices_coords: this.V.map((p) => [round(p[0]), round(p[1])]),
+      vertices_coords: this.V.map((p) => (this.exact ? [p[0], p[1]] : [round(p[0]), round(p[1])])),
       edges_vertices: this.E.map((e) => [e.a, e.b]),
       edges_assignment: this.E.map((e) => e.assignment),
       edges_foldAngle: this.E.map((e) => e.angle),
@@ -238,8 +239,8 @@ export function twoSheetStack({ size = 80, gap = 6, height = 20, stock = 'copy-8
  * α = (α₁, α₂, α₃, α₄) degrees (α_i between creases i and i+1). Assignments from `signs` (+1 V, −1 M).
  * Returns {doc, creases: [e1..e4], builder}.
  */
-export function degree4({ alpha = [70, 80, 110, 100], size = 160, phi0 = 15, signs = [1, -1, 1, 1], stock = 'copy-80' } = {}) {
-  const b = new DocBuilder('degree-4 vertex');
+export function degree4({ alpha = [70, 80, 110, 100], size = 160, phi0 = 15, signs = [1, -1, 1, 1], stock = 'copy-80', exact = false } = {}) {
+  const b = new DocBuilder('degree-4 vertex', { exact });
   const s = b.sheet({ id: 'vertex', stock, width: size, height: size });
   const c = size / 2;
   const phis = [phi0];
@@ -284,8 +285,8 @@ export function degree4({ alpha = [70, 80, 110, 100], size = 160, phi0 = 15, sig
  * Zig-zag rows run along u; straight creases along v. Assignments follow the Miura pattern.
  * Returns {doc, zig: edge[][], straight: edge[][], grid: vertex[][]}.
  */
-export function miura({ nx = 4, ny = 4, a = 20, b: bb = 20, gamma = 60, stock = 'copy-80' } = {}) {
-  const B = new DocBuilder('miura-ori');
+export function miura({ nx = 4, ny = 4, a = 20, b: bb = 20, gamma = 60, stock = 'copy-80', exact = false } = {}) {
+  const B = new DocBuilder('miura-ori', { exact });
   const g = (gamma * Math.PI) / 180;
   const lx = a * Math.sin(g), dy = a * Math.cos(g);
   const W = nx * lx, H = ny * bb + dy;
@@ -318,4 +319,61 @@ export async function withInitialPose(json, anglesDeg) {
   for (let v = 0; v < doc.nV; v++) coords.push([X[3 * v], X[3 * v + 1], X[3 * v + 2]].map(round));
   out.file_frames = [{ frame_title: 'initial', frame_classes: ['foldedForm'], frame_attributes: ['3D'], frame_inherit: true, frame_parent: 0, vertices_coords: coords }];
   return out;
+}
+
+/**
+ * V-fold pop-up card: two kinematic cardstock boards (left fixed by mechanism `base`, right turned
+ * by hinge `open` about the gutter) and a cardstock V piece (fan of tab | panel | panel | tab around
+ * a vertex on the gutter, glue lines at ±α from the centre fold). The initial frame stands at the
+ * default spread `open0` with the piece posed rigidly (degree-4 mode 1), as the kernel emits it.
+ * Glue regions stop 2 mm short of the vertex (the vertex itself is not welded to both boards).
+ */
+export async function vfoldCard({ W = 100, H = 140, alpha = 60, beta = 25, R = 50, stock = 'cardstock-250', open0 = 150 } = {}) {
+  const b = new DocBuilder('v-fold card');
+  b.rect({ id: 'board-left', stock, width: W, height: H, placement: { origin: [-W, 0, 0], rotation: [0, 0, 0, 1] }, kinematic: { mechanism: 'base' } });
+  b.rect({ id: 'board-right', stock, width: W, height: H, placement: { origin: [0, 0, 0], rotation: [0, 0, 0, 1] }, kinematic: { mechanism: 'open' } });
+  const c = R;
+  const s = b.sheet({ id: 'piece', stock, width: 2 * R, height: R, placement: { origin: [-c, 0, -H / 2], rotation: [0, 0, 0, 1] }, color: '#c8553d' });
+  const D = Math.PI / 180;
+  const at = (/** @type {number} */ r, /** @type {number} */ deg) => [c + r * Math.cos(deg * D), r * Math.sin(deg * D)];
+  const P = (/** @type {number} */ deg) => { const q = at(R, deg); return b.vertex(s, q[0], q[1]); };
+  const V = b.vertex(s, c, 0);
+  const pTr = P(90 - alpha - beta), pGr = P(90 - alpha), pC = P(90), pGl = P(90 + alpha), pTl = P(90 + alpha + beta);
+  b.face([V, pTr, pGr]); b.face([V, pGr, pC]); b.face([V, pC, pGl]);
+  const tabL = b.face([V, pGl, pTl]);
+  const centre = b.assign(V, pC, 'M', -180, 'score');
+  const glueR = b.assign(V, pGr, 'V', 180, 'score');
+  const glueL = b.assign(V, pGl, 'V', 180, 'score');
+  const r0 = 2;
+  b.joins.push({ id: 'glue-right', type: 'glue', a: { sheet: 'piece', region: [at(r0, 90 - alpha - beta), at(R, 90 - alpha - beta), at(R, 90 - alpha), at(r0, 90 - alpha)] }, b: { sheet: 'board-right' }, map: [1, 0, 0, 1, -c, H / 2], side: 'front' });
+  b.joins.push({ id: 'glue-left', type: 'glue', a: { sheet: 'piece', region: [at(r0, 90 + alpha), at(R, 90 + alpha), at(R, 90 + alpha + beta), at(r0, 90 + alpha + beta)] }, b: { sheet: 'board-left' }, map: [1, 0, 0, 1, W - c, H / 2], side: 'front' });
+  b.mechanisms.push({ id: 'open', type: 'hinge', axis: { origin: [0, 0, 0], direction: [0, 0, -1] }, angle_control: 'open', rest: 180, sheets_moving: ['board-right'] });
+  b.mechanisms.push({ id: 'base', type: 'hinge', axis: { origin: [0, 0, 0], direction: [0, 0, -1] }, angle_control: 'base', rest: 0, sheets_moving: ['board-left'] });
+  b.control({ id: 'open', kind: 'angle', min: 0, max: 180, default: open0, unit: 'deg' });
+  b.control({ id: 'base', kind: 'angle', min: 0, max: 0, default: 0, unit: 'deg' });
+  // initial frame: right board turned by ρ_g = 180 − open0 about −z; piece posed from the left tab
+  const rg = (180 - open0) * D;
+  const glue = 2 * Math.atan(Math.tan(rg / 2) / Math.cos(alpha * D));
+  const { loadDocument } = await import('../../src/document.js');
+  const { FaceTree } = await import('../../src/kinematics/facetree.js');
+  const flat = b.build();
+  const doc = loadDocument(flat);
+  const rho = new Float64Array(doc.nE);
+  rho[centre] = -rg; rho[glueR] = glue; rho[glueL] = glue;
+  const X = new Float64Array(3 * doc.nV);
+  new FaceTree(doc, 2, tabL).pose(rho, X);
+  const placed = b.placedCoords();
+  const cr = Math.cos(-rg), sr = Math.sin(-rg); // rotation about −z by −(rg)… i.e. +rg about +z lifts the right board
+  const coords = placed.map((p, v) => {
+    if (b.vSheet[v] === 2) return [X[3 * v], X[3 * v + 1], X[3 * v + 2]];
+    if (b.vSheet[v] === 1) return [p[0] * Math.cos(rg) - p[1] * Math.sin(rg), p[0] * Math.sin(rg) + p[1] * Math.cos(rg), p[2]];
+    return p;
+  });
+  void cr; void sr;
+  // the piece was creased and set at the default spread (crease memory = initial angles)
+  flat['pliego:edges_restAngle'][centre] = round(-rg / D);
+  flat['pliego:edges_restAngle'][glueR] = round(glue / D);
+  flat['pliego:edges_restAngle'][glueL] = round(glue / D);
+  flat.file_frames = [{ frame_title: 'initial', frame_classes: ['foldedForm'], frame_attributes: ['3D'], frame_inherit: true, frame_parent: 0, vertices_coords: coords.map((p) => p.map(round)) }];
+  return { doc: flat, centre, glueR, glueL, alpha };
 }

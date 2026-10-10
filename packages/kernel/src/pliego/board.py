@@ -241,3 +241,23 @@ def physical_values(model: BoardModel) -> dict[str, float]:
     """The card ``physical`` values a construction implies (rounded as the card stores them)."""
     return {"gsm": round(model.gsm, 1), "caliper_um": round(model.caliper_mm * 1000.0, 1),
             "E_md_gpa": round(model.E_md_gpa, 4), "E_cd_gpa": round(model.E_cd_gpa, 4)}
+
+
+def construction(slug: str) -> dict:
+    """The ``construction`` block of a committed board stock (a copy), for generators that draw
+    the board they fold (``pliego.corrugate``); fails loud for a stock without one."""
+    import copy
+
+    from .stock import load_card
+
+    card = load_card(slug)
+    if not isinstance(card.get("construction"), dict):
+        raise BoardError(f"stock {slug!r} has no construction block")
+    return copy.deepcopy(card["construction"])
+
+
+def caliper(slug: str) -> float:
+    """Caliper (mm) of a committed stock — the thickness dieline generators compensate for."""
+    from .stock import load_card
+
+    return float(load_card(slug)["derived"]["thickness"])

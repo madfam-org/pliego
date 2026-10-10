@@ -94,3 +94,17 @@ def test_section_sheet_verifies_scaled():
     doc = pliego.Assembly([sheet]).build()
     assert not [i for i in doc.verify() if i["level"] == "error"]
     assert len(sheet.holes) >= 8
+
+
+@pytest.mark.parametrize("flutes_up", [False, True])
+def test_single_face_section_has_a_scalloped_edge(flutes_up):
+    c = _construction("corrugated-single-face-b")
+    if flutes_up:
+        c = dict(c, layers=list(reversed(c["layers"])))
+    outline, voids = corrugate.section(c, 6)
+    caliper = corrugate.stack(c)[-1].z1
+    zs = [z for _, z in outline]
+    assert len(outline) > 20 and voids                 # scalloped edge, voids on the liner side
+    assert min(zs) == pytest.approx(0.0, abs=0.2) and max(zs) == pytest.approx(caliper, abs=0.2)
+    sheet = corrugate.section_sheet("s", c, 6, scale=4)
+    assert not [i for i in pliego.Assembly([sheet]).build().verify() if i["level"] == "error"]

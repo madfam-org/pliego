@@ -288,7 +288,10 @@ def slice_block(scene: Scene, *, size: tuple[float, float] = (70.0, 70.0),
     `fabrication=True` slices every real sheet (height / caliper of `stock`). `min_feature` (mm)
     is the smallest kept bridge or removed slit; the grid step defaults to half of it.
     `tear_grid`: excess chunks per side (1 = no tear lines). `contour`: cut | perforation |
-    halfcut; `tear`: perforation | cut. `spine`: pad the back edge (v = depth)."""
+    halfcut; `tear`: perforation | cut. `spine`: pad the back edge (v = depth). `margin` (mm, at
+    least twice the minimum feature) keeps material off the block's edge so the excess always
+    forms a frame. `report` counts layers, pieces, vertices, overhang layers and what the
+    minimum-feature rules dropped."""
     w, d = float(size[0]), float(size[1])
     if not (w > 0 and d > 0 and height > 0 and math.isfinite(w + d + height)):
         raise ValueError("block size and height must be positive")
@@ -401,9 +404,9 @@ def slice_block(scene: Scene, *, size: tuple[float, float] = (70.0, 70.0),
                 polygon_area([verts[v] for v in arr.faces[f]]) for f in reg) < mf * mf]
             if not small or not tears:
                 break
-            near = [verts[v] for reg in small for f in reg for v in arr.faces[f]]
+            corners = [verts[v] for reg in small for f in reg for v in arr.faces[f]]
             bad = {k for k, (p, q) in enumerate(tears)
-                   if any(dist_point_segment(sp, p, q) < 1e-5 for sp in near)}
+                   if any(dist_point_segment(sp, p, q) < 1e-5 for sp in corners)}
             if not bad:
                 break
             dropped_tears += len(bad)

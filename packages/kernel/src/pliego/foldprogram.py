@@ -25,7 +25,18 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 from . import flatmotion, flatops
-from .flatstate import TOL, FlatState, FlatStateError, as_line, centroid, embed3, pt, side
+from .flatstate import (
+    TOL,
+    FlatState,
+    FlatStateError,
+    as_line,
+    centroid,
+    embed3,
+    overlap,
+    pt,
+    side,
+    xf_apply,
+)
 
 UNFOLD = {"en": "Unfold", "es": "Desdobla", "fr": "Dépliez", "pt": "Desdobre"}
 TURN = {"en": "Turn over. ", "es": "Da la vuelta. ", "fr": "Retournez. ", "pt": "Vire. "}
@@ -73,6 +84,11 @@ class Built:
         3-D pose), folded creases opened by `open_deg` so stacked layers stay apart."""
         ang = self.pose_angles if pose else self.final_angles
         return {"angles": dict(ang), "root": self.root()}
+
+    def face_orders(self) -> list[list[int]]:
+        """The final flat state's complete layer order as FOLD ``faceOrders`` on the crease
+        pattern's faces (see `face_orders`)."""
+        return face_orders(self.state, self.arr)
 
     def root(self) -> tuple[float, float]:
         verts = self.arr.vertices
@@ -182,7 +198,9 @@ class FoldProgram:
     def hinges(self, sid: str, label, specs: list[dict], ms: int = 1200, substeps: int = 4,
                note=None) -> FoldProgram:
         """Several flaps turning at once (each spec: line, turn, at, layers=None,
-        from_="top"; see `hinge`); the flaps must not share a face."""
+        from_="top", leaf=None; see `hinge`; `leaf` = n picks the n-th of the flaps that meet
+        only along the line — the leaves of a book, counted from the top); the flaps must not
+        share a face."""
         st = self.state
         out, taken = [], set()
         for spec in specs:
@@ -192,13 +210,32 @@ class FoldProgram:
             on = {f for f in range(len(st.faces))
                   if side(p, d, centroid(st.image(f))) * sgn > 0}
             stack = flatops._stack_at(st, q, on)
-            layers = spec.get("layers")
-            if layers is not None:
-                stack = stack[-int(layers):] if spec.get("from_", "top") == "top" \
-                    else stack[:int(layers)]
-            grp = flatops.flood(st, set(stack), lambda f, on=on: f in on,
-                                lambda f, a, b, p=p, d=d: flatops._on_line(
-                                    st.faces[f].xf, st.points[a], st.points[b], p, d))
+
+            def flap(seeds, on=on, p=p, d=d):
+                return flatops.flood(st, set(seeds), on.__contains__,
+                                     lambda face, a, b: flatops._on_line(
+                                         st.faces[face].xf, st.points[a], st.points[b], p, d))
+            if spec.get("leaf") is not None:
+                # the n-th flap from the top (bottom with from_="bottom"): the layers at `at`
+                # split into flaps that meet only along the line
+                order = list(reversed(stack)) if spec.get("from_", "top") == "top" else stack
+                leaves, seen = [], set()
+                for f in order:
+                    if f not in seen:
+                        g = flap([f])
+                        leaves.append(g)
+                        seen |= g
+                n = int(spec["leaf"])
+                if not 0 <= n < len(leaves):
+                    raise FlatStateError(f"hinge '{sid}': leaf {n} asked, {len(leaves)} at the "
+                                         "point")
+                grp = leaves[n]
+            else:
+                layers = spec.get("layers")
+                if layers is not None:
+                    stack = stack[-int(layers):] if spec.get("from_", "top") == "top" \
+                        else stack[:int(layers)]
+                grp = flap(stack)
             for f in grp:
                 vals = [side(p, d, x) for x in st.image(f)]
                 if max(vals) > TOL and min(vals) < -TOL:
@@ -207,7 +244,8 @@ class FoldProgram:
             if len(grp) == len(st.faces):
                 raise FlatStateError(f"hinge '{sid}': the selection is the whole model")
             if grp & taken:
-                raise FlatStateError(f"hinge '{sid}': two flaps share a face")
+                raise FlatStateError(f"hinge '{sid}': two flaps share faces "
+                                     f"{sorted(grp & taken)[:6]}")
             taken |= grp
             out.append({"faces": sorted(grp), "p": p, "d": d, "turn": float(spec["turn"]),
                         "sense": sgn})
@@ -425,4 +463,28 @@ def edge_angles(state: FlatState, arr, edges: Sequence[int] | None = None) -> di
             if e in out or (edges is not None and e not in edges):
                 continue
             out[e] = 0.0 if m[f] == m[g] else state.crease_angle(m[f], m[g])
+    return out
+
+
+def face_orders(state: FlatState, arr) -> list[list[int]]:
+    """The complete layer order of a flat state on a kernel arrangement's faces, as FOLD
+    ``faceOrders`` triples [f, g, s]: s = +1 when face f lies on the side of face g's normal
+    (its front), −1 behind it. Every pair of overlapping faces on different layers is listed."""
+    cents = [centroid([(arr.vertices[v].x, arr.vertices[v].y) for v in f]) for f in arr.faces]
+    m = [state.face_at(c) for c in cents]
+    out: list[list[int]] = []
+    poly = []
+    for i, f in enumerate(arr.faces):
+        xf = state.faces[m[i]].xf
+        pts = [xf_apply(xf, (arr.vertices[v].x, arr.vertices[v].y)) for v in f]
+        poly.append(pts if not state.flipped(m[i]) else pts[::-1])
+    for i in range(len(arr.faces)):
+        for j in range(i + 1, len(arr.faces)):
+            if m[i] == m[j] or not overlap(poly[i], poly[j]):
+                continue
+            up = state.above(m[i], m[j])
+            if up is None:
+                continue
+            s_ij = 1 if up == (not state.flipped(m[j])) else -1
+            out.append([i, j, s_ij])
     return out

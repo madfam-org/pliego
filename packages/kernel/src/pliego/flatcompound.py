@@ -9,7 +9,7 @@ Moves of several rigid face groups at once, each returning a checked `pliego.fla
 - `squash(state, hinge, at=)`: the top flap stands up on its hinge, opens and is pressed flat
   symmetric about the hinge;
 - `petal(state, (K1, K2), tip)`: the top layer's petal turns up about the hinge K1–K2 while
-  its sides fold in along the kite lines Kᵢ–tip;
+  its sides fold in along the kite lines Kᵢ–tip and the layer under each side opens flat;
 - `rabbit_ear(state, (A, B, C), at=)`: the triangle's corners A and C fold in along their
   angle bisectors and the corner B stands up as an ear, laid flat towards side A–B.
 
@@ -241,8 +241,11 @@ def _refine(st: FlatState, par: list[int], line, faces: set[int]) -> tuple[FlatS
 
 def petal(state: FlatState, hinge, tip, *, at=None) -> Move:
     """Petal fold of the top layer: its petal (the triangle K1–K2–tip) turns up about the hinge
-    K1–K2 while each side folds in along the kite line Kᵢ–tip, the layer beneath the side
-    (joined to it at the flap edge through Kᵢ) opening flat with it."""
+    K1–K2 while each side folds in along the kite line Kᵢ–tip, and the layer beneath the side
+    (joined to it at the flap edge through Kᵢ) opens flat with it, folding onto the rest of its
+    layer along the one line that keeps both joints: the axis of R_h ∘ R_k ∘ R_e (the kite line
+    itself on a square flap such as the bird base's; from Kᵢ to the bottom of the kite on a
+    squashed preliminary flap, the frog base's)."""
     what = "petal fold"
     k1, k2, t = pt(hinge[0]), pt(hinge[1]), pt(tip)
     tri = [k1, k2, t] if (k2[0] - k1[0]) * (t[1] - k1[1]) - (k2[1] - k1[1]) * (t[0] - k1[0]) > 0 \
@@ -283,22 +286,32 @@ def petal(state: FlatState, hinge, tip, *, at=None) -> Move:
                                  "through the hinge end")
         ep, ed = as_line(st.segment_image(cr[0].f, cr[0].a, cr[0].b))
         seeds_par = {par[c.g if c.f in sf else c.f] for c in cr}
-        st, par = _refine(st, par, (kites[n][0], t),
+        # the inner layer folds onto itself along the line that keeps it joined to the side at
+        # the flap edge: the axis of R_h ∘ R_k ∘ R_e (the kite line itself on a square flap, as
+        # in the bird base; another line on other flaps, e.g. a squashed preliminary flap)
+        m = xf_compose(reflect_xf(hp, hd), xf_compose(reflect_xf(kites[n][1], kites[n][2]),
+                                                      reflect_xf(ep, ed)))
+        th = math.atan2(m[1], m[0]) / 2.0
+        kin = (math.cos(th), math.sin(th))
+        st, par = _refine(st, par, (kk, (kk[0] + kin[0], kk[1] + kin[1])),
                           {i for i in range(len(st.faces)) if par[i] in seeds_par})
-        edges.append((ep, ed, seeds_par))
+        edges.append((ep, ed, seeds_par, kin))
     group: dict[int, str] = {}
     xf: dict[str, Affine] = {"p": reflect_xf(hp, hd)}
     for i in range(len(st.faces)):
         if par[i] in layer and inside_convex(centroid(st.image(i)), tri, -TOL):
             group[i] = "p"
     msides = []
-    for n, (ep, ed, seeds_par) in enumerate(edges):
+    for n, (ep, ed, seeds_par, kin) in enumerate(edges):
         k, kp, kd, oside = kites[n]
         sf = sides(st, par, n)
+        cs_ = centroid([c for i in sf for c in st.image(i)])
+        ev = ed if ed[0] * (cs_[0] - k[0]) + ed[1] * (cs_[1] - k[1]) > 0 else (-ed[0], -ed[1])
+        eside = side(k, kin, (k[0] + ev[0], k[1] + ev[1]))
 
-        def beyond(f: int, st=st, kp=kp, kd=kd, oside=oside) -> bool:
+        def beyond(f: int, st=st, k=k, kin=kin, eside=eside) -> bool:
             c = centroid(st.image(f))
-            return side(kp, kd, c) * oside < 0 and side(hp, hd, c) * tside > 0
+            return side(k, kin, c) * eside > 0 and side(hp, hd, c) * tside > 0
         seeds = {i for i in range(len(st.faces)) if par[i] in seeds_par and beyond(i)}
         inner = flood(st, seeds, lambda f, st=st, beyond=beyond: par[f] not in layer
                       and beyond(f),
@@ -307,12 +320,16 @@ def petal(state: FlatState, hinge, tip, *, at=None) -> Move:
         xf[f"i{n}"] = xf_compose(xf[f"s{n}"], reflect_xf(ep, ed))
         group.update({i: f"s{n}" for i in sf})
         group.update({i: f"i{n}" for i in inner})
+        if not inner:
+            raise FlatStateError(f"{what}: no layer under the side at hinge end {n + 1}")
         tdir = (t[0] - k[0], t[1] - k[1])
         ln = math.hypot(*tdir)
         tdir = (tdir[0] / ln, tdir[1] / ln)
-        cs_ = centroid([c for i in sf for c in st.image(i)])
-        ev = ed if ed[0] * (cs_[0] - k[0]) + ed[1] * (cs_[1] - k[1]) > 0 else (-ed[0], -ed[1])
-        msides.append({"corner": k, "k": tdir, "e": ev, "kin": tdir, "side": sorted(sf),
+        ci = centroid([c for i in inner for c in st.image(i)])
+        kray = kin if kin[0] * (ci[0] - k[0]) + kin[1] * (ci[1] - k[1]) - \
+            (ev[0] * (ci[0] - k[0]) + ev[1] * (ci[1] - k[1])) * \
+            (kin[0] * ev[0] + kin[1] * ev[1]) > 0 else (-kin[0], -kin[1])
+        msides.append({"corner": k, "k": tdir, "e": ev, "kin": kray, "side": sorted(sf),
                        "inner": sorted(inner)})
     pet = sorted(i for i, g in group.items() if g == "p")
     motion = flatmotion.petal(pet, msides, k1, k2)

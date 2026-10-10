@@ -140,3 +140,26 @@ def test_rabbit_ear_rejects_a_triangle_off_the_paper():
     st = FlatState.of(SQUARE)
     with pytest.raises(FlatStateError):
         flatops.rabbit_ear(st, ((200, 0), (300, 0), (250, 80)))
+
+
+def test_frog_base_by_squashes_and_petal_folds():
+    fp, (o, b, kl, kr, t) = fm.frog_base()
+    st = fp.state
+    assert check(st) == []
+    reports, issues = flatfold.check(st.unfold("frog").build())
+    assert not [i for i in issues if i["level"] == "error"]
+    assert all(r.maekawa and r.flat_foldable for r in reports if r.maekawa is not None)
+    # the crease pattern has the frog base's four-fold symmetry about the sheet's centre
+    arr = st.unfold("frog").build()
+    pts = [(v.x, v.y) for v in arr.vertices]
+
+    def key(a, b):
+        return tuple(sorted((round(q[0], 3) + 0.0, round(q[1], 3) + 0.0) for q in (a, b)))
+    edges = [(pts[a], pts[b]) for (a, b), asg in zip(arr.edges, arr.assignment, strict=True)
+             if asg in ("M", "V", "F")]
+    lines = {key(a, b) for a, b in edges}
+    turned = {key((S - a[1], a[0]), (S - b[1], b[0])) for a, b in edges}
+    assert lines == turned
+    # four petals: the folded model is a long diamond a little over half as wide as the base
+    x0, _, x1, _ = st.bbox()
+    assert x1 - x0 < 0.31 * S

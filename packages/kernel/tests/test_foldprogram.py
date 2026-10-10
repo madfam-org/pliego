@@ -113,3 +113,22 @@ def test_operating_cycle_starts_from_the_finished_model():
     assert [i for i in doc.verify() if i["level"] == "error"] == []
     with pytest.raises(FlatStateError, match="no step"):
         fp.build(start_after="nope")
+
+
+def test_face_orders_are_complete_and_antisymmetric():
+    fp, _ = fm.bird_base()
+    b = fp.build()
+    fo = b.face_orders()
+    assert fo and all(s in (1, -1) for _, _, s in fo)
+    pairs = {(f, g) for f, g, _ in fo}
+    assert len(pairs) == len(fo) and not any((g, f) in pairs for f, g in pairs)
+    # faces adjacent across a folded crease: the kernel's local rule (valley +1, mountain −1)
+    full = {(f, g): s for f, g, s in fo}
+    local = pliego.flatfold.face_orders_local(b.arr)
+    checked = 0
+    for f, g, s in local:
+        got = full.get((f, g), full.get((g, f)))
+        if got is not None:
+            assert got == s
+            checked += 1
+    assert checked > 10

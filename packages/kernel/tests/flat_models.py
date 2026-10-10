@@ -138,3 +138,32 @@ def crane(s: float = 150.0, rise: float = 60.0, wings: str = "down"):
         fp.hinge("spread-f", "spread", wing, -90, at=low, layers=1)
         fp.hinge("spread-b", "spread", wing, 90, at=low, layers=1, from_="bottom")
     return fp, (o, b, kl, kr, y_pt)
+
+
+def frog_base(s: float = 150.0):
+    """Preliminary base → squash all four flaps (turning a page between the two on each side) →
+    petal-fold all four faces: the lifted point is the bottom of each face's top layer (an edge
+    midpoint of the square), and each kite line runs from it to the face's edges."""
+    fp = preliminary(s)
+    o, b, lft, rgt = corners(fp)
+    for tag in ("f", "b"):
+        fp.squash(f"squash-r-{tag}", "squash", (o, b), at=(rgt[0] - 12, rgt[1]), layers=1)
+        fp.fold(f"page-{tag}", "page", (b, o), "valley", at=(o[0] - 4, o[1] - 30), layers=2)
+        fp.squash(f"squash-l-{tag}", "squash", (o, b), at=(lft[0] + 12, lft[1]), layers=1)
+        fp.turn_over()
+    st = fp.state
+    x0, y0, x1, y1 = st.bbox()
+    o, b = st.vertex_near(((x0 + x1) / 2, y1)), st.vertex_near(((x0 + x1) / 2, y0))
+    t = st.vertex_near((o[0], (o[1] + b[1]) / 2 - (o[1] - b[1]) * 0.21), 1.0)
+    r2 = 1 / math.sqrt(2)
+    kl = meet(t, (-r2, r2), o, (x0 - o[0], t[1] - o[1]))
+    kr = meet(t, (r2, r2), o, (x1 - o[0], t[1] - o[1]))
+    seed = (o[0] + 3, (kl[1] + t[1]) / 2)
+    fp.petal("petal-1", "petal", (kl, kr), t, at=seed)
+    fp.turn_over()
+    fp.petal("petal-2", "petal", (kl, kr), t, at=seed)
+    fp.fold("page-3", "page", (o, b), "valley", at=(o[0] + 6, t[1] + 10), layers=3)
+    fp.petal("petal-3", "petal", (kl, kr), t, at=seed)
+    fp.fold("page-4", "page", (o, b), "valley", at=(o[0] - 6, t[1] + 10), layers=7)
+    fp.petal("petal-4", "petal", (kl, kr), t, at=seed)
+    return fp, (o, b, kl, kr, t)

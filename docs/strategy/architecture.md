@@ -64,7 +64,7 @@ pliego/                         (public, AGPL-3.0-only; docs MIT per ruling R72)
 ├── apps/
 │   ├── api/                    Flask 3 service: /api/v1 (catalog, documents, exports), /health, /ready
 │   └── web/                    static landing + studio (vanilla ES modules, self-contained WebGL2)
-├── materials/<slug>/stock.json paper stock cards (commons licence)
+├── materials/<slug>/stock.json paper stock cards (CERN-OHL-W-2.0, ruled 2026-10-10)
 ├── projects/                   git submodule → madfam-org/sheet-hyperobjects (pinned)
 ├── docs/                       spec/v1, strategy, interfaces, licenses, rulings
 ├── scripts/qa/                 fail-closed CI lanes (read-proof lines)
@@ -73,9 +73,9 @@ pliego/                         (public, AGPL-3.0-only; docs MIT per ruling R72)
 ```
 
 One container serves everything (Fashion Cabinet's shape): landing at `/`, studio at `/studio/`,
-engine modules at `/engine/`, API at `/api/v1/`. Hosts (proposed, pending the operator's word):
+engine modules at `/engine/`, API at `/api/v1/`. Hosts (ruled by the owner 2026-10-10):
 `pliego.madfam.io` (landing), `pliego-app.madfam.io` (studio), `pliego-api.madfam.io` (API) — flat
-labels, one Service. Container: Python 3.12 slim (digest-pinned), gunicorn, port 8000, metrics on
+labels, one Service; onboarding pending. Container: Python 3.12 slim (digest-pinned), gunicorn, port 8000, metrics on
 9090 (internal), uid 1001, read-only root filesystem, drop ALL, seccomp RuntimeDefault.
 
 ## 4. The commons: `sheet-hyperobjects`

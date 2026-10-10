@@ -347,11 +347,11 @@ jobs:
           kubeconform -strict -ignore-missing-schemas -summary "$RUNNER_TEMP/rendered.yaml"
           for needle in 'runAsNonRoot: true' 'readOnlyRootFilesystem: true' 'allowPrivilegeEscalation: false' \
                         'automountServiceAccountToken: false' 'type: RuntimeDefault' '- ALL' 'mountPath: /tmp' \
-                        'image: ghcr.io/madfam-org/pliego@sha256:'; do
+                        'image: ghcr.io/madfam-org/pliego@sha256:' 'enableServiceLinks: false'; do
             grep -qF -- "$needle" "$RUNNER_TEMP/rendered.yaml" || { echo "manifests: FAIL missing \`$needle\`"; exit 1; }
           done
           if grep -qE '^kind: (Ingress|Namespace)$' "$RUNNER_TEMP/rendered.yaml"; then echo "manifests: FAIL Ingress/Namespace in base"; exit 1; fi
-          echo "manifests: objects=$(grep -c '^kind:' "$RUNNER_TEMP/rendered.yaml") hardening=8 OK"
+          echo "manifests: objects=$(grep -c '^kind:' "$RUNNER_TEMP/rendered.yaml") hardening=9 OK"
 
   secrets:
     name: Secret scan (full history)

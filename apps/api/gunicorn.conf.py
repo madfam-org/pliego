@@ -9,8 +9,22 @@ listener only and nothing else there (apps/api/metrics.py).
 
 import os
 
-_metrics_port = int(os.environ.get("PLIEGO_METRICS_PORT", "9090"))
-_app_port = int(os.environ.get("PLIEGO_PORT", "8000"))
+
+def _port(name: str, default: str) -> int:
+    raw = os.environ.get(name, default)
+    try:
+        return int(raw)
+    except ValueError:
+        # A Kubernetes service link looks like tcp://10.43.0.1:80. The Deployment sets enableServiceLinks: false so
+        # none is injected; this names the cause if one ever reappears.
+        raise SystemExit(
+            f"{name}={raw!r} is not a port number; a Kubernetes service link? "
+            "Set enableServiceLinks: false on the pod or set the variable explicitly."
+        ) from None
+
+
+_metrics_port = _port("PLIEGO_METRICS_PORT", "9090")
+_app_port = _port("PLIEGO_PORT", "8000")
 
 bind = [f"0.0.0.0:{_app_port}", f"0.0.0.0:{_metrics_port}"]
 workers = int(os.environ.get("PLIEGO_WORKERS", "2"))

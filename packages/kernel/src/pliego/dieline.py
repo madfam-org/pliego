@@ -401,7 +401,7 @@ class Dieline:
         # flutes run across the machine direction: the flute axis is grain + 90°
         angle = (self.grain_deg + 90.0) % 360.0 if kind == "flute" else self.grain_deg
         return {"kind": kind, "angle_deg": angle,
-                "at": [min(xs) + 0.5 * (max(xs) - min(xs)), min(ys) - 12.0]}
+                "at": [min(xs) + 0.5 * (max(xs) - min(xs)), min(ys) - 30.0]}
 
 
 def _on_segment(k: tuple[int, int], a: Pt, b: Pt) -> bool:

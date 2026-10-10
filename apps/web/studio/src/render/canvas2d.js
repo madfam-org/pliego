@@ -3,10 +3,16 @@
 // with the same OrbitCamera: per-triangle projection, back-face aware two-sided colours, flat
 // Lambert shading (with paper translucency), painter's-algorithm depth sort, planar projected
 // shadows on the ground plane, and the optional crease overlay. Same interface as webgl.js.
+// Printed content degrades: `art` and placed artwork are not drawn (flat paper colours only);
+// annotation texts are pinned on the folded paper (painted right after their triangle, only when
+// it shows its front), mapped through the triangle's affine UV → screen map.
 
 import { OrbitCamera } from './camera.js';
 import { hexToLinear } from './math.js';
 import { computeBounds, readTheme, LIGHT_DIR } from './scene.js';
+import { baryWeights, locateUv, localToUv, CAP_HEIGHT_EM, INK, TEXT_EM_PX } from './printed.js';
+
+const CAP_UNITS = TEXT_EM_PX * CAP_HEIGHT_EM;
 
 const toCss = (lin, k = 1) => {
   const c = lin.map((v) => Math.round(255 * Math.min(1, Math.max(0, v * k)) ** (1 / 2.2)));
@@ -27,6 +33,27 @@ export function createCanvas2DRenderer(canvas) {
   // Reused scratch, grown on demand.
   let sx = new Float32Array(0), sy = new Float32Array(0), sw = new Float32Array(0), depth = new Float32Array(0);
   let order = new Uint32Array(0);
+  // Annotations: specs from setSheets (UVs of the text centre and of its baseline/cap-height
+  // ends), located on the render mesh once per topology (keyed by the indices array).
+  /** @type {{sheet: number, text: string, uv: number[][]}[]} */
+  let annSpecs = [];
+  /** @type {Map<number, {text: string, w: number[][]}[]>} */
+  let annByTri = new Map();
+  let annMesh = null;
+
+  function locateAnnotations(r) {
+    annByTri = new Map();
+    for (const a of annSpecs) {
+      const t = locateUv(r.uvs, r.sheetIds, r.indices, a.sheet, a.uv[0][0], a.uv[0][1]);
+      if (t < 0) continue;
+      const w = a.uv.map((p) => baryWeights(r.uvs, r.indices, t, p[0], p[1]));
+      if (w.some((x) => !x)) continue;
+      const list = annByTri.get(t) || [];
+      list.push({ text: a.text, w: /** @type {number[][]} */ (w) });
+      annByTri.set(t, list);
+    }
+    annMesh = r.indices;
+  }
 
   function grow(nv, nt) {
     if (sx.length < nv) { sx = new Float32Array(nv); sy = new Float32Array(nv); sw = new Float32Array(nv); }
@@ -40,6 +67,17 @@ export function createCanvas2DRenderer(canvas) {
 
     setSheets(list) {
       sheets = list.map((s) => ({ front: hexToLinear(s.front), back: hexToLinear(s.back) }));
+      annSpecs = [];
+      list.forEach((s, i) => {
+        if (!s.bbox) return;
+        for (const n of s.annotations || []) {
+          const r = (n.angleDeg * Math.PI) / 180, k = n.size;
+          const pts = [n.at, [n.at[0] + Math.cos(r) * k, n.at[1] + Math.sin(r) * k], [n.at[0] - Math.sin(r) * k, n.at[1] + Math.cos(r) * k]];
+          annSpecs.push({ sheet: i, text: n.text, uv: pts.map((p) => localToUv(s.bbox, p)) });
+        }
+      });
+      annMesh = null;
+      annByTri = new Map();
     },
 
     refreshTheme() { theme = readTheme(canvas); },
@@ -122,6 +160,30 @@ export function createCanvas2DRenderer(canvas) {
       const ord = order.subarray(0, n);
       ord.sort((p, q) => depth[q] - depth[p]);
 
+      if (annSpecs.length && annMesh !== I) locateAnnotations(r);
+      const project = (w, a3, b3, c3) => {
+        const x = w[0] * P[a3] + w[1] * P[b3] + w[2] * P[c3];
+        const y = w[0] * P[a3 + 1] + w[1] * P[b3 + 1] + w[2] * P[c3 + 1];
+        const z = w[0] * P[a3 + 2] + w[1] * P[b3 + 2] + w[2] * P[c3 + 2];
+        const cw = m[3] * x + m[7] * y + m[11] * z + m[15];
+        if (cw <= 1e-6) return null;
+        return [((m[0] * x + m[4] * y + m[8] * z + m[12]) / cw * 0.5 + 0.5) * W, (0.5 - (m[1] * x + m[5] * y + m[9] * z + m[13]) / cw * 0.5) * H];
+      };
+      const drawTexts = (list, a3, b3, c3) => {
+        for (const n of list) {
+          const p0 = project(n.w[0], a3, b3, c3), pu = project(n.w[1], a3, b3, c3), pv = project(n.w[2], a3, b3, c3);
+          if (!p0 || !pu || !pv || Math.hypot(pv[0] - p0[0], pv[1] - p0[1]) < 3) continue;   // illegible
+          ctx.save();
+          ctx.setTransform((pu[0] - p0[0]) / CAP_UNITS, (pu[1] - p0[1]) / CAP_UNITS, -(pv[0] - p0[0]) / CAP_UNITS, -(pv[1] - p0[1]) / CAP_UNITS, p0[0], p0[1]);
+          ctx.font = `${TEXT_EM_PX}px sans-serif`;
+          ctx.fillStyle = INK;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'alphabetic';
+          ctx.fillText(n.text, 0, CAP_UNITS / 2);
+          ctx.restore();
+        }
+      };
+
       const eye = camera.eye();
       ctx.lineJoin = 'round';
       ctx.lineWidth = 0.6;
@@ -150,6 +212,10 @@ export function createCanvas2DRenderer(canvas) {
         ctx.strokeStyle = col;      // hairline in the fill colour hides anti-aliasing seams
         ctx.fill();
         ctx.stroke();
+        if (isFront && annByTri.size) {
+          const list = annByTri.get(t);
+          if (list) drawTexts(list, a3, b3, c3);
+        }
       }
 
       if (overlay && overlay.positions.length) {

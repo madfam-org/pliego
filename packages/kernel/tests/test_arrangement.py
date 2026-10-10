@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import random
 
 import pytest
@@ -131,3 +132,107 @@ def test_j_joined_faces_share_one_area_floor():
     assert doc.verify(min_face_area_mm2=1500.0) == []          # union 2400 − 100 = 2300 mm²
     kinds = [i["kind"] for i in doc.verify(min_face_area_mm2=2400.0)]
     assert kinds == ["face_degenerate"]
+
+
+# ── J-edge clearance (hardening item 1): a bridge must not graze a corner ───────────────
+
+
+def _hole16(cx, cy, r=1.0, turn=0.5):
+    rr = r / math.cos(math.pi / 16)
+    return [(cx + rr * math.cos(2 * math.pi * (k + turn) / 16),
+             cy + rr * math.sin(2 * math.pi * (k + turn) / 16)) for k in range(16)]
+
+
+def _grazing_sheet():
+    """Minimal case from a stab-bound cover (hemp-leaf, H = 210 mm): exact visibility accepts a
+    J edge that passes 8e-5 mm from a corner of its own hole, below the emit tolerance."""
+    left = [(0.0, v) for v in (196.875, 183.75, 157.5, 131.25, 105.0, 78.75, 52.5, 26.25,
+                               13.125)]
+    s = pliego.Sheet("cover", [(0.0, 0.0), (150.0, 0.0), (150.0, 210.0), (0.0, 210.0)] + left)
+    s.hole(_hole16(10.0, 78.75))
+    s.hole(_hole16(20.0, 52.5))
+    return s
+
+
+def _faces_simple(arr):
+    v = arr.vertices
+    return all(len(set(f)) == len(f) and is_simple_polygon([v[i] for i in f]) for f in arr.faces)
+
+
+def test_bridges_keep_clear_of_corners(monkeypatch):
+    from pliego import arrangement_dcel
+
+    s = _grazing_sheet()
+    arr = s.build()
+    _check(arr)
+    assert _faces_simple(arr)
+    # the fixture really exercises the graze: exact visibility alone leaves a non-simple face
+    monkeypatch.setattr(arrangement_dcel, "CLEARANCE", 0)
+    old = build_arrangement(list(s.outline), list(s.holes), [])
+    assert not _faces_simple(old)
+
+
+def test_bridge_clearance_document_verifies(stocks):
+    s = _grazing_sheet()
+    s.label = {"en": "Cover", "es": "Tapa", "fr": "Couverture", "pt": "Capa"}
+    doc = pliego.Assembly([s]).build(stocks=stocks)
+    issues = doc.verify()
+    assert not [i for i in issues if i["level"] == "error"], issues
+
+
+# Three octagonal lace holes of a 6-fold doily (density 5, 200 mm), their facing sides collinear on
+# one radial line: exact visibility bridged along that line, 5e-7 mm from two hole corners.
+_LACE = [
+    [(11.725406, 103.492961), (11.845287, 104.403544), (12.573935, 104.962655),
+     (13.484517, 104.842775), (14.043628, 104.114127), (13.923748, 103.203544),
+     (13.1951, 102.644433), (12.284517, 102.764314)],
+    [(12.388408, 111.071102), (12.508288, 111.981685), (13.236936, 112.540796),
+     (14.147519, 112.420916), (14.70663, 111.692268), (14.586749, 110.781685),
+     (13.858102, 110.222574), (12.947519, 110.342455)],
+    [(13.709365, 118.562622), (13.829245, 119.473205), (14.557893, 120.032316),
+     (15.468476, 119.912435), (16.027587, 119.183787), (15.907706, 118.273205),
+     (15.179059, 117.714094), (14.268476, 117.833974)],
+]
+
+
+def test_collinear_lace_holes_bridge_clear(monkeypatch):
+    from pliego import arrangement_dcel
+
+    disc = [(100 + 94 * math.cos(2 * math.pi * k / 96), 100 + 94 * math.sin(2 * math.pi * k / 96))
+            for k in range(96)]
+    s = pliego.Sheet("doily", disc)
+    for h in _LACE:
+        s.hole(h)
+    arr = s.build()
+    _check(arr)
+    assert _faces_simple(arr)
+    monkeypatch.setattr(arrangement_dcel, "CLEARANCE", 0)
+    assert not _faces_simple(build_arrangement(list(s.outline), list(s.holes), []))
+
+
+def _rot(p, a):
+    return (math.cos(a) * p[0] - math.sin(a) * p[1], math.sin(a) * p[0] + math.cos(a) * p[1])
+
+
+def _rect(x, y, w, h):
+    return [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+
+
+@pytest.mark.parametrize("deg", [35, *range(0, 180, 7)])
+def test_rotated_window_grid_bridges_clear(deg, monkeypatch):
+    """A 2 × 2 grid of square holes (a townhouse's windows) on a turned wall: grid rounding left
+    a hole corner a hair off a bridge running along the next hole's side (35°: J (15,10)→(22.5,10)
+    over the hole edge (17.5,10)→(22.5,10)), a sliver face rule 3 rejects."""
+    from pliego import arrangement_dcel
+
+    a = math.radians(deg)
+    s = pliego.Sheet("wall", [_rot(p, a) for p in _rect(0, 0, 80, 40)])
+    for r in (_rect(10, 10, 5, 5), _rect(17.5, 10, 5, 5), _rect(10, 17.5, 5, 5),
+              _rect(17.5, 17.5, 5, 5)):
+        s.hole([_rot(p, a) for p in r])
+    arr = s.build()
+    _check(arr)
+    assert _faces_simple(arr)
+    if deg == 35:   # the reported case still fails on exact visibility alone
+        monkeypatch.setattr(arrangement_dcel, "CLEARANCE", 0)
+        assert not _faces_simple(build_arrangement(list(s.outline), list(s.holes), []))

@@ -32,7 +32,7 @@ export function createRenderer(canvas, opts = {}) {
   const warn = opts.onWarn || (() => {});
   if (opts.prefer !== 'canvas2d' && hasWebGL2(canvas)) {
     try {
-      return createWebGLRenderer(canvas);
+      return createWebGLRenderer(canvas, { onWarn: warn });
     } catch (e) {
       warn(`WebGL2 renderer failed: ${e instanceof Error ? e.message : e}`);
     }

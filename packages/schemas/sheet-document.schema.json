@@ -504,6 +504,19 @@
               "additionalProperties": false
             }
           ]
+        },
+        "presentation": {
+          "description": "§5.16 (preview only): the face viewers hold still while the program folds the rest about it, and a rigid end transform blended in over the program about that face's t = 0 centroid.",
+          "type": "object",
+          "properties": {
+            "root_face": {
+              "$ref": "#/$defs/index"
+            },
+            "end": {
+              "$ref": "#/$defs/placement"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

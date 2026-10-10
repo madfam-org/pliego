@@ -36,6 +36,9 @@ MECH_CONTROL_KEY = {"hinge": "angle_control", "slide": "control", "rotate": "con
                     "leaf": "control", "translate": "control"}
 
 
+META_KEYS = frozenset({"cartridge", "mode", "params", "kernel", "digest", "min_feature_mm"})
+
+
 class _Issues(list):
     def err(self, rule: int, kind: str, detail: str, **loc: Any) -> None:
         self.append({"level": "error", "kind": kind, "rule": rule, "detail": detail, **loc})
@@ -88,10 +91,14 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
     faces_ok = _rule3_faces(d, coords, out, floor)
     _rule4_edges(d, out)
     _edge_extras(d, out)
+    _face_orders(d, out)
     _rule5_overlap(d, coords, out)
     _rule6_stocks(d, out)
     _rule7_refs(d, coords, out)
     _rule14_print(d, coords, out)
+    _rule15_mechanism_sheets(d, out)
+    rule17_presentation(d, out)
+    rule18_art(d, out)
     _rule8_sequence(d, out)
     _rule11_pieces(d, out)
     _rule12_stacks(d, _sheet_tools(d, coords)[1], out)
@@ -99,6 +106,10 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
         _rule9_initial(d, coords, out)
     _rule13_packaging(d, coords, out)
     meta = d.get("pliego:meta") or {}
+    extra = sorted(set(meta) - META_KEYS) if isinstance(meta, dict) else []
+    if extra:  # rule 16 (§5.7): the schema closes pliego:meta; a warning until the commons is clean
+        out.warn(16, "meta_unknown_key", f"pliego:meta has keys outside §5.7: {extra} (the "
+                 "schema rejects them; put cartridge data in params or step notes)")
     if meta.get("digest") is not None and meta["digest"] != doc.digest():
         out.err(10, "digest_mismatch", f"meta.digest {meta['digest']} != {doc.digest()}")
     return list(out)
@@ -305,6 +316,11 @@ def _rule4_edges(d: dict, out: _Issues) -> None:
         for k in range(len(f)):
             sides.setdefault(frozenset((f[k], f[(k + 1) % len(f)])), []).append(i)
     trt = d.get("pliego:edges_treatment") or ["none"] * len(d["edges_vertices"])
+    twins: dict[tuple, int] = {}
+    for e, asg, t in zip(d["edges_vertices"], d["edges_assignment"], trt, strict=True):
+        if asg == "C" and t == "cut" and len(sides.get(frozenset(e), [])) == 1:
+            key = _coord_key(d, e)
+            twins[key] = twins.get(key, 0) + 1
     for i, (e, asg, ang, t) in enumerate(zip(d["edges_vertices"], d["edges_assignment"],
                                              d["edges_foldAngle"], trt, strict=True)):
         if asg not in ("B", "M", "V", "F", "U", "C", "J"):
@@ -326,9 +342,39 @@ def _rule4_edges(d: dict, out: _Issues) -> None:
                     "(valley > 0, mountain < 0)", edge=i)
         n = len(sides.get(frozenset(e), []))
         want = 1 if asg == "B" else 2
+        if asg == "C" and n == 1 and twins.get(_coord_key(d, e), 0) == 2:
+            want = 1  # one side of a split cut (§4): its twin borders the other side
         if n != want:
             out.err(4, "edge_faces", f"edge {i} ({asg}) borders {n} face(s), expected {want}",
                     edge=i)
+
+
+def _coord_key(d: dict, e: list[int]) -> tuple:
+    """Sheet + unordered end coordinates of an edge: the two sides of a split cut share it."""
+    vc = d["vertices_coords"]
+    p, q = (tuple(vc[e[0]][:2]), tuple(vc[e[1]][:2]))
+    return (d["pliego:vertices_sheet"][e[0]], min(p, q), max(p, q))
+
+
+def _face_orders(d: dict, out: _Issues) -> None:
+    """Rule 1–2 for FOLD ``faceOrders``: [f, g, s] with f ≠ g in range, on one sheet, s = ±1."""
+    fo = d.get("faceOrders")
+    if fo is None:
+        return
+    nf, fs = len(d["faces_vertices"]), d["pliego:faces_sheet"]
+    if not isinstance(fo, list):
+        out.err(1, "face_orders", "faceOrders must be a list of [f, g, s]")
+        return
+    for k, t in enumerate(fo):
+        ok = (isinstance(t, list) and len(t) == 3
+              and all(isinstance(x, int) and not isinstance(x, bool) for x in t))
+        if not ok or not (0 <= t[0] < nf and 0 <= t[1] < nf) or t[0] == t[1] \
+                or t[2] not in (-1, 1):
+            out.err(1, "face_orders", f"faceOrders[{k}] = {t!r} is not [f, g, ±1] with f ≠ g "
+                    "in range")
+        elif fs[t[0]] != fs[t[1]]:
+            out.err(2, "face_orders_sheet", f"faceOrders[{k}]: faces {t[0]} and {t[1]} lie on "
+                    "different sheets")
 
 
 # ── rule 5: sheets do not overlap in the layout frame ────────────────────────
@@ -402,8 +448,10 @@ from .document_verify_refs import (  # noqa: E402
     _rule8_sequence,
     _rule9_initial,
     _rule14_print,
+    _rule15_mechanism_sheets,
     _sheet_tools,
 )
+from .document_verify_view import rule17_presentation, rule18_art  # noqa: E402
 from .pieces import rule11_pieces as _rule11_pieces  # noqa: E402
 from .pieces import rule12_stacks as _rule12_stacks  # noqa: E402
 

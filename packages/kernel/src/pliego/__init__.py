@@ -43,7 +43,7 @@ from .assembly import (
     string,
     translate,
 )
-from .document import KERNEL_ID, KERNEL_VERSION, Document, canonical_json
+from .document import KERNEL_ID, KERNEL_VERSION, Document, canonical_bytes, canonical_json
 from .document_build import STOCK_DERIVED_KEYS, StockUnavailable, resolve_stock
 from .flatstate import FlatState, FlatStateError
 from .foldfile import load as load_fold
@@ -97,7 +97,8 @@ __all__ = [
     "EPS", "KERNEL_ID", "KERNEL_VERSION", "STOCK_DERIVED_KEYS", "Arc", "Arrangement",
     "ArrangementError", "Assembly", "Bezier", "Document", "Face", "Line", "Mark", "P",
     "Placement", "SegmentInput", "Sequence", "Sheet", "Step", "StockUnavailable", "Tab", "Vec2",
-    "angle_control", "build_arrangement", "canonical_json", "circle", "control", "curve_through",
+    "angle_control", "build_arrangement", "canonical_bytes", "canonical_json", "circle",
+    "control", "curve_through",
     "glue", "hinge", "leaf", "offset_ring", "pin", "pivot", "polygon_area", "rectangle",
     "regular_polygon", "resolve_stock", "rotate", "sequence_control", "slide", "slider",
     "square", "string", "translate", "FoldedState", "load_fold", "axioms",

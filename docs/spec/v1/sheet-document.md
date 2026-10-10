@@ -73,7 +73,7 @@ state (see `docs/strategy/engine.md` §6).
 | `faces_vertices` | yes | counter-clockwise vertex cycles; every face is a simple polygon (no holes — holes are bridged with `J` edges) |
 | `faces_edges` | no | if present must agree with `faces_vertices` |
 | `edges_faces`, `vertices_vertices`, `vertices_faces` | no | derived; readers recompute them |
-| `faceOrders` | no | layer order `[f, g, s]` (FOLD semantics); **may be partial in v1** — the kernel emits only pairs it can decide locally (faces adjacent across a folded M/V crease); a missing pair means "unknown", never "no overlap" |
+| `faceOrders` | no | layer order `[f, g, s]` (FOLD semantics: face f lies on side s = ±1 of face g's normal; f ≠ g on one sheet); **may be partial** — a missing pair means "unknown", never "no overlap". <!-- lane H (w3/hardening) item 7 --> The kernel writes it when a cartridge supplies a layer order: a fold program's complete flat-state order (`pliego.FoldProgram`, every overlapping pair) or the author's own triples |
 | `file_frames` | conditional | 3-D frames (§6) |
 
 `edges_assignment` is the **design** intent. The physical treatment of each line (how it was made)
@@ -153,7 +153,10 @@ The sheet outline (`B` edges) is cut by the exporters; `treatment` for `B` is `n
 - `offset`: layout-frame position of the sheet-local origin.
 - `placement`: rigid transform applied after the `(u, v) → (u, 0, −v)` map; quaternion `[x, y, z, w]`.
 - `front` / `back`: render appearance. `art` (optional) is a relative path to an image covering the
-  sheet's local bounding box (front is drawn as seen from +normal; back is mirrored as paper is).
+  sheet's local bounding box (front is drawn as seen from +normal; back is mirrored as paper is),
+  or an image data URI (§5.17). <!-- lane H (w3/hardening) item 10 -->
+- `presentation` (optional, preview only): the root face and end transform a viewer uses to
+  present the fold program (§5.16). <!-- lane H (w3/hardening) item 9 -->
 - `kinematic`: `null` for a physical sheet, or `{"mechanism": "<mechanism id>"}` when the sheet is a
   rigid board (book boards, the base page halves of a pop-up spread). A kinematic sheet's vertices
   have infinite mass. It follows its mechanism's transform **only if the mechanism lists it in
@@ -289,8 +292,8 @@ declared here; the viewer builds its UI from this list.
 face-area floor of rule §8.3 becomes `min_feature_mm²` (default 1 mm²). Papercuts in tissue and
 fine kirigami declare it; nothing else should.
 
-`digest` is the SHA-256 of the canonical serialisation of the document with `digest` set to
-`null` (GOC-1 compatible).
+`digest` is `"sha256:"` + the hex SHA-256 of the canonical serialisation (§5.15) of the document
+with `digest` set to `null`. <!-- lane H (w3/hardening) item 8: was "(GOC-1 compatible)" -->
 
 ### 5.8 Removable pieces, stacks and tear-away — `pliego:pieces`, `pliego:stacks`, step `remove`
 
@@ -449,7 +452,127 @@ When `pliego:pages` is present, the PDF exporter prints each page once at 1:1 on
 `size`, instead of tiling the whole layout. The SVG exporter draws the page frames on a `pages`
 layer. SVG, PDF and DXF print annotations on their `label` / `TEXT` layers.
 
-Rule 13 (§8) covers both fields.
+Rule 14 (§8) covers both fields.
+
+<!-- lane H (w3/hardening) §5.13: begin -->
+### 5.13 Cuts split their vertices
+
+A `cut` (assignment `C`, treatment `cut`) separates the sheet (§4), and the document carries the
+separation in its topology. Around each vertex, the faces touching it are grouped across the
+edges that do not separate material (every edge except `C` + `cut`). A vertex whose faces fall
+into k > 1 groups is written as k vertices with the same layout coordinates, one per group. A cut
+edge whose two sides then reach different vertices is written twice, once per side: **twin
+edges** with the same coordinates, assignment, treatment and name, each bordering one face. That
+is what rule 4's "one face on each side of a split" means.
+
+- A slit opens wherever it can: along its interior vertices and where it reaches the outline. An
+  interior tip, whose faces are still joined around its far side, stays one vertex. A
+  single-segment slit with both ends inside the sheet has nothing to split and stays one edge
+  between two faces.
+- A closed cut frees its island. Tear-off perforations (`C` + `perforation`) stay joined until
+  they tear (engine).
+- Frames (`initial`, `target:*`) may move twin vertices apart: an opened slit is developable
+  (rule 9).
+- Exporters draw each cut once (the twins coincide); papercut checks measure one vertex per
+  point.
+
+A reader that needs the unsplit topology merges the vertices of one sheet that share coordinates.
+<!-- lane H (w3/hardening) §5.13: end -->
+
+<!-- lane H (w3/hardening) §5.14: begin -->
+### 5.14 The initial state: set creases and world placement
+
+- **Set creases.** A foldable edge (`M`, `V`, `F`, `U`) folded in the `initial` frame is a set
+  crease: its `pliego:edges_restAngle` is the signed dihedral it has in that frame (§1 signs; a
+  crease folded flat takes its design sign), unless the author gave it a rest angle. Without it
+  the engine would read the pose as elastic and spring a standing pop-up or a rolled tube back
+  toward flat at the first step. The kernel writes it; `B`, `C` and `J` edges keep 0.
+- **World placement.** Un-placed sheets would all lie at the world origin, on top of each
+  other. When a multi-sheet document has no joins, mechanisms or stacks and every sheet's
+  placement is the identity, the kernel lays the sheets out in the world as in the layout frame:
+  each sheet's `placement.origin` is `[offset.x, 0, −offset.y]`, so local `(u, v)` lands at
+  `(offset.x + u, 0, −(offset.y + v))`, side by side on the table (and an `initial` frame is
+  written, §6). A cartridge that places any sheet itself, or ties sheets together, keeps its own
+  placements.
+<!-- lane H (w3/hardening) §5.14: end -->
+
+<!-- lane H (w3/hardening) §5.15: begin -->
+### 5.15 Canonical serialisation (what `meta.digest` hashes)
+
+The canonical serialisation of a document is **RFC 8785 (JSON Canonicalization Scheme)**: the
+bytes JavaScript's `JSON.stringify` writes for the parsed document with every object's keys
+sorted, encoded as UTF-8. So a reader in any language reproduces the kernel's digest from the
+JSON it received, whatever number spelling or key order the file used.
+
+- **Objects:** members sorted by key, comparing the keys as **UTF-16 code units** (JavaScript's
+  default sort; for keys within the Basic Multilingual Plane this is code-point order); no
+  whitespace anywhere.
+- **Numbers:** IEEE-754 doubles printed as ECMAScript `Number.prototype.toString` does — the
+  shortest digits that round-trip, plain notation for 1e-7 ≤ |x| < 1e21, exponent form
+  otherwise. So every integral value is written as an integer (`0.0` → `0`, `90.0` → `90`,
+  `-0` → `0`), `0.000015` stays `0.000015` (not `1.5e-05`), `1e-7` → `1e-7` (not `1e-07`),
+  `1e21` → `1e+21`, `1.5e300` → `1.5e+300`: the exponent is written as `e`, a sign, and its
+  digits without leading zeros. Integers beyond ±2^53, NaN and infinities are not allowed. How a
+  writer spelled a number in its file never matters: readers hash the value.
+- **Strings:** escaped as `JSON.stringify` does: `\"`, `\\`, `\b \f \n \r \t`, other
+  characters below U+0020 as `\u00xx` (lower-case hex); everything else, `/`, U+2028 and U+2029
+  included, is written as itself. Strings with lone surrogates are not allowed.
+- **Literals:** `true`, `false`, `null`.
+
+`digest` = `"sha256:"` + hex SHA-256 of the canonical bytes of the document with
+`pliego:meta.digest` set to `null`. The kernel's `pliego.canonical_bytes` implements it;
+`packages/kernel/tests/fixtures/digest_vector.json` is a shared test vector (a document, its
+canonical text and its digest, cross-checked against Node's `JSON.stringify`). The engine
+recomputes the digest on load when it is present (rule 10). This is GOC-1 §3.1 made exact
+across languages: GOC-1's integral-float rule falls out of the number rule, but GOC-1's
+Python `repr` spelling of other floats (`1.5e-05`, `1e-07`, `1e+16`) differs from the
+ECMAScript spelling, so a checker built on GOC-1 `canonical_json` agrees with §5.15 only on
+documents whose non-integral numbers lie in 1e-4 ≤ |x| < 1e16.
+<!-- lane H (w3/hardening) §5.15: end -->
+
+<!-- lane H (w3/hardening) §5.16: begin -->
+### 5.16 `presentation` — how a viewer presents a sheet (optional, preview only)
+
+A sheet may carry `"presentation": {"root_face": f, "end": {"origin": [x, y, z], "rotation":
+[x, y, z, w]}}`, both members optional. It changes no physics and no frame; it tells a viewer
+how to show the fold program, so a finished model can stand upright without the cartridge
+tilting the flat sheet at t = 0.
+
+- `root_face` (global face index, on this sheet): the face the preview holds still while the
+  program folds the rest of the sheet about it. Default: the sheet's first face. Its pose is its
+  t = 0 pose (the `initial` frame, else the placement).
+- `end`: a rigid transform the viewer blends in over the program — identity at sequence position
+  0, `end` at the last step, linearly in between (rotation by slerp, translation by lerp). It
+  rotates about the root face's t = 0 centroid, then translates by `origin`. Mechanisms apply
+  before it.
+
+The studio stub implements both. **Ground:** the preview also keeps the posed paper above the
+table (`y = 0`, §1): when a rigid preview would swing any visible point below it, the whole scene
+is lifted until its lowest point rests on the table. The physics engine needs no clamp (contact
+with the ground does this). Rule 17 (§8) checks the field.
+<!-- lane H (w3/hardening) §5.16: end -->
+
+<!-- lane H (w3/hardening) §5.17: begin -->
+### 5.17 Printed art sources (`front.art`, `back.art`)
+
+`art` is either a **relative path** inside the cartridge (no scheme, no leading `/`, no `..`
+segment, no backslash) or an **image data URI** — so a cartridge can compute its printed faces
+in `main.py` without shipping files:
+
+- `data:image/svg+xml[;charset=…][;base64],…` (URL-encoded or base64), or
+  `data:image/png;base64,…` (the payload must start with the PNG signature);
+- the decoded payload is at most 1 MiB;
+- an SVG payload is UTF-8, has an `<svg>` element and none of: `<script`, `foreignObject`, a
+  `javascript:` URL, an `on…=` event-handler attribute, a DOCTYPE or ENTITY declaration,
+  `@import`, or a `href` / `src` / `url(…)` reference outside itself (only `#fragment` and
+  inline `data:image/png` / `data:image/jpeg` references are allowed).
+
+Renderers load art **only as images** (an `<img>`, an `Image` decoded into a texture, an SVG
+`<image href>`), never as inline DOM or fetched text, so even an SVG that slipped past the
+sanitiser cannot run script. Rule 18 (§8) enforces the list above. Exporters: the SVG export
+places the front art on its `art` layer; PDF, DXF and HPGL ignore art for now (export parity
+is a backlog item).
+<!-- lane H (w3/hardening) §5.17: end -->
 
 ## 6. `file_frames` — 3-D states
 
@@ -508,6 +631,30 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     `text` 1–32 printable characters and `size` 0.5–50 mm; `pliego:pages` is well formed (size
     > 0, 0 ≤ margin < half the page, ≥ 1 page, unique ids) and its pages do not overlap. A sheet
     outside every page's printable area is a warning (`sheet_off_page`).
+<!-- lane H (w3/hardening) rule 15: begin -->
+15. Mechanisms move only rigid sheets (§5.4): every sheet a `hinge`, `rotate` or `translate`
+    lists in `sheets_moving` is kinematic on that mechanism (`kinematic.mechanism` = its id),
+    and the sheet a `leaf` turns is physical (`kinematic: null`) — a leaf bends its page. The
+    engine refuses both mistakes; the kernel reports them as a warning
+    (`mechanism_moves_physical`, `leaf_on_kinematic`) until every landed cartridge is clean, then
+    as an error.
+<!-- lane H (w3/hardening) rule 15: end -->
+<!-- lane H (w3/hardening) rule 16: begin -->
+16. `pliego:meta` carries only the §5.7 keys (`cartridge`, `mode`, `params`, `kernel`,
+    `min_feature_mm`, `digest`); the schema closes the object. Cartridge data belongs in
+    `params` or in step notes. The kernel reports extra keys as a warning (`meta_unknown_key`)
+    until the commons is clean, then as an error.
+<!-- lane H (w3/hardening) rule 16: end -->
+<!-- lane H (w3/hardening) rule 17: begin -->
+17. Presentation (§5.16): a sheet's `presentation` has only `root_face` and `end`; `root_face`
+    is a face of that sheet; `end` is a placement with a finite origin and a unit quaternion.
+<!-- lane H (w3/hardening) rule 17: end -->
+<!-- lane H (w3/hardening) rule 18: begin -->
+18. Printed art (§5.17): every sheet's `front.art` / `back.art` is null, a relative path inside
+    the cartridge, or an `image/svg+xml` / `image/png` data URI that decodes, is at most 1 MiB
+    and (SVG) carries no script, event handler, foreignObject, `javascript:` URL, DOCTYPE/ENTITY,
+    `@import` or external reference (`art_source`).
+<!-- lane H (w3/hardening) rule 18: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

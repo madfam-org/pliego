@@ -39,7 +39,8 @@ from .geometry import (
 
 SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 KINDS = {"valley": "V", "mountain": "M", "flat": "F", "unassigned": "U", "cut": "C"}
-ALLOWED = {  # spec §4: treatment → allowed assignments
+ALLOWED = {  # spec §4: treatment → allowed assignments (B and J are never authored)
+    "none": {"F", "U"},
     "crease": {"M", "V", "F"},
     "score": {"M", "V", "F"},
     "perforation": {"M", "V", "F", "C"},
@@ -154,6 +155,7 @@ class Sheet:
     tabs: list[Tab] = field(default_factory=list, init=False)
     edge_labels: list[tuple[str, Vec2, Vec2]] = field(default_factory=list, init=False)
     annotations: list[dict] = field(default_factory=list, init=False)
+    presentation: dict | None = field(default=None, init=False)  # spec §5.16 (preview only)
     _hole_boxes: list[tuple[float, float, float, float]] = field(default_factory=list,
                                                                  init=False, repr=False)
     _built: Arrangement | None = field(default=None, init=False, repr=False)
@@ -265,6 +267,14 @@ class Sheet:
               rest: float | None = None) -> Mark:
         """A scored line (blade/laser at reduced power); folds if `kind` is valley/mountain."""
         return self.crease(a, b, kind, angle, "score", label, name=name, rest=rest)
+
+    def bend(self, a: PointLike, b: PointLike, label: str | dict | None = None, *,
+             name: str | None = None) -> Mark:
+        """An untreated facet line (spec §4: `F` + treatment `none`): plain paper that bends
+        smoothly — the rulings of a rolled cone or cylinder, the facets of a curved surface.
+        It splits faces so a fold program can target it, but nothing scores or creases it, so
+        exporters never draw it. Polylines: `path(points, "flat", treatment="none")`."""
+        return self.crease(a, b, "flat", 0.0, "none", label, name=name)
 
     def perforate(self, a: PointLike, b: PointLike, kind: str = "flat", angle: float = 0.0,
                   label: str | dict | None = None, *, name: str | None = None,
@@ -381,8 +391,36 @@ class Sheet:
                                  "size": float(size)})
         return self
 
+    def present(self, root: PointLike | None = None, end: Placement | None = None) -> Sheet:
+        """How viewers present this sheet (spec §5.16, preview only — no physics): `root` is a
+        sheet-local point inside the face the preview holds still while the program folds the
+        rest about it (default: the sheet's first face); `end` is a rigid transform the viewer
+        blends in over the program — identity at its start, `end` at its last step — rotating
+        about the root face's t = 0 centroid, so a finished model can stand upright without
+        tilting the flat sheet at t = 0."""
+        pr: dict = {}
+        if root is not None:
+            q = as_vec(root)
+            if not self.region_contains(q):
+                raise ValueError(f"sheet '{self.id}': presentation root ({q.x}, {q.y}) is off "
+                                 "the sheet")
+            pr["root"] = q
+        if end is not None:
+            if not isinstance(end, Placement):
+                raise ValueError("presentation end must be a pliego.Placement")
+            n = math.sqrt(sum(c * c for c in end.rotation))
+            if not (all(math.isfinite(c) for c in (*end.origin, *end.rotation))
+                    and abs(n - 1.0) < 1e-6):
+                raise ValueError("presentation end needs a finite origin and a unit quaternion")
+            pr["end"] = end
+        self.presentation = pr or None
+        return self
+
     def art(self, front: str | None = None, back: str | None = None) -> Sheet:
-        """Attach printed art (relative image paths covering the local bounding box)."""
+        """Attach printed art covering the local bounding box: relative image paths, or
+        `data:image/svg+xml` / `data:image/png` URIs that pass the §5.17 sanitiser."""
+        _check_art(front)
+        _check_art(back)
         if front is not None:
             self.front = Face(self.front.color, front)  # type: ignore[union-attr]
         if back is not None:
@@ -431,6 +469,7 @@ class Sheet:
         out.tabs = [Tab(out.marks[t.mark.index], list(t.region), t.name) for t in self.tabs]
         out.edge_labels = list(self.edge_labels)
         out.annotations = [dict(a) for a in self.annotations]
+        out.presentation = None if self.presentation is None else dict(self.presentation)
         out._built = self._built
         return out
 
@@ -492,7 +531,17 @@ def _face(value: Face | dict | str | None) -> Face:
         raise ValueError(f"face must be a colour, dict or Face, got {value!r}")
     if face.color is not None and not HEX.match(face.color):
         raise ValueError(f"face colour {face.color!r} must be #rrggbb")
+    _check_art(face.art)
     return face
+
+
+def _check_art(src: str | None) -> None:
+    """Fail loud at authoring on art verify would reject (spec §5.17)."""
+    from .document_verify_view import check_art
+
+    why = check_art(src)
+    if why:
+        raise ValueError(why)
 
 
 def _box(ring: Sequence[Vec2], pad: float) -> tuple[float, float, float, float]:

@@ -105,10 +105,17 @@ def analyze(sheet: Sheet, min_feature_mm: float = 1.0, cutter_min_mm: float | No
                        f"{sizes[0][0]:.2f} mm²"})
     cutter = min_feature_mm if cutter_min_mm is None else cutter_min_mm
     reach = search_mm if search_mm is not None else max(10.0, 5.0 * max(min_feature_mm, cutter))
-    segs = [(verts[a], verts[b]) for (a, b), asg in zip(arr.edges, arr.assignment, strict=True)
-            if asg in ("B", "C")]
-    vid = [(a, b) for (a, b), asg in zip(arr.edges, arr.assignment, strict=True)
-           if asg in ("B", "C")]
+    # The two sides of a split cut (spec §4) have their own vertices at the same points: measure
+    # on one vertex per point, so a slit's sides are neither a bridge nor a gap to each other.
+    first: dict = {}
+    canon = [first.setdefault(g, i) for i, g in enumerate(arr.grid)]
+    vid: list[tuple[int, int]] = []
+    seen: set[frozenset] = set()
+    for (a, b), asg in zip(arr.edges, arr.assignment, strict=True):
+        if asg in ("B", "C") and frozenset((canon[a], canon[b])) not in seen:
+            seen.add(frozenset((canon[a], canon[b])))
+            vid.append((canon[a], canon[b]))
+    segs = [(verts[a], verts[b]) for a, b in vid]
     order = sorted(range(len(segs)), key=lambda i: (min(segs[i][0].x, segs[i][1].x), i))
     lo_x = [min(a.x, b.x) for a, b in segs]
     lo_y = [min(a.y, b.y) for a, b in segs]

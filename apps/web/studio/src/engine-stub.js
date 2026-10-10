@@ -4,7 +4,8 @@
 // Same public surface as the real engine (loadDocument, World with setControl/step/render/grab/
 // moveGrab/release/pick/stats/snapshot/restore) but NO physics: a rigid face-tree pose driven by
 // the fold program and by hinge / leaf / rotate mechanisms; excess pieces a step removes (spec §5.8)
-// lift away and disappear. The studio uses it only when
+// lift away and disappear. A sheet's presentation (spec §5.16) picks the face held still and an
+// end transform; a ground clamp keeps the posed paper above the table (y = 0). The studio uses it only when
 // /engine/index.js is absent or has no World, and says so in the status bar. Node tests use it as
 // the WebGL-less contract double.
 
@@ -141,6 +142,21 @@ function newell(pts) {
   }
   return unit(n);
 }
+/** Rotation `q` (unit quaternion [x, y, z, w]) scaled to fraction `w` of its angle. */
+function slerpFromIdentity(q, w) {
+  let [x, y, z, s] = q;
+  if (s < 0) { x = -x; y = -y; z = -z; s = -s; }
+  const half = Math.acos(Math.min(1, s)), sh = Math.sin(half);
+  if (sh < 1e-12) return [0, 0, 0, 1];
+  const k = Math.sin(w * half) / sh;
+  return [x * k, y * k, z * k, Math.cos(w * half)];
+}
+/** Spec §5.16: the face a sheet's preview holds still (presentation.root_face, else its first face). */
+function rootFace(j, s) {
+  const pr = j['pliego:sheets'][s].presentation, fs = j['pliego:faces_sheet'];
+  const f = pr && pr.root_face;
+  return Number.isInteger(f) && f >= 0 && f < fs.length && fs[f] === s ? f : fs.indexOf(s);
+}
 const ease = (x) => x * x * (3 - 2 * x);
 // A removed piece lifts through the first LIFT_END of its step, then disappears.
 const LIFT_END = 0.75;
@@ -180,8 +196,9 @@ export class World {
     this._parent = new Array(F).fill(null);
     this._order = [];
     const seen = new Array(F).fill(false);
+    this._root = sheets.map((_, s) => rootFace(j, s));
     for (let s = 0; s < sheets.length; s++) {
-      const root = fsheet.indexOf(s);
+      const root = this._root[s];
       if (root < 0) continue;
       const queue = [root]; seen[root] = true;
       while (queue.length) {
@@ -204,7 +221,7 @@ export class World {
       const I = this._initial;
       const nI = j.faces_vertices.map((f) => newell(f.map((v) => I[v])));
       for (let s = 0; s < sheets.length; s++) {
-        const root = fsheet.indexOf(s);
+        const root = this._root[s];
         if (root < 0) continue;
         const f = j.faces_vertices[root];
         const k = this._wellShaped(f);
@@ -406,6 +423,7 @@ export class World {
       this._faceT[f] = compose(this._faceT[par.face], axisRot(o, d, theta[par.edge] * DEG));
     }
     const M = this._mechanisms(this._rootPose);
+    const Pr = this._presentation();
     const { positions: P, normals: N } = this._buf;
     const written = new Uint8Array(U.length);
     const sv = this._seqValue();
@@ -417,7 +435,7 @@ export class World {
     }
     for (const fi of this._faceOrder) {
       const f = j.faces_vertices[fi];
-      let T = compose(M[fsheet[fi]], this._faceT[fi] || this._rootPose[fsheet[fi]]);
+      let T = compose(Pr[fsheet[fi]], compose(M[fsheet[fi]], this._faceT[fi] || this._rootPose[fsheet[fi]]));
       const k = this._faceStep[fi];
       if (k >= 0 && sv > k && sv - k < LIFT_END) {   // hidden pieces keep their rest pose (stable bounds)
         const lift = this._lift * ease(Math.min(1, (sv - k) / LIFT_END));
@@ -434,7 +452,50 @@ export class World {
         if (!written[v]) { written[v] = 1; this.positions[v * 3] = w[0]; this.positions[v * 3 + 1] = w[1]; this.positions[v * 3 + 2] = w[2]; }
       });
     }
+    this._groundClamp();
     this._dirty = false;
+  }
+
+  /**
+   * Spec §5.16 presentation: per sheet, the `end` transform blended in over the program
+   * (identity at step 0, `end` at the last step), rotating about the root face's t = 0 centroid.
+   * Preview only.
+   */
+  _presentation() {
+    const j = this._j;
+    const sheets = j['pliego:sheets'];
+    const seq = j['pliego:sequence'];
+    const n = seq && seq.steps ? seq.steps.length : 0;
+    const w = n ? Math.max(0, Math.min(1, this._seqValue() / n)) : 0;
+    return sheets.map((sh, s) => {
+      const end = sh.presentation && sh.presentation.end;
+      if (!end || !w || this._root[s] < 0) return IDENT();
+      const f = j.faces_vertices[this._root[s]];
+      const c = f.map((v) => apply(this._rootPose[s], this._unplaced[v])).reduce((a, p) => [a[0] + p[0] / f.length, a[1] + p[1] / f.length, a[2] + p[2] / f.length], [0, 0, 0]);
+      const r = quatToR(slerpFromIdentity(end.rotation, w));
+      const rc = apply({ r, t: [0, 0, 0] }, c);
+      return { r, t: [c[0] + w * end.origin[0] - rc[0], c[1] + w * end.origin[1] - rc[1], c[2] + w * end.origin[2] - rc[2]] };
+    });
+  }
+
+  /**
+   * The table (spec §1: the ground is y = 0). A rigid face-tree preview can swing paper through
+   * the table (a mountain fold on a flat sheet, an end transform); when any visible point would
+   * pass below y = 0 the whole scene is lifted until its lowest point rests on it. Physics would
+   * push the paper up by contact instead; `opts.ground === false` turns the clamp off.
+   */
+  _groundClamp() {
+    if (this.opts.ground === false) return;
+    const { positions: P, indices: I } = this._buf;
+    let min = Infinity;
+    // every visible render corner (a torn preview poses one vertex differently per face) and the
+    // float64 vertex positions (the float32 render buffer rounds)
+    for (let t = 0; t < I.length; t++) min = Math.min(min, P[I[t] * 3 + 1], this.positions[this._renderSim[I[t]] * 3 + 1]);
+    if (!(min < 0)) { this.groundLift = 0; return; }
+    const lift = -min;
+    for (let i = 1; i < P.length; i += 3) P[i] += lift;
+    for (let i = 1; i < this.positions.length; i += 3) this.positions[i] += lift;
+    this.groundLift = lift;
   }
 
   /** @param {string} id @param {number|boolean} value */

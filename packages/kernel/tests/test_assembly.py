@@ -35,12 +35,35 @@ def test_row_layout_separates_sheets(stocks):
 
 
 def test_leaf_mechanism_and_kinematic_sheet(stocks):
-    leaf = pliego.Sheet("page", pliego.rectangle(100, 140), label=L4, kinematic="turn")
+    leaf = pliego.Sheet("page", pliego.rectangle(100, 140), label=L4)
+    board = pliego.Sheet("board", pliego.rectangle(100, 140), label=L4, kinematic="cover")
     d = pliego.Assembly(
-        [leaf], mechanisms=[pliego.leaf("turn", leaf, ((0, 0), (0, 140)), "page-turn")],
-        controls=[pliego.angle_control("page-turn", L4, 0)]).build(stocks=stocks)
+        [leaf, board],
+        mechanisms=[pliego.leaf("turn", leaf, ((0, 0), (0, 140)), "page-turn"),
+                    pliego.hinge("cover", (110, 0, 0), (0, 0, -1), "cover-open", [board])],
+        controls=[pliego.angle_control("page-turn", L4, 0),
+                  pliego.angle_control("cover-open", L4, 0)]).build(stocks=stocks)
     assert d.verify() == []
-    assert d.sheets[0]["kinematic"] == {"mechanism": "turn"}
+    assert d.sheets[0]["kinematic"] is None
+    assert d.sheets[1]["kinematic"] == {"mechanism": "cover"}
+
+
+def test_rule15_mechanisms_move_only_rigid_sheets(stocks):
+    """Spec §5.4 / rule 15: a hinge moves only sheets kinematic on it; a leaf turns a physical
+    page (the engine refuses both mistakes)."""
+    from pliego import document_verify_refs as refs
+
+    page = pliego.Sheet("page", pliego.rectangle(100, 140), label=L4, kinematic="turn")
+    flap = pliego.Sheet("flap", pliego.rectangle(100, 140), label=L4)
+    d = pliego.Assembly(
+        [page, flap],
+        mechanisms=[pliego.leaf("turn", page, ((0, 0), (0, 140)), "page-turn"),
+                    pliego.hinge("lid", (110, 0, 0), (0, 0, -1), "lid-open", [flap])],
+        controls=[pliego.angle_control("page-turn", L4, 0),
+                  pliego.angle_control("lid-open", L4, 0)]).build(stocks=stocks)
+    kinds = {(i["kind"], i["level"]) for i in d.verify() if i.get("rule") == 15}
+    want = "error" if refs.RULE15_LEVEL == "error" else "warning"
+    assert kinds == {("leaf_on_kinematic", want), ("mechanism_moves_physical", want)}
 
 
 def test_initial_pose_from_angles_is_developable(stocks):

@@ -3,6 +3,7 @@
 // per-vertex normals when an engine omits them, and the theme colours shared by both renderers.
 
 import { mat4, vec3, hexToLinear } from './math.js';
+import { printedFromDocument } from './printed.js';
 
 /** Unit direction toward the key light (upper left, slightly in front). */
 export const LIGHT_DIR = vec3.normalize([-0.45, 1.0, 0.38]);
@@ -79,23 +80,26 @@ export function readTheme(el) {
   };
 }
 
-/** Normalises the sheet list a renderer needs from a sheet document. */
+/**
+ * Normalises the sheet list a renderer needs from a sheet document: colours, `art` per side,
+ * size and grain, plus the printed content (`printed.js`): the sheet-local bounding box the render
+ * UVs span, placed artwork per side (with its clip polygon) and annotations.
+ * @param {any} json
+ */
 export function sheetsFromDocument(json) {
-  const vs = json['pliego:vertices_sheet'] || [];
   return (json['pliego:sheets'] || []).map((sh, s) => {
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    json.vertices_coords.forEach((p, i) => {
-      if (vs[i] !== s) return;
-      x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]);
-    });
+    const { bbox, artwork, annotations } = printedFromDocument(json, s);
     return {
       id: sh.id,
       front: sh.front?.color || '#f4efe6',
       back: sh.back?.color || sh.front?.color || '#f4efe6',
       artFront: sh.front?.art || null,
       artBack: sh.back?.art || null,
-      size: [Math.max(1, x1 - x0), Math.max(1, y1 - y0)],
+      size: [Math.max(1, bbox.x1 - bbox.x0), Math.max(1, bbox.y1 - bbox.y0)],
       grainDeg: typeof sh.grain_deg === 'number' ? sh.grain_deg : 90,
+      bbox,
+      artwork,
+      annotations,
     };
   });
 }

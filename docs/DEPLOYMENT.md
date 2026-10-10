@@ -46,16 +46,16 @@ The all-zero digest in the kustomization is a placeholder that never resolves.
 
 ## First deploy: what must happen, in order
 
-1. **Enclii: check out submodules in build-publish.** The reusable workflow's checkout has no
-   `submodules` option today, so `projects/` would be empty in the build context; the root
-   Dockerfile fails closed on that (`commons-in-image: cartridges=0`). An Enclii change is needed
-   before the first real build (or an owner decision to vendor the commons differently).
-2. **The api lane lands `apps/api`** with `app.py` (Flask `app`), `requirements.txt` (including
+1. **Done: Enclii checks out submodules in build-publish.** enclii#714 added the optional
+   `checkout_submodules` input (build job only, default `"false"`). Pliego passes `"true"`, so
+   `projects/` is populated in the build context. The root Dockerfile still fails closed on an
+   empty commons (`commons-in-image: cartridges=0`).
+2. **Done: `apps/api` is on main** with `app.py` (Flask `app`), `requirements.txt` (including
    gunicorn), `/health`, `/ready`, `/api/v1`, and a metrics listener on 9090.
 3. **Operator: repository settings** (secret scanning, push protection, private vulnerability
    reporting, Dependabot, squash-only, read-only workflow token, SHA pinning required, branch
    protection with CODEOWNERS).
-4. **Operator: one dispatch** of Build & Deploy so a digest is pinned (onboarding rejects unpinned
+4. **One dispatch** of Build & Deploy (agent or operator) so a digest is pinned (onboarding rejects unpinned
    manifests, and a first push has no previous commit to diff).
 5. **Operator: Enclii onboarding** of project `pliego` (no database, no bucket), the repository
    secret `ENCLII_CALLBACK_TOKEN`, a services-sync dry run read on its own before any reconcile.

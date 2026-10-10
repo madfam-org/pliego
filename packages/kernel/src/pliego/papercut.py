@@ -110,18 +110,25 @@ def analyze(sheet: Sheet, min_feature_mm: float = 1.0, cutter_min_mm: float | No
     vid = [(a, b) for (a, b), asg in zip(arr.edges, arr.assignment, strict=True)
            if asg in ("B", "C")]
     order = sorted(range(len(segs)), key=lambda i: (min(segs[i][0].x, segs[i][1].x), i))
+    lo_x = [min(a.x, b.x) for a, b in segs]
+    lo_y = [min(a.y, b.y) for a, b in segs]
+    hi_y = [max(a.y, b.y) for a, b in segs]
     near = _BoundaryGraph(verts, vid)
     min_bridge: float | None = None
     min_gap: float | None = None
     for oi, i in enumerate(order):
         a0, a1 = segs[i]
         hi_x = max(a0.x, a1.x) + reach
+        ylo, yhi = lo_y[i] - reach, hi_y[i] + reach
+        va, vb = vid[i]
         for j in order[oi + 1:]:
-            b0, b1 = segs[j]
-            if min(b0.x, b1.x) > hi_x:
+            if lo_x[j] > hi_x:
                 break
-            if set(vid[i]) & set(vid[j]):
+            if lo_y[j] > yhi or hi_y[j] < ylo:
+                continue  # farther than `reach` in y: d > reach, skipped below anyway
+            if va in vid[j] or vb in vid[j]:
                 continue
+            b0, b1 = segs[j]
             d, p, q = _seg_dist(a0, a1, b0, b1)
             if d > reach or d <= EPS:
                 continue

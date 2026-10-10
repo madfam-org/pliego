@@ -20,7 +20,11 @@ Formulas and defaults come from the rsE research memo §a3–§b:
   ``√(D_md·D_cd)`` because one crease constant serves every crease direction;
 - crease yield 35° (rest opening 27–43°, Lechenault 2014);
 - ``perf_factor`` = bridge fraction of the perforation pitch (material left between cuts);
-- ``collision_thickness = max(t, 0.05 mm)`` (numerical floor, rsE §a3).
+- ``collision_thickness = max(t, 0.05 mm)`` (numerical floor, rsE §a3);
+- optional keys: in-plane shear ``G12 = 0.387·√(E_md·E_cd)`` (Baum et al. 1981 — the same
+  estimate the engine falls back to, written out so the snapshot is self-describing), scored-hinge
+  yield ``score_yield_deg = crease_yield_deg · score_factor``, and the card's perforation pattern
+  ``perf_cut_mm`` / ``perf_bridge_mm`` (only when ``fabrication.perforation`` is present).
 
 CLI (drift gate, read-proof line ``stock: cards=N drift=D``)::
 
@@ -46,6 +50,11 @@ DERIVED_KEYS: tuple[str, ...] = (
     "crease_k", "crease_yield_deg", "crease_set_rate", "score_factor", "perf_factor",
     "tear_strain", "friction", "collision_thickness",
 )
+# Optional snapshot keys (spec §5.2), emitted after the required ones when the card supports them:
+# ``G12`` and ``score_yield_deg`` always (from E_md/E_cd and the yield/score factor every card
+# carries), the perforation pattern when the card has ``fabrication.perforation``.
+OPTIONAL_DERIVED_KEYS: tuple[str, ...] = ("G12", "score_yield_deg", "perf_cut_mm",
+                                          "perf_bridge_mm")
 
 STATUSES = ("measured", "nominal", "estimated")
 CLASSES = (
@@ -73,6 +82,7 @@ DEFAULT_SCORE_FACTOR = 0.35
 DEFAULT_PERF_CUT_MM = 3.0
 DEFAULT_PERF_BRIDGE_MM = 1.0
 MIN_COLLISION_MM = 0.05
+G12_BAUM = 0.387   # G12 ≈ 0.387·√(E_md·E_cd) (Baum, Brennan & Habeger 1981)
 
 GPA = 1e9          # GPa → g/(mm·s²)
 MNM = 1e6          # mN·m → g·mm²/s²
@@ -240,9 +250,11 @@ def derive(card: dict[str, Any]) -> dict[str, float]:
     if isinstance(bend.get("md"), (int, float)) and isinstance(bend.get("cd"), (int, float)):
         d_md, d_cd = float(bend["md"]) * MNM, float(bend["cd"]) * MNM   # measured wins
     l_star = _value(physical, "crease_length_scale_t") * t          # mm
-    perf = fab.get("perforation") or {}
+    perf = fab.get("perforation") if isinstance(fab.get("perforation"), dict) else {}
     cut = float(perf.get("cut_mm", DEFAULT_PERF_CUT_MM))
     bridge = float(perf.get("bridge_mm", DEFAULT_PERF_BRIDGE_MM))
+    crease_yield = _value(physical, "crease_yield_deg")
+    score_factor = _value(physical, "score_factor", DEFAULT_SCORE_FACTOR)
     derived = {
         "areal_density": gsm * 1e-6,                                # g/mm²
         "thickness": t,
@@ -252,19 +264,24 @@ def derive(card: dict[str, Any]) -> dict[str, float]:
         "D_md": d_md,
         "D_cd": d_cd,
         "crease_k": math.sqrt(d_md * d_cd) / l_star,
-        "crease_yield_deg": _value(physical, "crease_yield_deg"),
+        "crease_yield_deg": crease_yield,
         "crease_set_rate": _value(physical, "crease_set_rate", DEFAULT_CREASE_SET_RATE),
-        "score_factor": _value(physical, "score_factor", DEFAULT_SCORE_FACTOR),
+        "score_factor": score_factor,
         "perf_factor": bridge / (cut + bridge),
         "tear_strain": _value(physical, "tear_strain"),
         "friction": _value(physical, "friction"),
         "collision_thickness": max(t, MIN_COLLISION_MM),
+        "G12": G12_BAUM * math.sqrt(e_md * e_cd),
+        "score_yield_deg": crease_yield * score_factor,
     }
-    return {k: _sig(derived[k]) for k in DERIVED_KEYS}
+    if perf:
+        derived["perf_cut_mm"], derived["perf_bridge_mm"] = cut, bridge
+    return {k: _sig(derived[k]) for k in DERIVED_KEYS + OPTIONAL_DERIVED_KEYS if k in derived}
 
 
 def snapshot(card: dict[str, Any] | str, root: Path | str | None = None) -> dict[str, Any]:
-    """The sheet-document stock snapshot (spec §5.2): name, gsm, caliper, derived.
+    """The sheet-document stock snapshot (spec §5.2): name, gsm, caliper, derived and the
+    card's ``appearance`` (front/back colours — the default faces of sheets that author none).
 
     ``card`` is a stock card dict or a committed stock slug (loaded from ``materials/``; this is
     the hook ``pliego.document_build.resolve_stock`` calls).
@@ -278,7 +295,17 @@ def snapshot(card: dict[str, Any] | str, root: Path | str | None = None) -> dict
         "caliper_mm": _sig(_value(physical, "caliper_um") / 1000.0),
         "derived": derive(card),
         "derived_basis": DERIVE_BASIS,
+        **_appearance(card),
     }
+
+
+def _appearance(card: dict[str, Any]) -> dict[str, Any]:
+    app = card.get("appearance")
+    if not isinstance(app, dict):
+        return {}
+    out = {k: app[k] for k in ("front", "back") if isinstance(app.get(k), str)
+           and _COLOR.match(app[k])}
+    return {"appearance": out} if out else {}
 
 
 # ---------------------------------------------------------------- loading
@@ -362,8 +389,9 @@ def check(root: Path | str, write: bool = False) -> tuple[int, int, list[str]]:
                 path.write_text(dump_card(card), encoding="utf-8")
             else:
                 drift += 1
-                keys = sorted(k for k in DERIVED_KEYS
-                              if not isinstance(committed, dict) or committed.get(k) != fresh[k])
+                keys = sorted(k for k in set(fresh) | set(committed or {})
+                              if not isinstance(committed, dict)
+                              or committed.get(k) != fresh.get(k))
                 problems.append(f"{slug}: derived drift in {', '.join(keys) or 'derived_basis'}")
     return len(slugs), drift, problems
 

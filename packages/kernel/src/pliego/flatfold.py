@@ -11,11 +11,18 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from .arrangement import Arrangement
+from .arrangement import GRID_MM, Arrangement
 from .exact import kawasaki_exact, sort_ccw
 from .kinematics import face_adjacency, interior_vertices, pose_arrangement
 
-KAWASAKI_TOL_RAD = 1e-9
+KAWASAKI_TOL_RAD = 1e-6
+"""Default float Kawasaki tolerance (rad), derived from the snapping grid: a crease direction
+built from grid-snapped end points (GRID_MM = 1e-6 mm) is off by at most √2·GRID_MM / L rad,
+and each ray enters the alternating sector sum once, so a vertex's sum is off by at most
+Σᵢ √2·GRID_MM / Lᵢ. `check()` uses that per-vertex bound (`kawasaki_tol`); 1e-6 rad is the bound
+for a degree-4 vertex whose creases are ≥ 5.7 mm long, the default when lengths are unknown.
+Irrational slopes (the hex twist's 105/60/75/120° sectors) snap by ~1e-8 rad and pass."""
+KAWASAKI_FLOOR_RAD = 1e-9   # never tighter than float rounding of the sector sum
 
 
 @dataclass
@@ -50,6 +57,17 @@ def _creases_at(arr: Arrangement, v: int) -> list[tuple[tuple[int, int], int]]:
     return [(d, by_dir[d]) for d in order]
 
 
+def kawasaki_tol(arr: Arrangement, v: int) -> float:
+    """Per-vertex Kawasaki tolerance (rad): Σ √2·GRID_MM / Lᵢ over the folding edges at v."""
+    p = arr.vertices[v]
+    verts = arr.vertices
+    tol = 0.0
+    for e, (a, b) in enumerate(arr.edges):
+        if v in (a, b) and arr.assignment[e] in ("M", "V", "U"):
+            tol += math.sqrt(2.0) * GRID_MM / p.distance(verts[b if a == v else a])
+    return max(KAWASAKI_FLOOR_RAD, tol)
+
+
 def kawasaki_float(dirs: list[tuple[int, int]], tol: float = KAWASAKI_TOL_RAD) -> bool:
     """Alternating sector sum = π within `tol` (float); `dirs` sorted CCW."""
     if len(dirs) % 2 or len(dirs) < 2:
@@ -80,7 +98,7 @@ def vertex_report(arr: Arrangement, v: int) -> VertexReport:
                     blb = False
     return VertexReport(v, len(cr), m, vv, maekawa,
                         kawasaki_exact(dirs) if dirs else False,
-                        kawasaki_float(dirs) if dirs else False, blb,
+                        kawasaki_float(dirs, kawasaki_tol(arr, v)) if dirs else False, blb,
                         [round(s, 6) for s in sectors])
 
 
@@ -101,8 +119,8 @@ def check(arr: Arrangement) -> tuple[list[VertexReport], list[dict]]:
                            "180°"})
         elif not r.kawasaki_exact:
             issues.append({"level": "warning", "kind": "kawasaki_inexact", "vertex": v,
-                           "detail": f"{at}: Kawasaki holds within {KAWASAKI_TOL_RAD} rad only "
-                           "(irrational or snapped slopes)"})
+                           "detail": f"{at}: Kawasaki holds within {kawasaki_tol(arr, v):.3g} "
+                           "rad only (irrational or snapped slopes)"})
         if r.maekawa is False:
             issues.append({"level": "error", "kind": "maekawa", "vertex": v,
                            "detail": f"{at}: |M − V| = |{r.mountains} − {r.valleys}| ≠ 2"})

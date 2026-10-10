@@ -23,6 +23,10 @@ from .exact import GRID, IPoint, crossing_point, round_point
 from .geometry import EPS, Vec2, point_in_polygon
 
 EPS_GRID = int(round(EPS * GRID))  # 100 grid units
+GRID_MM = 1.0 / GRID
+"""The snapping grid (mm): every vertex of an arrangement lies on multiples of 1e-6 mm (the
+spec §1 emit grid). A crease of length L therefore has its direction known to ≈ √2·GRID_MM / L
+rad — the floor for any closure or Kawasaki tolerance on built geometry."""
 
 ASSIGNMENTS = ("B", "M", "V", "F", "U", "C", "J")
 TREATMENTS = ("none", "crease", "score", "perforation", "cut", "halfcut")
@@ -75,7 +79,12 @@ class Arrangement:
 
     @property
     def vertices(self) -> list[Vec2]:
-        return [Vec2(x / GRID, y / GRID) for x, y in self.grid]
+        """Vertex positions in mm (computed once; `grid` is never mutated after build)."""
+        cached = self.__dict__.get("_vertices")
+        if cached is None or len(cached) != len(self.grid):
+            cached = [Vec2(x / GRID, y / GRID) for x, y in self.grid]
+            self.__dict__["_vertices"] = cached
+        return list(cached)
 
     def edges_of_tag(self, tag: int) -> list[int]:
         return [i for i, t in enumerate(self.tags) if tag in t]

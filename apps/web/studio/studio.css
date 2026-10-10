@@ -114,8 +114,10 @@ input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px;
 .segmented button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .segmented button:disabled { opacity: 0.5; cursor: not-allowed; }
 .notice { margin: 0; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--card); border-radius: 6px; font-size: 0.9rem; }
-.viewer { position: relative; flex: 1; min-height: 360px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--viewer-bg); }
-.view-canvas { display: block; width: 100%; height: 100%; min-height: 360px; touch-action: none; cursor: grab; }
+/* The viewer needs a DEFINITE height: a canvas sized from its own CSS height grows from its backing
+   buffer's aspect ratio in a feedback loop. The canvas fills the viewer absolutely. */
+.viewer { position: relative; flex: none; height: clamp(360px, 62vh, 760px); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--viewer-bg); }
+.view-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 .view-canvas:active { cursor: grabbing; }
 .viewer.grab .view-canvas { cursor: crosshair; }
 .view-canvas:focus-visible { outline-offset: -3px; }
@@ -168,7 +170,7 @@ input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px;
   .studio { grid-template-columns: 1fr; padding: 10px 16px; }
   .viewer-col { order: -1; }
   .panel-right { grid-template-columns: 1fr; }
-  .viewer, .view-canvas { min-height: 300px; }
+  .viewer { height: clamp(300px, 55vh, 520px); }
   .topbar { flex-wrap: wrap; }
   .st-end { margin-left: 0; }
 }

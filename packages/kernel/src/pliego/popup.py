@@ -104,7 +104,7 @@ class PopUp:
         ctrl = angle_control("open", OPEN_LABEL, default=self.default_open)
         return Assembly(self.sheets, joins=self.joins, mechanisms=[mech], controls=[ctrl],
                         initial=lambda sid, uv: pose[sid](*uv), title=self.name,
-                        meta={"cartridge": self.sheets[-1].id, "params": dict(self.meta)})
+                        meta={"params": dict(self.meta)})  # cartridge: set by runner / CLI
 
     def document(self, stocks: dict | None = None):
         return self.assembly().build(stocks=stocks)
@@ -353,6 +353,9 @@ def floating_layer(p: float = 50.0, q: float = 40.0, p2: float = 25.0, q2: float
                  height, {"p": p, "q": q, "p2": p2, "q2": q2, "at": at})
 
 
+RATIO_TOL = 1e-12  # V-fold: |cos β / cos δ − 1| below this is the flat state
+
+
 # ── V-fold ───────────────────────────────────────────────────────────────────
 
 
@@ -396,9 +399,12 @@ def v_fold(alpha: float = 40.0, beta: float | None = None, glue_len: float = 50.
         if nrm[0] * inner[0] + nrm[1] * inner[1] < 0:
             nrm = (-nrm[0], -nrm[1], -nrm[2])
         ratio = math.cos(rb) / math.cos(delta)
-        if ratio > 1 + 1e-12:
+        if ratio > 1 + RATIO_TOL:
             return None
-        s = math.sqrt(max(0.0, 1 - ratio * ratio))
+        # near the flat 180° state ratio → 1 and 1 − ratio² cancels catastrophically (rounding
+        # of δ alone leaves s ≈ 1e-8, lifting the apex ~1e-6 mm); within RATIO_TOL it is flat
+        s = 0.0 if ratio > 1 - RATIO_TOL else math.sqrt((1.0 - ratio) * (1.0 + ratio))
+        ratio = min(ratio, 1.0)
         f = tuple(ratio * m[k] + s * nrm[k] for k in range(3))
         return gl, gr, f
 

@@ -128,3 +128,17 @@ def test_bad_parameters_fail_loud():
         PU.oa_cut_fold(blocks=((50, 40, 10, 10),))
     with pytest.raises(ValueError):
         PU.step_fold(steps=9)
+
+
+@pytest.mark.parametrize("deg", [43.0, 45.0, 48.0, 49.0, 51.0, 52.0, 55.0, 40.0, 60.0])
+def test_v_fold_closes_flat_at_180_without_rounding_lift(deg):
+    """1 − (cos β / cos δ)² cancels near 180°; the clamp keeps α = β flat at both extremes."""
+    report = PU.v_fold(alpha=deg, beta=deg, glue_len=40.0, apex=70.0, at=40.0).closure()
+    assert report == {"flat_at_0": True, "flat_at_180": True, "locked_at": [], "ok": True}
+
+
+def test_popup_assembly_leaves_the_cartridge_unset():
+    """The runner / CLI write pliego:meta.cartridge; a generator must not claim its sheet id."""
+    meta = PU.v_fold().document().data["pliego:meta"]
+    assert "cartridge" not in meta
+    assert meta["params"]["alpha"] == 40.0

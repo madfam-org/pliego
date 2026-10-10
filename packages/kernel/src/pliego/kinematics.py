@@ -4,7 +4,8 @@
 - loop-closure residuals (how far the faces disagree on shared vertices);
 - the vertex constraint matrix ``Σ ρ̇ᵢ ℓᵢ = 0`` and DOF = m − rank(C) via a stdlib one-sided Jacobi
   SVD (rsE §a2);
-- degree-4 closed forms (Foschi–Hull–Ku Thm 1) and the Miura-ori cell (Schenk & Guest 2013).
+- degree-4 closed forms (Foschi–Hull–Ku Thm 1) and the Miura-ori cell (Schenk & Guest 2013);
+- the motion solver `solve()` and `vertex_folds()` / `vertex_residuals()` (``pliego.motion``).
 
 Conventions: angles in degrees at the API, radians inside; un-placed world frame (u, 0, −v), so a
 counter-clockwise sheet's front normal is +Y and a positive (valley) angle lifts faces toward +Y.
@@ -121,12 +122,25 @@ def pose_arrangement(arr: Arrangement, angles: dict[int, float], root: Vec2 | No
     return [p if p is not None else pts[i] for i, p in enumerate(out)]
 
 
-def closure_residual(arr: Arrangement, angles: dict[int, float], root: Vec2 | None = None
-                     ) -> float:
+def closure_residual(arr: Arrangement, angles: dict[int, float], root: Vec2 | None = None,
+                     *, relative: bool = False) -> float:
     """Loop-closure residual (mm): for every crease between two posed faces, the largest
     distance between the far face's vertices placed by its tree transform and by rotating the
     near face's transform about that crease by its angle. 0 for a consistent fold state —
-    this also checks the creases the spanning tree did not cross."""
+    this also checks the creases the spanning tree did not cross.
+
+    The mm value grows with the sheet (an angular error θ at a vertex moves a point at distance
+    R by ≈ θ·R). `relative=True` divides by the sheet's diagonal, giving a dimensionless value
+    comparable across sizes; `vertex_residuals()` gives the per-vertex residual in radians and
+    `snap_angle_rad()` the angular floor set by the snapping grid — honest tolerances are a
+    small multiple of it."""
+    if relative:
+        lo_x = min(v.x for v in arr.vertices)
+        hi_x = max(v.x for v in arr.vertices)
+        lo_y = min(v.y for v in arr.vertices)
+        hi_y = max(v.y for v in arr.vertices)
+        diag = math.hypot(hi_x - lo_x, hi_y - lo_y) or 1.0
+        return closure_residual(arr, angles, root) / diag
     tr = face_transforms(arr, angles, root_face(arr, root))
     pts = [unplaced(v.x, v.y) for v in arr.vertices]
     worst = 0.0
@@ -142,6 +156,18 @@ def closure_residual(arr: Arrangement, angles: dict[int, float], root: Vec2 | No
             for v in arr.faces[g]:
                 worst = max(worst, dist(_apply(expect, pts[v]), _apply(tr[g], pts[v])))  # type: ignore[arg-type]
     return worst
+
+
+def snap_angle_rad(arr: Arrangement) -> float:
+    """Angular uncertainty (rad) of the shortest crease direction after grid snapping:
+    √2·GRID_MM / L_min over the foldable (M/V/U) edges — 0 when there are none."""
+    from .arrangement import GRID_MM
+
+    verts = arr.vertices
+    lengths = [verts[a].distance(verts[b]) for (a, b), asg in zip(arr.edges, arr.assignment,
+                                                                   strict=True)
+               if asg in ("M", "V", "U")]
+    return math.sqrt(2.0) * GRID_MM / min(lengths) if lengths else 0.0
 
 
 # ── constraints and DOF ──────────────────────────────────────────────────────
@@ -194,9 +220,10 @@ def singular_values(m: list[list[float]], sweeps: int = 60) -> list[float]:
                 alpha = math.fsum(t * t for t in x)
                 beta = math.fsum(t * t for t in y)
                 gamma = math.fsum(s * t for s, t in zip(x, y, strict=True))
-                if abs(gamma) <= 1e-15 * math.sqrt(alpha * beta) or gamma == 0.0:
+                if gamma == 0.0 or alpha == 0.0 or beta == 0.0 \
+                        or abs(gamma) <= 1e-15 * math.sqrt(alpha) * math.sqrt(beta):
                     continue
-                off = max(off, abs(gamma) / math.sqrt(alpha * beta))
+                off = max(off, abs(gamma) / (math.sqrt(alpha) * math.sqrt(beta)))
                 zeta = (beta - alpha) / (2.0 * gamma)
                 t = math.copysign(1.0, zeta) / (abs(zeta) + math.sqrt(1.0 + zeta * zeta))
                 c = 1.0 / math.sqrt(1.0 + t * t)
@@ -259,3 +286,21 @@ def miura_poisson(gamma_deg: float, theta_deg: float) -> float:
     """In-plane Poisson ratio ν_SL = −cos²θ · tan²γ (Schenk & Guest 2013)."""
     g, t = math.radians(gamma_deg), math.radians(theta_deg)
     return -math.cos(t) ** 2 * math.tan(g) ** 2
+
+
+# ── Tier R motion (pliego.motion) ────────────────────────────────────────────
+
+from .motion import (  # noqa: E402 - re-exported: pliego.kinematics.solve(...)
+    KinematicPath,
+    KinematicsError,
+    solve,
+    vertex_folds,
+    vertex_residuals,
+)
+
+__all__ = [
+    "KinematicPath", "KinematicsError", "closure_residual", "constraint_matrix", "degree4_mode1",
+    "degree4_mode2", "dof", "face_adjacency", "face_transforms", "interior_vertices",
+    "miura_cell", "miura_poisson", "pose_arrangement", "rank", "root_face", "singular_values",
+    "snap_angle_rad", "solve", "vertex_folds", "vertex_residuals",
+]

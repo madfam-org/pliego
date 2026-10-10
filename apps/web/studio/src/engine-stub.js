@@ -158,6 +158,30 @@ function rootFace(j, s) {
   return Number.isInteger(f) && f >= 0 && f < fs.length && fs[f] === s ? f : fs.indexOf(s);
 }
 const ease = (x) => x * x * (3 - 2 * x);
+
+/**
+ * Keyed mechanism output (spec §5.20; the engine's keyed.js): linear between [control, output]
+ * keys, held outside them, wrapped every `period` when one is given. No keys: the value itself.
+ */
+export function keyedOutput(m, v) {
+  const K = m.keys;
+  if (!Array.isArray(K) || K.length < 2) return v;
+  const n = K.length, c0 = K[0][0];
+  let u = v;
+  if (m.period > 0) {
+    u = (v - c0) % m.period;
+    if (u < 0) u += m.period;
+    u += c0;
+    const cl = K[n - 1][0], span = c0 + m.period - cl;
+    if (u >= cl) return span > 0 ? K[n - 1][1] + ((u - cl) / span) * (K[0][1] - K[n - 1][1]) : K[n - 1][1];
+  } else {
+    if (u <= c0) return K[0][1];
+    if (u >= K[n - 1][0]) return K[n - 1][1];
+  }
+  let lo = 0, hi = n - 1;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (K[mid][0] <= u) lo = mid; else hi = mid; }
+  return K[lo][1] + ((u - K[lo][0]) / (K[hi][0] - K[lo][0])) * (K[hi][1] - K[lo][1]);
+}
 // A removed piece lifts through the first LIFT_END of its step, then disappears.
 const LIFT_END = 0.75;
 // Fully folded layers are drawn this far from flat (a 75 mm flap opens ~0.7 mm): coplanar layers
@@ -373,38 +397,55 @@ export class World {
     return theta.map((x) => Math.max(-FLAT_MAX, Math.min(FLAT_MAX, x)));
   }
 
-  /** Whole-sheet mechanism transforms (world space, applied after the face-tree pose). */
+  /**
+   * Whole-sheet mechanism transforms (world space, applied after the face-tree pose). Keys map a
+   * control value to the mechanism's output and `ride` composes with the ridden mechanism (spec
+   * §5.20, mirrored from the engine's keyed.js).
+   */
   _mechanisms(treeRoot) {
     const j = this._j;
     const sheets = j['pliego:sheets'];
     const idx = new Map(sheets.map((s, i) => [s.id, i]));
     const M = sheets.map(() => IDENT());
-    for (const m of j['pliego:mechanisms'] || []) {
+    const mechs = j['pliego:mechanisms'] || [];
+    const byId = new Map(mechs.map((m) => [m.id, m]));
+    const memo = new Map();
+    const tf = (m, depth = 0) => {
+      if (memo.has(m.id)) return memo.get(m.id);
+      let T = IDENT();
       if (m.type === 'hinge') {
-        const v = this._controls.get(m.angle_control) ?? m.rest;
-        const T = axisRot(m.axis.origin, unit(m.axis.direction), (v - m.rest) * DEG);
-        for (const id of m.sheets_moving) M[idx.get(id)] = compose(T, M[idx.get(id)]);
+        const v = keyedOutput(m, this._controls.get(m.angle_control) ?? m.rest);
+        T = axisRot(m.axis.origin, unit(m.axis.direction), (v - m.rest) * DEG);
+      } else if (m.type === 'rotate') {
+        const cs = idx.get(m.center.sheet);
+        const o = apply(treeRoot[cs], [m.center.at[0], 0, -m.center.at[1]]);
+        const n = unit(rotOnly(treeRoot[cs], [0, 1, 0]));
+        T = axisRot(o, n, keyedOutput(m, this._controls.get(m.control) || 0) * DEG);
+      } else if (m.type === 'translate') {
+        const ctl = (j['pliego:controls'] || []).find((c) => c.id === m.control);
+        const max = ctl && ctl.max ? ctl.max : 1;
+        const v = this._controls.get(m.control) || 0;
+        const d = unit(m.direction), k = m.keys ? keyedOutput(m, v) : (v / max) * m.travel;
+        T = { r: [1, 0, 0, 0, 1, 0, 0, 0, 1], t: [d[0] * k, d[1] * k, d[2] * k] };
+      }
+      const r = m.ride !== undefined ? byId.get(m.ride) : null;
+      if (r && depth < mechs.length) T = compose(tf(r, depth + 1), T);
+      memo.set(m.id, T);
+      return T;
+    };
+    for (const m of mechs) {
+      if (m.type === 'hinge' || m.type === 'rotate' || m.type === 'translate') {
+        const T = tf(m);
+        for (const id of m.sheets_moving || []) M[idx.get(id)] = compose(T, M[idx.get(id)]);
       } else if (m.type === 'leaf') {
         const s = idx.get(m.sheet), off = sheets[s].offset;
-        const v = this._controls.get(m.control) || 0;
+        const v = keyedOutput(m, this._controls.get(m.control) || 0);
         const p0 = apply(treeRoot[s], [m.spine[0][0], 0, -m.spine[0][1]]), p1 = apply(treeRoot[s], [m.spine[1][0], 0, -m.spine[1][1]]);
         const pts = j.vertices_coords.filter((_, i) => j['pliego:vertices_sheet'][i] === s);
         const c = pts.reduce((a, p) => [a[0] + (p[0] - off[0]) / pts.length, a[1] + (p[1] - off[1]) / pts.length], [0, 0]);
         const d = [m.spine[1][0] - m.spine[0][0], m.spine[1][1] - m.spine[0][1]];
         const side = d[0] * (c[1] - m.spine[0][1]) - d[1] * (c[0] - m.spine[0][0]);   // > 0: leaf on the left
         M[s] = compose(axisRot(p0, unit(sub(p1, p0)), (side > 0 ? 1 : -1) * v * DEG), M[s]);
-      } else if (m.type === 'rotate') {
-        const cs = idx.get(m.center.sheet);
-        const o = apply(treeRoot[cs], [m.center.at[0], 0, -m.center.at[1]]);
-        const n = unit(rotOnly(treeRoot[cs], [0, 1, 0]));
-        const T = axisRot(o, n, (this._controls.get(m.control) || 0) * DEG);
-        for (const id of m.sheets_moving) M[idx.get(id)] = compose(T, M[idx.get(id)]);
-      } else if (m.type === 'translate') {
-        const ctl = (j['pliego:controls'] || []).find((c) => c.id === m.control);
-        const max = ctl && ctl.max ? ctl.max : 1;
-        const d = unit(m.direction), k = ((this._controls.get(m.control) || 0) / max) * m.travel;
-        const T = { r: [1, 0, 0, 0, 1, 0, 0, 0, 1], t: [d[0] * k, d[1] * k, d[2] * k] };
-        for (const id of m.sheets_moving || []) M[idx.get(id)] = compose(T, M[idx.get(id)]);
       }
       // `slide` and driven pins need the physics engine (joins); the stub leaves them static.
     }

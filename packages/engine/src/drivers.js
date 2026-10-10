@@ -9,12 +9,13 @@
  * targets from the measured angle at step entry to the target over `duration_ms` (smoothstep), keeps
  * targets held until a later step releases them, and accepts fractional step positions.
  */
-import { axisAngleMatrix, mat3Vec, quatRotate, DEG } from './geom.js';
+import { axisAngleMatrix, mat3Vec, mat3Mul, quatRotate, DEG } from './geom.js';
 import { TK_DRIVE, TK_SLIDER, TK_GRAB } from './xpbd/joins.js';
 import { HAND_FACTOR } from './constants.js';
 import { locatePoint } from './mesh.js';
 import { triNormal } from './xpbd/joins.js';
 import { KinematicProgram } from './kinematics/program.js';
+import { keyedOutput } from './keyed.js';
 
 const LEAF_STIFFNESS = 2.0e5; // g/s², the hand turning a page
 
@@ -181,38 +182,22 @@ export class Drivers {
     }
     // fixed vertices
     const X = w.fixedTarget;
+    /** @type {Map<string, {R: number[]|null, T: number[]}>} */
+    const memo = new Map();
     for (const grp of this.groups) {
-      const m = grp.mech ? this.mech.get(grp.mech) : null;
-      let R = null, o = [0, 0, 0], t = [0, 0, 0];
-      if (m && m.type === 'hinge') {
-        R = axisAngleMatrix(m.axis.direction, (/** @type {number} */(this.value.get(m.angle_control)) - m.rest) * DEG);
-        o = m.axis.origin;
-      } else if (m && m.type === 'rotate') {
-        if (!m._c) {
-          const s = /** @type {number} */(w.doc.sheetIndex.get(m.center.sheet));
-          const r = locatePoint(w.mesh, s, m.center.at[0], m.center.at[1]);
-          m._c = bary(this.Xplaced, r); m._n = triNormal(w.mesh, this.Xplaced, /** @type {any} */(r).tri);
-        }
-        R = axisAngleMatrix(m._n, /** @type {number} */(this.value.get(m.control)) * DEG);
-        o = m._c;
-      } else if (m && m.type === 'translate') {
-        const c = this.controls.get(m.control);
-        const val = /** @type {number} */(this.value.get(m.control));
-        const frac = typeof c.max === 'number' && c.max !== 0 ? val / c.max : val / m.travel;
-        const d = norm3(m.direction);
-        t = [d[0] * m.travel * frac, d[1] * m.travel * frac, d[2] * m.travel * frac];
-      }
+      const tf = grp.mech ? this.transformOf(w, grp.mech, memo) : null;
+      const R = tf ? tf.R : null, t = tf ? tf.T : [0, 0, 0];
       for (let i = 0; i < grp.verts.length; i++) {
         const v = grp.verts[i];
         let p = [grp.base[3 * i], grp.base[3 * i + 1], grp.base[3 * i + 2]];
-        if (R) { const q = mat3Vec(R, [p[0] - o[0], p[1] - o[1], p[2] - o[2]]); p = [q[0] + o[0], q[1] + o[1], q[2] + o[2]]; }
+        if (R) p = mat3Vec(R, p);
         X[3 * v] = p[0] + t[0]; X[3 * v + 1] = p[1] + t[1]; X[3 * v + 2] = p[2] + t[2];
       }
     }
     // leaf page turn: each band vertex on an arc about the spine (radius shrinks mid-turn)
     const T = w.terms;
     for (const lf of this.leaves) {
-      const a = /** @type {number} */(this.value.get(lf.m.control)) * DEG;
+      const a = keyedOutput(lf.m, /** @type {number} */(this.value.get(lf.m.control))) * DEG;
       for (const d of lf.drivers) {
         const r = d.r0 * (1 - 0.18 * Math.sin(a));
         const tgt = T.info[d.term].target;
@@ -229,7 +214,7 @@ export class Drivers {
       const frac = typeof c.max === 'number' && c.max !== 0 ? val / c.max : val / m.travel;
       const was = !!inf.driven;
       inf.driven = true;
-      inf.s = Math.max(0, Math.min(inf.trackLen, m.travel * frac));
+      inf.s = Math.max(0, Math.min(inf.trackLen, m.keys ? keyedOutput(m, val) : m.travel * frac));
       if (!was) dirty = true;
     }
     // wind
@@ -241,6 +226,51 @@ export class Drivers {
       for (const v of k.verts) for (let c = 0; c < 3; c++) w.fixedTarget[3 * v + c] = k.a[3 * v + c] + f * (k.b[3 * v + c] - k.a[3 * v + c]);
     }
     return dirty;
+  }
+
+  /**
+   * Rigid transform p ↦ R·p + T of a hinge, rotate or translate mechanism at its current control
+   * value (keys applied, spec §5.20), composed with the mechanism it rides. Memoised per call of
+   * `apply`. R is null for a pure translation.
+   * @param {any} w @param {string} id @param {Map<string, {R: number[]|null, T: number[]}>} memo
+   * @returns {{R: number[]|null, T: number[]}}
+   */
+  transformOf(w, id, memo) {
+    const hit = memo.get(id);
+    if (hit) return hit;
+    const m = this.mech.get(id);
+    /** @type {number[]|null} */
+    let R = null;
+    let T = [0, 0, 0];
+    if (m && m.type === 'hinge') {
+      const o = m.axis.origin;
+      R = axisAngleMatrix(m.axis.direction, (keyedOutput(m, /** @type {number} */(this.value.get(m.angle_control))) - m.rest) * DEG);
+      const q = mat3Vec(R, o);
+      T = [o[0] - q[0], o[1] - q[1], o[2] - q[2]];
+    } else if (m && m.type === 'rotate') {
+      if (!m._c) {
+        const s = /** @type {number} */(w.doc.sheetIndex.get(m.center.sheet));
+        const r = locatePoint(w.mesh, s, m.center.at[0], m.center.at[1]);
+        m._c = bary(this.Xplaced, r); m._n = triNormal(w.mesh, this.Xplaced, /** @type {any} */(r).tri);
+      }
+      R = axisAngleMatrix(m._n, keyedOutput(m, /** @type {number} */(this.value.get(m.control))) * DEG);
+      const q = mat3Vec(R, m._c);
+      T = [m._c[0] - q[0], m._c[1] - q[1], m._c[2] - q[2]];
+    } else if (m && m.type === 'translate') {
+      const c = this.controls.get(m.control);
+      const val = /** @type {number} */(this.value.get(m.control));
+      const disp = m.keys ? keyedOutput(m, val) : m.travel * (typeof c.max === 'number' && c.max !== 0 ? val / c.max : val / m.travel);
+      const d = norm3(m.direction);
+      T = [d[0] * disp, d[1] * disp, d[2] * disp];
+    }
+    if (m && m.ride !== undefined) {
+      const r = this.transformOf(w, m.ride, memo);
+      if (r.R) { const q = mat3Vec(r.R, T); T = [q[0], q[1], q[2]]; R = R ? mat3Mul(r.R, R) : r.R.slice(); }
+      T = [T[0] + r.T[0], T[1] + r.T[1], T[2] + r.T[2]];
+    }
+    const out = { R, T };
+    memo.set(id, out);
+    return out;
   }
 
   /**

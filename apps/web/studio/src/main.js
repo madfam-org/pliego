@@ -59,15 +59,20 @@ function needsEngine(id) {
   if (!c) return false;
   if (c.kind === 'wind') return true;
   const joins = j['pliego:joins'] || [];
-  for (const m of j['pliego:mechanisms'] || []) {
-    if ((m.control || m.angle_control) !== id) continue;
+  // every mechanism this control moves, directly or through `ride` (spec §5.20), moves its sheets
+  // in the preview; a join between two of those sheets moves with them
+  const mechs = j['pliego:mechanisms'] || [];
+  const byId = new Map(mechs.map((m) => [m.id, m]));
+  const onControl = (m, depth = 0) => (m.control || m.angle_control) === id ||
+    (m.ride !== undefined && byId.has(m.ride) && depth < mechs.length && onControl(byId.get(m.ride), depth + 1));
+  const driven = mechs.filter((m) => onControl(m));
+  const moving = new Set(driven.flatMap((m) => m.sheets_moving || []));
+  for (const m of driven) {
     if (m.type === 'slide') return true;
     if (joins.some((jn) => jn.mechanism === m.id)) return true;   // driven pins / sliders
-    const moving = new Set(m.sheets_moving || []);
-    if (joins.some((jn) => (jn.type === 'glue' || jn.type === 'pivot' || jn.type === 'string') && jn.a && jn.b &&
-      moving.has(jn.a.sheet) !== moving.has(jn.b.sheet || ''))) return true;
   }
-  return false;
+  return driven.length > 0 && joins.some((jn) => (jn.type === 'glue' || jn.type === 'pivot' || jn.type === 'string') && jn.a && jn.b &&
+    moving.has(jn.a.sheet) !== moving.has(jn.b.sheet || ''));
 }
 
 // ---------- rendering of panels ----------

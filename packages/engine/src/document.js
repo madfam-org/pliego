@@ -6,6 +6,7 @@
  */
 import { BUILTIN_STOCKS, DERIVED_KEYS } from './material.js';
 import { checkGeometry, checkJoinsAndFrames } from './docrules.js';
+import { checkKeyedMechanisms } from './keyed.js';
 
 export class DocumentError extends Error {
   /** @param {string[]} problems */
@@ -359,6 +360,7 @@ function checkRefs(c, P) {
       }
     }
   });
+  checkKeyedMechanisms(mechanisms, P); // spec §5.20, rule 20
   for (const s of sheets) {
     if (!s.kinematic) continue;
     const m = mech.get(s.kinematic.mechanism);

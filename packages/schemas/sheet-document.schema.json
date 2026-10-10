@@ -1051,6 +1051,16 @@
                 "items": {
                   "$ref": "#/$defs/slug"
                 }
+              },
+              "keys": {
+                "$ref": "#/$defs/keyTable"
+              },
+              "period": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "ride": {
+                "$ref": "#/$defs/slug"
               }
             },
             "additionalProperties": false
@@ -1076,6 +1086,13 @@
                 "$ref": "#/$defs/slug"
               },
               "travel": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "keys": {
+                "$ref": "#/$defs/keyTable"
+              },
+              "period": {
                 "type": "number",
                 "exclusiveMinimum": 0
               }
@@ -1112,6 +1129,16 @@
                 "items": {
                   "$ref": "#/$defs/slug"
                 }
+              },
+              "keys": {
+                "$ref": "#/$defs/keyTable"
+              },
+              "period": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "ride": {
+                "$ref": "#/$defs/slug"
               }
             },
             "additionalProperties": false
@@ -1147,6 +1174,13 @@
               },
               "control": {
                 "$ref": "#/$defs/slug"
+              },
+              "keys": {
+                "$ref": "#/$defs/keyTable"
+              },
+              "period": {
+                "type": "number",
+                "exclusiveMinimum": 0
               }
             },
             "additionalProperties": false
@@ -1184,12 +1218,40 @@
                 "items": {
                   "$ref": "#/$defs/slug"
                 }
+              },
+              "keys": {
+                "$ref": "#/$defs/keyTable"
+              },
+              "period": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "ride": {
+                "$ref": "#/$defs/slug"
               }
             },
             "additionalProperties": false
           }
         }
       ]
+    },
+    "keyTable": {
+      "description": "Spec §5.20: [control value, output] pairs, control values strictly increasing; output is the angle (deg) or travel (mm) the mechanism uses in place of the control value.",
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "array",
+        "prefixItems": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "minItems": 2,
+        "maxItems": 2
+      }
     },
     "control": {
       "type": "object",

@@ -92,6 +92,13 @@ Each fixed substep, of length Δt = 1/(60·S), runs these stages in order:
 5. **Bookkeeping.** `v = (x − x_start)/Δt`, unwrapped hinge angles, and rate-independent crease
    plasticity (Narain et al. 2013): `θ_rest ← θ − sign·θ_y`.
 
+**Keyed mechanisms** (spec §5.20, `src/keyed.js`). A `hinge`, `rotate`, `leaf`, `translate` or
+`slide` with `keys` maps its control value through a linear table (optionally `period`ic) before
+its usual formula, and a `hinge`/`rotate`/`translate` with `ride` is carried by another one
+(T = T_ride ∘ T_own). One control then drives a crank-rocker four-bar (the coupler rides the crank)
+or a cam follower exactly; the studio's preview stub evaluates the same table. Test
+`keyed-mechanisms`.
+
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force
 exceeds `perf_factor·Y·tear_strain·(length it carries)`. Only the most loaded weld breaks in each

@@ -574,6 +574,26 @@ places the front art on its `art` layer; PDF, DXF and HPGL ignore art for now (e
 is a backlog item).
 <!-- lane H (w3/hardening) §5.17: end -->
 
+<!-- §5.20–§5.22 added by wave 3 lane E (engine). Delimited for the coordinator, who renumbers at integration. -->
+
+### 5.20 Keyed mechanisms — `keys`, `period`, `ride`
+
+A mechanism moves linearly in its control by default (§5.4). Three optional fields let one control
+drive non-linear motion exactly: couplers, crank-rockers and cam followers.
+
+| Field | On | Meaning |
+|---|---|---|
+| `keys` | `hinge`, `rotate`, `leaf`, `translate`, `slide` | ≥ 2 `[control value, output]` pairs, control values strictly increasing. The output is linear between keys and held at the first or last output outside them. It **replaces the control value** in the mechanism's formula: the effective hinge angle (rotation = output − `rest`), the `rotate` or `leaf` angle (deg), the `translate` displacement along `direction` (mm, within ±`travel`) or the `slide` position along the track (mm, within [0, `travel`]). |
+| `period` | with `keys` | > 0. The control value is wrapped into [c₀, c₀ + `period`) before the lookup (c₀ = the first key's control value), and the segment after the last key runs linearly back to the first key's output at c₀ + `period`. Keys span at most one period. A table whose output gains a whole turn per period (a coupler's own rotation) ends with a key at c₀ + `period`; the wrap back to the first output is then a whole turn, invisible in a rotation. |
+| `ride` | `hinge`, `rotate`, `translate` | the id of another `hinge`, `rotate` or `translate` mechanism that carries this one: the mechanism's transform is applied first, in the placed frame, then the ridden mechanism's transform, both at the same moment (T = T_ride ∘ T_own). Rides form no cycle. A coupler is a `rotate` about its crank pin (a point of the crank sheet in its placed pose) riding the crank's `rotate`, keyed by the coupler's heading minus the crank angle. |
+
+A kinematic sheet still follows exactly one mechanism (§5.1); `ride` is how motions combine.
+The engine and the studio preview evaluate the same table; between keys the motion is the linear
+blend of the outputs, so authors sample the closed form finely enough for the linkage to stay
+within tolerance (5° keys keep a 76 mm coupler within 0.04 mm of its rocker pin).
+
+<!-- end of lane E §5.20 block (§5.21–§5.22 follow when added) -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -655,6 +675,13 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     and (SVG) carries no script, event handler, foreignObject, `javascript:` URL, DOCTYPE/ENTITY,
     `@import` or external reference (`art_source`).
 <!-- lane H (w3/hardening) rule 18: end -->
+<!-- rules 20–22 added by wave 3 lane E (engine); the coordinator renumbers at integration. -->
+20. Keyed mechanisms (§5.20): `keys` appear only on `hinge`, `rotate`, `leaf`, `translate` and
+    `slide`, as ≥ 2 number pairs with strictly increasing control values; `translate` outputs lie
+    within ±`travel` and `slide` outputs within [0, `travel`]; `period` > 0, only with `keys`, and
+    the keys span at most one period; `ride` names a `hinge`, `rotate` or `translate` mechanism,
+    appears only on those types, and rides form no cycle.
+<!-- end of lane E rules -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

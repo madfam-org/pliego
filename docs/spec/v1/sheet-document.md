@@ -289,8 +289,8 @@ declared here; the viewer builds its UI from this list.
 face-area floor of rule §8.3 becomes `min_feature_mm²` (default 1 mm²). Papercuts in tissue and
 fine kirigami declare it; nothing else should.
 
-`digest` is the SHA-256 of the canonical serialisation of the document with `digest` set to
-`null` (GOC-1 compatible).
+`digest` is `"sha256:"` + the hex SHA-256 of the canonical serialisation (§5.15) of the document
+with `digest` set to `null`. <!-- lane H (w3/hardening) item 8: was "(GOC-1 compatible)" -->
 
 ### 5.8 Removable pieces, stacks and tear-away — `pliego:pieces`, `pliego:stacks`, step `remove`
 
@@ -492,6 +492,34 @@ A reader that needs the unsplit topology merges the vertices of one sheet that s
   written, §6). A cartridge that places any sheet itself, or ties sheets together, keeps its own
   placements.
 <!-- lane H (w3/hardening) §5.14: end -->
+
+<!-- lane H (w3/hardening) §5.15: begin -->
+### 5.15 Canonical serialisation (what `meta.digest` hashes)
+
+The canonical serialisation of a document is **RFC 8785 (JSON Canonicalization Scheme)**: the
+bytes JavaScript's `JSON.stringify` writes for the parsed document with every object's keys
+sorted, encoded as UTF-8. So a reader in any language reproduces the kernel's digest from the
+JSON it received, whatever number spelling or key order the file used.
+
+- **Objects:** members sorted by key, comparing the keys as **UTF-16 code units** (JavaScript's
+  default sort; for keys within the Basic Multilingual Plane this is code-point order); no
+  whitespace anywhere.
+- **Numbers:** IEEE-754 doubles printed as ECMAScript `Number.prototype.toString` does — the
+  shortest digits that round-trip, plain notation for 1e-7 ≤ |x| < 1e21, exponent form
+  otherwise. So `5.0` → `5`, `5e-06` → `0.000005`, `1e-7` → `1e-7`, `1e21` → `1e+21`, `-0` → `0`.
+  Integers beyond ±2^53, NaN and infinities are not allowed.
+- **Strings:** escaped as `JSON.stringify` does: `\"`, `\\`, `\b \f \n \r \t`, other
+  characters below U+0020 as `\u00xx` (lower-case hex); everything else, `/`, U+2028 and U+2029
+  included, is written as itself. Strings with lone surrogates are not allowed.
+- **Literals:** `true`, `false`, `null`.
+
+`digest` = `"sha256:"` + hex SHA-256 of the canonical bytes of the document with
+`pliego:meta.digest` set to `null`. The kernel's `pliego.canonical_bytes` implements it;
+`packages/kernel/tests/fixtures/digest_vector.json` is a shared test vector (a document, its
+canonical text and its digest, cross-checked against Node's `JSON.stringify`). The engine
+recomputes the digest on load when it is present (rule 10). This is GOC-1 §3.1 made exact
+across languages: GOC-1's integral-float rule falls out of the number rule.
+<!-- lane H (w3/hardening) §5.15: end -->
 
 ## 6. `file_frames` — 3-D states
 

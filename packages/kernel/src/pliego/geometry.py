@@ -360,37 +360,77 @@ def bbox(pts: Iterable[Vec2]) -> tuple[Vec2, Vec2]:
 
 
 def point_in_polygon(p: Vec2, ring: Sequence[Vec2], eps: float = EPS) -> int:
-    """+1 strictly inside, 0 on the boundary (within eps), −1 outside. Works for either winding."""
+    """+1 strictly inside, 0 on the boundary (within eps), −1 outside. Works for either winding.
+
+    One pass over plain floats; the boundary distance (same formula as `dist_point_segment`) is
+    only evaluated for edges whose eps-padded bounding box contains the point."""
+    px, py = p.x, p.y
     n = len(ring)
-    for i in range(n):
-        if dist_point_segment(p, ring[i], ring[(i + 1) % n]) <= eps:
-            return 0
     inside = False
+    on_edge = False
+    eps2 = EPS * EPS
+    b = ring[n - 1]
+    bx, by = b.x, b.y
     for i in range(n):
-        a, b = ring[i], ring[(i + 1) % n]
-        if (a.y > p.y) != (b.y > p.y):
-            x = a.x + (p.y - a.y) * (b.x - a.x) / (b.y - a.y)
-            if x > p.x:
+        a = ring[i]
+        ax, ay = a.x, a.y
+        # edge (b → a) is ring[i−1] → ring[i]; the crossing parity is direction-independent
+        if not on_edge and (min(ax, bx) - eps <= px <= max(ax, bx) + eps
+                            and min(ay, by) - eps <= py <= max(ay, by) + eps):
+            dx, dy = ax - bx, ay - by
+            denom = dx * dx + dy * dy
+            if denom < eps2:
+                d = math.hypot(px - bx, py - by)
+            else:
+                t = max(0.0, min(1.0, ((px - bx) * dx + (py - by) * dy) / denom))
+                d = math.hypot(px - (bx + dx * t), py - (by + dy * t))
+            if d <= eps:
+                on_edge = True
+        if (ay > py) != (by > py):
+            x = ax + (py - ay) * (bx - ax) / (by - ay)
+            if x > px:
                 inside = not inside
+        bx, by = ax, ay
+    if on_edge:
+        return 0
     return 1 if inside else -1
 
 
 def is_simple_polygon(ring: Sequence[Vec2], eps: float = EPS) -> bool:
-    """No repeated vertices and no two non-adjacent edges touching (O(n²))."""
+    """No repeated vertices (within eps) and no two non-adjacent edges touching.
+
+    Sweep over x: only vertex / edge pairs whose eps-padded x ranges overlap are compared, with
+    the same predicates as the all-pairs definition (identical result, ~n log n on sheets)."""
     n = len(ring)
     if n < 3:
         return False
-    for i in range(n):
-        for j in range(i + 1, n):
-            if ring[i].distance(ring[j]) <= eps:
+    xs = sorted(range(n), key=lambda k: ring[k].x)
+    for oi, i in enumerate(xs):
+        pi = ring[i]
+        for j in xs[oi + 1:]:
+            pj = ring[j]
+            if pj.x - pi.x > eps:
+                break
+            if pi.distance(pj) <= eps:
                 return False
+    boxes = []
     for i in range(n):
         a0, a1 = ring[i], ring[(i + 1) % n]
-        for j in range(i + 1, n):
-            if j == i or (j + 1) % n == i or (i + 1) % n == j:
+        boxes.append((min(a0.x, a1.x) - eps, max(a0.x, a1.x) + eps,
+                      min(a0.y, a1.y) - eps, max(a0.y, a1.y) + eps))
+    order = sorted(range(n), key=lambda k: boxes[k][0])
+    for oi, i in enumerate(order):
+        _, hx_i, ly_i, hy_i = boxes[i]
+        a0, a1 = ring[i], ring[(i + 1) % n]
+        for j in order[oi + 1:]:
+            lx_j, _, ly_j, hy_j = boxes[j]
+            if lx_j > hx_i:
+                break
+            if ly_j > hy_i or ly_i > hy_j:
                 continue
-            b0, b1 = ring[j], ring[(j + 1) % n]
-            if segments_touch(a0, a1, b0, b1, eps):
+            if (j + 1) % n == i or (i + 1) % n == j:
+                continue
+            if segments_touch(a0, a1, ring[j], ring[(j + 1) % n], eps):
                 return False
     return True
 

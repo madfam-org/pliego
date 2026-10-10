@@ -75,7 +75,12 @@ class Arrangement:
 
     @property
     def vertices(self) -> list[Vec2]:
-        return [Vec2(x / GRID, y / GRID) for x, y in self.grid]
+        """Vertex positions in mm (computed once; `grid` is never mutated after build)."""
+        cached = self.__dict__.get("_vertices")
+        if cached is None or len(cached) != len(self.grid):
+            cached = [Vec2(x / GRID, y / GRID) for x, y in self.grid]
+            self.__dict__["_vertices"] = cached
+        return list(cached)
 
     def edges_of_tag(self, tag: int) -> list[int]:
         return [i for i, t in enumerate(self.tags) if tag in t]

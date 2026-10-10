@@ -7,17 +7,17 @@
 
 | Area | State on 2026-10-10 |
 |---|---|
-| Contract (`docs/spec/v1`, sheet-document schema) | written; changes go through the coordinator |
-| Kernel (`packages/kernel`) | wave-1 build in progress (kernel-core, kernel-gen lanes) |
-| Engine (`packages/engine`) | wave-1 build in progress (engine lane) |
-| Studio and landing (`apps/web`) | wave-1 build in progress (web lane) |
-| API (`apps/api`) | not started (wave 2); the image's `CMD` expects `apps.api.app:app` |
-| Packaging (lane P, wave 2b) | board and EVA foam stock cards (corrugation model, estimates [E]), `pliego.corrugate`, `pliego.dieline` (box and carton styles), `pliego.envelope`, `pliego.press` (finishes, artwork) and the dieline export profile are built and tested; spec §5.9–§5.11 / rule 13 are drafts awaiting the coordinator; the engine does not yet use finish regions, and the studio does not render relief or placed artwork |
-| Commons (`sheet-hyperobjects`, mounted at `projects/`) | repository created, empty of cartridges; not yet mounted here |
-| CI (`.github/workflows/ci.yml`) | lanes written; lanes for code that does not exist print `skip:` |
+| Contract (`docs/spec/v1`, sheet-document schema) | v1 in force; changes go through the coordinator. Spec §5.1–§5.17 and rules 1–18 (§5.13–§5.17 and rules 15–18 from the hardening wave: split cuts, initial-state conventions, canonical serialisation for `meta.digest`, presentation, data-URI art) |
+| Kernel (`packages/kernel`) | built and tested (stdlib only; `pytest packages/kernel/tests`): authoring, planar arrangement with clearance-checked hole bridging and split cuts, fold programs (Tier R motion solver, layer-ordered `FoldProgram`), generators (tessellations, pop-ups, books, papercuts, reveal blocks, boards and corrugation, dielines, envelopes, finishes, papercraft nets), exporters (SVG, DXF, PDF, HPGL, GLB, FOLD) and `verify()` for every §8 rule. Rules 15 (mechanisms move only rigid sheets) and 16 (closed `pliego:meta`) are warnings until the commons is clean |
+| Engine (`packages/engine`) | merged: XPBD paper physics in plain JavaScript (`node --test packages/engine/test`), loads and verifies documents (fail closed). Not yet: glue zones as welds, local stiffness from finishes, tearing and peel, stack contact, `represents` multiplicity, speed targets on large physical sheets (50–300 ms per step under load). It still requires every cut edge to border two faces, so it rejects the split cuts the kernel now writes (spec §5.13) until it is updated; it checks only the format of `meta.digest`, not its value (§5.15) |
+| Studio and landing (`apps/web`) | built: catalog, parameters, controls, fold-program scrubber, WebGL2 and Canvas 2D 3-D views, SVG crease-pattern view, exports, share links, four languages. The kinematic preview (`engine-stub.js`) is used when no engine is mounted; it honours §5.16 presentation and keeps paper above the table. Printed art, placed artwork and annotations render in the WebGL view (verified by node tests only, no browser run yet); joins and slides stay disabled in the preview; relief and sheen of finishes are not rendered |
+| API (`apps/api`) | built and tested: one Flask app serving the landing, studio, engine modules, schemas, `llms.txt`, robots/sitemap and `/api/v1` (catalog, documents, exports) with a sandboxed, killable cartridge runner, CORS allowlist, rate limits and a separate Prometheus `/metrics` listener; documented in `openapi.json` |
+| Commons (`sheet-hyperobjects`, mounted at `projects/`) | 125 cartridges on the commons' main branch, each one hyperobject family with modes and presets, four languages and an article. The `projects/` submodule here is still pinned to an early commit (32 cartridges) until the coordinator bumps it |
+| Exporters and printed art | the SVG export places front art; PDF, DXF and HPGL ignore printed art (export parity is open) |
+| CI (`.github/workflows/ci.yml`) | lanes run on every PR: guards, compliance, kernel, stocks, engine, web, API |
 | Deploy (`build-deploy.yml`, `enclii.yaml`, `infra/k8s/production`) | written, dispatch-only; Enclii onboarding not done |
 | Identity (Janua client `pliego-web`) | declared in `janua.client.yaml`; not provisioned |
-| AI (Selva) | inert: `SELVA_BASE_URL` unset, every AI route answers 503 |
+| AI (Selva) | inert: no AI route is served |
 | Commerce | none. No tiers, no prices, no checkout |
 
 Rulings in force: commons object licence CERN-OHL-W-2.0 and hosts `pliego.madfam.io`,
@@ -25,5 +25,4 @@ Rulings in force: commons object licence CERN-OHL-W-2.0 and hosts `pliego.madfam
 tiers.
 
 Known gaps before the first deploy (docs/DEPLOYMENT.md): Enclii's reusable build checks out
-without submodules, so the image build fails closed on an empty `projects/`; the API and its
-`/metrics` listener do not exist yet.
+without submodules, so the image build fails closed on an empty `projects/`.

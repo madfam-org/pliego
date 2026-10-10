@@ -220,7 +220,11 @@ jobs:
           fi
       - name: Test (node --test, zero dependencies)
         if: steps.detect.outputs.present == 'true'
-        run: node --test packages/engine/test/
+        # `node --test` over a directory with no test files reports `# tests 0` and exits 0: a silent pass.
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap packages/engine/test/ | tee "$RUNNER_TEMP/engine-tap.txt"
+          grep -Eq '^# tests [1-9]' "$RUNNER_TEMP/engine-tap.txt" || { echo "engine: FAIL 0 tests ran"; exit 1; }
       - name: Type check (JSDoc, @ts-check; TypeScript pinned, no install step in the repo)
         if: steps.detect.outputs.present == 'true'
         run: |
@@ -253,7 +257,11 @@ jobs:
           if [ -d apps/web/test ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
       - name: Test (node --test, zero dependencies)
         if: steps.detect.outputs.present == 'true'
-        run: node --test apps/web/test/
+        # `node --test` over a directory with no test files reports `# tests 0` and exits 0: a silent pass.
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap apps/web/test/ | tee "$RUNNER_TEMP/web-tap.txt"
+          grep -Eq '^# tests [1-9]' "$RUNNER_TEMP/web-tap.txt" || { echo "web: FAIL 0 tests ran"; exit 1; }
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
         run: |

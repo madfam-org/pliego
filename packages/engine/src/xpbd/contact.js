@@ -51,6 +51,12 @@ export class Contact {
     }
     this.weldSheet = near;
     this.mark = new Int32Array(mesh.nV).fill(-1);
+    // faceOrders [f, g, s] (FOLD: f lies on side s of g's normal; partial in v1 — a missing pair is
+    // "unknown"): seeds the sidedness of a vertex of face f against a triangle of face g
+    /** @type {Map<number, number>} */
+    this.faceSide = new Map();
+    this.nF = w.doc.nF;
+    for (const fo of w.doc.faceOrders ?? []) if (Array.isArray(fo) && fo.length === 3 && fo[2] !== 0) this.faceSide.set(fo[0] * this.nF + fo[1], fo[2] > 0 ? 1 : -1);
   }
 
   /** Rebuild candidate pairs. @param {Float64Array} x @param {Uint8Array} fixed @param {number} reach extra radius (mm) */
@@ -150,6 +156,10 @@ export class Contact {
       if (!(ba >= -1e-3 && bb >= -1e-3 && bc >= -1e-3)) continue;
       const key = v * m.nT + t;
       let s = this.side.get(key);
+      if (s === undefined && this.faceSide.size) {
+        const fs = this.faceSide.get(m.vFace[v] * this.nF + m.triFace[t]);
+        if (fs !== undefined) { s = fs; this.side.set(key, s); }
+      }
       if (s === undefined) {
         // sidedness from the substep start (before this substep's motion)
         const sx = xs[3 * v] - (ba * xs[3 * a] + bb * xs[3 * b] + bc * xs[3 * c]);

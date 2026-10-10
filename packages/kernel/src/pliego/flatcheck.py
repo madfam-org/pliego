@@ -305,7 +305,7 @@ def check(state: FlatState, *, local: bool = True, cs: list | None = None) -> li
                                f"{sorted({x for lit in lits for x in lit})}"})
         if len(issues) > 20:
             break
-    if local and not issues:
+    if local and not issues and not state.partial:
         issues.extend(local_check(state))
     return issues
 

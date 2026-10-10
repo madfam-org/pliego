@@ -244,6 +244,32 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   jumping frog's degree-6 head and the fortune teller's degree-8 vertex.
   `foldpattern.py` holds the pattern-side helpers (`face_points`, `edge_angles`, `face_orders`),
   re-exported by `foldprogram`.
+- **3-D poses interleaved with flat folds** (`foldpose.py`). While a program is recorded,
+  `Pose3` tracks every face's world pose; `hinge`/`hinges`, `vertex_pose` and the new
+  `FoldProgram.kinematic(sid, label, drive=[(segment, deg)], free=[segment | (segment,
+  "valley" | "mountain")], fixed=)` set it. `kinematic` is a rigid step on the whole crease
+  pattern so far: the creases (in every layer) on the drive segments turn to their angles, those
+  on the free segments follow, the rest hold (`kinematics.solve`, chord continuation); a hinted
+  free crease leaves a start where the rigid paths branch the hinted way first (the masu gusset
+  folding in, not out). After a 3-D step, `fold(..., within=sheet point, hinge=None)` folds the
+  group of faces lying in one plane and joined to the face at `within`: the group is
+  re-flattened in that face's folded frame (a `FlatState(partial=True)` of the group: placement,
+  order, taco/tortilla checked; Kawasaki/Maekawa skipped at its rim, whose creases it does not
+  hold), its layer order read from the side each face approached the plane from late in the 3-D
+  step that brought it there, completed and checked by `flatcheck`, folded with `flatops.fold`
+  and carried back into 3-D; `hinge` turns a flap of the moving paper about an existing crease
+  at the same time. Other flat operations after 3-D steps fail. The flat state keeps the
+  placements faces had before the first 3-D step (later flat folds add creases only), so for such
+  programs `Built.final_angles`/`target()` describe that flat state and `target(pose=True)` the
+  model; creases folded only in 3-D stay `F` in the pattern and are driven by the sequence. At
+  every sampled state of a `kinematic` step and of a flat fold after 3-D steps, the build checks
+  that no moving face crosses paper that does not move with it (`penetration_mm` per row; more
+  than 0.05 mm fails). Hinge poses now read the flap's faces in the state the hinge was recorded
+  on (not the final one). Proof: the masu box — midlines, blintz, edge creases, ends opened,
+  side walls raised, each end wall raised while its corners fold in, each flap folded over its
+  wall with its tip landing on the floor; every face ends inside the walls (|x|, |z| ≤ q,
+  0 ≤ y ≤ q). Fidelity: exact at every sample (tear ~1e-12 mm); the preview's blend between the
+  kinematic samples tears about 1 mm after refinement.
 <!-- FL2 (wave 3, flat operations) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

@@ -40,12 +40,11 @@ from .foldpattern import (  # noqa: F401 - re-exported
     face_orders,
     face_points,
 )
+from .preview import MAX_SAMPLES, MID_TEAR_MM  # noqa: F401 - re-exported
 
 UNFOLD = {"en": "Unfold", "es": "Desdobla", "fr": "Dépliez", "pt": "Desdobre"}
 TURN = {"en": "Turn over. ", "es": "Da la vuelta. ", "fr": "Retournez. ", "pt": "Vire. "}
 SAME_TOL_DEG = 1e-7
-MID_TEAR_MM = 0.5    # refine a step's samples until the preview's blend tears less than this
-MAX_SAMPLES = 24
 EXACT_MM = 1e-3     # a step whose preview tears less than this (grid snapping) counts as exact
 
 
@@ -63,6 +62,8 @@ class _Rec:
     ms: int
     hinge: dict | None = None
     note: dict | None = None
+    state: FlatState | None = None  # the flat state a 3-D step acts on
+    fn: object = None               # t ↦ world pose per face (`foldpose.Pose3`)
 
 
 @dataclass
@@ -116,17 +117,21 @@ class FoldProgram:
         self.sheet_kwargs = sheet_kwargs
         self._turned = False
         self._hinges = False
+        from .foldpose import Pose3
+        self.pose = Pose3(self.state)
 
     # ── view ──
     def turn_over(self) -> FoldProgram:
         self._flat_only("turn_over")
         self.state = self.state.turn_over()
+        self.pose = type(self.pose)(self.state)
         self._turned = not self._turned
         return self
 
     def rotate(self, deg: float, center=(0.0, 0.0)) -> FoldProgram:
         self._flat_only("rotate")
         self.state = self.state.rotate(deg, center)
+        self.pose = type(self.pose)(self.state)
         return self
 
     def _label(self, label) -> dict:
@@ -145,6 +150,7 @@ class FoldProgram:
         self.recs.append(_Rec(sid, self._label(label), move, ms,
                               note=None if note is None else _l4(note)))
         self.state = move.state
+        self.pose.follow(move)
         return self
 
     def add(self, sid: str, label, move: flatops.Move, ms: int = 1500, note=None) -> FoldProgram:
@@ -156,9 +162,28 @@ class FoldProgram:
 
     # ── operations ──
     def fold(self, sid: str, label, line, direction: str = "valley", ms: int = 1500,
-             note=None, **select) -> FoldProgram:
-        return self._add(sid, label, flatops.fold(self.state, line, direction, **select), ms,
-                         note)
+             note=None, within=None, hinge: dict | None = None, **select) -> FoldProgram:
+        """A flat fold (`pliego.flatops.fold`). After 3-D steps it folds the coplanar group
+        joined to the face at the sheet point `within` (default: the first of `sheet_points`),
+        re-flattened in that face's folded frame (`pliego.foldpose`); `hinge` ({line, turn, at,
+        layers=None, from_="top"}, in that frame) turns a flap of the moving paper about an
+        existing crease at the same time."""
+        if not self.pose.lifted:
+            if hinge is not None:
+                raise FlatStateError(f"{sid}: a nested hinge needs an earlier 3-D step")
+            return self._add(sid, label, flatops.fold(self.state, line, direction, **select),
+                             ms, note)
+        if within is None and select.get("sheet_points"):
+            within = list(select["sheet_points"])[0]
+        if within is None:
+            raise FlatStateError(f"{sid}: flat operations after hinge poses fold the coplanar "
+                                 "group at within= (a sheet point), or come before hinge poses")
+        move, fn = self.pose.fold(self.state, within, line, direction, hinge, select)
+        self.recs.append(_Rec(sid, self._label(label), move, ms,
+                              note=None if note is None else _l4(note), state=move.state,
+                              fn=fn))
+        self.state = move.state
+        return self
 
     def crease_and_unfold(self, sid: str, label, line, direction: str = "valley",
                           ms: int = 1200, **select) -> FoldProgram:
@@ -276,9 +301,37 @@ class FoldProgram:
             out.append({"faces": sorted(grp), "p": p, "d": d, "turn": float(spec["turn"]),
                         "sense": sgn})
         self._hinges = True
+        fn = self.pose.hinge(self.state, out)
         self.recs.append(_Rec(sid, self._label(label), None, ms,
                               {"specs": out, "substeps": int(substeps)},
-                              None if note is None else _l4(note)))
+                              None if note is None else _l4(note), state=self.state, fn=fn))
+        return self
+
+    def kinematic(self, sid: str, label, drive, free=(), fixed=None, ms: int = 1500,
+                  substeps: int = 6, note=None) -> FoldProgram:
+        """A rigid 3-D step on the whole crease pattern so far (`pliego.foldpose`): the creases
+        on the folded-frame segments of `drive` ([(segment, degrees)]) turn to those fold angles
+        (valley > 0, the sheet's sense), the creases on the `free` segments follow (a free item
+        may be (segment, "valley" | "mountain"): the way that crease leaves a start where the
+        rigid paths branch), every other crease holds; `fixed`: a sheet point on a face that
+        stays. Every layer's crease on a segment counts (creases through every layer turn
+        together)."""
+        from .foldpose import creases_on
+
+        drive_segs = [(creases_on(self.state, [seg]), float(a)) for seg, a in drive]
+        if any(not segs for segs, _ in drive_segs):
+            raise FlatStateError(f"kinematic '{sid}': a drive segment lies on no crease")
+        free_segs = []
+        for item in free:
+            seg, hint = (item[0], item[1]) if isinstance(item[1], str) else (item, None)
+            sign = {"valley": 1, "mountain": -1, None: 0}[hint]
+            free_segs += [(x, sign) for x in creases_on(self.state, [seg])]
+        fn, samples = self.pose.kinematic(self.state, drive_segs, free_segs, fixed,
+                                          4 * int(substeps))
+        self._hinges = True
+        self.recs.append(_Rec(sid, self._label(label), None, ms,
+                              {"kin": True, "substeps": int(substeps), "samples": samples},
+                              None if note is None else _l4(note), state=self.state, fn=fn))
         return self
 
     def collapse(self, sid: str, label, center, folds, ms: int = 2400, note=None,
@@ -296,7 +349,8 @@ class FoldProgram:
         before `hinge` poses."""
         from .flatvertex import VertexPath, star
 
-        if any(r.hinge is not None and "vertex" not in r.hinge for r in self.recs):
+        if any((r.hinge is not None and "vertex" not in r.hinge)
+               or (r.move is not None and r.fn is not None) for r in self.recs):
             raise FlatStateError(f"vertex pose '{sid}': vertex poses must come before hinges")
         st = star(self.state, center)
         prev = [r.hinge["vertex"] for r in self.recs
@@ -318,48 +372,11 @@ class FoldProgram:
         path = VertexPath(st, start, target, {w: self.state.faces[w].xf for w in st.wedges},
                           fixed=k0, hold=[i for i in range(n) if i not in named])
         self._hinges = True
+        fn = self.pose.vertex(self.state, path)
         self.recs.append(_Rec(sid, self._label(label), None, ms,
                               {"vertex": path, "substeps": int(substeps)},
-                              None if note is None else _l4(note)))
+                              None if note is None else _l4(note), state=self.state, fn=fn))
         return self
-
-    @staticmethod
-    def _sample(tree, readout, poses_at, ts0, cur, end, folds, sid):
-        """Angles at the sample times, refined (midpoints inserted) wherever the preview's
-        linear blend between two samples tears more than MID_TEAR_MM, up to MAX_SAMPLES."""
-        ts = sorted(set(ts0))
-        done = None
-        while True:
-            prev, seq, tears, mids, devs = dict(cur), [], [], [], []
-            last = cur
-            for t in ts:
-                poses = poses_at(min(t, 1.0))
-                ang = readout(poses, end if (end is not None and t >= 1.0) else prev)
-                if end is not None and t >= 1.0:
-                    bad = max((min(abs(ang[e] - end[e]), 360.0 - abs(ang[e] - end[e]))
-                               for e in folds), default=0.0)
-                    if bad > 1e-5:
-                        raise FlatStateError(f"step '{sid}': the motion does not end in the "
-                                             f"folded state ({bad:.3g}° off)")
-                    ang = dict(end)
-                else:
-                    ang = tree.fit(poses, ang)
-                full = {**last, **ang}
-                drawn = tree.pose(full)
-                tears.append(tree.tear(drawn))
-                devs.append(tree.deviation(drawn, _rooted(poses, drawn)))
-                mids.append(tree.tear(tree.pose({e: (last[e] + full[e]) / 2.0 for e in folds})))
-                seq.append(ang)
-                prev, last = ang, full
-            if done is not None and max(mids) > 0.75 * max(done[2]):
-                return done           # refining does not help: a jump the blend cannot follow
-            done = (seq, tears, mids, devs)
-            bad_iv = [k for k, m in enumerate(mids) if m > MID_TEAR_MM and m > 2.0 * tears[k]
-                      and (k == 0 or m > 2.0 * tears[k - 1])]
-            if not bad_iv or len(ts) >= MAX_SAMPLES:
-                return done
-            t_prev = [0.0] + ts[:-1]
-            ts = sorted(set(ts) | {(t_prev[k] + ts[k]) / 2.0 for k in bad_iv})[:MAX_SAMPLES]
 
     # ── build ──
     def build(self, id: str = "square", *, start_after: str | None = None) -> Built:
@@ -368,8 +385,9 @@ class FoldProgram:
         only shape the starting pose (`Built.start_angles`, `Built.initial()`), e.g. a finished
         model whose program is an operating cycle."""
         from .assembly import EdgeRef, Sequence, Step
+        from .foldpose import check_penetration
         from .kinematics import face_adjacency
-        from .preview import PreviewTree
+        from .preview import PreviewTree, sample_step
 
         final = self.state
         sheet = final.unfold(id, **self.sheet_kwargs)
@@ -417,11 +435,32 @@ class FoldProgram:
         if start_after is not None and start_after not in [r.sid for r in self.recs]:
             raise FlatStateError(f"start_after: no step '{start_after}'")
         start_angles = dict(cur)
+        prev_state, prev_map = self.start, fmap(self.start)
         for rec in self.recs:
             # candidate motions: t ∈ (0, 1] ↦ intended poses of the pattern's faces
             cands: list = []
             end = None
-            if rec.move is not None:
+            start_poses = None
+            if rec.fn is not None and (rec.move is not None or "kin" in rec.hinge):
+                # a step after 3-D steps (`pliego.foldpose`): the recorded world poses
+                smap = fmap(rec.state)
+
+                def fn_poses(t: float, fn=rec.fn, smap=smap):
+                    w = fn(t)
+                    return [w[smap[f]] for f in range(nf)]
+                cands.append(fn_poses)
+                start_poses = fn_poses(0.0)
+                drawn = [flatmotion.compose(extra[f], embed3(prev_state.faces[prev_map[f]].xf))
+                         for f in range(nf)]
+                bad = max(_dev(start_poses[f], drawn[f]) for f in range(nf))
+                if bad > 1e-6:
+                    raise FlatStateError(f"step '{rec.sid}': the recorded pose does not start "
+                                         f"where the previous step ended ({bad:.3g})")
+                end_poses = fn_poses(1.0)
+                extra = [flatmotion.compose(end_poses[f], flatmotion.invert(
+                    embed3(rec.state.faces[smap[f]].xf))) for f in range(nf)]
+                ts0 = rec.hinge["samples"] if rec.move is None else list(rec.move.samples)
+            elif rec.move is not None:
                 mv = rec.move
                 after_map = fmap(mv.state)
                 base = [embed3(mv.before.faces[mv.parent[after_map[f]]].xf) for f in range(nf)]
@@ -435,12 +474,13 @@ class FoldProgram:
                 ts0 = list(mv.samples)
             elif "vertex" in rec.hinge:
                 vp = rec.hinge["vertex"]
-                base = [embed3(final.faces[final_map[f]].xf) for f in range(nf)]
+                smap = fmap(rec.state)
+                base = [embed3(rec.state.faces[smap[f]].xf) for f in range(nf)]
                 sector = {sf: i for i, grp in enumerate(vp.star.groups) for sf in grp}
 
-                def vertex_extra(t: float, vp=vp, sector=sector):
+                def vertex_extra(t: float, vp=vp, sector=sector, smap=smap):
                     g = vp.sector_rigid(t)
-                    return [g[sector[final_map[f]]] if final_map[f] in sector
+                    return [g[sector[smap[f]]] if smap[f] in sector
                             else flatmotion.ID_RIGID for f in range(nf)]
 
                 def poses_at(t: float, base=base, vertex_extra=vertex_extra):
@@ -451,11 +491,12 @@ class FoldProgram:
                 ts0 = [k / rec.hinge["substeps"] for k in range(1, rec.hinge["substeps"] + 1)]
             else:
                 h = rec.hinge
-                base = [embed3(final.faces[final_map[f]].xf) for f in range(nf)]
+                smap = fmap(rec.state)
+                base = [embed3(rec.state.faces[smap[f]].xf) for f in range(nf)]
                 start_extra = list(extra)
                 turns = []
                 for spec in h["specs"]:
-                    grp = {f for f in range(nf) if final_map[f] in set(spec["faces"])}
+                    grp = {f for f in range(nf) if smap[f] in set(spec["faces"])}
                     ref = next(f for f in range(nf) if f not in grp)
                     for f, g, _, _ in edge_faces.values():
                         if (f in grp) != (g in grp):
@@ -481,6 +522,10 @@ class FoldProgram:
                 cands.append(poses_at)
                 extra = hinge_extra(1.0)
                 ts0 = [k / h["substeps"] for k in range(1, h["substeps"] + 1)]
+            if rec.move is not None:
+                prev_state, prev_map = rec.move.state, fmap(rec.move.state)
+            elif rec.state is not None:
+                prev_state, prev_map = rec.state, fmap(rec.state)
             if not emit:
                 if end is not None:
                     cur = {**cur, **end}
@@ -492,11 +537,14 @@ class FoldProgram:
                 continue
             best = None
             for ci, poses_at in enumerate(cands):
-                res = self._sample(tree, readout, poses_at, ts0, cur, end, folds, rec.sid)
+                res = sample_step(tree, readout, poses_at, ts0, cur, end, folds, rec.sid)
                 score = max(res[1] + res[2])
                 if best is None or score < best[0] - 1e-9:
                     best = (score, res[0], max(res[1]), max(res[2]), max(res[3]), ci)
             _, seq, tear, mid, dev, which = best
+            pen = None
+            if start_poses is not None:
+                pen = check_penetration(arr, cands[0], start_poses, ts0, rec.sid)
             n = len(seq)
             last = cur
             for k, ang in enumerate(seq, 1):
@@ -515,9 +563,12 @@ class FoldProgram:
             if max(tear, mid) <= EXACT_MM:
                 exact += 1
             rows.append({"id": rec.sid, "kind": rec.move.kind if rec.move else (
-                         "vertex-pose" if "vertex" in rec.hinge else "hinge"),
+                         "vertex-pose" if "vertex" in rec.hinge else
+                         "kinematic" if "kin" in rec.hinge else "hinge"),
                          "samples": n, "tear_mm": tear, "mid_tear_mm": mid, "deviation_mm": dev,
                          "variant": which})
+            if pen is not None:
+                rows[-1]["penetration_mm"] = pen
         seq_out = Sequence(steps, mode="physical")
         report = {"operations": len(self.recs), "steps": len(steps), "faces": nf,
                   "creases": len(folds), "exact_steps": exact, "max_tear_mm": worst,
@@ -527,8 +578,8 @@ class FoldProgram:
                      start_angles)
 
 
-def _rooted(intended: list, drawn: list) -> list:
-    """Intended poses moved so face 0 sits where the preview draws it (the preview keeps face 0
-    fixed; the intended motion may move it)."""
-    fix = flatmotion.compose(drawn[0], flatmotion.invert(intended[0]))
-    return [flatmotion.compose(fix, p) for p in intended]
+def _dev(a, b) -> float:
+    from .foldpose import rigid_dev
+    return rigid_dev(a, b)
+
+

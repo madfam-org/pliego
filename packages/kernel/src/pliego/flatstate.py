@@ -81,7 +81,8 @@ class FlatState:
 
     def __init__(self, outline: Sequence[Pt], points: Sequence[Pt], faces: Sequence[Face],
                  order: dict[tuple[int, int], int], *, cuts: Sequence[tuple[Pt, Pt]] = (),
-                 seams: Sequence[tuple[Pt, Pt]] = (), creased: Sequence[tuple[Pt, Pt]] = ()):
+                 seams: Sequence[tuple[Pt, Pt]] = (), creased: Sequence[tuple[Pt, Pt]] = (),
+                 partial: bool = False):
         self.outline = tuple(outline)
         self.points = tuple(points)
         self.faces = tuple(faces)
@@ -92,6 +93,9 @@ class FlatState:
         self.cuts = tuple(cuts)
         self.seams = tuple(seams)
         self.creased = tuple(creased)
+        # a group of faces taken out of a larger folding (`pliego.foldpose`): vertices on its
+        # rim meet creases it does not hold, so the local Kawasaki / Maekawa test does not apply
+        self.partial = partial
         self._img: list[list[Pt] | None] = [None] * len(self.faces)
         self._half: dict[tuple[int, int], int] | None = None
         self._cut: set[tuple[int, int]] | None = None
@@ -99,7 +103,8 @@ class FlatState:
     def derive(self, *, points: Sequence[Pt] | None = None, faces: Sequence[Face] | None = None,
                order: dict[tuple[int, int], int] | None = None, **extra) -> FlatState:
         """A state with the same sheet (outline, slits, seams) and the given changes."""
-        kw = {"cuts": self.cuts, "seams": self.seams, "creased": self.creased, **extra}
+        kw = {"cuts": self.cuts, "seams": self.seams, "creased": self.creased,
+              "partial": self.partial, **extra}
         return FlatState(self.outline, self.points if points is None else points,
                          self.faces if faces is None else faces,
                          self.order if order is None else order, **kw)

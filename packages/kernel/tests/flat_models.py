@@ -358,3 +358,55 @@ def newspaper_hat(w: float = 380.0, h: float = 580.0) -> FoldProgram:
                 sheet_points=[seed])
         fp.fold(f"brim-{side}-2", "brim", ((w + 1.0, b), (-1.0, b)), kind, sheet_points=[seed])
     return fp
+
+
+def masu_box(s: float = 200.0):
+    """The traditional masu box: crease the square's midlines (it is turned to a diamond), blintz,
+    crease each edge to the centre line through every layer, open the top and bottom corners;
+    raise the side walls (hinge); raise each end wall while its corners fold in (a rigid step on
+    the whole pattern), then fold its flap over the wall into the box, the flap's tip landing on
+    the floor (a flat fold inside the wall's coplanar group, with the tip turning at once)."""
+    h, lh = s / 2.0, s / math.sqrt(2.0)
+    q = lh / 4.0
+    fp = FoldProgram([(0, 0), (s, 0), (s, s), (0, s)])
+    fp.rotate(45.0, (h, h))
+
+    def o(x, y):
+        return (x + h, y + h)
+    corner = {}
+    for p in fp.state.outline:
+        w = fp.state.to_folded(p)
+        corner[(round((w[0] - h) / lh), round((w[1] - h) / lh))] = p
+    fp.crease_and_unfold("half-1", "half", (o(-lh, -lh), o(lh, lh)), "valley")
+    fp.crease_and_unfold("half-2", "half", (o(lh, -lh), o(-lh, lh)), "valley")
+    fp.fold("blintz-1", "blintz", (o(-lh, 2 * q), o(lh, 2 * q)), "valley")
+    fp.fold("blintz-2", "blintz", (o(2 * q, lh), o(2 * q, -lh)), "valley")
+    fp.fold("blintz-3", "blintz", (o(lh, -2 * q), o(-lh, -2 * q)), "valley")
+    fp.fold("blintz-4", "blintz", (o(-2 * q, -lh), o(-2 * q, lh)), "valley")
+    for sid, a, b in (("edge-top", (-lh, q), (lh, q)), ("edge-bottom", (lh, -q), (-lh, -q)),
+                      ("edge-right", (q, lh), (q, -lh)), ("edge-left", (-q, -lh), (-q, lh))):
+        fp.crease_and_unfold(sid, "edge", (o(*a), o(*b)), "valley")
+    fp.fold("open-top", "open", (o(lh, 2 * q), o(-lh, 2 * q)), "valley",
+            sheet_points=[corner[(0, 1)]])
+    fp.fold("open-bottom", "open", (o(-lh, -2 * q), o(lh, -2 * q)), "valley",
+            sheet_points=[corner[(0, -1)]])
+    flat = fp.state
+    fp.hinges("walls", "walls", [
+        {"line": (o(q, -lh), o(q, lh)), "turn": 90.0, "at": o(1.6 * q, 0.0)},
+        {"line": (o(-q, -lh), o(-q, lh)), "turn": 90.0, "at": o(-1.6 * q, 0.0)}])
+    for sy in (1, -1):
+        tag = "top" if sy > 0 else "bottom"
+        free = []
+        for sx in (1, -1):
+            free += [(o(sx * q, sy * q), o(sx * 2 * q, sy * q)),
+                     ((o(sx * q, sy * q), o(sx * q, sy * 3 * q)), "valley"),   # gusset in
+                     (o(sx * q, sy * q), o(sx * 2 * q, sy * 2 * q))]
+        fp.kinematic(f"end-{tag}", "end wall", [((o(-q, sy * q), o(q, sy * q)), 90.0)],
+                     free=free, fixed=(h, h))
+        line = (o(-lh, 2 * q), o(lh, 2 * q)) if sy > 0 else (o(lh, -2 * q), o(-lh, -2 * q))
+        fp.fold(f"flap-{tag}", "flap", line, "valley",
+                within=flat.preimage(o(0.0, sy * 1.5 * q)), sheet_points=[corner[(0, sy)]],
+                hinge={"line": (o(-lh, sy * 3 * q), o(lh, sy * 3 * q)), "turn": -90.0,
+                       "at": o(0.0, sy * 3.5 * q)})
+    return fp, {"q": q, "h": h}
+

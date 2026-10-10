@@ -221,14 +221,16 @@ def build_assembly(net, mode: str = "fold", *, stock: str = "cardstock-250",
             face = net.mesh.faces[f]
             p = apply(isl.sheet_map, isl.pos[f][face.index(a)])
             q = apply(isl.sheet_map, isl.pos[f][face.index(b)])
-            marks.append(_crease(sheet, p, q, net.fold[(min(a, b), max(a, b))], treatment))
+            marks.append(_crease(sheet, p, q, net.fold[(min(a, b), max(a, b))], treatment,
+                                 preset=mode == "glued"))
         tmarks = []
         tabbed = {(t.face, t.a, t.b) for t in isl.tabs}
         for t in isl.tabs:
             face = net.mesh.faces[t.face]
             p = apply(isl.sheet_map, isl.pos[t.face][face.index(t.a)])
             q = apply(isl.sheet_map, isl.pos[t.face][face.index(t.b)])
-            tmarks.append(_crease(sheet, p, q, t.fold, treatment, name=f"edge-{t.cut}"))
+            tmarks.append(_crease(sheet, p, q, t.fold, treatment, name=f"edge-{t.cut}",
+                                  preset=mode == "glued"))
         for cut in net.cuts:
             for i, f, a, b in cut.sides:
                 if i == isl.index and (f, a, b) not in tabbed:
@@ -253,11 +255,15 @@ def build_assembly(net, mode: str = "fold", *, stock: str = "cardstock-250",
     return _glued_assembly(net, sheets, tree_marks, tab_marks, layout, pages, title)
 
 
-def _crease(sheet: Sheet, p: Pt, q: Pt, fold: float, treatment: str, name: str | None = None):
+def _crease(sheet: Sheet, p: Pt, q: Pt, fold: float, treatment: str, name: str | None = None,
+            preset: bool = False):
+    """A fold line; `preset` gives it its fold angle as crease memory (the card was folded
+    before gluing, so the glued model's creases rest where they stand)."""
     if abs(fold) < 1e-9:
         return sheet.crease(p, q, "flat", 0.0, "crease", name=name)
     kind = "valley" if fold > 0 else "mountain"
-    return sheet.crease(p, q, kind, abs(fold), treatment, name=name)
+    return sheet.crease(p, q, kind, abs(fold), treatment, name=name,
+                        rest=abs(fold) if preset else None)
 
 
 def _shrunk(poly: list[Pt], d: float) -> list[Pt]:

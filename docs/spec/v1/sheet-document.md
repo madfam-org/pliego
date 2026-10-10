@@ -484,6 +484,13 @@ A reader that needs the unsplit topology merges the vertices of one sheet that s
   crease folded flat takes its design sign), unless the author gave it a rest angle. Without it
   the engine would read the pose as elastic and spring a standing pop-up or a rolled tube back
   toward flat at the first step. The kernel writes it; `B`, `C` and `J` edges keep 0.
+- **World placement.** Un-placed sheets would all lie at the world origin, on top of each
+  other. When a multi-sheet document has no joins, mechanisms or stacks and every sheet's
+  placement is the identity, the kernel lays the sheets out in the world as in the layout frame:
+  each sheet's `placement.origin` is `[offset.x, 0, −offset.y]`, so local `(u, v)` lands at
+  `(offset.x + u, 0, −(offset.y + v))`, side by side on the table (and an `initial` frame is
+  written, §6). A cartridge that places any sheet itself, or ties sheets together, keeps its own
+  placements.
 <!-- lane H (w3/hardening) §5.14: end -->
 
 ## 6. `file_frames` — 3-D states

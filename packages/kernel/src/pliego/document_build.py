@@ -71,7 +71,24 @@ def layout_offsets(sheets: list[Sheet], layout: str | dict, gap: float = 10.0) -
     return out
 
 
-def _initial_coords(sheet: Sheet, arr: Arrangement, spec: Any) -> list[list[float]]:
+def world_placements(assembly, offsets: list[Vec2]) -> list:
+    """Each sheet's world placement. A multi-sheet document whose sheets are all un-placed
+    (identity) and that has no joins, mechanisms or stacks would stack every sheet at the world
+    origin; its sheets are then laid out in the world as in the layout frame — local (u, v) at
+    world (offset.x + u, 0, −(offset.y + v)) — so they lie side by side on the table. A
+    cartridge that places any sheet itself, or ties sheets together, keeps its placements."""
+    from .sheet import Placement
+
+    sheets = assembly.sheets
+    authored = [s.placement for s in sheets]
+    if (len(sheets) < 2 or assembly.joins or assembly.mechanisms
+            or getattr(assembly, "stacks", None)
+            or any(not p.is_identity() for p in authored)):  # type: ignore[union-attr]
+        return authored
+    return [Placement((float(o.x), 0.0, float(-o.y))) for o in offsets]
+
+
+def _initial_coords(sheet: Sheet, arr: Arrangement, spec: Any, pl=None) -> list[list[float]]:
     """3-D world coordinates of one sheet's vertices for the `initial` / target frames."""
     local: list[tuple[float, float, float]]
     verts = arr.vertices
@@ -89,17 +106,19 @@ def _initial_coords(sheet: Sheet, arr: Arrangement, spec: Any) -> list[list[floa
         local = pose_arrangement(arr, angles, None if root is None else as_vec(root))
     else:
         local = [unplaced(v.x, v.y) for v in verts]
-    pl = sheet.placement
+    pl = pl or sheet.placement
     return [list(add(quat_rotate(pl.rotation, p), pl.origin)) for p in local]  # type: ignore[union-attr]
 
 
-def _frame_for(assembly, arrs: list[Arrangement], spec: Any, title: str) -> dict:
+def _frame_for(assembly, arrs: list[Arrangement], spec: Any, title: str,
+               placements: list | None = None) -> dict:
     coords: list[list[float]] = []
-    for sheet, arr in zip(assembly.sheets, arrs, strict=True):
+    placements = placements or [s.placement for s in assembly.sheets]
+    for sheet, arr, pl in zip(assembly.sheets, arrs, placements, strict=True):
         per = spec.get(sheet.id) if isinstance(spec, dict) and not _is_pose(spec) else spec
         if per == "flat":
             per = None
-        coords.extend(_initial_coords(sheet, arr, per))
+        coords.extend(_initial_coords(sheet, arr, per, pl))
     return {"frame_title": title, "frame_classes": ["foldedForm"], "frame_attributes": ["3D"],
             "frame_inherit": True, "frame_parent": 0, "vertices_coords": coords}
 
@@ -150,8 +169,8 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
 
     stock_snaps = {slug: resolve_stock(slug, stocks) for slug in sorted({s.stock for s in sheets})}
     sheet_objs = []
-    for s, off in zip(sheets, offsets, strict=True):
-        pl = s.placement
+    placements = world_placements(assembly, offsets)
+    for s, off, pl in zip(sheets, offsets, placements, strict=True):
         app = stock_snaps[s.stock].get("appearance") or {}
         sheet_objs.append({
             "id": s.id, "label": dict(s.label), "stock": s.stock,  # type: ignore[arg-type]
@@ -252,12 +271,12 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
     if controls:
         data["pliego:controls"] = controls
     need_initial = (assembly.initial is not None or bool(assembly.joins)
-                    or any(not s.placement.is_identity() for s in sheets))  # type: ignore[union-attr]
+                    or any(not p.is_identity() for p in placements))  # type: ignore[union-attr]
     frames = []
     if need_initial:
-        frames.append(_frame_for(assembly, arrs, assembly.initial, "initial"))
+        frames.append(_frame_for(assembly, arrs, assembly.initial, "initial", placements))
     for name, spec in (assembly.targets or {}).items():
-        frames.append(_frame_for(assembly, arrs, spec, f"target:{name}"))
+        frames.append(_frame_for(assembly, arrs, spec, f"target:{name}", placements))
     if frames:
         data["file_frames"] = frames
     if need_initial:  # creases set in the initial pose keep it (spec §3 edges_restAngle)

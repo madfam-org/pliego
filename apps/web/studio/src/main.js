@@ -4,7 +4,7 @@
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
 import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, fetchObject } from './data.js';
-import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings } from './share.js';
+import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, legendKinds, LINE_STYLE } from './diagram.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
 import { createRenderer, rendererOverride } from './render/index.js';
@@ -295,7 +295,7 @@ async function selectItem(slug, rawParams, rawMode) {
   state.params = coerceParams(activeParams(), rawParams || {});
   renderAll();
   try {
-    const custom = rawParams && Object.keys(rawParams).length ? state.params : null;
+    const custom = hasParams(rawParams) ? state.params : null;
     await useDocument(await fetchDocument(item, state.catalog.source, custom, state.mode));
   } catch (e) {
     fail('error.document', e);

@@ -2,17 +2,19 @@
 // Share-by-URL: the object slug (and, for objects with several modes, the mode) lives in the query
 // (`?slug=…&mode=…`), parameter values in the hash (`#width=200&stock=kami`), and studio-only state
 // under reserved underscore keys (`_view=2d`). Pure functions so Node tests can cover them.
+// URL input stays in URLSearchParams: no object property is ever named by a user-supplied key
+// (no prototype pollution, no shadowed builtins). Only manifest parameter ids are read out of it.
 
 /**
  * @param {string} search location.search
  * @param {string} hash location.hash
- * @returns {{slug: string|null, mode: string|null, params: Record<string, string>, view: '3d'|'2d', renderer: string|null, engine: string|null}}
+ * @returns {{slug: string|null, mode: string|null, params: URLSearchParams, view: '3d'|'2d', renderer: string|null, engine: string|null}}
  */
 export function parseShare(search, hash) {
   const q = new URLSearchParams(search || '');
   const h = new URLSearchParams(String(hash || '').replace(/^#/, ''));
-  const params = {};
-  for (const [k, v] of h) if (!k.startsWith('_')) params[k] = v;
+  const params = new URLSearchParams();
+  for (const [k, v] of h) if (!k.startsWith('_')) params.append(k, v);
   return {
     slug: q.get('slug'),
     mode: q.get('mode'),
@@ -52,23 +54,33 @@ export function paramsForMode(parameters, mode) {
   return (parameters || []).filter((p) => !Array.isArray(p.modes) || (mode !== null && p.modes.includes(mode)));
 }
 
-/** Typed parameter values back to the strings `coerceParams` reads (as in a share hash). */
+/**
+ * Typed parameter values back to the strings `coerceParams` reads, as a share hash carries them.
+ * @param {Record<string, unknown>} values
+ */
 export function paramStrings(values) {
-  const out = {};
-  for (const [k, v] of Object.entries(values || {})) if (v !== undefined && v !== null) out[k] = String(v);
+  const out = new URLSearchParams();
+  for (const [k, v] of Object.entries(values || {})) if (v !== undefined && v !== null) out.set(k, String(v));
   return out;
+}
+
+/** True when a raw parameter source (URLSearchParams or plain object) carries any value. */
+export function hasParams(raw) {
+  if (!raw) return false;
+  return raw instanceof URLSearchParams ? [...raw.keys()].length > 0 : Object.keys(raw).length > 0;
 }
 
 /**
  * Coerce hash strings to the manifest parameter types; unknown or invalid values fall back to the
- * declared default.
+ * declared default. Only manifest ids are read, so stray hash keys are ignored.
  * @param {any[]} parameters manifest parameters
- * @param {Record<string, string>} raw
+ * @param {URLSearchParams | Record<string, string>} raw
  */
 export function coerceParams(parameters, raw) {
+  const get = (id) => (raw instanceof URLSearchParams ? (raw.has(id) ? raw.get(id) : undefined) : raw[id]);
   const out = {};
   for (const p of parameters) {
-    const v = raw[p.id];
+    const v = get(p.id);
     if (p.type === 'slider') {
       const n = Number(v);
       out[p.id] = v !== undefined && Number.isFinite(n) ? Math.min(p.max ?? n, Math.max(p.min ?? n, n)) : p.default;

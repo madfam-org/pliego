@@ -1,0 +1,688 @@
+{
+ "file_spec": 1.2,
+ "file_creator": "pliego-engine test docbuilder",
+ "file_title": "v-fold card",
+ "file_classes": [
+  "multiModel"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "joins"
+ ],
+ "frame_unit": "mm",
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   100,
+   0
+  ],
+  [
+   100,
+   140
+  ],
+  [
+   0,
+   140
+  ],
+  [
+   120,
+   0
+  ],
+  [
+   220,
+   0
+  ],
+  [
+   220,
+   140
+  ],
+  [
+   120,
+   140
+  ],
+  [
+   290,
+   0
+  ],
+  [
+   339.809735,
+   4.357787
+  ],
+  [
+   333.30127,
+   25
+  ],
+  [
+   290,
+   50
+  ],
+  [
+   246.69873,
+   25
+  ],
+  [
+   240.190265,
+   4.357787
+  ]
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   3,
+   0
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   5,
+   6
+  ],
+  [
+   6,
+   7
+  ],
+  [
+   7,
+   4
+  ],
+  [
+   8,
+   9
+  ],
+  [
+   9,
+   10
+  ],
+  [
+   10,
+   8
+  ],
+  [
+   10,
+   11
+  ],
+  [
+   11,
+   8
+  ],
+  [
+   11,
+   12
+  ],
+  [
+   12,
+   8
+  ],
+  [
+   12,
+   13
+  ],
+  [
+   13,
+   8
+  ]
+ ],
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "V",
+  "B",
+  "M",
+  "B",
+  "V",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  180,
+  0,
+  -180,
+  0,
+  180,
+  0,
+  0
+ ],
+ "faces_vertices": [
+  [
+   0,
+   1,
+   2,
+   3
+  ],
+  [
+   4,
+   5,
+   6,
+   7
+  ],
+  [
+   8,
+   9,
+   10
+  ],
+  [
+   8,
+   10,
+   11
+  ],
+  [
+   8,
+   11,
+   12
+  ],
+  [
+   8,
+   12,
+   13
+  ]
+ ],
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:faces_sheet": [
+  0,
+  1,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "score",
+  "none",
+  "score",
+  "none",
+  "score",
+  "none",
+  "none"
+ ],
+ "pliego:edges_restAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  56.373571,
+  0,
+  -30,
+  0,
+  56.373571,
+  0,
+  0
+ ],
+ "pliego:sheets": [
+  {
+   "id": "board-left",
+   "label": {
+    "en": "board-left",
+    "es": "board-left",
+    "fr": "board-left",
+    "pt": "board-left"
+   },
+   "stock": "cardstock-250",
+   "grain_deg": 90,
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     -100,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "back": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "kinematic": {
+    "mechanism": "base"
+   }
+  },
+  {
+   "id": "board-right",
+   "label": {
+    "en": "board-right",
+    "es": "board-right",
+    "fr": "board-right",
+    "pt": "board-right"
+   },
+   "stock": "cardstock-250",
+   "grain_deg": 90,
+   "offset": [
+    120,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "back": {
+    "color": "#f4efe6",
+    "art": null
+   },
+   "kinematic": {
+    "mechanism": "open"
+   }
+  },
+  {
+   "id": "piece",
+   "label": {
+    "en": "piece",
+    "es": "piece",
+    "fr": "piece",
+    "pt": "piece"
+   },
+   "stock": "cardstock-250",
+   "grain_deg": 90,
+   "offset": [
+    240,
+    0
+   ],
+   "placement": {
+    "origin": [
+     -50,
+     0,
+     -70
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "front": {
+    "color": "#c8553d",
+    "art": null
+   },
+   "back": {
+    "color": "#c8553d",
+    "art": null
+   },
+   "kinematic": null
+  }
+ ],
+ "pliego:stocks": {
+  "cardstock-250": {
+   "name": {
+    "en": "Cardstock 250 g/m²",
+    "es": "Cartulina 250 g/m²",
+    "fr": "Bristol 250 g/m²",
+    "pt": "Cartolina 250 g/m²"
+   },
+   "gsm": 250,
+   "caliper_mm": 0.3,
+   "derived": {
+    "areal_density": 0.00025,
+    "thickness": 0.3,
+    "E_md": 4500000000,
+    "E_cd": 2000000000,
+    "nu": 0.293,
+    "D_md": 11075850.707377663,
+    "D_cd": 4922600.314390073,
+    "crease_k": 123065.00785975181,
+    "crease_yield_deg": 25,
+    "crease_set_rate": 0.6,
+    "score_factor": 0.35,
+    "perf_factor": 0.2,
+    "tear_strain": 0.015,
+    "friction": 0.45,
+    "collision_thickness": 0.3
+   },
+   "derived_basis": "test fixture (rsE §b)"
+  }
+ },
+ "pliego:meta": {
+  "cartridge": "engine-fixture",
+  "mode": "default",
+  "params": {},
+  "kernel": "pliego-engine test docbuilder",
+  "digest": null
+ },
+ "pliego:joins": [
+  {
+   "id": "glue-right",
+   "type": "glue",
+   "a": {
+    "sheet": "piece",
+    "region": [
+     [
+      51.99238939618349,
+      0.17431148549531633
+     ],
+     [
+      99.80973490458729,
+      4.357787137382909
+     ],
+     [
+      93.30127018922194,
+      24.999999999999996
+     ],
+     [
+      51.732050807568875,
+      0.9999999999999999
+     ]
+    ]
+   },
+   "b": {
+    "sheet": "board-right"
+   },
+   "map": [
+    1,
+    0,
+    0,
+    1,
+    -50,
+    70
+   ],
+   "side": "front"
+  },
+  {
+   "id": "glue-left",
+   "type": "glue",
+   "a": {
+    "sheet": "piece",
+    "region": [
+     [
+      48.267949192431125,
+      0.9999999999999999
+     ],
+     [
+      6.698729810778062,
+      24.999999999999996
+     ],
+     [
+      0.19026509541271963,
+      4.35778713738291
+     ],
+     [
+      48.00761060381651,
+      0.1743114854953164
+     ]
+    ]
+   },
+   "b": {
+    "sheet": "board-left"
+   },
+   "map": [
+    1,
+    0,
+    0,
+    1,
+    50,
+    70
+   ],
+   "side": "front"
+  }
+ ],
+ "pliego:mechanisms": [
+  {
+   "id": "open",
+   "type": "hinge",
+   "axis": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "direction": [
+     0,
+     0,
+     -1
+    ]
+   },
+   "angle_control": "open",
+   "rest": 180,
+   "sheets_moving": [
+    "board-right"
+   ]
+  },
+  {
+   "id": "base",
+   "type": "hinge",
+   "axis": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "direction": [
+     0,
+     0,
+     -1
+    ]
+   },
+   "angle_control": "base",
+   "rest": 0,
+   "sheets_moving": [
+    "board-left"
+   ]
+  }
+ ],
+ "pliego:controls": [
+  {
+   "label": {
+    "en": "open",
+    "es": "open",
+    "fr": "open",
+    "pt": "open"
+   },
+   "id": "open",
+   "kind": "angle",
+   "min": 0,
+   "max": 180,
+   "default": 150,
+   "unit": "deg"
+  },
+  {
+   "label": {
+    "en": "base",
+    "es": "base",
+    "fr": "base",
+    "pt": "base"
+   },
+   "id": "base",
+   "kind": "angle",
+   "min": 0,
+   "max": 0,
+   "default": 0,
+   "unit": "deg"
+  }
+ ],
+ "file_frames": [
+  {
+   "frame_title": "initial",
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_inherit": true,
+   "frame_parent": 0,
+   "vertices_coords": [
+    [
+     -100,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     -140
+    ],
+    [
+     -100,
+     0,
+     -140
+    ],
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     86.60254,
+     50,
+     0
+    ],
+    [
+     86.60254,
+     50,
+     -140
+    ],
+    [
+     0,
+     0,
+     -140
+    ],
+    [
+     0,
+     0,
+     -70
+    ],
+    [
+     43.136496,
+     24.904868,
+     -74.357787
+    ],
+    [
+     37.5,
+     21.650635,
+     -95
+    ],
+    [
+     -9.66104,
+     36.05549,
+     -103.266589
+    ],
+    [
+     -43.30127,
+     0,
+     -95
+    ],
+    [
+     -49.809735,
+     0,
+     -74.357787
+    ]
+   ]
+  }
+ ]
+}

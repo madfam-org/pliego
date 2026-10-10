@@ -172,6 +172,12 @@ class Mesh:
         return Mesh(list(self.vertices), out)
 
 
+def nearest_face(mesh: Mesh, point: Sequence[float]) -> int:
+    """The face whose centroid is closest to `point` (ties: lowest index) — for picking the
+    face to extrude on a generated mesh."""
+    return min(range(len(mesh.faces)), key=lambda f: (norm(sub(mesh.centroid(f), point)), f))
+
+
 def merged(*meshes: Mesh) -> Mesh:
     """Disjoint meshes as one (separate components; `net()` unfolds each into its own pieces)."""
     verts: list[Vec3] = []
@@ -354,6 +360,78 @@ def prism(polygon: Sequence[tuple[float, float]], depth: float) -> Mesh:
         j = (i + 1) % n
         faces.append([i, n + i, n + j, j])
     return Mesh(verts, faces).check()
+
+
+def hull(points: Sequence[Sequence[float]], merge: bool = True) -> Mesh:
+    """Convex hull of 3-D points (incremental, deterministic: points in the given order).
+    `merge` joins coplanar neighbouring triangles into one polygon face. Points inside the
+    hull or on its surface are left out."""
+    pts = [(float(p[0]), float(p[1]), float(p[2])) for p in points]
+    if len(pts) < 4:
+        raise MeshError("a hull needs at least 4 points")
+    lo, hi = min(range(len(pts)), key=lambda i: pts[i]), max(range(len(pts)), key=lambda i: pts[i])
+    span = norm(sub(pts[hi], pts[lo]))
+    eps = 1e-9 * max(span, 1.0)
+    c = max(range(len(pts)), key=lambda i: norm(cross(sub(pts[hi], pts[lo]),
+                                                     sub(pts[i], pts[lo]))))
+    n0 = cross(sub(pts[hi], pts[lo]), sub(pts[c], pts[lo]))
+    d = max(range(len(pts)), key=lambda i: abs(dot(n0, sub(pts[i], pts[lo]))))
+    if norm(n0) <= eps * span or abs(dot(n0, sub(pts[d], pts[lo]))) <= eps * norm(n0):
+        raise MeshError("hull points are coplanar")
+    a, b = (lo, hi) if dot(n0, sub(pts[d], pts[lo])) < 0 else (hi, lo)
+    faces = [[a, b, c], [a, d, b], [b, d, c], [c, d, a]]
+
+    def outside(f: list[int], p: Vec3) -> bool:
+        n = cross(sub(pts[f[1]], pts[f[0]]), sub(pts[f[2]], pts[f[0]]))
+        return dot(n, sub(p, pts[f[0]])) > eps * norm(n)
+
+    for i, p in enumerate(pts):
+        if i in (a, b, c, d):
+            continue
+        seen = [f for f in faces if outside(f, p)]
+        if not seen:
+            continue
+        edges = {(f[k], f[(k + 1) % 3]) for f in seen for k in range(3)}
+        horizon = [e for e in edges if (e[1], e[0]) not in edges]
+        faces = [f for f in faces if f not in seen] + [[u, v, i] for u, v in sorted(horizon)]
+    used = sorted({v for f in faces for v in f})
+    remap = {v: k for k, v in enumerate(used)}
+    out = Mesh([pts[v] for v in used], [[remap[v] for v in f] for f in faces])
+    return (_merge_coplanar(out) if merge else out).check()
+
+
+def _merge_coplanar(m: Mesh) -> Mesh:
+    """Join neighbouring faces that share a plane into one polygon (convex meshes)."""
+    n = len(m.faces)
+    parent = list(range(n))
+
+    def find(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    normals = [m.normal(f) for f in range(n)]
+    for (_lo, _hi), uses in sorted(m.edges().items()):
+        if len(uses) == 2:
+            f, g = uses[0][0], uses[1][0]
+            if dot(normals[f], normals[g]) > 1.0 - 1e-12:
+                parent[find(f)] = find(g)
+    groups: dict[int, list[int]] = {}
+    for f in range(n):
+        groups.setdefault(find(f), []).append(f)
+    faces = []
+    for members in sorted(groups.values()):
+        edges = {(fa[k], fa[(k + 1) % len(fa)]) for fa in (m.faces[f] for f in members)
+                 for k in range(len(fa))}
+        nxt = {u: v for u, v in edges if (v, u) not in edges}
+        start = min(nxt)
+        ring, cur = [start], nxt[start]
+        while cur != start:
+            ring.append(cur)
+            cur = nxt[cur]
+        faces.append(ring)
+    return Mesh(list(m.vertices), faces)
 
 
 def extrude(mesh: Mesh, face: int, distance: float, shrink: float = 1.0) -> Mesh:

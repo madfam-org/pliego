@@ -231,8 +231,52 @@ def choose_turn(isl, w: float, h: float, pad: float, foot: float) -> float | Non
     return None if best is None else best[2]
 
 
+def _oriented(isl, turn: float) -> tuple[float, float, Rigid2]:
+    t = rotation(turn)
+    pts = [apply(t, p) for poly in island_polygons(isl) for p in poly]
+    x0, y0 = min(p[0] for p in pts), min(p[1] for p in pts)
+    return (max(p[0] for p in pts) - x0, max(p[1] for p in pts) - y0,
+            compose((1.0, 0.0, -x0, -y0), t))
+
+
+def _skyline_spot(sky: list[list[float]], iw: float, ih: float, w: float, h: float):
+    """Best (bottom, x, index) for an iw × ih box on a skyline [[x, depth, width], …] measured
+    down from the top of the printable area, or None."""
+    best = None
+    for i, (x, _d, _sw) in enumerate(sky):
+        if x + iw > w + 1e-9:
+            break
+        depth, j, reach = 0.0, i, x
+        while reach < x + iw - 1e-9:
+            depth = max(depth, sky[j][1])
+            reach = sky[j][0] + sky[j][2]
+            j += 1
+        if depth + ih <= h + 1e-9 and (best is None or (depth + ih, x) < best[:2]):
+            best = (depth + ih, x, depth)
+    return best
+
+
+def _skyline_add(sky: list[list[float]], x: float, iw: float, bottom: float) -> list[list[float]]:
+    out: list[list[float]] = []
+    for sx, sd, sw in sky:
+        for a, b in ((sx, min(sx + sw, x)), (max(sx, x + iw), sx + sw)):
+            if b - a > 1e-9:
+                out.append([a, sd, b - a])
+    out.append([x, bottom, iw])
+    out.sort()
+    merged: list[list[float]] = []
+    for seg in out:
+        if merged and abs(merged[-1][1] - seg[1]) < 1e-9 and \
+                abs(merged[-1][0] + merged[-1][2] - seg[0]) < 1e-9:
+            merged[-1][2] += seg[2]
+        else:
+            merged.append(seg)
+    return merged
+
+
 def pack(net) -> None:
-    """Rotate each island to fit and shelf-pack them onto pages (first fit, tallest first)."""
+    """Rotate each island to fit (its best turn or a quarter turn more) and skyline-pack the
+    pieces onto pages: biggest first, each at the lowest, then leftmost, free spot."""
     from .unfold import LABEL_FOOT_MM, PIECE_GAP_MM
 
     pw, ph = net.page_size
@@ -243,36 +287,33 @@ def pack(net) -> None:
         turn = choose_turn(isl, w, h, PIECE_GAP_MM, LABEL_FOOT_MM)
         if turn is None:
             raise MeshError(f"piece {isl.index + 1} does not fit the printable page")
-        t = rotation(turn)
-        pts = [apply(t, p) for poly in island_polygons(isl) for p in poly]
-        x0, y0 = min(p[0] for p in pts), min(p[1] for p in pts)
-        bw = max(p[0] for p in pts) - x0
-        bh = max(p[1] for p in pts) - y0
-        isl.sheet_map = compose((1.0, 0.0, -x0, -y0), t)
-        items.append((bw + 2 * PIECE_GAP_MM, bh + 2 * PIECE_GAP_MM + LABEL_FOOT_MM, isl))
-    pages: list[dict] = []
-    for iw, ih, isl in sorted(items, key=lambda it: (-it[1], it[2].index)):
+        options = []
+        for t in (turn, turn + 90.0):
+            bw, bh, smap = _oriented(isl, t)
+            iw, ih = bw + 2 * PIECE_GAP_MM, bh + 2 * PIECE_GAP_MM + LABEL_FOOT_MM
+            if iw <= w + 1e-9 and ih <= h + 1e-9:
+                options.append((iw, ih, smap))
+        items.append((max(o[0] * o[1] for o in options), isl, options))
+    pages: list[list[list[float]]] = []
+    for _area, isl, options in sorted(items, key=lambda it: (-it[0], it[1].index)):
         spot = None
-        for pi, pg in enumerate(pages):
-            for sh in pg["shelves"]:
-                if ih <= sh["h"] + 1e-9 and sh["x"] + iw <= w + 1e-9:
-                    spot = (pi, sh)
-                    break
-            if spot is None and pg["top"] - ih >= -1e-9 and iw <= w + 1e-9:
-                sh = {"y": pg["top"] - ih, "h": ih, "x": 0.0}
-                pg["shelves"].append(sh)
-                pg["top"] -= ih
-                spot = (pi, sh)
+        for pi, sky in enumerate(pages):
+            for iw, ih, smap in options:
+                found = _skyline_spot(sky, iw, ih, w, h)
+                if found is not None and (spot is None or found[:2] < spot[0][:2]):
+                    spot = (found, pi, iw, ih, smap)
             if spot is not None:
                 break
         if spot is None:
-            pages.append({"top": h - ih, "shelves": [{"y": h - ih, "h": ih, "x": 0.0}]})
-            spot = (len(pages) - 1, pages[-1]["shelves"][0])
-        pi, sh = spot
-        ox = pi * (pw + PAGE_GAP_MM) + m + sh["x"] + PIECE_GAP_MM
-        oy = m + sh["y"] + PIECE_GAP_MM + LABEL_FOOT_MM
-        sh["x"] += iw
-        isl.page, isl.offset = pi, (ox, oy)
+            pages.append([[0.0, 0.0, w]])
+            iw, ih, smap = options[0]
+            spot = (_skyline_spot(pages[-1], iw, ih, w, h), len(pages) - 1, iw, ih, smap)
+        (bottom, x, _depth), pi, iw, ih, smap = spot
+        pages[pi] = _skyline_add(pages[pi], x, iw, bottom)
+        isl.sheet_map = smap
+        isl.page = pi
+        isl.offset = (pi * (pw + PAGE_GAP_MM) + m + x + PIECE_GAP_MM,
+                      m + (h - bottom) + PIECE_GAP_MM + LABEL_FOOT_MM)
     net.pages = len(pages)
 
 

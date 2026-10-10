@@ -276,7 +276,7 @@ declared here; the viewer builds its UI from this list.
 
 ## 7. Defaults for plain FOLD files
 
-A FOLD file without `pliego:` fields loads as: one sheet `sheet-0`, stock `kami-70` (the engine
+A FOLD file without `pliego:` fields loads as: one sheet `sheet-0`, stock `kami` (the engine
 ships that one stock snapshot as its only built-in), grain 90°, treatment `crease` for `M`/`V`,
 `cut` for `C`, `none` otherwise; placement identity; controls `[sequence]` with a single step that
 drives every `M`/`V` edge to its `edges_foldAngle`.

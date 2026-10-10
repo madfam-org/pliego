@@ -70,7 +70,7 @@ def PARAM(get, default):
         return default
 
 size = PARAM(lambda: size, 150.0)           # noqa: F821
-stock = PARAM(lambda: stock, "kami-70")     # noqa: F821
+stock = PARAM(lambda: stock, "kami")     # noqa: F821
 
 sheet = pliego.Sheet("square", pliego.square(size), stock=stock,
                      label={"en": "Square", "es": "Cuadrado", "fr": "Carré", "pt": "Quadrado"})

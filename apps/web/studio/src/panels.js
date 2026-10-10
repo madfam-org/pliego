@@ -16,6 +16,13 @@ const h = (tag, attrs = {}, ...kids) => {
   return n;
 };
 const fmt = (v, digits = 0) => Number(v).toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: digits });
+// Manifest slider values: as many decimals as the step has; units as a reader writes them.
+const stepDigits = (step) => { const s = String(step ?? 1), i = s.indexOf('.'); return i < 0 ? 0 : Math.min(4, s.length - i - 1); };
+const UNIT_TEXT = { deg: '°', ratio: '' };
+export function paramText(v, p) {
+  const u = p.unit in UNIT_TEXT ? UNIT_TEXT[p.unit] : p.unit || '';
+  return `${fmt(v, stepDigits(p.step))}${u === '°' ? u : u ? ` ${u}` : ''}`;
+}
 
 /**
  * @param {HTMLElement} list @param {any[]} items @param {string|null} current @param {I18n} i18n
@@ -34,6 +41,22 @@ export function renderCatalog(list, items, current, i18n, onSelect) {
 }
 
 /**
+ * Mode selector, shown only when the object has more than one mode (e.g. an exact rigid program
+ * and a by-hand physics version of the same fold).
+ * @param {HTMLElement} box @param {{id: string, label: any}[]} modes @param {string|null} current
+ * @param {boolean} enabled @param {I18n} i18n @param {(id: string) => void} onChange
+ */
+export function renderModes(box, modes, current, enabled, i18n, onChange) {
+  box.replaceChildren();
+  box.hidden = !Array.isArray(modes) || modes.length < 2;
+  if (box.hidden) return;
+  const sel = h('select', { id: 'mode-select', disabled: !enabled });
+  for (const m of modes) sel.append(h('option', { value: m.id, selected: m.id === current, text: i18n.loc(m.label) || m.id }));
+  sel.addEventListener('change', () => onChange(sel.value));
+  box.append(h('div', { class: 'field' }, h('label', { for: 'mode-select', text: i18n.t('mode.label') }), sel));
+}
+
+/**
  * @param {HTMLFormElement} form @param {HTMLElement} note @param {any[]} params
  * @param {Record<string, any>} values @param {boolean} enabled @param {I18n} i18n
  * @param {(id: string, value: any) => void} onChange
@@ -47,9 +70,9 @@ export function renderParams(form, note, params, values, enabled, i18n, onChange
     const label = i18n.loc(p.label) || p.id;
     let field;
     if (p.type === 'slider') {
-      const out = h('output', { for: id, class: 'value', text: `${fmt(values[p.id])}${p.unit ? ` ${p.unit}` : ''}` });
+      const out = h('output', { for: id, class: 'value', text: paramText(values[p.id], p) });
       const input = h('input', { type: 'range', id, min: p.min, max: p.max, step: p.step || 1, value: values[p.id], disabled: !enabled });
-      input.addEventListener('input', () => { out.textContent = `${fmt(input.value)}${p.unit ? ` ${p.unit}` : ''}`; });
+      input.addEventListener('input', () => { out.textContent = paramText(input.value, p); });
       input.addEventListener('change', () => onChange(p.id, Number(input.value)));
       field = h('div', { class: 'field' }, h('label', { for: id }, h('span', { text: label }), out), input);
     } else if (p.type === 'select') {

@@ -3,10 +3,10 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseShare, buildShare, coerceParams } from '../studio/src/share.js';
-import { normalizeCatalog } from '../studio/src/data.js';
+import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings } from '../studio/src/share.js';
+import { normalizeCatalog, normalizeModes, renderBody } from '../studio/src/data.js';
 import { lineKind } from '../studio/src/diagram.js';
-import { stepIndex } from '../studio/src/panels.js';
+import { stepIndex, paramText } from '../studio/src/panels.js';
 import { triangulate, signedArea } from '../studio/src/geom.js';
 import { rendererOverride } from '../studio/src/render/index.js';
 
@@ -21,6 +21,40 @@ test('share URL round-trips slug, params and view; keeps test overrides', () => 
   assert.equal(s.view, '2d');
   assert.equal(s.renderer, 'canvas2d');
   assert.equal(parseShare('', '').view, '3d');
+});
+
+test('share URL carries the mode in the query only when given', () => {
+  const url = buildShare('https://pliego-app.madfam.io/studio/', { slug: 'inside-reverse-fold', mode: 'hand', params: { angle: 40 } });
+  const s = parseShare(new URL(url).search, new URL(url).hash);
+  assert.equal(s.slug, 'inside-reverse-fold');
+  assert.equal(s.mode, 'hand');
+  assert.deepEqual(s.params, { angle: '40' });
+  assert.equal(new URL(buildShare('https://x/studio/', { slug: 'valley-fold' })).searchParams.has('mode'), false);
+  assert.equal(parseShare('?slug=a', '').mode, null);
+});
+
+test('mode-restricted parameters apply only to their modes; typed values round-trip', () => {
+  const params = [
+    { id: 'width', type: 'slider', min: 10, max: 90, default: 50 },
+    { id: 'tear', type: 'checkbox', default: false, modes: ['hand'] },
+  ];
+  assert.deepEqual(paramsForMode(params, 'rigid').map((p) => p.id), ['width']);
+  assert.deepEqual(paramsForMode(params, 'hand').map((p) => p.id), ['width', 'tear']);
+  assert.deepEqual(paramsForMode(params, null).map((p) => p.id), ['width']);
+  // switching modes drops what no longer applies and keeps typed values intact (true stays true)
+  const typed = { width: 70, tear: true };
+  assert.deepEqual(coerceParams(paramsForMode(params, 'hand'), paramStrings(typed)), { width: 70, tear: true });
+  assert.deepEqual(coerceParams(paramsForMode(params, 'rigid'), paramStrings(typed)), { width: 70 });
+});
+
+test('modes normalise from ids and manifest entries; the request body names the mode', () => {
+  assert.deepEqual(normalizeModes(['rigid', 'hand']), [{ id: 'rigid', label: null }, { id: 'hand', label: null }]);
+  assert.deepEqual(normalizeModes([{ id: 'hand', label: { en: 'By hand' }, script_file: 'main.py' }, { nope: 1 }, 7]), [{ id: 'hand', label: { en: 'By hand' } }]);
+  assert.deepEqual(normalizeModes(undefined), []);
+  const items = normalizeCatalog({ projects: [{ slug: 'r', modes: ['rigid', 'hand'] }] }, 'http://x/api/v1/');
+  assert.deepEqual(items[0].modes.map((m) => m.id), ['rigid', 'hand']);
+  assert.deepEqual(JSON.parse(renderBody('r', { a: 1 }, 'hand')), { slug: 'r', mode: 'hand', params: { a: 1 } });
+  assert.deepEqual(JSON.parse(renderBody('r', {}, null, { format: 'svg' })), { slug: 'r', params: {}, format: 'svg' });
 });
 
 test('parameter coercion clamps, validates options and falls back to defaults', () => {
@@ -55,6 +89,13 @@ test('diagram line kinds follow the fabrication conventions', () => {
   assert.equal(lineKind('M', 'perforation'), 'perforation');
   assert.equal(lineKind('J', 'none'), null);
   assert.equal(lineKind('F', 'none'), null);
+});
+
+test('slider values show the step\'s decimals and readable units', () => {
+  assert.equal(paramText(0.5, { step: 0.01, unit: 'ratio' }), (0.5).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  assert.equal(paramText(45, { step: 1, unit: 'deg' }), '45°');
+  assert.equal(paramText(200, { step: 5, unit: 'mm' }), '200 mm');
+  assert.equal(paramText(3, {}), '3');
 });
 
 test('step index for sequence values', () => {

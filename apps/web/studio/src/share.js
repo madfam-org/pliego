@@ -1,12 +1,12 @@
 // @ts-check
-// Share-by-URL: the object slug lives in `?slug=`, parameter values in the hash
-// (`#width=200&stock=kami`), and studio-only state under reserved underscore keys (`_view=2d`).
-// Pure functions so Node tests can cover them.
+// Share-by-URL: the object slug (and, for objects with several modes, the mode) lives in the query
+// (`?slug=…&mode=…`), parameter values in the hash (`#width=200&stock=kami`), and studio-only state
+// under reserved underscore keys (`_view=2d`). Pure functions so Node tests can cover them.
 
 /**
  * @param {string} search location.search
  * @param {string} hash location.hash
- * @returns {{slug: string|null, params: Record<string, string>, view: '3d'|'2d', renderer: string|null, engine: string|null}}
+ * @returns {{slug: string|null, mode: string|null, params: Record<string, string>, view: '3d'|'2d', renderer: string|null, engine: string|null}}
  */
 export function parseShare(search, hash) {
   const q = new URLSearchParams(search || '');
@@ -15,6 +15,7 @@ export function parseShare(search, hash) {
   for (const [k, v] of h) if (!k.startsWith('_')) params[k] = v;
   return {
     slug: q.get('slug'),
+    mode: q.get('mode'),
     params,
     view: h.get('_view') === '2d' ? '2d' : '3d',
     renderer: q.get('renderer'),
@@ -24,12 +25,13 @@ export function parseShare(search, hash) {
 
 /**
  * @param {string} base absolute URL of the studio page (origin + path)
- * @param {{slug: string, params?: Record<string, unknown>, view?: string, keep?: URLSearchParams}} s
+ * @param {{slug: string, mode?: string|null, params?: Record<string, unknown>, view?: string, keep?: URLSearchParams}} s
  */
-export function buildShare(base, { slug, params = {}, view = '3d', keep }) {
+export function buildShare(base, { slug, mode = null, params = {}, view = '3d', keep }) {
   const u = new URL(base);
   const q = new URLSearchParams();
   q.set('slug', slug);
+  if (mode) q.set('mode', mode);
   if (keep) for (const k of ['renderer', 'engine', 'lang']) { const v = keep.get(k); if (v) q.set(k, v); }
   u.search = q.toString();
   const h = new URLSearchParams();
@@ -38,6 +40,23 @@ export function buildShare(base, { slug, params = {}, view = '3d', keep }) {
   const hs = h.toString();
   u.hash = hs ? hs : '';
   return u.href;
+}
+
+/**
+ * The parameters that apply to a mode: a manifest parameter may list the `modes` it belongs to;
+ * without that list it applies to every mode. The API rejects a parameter sent for another mode.
+ * @param {any[]} parameters manifest parameters
+ * @param {string|null} mode
+ */
+export function paramsForMode(parameters, mode) {
+  return (parameters || []).filter((p) => !Array.isArray(p.modes) || (mode !== null && p.modes.includes(mode)));
+}
+
+/** Typed parameter values back to the strings `coerceParams` reads (as in a share hash). */
+export function paramStrings(values) {
+  const out = {};
+  for (const [k, v] of Object.entries(values || {})) if (v !== undefined && v !== null) out[k] = String(v);
+  return out;
 }
 
 /**

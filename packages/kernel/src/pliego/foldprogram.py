@@ -164,6 +164,11 @@ class FoldProgram:
         self._add(sid, label, m, ms)
         return self._add(f"{sid}-open", UNFOLD, back, max(100, ms * 3 // 4))
 
+    def crease(self, sid: str, label, line, direction: str = "valley", ms: int = 600,
+               **select) -> FoldProgram:
+        """Mark creases on the selected layers without moving them (no step is emitted)."""
+        return self._add(sid, label, flatops.crease(self.state, line, direction, **select), ms)
+
     def unfold_last(self, sid: str, label=None, ms: int = 900) -> FoldProgram:
         """Open the previous operation again (its creases stay)."""
         last = self.recs[-1].move

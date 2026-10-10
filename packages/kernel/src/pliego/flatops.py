@@ -10,6 +10,7 @@ points are in the **folded frame** of the state they act on (what a diagram show
   count (top layers for a valley, bottom layers for a mountain) or by face ids / sheet points,
   plus all paper connected to them on that side without crossing the line;
 - `crease_and_unfold(...)`: the same selection, folded and opened again (new creases only);
+  `crease(...)` adds those creases without the motion;
 - `reverse_fold`, `squash`, `petal`, `rabbit_ear` (`pliego.flatcompound`, re-exported here):
   moves of several rigid groups at once;
 - `FlatState.turn_over()` turns the model over (no crease moves).
@@ -399,6 +400,14 @@ def fold(state: FlatState, line, direction: str = "valley", *, at=None, layers: 
                 {"line": (p, d), "direction": direction, "moving": sorted(mv), "split": st1})
 
 
+def crease(state: FlatState, line, direction: str = "valley", **select) -> Move:
+    """Add creases without moving the paper: the creases the same `fold` would make (the same
+    selection), the state left as it is (a line scored or marked; it folds later or never)."""
+    m = fold(state, line, direction, **select)
+    return Move("crease", state, m.before_split(), list(m.parent), lambda t: {}, [1.0],
+                {"line": m.info["line"]})
+
+
 def crease_and_unfold(state: FlatState, line, direction: str = "valley", **select) -> list[Move]:
     """Fold and open again: [the fold, the unfold]. The final state has the new creases and the
     old folding (the creases keep their sign as memory only in the fold step)."""
@@ -462,5 +471,5 @@ def _other(state: FlatState, f: int, a: int, b: int) -> int:
 
 from .flatcompound import petal, rabbit_ear, reverse_fold, squash  # noqa: E402
 
-__all__ = ["Move", "crease_and_unfold", "flood", "fold", "halves", "petal", "rabbit_ear",
+__all__ = ["Move", "crease", "crease_and_unfold", "flood", "fold", "halves", "petal", "rabbit_ear",
            "reverse_fold", "squash", "subdivide"]

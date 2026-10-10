@@ -132,3 +132,13 @@ def test_face_orders_are_complete_and_antisymmetric():
             assert got == s
             checked += 1
     assert checked > 10
+
+
+def test_crease_marks_lines_without_a_step():
+    fp = FoldProgram(SQUARE)
+    fp.crease("mark", "Mark", ((0, S / 2), (S, S / 2)), "valley", at=(10, 10))
+    fp.fold("diagonal", "Diagonal", ((S, 0), (0, S)), "valley", at=(10, 10))
+    b = fp.build()
+    assert [s.id for s in b.sequence.steps] == ["diagonal"]
+    kinds = sorted(m.assignment for m in b.sheet.marks)
+    assert "F" in kinds and "V" in kinds

@@ -19,9 +19,13 @@ manifest + article), verified by the kernel, the keystone (`pliego-spec`) and an
    are in scope for the engine and the commons.
 4. **Reveal blocks**: paper blocks whose layers are pre-cut so that the excess can be torn away,
    usually top to bottom, to reveal a scene.
-5. The overlap between paper and board sheets, single- or few-layer 3-D prints, and fabric must
-   stay **separate in concerns yet seamlessly integrated**. That is an ecosystem decision, routed
-   as an RFC to the owner (see "Cross-commons sheets" below). This catalog does not take it.
+5. The overlap between paper and board sheets, single- or few-layer 3-D prints, fabric, felt and
+   foam must stay **separate in concerns yet seamlessly integrated**. The owner ruled this on
+   2026-10-10 (internal RFC 0045 / ADR-024); see "Cross-commons sheets" below.
+6. **Low-poly papercraft** is in scope, and the roadmap must cover **all modes of paper
+   engineering**. The [modes coverage matrix](./paper-engineering-modes.md) maps every mode to
+   platform layers and to the hyperobjects below. A mode with no hyperobject is a gap, and gaps are
+   added here.
 
 **Families, mapped onto the manifest.** A variant that needs different sheets or a different
 script is a `mode`. Variants that share one generator are a `design`/`style` select parameter.
@@ -69,6 +73,14 @@ Tier: **R** rigid/kinematic, **C** compliant physics, **R+C** both (kinematic dr
 | `score-vs-crease` | 300 g/m² card folded scored and unscored | why cardstock is scored | `score` treatment, stock | C | — |
 | `perforated-tear` | a perforated tear-off strip | perforation treatment | `perforation` | C | — |
 
+## Rung 1b — More techniques (W2c)
+
+| slug | object | variants | tier | wave |
+|---|---|---|---|---|
+| `deckle-tear` | torn and deckle edges | straight tear, deckle, along a fold | R (outline) / C (fracture, W3) | W2c |
+| `fastener-joins` | mechanical joins in card | brad pivot, eyelet, rivet, staple, split pin (hardware via the keystone's standard parts) | R | W2c |
+| `paper-weaving` | strip weaving | plain and twill mats, woven heart basket (Nordic tradition, credited with sources) | R+C | W2c |
+
 ## Rung 2 — Bases (fold)
 
 Flat-foldable crease patterns: Maekawa and Kawasaki pass exactly. Each base has a collapse program
@@ -109,6 +121,7 @@ state. Honest limit: multi-layer collapses run kinematically, and physics settle
 | `paper-popper` | the banger | snap (C) | R+C | W2b·L2 |
 | `fox-puppet` | finger puppet | — | R | W2b·L2 |
 | `ninja-star` | two-unit shuriken (modular) | — | R | W2b·L2 |
+| `modular-origami` | interlocking-unit assemblies (generic units only) | triangular-unit forms, square-unit cube, ring | R | W2c |
 
 ## Rung 4 — Tessellations and curved folding (fold)
 
@@ -166,6 +179,8 @@ state. Honest limit: multi-layer collapses run kinematically, and physics settle
 | `spiral-popup` | spiral springing from the gutter | turns | C | W2b·L5 |
 | `mouth-popup` | the talking mouth | — | R+C | W2b·L5 |
 | `greeting-card` | **one family, every common card** | single fold, tent, gatefold, z-fold, tri-fold, with insert; A6, A5, US sizes | R | W2b·L5 |
+| `card-linkages` | levers and linkages in card | four-bar, scissor and lazy-tongs extender, rocker | R | W2c |
+| `paper-automaton` | cam-and-crank automaton box (original) | cam profiles, crank, follower figure | R | W2c |
 
 ## Rung 8 — Books and print finishing (fold + bind)
 
@@ -181,6 +196,7 @@ state. Honest limit: multi-layer collapses run kinematically, and physics settle
 | `flip-book` | thumbed page stack | pages | C | W2c |
 | `pocket-zine` | eight-page one-sheet zine (one cut) | — | R | W2c |
 | `stab-binding` | Japanese stab binding | four-hole, tortoise-shell, noble | C | W2c |
+| `case-binding` | hardcover: greyboard boards and bookcloth (a cross-commons laminate, RFC 0045) | quarter, half, full cloth | C | W2c |
 | `print-folds` | **one family, every commercial print fold** | letter (tri-fold), z-fold, gatefold, French fold, roll fold, double parallel, accordion, cross fold, map fold | R | W2c |
 
 ## Rung 9 — Flexagons, toys and flight
@@ -219,6 +235,9 @@ and flap sizes include the board caliper.
 | `paper-bag` | flat-bottom (SOS) bag with gussets | — | R+C | W2c |
 | `gift-wrap` | wrapping a box | standard, diagonal (Japanese) wrap | C | W2c |
 | `embossed-stationery` | **pressing**: emboss, deboss, foil and letterpress on a card | blind emboss, registered emboss, deboss, hot foil, letterpress | R | W2b·P |
+| `branded-tag` | **branding**: artwork, pressed mark and heat/burn mark on a board tag | artwork, emboss, iron burn, laser burn | R | W2c |
+| `honeycomb-panel` | structural paper honeycomb core between liners | cell size, core height | C | W2c |
+| `cardboard-furniture` | slotted thick-board furniture (original) | stool, shelf, side table | R+C | W2c |
 
 ## Rung 11 — Paper models, nets and rolled paper
 
@@ -227,7 +246,8 @@ and flap sizes include the board caliper.
 | `platonic-solids` | the five solids as tabbed nets | tetra, cube, octa, dodeca, icosa | R | W2c |
 | `paper-globe` | gores and the sphere | 12, 24 gores | C | W2c |
 | `paper-house` | cut-out house model with tabs (original) | — | R | W2c |
-| `papercraft-unfold` | any low-poly mesh unfolded to a tabbed net (bridge to yantra4d solids) | — | R | W2c |
+| `low-poly-papercraft` | **one family, low-poly papercraft**: original models unfolded into tabbed, numbered nets on pages, with a program that folds each net into its model | animal heads, mask, vase, planet, heart, vehicle (original designs) | R | W2b·PC |
+| `papercraft-unfold` | any low-poly mesh unfolded to a tabbed net (the bridge to Yantra4D solids) | icosphere, torus, mesh asset | R | W2b·PC |
 | `quilling` | rolled strip shapes | tight and loose coil, teardrop, marquise, scroll | C | W2c |
 | `paper-beads` | rolled tapered strips | — | C | W2c |
 | `party-hat` | cone from a sector | — | C | W2c |
@@ -235,6 +255,8 @@ and flap sizes include the board caliper.
 | `paper-chain` | looped, glued strips | — | C | W2c |
 | `paper-crown` | zigzag band | — | C | W2c |
 | `kusudama` | traditional glued flower ball (modular) | — | R | W2c |
+| `paper-yarn` | twisted strip yarn and rope (paper textiles link to Fashion Cabinet) | yarn, cord, rope | C | W2c |
+| `paper-mobile` | balanced hanging mobile | arms, tiers | C | W2c |
 
 ## Rung 12 — Celebration paper (heritage-aware)
 
@@ -256,8 +278,27 @@ and flap sizes include the board caliper.
 | `tunnel-book-forest` | leporello walls + four layered cut frames of trees, opened by pulling the cover | `spine`, `page_edge`, `glue_zone` | W2c |
 | `carousel-village` | a carousel book whose six chambers are parallel-fold houses | `spine`, `gutter` | W2c |
 
-**Count.** W2a landed 21. W2b plans 62 more (rungs 2–7, six packaging and pressing objects, and the
-reveal block), and W2c plans 44. That makes 127 planned, against the owner's floor of 100.
+## Rung 14 — Paper electronics (W2c)
+
+| slug | object | variants | tier | wave |
+|---|---|---|---|---|
+| `paper-circuit-card` | copper-tape and conductive-ink circuit on a card and pop-up, with a fold switch and an LED | flat card, pop-up, slider switch | R | W2c |
+
+## Rung 15 — Physics showcases (need the engine, W3)
+
+| slug | object | variants | tier | wave |
+|---|---|---|---|---|
+| `wet-folded-sculpture` | wet-folding: moisture-softened stock dries into sculpted curves | mask, animal form (original) | C | W3 |
+| `papier-mache-shell` | strips laminated over a form | bowl, mask | C | W3 |
+| `foam-armor-piece` | heat-formed EVA plate worn over a garment (cross-commons with Fashion Cabinet) | bracer, pauldron | C | W3 |
+| `self-folding-sheet` | pre-stressed and 4-D sheets that fold themselves (cross-commons with Yantra4D) | heat-shrink film, printed-on-fabric | C | W3 |
+| `crumpled-sheet` | crumpling | copy paper, kraft, foil | C | W3 |
+| `bending-active-shell` | strip gridshell and bent-plate pavilion | dome, vault | C | W3 |
+| `paper-bridge` | load-bearing paper: span a gap and carry weight | folded beam, corrugated deck, tube truss | C | W3 |
+
+**Count.** W2a landed 21. W2b plans 64 more: rungs 2–7, six packaging and pressing objects, the
+reveal block, and the two papercraft families. W2c plans 56 and W3 plans 7. That makes 148 planned,
+against the owner's floor of 100.
 
 ## Platform capabilities the catalog needs
 
@@ -270,8 +311,12 @@ reveal block), and W2c plans 44. That makes 127 planned, against the owner's flo
 | Pressing | finish regions on a sheet: emboss, deboss, foil, varnish/spot UV and letterpress impression, each with depth, profile and colour. They are exported as separate plates (emboss die male/female, foil plate) and rendered as relief and sheen. Locally stiffer embossed areas are noted for the engine. | P (W2b) |
 | Branding | brand artwork mapped onto dieline panels (front/back, bleed and safe area, spot colours), previewed on the folded object in the studio. Heat branding (burn marks) waits for confirmation. | P (W2b) |
 | Reveal blocks | contract: removable pieces and tear-away steps. Kernel: stack slicer, from a heightfield or implicit scene to N layers of contours to die-cut or perforated layers. Studio preview: pieces removed top to bottom. Engine tearing comes in W3. | R (W2b) |
-| Nets / papercraft unfolder | polyhedron and mesh unfolding with tabs (the yantra4d bridge) | W2c |
+| Mesh unfolder | `pliego.unfold`: cut tree, overlap splitting into islands, glue tabs, matching edge numbers, page layout and the net-to-model fold program. It reads cartridge-local mesh assets through a sandbox-safe read-only API confined to the cartridge directory. | PC (W2b) |
+| Sheet behaviour across commons | the keystone's sheet-behaviour block, `material_ref` and laminates (RFC 0045 S1). Foam stock cards belong to Pliego (S2). | K1 (keystone) · P (foam) |
+| Trace layer | conductive traces as a finish/plate for paper circuits, with parts via the keystone's standard parts | W2c |
+| Moisture and heat states | wet-folding, papier-mâché drying, foam heat-forming and burn marks as engine state | W3 |
 | Air | flight, falling spinners, wind toys: the engine's air model | W3 |
+| Load and fracture | paper bridges, box compression, tearing and crumpling | W3 |
 
 ## Cross-commons sheets (routed to the owner, not ruled here)
 
@@ -279,15 +324,21 @@ Paper and board (Pliego, `sheet-hyperobjects`), single- or few-layer 3-D prints 
 `solid-hyperobjects`) and fabric (Fashion Cabinet, `soft-hyperobjects`) are all thin sheets. They
 meet in real objects: prints made onto stretched fabric that curl when released, printed hinges in
 paper pop-ups, bookcloth over board, sewing patterns on paper. The owner asked for them to stay
-**separate in concerns yet seamlessly integrated**. The options and a recommendation go to the owner
-as an internal-devops RFC. Until it is ruled, Pliego's stock cards stay Pliego-owned, and nothing
-here moves code or contracts across the commons.
+**separate in concerns yet seamlessly integrated**. **Ruled 2026-10-10** (internal RFC 0045 /
+ADR-024):
+
+- the platforms link through the keystone (a shared sheet-behaviour block, `material_ref` and
+  laminates), and the engines stay separate;
+- felt goes to Fashion Cabinet and foam to Pliego;
+- thin prints stay Yantra4D cartridges, each with a sheet card;
+- branding covers artwork, pressed marks and heat/burn branding.
 
 ## Wave plan
 
 | Wave | Content | Gate |
 |---|---|---|
 | W2a | Rung 1 (14) + `miura-ori`, `v-fold-popup`, `parallel-fold-popup`, `papel-picado-banner`, `paper-snowflake`, `leporello`, `rotating-squares` — **landed (21)** | kernel core + generators merged; keystone `pliego-spec` draft installable; engine smoke passes |
-| W2b | Lanes L1 (bases + crane family, 12), L2 (traditional toys and `paper-airplane`, 12), L3 (tessellations, 9), L4 (kirigami + papercut, 12), L5 (paper engineering + `greeting-card`, 10), P (board/corrugation/dielines/envelopes/pressing/branding platform + 6 objects), R (reveal-block platform + `reveal-block`) | kernel 0.2.0 on Pliego main (madfam-org/pliego#2) and the commons `PLIEGO_PIN` bumped to it |
-| W2c | Rungs 8, 9, 11, 12, the rest of rung 10 and the rung-13 compositions | W2b landed; the interfaces the dioramas compose are verified |
-| W3 | Physics showcases that need the engine: flight, wind, tearing, pop-up physics, board crush | engine merged and benchmarked |
+| W2b | Lanes L1 (bases + crane family, 12), L2 (traditional toys and `paper-airplane`, 12), L3 (tessellations, 9), L4 (kirigami + papercut, 12), L5 (paper engineering + `greeting-card`, 10), P (board/corrugation/foam/dielines/envelopes/pressing/branding platform + 6 objects), R (reveal-block platform + `reveal-block`), PC (mesh unfolder + `low-poly-papercraft` + `papercraft-unfold`; starts when a lane slot frees) | kernel 0.2.0 on Pliego main (madfam-org/pliego#2) and the commons `PLIEGO_PIN` bumped to it |
+| K1 | Keystone sheet-behaviour block, `material_ref` and laminates (RFC 0045 phase 1). Then the platform phases: Pliego, Fashion Cabinet (felt cards), Yantra4D (thin-print cards) | owner merges per phase |
+| W2c | Rungs 1b, 8, 9, 11, 12 and 14, the rest of rungs 3, 7 and 10, and the rung-13 compositions | W2b landed; the interfaces the dioramas compose are verified |
+| W3 | Rung 15 and the engine showcases: flight, wind, tearing, crumpling, moisture, heat, load, pop-up physics | engine merged and benchmarked |

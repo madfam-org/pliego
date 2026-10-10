@@ -451,6 +451,31 @@ layer. SVG, PDF and DXF print annotations on their `label` / `TEXT` layers.
 
 Rule 14 (§8) covers both fields.
 
+<!-- lane H (w3/hardening) §5.13: begin -->
+### 5.13 Cuts split their vertices
+
+A `cut` (assignment `C`, treatment `cut`) separates the sheet (§4), and the document carries the
+separation in its topology. Around each vertex, the faces touching it are grouped across the
+edges that do not separate material (every edge except `C` + `cut`). A vertex whose faces fall
+into k > 1 groups is written as k vertices with the same layout coordinates, one per group. A cut
+edge whose two sides then reach different vertices is written twice, once per side: **twin
+edges** with the same coordinates, assignment, treatment and name, each bordering one face. That
+is what rule 4's "one face on each side of a split" means.
+
+- A slit opens wherever it can: along its interior vertices and where it reaches the outline. An
+  interior tip, whose faces are still joined around its far side, stays one vertex. A
+  single-segment slit with both ends inside the sheet has nothing to split and stays one edge
+  between two faces.
+- A closed cut frees its island. Tear-off perforations (`C` + `perforation`) stay joined until
+  they tear (engine).
+- Frames (`initial`, `target:*`) may move twin vertices apart: an opened slit is developable
+  (rule 9).
+- Exporters draw each cut once (the twins coincide); papercut checks measure one vertex per
+  point.
+
+A reader that needs the unsplit topology merges the vertices of one sheet that share coordinates.
+<!-- lane H (w3/hardening) §5.13: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any

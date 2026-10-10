@@ -5,9 +5,10 @@ Built on :mod:`pliego.dieline` (family ``envelope``): the central panel is the e
 behind it (mountain, 180°) to make the back. The sheet is placed print side down, so the flaps
 fold up off the table, the way an envelope is folded by hand.
 
-Sizes are **finished** (outside) sizes: ISO 269 C4 229 × 324, C5 162 × 229, C6 114 × 162,
-DL 110 × 220 mm; US #10 4⅛ × 9½ in, A2 4⅜ × 5¾ in, A7 5¼ × 7¼ in (US sizes converted at
-25.4 mm/in). The front panel is the size less the caliper (a 180° fold adds about t). Styles:
+Sizes are **finished** (outside) sizes: ISO 269 (withdrawn 2019, the sizes remain in use)
+C4 229 × 324, C5 162 × 229, C6 114 × 162, DL 110 × 220 mm; US #10 4⅛ × 9½ in, A2 4⅜ × 5¾ in,
+A7 5¼ × 7¼ in (US sizes converted at 25.4 mm/in). The front panel is the size less the
+caliper (a 180° fold adds about t). Styles:
 
 - ``commercial`` — side flaps, a bottom flap glued over them, a seal flap with a shallow point;
 - ``baronial`` — the same seams with a deep pointed seal flap (A-sizes are the usual home);

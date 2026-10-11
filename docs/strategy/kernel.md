@@ -345,6 +345,14 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   arrangement's vertices back on the state's exact points; `Pose3.kinematic` solves on it and
   `FoldProgram.build` reads penetration on it. Proof: the masu lid at its real size
   (200 + 4√2·1.5 mm, no 8 µm rounding) and a 123.4567 mm box fold and build.
+- **Speed.** Profiled on the masu box: 90 % of a rigid step was `motion._rank`, two SVDs of
+  the whole pattern's closure Jacobian per `solve()` for `KinematicPath.dof`/`free_dof`,
+  which fold programs never read. They are now computed on first read (same values).
+  `flatmotion.mat_mul3` is `space.mat_mul` without generators (the builtin `sum` of the same
+  products, bit for bit), used by `flatmotion.compose` and the closure loops. An end-wall
+  step went from about 15.8 s to 1.1 s, the kernel's masu test from 43 s to 7 s, and the
+  commons masu-box render in the runner from 33 s to about 5 s (a busy laptop; ±50 %).
+  Documents are byte-identical.
 <!-- FL3 (wave 4, fold-program robustness) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

@@ -230,3 +230,41 @@ def test_exact_arrangement_puts_vertices_back_on_the_state():
             assert (a.x, a.y) in pts
             moved += 1
     assert moved > 0
+
+
+# ── speed: a fold program's rigid steps compute no closure rank, multiply 3×3 unrolled ──
+
+def test_kinematic_steps_skip_the_rank_svd(monkeypatch):
+    from pliego import motion
+
+    def no_rank(*a, **k):
+        raise AssertionError("a fold program's rigid step computed the closure rank")
+    monkeypatch.setattr(motion, "_rank", no_rank)
+    fp, g = fm.masu_box()       # 4–5 s per end-wall step before, most of it this SVD
+    assert masu_inside(fp, g) < 1e-6
+    monkeypatch.undo()
+    sh = pliego.Sheet("s", [(0, 0), (100, 0), (100, 100), (0, 100)])
+    sh.crease((50, 0), (50, 100), "valley", 0.0)
+    arr = sh.build()
+    path = motion.solve(arr, {}, {e: 30.0 for e, a in enumerate(arr.assignment) if a == "V"},
+                        steps=2)
+    assert "_rank_at" in path.__dict__
+    assert (path.dof, path.free_dof) == (1, 0) and "_rank_at" not in path.__dict__
+
+
+def test_mat_mul3_is_space_mat_mul_bit_for_bit():
+    import random
+    import struct
+
+    from pliego.space import mat_mul
+    rnd = random.Random(7)
+    pool = [0.0, -0.0, 1.0, -1.0, 0.5, math.sqrt(0.5), 1e-300, -1e-16]
+
+    def r():
+        return rnd.choice(pool) if rnd.random() < 0.5 else rnd.uniform(-1.0, 1.0)
+    for _ in range(3000):
+        a = tuple(tuple(r() for _ in range(3)) for _ in range(3))
+        b = tuple(tuple(r() for _ in range(3)) for _ in range(3))
+        x, y = mat_mul(a, b), flatmotion.mat_mul3(a, b)
+        assert all(struct.pack("d", x[i][j]) == struct.pack("d", y[i][j])
+                   for i in range(3) for j in range(3))

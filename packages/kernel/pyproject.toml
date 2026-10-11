@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pliego-kernel"
-version = "0.2.0"
+version = "0.3.0"
 description = "Pliego sheet-hyperobject kernel: crease patterns, cuts, assemblies and fold programs (import name: pliego)"
 requires-python = ">=3.11"
 license = { text = "AGPL-3.0-only" }

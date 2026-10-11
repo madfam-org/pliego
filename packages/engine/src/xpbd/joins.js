@@ -12,13 +12,16 @@
  * - pin: Dirichlet (the vertices are fixed; `world: null` = where they start); a `translate`
  *   mechanism moves them.
  * All of these become point terms of the implicit block (stiffness HARD_FACTOR × stiffest membrane
- * spring) plus, for pins, fixed vertices.
+ * spring) plus, for pins, fixed vertices. A step-gated pin (spec §5.19) is a stiff anchor term per
+ * vertex instead, so it can switch on and off without changing the free-vertex set; gated glue
+ * does not mark its vertices welded until it holds (see gates.js).
  */
 import { locatePoint } from '../mesh.js';
 import { pointInPolygon, distPointSeg } from '../geom.js';
 import { TERM_FULL, TERM_PERP, TERM_STRING } from './implicit.js';
+import { joinGates } from '../gates.js';
 
-export const TK_GLUE = 1, TK_PIVOT = 2, TK_STRING = 3, TK_SLIDER = 4, TK_GRAB = 5, TK_DRIVE = 6, TK_PERF = 7;
+export const TK_GLUE = 1, TK_PIVOT = 2, TK_STRING = 3, TK_SLIDER = 4, TK_GRAB = 5, TK_DRIVE = 6, TK_PERF = 7, TK_ANCHOR = 8;
 
 /** Growable list of point terms, frozen into typed arrays by `finish()`. */
 export class TermList {
@@ -59,6 +62,7 @@ export function resolveJoins(doc, mesh, kHard) {
   const pins = [];
   const weldSheet = new Int32Array(mesh.nV).fill(-1);
   const si = (/** @type {string} */ id) => /** @type {number} */(doc.sheetIndex.get(id));
+  const gated = joinGates(doc);
   const loc = (/** @type {number} */ s, /** @type {number[]} */ p, /** @type {string} */ what) => {
     const r = locatePoint(mesh, s, p[0], p[1]);
     if (!r) throw new Error(`join ${what}: point (${p[0]}, ${p[1]}) not on the mesh of sheet ${doc.sheets[s].id}`);
@@ -79,7 +83,7 @@ export function resolveJoins(doc, mesh, kHard) {
         if (!pointInPolygon(u, w, reg, 1e-6)) continue;
         const r = loc(sb, [ma * u + mb * w + tx, mc * u + md * w + ty], j.id);
         terms.add(TK_GLUE, TERM_FULL, [v, ...r.verts], [1, -r.w[0], -r.w[1], -r.w[2]], { join: j.id, tri: r.tri, offset: off, k: kHard });
-        weldSheet[v] = sb;
+        if (!gated.has(j.id)) weldSheet[v] = sb;
       }
     } else if (j.type === 'pivot') {
       const ra = loc(si(j.a.sheet), j.a.at, j.id), rb = loc(si(j.b.sheet), j.b.at, j.id);
@@ -106,10 +110,16 @@ export function resolveJoins(doc, mesh, kHard) {
       if (j.a.along) {
         const [p, q] = j.a.along;
         const tol = Math.max(doc.sheets[s].derived.collision_thickness, 1e-3 * mesh.h);
-        for (let v = 0; v < mesh.nV; v++) if (mesh.vSheet[v] === s && distPointSeg(mesh.uv[2 * v], mesh.uv[2 * v + 1], p[0], p[1], q[0], q[1]) <= tol) verts.push(v);
+        const near = (/** @type {number} */ t) => { for (let v = 0; v < mesh.nV; v++) if (mesh.vSheet[v] === s && distPointSeg(mesh.uv[2 * v], mesh.uv[2 * v + 1], p[0], p[1], q[0], q[1]) <= t) verts.push(v); };
+        near(tol);
+        // a grip line across open paper (no document edge on it) may fall between mesh rows at
+        // some mesh sizes: grip the band of half a mesh edge around it instead of failing
+        if (!verts.length) near(0.5 * mesh.h);
       } else verts.push(nearestVertex(mesh, s, j.a.at));
       if (!verts.length) throw new Error(`join ${j.id}: pin selects no mesh vertex`);
-      pins.push({ verts, world: j.world, mechanism: j.mechanism ?? null, id: j.id });
+      if (gated.has(j.id)) {
+        for (const v of verts) terms.add(TK_ANCHOR, TERM_FULL, [v], [1], { join: j.id, target: [0, 0, 0], world: j.world ?? null, leadV: verts[0], mechanism: j.mechanism ?? null, k: kHard });
+      } else pins.push({ verts, world: j.world, mechanism: j.mechanism ?? null, id: j.id });
     }
   }
   return { terms, pins, weldSheet };
@@ -171,7 +181,7 @@ export function updateTerms(w, x) {
         const s = inf.s * (L / inf.trackLen);
         T.c[3 * t] = -s * dx / L; T.c[3 * t + 1] = -s * dy / L; T.c[3 * t + 2] = -s * dz / L;
       } else { T.mode[t] = TERM_PERP; T.c[3 * t] = 0; T.c[3 * t + 1] = 0; T.c[3 * t + 2] = 0; }
-    } else if (inf.kind === TK_GRAB || inf.kind === TK_DRIVE) {
+    } else if (inf.kind === TK_GRAB || inf.kind === TK_DRIVE || inf.kind === TK_ANCHOR) {
       T.c[3 * t] = -inf.target[0]; T.c[3 * t + 1] = -inf.target[1]; T.c[3 * t + 2] = -inf.target[2];
     }
   }

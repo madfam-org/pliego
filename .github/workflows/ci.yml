@@ -76,7 +76,7 @@ jobs:
           ref: ${{ env.GATES_SHA }}
           path: .madfam-gates
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
       - name: Byte gate (control bytes, BOM, U+2028/U+2029)
@@ -211,7 +211,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
       - name: Detect engine
@@ -252,7 +252,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
       - name: Detect web
@@ -303,6 +303,11 @@ jobs:
       - name: Test (pytest)
         if: steps.detect.outputs.present == 'true'
         run: python -m pytest apps/api/tests -q
+      - name: Catalog thumbnails cover the commons (every cartridge's preview renders)
+        if: steps.detect.outputs.present == 'true'
+        # The same build the image runs (Dockerfile), strict: one line per cartridge whose preview cannot be
+        # produced, and a failure on any (or on zero cartridges read).
+        run: python -m apps.api.thumbnails build "$RUNNER_TEMP/thumbnails" --strict
       - name: OpenAPI matches the served routes
         if: steps.detect.outputs.present == 'true'
         env:

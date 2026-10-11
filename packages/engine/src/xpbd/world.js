@@ -23,6 +23,8 @@ import { Wind, addAirForces } from './air.js';
 import { RenderBuffers } from './render.js';
 import { pcgStep } from './pcg.js';
 import { snapshotWorld, restoreWorld } from './state.js';
+import { JoinGates } from './gates.js';
+import { Presentation } from './presentation.js';
 import * as K from '../constants.js';
 
 const G12 = new Float64Array(12);
@@ -76,12 +78,14 @@ export class World {
       terms.add(TK_PERF, 0, [a, b], [1, -1], { k: this.kHard, pair: i, fBreak: m.perfFactor * Y * m.tearStrain * mesh.perfPairLen[i] });
     }
     this.drivers = new Drivers(this, terms, pins, opts);
+    this.warnings = this.drivers.warnings;
     this.terms = terms.finish();
     for (let t = 0; t < this.terms.count; t++) this.terms.k[t] = this.terms.info[t].k ?? 0;
     this.terms.active[this.drivers.grabTerm] = 0;
     this.fixed = this.drivers.fixed;
     this.invMass = new Float64Array(nV);
     for (let v = 0; v < nV; v++) this.invMass[v] = this.fixed[v] ? 0 : 1 / this.mass[v];
+    this.gates = new JoinGates(this); // step-gated joins (spec §5.19): all off until their step
     this.fixedTarget = Float64Array.from(this.x);
     this._clampCorrection();
     this.sys = buildSystem(this);
@@ -110,6 +114,7 @@ export class World {
     this._grounded = 0;
     this._stringTaut = new Uint8Array(this.terms.count);
     this._factorState = null;
+    this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
   }
 
@@ -264,6 +269,7 @@ export class World {
     const dt = this.dt, nV = this.mesh.nV;
     const x = this.x, v = this.v, xs = this.xs, w = this.invMass, f = this.fext;
     if (this.drivers.apply(this, dt)) this.dirty = true;
+    if (this.gates.count) { if (this.gates.update(this)) this.dirty = true; this.gates.follow(this); }
     xs.set(x);
     if (this.sys.nFree === 0) {
       // every vertex is driven (kinematic program / boards): follow the drivers, nothing to solve
@@ -445,7 +451,7 @@ export class World {
     for (let t = 0; t < T.count; t++) {
       if (T.kind[t] !== TK_STRING) continue;
       termResidual(T, t, x, r);
-      const taut = Math.hypot(r[0], r[1], r[2]) > T.len[t] ? 1 : 0;
+      const taut = Math.hypot(r[0], r[1], r[2]) > T.len[t] && !(T.gateOff && T.gateOff[t]) ? 1 : 0;
       T.active[t] = taut;
       if (taut !== this._stringTaut[t]) { this._stringTaut[t] = taut; this.dirty = true; }
     }
@@ -469,7 +475,8 @@ export class World {
     if (!(vertex >= 0 && vertex < this.mesh.nV) || this.invMass[vertex] === 0) return false;
     const T = this.terms, t = this.drivers.grabTerm;
     T.verts[T.start[t]] = vertex;
-    T.info[t].target = point.slice(0, 3);
+    this._grabSheet = this.mesh.vSheet[vertex];
+    T.info[t].target = this.presentation.unpresent(point, this._grabSheet); // points arrive in render space
     T.k[t] = this.opts.grabStiffness;
     T.active[t] = 1;
     this.dirty = true;
@@ -477,7 +484,7 @@ export class World {
     return true;
   }
   /** @param {number[]} point */
-  moveGrab(point) { const inf = this.terms.info[this.drivers.grabTerm]; inf.target = point.slice(0, 3); this._asleep = false; }
+  moveGrab(point) { const inf = this.terms.info[this.drivers.grabTerm]; inf.target = this.presentation.unpresent(point, this._grabSheet ?? 0); this._asleep = false; }
   release() {
     const T = this.terms, t = this.drivers.grabTerm;
     if (T.active[t]) { T.active[t] = 0; T.k[t] = 0; this.dirty = true; }
@@ -521,6 +528,7 @@ export class World {
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
       substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
+      unheldWelds: this.gates.unheld(this),
     };
   }
 

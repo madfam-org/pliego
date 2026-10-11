@@ -43,6 +43,13 @@ RUN set -eu; \
       echo "projects/ holds 0 cartridges: the sheet-hyperobjects submodule was not checked out" >&2; \
       exit 1; \
     fi
+# Catalog previews (apps/api/thumbnails.py): one crease-pattern SVG per cartridge (default mode, manifest
+# defaults, the kernel's SVG exporter in the diagram palette), rendered through the sandboxed runner HERE, once:
+# the root filesystem is read-only at run time and a first-request render of the whole commons would cost minutes
+# of CPU on the pod. Report-only (the log prints `thumbnails: cartridges=N produced=P failed=F` and names every
+# failure); CI's `api` job runs the same build with --strict. Served at /projects/<slug>.svg.
+RUN cd /app && /opt/venv/bin/python -m apps.api.thumbnails build /app/build/thumbnails \
+    && chmod -R a+rX /app/build/thumbnails
 # Byte-compile at build time: the root filesystem is read-only at run time.
 RUN /opt/venv/bin/python -m compileall -q /app/apps /opt/venv/lib
 

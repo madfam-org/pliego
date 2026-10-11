@@ -338,6 +338,25 @@ class OpenApiTest(TmpCase):
         documented = oapi.spec_routes(spec, "/api/v1")
         self.assertEqual(served - documented, {("DELETE", "/api/v1/documents/{doc_id}")})
 
+    def test_contract_enums_and_response_headers(self) -> None:
+        spec = {
+            "components": {"schemas": {"Format": {"enum": ["fold", "svg"]}}},
+            "paths": {"/api/v1/exports": {"post": {"responses": {"200": {"headers": {
+                "X-Pliego-Verify": {}, "X-Generator-Instance-Id": {}}}}}}},
+        }
+        good = {"enums": {"Format": ("fold", "svg")},
+                "response_headers": {("POST", "/api/v1/exports"): ("X-Pliego-Verify",
+                                                                   "X-Generator-Instance-Id")}}
+        self.assertEqual(oapi.contract_problems(spec, good), (3, []))
+        bad = {"enums": {"Format": ("fold", "svg", "glb")},
+               "response_headers": {("POST", "/api/v1/exports"): ("X-Generator-Complete",),
+                                    ("POST", "/api/v1/bundles"): ("X",)}}
+        checked, problems = oapi.contract_problems(spec, bad)
+        self.assertEqual(checked, 3)
+        self.assertEqual(len(problems), 3)
+        self.assertIn("X-Generator-Complete", problems[1])
+        self.assertIn("not documented", problems[2])
+
     def test_missing_app_is_a_printed_skip(self) -> None:
         code, out = run_main(oapi, "--root", str(self.tmp))
         self.assertEqual(code, 2)

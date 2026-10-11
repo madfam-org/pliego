@@ -219,7 +219,7 @@ independent of mesh resolution.
 | `type` | Fields | Physics |
 |---|---|---|
 | `glue` | `a: {sheet, region: [[u,v]…]}`, `b: {sheet}`, `map: [a, b, c, d, tx, ty]`, `side: "front"\|"back"` | every engine vertex of sheet *a* inside `region` is welded to the point `M·(u,v)+t` on sheet *b* (2×2 matrix `[[a,b],[c,d]]` row-major, translation `[tx,ty]`); `side` says which face of *b* the tab lies on |
-| `pivot` | `a: {sheet, at: [u,v]}`, `b: {sheet, at: [u,v]}`, `hardware_ref?` | the two points coincide; rotation is free (a brad / split pin). `hardware_ref` follows the bridge contract to yantra4d (§9) |
+| `pivot` | `a: {sheet, at: [u,v]}`, `b: {sheet, at: [u,v]}`, `hardware_ref?` | the two points coincide; rotation is free (a brad / split pin). `hardware_ref` follows the bridge contract to yantra4d: the `hardwareRef` shape in `packages/schemas/sheet-document.schema.json` (`{platform: "yantra4d", project_slug, mode?, linked?, params_map?}`), which is Fashion Cabinet's `hardware_ref` shape; hyperobjects-spec owns the bridge (its `hardware-ref` contract and `docs/BRIDGE_HANDSHAKE.md`). Pliego checks the shape only; resolving the slug and `params_map` against the solid commons is not wired yet. (There is no §9: the earlier pointer named a section that was never written.) |
 | `string` | `a: {sheet, at}`, `b: {sheet, at} \| {world: [x,y,z]}`, `length` | unilateral distance ≤ `length` (thread, ribbon, the line a papel picado banner hangs from) |
 | `pin` | `a: {sheet, at} \| {sheet, along: [[u,v],[u,v]]}`, `world: [x,y,z] \| null`, `mechanism?` | the point (or every vertex within `collision_thickness` of the segment) is fixed in the world (`world: null` means "where it starts"); with `mechanism` naming a `translate` driver, the pinned points move with it (kirigami pulled open, a banner line raised) |
 | `slider` | `a: {sheet, at}`, `track: {sheet, from: [u,v], to: [u,v]}`, `mechanism?` | the point stays on the track segment of the track sheet; if `mechanism` names a `slide` driver, the point's position along the track is driven |
@@ -574,6 +574,66 @@ places the front art on its `art` layer; PDF, DXF and HPGL ignore art for now (e
 is a backlog item).
 <!-- lane H (w3/hardening) §5.17: end -->
 
+<!-- lane E (wave 3) §5.18–§5.20: begin -->
+
+### 5.18 Keyed mechanisms — `keys`, `period`, `ride`
+
+A mechanism moves linearly in its control by default (§5.4). Three optional fields let one control
+drive non-linear motion exactly: couplers, crank-rockers and cam followers.
+
+| Field | On | Meaning |
+|---|---|---|
+| `keys` | `hinge`, `rotate`, `leaf`, `translate`, `slide` | ≥ 2 `[control value, output]` pairs, control values strictly increasing. The output is linear between keys and held at the first or last output outside them. It **replaces the control value** in the mechanism's formula: the effective hinge angle (rotation = output − `rest`), the `rotate` or `leaf` angle (deg), the `translate` displacement along `direction` (mm, within ±`travel`) or the `slide` position along the track (mm, within [0, `travel`]). |
+| `period` | with `keys` | > 0. The control value is wrapped into [c₀, c₀ + `period`) before the lookup (c₀ = the first key's control value), and the segment after the last key runs linearly back to the first key's output at c₀ + `period`. Keys span at most one period. A table whose output gains a whole turn per period (a coupler's own rotation) ends with a key at c₀ + `period`; the wrap back to the first output is then a whole turn, invisible in a rotation. |
+| `ride` | `hinge`, `rotate`, `translate` | the id of another `hinge`, `rotate` or `translate` mechanism that carries this one: the mechanism's transform is applied first, in the placed frame, then the ridden mechanism's transform, both at the same moment (T = T_ride ∘ T_own). Rides form no cycle. A coupler is a `rotate` about its crank pin (a point of the crank sheet in its placed pose) riding the crank's `rotate`, keyed by the coupler's heading minus the crank angle. |
+
+A kinematic sheet still follows exactly one mechanism (§5.1); `ride` is how motions combine.
+The engine and the studio preview evaluate the same table; between keys the motion is the linear
+blend of the outputs, so authors sample the closed form finely enough for the linkage to stay
+within tolerance (5° keys keep a 76 mm coupler within 0.04 mm of its rocker pin).
+
+### 5.19 Step-activated joins — `active_from`
+
+A `glue`, `pivot`, `string` or `pin` join may carry `active_from`: a step id of the fold program
+(§5.6), or its 0-based index. The join does not hold until that step has begun (sequence position
+p > k) and holds from then on; scrubbing the program back before the step lets go again (a join's
+state is a function of p, like every other part of the program). A fold program can then show the
+making — flat at t = 0 — and still end glued.
+
+- **Rule 9 does not apply** to a step-activated glue: the `initial` frame shows the paper before
+  it is glued. (Rule 9 still asks for an `initial` frame when joins exist.)
+- **Created from the current geometry.** When the join switches on, the engine welds what the
+  paper is doing at that moment. The snap distance is max(1 mm, 4 × the larger
+  `collision_thickness` of the two sheets).
+  - glue and pivot: a weld point within the snap distance of its authored point snaps onto it.
+    Otherwise, if the paper lies on its zone (the gap across sheet *b*'s surface is within the
+    snap distance) but has slid along it, it is welded where it lies. Otherwise the paper does
+    not touch its zone and that weld point does not take hold (the engine counts it, and holds
+    it only if the join switches off and on again). Glue closes the gap across *b*; a pivot
+    keeps it (two layers riveted).
+  - string: holds from then on, slack or taut as the geometry is.
+  - pin: grips the point where it is (`world: null`), or moves it to `world` when it is within
+    the snap distance; a pin's `mechanism` moves it by the mechanism's motion since activation.
+- **Preview.** The studio's preview has no welds. It applies the same rule to what it can show:
+  while a glue within one sheet holds, a `release` of a crease on the face-tree path between the
+  tab's face and its zone's face (the loop the glue closes) leaves that crease where it is.
+
+### 5.20 Untying joins — step `release_joins`
+
+A step may list `release_joins`: ids of `glue`, `pivot`, `string` or `pin` joins it unties. From the
+moment that step has begun (p > r) the join no longer holds, and it stays released in later steps
+(the state-between-steps rule of §5.6); scrubbing back before the step ties it again. A carousel
+book's ribbons are untied before it opens; a brad comes out; a pinned sheet is let go.
+
+- A join is released at most once, by a step after the one that activates it (§5.19).
+- A released join that has no `active_from` holds from the start; a released glue without
+  `active_from` still satisfies rule 9 in the `initial` frame.
+- The engine treats a released pin as a stiff anchor (not a fixed vertex), so letting it go
+  changes no simulation topology. In the preview, releasing a glue within one sheet ends the
+  crease lock of §5.19 from that step on.
+
+<!-- lane E (wave 3) §5.18–§5.20: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -611,7 +671,8 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
    points lie inside their sheets.
 8. Every sequence target references an `M`/`V`/`F` edge; angles are in [−180, 180].
 9. If `initial` is present, its edge lengths match the layout lengths within 1e-3 relative error
-   (sheets are developable — folding never stretches paper), and every glue weld is satisfied within
+   (sheets are developable — folding never stretches paper), and every glue weld (except a
+   step-activated one, §5.19) is satisfied within
    `collision_thickness`: each vertex of the glue `region` polygon, mapped to sheet *b*, lies within
    `max(collision_thickness(a), collision_thickness(b))` of its image on *b* in the `initial` frame.
 10. `pliego:meta.digest`, when present, matches.
@@ -655,6 +716,18 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     and (SVG) carries no script, event handler, foreignObject, `javascript:` URL, DOCTYPE/ENTITY,
     `@import` or external reference (`art_source`).
 <!-- lane H (w3/hardening) rule 18: end -->
+<!-- lane E (wave 3) rules 19–21: begin -->
+19. Keyed mechanisms (§5.18): `keys` appear only on `hinge`, `rotate`, `leaf`, `translate` and
+    `slide`, as ≥ 2 number pairs with strictly increasing control values; `translate` outputs lie
+    within ±`travel` and `slide` outputs within [0, `travel`]; `period` > 0, only with `keys`, and
+    the keys span at most one period; `ride` names a `hinge`, `rotate` or `translate` mechanism,
+    appears only on those types, and rides form no cycle.
+20. Step-activated joins (§5.19): `active_from` appears only on `glue`, `pivot`, `string` and
+    `pin` joins of a document with a fold program, and names a step id or a step index of it.
+21. Untying (§5.20): every `release_joins` entry names an existing `glue`, `pivot`, `string` or
+    `pin` join; no join is released twice; a join with `active_from` is released only by a later
+    step.
+<!-- lane E (wave 3) rules 19–21: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

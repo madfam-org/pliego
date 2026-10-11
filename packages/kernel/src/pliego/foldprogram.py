@@ -235,21 +235,28 @@ class FoldProgram:
 
     def hinge(self, sid: str, label, line, turn: float, at, ms: int = 1200,
               layers: int | None = None, from_: str = "top", substeps: int = 4,
-              note=None) -> FoldProgram:
+              note=None, faces=None, sheet_points=None) -> FoldProgram:
         """A 3-D pose step after the flat program: the flap on `at`'s side of the folded line —
         the layers picked at `at` (all, or `layers` from the top or from the bottom) and every
         layer connected to them without crossing the line, which must run along existing
         creases — turns by `turn` degrees about the line (positive lifts it towards the viewer).
-        Hinge steps compose: later ones turn about axes carried by the faces they hinge on."""
-        spec = {"line": line, "turn": turn, "at": at, "layers": layers, "from_": from_}
+        Hinge steps compose: later ones turn about axes carried by the faces they hinge on.
+
+        The flood stops at every crease whose image lies on the line, so a flap folded onto
+        the line (a dart's corner flap, folded to the keel) stays behind. `sheet_points` (sheet
+        points; the faces there seed the flood, in place of the layers at `at`) or `faces`
+        (state faces: exactly the flap) name the flap instead (spec §5.39); `at` still gives the
+        side, and with it the sense of `turn`."""
+        spec = {"line": line, "turn": turn, "at": at, "layers": layers, "from_": from_,
+                "faces": faces, "sheet_points": sheet_points}
         return self.hinges(sid, label, [spec], ms, substeps, note)
 
     def hinges(self, sid: str, label, specs: list[dict], ms: int = 1200, substeps: int = 4,
                note=None) -> FoldProgram:
         """Several flaps turning at once (each spec: line, turn, at, layers=None,
-        from_="top", leaf=None; see `hinge`; `leaf` = n picks the n-th of the flaps that meet
-        only along the line — the leaves of a book, counted from the top); the flaps must not
-        share a face."""
+        from_="top", leaf=None, sheet_points=None, faces=None; see `hinge`; `leaf` = n picks the
+        n-th of the flaps that meet only along the line — the leaves of a book, counted from the
+        top); the flaps must not share a face."""
         st = self.state
         out, taken = [], set()
         for spec in specs:
@@ -275,7 +282,16 @@ class FoldProgram:
                             raise FlatStateError(f"hinge '{sid}': the line crosses face {f}; "
                                                  "hinge poses turn about existing creases only")
                 return grp
-            if spec.get("leaf") is not None:
+            if spec.get("faces") is not None:
+                grp = {int(f) for f in spec["faces"]}
+                if not grp or not grp <= set(range(len(st.faces))):
+                    raise FlatStateError(f"hinge '{sid}': faces must name faces of the state")
+            elif spec.get("sheet_points") is not None:
+                seeds = [st.face_at(x) for x in spec["sheet_points"]]
+                if not seeds:
+                    raise FlatStateError(f"hinge '{sid}': sheet_points names no point")
+                grp = flap(seeds)
+            elif spec.get("leaf") is not None:
                 # the n-th flap from the top (bottom with from_="bottom"): the layers at `at`
                 # split into flaps that meet only along the line
                 order = list(reversed(stack)) if spec.get("from_", "top") == "top" else stack

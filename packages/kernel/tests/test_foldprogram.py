@@ -164,3 +164,46 @@ def test_document_carries_complete_face_orders(stocks):
     b.sheet.valley((0, 10), (S, 10))                      # the faces no longer match
     with pytest.raises(ValueError, match="do not match"):
         pliego.Assembly([b.sheet], face_orders={b.sheet.id: b}).build(stocks=stocks)
+
+
+# ── spec §5.39: a hinge flap named by sheet points or faces ──
+
+def test_dart_fuselage_opens_with_its_corner_flap():
+    from pliego import flatmotion
+    from pliego.flatstate import embed3
+    from pliego.foldpose import rigid_dev
+
+    c, H = 105.0, 297.0
+    keel = ((c, -10.0), (c, H + 10.0))
+    half, flap = (c - 20.0, 150.0), (20.0, 230.0)     # the left half; its first corner flap
+    cut = fm.dart_plane()
+    st = cut.state
+    at, fl, hf = st.to_folded(half), st.face_at(flap), st.face_at(half)
+    cut.hinge("open", "open", keel, 16.0, at=at, layers=1)
+    # the flood stops at the corner crease, which lies on the keel: the flap stays behind
+    assert fl not in cut.recs[-1].hinge["specs"][0]["faces"]
+    fp = fm.dart_plane()
+    fp.hinge("open", "open", keel, 16.0, at=at, sheet_points=[half, flap])
+    faces = fp.recs[-1].hinge["specs"][0]["faces"]
+    assert fl in faces and hf in faces
+    w = fp.pose.world
+    rel = flatmotion.compose(flatmotion.invert(w[hf]), w[fl])
+    flat = flatmotion.compose(flatmotion.invert(embed3(st.faces[hf].xf)), embed3(st.faces[fl].xf))
+    assert rigid_dev(rel, flat) < 1e-9          # the flap turned with its half
+    assert fp.build().report["rows"][-1]["tear_mm"] < 1e-9
+
+
+def test_hinge_faces_names_the_flap_exactly():
+    fp = fm.dart_plane()
+    c, H = 105.0, 297.0
+    keel = ((c, -10.0), (c, H + 10.0))
+    st = fp.state
+    left = sorted(f for f in range(len(st.faces))
+                  if sum(p[0] for p in st.poly(f)) / len(st.poly(f)) < c)
+    at = st.to_folded((c - 20.0, 150.0))
+    with pytest.raises(FlatStateError, match="faces must name"):
+        fp.hinge("open", "open", keel, 16.0, at=at, faces=[len(st.faces)])
+    with pytest.raises(FlatStateError, match="joined to the rest off the line"):
+        fp.hinge("open", "open", keel, 16.0, at=at, faces=left[:1])
+    fp.hinge("open", "open", keel, 16.0, at=at, faces=left)
+    assert fp.recs[-1].hinge["specs"][0]["faces"] == left

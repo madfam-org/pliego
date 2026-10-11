@@ -230,6 +230,23 @@ def canard_plane(trim: float = 10.0, dihedral: float = 6.0, W: float = 210.0, H:
     return fp, {"c": c, "k": k, "y_slit": y_slit, "x1": x1, "x2": x2, "e": e, "kc": kc}
 
 
+def dart_plane(W: float = 210.0, H: float = 297.0) -> FoldProgram:
+    """The traditional dart (as in the commons' paper-airplane) up to its fuselage: crease the
+    centre line, fold the top corners to it, fold the new slanted edges to it again, fold in
+    half. The first corner creases now lie on the keel: each corner flap is joined to its half
+    by a crease on the line the fuselage opens about."""
+    c = W / 2.0
+    t = math.tan(math.radians(22.5))
+    fp = FoldProgram([(0, 0), (W, 0), (W, H), (0, H)])
+    fp.crease_and_unfold("centre", "centre", ((c, -10.0), (c, H + 10.0)), "valley")
+    fp.fold("corner-l", "corners", ((0.0, H - c), (c, H)), "valley")
+    fp.fold("corner-r", "corners", ((c, H), (W, H - c)), "valley")
+    fp.fold("edge-l", "edges", ((c - 400.0 * t, H - 400.0), (c, H)), "valley")
+    fp.fold("edge-r", "edges", ((c, H), (c + 400.0 * t, H - 400.0)), "valley")
+    fp.fold("fold-half", "fold half", ((c, -10.0), (c, H + 10.0)), "valley")
+    return fp
+
+
 def ring_wing(length: float = 297.0, width: float = 45.0, bands: int = 2, n: int = 16,
               kinematic: bool = True) -> FoldProgram:
     """The ring wing (as in the commons' paper-airplane): a strip whose leading edge is folded

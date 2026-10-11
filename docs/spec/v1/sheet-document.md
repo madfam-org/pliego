@@ -754,6 +754,23 @@ the paper the long way round, through itself. The kernel signs a crease at ±180
 sequence and `target(pose=True)` give the motion's.
 <!-- lane FL3 (w4/fold-robustness) §5.38: end -->
 
+<!-- lane FL3 (w4/fold-robustness) §5.39: begin -->
+### 5.39 Kernel fold programs: naming a hinge flap
+
+A kernel hinge pose (`FoldProgram.hinge` / `hinges`) turns a flap about a folded line that runs
+along existing creases. By default the flap is the layers picked at a point and the paper joined
+to them without crossing a crease whose image lies on the line. A flap folded onto that line
+(the dart's corner flaps, folded to the keel) is joined to its half by such a crease, so the
+flood leaves it behind.
+
+- `sheet_points=[…]`: the faces at those sheet points seed the flood, in place of the layers
+  at `at`.
+- `faces=[…]`: exactly those faces of the state are the flap.
+- `at` still gives the flap's side, and with it the sense of the turn. The flap is still
+  checked: it must not be the whole model, must not share faces with another flap of the
+  step, and may be joined to the rest only along the line.
+<!-- lane FL3 (w4/fold-robustness) §5.39: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any

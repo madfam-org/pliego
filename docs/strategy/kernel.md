@@ -361,6 +361,9 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   Proof: the waterbomb balloon's eight tuck creases end at the sign they approach with and no
   target swings past 180° (`test_tucked_points_end_turned_towards_the_viewer`); the masu's
   flaps build the same angles with or without the commons' [0.5, 1] samples.
+- **Hinge flaps by name** (spec §5.39). `hinge(..., sheet_points=, faces=)` and the same keys
+  in a `hinges` spec. Proof: the traditional dart (`flat_models.dart_plane`) opens its fuselage
+  with each corner flap, whose crease lies on the keel, turning with its own half.
 <!-- FL3 (wave 4, fold-program robustness) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

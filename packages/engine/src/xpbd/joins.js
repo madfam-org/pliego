@@ -60,11 +60,13 @@ export function resolveJoins(doc, mesh, kHard) {
   const terms = new TermList();
   /** @type {{verts:number[], world:number[]|null, mechanism:string|null, id:string}[]} */
   const pins = [];
+  /** @type {string[]} */
+  const warnings = [];
   const weldSheet = new Int32Array(mesh.nV).fill(-1);
   const si = (/** @type {string} */ id) => /** @type {number} */(doc.sheetIndex.get(id));
   const gated = joinGates(doc);
   const loc = (/** @type {number} */ s, /** @type {number[]} */ p, /** @type {string} */ what) => {
-    const r = locatePoint(mesh, s, p[0], p[1]);
+    const r = locatePoint(mesh, s, p[0], p[1]) ?? snapPoint(mesh, s, p[0], p[1], Math.max(doc.sheets[s].derived.collision_thickness, 1e-3 * mesh.h));
     if (!r) throw new Error(`join ${what}: point (${p[0]}, ${p[1]}) not on the mesh of sheet ${doc.sheets[s].id}`);
     return r;
   };
@@ -77,14 +79,23 @@ export function resolveJoins(doc, mesh, kHard) {
       // breaks the zero-thickness linkage at hinges between glued panels (measured: 8 % local strain
       // at a V-fold vertex). Contact between the tab and b is skipped; `side` is a render hint.
       const off = 0;
+      // a region may cover an opening of sheet b (a lining behind a façade with windows): glue over
+      // an opening holds nothing, so a weld point whose image is off b's paper (beyond the snap
+      // tolerance) is skipped and World.warnings says how many. A glue that welds nothing fails.
+      const tol = Math.max(doc.sheets[sb].derived.collision_thickness, 1e-3 * mesh.h);
+      let welded = 0, open = 0;
       for (let v = 0; v < mesh.nV; v++) {
         if (mesh.vSheet[v] !== sa) continue;
         const u = mesh.uv[2 * v], w = mesh.uv[2 * v + 1];
         if (!pointInPolygon(u, w, reg, 1e-6)) continue;
-        const r = loc(sb, [ma * u + mb * w + tx, mc * u + md * w + ty], j.id);
+        const r = locatePoint(mesh, sb, ma * u + mb * w + tx, mc * u + md * w + ty) ?? snapPoint(mesh, sb, ma * u + mb * w + tx, mc * u + md * w + ty, tol);
+        if (!r) { open++; continue; }
+        welded++;
         terms.add(TK_GLUE, TERM_FULL, [v, ...r.verts], [1, -r.w[0], -r.w[1], -r.w[2]], { join: j.id, tri: r.tri, offset: off, k: kHard });
         if (!gated.has(j.id)) weldSheet[v] = sb;
       }
+      if (!welded && open) throw new Error(`join ${j.id}: no point of the glue region lands on the paper of sheet ${doc.sheets[sb].id}`);
+      if (open) warnings.push(`join ${j.id}: ${open} of ${open + welded} weld points land on an opening of sheet ${doc.sheets[sb].id} and hold nothing`);
     } else if (j.type === 'pivot') {
       const ra = loc(si(j.a.sheet), j.a.at, j.id), rb = loc(si(j.b.sheet), j.b.at, j.id);
       terms.add(TK_PIVOT, TERM_FULL, [...ra.verts, ...rb.verts], [...ra.w, ...rb.w.map((x) => -x)], { join: j.id, tri: rb.tri, offset: null, k: kHard });
@@ -122,7 +133,37 @@ export function resolveJoins(doc, mesh, kHard) {
       } else pins.push({ verts, world: j.world, mechanism: j.mechanism ?? null, id: j.id });
     }
   }
-  return { terms, pins, weldSheet };
+  return { terms, pins, weldSheet, warnings };
+}
+
+/**
+ * The nearest point of sheet s's mesh to (u, v) when it is within `tol` (mm), as barycentric weights
+ * of its triangle (clamped to the triangle), else null. For points that rounding put just off a
+ * cut or boundary edge.
+ * @param {import('../mesh.js').Mesh} mesh @param {number} s @param {number} u @param {number} v @param {number} tol
+ * @returns {{tri:number, w:[number,number,number], verts:[number,number,number]}|null}
+ */
+export function snapPoint(mesh, s, u, v, tol) {
+  const { tris, triSheet, uv } = mesh;
+  let best = null, bd = tol;
+  for (let t = 0; t < mesh.nT; t++) {
+    if (triSheet[t] !== s) continue;
+    const q = [tris[3 * t], tris[3 * t + 1], tris[3 * t + 2]];
+    for (let i = 0; i < 3; i++) {
+      const a = q[i], b = q[(i + 1) % 3];
+      const ax = uv[2 * a], ay = uv[2 * a + 1], dx = uv[2 * b] - ax, dy = uv[2 * b + 1] - ay;
+      const L2 = dx * dx + dy * dy;
+      const f = L2 > 0 ? Math.max(0, Math.min(1, ((u - ax) * dx + (v - ay) * dy) / L2)) : 0;
+      const d = Math.hypot(ax + f * dx - u, ay + f * dy - v);
+      if (d <= bd) {
+        bd = d;
+        /** @type {[number,number,number]} */ const w = [0, 0, 0];
+        w[i] = 1 - f; w[(i + 1) % 3] = f;
+        best = { tri: t, w, verts: /** @type {[number,number,number]} */ (q) };
+      }
+    }
+  }
+  return best;
 }
 
 /** @param {import('../mesh.js').Mesh} mesh @param {number} s @param {number[]} p */

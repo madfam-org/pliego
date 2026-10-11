@@ -68,7 +68,7 @@ export class World {
     let kmax = 0;
     for (let e = 0; e < mesh.nE; e++) kmax = Math.max(kmax, this.kMem[e]);
     this.kHard = K.HARD_FACTOR * kmax;
-    const { terms, pins, weldSheet } = resolveJoins(doc, mesh, this.kHard);
+    const { terms, pins, weldSheet, warnings: joinWarnings } = resolveJoins(doc, mesh, this.kHard);
     this.weldSheet = weldSheet;
     // perforations: breakable welds between the duplicated vertices (tear at the stock's tear strain)
     for (let i = 0; i < mesh.perfPairs.length / 2; i++) {
@@ -79,6 +79,7 @@ export class World {
     }
     this.drivers = new Drivers(this, terms, pins, opts);
     this.warnings = this.drivers.warnings;
+    this.warnings.push(...joinWarnings);
     this.terms = terms.finish();
     for (let t = 0; t < this.terms.count; t++) this.terms.k[t] = this.terms.info[t].k ?? 0;
     this.terms.active[this.drivers.grabTerm] = 0;

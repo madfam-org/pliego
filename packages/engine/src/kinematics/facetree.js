@@ -147,6 +147,12 @@ export class LoopClosure {
     }
     this.m = this.vars.length;
     this.rows = 3 * this.loops.length;
+    // column structure of the Jacobian: the loops (3 rows each) in which each variable appears, in
+    // ascending order, so the normal equations can be assembled from nonzeros only (see solve)
+    /** @type {number[][]} */
+    this.colLoops = Array.from({ length: this.m }, () => []);
+    this.loops.forEach((L, k) => { for (const e of L.edges) { const j = this.varOf.get(e); if (j !== undefined && !this.colLoops[j].includes(k)) this.colLoops[j].push(k); } });
+    for (const c of this.colLoops) c.sort((a, b) => a - b);
   }
 
   /** Residual vector (3 per interior vertex). @param {ArrayLike<number>} rho per document edge */
@@ -211,14 +217,24 @@ export class LoopClosure {
       res = Math.sqrt(r.reduce((s, x) => s + x * x, 0));
       if (res < tol) break;
       const J = this.jacobian(rho);
-      const n = this.rows, k = free.length;
-      // Δ = −Cᵀ (C Cᵀ + λ² I)⁻¹ r over the free columns
+      const n = this.rows, k = free.length, m = this.m;
+      // Δ = −Cᵀ (C Cᵀ + λ² I)⁻¹ r over the free columns. C Cᵀ is assembled column by column from the
+      // nonzero rows only (a column touches the 3 rows of each of its one or two loops): the same
+      // additions in the same order as the dense triple loop, so the result is bit-identical, at
+      // O(columns) instead of O(rows² · columns) — the dense loop took 87 % of a 547-vertex
+      // kinematic tessellation's frame (sim readiness, lane S)
       const M = new Float64Array(n * n);
-      for (let a = 0; a < n; a++) for (let b = a; b < n; b++) {
-        let s = a === b ? lam * lam : 0;
-        for (const e of free) { const j = /** @type {number} */(this.varOf.get(e)); s += J[a * this.m + j] * J[b * this.m + j]; }
-        M[a * n + b] = s; M[b * n + a] = s;
+      for (let a = 0; a < n; a++) M[a * n + a] = lam * lam;
+      const rowsOf = (/** @type {number} */ j) => { const R = []; for (const q of this.colLoops[j]) R.push(3 * q, 3 * q + 1, 3 * q + 2); return R; };
+      const fj = free.map((e) => /** @type {number} */(this.varOf.get(e)));
+      for (const j of fj) {
+        const R = rowsOf(j);
+        for (let p = 0; p < R.length; p++) for (let q = p; q < R.length; q++) {
+          const a = R[p], b = R[q];
+          M[a * n + b] += J[a * m + j] * J[b * m + j];
+        }
       }
+      for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) M[b * n + a] = M[a * n + b];
       // damped least squares: λ² scaled to the system so the flat (singular) state stays solvable
       let tr = 0;
       for (let a = 0; a < n; a++) tr += M[a * n + a];
@@ -226,9 +242,9 @@ export class LoopClosure {
       for (let a = 0; a < n; a++) M[a * n + a] += damp;
       const y = solveSPD(M, Array.from(r), n);
       for (let q = 0; q < k; q++) {
-        const e = free[q], j = /** @type {number} */(this.varOf.get(e));
+        const e = free[q], j = fj[q];
         let s = 0;
-        for (let a = 0; a < n; a++) s += J[a * this.m + j] * y[a];
+        for (const a of rowsOf(j)) s += J[a * m + j] * y[a];
         rho[e] -= s;
       }
     }

@@ -110,7 +110,11 @@ export function resolveJoins(doc, mesh, kHard) {
       if (j.a.along) {
         const [p, q] = j.a.along;
         const tol = Math.max(doc.sheets[s].derived.collision_thickness, 1e-3 * mesh.h);
-        for (let v = 0; v < mesh.nV; v++) if (mesh.vSheet[v] === s && distPointSeg(mesh.uv[2 * v], mesh.uv[2 * v + 1], p[0], p[1], q[0], q[1]) <= tol) verts.push(v);
+        const near = (/** @type {number} */ t) => { for (let v = 0; v < mesh.nV; v++) if (mesh.vSheet[v] === s && distPointSeg(mesh.uv[2 * v], mesh.uv[2 * v + 1], p[0], p[1], q[0], q[1]) <= t) verts.push(v); };
+        near(tol);
+        // a grip line across open paper (no document edge on it) may fall between mesh rows at
+        // some mesh sizes: grip the band of half a mesh edge around it instead of failing
+        if (!verts.length) near(0.5 * mesh.h);
       } else verts.push(nearestVertex(mesh, s, j.a.at));
       if (!verts.length) throw new Error(`join ${j.id}: pin selects no mesh vertex`);
       if (gated.has(j.id)) {

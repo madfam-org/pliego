@@ -59,6 +59,24 @@ def test_carousel_ribbons_tie_the_covers_at_their_open_distance():
     assert doc.verify() == [], doc.summary(doc.verify())
 
 
+def test_lined_carousel_hides_the_covers_and_its_linings_hold():
+    st = book.carousel_strip(6, 100.0, 140.0, spines=False, lined=True)
+    gable = [(0.0, 0.0), (13.0, 10.0), (26.0, 0.0)]
+    cfs = [cut_fold(st.sheet, **st.spine_frame(k), angle=st.open_angle, gutter_name="spine",
+                    blocks=[Block(a=44, b=26, lo=10, hi=60, crest=gable)]) for k in range(6)]
+    assert st.offset == 100.0 and st.spine_u(0) == 200.0 and len(st.lining_marks) == 2
+    arr = st.sheet.build()
+    for g in (0.0, st.open_angle, 178.0):
+        assert K.closure_residual(arr, _edge_angles(st, cfs, g)) < 1e-9
+    init = {m: a for cf in cfs for m, a in cf.angles(st.open_angle).items()}
+    init.update(st.angles(st.open_angle))
+    doc = pliego.Assembly([st.sheet], joins=st.ribbons() + st.lining_glue(),
+                          initial={"angles": init, "root": (150, 70)}).build()
+    assert doc.verify() == [], doc.summary(doc.verify())
+    names = set(doc.data["pliego:edges_name"]) - {None}
+    assert {"cover-front-edge", "cover-back-edge", "spine", "fore-edge"} <= names
+
+
 def test_carousel_strip_with_its_own_spines_and_bad_counts():
     st = book.carousel_strip(5, 80.0, 120.0)
     assert len(st.spine_marks) == 5 and len(st.fore_marks) == 4

@@ -258,12 +258,15 @@ def carousel(leaves: int = 6, width: float = 100.0, height: float = 140.0,
 
 @dataclass
 class CarouselStrip:
-    """One strip of 2·N panels: front cover, N − 1 double walls, back cover (`carousel_strip`).
+    """One strip of 2·N panels: front cover, N − 1 double walls, back cover (`carousel_strip`),
+    optionally with a lining panel before the front cover and after the back cover.
 
-    Spine folds (valley, k = 0 … N − 1) lie at u = (2k + 1)·width, every one on the book's spine
-    axis; fore-edge folds (mountain, folded flat) at u = 2k·width make the double walls. Opened,
-    neighbouring walls stand ``alpha`` = (360 − gap)/N apart and every spine fold turns by
-    180 − alpha; any common spine angle is a rigid state."""
+    Spine folds (valley, k = 0 … N − 1) lie at u = offset + (2k + 1)·width, every one on the
+    book's spine axis; fore-edge folds (mountain, folded flat) at u = offset + 2k·width make the
+    double walls (offset = width when lined, else 0). Opened, neighbouring walls stand
+    ``alpha`` = (360 − gap)/N apart and every spine fold turns by 180 − alpha; any common spine
+    angle is a rigid state. A lining folds flat behind its cover (mountain) and is glued to it,
+    hiding whatever a chamber scene cut through the cover."""
 
     sheet: Sheet
     chambers: int
@@ -272,6 +275,11 @@ class CarouselStrip:
     gap: float
     spine_marks: list[Mark]
     fore_marks: list[Mark]
+    lining_marks: list[Mark]
+
+    @property
+    def offset(self) -> float:
+        return self.width if self.lining_marks else 0.0
 
     @property
     def alpha(self) -> float:
@@ -285,18 +293,19 @@ class CarouselStrip:
     def spine_u(self, k: int) -> float:
         if not 0 <= k < self.chambers:
             raise ValueError(f"spine fold {k} is not in [0, {self.chambers})")
-        return (2 * k + 1) * self.width
+        return self.offset + (2 * k + 1) * self.width
 
     def spine_frame(self, k: int) -> dict:
         """Keyword arguments locating spine fold k for `pliego.cutfold.cut_fold` (origin, along,
-        across, reach, span): the corner of chamber k + 1, between panels 2k and 2k + 1."""
+        across, reach, span): the corner of chamber k + 1, between its two walls."""
         return {"origin": (self.spine_u(k), 0.0), "along": (0.0, 1.0), "across": (1.0, 0.0),
                 "reach": (self.width, self.width), "span": (0.0, self.height)}
 
     def angles(self, spine_deg: float) -> dict[Mark, float]:
-        """{mark: deg}: the strip's own spine folds at ``spine_deg``, fore-edge folds flat."""
+        """{mark: deg}: the strip's own spine folds at ``spine_deg``; fore-edge folds and
+        linings flat."""
         out = {m: spine_deg for m in self.spine_marks}
-        out.update({m: -180.0 for m in self.fore_marks})
+        out.update({m: -180.0 for m in self.fore_marks + self.lining_marks})
         return out
 
     def ribbons(self, inset: float = 6.0, edge: float = 15.0, slack: float = 0.5) -> list[dict]:
@@ -304,19 +313,35 @@ class CarouselStrip:
         top and bottom) at their open distance plus ``slack``."""
         r = self.width - inset
         chord = 2.0 * r * math.sin(math.radians(self.gap) / 2.0)
-        last = 2 * self.chambers * self.width - inset
-        return [string(f"ribbon-{name}", (self.sheet, (inset, y)), (self.sheet, (last, y)),
+        first = self.offset + inset
+        last = self.offset + 2 * self.chambers * self.width - inset
+        return [string(f"ribbon-{name}", (self.sheet, (first, y)), (self.sheet, (last, y)),
                        round(chord, 3) + slack)
                 for name, y in (("top", self.height - edge), ("bottom", edge))]
+
+    def lining_glue(self, inset: float = 0.5) -> list[dict]:
+        """Glue joins welding each lining, folded behind its cover, to the cover's back."""
+        if not self.lining_marks:
+            return []
+        w, h = self.width, self.height
+        end = self.offset + 2 * self.chambers * w
+        out = []
+        for name, u0, axis in (("front", 0.0, self.offset), ("back", end, end)):
+            region = [(u0 + inset, inset), (u0 + w - inset, inset), (u0 + w - inset, h - inset),
+                      (u0 + inset, h - inset)]
+            out.append(glue(f"lining-{name}", self.sheet, region, self.sheet,
+                            (-1.0, 0.0, 0.0, 1.0, 2.0 * axis, 0.0), "back"))
+        return out
 
 
 def carousel_strip(chambers: int = 6, width: float = 100.0, height: float = 140.0, *,
                    stock: str = "cardstock-250", gap: float = 2.0, spines: bool = True,
-                   sheet_id: str = "carousel", label: dict | None = None,
-                   placement: Placement | None = None, treatment: str = "score") -> CarouselStrip:
+                   lined: bool = False, sheet_id: str = "carousel", label: dict | None = None,
+                   placement: Placement | None = None, treatment: str = "score",
+                   front: str | None = None, back: str | None = None) -> CarouselStrip:
     """The carousel (star) book as one strip. With ``spines=False`` the spine folds are left to
     the caller (a `cut_fold` per chamber adds them, with its scene cut across); the fore-edge
-    folds are always added."""
+    folds are always added. ``lined`` adds the two cover linings (see `CarouselStrip`)."""
     _count("chambers", chambers, 24)
     if chambers < 3:
         raise ValueError("a carousel needs at least 3 chambers")
@@ -324,16 +349,20 @@ def carousel_strip(chambers: int = 6, width: float = 100.0, height: float = 140.
     if gap >= 30.0:
         raise ValueError("the covers' gap must be under 30°")
     n = chambers
-    sheet = Sheet(sheet_id, _rect(2 * n * width, height), stock=stock, grain_deg=90.0,
+    off = width if lined else 0.0
+    length = 2 * n * width + 2 * off
+    sheet = Sheet(sheet_id, _rect(length, height), stock=stock, grain_deg=90.0,
                   label=label or {"en": "Carousel strip", "es": "Tira del carrusel",
                                   "fr": "Bande du carrousel", "pt": "Tira do carrossel"},
-                  placement=placement)
-    sheet.label_edge("cover-front-edge", (0, 0), (0, height))
-    sheet.label_edge("cover-back-edge", (2 * n * width, 0), (2 * n * width, height))
+                  placement=placement, front=front, back=back)
+    end = off + 2 * n * width
+    if not lined:                       # lined: the lining folds carry these names
+        sheet.label_edge("cover-front-edge", (0, 0), (0, height))
+        sheet.label_edge("cover-back-edge", (end, 0), (end, height))
     alpha = (360.0 - gap) / n
-    spine, fore = [], []
+    spine, fore, lining = [], [], []
     for j in range(2 * n - 1):
-        x = (j + 1) * width
+        x = off + (j + 1) * width
         if j % 2 == 0:
             if spines:
                 spine.append(sheet.crease((x, 0), (x, height), "valley", 180.0 - alpha,
@@ -341,7 +370,11 @@ def carousel_strip(chambers: int = 6, width: float = 100.0, height: float = 140.
         else:
             fore.append(sheet.crease((x, 0), (x, height), "mountain", 180.0,
                                      treatment=treatment, name="fore-edge"))
-    return CarouselStrip(sheet, n, width, height, gap, spine, fore)
+    if lined:
+        for x, name in ((off, "cover-front-edge"), (end, "cover-back-edge")):
+            lining.append(sheet.crease((x, 0), (x, height), "mountain", 180.0,
+                                       treatment=treatment, name=name))
+    return CarouselStrip(sheet, n, width, height, gap, spine, fore, lining)
 
 
 GENERATORS: dict[str, Callable[..., Assembly]] = {

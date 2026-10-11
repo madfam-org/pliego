@@ -26,7 +26,7 @@ node packages/engine/test/helpers/write-fixtures.js   # regenerate test/fixtures
 ```js
 import { loadDocument, buildMesh, World, kinematics, materials, constants } from '@pliego/engine';
 
-const doc = loadDocument(json);        // validates spec §8; throws DocumentError listing EVERY problem
+const doc = loadDocument(json);        // validates spec §8 (incl. meta.digest); throws DocumentError listing EVERY problem
 const world = new World(doc, {
   meshEdge: 6,        // mm target edge length (default: largest sheet span / 30, clamped to 3–8 mm)
   substeps: 20,       // fixed substeps per 60 Hz frame; step() runs whole substeps only
@@ -45,7 +45,8 @@ world.grab(v, [x, y, z]); world.moveGrab([x, y, z]); world.release();
 world.pick(origin, dir);         // { vertex, triangle, point, sheet } | null
 world.setForce(v, [fx, fy, fz]); // constant external force (µN), for tests and tools
 world.stats();                   // { maxStrain, maxCompression, energy{stretch,bend,crease}, contacts, grounded,
-                                 //   substepsRun, factorizations, pcgIterations, kinematicResidual, finite, time }
+                                 //   substepsRun, factorizations, pcgIterations, kinematicResidual, finite, time,
+                                 //   tornWelds, unheldWelds }
 world.snapshot(); world.restore(s);   // bit-exact, including the factorisation state
 ```
 
@@ -91,6 +92,57 @@ Each fixed substep, of length Δt = 1/(60·S), runs these stages in order:
    friction, remembered sidedness), then the 0.5 % stretch limiter last.
 5. **Bookkeeping.** `v = (x − x_start)/Δt`, unwrapped hinge angles, and rate-independent crease
    plasticity (Narain et al. 2013): `θ_rest ← θ − sign·θ_y`.
+
+**Keyed mechanisms** (spec §5.18, `src/keyed.js`). A `hinge`, `rotate`, `leaf`, `translate` or
+`slide` with `keys` maps its control value through a linear table (optionally `period`ic) before
+its usual formula, and a `hinge`/`rotate`/`translate` with `ride` is carried by another one
+(T = T_ride ∘ T_own). One control then drives a crank-rocker four-bar (the coupler rides the crank)
+or a cam follower exactly; the studio's preview stub evaluates the same table. Test
+`keyed-mechanisms`.
+
+**Step-activated joins** (spec §5.19, `src/gates.js`, `src/xpbd/gates.js`). A glue, pivot, string
+or pin with `active_from` is off until its step begins. When it switches on it is created from the
+current geometry: weld points within the snap distance (max(1 mm, 4 × caliper)) snap onto their
+zone, paper that lies on its zone but slid along it is welded where it lies, and paper off its
+zone does not take hold (`stats().unheldWelds`). A gated pin is a stiff anchor term rather than a
+fixed vertex, so the free-vertex set (and the symbolic factorisation) never changes. Switching
+refactorises; contact exclusion around welds follows the gates. Test `step-joins`.
+A step's `release_joins` (spec §5.20) unties joins from that step on, through the same gates
+(test `untie-joins`).
+
+**Start pose** (backlog item 21). A mechanism control starts at its `default` unless the
+mechanism's neutral value (0, or a hinge's `rest`) reproduces the document's initial pose better;
+then it starts there and glides to the default at `mechanismRate`, and `world.warnings` says so.
+Before, such a document teleported its kinematic sheets on the first substep and smashed the
+paper around them: `pull-tab-slider` `straight` stretched 8–16 % and `dissolve-scene` 5–13 %; now
+0.45–2.4 % and < 0.5 % (the rest in `pull-tab-slider` comes from the document stacking its strip
+0.3 mm above the backing where 0.33 mm is the contact distance, so the sliding strip drags the
+free backing by friction). Test `start-pose`.
+
+**Next engine milestones** (measured, not implemented): `rotating-squares` needs in-plane
+plasticity of its kirigami ligaments (46–218 % stretch today), and `tab-and-slot` needs
+edge–edge contact (10–13 % stretch, 1.5 % in `low-cross`), because vertex–triangle contact lets a
+tab's edge pass a slot's edge.
+
+**Digest** (spec §5.7 and rule 10, canonical serialisation per lane H's §5.15, `src/digest.js`).
+When `pliego:meta.digest` is present, `loadDocument` recomputes "sha256:" + SHA-256 of the RFC 8785
+canonical text of the document (keys sorted as UTF-16 code units, ECMAScript number spelling,
+digest set to null) and rejects a mismatch. SHA-256 is implemented here (synchronous; WebCrypto's
+digest is asynchronous). About 7 ms for a 250 kB document. Test `digest` (the kernel's shared
+vector, node:crypto parity, tamper rejection).
+
+**Split cuts** (spec §5.13, from lane H). The kernel writes a cut once per side: twin `C` edges with
+the same coordinates over split vertices, each bordering one face. Rule 4 accepts a `C` edge that
+borders one face when exactly one other `C` edge of its sheet has the same endpoint coordinates;
+the mesher builds one side per twin (an unsplit cut is still split by the mesher), and coincident
+copies share a contact group. Rule 3's area floor is measured per material face (faces joined
+across `J` edges), as the kernel's verify measures it. Test `split-cuts`.
+
+**Presentation** (spec §5.16, `src/xpbd/presentation.js`). A sheet's `presentation.end` blends in
+over the fold program about its root face's t = 0 centroid, in what the World shows: `render()`,
+`creaseLines()` and `pick()` are presented; `grab()`/`moveGrab()` points are mapped back. The
+simulation (`positions`, stats, contact, the ground) is untouched. Rule 17 is checked on load.
+Test `presentation`.
 
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force
@@ -167,7 +219,8 @@ Tests: `determinism-replay` and `determinism-snapshot`.
 
 Board needs nothing the paper path lacks:
 
-- **Caliper** sets the contact gap (`collision_thickness`).
+- **Caliper** sets the contact gap (`collision_thickness`; two different stocks touch at the mean
+  of theirs).
 - **Strong orthotropy** comes through the per-hinge D(φ) with `grain_deg`.
 - **Machine scores** use the `score` treatment with `score_factor` and `score_yield_deg`.
 
@@ -196,6 +249,29 @@ Two limits apply:
 | kinematic Miura, 1285 vertices | 21 ms/frame |
 | folding a 726-vertex sheet | about 170–240 ms/frame |
 | folding an 1838-vertex sheet | about 680–820 ms/frame |
+
+**Studio interactive options** (mesh edge from the sheet area, 8 substeps; backlog item 22,
+`node packages/engine/test/helpers/perf-docs.js <docs>`; best mean of 5 interleaved runs per side,
+this Mac, Node 20, under load from other jobs, so treat ±10 % as noise):
+
+| document | V | before (origin/main) | after | change |
+|---|---|---|---|---|
+| page-turn (default) | 424 | 24.8 ms/frame | 24.2 | ≈ 0 |
+| valley-fold (default) | 449 | 37.1 | 34.5 | −7 % |
+| v-fold-popup (spread) | 477 | 13.6 | 11.6 | −15 % |
+| papel-picado-banner (default, in wind) | 1955 | 248.3 | 127.9 | −48 % |
+
+What was measured first (CPU profiles): the triangular solves inside PCG (≈ 25 %) and the
+numeric factorisation (≈ 18 %) lead on single sheets; on the banner the contact broad phase led
+(44 % in the per-candidate sphere test alone). The change: triangle bounding spheres once per
+broad phase and a typed-array cell table (same candidates in the same order, so results are
+bit-identical), and no allocation inside the factorisation's inner loop (bit-identical). What did
+not pay: minimum-fill ordering is within 2 % of the current minimum-degree fill on these meshes
+(so AMD or nested dissection would not either); the symbolic analysis is already done once per
+World; the solve and factorisation already run at about 1.3 and 2.3 GFLOP/s, the scalar limit of
+plain JavaScript, so a supernodal layout would add little without SIMD; raising or lowering the PCG
+refactor threshold (3–12 iterations) was slower than today's 6. The next step is WASM SIMD or
+WebGPU (out of scope here).
 
 The < 8 ms/frame target is not met for moving sheets above a few hundred vertices. The
 factorisation and the triangular solves dominate (block Cholesky in plain JavaScript). Ways to

@@ -355,8 +355,8 @@ def _glue_welds(d: dict, coords: list, vc: list, out) -> None:
         return None
 
     for j in d.get("pliego:joins") or []:
-        if j.get("type") != "glue":
-            continue
+        if j.get("type") != "glue" or "active_from" in j:
+            continue  # a step-activated glue (spec §5.19) is made during its step, not at t = 0
         a, b = (j.get("a") or {}).get("sheet"), (j.get("b") or {}).get("sheet")
         if a not in ids or b not in ids or not isinstance(j.get("map"), list):
             continue

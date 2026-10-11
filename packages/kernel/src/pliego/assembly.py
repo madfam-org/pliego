@@ -233,7 +233,8 @@ Target = Mark | EdgeRef | int
 class Step:
     """One fold-program step. Targets are (mark | global edge index, angle | None) pairs; a
     `None` angle uses the mark's own fold angle. Releases hand hinges back to the paper.
-    `remove` takes excess pieces (ids or `pliego.piece` dicts) out of the model (spec §5.8)."""
+    `remove` takes excess pieces (ids or `pliego.piece` dicts) out of the model (spec §5.8);
+    `release_joins` unties joins (ids or join dicts) from this step on (spec §5.20)."""
 
     id: str
     label: str | dict
@@ -242,6 +243,7 @@ class Step:
     duration_ms: int = 1500
     note: str | dict | None = None
     remove: list[str | dict] = field(default_factory=list)
+    release_joins: list[str] = field(default_factory=list)  # spec §5.20: joins this step unties
 
     def __post_init__(self) -> None:
         check_slug(self.id, "step id")
@@ -255,6 +257,8 @@ class Step:
             self.note = i18n(self.note, self.id)
         self.remove = [check_slug(r["id"] if isinstance(r, dict) else r, "removed piece")
                        for r in self.remove]
+        self.release_joins = [check_slug(j["id"] if isinstance(j, dict) else j, "released join")
+                              for j in self.release_joins]
 
 
 @dataclass

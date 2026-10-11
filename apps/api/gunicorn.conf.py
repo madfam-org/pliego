@@ -30,8 +30,9 @@ bind = [f"0.0.0.0:{_app_port}", f"0.0.0.0:{_metrics_port}"]
 workers = int(os.environ.get("PLIEGO_WORKERS", "2"))
 threads = int(os.environ.get("PLIEGO_THREADS", "4"))
 worker_class = "gthread"
-# A render is bounded by the runner's own 30 s timeout; the worker timeout sits above it.
-timeout = 60
+# A render is bounded by the runner's own timeout (PLIEGO_RENDER_TIMEOUT_S, 60 s in production); the worker
+# timeout sits above it.
+timeout = 90
 graceful_timeout = 30
 keepalive = 5
 worker_tmp_dir = "/tmp"

@@ -66,6 +66,7 @@ class Settings:
     projects_dir: Path | None = None
     materials_dir: Path | None = None
     thumbnails_dir: Path | None = None
+    prerender_dir: Path | None = None
     host_landing: str = HOST_LANDING
     host_app: str = HOST_APP
     host_api: str = HOST_API
@@ -111,6 +112,11 @@ class Settings:
         return self.render_cache_dir or (Path(tempfile.gettempdir()) / "pliego-render-cache")
 
     @property
+    def prerender(self) -> Path:
+        """The warm tier rendered at image build time (apps/api/prerender.py), read-only."""
+        return self.prerender_dir or (self.root / "build" / "prerender")
+
+    @property
     def thumbnails(self) -> Path:
         """Built catalog previews (apps/api/thumbnails.py; the image builds them at build time)."""
         return self.thumbnails_dir or (self.root / "build" / "thumbnails")
@@ -122,6 +128,7 @@ class Settings:
         projects = env.get("PLIEGO_PROJECTS_DIR")
         materials = env.get("PLIEGO_MATERIALS_DIR")
         thumbnails = env.get("PLIEGO_THUMBNAILS_DIR")
+        prerender = env.get("PLIEGO_PRERENDER_DIR")
         header = env.get("PLIEGO_TRUSTED_PROXY_HEADER")
         timeout = env.get("PLIEGO_RENDER_TIMEOUT_S")
         cache_dir = env.get("PLIEGO_RENDER_CACHE_DIR")
@@ -130,6 +137,7 @@ class Settings:
             projects_dir=Path(projects) if projects else None,
             materials_dir=Path(materials) if materials else None,
             thumbnails_dir=Path(thumbnails) if thumbnails else None,
+            prerender_dir=Path(prerender) if prerender else None,
             host_landing=(env.get("PLIEGO_PUBLIC_LANDING_HOST") or HOST_LANDING).strip().lower(),
             host_app=(env.get("PLIEGO_PUBLIC_APP_HOST") or HOST_APP).strip().lower(),
             host_api=(env.get("PLIEGO_PUBLIC_API_HOST") or HOST_API).strip().lower(),

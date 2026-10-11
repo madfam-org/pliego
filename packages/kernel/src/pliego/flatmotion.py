@@ -32,7 +32,6 @@ from .space import (
     axis_rotation,
     cross,
     dot,
-    mat_mul,
     mat_vec,
     sub,
     unit,
@@ -44,9 +43,22 @@ UP: Vec3 = (0.0, 1.0, 0.0)
 Motion = Callable[[float], dict[int, Rigid]]
 
 
+def mat_mul3(a: Mat3, b: Mat3) -> Mat3:
+    """`space.mat_mul` without its generators, bit for bit (each entry is still the builtin
+    `sum` of the same three products, in the same order): the fold programs' hot path."""
+    (a00, a01, a02), (a10, a11, a12), (a20, a21, a22) = a
+    (b00, b01, b02), (b10, b11, b12), (b20, b21, b22) = b
+    return ((sum((a00 * b00, a01 * b10, a02 * b20)), sum((a00 * b01, a01 * b11, a02 * b21)),
+             sum((a00 * b02, a01 * b12, a02 * b22))),
+            (sum((a10 * b00, a11 * b10, a12 * b20)), sum((a10 * b01, a11 * b11, a12 * b21)),
+             sum((a10 * b02, a11 * b12, a12 * b22))),
+            (sum((a20 * b00, a21 * b10, a22 * b20)), sum((a20 * b01, a21 * b11, a22 * b21)),
+             sum((a20 * b02, a21 * b12, a22 * b22))))
+
+
 def compose(a: Rigid, b: Rigid) -> Rigid:
     """a ∘ b."""
-    return (mat_mul(a[0], b[0]), add(mat_vec(a[0], b[1]), a[1]))
+    return (mat_mul3(a[0], b[0]), add(mat_vec(a[0], b[1]), a[1]))
 
 
 def apply(t: Rigid, p: Sequence[float]) -> Vec3:

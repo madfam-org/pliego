@@ -43,13 +43,15 @@ RUN set -eu; \
       echo "projects/ holds 0 cartridges: the sheet-hyperobjects submodule was not checked out" >&2; \
       exit 1; \
     fi
-# Catalog previews (apps/api/thumbnails.py): one crease-pattern SVG per cartridge (default mode, manifest
-# defaults, the kernel's SVG exporter in the diagram palette), rendered through the sandboxed runner HERE, once:
-# the root filesystem is read-only at run time and a first-request render of the whole commons would cost minutes
-# of CPU on the pod. Report-only (the log prints `thumbnails: cartridges=N produced=P failed=F` and names every
-# failure); CI's `api` job runs the same build with --strict. Served at /projects/<slug>.svg.
-RUN cd /app && /opt/venv/bin/python -m apps.api.thumbnails build /app/build/thumbnails \
-    && chmod -R a+rX /app/build/thumbnails
+# The warm tier and the catalog previews (apps/api/prerender.py), rendered through the sandboxed runner HERE,
+# once: every cartridge, every mode, at its defaults and at every applicable preset, stored under the runtime
+# render-cache key (document, svg, dxf, hpgl) in /app/build/prerender, so a first view never waits on a cold render;
+# the same pass draws one crease-pattern SVG per cartridge into /app/build/thumbnails (/projects/<slug>.svg).
+# The root filesystem is read-only at run time. Report-only (the log prints the `prerender:` and `thumbnails:`
+# lines and names every failure); CI's `api` job runs the same build with --strict.
+RUN cd /app && /opt/venv/bin/python -m apps.api.prerender build --out /app/build/prerender \
+       --thumbnails /app/build/thumbnails \
+    && chmod -R a+rX /app/build
 # Byte-compile at build time: the root filesystem is read-only at run time.
 RUN /opt/venv/bin/python -m compileall -q /app/apps /opt/venv/lib
 

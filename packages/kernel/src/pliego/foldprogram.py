@@ -235,21 +235,28 @@ class FoldProgram:
 
     def hinge(self, sid: str, label, line, turn: float, at, ms: int = 1200,
               layers: int | None = None, from_: str = "top", substeps: int = 4,
-              note=None) -> FoldProgram:
+              note=None, faces=None, sheet_points=None) -> FoldProgram:
         """A 3-D pose step after the flat program: the flap on `at`'s side of the folded line —
         the layers picked at `at` (all, or `layers` from the top or from the bottom) and every
         layer connected to them without crossing the line, which must run along existing
         creases — turns by `turn` degrees about the line (positive lifts it towards the viewer).
-        Hinge steps compose: later ones turn about axes carried by the faces they hinge on."""
-        spec = {"line": line, "turn": turn, "at": at, "layers": layers, "from_": from_}
+        Hinge steps compose: later ones turn about axes carried by the faces they hinge on.
+
+        The flood stops at every crease whose image lies on the line, so a flap folded onto
+        the line (a dart's corner flap, folded to the keel) stays behind. `sheet_points` (sheet
+        points; the faces there seed the flood, in place of the layers at `at`) or `faces`
+        (state faces: exactly the flap) name the flap instead (spec §5.39); `at` still gives the
+        side, and with it the sense of `turn`."""
+        spec = {"line": line, "turn": turn, "at": at, "layers": layers, "from_": from_,
+                "faces": faces, "sheet_points": sheet_points}
         return self.hinges(sid, label, [spec], ms, substeps, note)
 
     def hinges(self, sid: str, label, specs: list[dict], ms: int = 1200, substeps: int = 4,
                note=None) -> FoldProgram:
         """Several flaps turning at once (each spec: line, turn, at, layers=None,
-        from_="top", leaf=None; see `hinge`; `leaf` = n picks the n-th of the flaps that meet
-        only along the line — the leaves of a book, counted from the top); the flaps must not
-        share a face."""
+        from_="top", leaf=None, sheet_points=None, faces=None; see `hinge`; `leaf` = n picks the
+        n-th of the flaps that meet only along the line — the leaves of a book, counted from the
+        top); the flaps must not share a face."""
         st = self.state
         out, taken = [], set()
         for spec in specs:
@@ -275,7 +282,16 @@ class FoldProgram:
                             raise FlatStateError(f"hinge '{sid}': the line crosses face {f}; "
                                                  "hinge poses turn about existing creases only")
                 return grp
-            if spec.get("leaf") is not None:
+            if spec.get("faces") is not None:
+                grp = {int(f) for f in spec["faces"]}
+                if not grp or not grp <= set(range(len(st.faces))):
+                    raise FlatStateError(f"hinge '{sid}': faces must name faces of the state")
+            elif spec.get("sheet_points") is not None:
+                seeds = [st.face_at(x) for x in spec["sheet_points"]]
+                if not seeds:
+                    raise FlatStateError(f"hinge '{sid}': sheet_points names no point")
+                grp = flap(seeds)
+            elif spec.get("leaf") is not None:
                 # the n-th flap from the top (bottom with from_="bottom"): the layers at `at`
                 # split into flaps that meet only along the line
                 order = list(reversed(stack)) if spec.get("from_", "top") == "top" else stack
@@ -317,26 +333,36 @@ class FoldProgram:
         return self
 
     def kinematic(self, sid: str, label, drive, free=(), fixed=None, ms: int = 1500,
-                  substeps: int = 6, note=None) -> FoldProgram:
+                  substeps: int = 6, note=None, frame: str = "sheet") -> FoldProgram:
         """A rigid 3-D step on the whole crease pattern so far (`pliego.foldpose`): the creases
-        on the folded-frame segments of `drive` ([(segment, degrees)]) turn to those fold angles
-        (valley > 0, the sheet's sense), the creases on the `free` segments follow (a free item
-        may be (segment, "valley" | "mountain"): the way that crease leaves a start where the
-        rigid paths branch), every other crease holds; `fixed`: a sheet point on a face that
-        stays. Every layer's crease on a segment counts (creases through every layer turn
-        together)."""
+        on the folded-frame segments of `drive` ([(segment, degrees)]) turn to those fold angles,
+        the creases on the `free` segments follow (a free item may be (segment, "valley" |
+        "mountain"): the way that crease leaves a start where the rigid paths branch), every
+        other crease holds; `fixed`: a sheet point on a face that stays. Every layer's crease on
+        a segment counts (creases through every layer turn together). `frame` says how the
+        angles and hints reach each layer (spec §5.35):
+
+        - ``"sheet"`` (default): valley > 0 in the sheet's sense on every layer — the layers of
+          a model folded in half turn as mirror images (a puppet's mouth pleat);
+        - ``"folded"``: valley > 0 turns the paper towards the viewer, relative to the paper that
+          stays — the sheet's sense on a layer that shows its front, the opposite on a turned-over
+          layer (`foldpose.layer_signs`), so every layer turns as one stack (a frog's spring
+          pleat, a plane's fuselage opening, a rolled ring)."""
         from .foldpose import creases_on
 
-        drive_segs = [(creases_on(self.state, [seg]), float(a)) for seg, a in drive]
-        if any(not segs for segs, _ in drive_segs):
+        if frame not in ("sheet", "folded"):
+            raise FlatStateError(f"kinematic '{sid}': frame must be 'sheet' or 'folded'")
+
+        drive_segs = [((pt(seg[0]), pt(seg[1])), float(a)) for seg, a in drive]
+        if any(not creases_on(self.state, [seg]) for seg, _ in drive_segs):
             raise FlatStateError(f"kinematic '{sid}': a drive segment lies on no crease")
         free_segs = []
         for item in free:
             seg, hint = (item[0], item[1]) if isinstance(item[1], str) else (item, None)
-            sign = {"valley": 1, "mountain": -1, None: 0}[hint]
-            free_segs += [(x, sign) for x in creases_on(self.state, [seg])]
+            free_segs.append(((pt(seg[0]), pt(seg[1])),
+                              {"valley": 1, "mountain": -1, None: 0}[hint]))
         fn, samples = self.pose.kinematic(self.state, drive_segs, free_segs, fixed,
-                                          4 * int(substeps))
+                                          4 * int(substeps), frame)
         self._hinges = True
         self.recs.append(_Rec(sid, self._label(label), None, ms,
                               {"kin": True, "substeps": int(substeps), "samples": samples},
@@ -372,16 +398,20 @@ class FoldProgram:
 
     # ── build ──
     def build(self, id: str = "square", *, start_after: str | None = None,
-              rest_memory: float | None = None) -> Built:
+              rest_memory: float | None = None, root=None) -> Built:
         """The crease pattern, the fold program and the report (see the module docstring).
         `start_after` (a step id): the program starts after that operation — the earlier moves
         only shape the starting pose (`Built.start_angles`, `Built.initial()`), e.g. a finished
         model whose program is an operating cycle, or a sheet creased beforehand. With
         `rest_memory` (deg) the creases open at the start that remember a fold get that rest
-        angle, signed by their last fold (a pre-creased sheet: `pliego:edges_restAngle`)."""
+        angle, signed by their last fold (a pre-creased sheet: `pliego:edges_restAngle`).
+        `root` (a sheet point): the face the preview holds still (spec §5.16 `root_face`, set on
+        the sheet with `Sheet.present`); the program's samples are fitted on the preview's face
+        tree rooted there (default: the sheet's first face)."""
         from .assembly import EdgeRef, Sequence, Step
-        from .foldpose import check_penetration
-        from .kinematics import face_adjacency
+        from .foldpose import check_penetration, exact_arrangement
+        from .geometry import Vec2
+        from .kinematics import face_adjacency, root_face
         from .preview import PreviewTree, sample_step
 
         final = self.state
@@ -396,6 +426,9 @@ class FoldProgram:
             start_state = rec0.move.state
         sheet = final.unfold(id, rest_memory=rest_memory, memory_from=start_state,
                              **self.sheet_kwargs)
+        if root is not None:
+            pr = sheet.presentation or {}
+            sheet.present(root=root, end=pr.get("end"))
         arr = sheet.build()
         nf = len(arr.faces)
         cents = face_points(arr)
@@ -404,7 +437,7 @@ class FoldProgram:
             for g, e, a, b in lst:
                 edge_faces.setdefault(e, (f, g, a, b))
         folds = sorted(edge_faces)
-        tree = PreviewTree(arr)
+        tree = PreviewTree(arr, 0 if root is None else root_face(arr, Vec2(*pt(root))))
         unpl = tree.unplaced
 
         def fmap(state: FlatState) -> list[int]:
@@ -441,6 +474,8 @@ class FoldProgram:
             raise FlatStateError(f"start_after: no step '{start_after}'")
         start_angles = dict(cur)
         prev_state, prev_map = self.start, fmap(self.start)
+        on_points = None
+        kept: set[int] = set()
         for rec in self.recs:
             # candidate motions: t ∈ (0, 1] ↦ intended poses of the pattern's faces
             cands: list = []
@@ -541,17 +576,23 @@ class FoldProgram:
                     emit, start_angles = True, dict(cur)
                 continue
             best = None
+            tucked = rec.move is not None and rec.move.kind == "tuck"
             for ci, poses_at in enumerate(cands):
-                res = sample_step(tree, readout, poses_at, ts0, cur, end, folds, rec.sid)
+                res = sample_step(tree, readout, poses_at, ts0, cur, end, folds, rec.sid,
+                                  end_follows_motion=tucked, keep=frozenset(kept))
                 score = max(res[1] + res[2])
                 if best is None or score < best[0] - 1e-9:
                     best = (score, res[0], max(res[1]), max(res[2]), max(res[3]), ci)
             _, seq, tear, mid, dev, which = best
             pen = None
-            if start_poses is not None:
-                pen = check_penetration(arr, cands[0], start_poses, ts0, rec.sid)
-            elif rec.move is not None and rec.move.kind == "tuck":
-                pen = check_penetration(arr, cands[0], cands[0](0.0), ts0, rec.sid, fail=False)
+            if start_poses is not None or (rec.move is not None and rec.move.kind == "tuck"):
+                if on_points is None:     # faces on the state's points, as posed (§5.37)
+                    on_points = exact_arrangement(arr, final)
+                if start_poses is not None:
+                    pen = check_penetration(on_points, cands[0], start_poses, ts0, rec.sid)
+                else:
+                    pen = check_penetration(on_points, cands[0], cands[0](0.0), ts0, rec.sid,
+                                            fail=False)
             n = len(seq)
             last = cur
             for k, ang in enumerate(seq, 1):
@@ -566,6 +607,12 @@ class FoldProgram:
                                       note=rec.note if k == 1 else None))
                 last = full
             cur = last
+            # a tuck's crease that ends at ±180° against its layer order keeps that sign while
+            # it stays there (spec §5.38)
+            kept = {e for e in kept if abs(abs(cur[e]) - 180.0) < 1e-6}
+            if tucked and end is not None:
+                kept |= {e for e in folds if abs(abs(cur[e]) - 180.0) < 1e-6
+                         and cur[e] == -end[e]}
             worst, worst_mid, worst_dev = max(worst, tear), max(worst_mid, mid), max(worst_dev, dev)
             if max(tear, mid) <= EXACT_MM:
                 exact += 1

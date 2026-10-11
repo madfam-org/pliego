@@ -546,7 +546,10 @@ tilting the flat sheet at t = 0.
   rotates about the root face's t = 0 centroid, then translates by `origin`. Mechanisms apply
   before it.
 
-The studio stub implements both. **Ground:** the preview also keeps the posed paper above the
+The studio stub implements both. The kernel's replica of the preview (`pliego.preview.PreviewTree`,
+which a fold program fits its samples on) roots at `root_face` too: `FoldProgram.build(root=)`
+sets the sheet's presentation root and fits on the tree held there. <!-- lane FL3
+(w4/fold-robustness) item 7 --> **Ground:** the preview also keeps the posed paper above the
 table (`y = 0`, §1): when a rigid preview would swing any visible point below it, the whole scene
 is lifted until its lowest point rests on the table. The physics engine needs no clamp (contact
 with the ground does this). Rule 17 (§8) checks the field.
@@ -670,6 +673,107 @@ copper tape or conductive ink laid along a centre line, with contact pads where 
   does not render the conductor.
 <!-- lane X (w3/trace-finish) §5.30: end -->
 
+<!-- lane FL3 (w4/fold-robustness) §5.35: begin -->
+### 5.35 Kernel fold programs: a rigid step through turned-over layers
+
+How the kernel's `FoldProgram.kinematic` (a rigid 3-D step on the whole crease pattern) reads its
+drive. It changes no document field: the step's targets are signed fold angles (§5.6) as before.
+
+- A drive or free segment names every layer's crease whose folded image lies on it. With
+  `frame="sheet"` (the default) each takes the angle as given, in the sheet's sense (valley > 0):
+  the layers of a model folded in half turn as mirror images.
+- With `frame="folded"` the angle is in the folded frame: valley > 0 turns the paper towards the
+  viewer, relative to the paper that stays. A layer whose paper on the staying side shows its
+  front takes the angle as given; a turned-over layer takes its opposite. For a crease folded
+  flat, the staying side is the face joined to the fixed face once the segment's creases are
+  cut; where the paper joins round the segment, the crease keeps the sheet's sense. Every layer
+  then turns as one stack (a frog's spring pleat, a plane's fuselage, a rolled ring).
+- A crease folded flat starts at ±180° by its layer order, not by the sign of round-off in the
+  posed faces. The pattern merges collinear creases into one edge; an edge whose creases would
+  take opposite signs is refused.
+- A sheet-frame drive that finds no rigid path across layers turned opposite ways says so and
+  names `frame="folded"`.
+<!-- lane FL3 (w4/fold-robustness) §5.35: end -->
+
+<!-- lane FL3 (w4/fold-robustness) §5.36: begin -->
+### 5.36 Kernel fold programs: the branch of a rigid step does not depend on its sampling
+
+A kernel rigid step (`FoldProgram.kinematic`) is sampled at `4 × substeps` states on the chord
+continuation (§5.6, `kinematics.solve(..., along="chord")`). Where the rigid paths branch (a
+flat or flat-folded start), a coarse sampling could let the predictor jump to a neighbouring
+branch between two samples, so the folded result depended on `substeps` (a masu gusset folding
+out at 5).
+
+- After solving, the kernel checks the path: a hinted free crease must stay on its hinted side
+  of its start angle, and a free crease that has left flat on one side must not turn up on the
+  other.
+- A path that fails is solved again with 2, 4, 8, then 16 internal states per sample. The
+  states at the sample fractions are the same closed states of one branch, so the program keeps
+  them and drops the rest: every sampling gives the same states where their fractions agree.
+- A free crease that still flips at the finest refinement passes through flat for real, and the
+  path is kept. A hinted crease that still turns against its hint fails the step.
+<!-- lane FL3 (w4/fold-robustness) §5.36: end -->
+
+<!-- lane FL3 (w4/fold-robustness) §5.37: begin -->
+### 5.37 Kernel fold programs: rigid steps solve on exact geometry, not on the grid
+
+A document's vertices lie on the 1e-6 mm grid (§1). The kernel's fold-program state keeps exact
+coordinates. A rigid step that ends where rigid branches meet (the masu's end wall standing with
+its gussets folded flat) could not reach that end on the snapped pattern when the vertices fell
+off the grid: the solver landed on another branch and the next step's start did not close (the
+masu lid needed its square rounded to 8 µm).
+
+- A kernel rigid step (`FoldProgram.kinematic`) solves loop closure on the arrangement's
+  topology with each vertex off the grid put back on the state's exact point (within 1e-5 mm;
+  `foldpose.exact_arrangement`). A vertex on the grid up to round-off (1e-9 mm) keeps the
+  grid's value, so the solver has no float noise to chase there.
+- The build's penetration check (§5.6 report, `penetration_mm`) reads the faces on the same
+  exact points, so touching faces off the grid do not count as crossing.
+- The document keeps its vertices on the grid and its targets rounded as before. A pattern on
+  the grid gives the same programs. Off the grid, a step's angles now close on the exact
+  pattern instead of the snapped one, which moves step targets by the snapping misfit (about
+  1e-5°).
+<!-- lane FL3 (w4/fold-robustness) §5.37: end -->
+
+<!-- lane FL3 (w4/fold-robustness) §5.38: begin -->
+### 5.38 Kernel fold programs: the sign of a crease at ±180°
+
+A crease folded flat is +180° (valley) or −180° (mountain): one pose for paper of no thickness,
+two layer orders. The preview blends angles linearly between steps, so a wrong sign swings
+the paper the long way round, through itself. The kernel signs a crease at ±180° as follows:
+
+- **By its motion.** A crease that goes from open (0°) to ±180° within one sample takes the sign
+  of its angle halfway through that sample. It took the sign of round-off before (the masu's
+  flap had to be sampled at 0.5 as well).
+- **A tuck's end.** A tuck turns its flap the simple fold's way and ends with it behind the
+  pocket's wall: its layer order may give the flap's crease the other sign than the motion
+  for the same pose. The step's end takes the motion's sign (the balloon's points end turned
+  towards the viewer), and later steps keep that sign while the crease stays at ±180°.
+- **At a rigid step's start** (`FoldProgram.kinematic`), a crease at ±180° whose faces keep
+  their flat-state placement takes the flat state's sign (§5.35). One that a 3-D step folded
+  takes the sign that step approached it with, read halfway.
+
+`Built.final_angles` and `target()` still give the layer order's signs; `pose_angles`, the
+sequence and `target(pose=True)` give the motion's.
+<!-- lane FL3 (w4/fold-robustness) §5.38: end -->
+
+<!-- lane FL3 (w4/fold-robustness) §5.39: begin -->
+### 5.39 Kernel fold programs: naming a hinge flap
+
+A kernel hinge pose (`FoldProgram.hinge` / `hinges`) turns a flap about a folded line that runs
+along existing creases. By default the flap is the layers picked at a point and the paper joined
+to them without crossing a crease whose image lies on the line. A flap folded onto that line
+(the dart's corner flaps, folded to the keel) is joined to its half by such a crease, so the
+flood leaves it behind.
+
+- `sheet_points=[…]`: the faces at those sheet points seed the flood, in place of the layers
+  at `at`.
+- `faces=[…]`: exactly those faces of the state are the flap.
+- `at` still gives the flap's side, and with it the sense of the turn. The flap is still
+  checked: it must not be the whole model, must not share faces with another flap of the
+  step, and may be joined to the rest only along the line.
+<!-- lane FL3 (w4/fold-robustness) §5.39: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -765,8 +869,10 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     step.
 <!-- lane E (wave 3) rules 19–21: end -->
 <!-- lane X (w3/trace-finish) rule 30: begin -->
-30. Paper circuits (§5.30), checked by `pliego.press.circuit(finishes, closed=…)` — not yet
-    wired into `Document.verify()`: every trace finish passes §5.30 (rule 13 already applies
+30. Paper circuits (§5.30), checked by `pliego.press.circuit(finishes, closed=…)` — wired into
+    `Document.verify()`, which checks the circuit with every fold switch open and then closed
+    and leaves traces that rule 13 refuses to rule 13 <!-- lane FL3 (w4/fold-robustness) item
+    7: was "not yet wired into `Document.verify()`" -->: every trace finish passes §5.30 (rule 13 already applies
     its record checks); traces on the same sheet and side whose conductors overlap form one
     net, and a fold switch named closed joins its contact pads. With exactly one cell, whose
     `plus` and `minus` pads sit on different nets (else `short`), the circuit is **closed**

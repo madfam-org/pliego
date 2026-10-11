@@ -107,6 +107,7 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             "stocks": len(stock_state["cards"]),
             "stocks_invalid": len(stock_state["invalid"]),
             "thumbnails": thumbnails.count(),
+            "prerendered": cache.prerendered.count() if cache.prerendered is not None else 0,
         })
 
     @bp.get("/ready")

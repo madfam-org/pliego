@@ -95,3 +95,190 @@ def test_penetration_measures_a_crossing():
     poses[right] = stand            # stood up through the left panel along x = 15
     assert foldpose.penetration(arr, poses, {right}) == pytest.approx(100.0)
     assert foldpose.penetration(arr, flat, {right}) == 0.0
+
+
+# ── spec §5.35: a rigid step drives every layer, signed by its orientation ──
+
+def frog_pleat(kinematic: bool):
+    """The jumping frog's spring pleat opened by 35°: its two creases run through the body strip
+    and through both side flaps, which are turned over."""
+    fp, g = fm.jumping_frog()
+    w, yb = 76.2, g["yb"]
+    low = ((w / 4.0, yb / 2.0), (3.0 * w / 4.0, yb / 2.0))
+    top = ((w / 4.0, 3.0 * yb / 4.0), (3.0 * w / 4.0, 3.0 * yb / 4.0))
+    if kinematic:
+        fp.kinematic("spring", "spring", [(low, 145.0), (top, 145.0)], fixed=g["o"],
+                     frame="folded")
+    else:
+        on = (5.0 * w / 8.0, 0.6 * yb)
+        fp.hinge("spring", "spring", low, 35.0, at=on, layers=1)
+        fp.hinge("spring-2", "spring", top, 35.0, at=on, layers=1)
+    return fp, g, low
+
+
+def worst_dev(a, b) -> float:
+    return max(foldpose.rigid_dev(x, y) for x, y in zip(a.pose.world, b.pose.world, strict=True))
+
+
+def test_layer_signs_turn_the_turned_over_layers_the_other_way():
+    fp, g, low = frog_pleat(kinematic=False)
+    st = fp.recs[-1].state
+    signs = foldpose.layer_signs(st, low, st.face_at(g["o"]))
+    by_x = sorted((min(a[0], b[0]), sg) for (a, b), sg in signs)
+    # the side flaps (x < W/4 and x > 3W/4 on the sheet) show their back: −1; the body: +1
+    assert [sg for _, sg in by_x] == [-1, 1, -1]
+
+
+def test_the_sheet_frame_points_turned_over_layers_to_the_folded_frame():
+    fp, g = fm.jumping_frog()
+    w, yb = 76.2, g["yb"]
+    low = ((w / 4.0, yb / 2.0), (3.0 * w / 4.0, yb / 2.0))
+    with pytest.raises(FlatStateError, match="frame='folded'"):
+        fp.kinematic("spring", "spring", [(low, 145.0)], fixed=g["o"])
+    with pytest.raises(FlatStateError, match="frame must be"):
+        fp.kinematic("spring", "spring", [(low, 145.0)], fixed=g["o"], frame="world")
+
+
+def test_kinematic_opens_the_frog_pleat_through_every_layer():
+    kin, _, _ = frog_pleat(kinematic=True)
+    hin, _, _ = frog_pleat(kinematic=False)
+    assert worst_dev(kin, hin) < 1e-9
+    row = kin.build("card").report["rows"][-1]
+    assert row["kind"] == "kinematic" and row["tear_mm"] < 1e-6 and row["deviation_mm"] < 1e-6
+
+
+def test_kinematic_opens_the_canard_fuselage_with_its_nose_roll():
+    kin, hin = fm.canard_plane(kinematic_open=True)[0], fm.canard_plane()[0]
+    assert worst_dev(kin, hin) < 1e-9
+    rows = {r["id"]: r for r in kin.build().report["rows"]}
+    assert rows["open-fuselage"]["kind"] == "kinematic"
+    assert rows["open-fuselage"]["tear_mm"] < 1e-6
+
+
+def test_kinematic_rolls_the_ring_wing_with_its_folded_leading_edge():
+    kin, hin = fm.ring_wing(n=8), fm.ring_wing(n=8, kinematic=False)
+    assert worst_dev(kin, hin) < 1e-9
+    row = kin.build("strip").report["rows"][-1]
+    assert row["kind"] == "kinematic" and row["tear_mm"] < 1e-6
+
+
+# ── spec §5.36: the branch of a rigid step does not depend on its sampling ──
+
+def masu_inside(fp, g) -> float:
+    """How far the finished masu's paper reaches outside its walls (mm; 0 = a box)."""
+    q, h = g["q"], g["h"]
+    st, w = fp.state, fp.pose.world
+    pts = [flatmotion.apply(w[f], (st.points[v][0], 0.0, -st.points[v][1]))
+           for f in range(len(st.faces)) for v in st.faces[f].verts]
+    return max(max(abs(p[0] - h), abs(p[2] + h)) for p in pts) - q
+
+
+def test_masu_gussets_fold_in_at_any_substep_count(monkeypatch):
+    paths = {}
+    orig = foldpose.solve_step
+
+    def spy(arr, cur, drive, free, steps, hints=None):
+        out = orig(arr, cur, drive, free, steps, hints)
+        paths.setdefault(steps, []).append(out)
+        return out
+    monkeypatch.setattr(foldpose, "solve_step", spy)
+    for n in (5, 10):    # 5 folded a gusset of the bottom wall outward before
+        fp, g = fm.masu_box(substeps=n)
+        assert masu_inside(fp, g) < 1e-6
+    # the same closed states at the fractions both samplings share (after the hint's nudge)
+    for a, b in zip(paths[20], paths[40], strict=True):
+        for k in range(1, 21):
+            sa, sb = a[1 + k], b[1 + 2 * k]
+            assert max(abs(sa[e] - sb[e]) for e in sa) < 1e-6
+
+
+def test_branch_jump_names_the_crease():
+    cur = {1: 0.0, 2: 0.0}
+    assert foldpose.branch_jump([{1: 2.0, 2: -1.0}, {1: -3.0, 2: -2.0}], cur, [1, 2], {}) == \
+        "free crease 1 flipped from + at substep 2"
+    assert "against its hint" in foldpose.branch_jump([{1: -2.0, 2: 0.0}], cur, [1, 2], {1: 1})
+    assert foldpose.branch_jump([{1: 2.0, 2: 180.0}, {1: 5.0, 2: -180.0}], cur, [1, 2], {}) \
+        is None
+
+
+# ── spec §5.37: a rigid step solves on the state's exact points, not the 1e-6 mm grid ──
+
+def test_masu_lid_off_the_grid_folds_without_rounding():
+    # the lid's square is the box's plus 4·√2·gap: 208.485281… mm puts the pattern's vertices
+    # off the grid (the commons rounded it to 8 µm); the second end wall's start did not close
+    s = 200.0 + 4.0 * math.sqrt(2.0) * 1.5
+    fp, g = fm.masu_box(s=s)
+    assert masu_inside(fp, g) < 1e-6
+    b = fp.build()
+    rows = {r["id"]: r for r in b.report["rows"]}
+    for sid in ("end-top", "flap-top", "end-bottom", "flap-bottom"):
+        assert rows[sid]["tear_mm"] < 1e-5 and rows[sid]["penetration_mm"] <= 0.05
+
+
+def test_exact_arrangement_puts_vertices_back_on_the_state():
+    fp, _ = fm.masu_box(s=123.4567)
+    st = fp.recs[-1].state
+    arr = st.unfold("x").build()
+    ex = foldpose.exact_arrangement(arr, st)
+    assert ex.edges == arr.edges and ex.faces == arr.faces
+    pts = set(st.points)
+    moved = 0
+    for a, b in zip(ex.vertices, arr.vertices, strict=True):
+        d = abs(a.x - b.x) + abs(a.y - b.y)
+        assert d < 2e-6
+        if d:       # off the grid: back on the state's exact point
+            assert (a.x, a.y) in pts
+            moved += 1
+    assert moved > 0
+
+
+# ── speed: a fold program's rigid steps compute no closure rank, multiply 3×3 unrolled ──
+
+def test_kinematic_steps_skip_the_rank_svd(monkeypatch):
+    from pliego import motion
+
+    def no_rank(*a, **k):
+        raise AssertionError("a fold program's rigid step computed the closure rank")
+    monkeypatch.setattr(motion, "_rank", no_rank)
+    fp, g = fm.masu_box()       # 4–5 s per end-wall step before, most of it this SVD
+    assert masu_inside(fp, g) < 1e-6
+    monkeypatch.undo()
+    sh = pliego.Sheet("s", [(0, 0), (100, 0), (100, 100), (0, 100)])
+    sh.crease((50, 0), (50, 100), "valley", 0.0)
+    arr = sh.build()
+    path = motion.solve(arr, {}, {e: 30.0 for e, a in enumerate(arr.assignment) if a == "V"},
+                        steps=2)
+    assert "_rank_at" in path.__dict__
+    assert (path.dof, path.free_dof) == (1, 0) and "_rank_at" not in path.__dict__
+
+
+def test_mat_mul3_is_space_mat_mul_bit_for_bit():
+    import random
+    import struct
+
+    from pliego.space import mat_mul
+    rnd = random.Random(7)
+    pool = [0.0, -0.0, 1.0, -1.0, 0.5, math.sqrt(0.5), 1e-300, -1e-16]
+
+    def r():
+        return rnd.choice(pool) if rnd.random() < 0.5 else rnd.uniform(-1.0, 1.0)
+    for _ in range(3000):
+        a = tuple(tuple(r() for _ in range(3)) for _ in range(3))
+        b = tuple(tuple(r() for _ in range(3)) for _ in range(3))
+        x, y = mat_mul(a, b), flatmotion.mat_mul3(a, b)
+        assert all(struct.pack("d", x[i][j]) == struct.pack("d", y[i][j])
+                   for i in range(3) for j in range(3))
+
+
+# ── spec §5.38: a crease reaching ±180° in one sample takes the sign of its motion ──
+
+def test_masu_flap_signs_do_not_need_a_halfway_sample():
+    # the commons read the masu flap's step at [0.5, 1] so its creases took their sign from
+    # the motion, not from round-off at 180°
+    plain = fm.masu_box()[0].build()
+    fp, _ = fm.masu_box()
+    for r in fp.recs:
+        if r.sid.startswith("flap"):
+            r.move.samples[:] = [0.5, 1.0]
+    halfway = fp.build()
+    assert plain.pose_angles == halfway.pose_angles

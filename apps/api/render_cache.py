@@ -13,7 +13,11 @@ be served as the exact bytes a miss would produce. The key is the sha256 of the 
 - ``kernel`` — ``pliego.__version__`` plus a digest of the kernel package, the runner and sandbox
   code and the stock cards: a kernel edit without a version bump must not reuse old bytes.
 
-Two tiers, both optional and both bounded by BYTES:
+First, read-only: the PRERENDERED tier (``prerender_store.py``), renders of every cartridge, mode
+and preset made at image build time under these same keys (``prerender.py``). A missing entry is a
+plain fall-through; a corrupt one also counts ``pliego_render_cache_prerendered_invalid_total``.
+
+Then two tiers, both optional and both bounded by BYTES:
 
 - memory: a per-worker LRU (``PLIEGO_RENDER_CACHE_MB``, default 16);
 - disk: a directory under ``/tmp`` (the only writable path in the image) shared by the pod's workers
@@ -45,6 +49,7 @@ from pathlib import Path
 from .config import Settings
 from .manifest import Cartridge, Mode
 from .metrics import Metrics
+from .prerender_store import PrerenderStore
 from .render import RUNNER, RenderResult
 
 KEY_VERSION = 1
@@ -135,6 +140,9 @@ class RenderCache:
         self.memory_bytes = int(settings.render_cache_mb * (1 << 20))
         self.disk_bytes = int(settings.render_cache_disk_mb * (1 << 20))
         self.disk_dir = settings.render_cache_path if self.disk_bytes > 0 else None
+        store = PrerenderStore(settings.prerender)
+        self.prerendered = store if store.available() else None
+        self._bad_prerendered: set[str] = set()
         self._lru: OrderedDict[str, tuple[RenderResult, int]] = OrderedDict()
         self._used = 0
         self._lock = threading.Lock()
@@ -143,7 +151,7 @@ class RenderCache:
 
     @property
     def enabled(self) -> bool:
-        return self.memory_bytes > 0 or self.disk_dir is not None
+        return self.memory_bytes > 0 or self.disk_dir is not None or self.prerendered is not None
 
     # ── key ──────────────────────────────────────────────────────────────────
     def kernel(self) -> str:
@@ -168,7 +176,17 @@ class RenderCache:
             self.metrics.inc(name, **labels)
 
     def get(self, key: str) -> tuple[RenderResult | None, str]:
-        """(result, tier) — tier is ``memory``, ``disk`` or ``miss``."""
+        """(result, tier) — tier is ``prerendered``, ``memory``, ``disk`` or ``miss``."""
+        if self.prerendered is not None and key not in self._bad_prerendered:
+            warm, why = self.prerendered.get(key)
+            if warm is not None:
+                self._count("pliego_render_cache_hits_total", tier="prerendered")
+                return warm, "prerendered"
+            if why != "missing":  # corrupt or foreign: fall through, and stop re-reading it
+                with self._lock:
+                    if len(self._bad_prerendered) < 4096:
+                        self._bad_prerendered.add(key)
+                self._count("pliego_render_cache_prerendered_invalid_total")
         with self._lock:
             entry = self._lru.get(key)
             if entry is not None:

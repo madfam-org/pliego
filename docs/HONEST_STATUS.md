@@ -3,9 +3,11 @@
 > Last Updated: 2026-10-10
 > Boundary: public. The single truth for what works today. Keep it true when you change behaviour.
 
-**Lifecycle: incubating, first deploy live.** `https://pliego.madfam.io/` serves the landing and
-studio (answering 200 on 2026-10-10, including `/health`). Production changes only when a build is
-dispatched; merges do not auto-deploy.
+**Lifecycle: incubating, first deploy live.** One container serves the three ruled hosts: the
+landing at `https://pliego.madfam.io/`, the studio at `https://pliego-app.madfam.io/studio/` and the
+API at `https://pliego-api.madfam.io/api/v1/` (each answering 200 on 2026-10-10, including
+`/health`). Production changes only when a build is dispatched; merges do not auto-deploy, so what
+is described below as merged is live only after the next dispatched build.
 
 | Area | State on 2026-10-10 |
 |---|---|

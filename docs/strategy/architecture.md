@@ -62,20 +62,25 @@ pliego/                         (public, AGPL-3.0-only; docs MIT per ruling R72)
 │   ├── engine/                 @pliego/engine (JS ESM + JSDoc, zero deps; node --test)
 │   └── schemas/                sheet-document, stock-card (manifest schema lives in hyperobjects-spec)
 ├── apps/
-│   ├── api/                    Flask 3 service: /api/v1 (catalog, documents, exports), /health, /ready
+│   ├── api/                    Flask 3 service: /api/v1 (catalog, documents, exports), /health, /ready,
+│                               catalog previews at /projects/<slug>.svg
 │   └── web/                    static landing + studio (vanilla ES modules, self-contained WebGL2)
 ├── materials/<slug>/stock.json paper stock cards (CERN-OHL-W-2.0, ruled 2026-10-10)
 ├── projects/                   git submodule → madfam-org/sheet-hyperobjects (pinned)
 ├── docs/                       spec/v1, strategy, interfaces, licenses, rulings
 ├── scripts/qa/                 fail-closed CI lanes (read-proof lines)
 ├── infra/k8s/production/       kustomization (digest pins), deployment, service, network policy
-└── .github/workflows/          ci.yml, build-deploy.yml (dispatch-only until onboarded), bump-commons-pin.yml
+└── .github/workflows/          ci.yml, build-deploy.yml (dispatch-only until onboarded), codeql.yml
 ```
+
+A `bump-commons-pin.yml` workflow (a scheduled pull request that moves the `projects/` pin) is
+**planned, not built**: commons pin bumps are pull requests opened by hand today (for example
+`chore(commons): bump projects pin to 0ab3237`), checked by `scripts/qa/verify_commons_pin.py`.
 
 One container serves everything (Fashion Cabinet's shape): landing at `/`, studio at `/studio/`,
 engine modules at `/engine/`, API at `/api/v1/`. Hosts (ruled by the owner 2026-10-10):
 `pliego.madfam.io` (landing), `pliego-app.madfam.io` (studio), `pliego-api.madfam.io` (API) — flat
-labels, one Service; onboarding pending. Container: Python 3.12 slim (digest-pinned), gunicorn, port 8000, metrics on
+labels, one Service; serving since the first deploy (2026-10-10, docs/HONEST_STATUS.md). Container: Python 3.12 slim (digest-pinned), gunicorn, port 8000, metrics on
 9090 (internal), uid 1001, read-only root filesystem, drop ALL, seccomp RuntimeDefault.
 
 ## 4. The commons: `sheet-hyperobjects`

@@ -17,7 +17,9 @@ is ``f = (cos β / cos δ)·m + √(1 − cos²β / cos²δ)·n`` (δ = half the
 m their bisector, n the normal on the inner side); β < δ is a lock, β = α is flat at both extremes.
 
 The initial frame is that kinematic pose at the default ``open`` value, so every glue weld holds
-exactly. Cut-folds start flat (``open`` = 180°): a ``C`` edge shares its vertices in the sheet
+exactly. For scenes cut from the card itself — nested step folds, boxes in corners, pop-out
+silhouettes — on any straight fold of any sheet, see `cut_fold` (`pliego.cutfold`, re-exported
+here). Cut-folds start flat (``open`` = 180°): a ``C`` edge shares its vertices in the sheet
 document, so a frame cannot separate a slit's two sides (reported as a contract gap).
 """
 
@@ -28,6 +30,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from .assembly import Assembly, angle_control, glue, hinge
+from .cutfold import Block, CutFold, cut_fold  # noqa: F401  (composition builder, re-exported)
 from .sheet import Sheet
 
 V2 = tuple[float, float]

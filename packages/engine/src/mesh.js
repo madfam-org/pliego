@@ -4,7 +4,8 @@
  *
  * Per sheet: split every document edge into segments ≤ h (once per edge, so neighbouring faces
  * conform), triangulate each face (ear clipping + grain-aligned lattice + Delaunay flips), duplicate
- * vertices along cut edges (C + treatment `cut`; cut tips keep one shared vertex), classify interior
+ * vertices along cut edges (C + treatment `cut`; cut tips keep one shared vertex) unless the
+ * document already split them (twin edges, spec §5.13: one side each, sharing contact groups), classify interior
  * mesh edges as hinges (panel | crease | score | perforation) with their grain angle φ, lump masses,
  * and build the render mesh (vertices split along fold hinges into smoothing groups, sheet UVs).
  * All arrays are typed and allocated once.
@@ -64,6 +65,8 @@ export function buildMesh(doc, opts = {}) {
   /** @type {Map<number, number>[]} */
   const sectorVertex = [];
   const docVertex = new Int32Array(doc.nV).fill(-1);
+  /** @type {Map<string, number>} */
+  const placeGroup = new Map();
   for (let v = 0; v < doc.nV; v++) {
     const fs = vertexFaces[v];
     const parent = new Map(fs.map((f) => [f, f]));
@@ -79,7 +82,11 @@ export function buildMesh(doc, opts = {}) {
     const byRoot = new Map();
     const s = doc.vSheet[v];
     const [ox, oy] = doc.sheets[s].offset;
-    const g = groupCounter++;
+    // copies of one point share a contact group: the sectors made here, and the vertices a split
+    // cut wrote with the same coordinates on the same sheet (spec §5.13)
+    const placeKey = `${s}|${coords[2 * v]},${coords[2 * v + 1]}`;
+    let g = placeGroup.get(placeKey);
+    if (g === undefined) { g = groupCounter++; placeGroup.set(placeKey, g); }
     for (const f of fs) {
       const r = find(f);
       let mv = byRoot.get(r);
@@ -92,20 +99,30 @@ export function buildMesh(doc, opts = {}) {
   // split points per edge, per side
   /** @type {number[][][]} */
   const split = [];
+  const twin = /** @type {Int32Array|undefined} */ (doc.edgeTwin);
+  const edgeGroup = new Int32Array(nE);
   for (let e = 0; e < nE; e++) {
     const a = edges[2 * e], b = edges[2 * e + 1];
     const s = doc.eSheet[e];
     const [ox, oy] = doc.sheets[s].offset;
     const ax = coords[2 * a] - ox, ay = coords[2 * a + 1] - oy, bx = coords[2 * b] - ox, by = coords[2 * b + 1] - oy;
     const k = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / h - 1e-9));
-    const sides = isCut(e) ? 2 : 1;
+    // an unsplit cut is meshed on both sides here; a split cut (twin edges, spec §5.13) already
+    // has one document edge per side, each bordering one face
+    const sides = isCut(e) && edgeFaces[2 * e + 1] >= 0 ? 2 : 1;
     const per = [];
-    const g0 = groupCounter;
-    groupCounter += k - 1;
+    let g0 = groupCounter, rev = false;
+    const tw = twin ? twin[e] : -1;
+    if (tw >= 0 && tw < e) {
+      // the twin was split first: share its contact groups (its points run the same or the other way)
+      g0 = edgeGroup[tw];
+      rev = coords[2 * edges[2 * tw]] !== coords[2 * a] || coords[2 * edges[2 * tw] + 1] !== coords[2 * a + 1];
+    } else groupCounter += k - 1;
+    edgeGroup[e] = g0;
     for (let sd = 0; sd < sides; sd++) {
       const list = [];
       const f = edgeFaces[2 * e + sd] >= 0 ? edgeFaces[2 * e + sd] : edgeFaces[2 * e];
-      for (let q = 1; q < k; q++) list.push(addVertex(ax + ((bx - ax) * q) / k, ay + ((by - ay) * q) / k, s, g0 + q - 1, f));
+      for (let q = 1; q < k; q++) list.push(addVertex(ax + ((bx - ax) * q) / k, ay + ((by - ay) * q) / k, s, g0 + (rev ? k - q : q) - 1, f));
       per.push(list);
     }
     split.push(per);

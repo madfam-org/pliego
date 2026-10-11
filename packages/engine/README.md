@@ -131,6 +131,13 @@ digest set to null) and rejects a mismatch. SHA-256 is implemented here (synchro
 digest is asynchronous). About 7 ms for a 250 kB document. Test `digest` (the kernel's shared
 vector, node:crypto parity, tamper rejection).
 
+**Split cuts** (spec §5.13, from lane H). The kernel writes a cut once per side: twin `C` edges with
+the same coordinates over split vertices, each bordering one face. Rule 4 accepts a `C` edge that
+borders one face when exactly one other `C` edge of its sheet has the same endpoint coordinates;
+the mesher builds one side per twin (an unsplit cut is still split by the mesher), and coincident
+copies share a contact group. Rule 3's area floor is measured per material face (faces joined
+across `J` edges), as the kernel's verify measures it. Test `split-cuts`.
+
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force
 exceeds `perf_factor·Y·tear_strain·(length it carries)`. Only the most loaded weld breaks in each

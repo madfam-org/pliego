@@ -11,7 +11,8 @@ import { polygonArea, polygonIsSimple, pointInPolygon, segmentsCross } from './g
 
 /**
  * Rules 2, 3, 4, 5. Also attaches `faceEdges`, `edgeFaces` (2 per edge, −1 if none),
- * `edgeFaceDir` (+1 when the face walks the edge a→b) and per-sheet face polygons.
+ * `edgeFaceDir` (+1 when the face walks the edge a→b), per-sheet face polygons and `edgeTwin`
+ * (the other side of a split cut, spec §5.13, or −1).
  * @param {Doc & Record<string, any>} doc @param {string[]} P
  */
 export function checkGeometry(doc, P) {
@@ -37,6 +38,8 @@ export function checkGeometry(doc, P) {
   const mf = doc.meta && typeof doc.meta.min_feature_mm === 'number' ? doc.meta.min_feature_mm : 1;
   if (!(mf > 0)) P.push('pliego:meta.min_feature_mm must be > 0');
   const minArea = mf > 0 ? mf * mf : 1;
+  /** @type {number[]} */
+  const faceArea = [];
   for (let f = 0; f < nF; f++) {
     const fv = faces[f];
     const poly = [];
@@ -46,7 +49,7 @@ export function checkGeometry(doc, P) {
     if (new Set(fv).size !== fv.length) P.push(`rule 3: face ${f} repeats a vertex`);
     else if (!polygonIsSimple(poly)) P.push(`rule 3: face ${f} is not simple`);
     if (A < 0) P.push(`rule 3: face ${f} is clockwise (area ${A.toFixed(3)} mm²)`);
-    else if (A < minArea) P.push(`rule 3: face ${f} area ${A.toFixed(4)} mm² is below the ${minArea} mm² floor (min_feature_mm²)`);
+    faceArea.push(A);
     const fe = [];
     for (let i = 0; i < fv.length; i++) {
       const a = fv[i], b = fv[(i + 1) % fv.length];
@@ -60,10 +63,42 @@ export function checkGeometry(doc, P) {
     }
     faceEdges.push(fe);
   }
+  // split cuts (spec §5.13): a cut written once per side is a pair of twin C edges on one sheet
+  // with identical endpoint coordinates, each bordering one face
+  const edgeTwin = new Int32Array(nE).fill(-1);
+  /** @type {Map<string, number[]>} */
+  const byPlace = new Map();
   for (let e = 0; e < nE; e++) {
-    const n = (edgeFaces[2 * e] >= 0 ? 1 : 0) + (edgeFaces[2 * e + 1] >= 0 ? 1 : 0);
+    if (assignment[e] !== 'C') continue;
+    const a = edges[2 * e], b = edges[2 * e + 1];
+    const pa = `${coords[2 * a]},${coords[2 * a + 1]}`, pb = `${coords[2 * b]},${coords[2 * b + 1]}`;
+    const key = `${eSheet[e]}|${pa < pb ? `${pa}|${pb}` : `${pb}|${pa}`}`;
+    const l = byPlace.get(key);
+    if (l) l.push(e); else byPlace.set(key, [e]);
+  }
+  for (const l of byPlace.values()) if (l.length === 2) { edgeTwin[l[0]] = l[1]; edgeTwin[l[1]] = l[0]; }
+  const sides = (/** @type {number} */ e) => (edgeFaces[2 * e] >= 0 ? 1 : 0) + (edgeFaces[2 * e + 1] >= 0 ? 1 : 0);
+  // rule 3 floor per material face: faces joined across J edges (artificial bridges, spec §2)
+  // count as one region — the kernel's verify measures it the same way
+  const jRoot = faces.map((_, f) => f);
+  const findJ = (/** @type {number} */ f) => { while (jRoot[f] !== f) { jRoot[f] = jRoot[jRoot[f]]; f = jRoot[f]; } return f; };
+  for (let e = 0; e < nE; e++) {
+    if (assignment[e] !== 'J' || edgeFaces[2 * e] < 0 || edgeFaces[2 * e + 1] < 0) continue;
+    const r0 = findJ(edgeFaces[2 * e]), r1 = findJ(edgeFaces[2 * e + 1]);
+    if (r0 !== r1) jRoot[Math.max(r0, r1)] = Math.min(r0, r1);
+  }
+  /** @type {Map<number, number>} */
+  const regionArea = new Map();
+  for (let f = 0; f < nF; f++) if (faceArea[f] >= 0) regionArea.set(findJ(f), (regionArea.get(findJ(f)) ?? 0) + faceArea[f]);
+  for (const [r, A] of regionArea) if (A < minArea) P.push(`rule 3: face ${r} area ${A.toFixed(4)} mm² (with the faces joined to it across J edges) is below the ${minArea} mm² floor (min_feature_mm²)`);
+  for (let e = 0; e < nE; e++) {
+    const n = sides(e);
     const a = assignment[e];
     if (a === 'B') { if (n !== 1) P.push(`rule 4: boundary edge ${e} borders ${n} faces, expected 1`); }
+    else if (a === 'C' && n === 1) {
+      const t = edgeTwin[e];
+      if (t < 0 || sides(t) !== 1) P.push(`rule 4: C edge ${e} borders 1 face and has no split-cut twin (§5.13: exactly one other C edge of its sheet with the same endpoint coordinates, also bordering one face)`);
+    }
     else if (n !== 2) P.push(`rule 4: ${a} edge ${e} borders ${n} faces, expected 2`);
     else if (edgeFaceDir[2 * e] === edgeFaceDir[2 * e + 1]) P.push(`rule 3: faces ${edgeFaces[2 * e]} and ${edgeFaces[2 * e + 1]} overlap along edge ${e} (same orientation)`);
   }
@@ -84,7 +119,7 @@ export function checkGeometry(doc, P) {
       for (const f of sheetFaces[o]) if (pointInPolygon(cx, cy, facePolys[f], -1)) { P.push(`rule 5: sheet ${doc.sheets[s].id} overlaps sheet ${doc.sheets[o].id} in the layout frame`); break; }
     }
   }
-  Object.assign(doc, { faceEdges, edgeFaces, edgeFaceDir, facePolys, sheetFaces });
+  Object.assign(doc, { faceEdges, edgeFaces, edgeFaceDir, facePolys, sheetFaces, edgeTwin });
 }
 
 /** A point strictly inside a simple polygon (centroid of an ear). @param {number[]} P */

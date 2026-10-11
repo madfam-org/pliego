@@ -13,6 +13,16 @@ duplicated per face) so creases stay crisp; non-convex faces are ear-clipped in 
 glTF distances are metres: positions are scaled by ``unit_scale`` (default 0.001, mm → m); the
 scale is recorded in ``asset.extras["pliego:unit_scale"]``. Optional morph targets (``morph``:
 frame titles or V × 3 states) carry POSITION deltas for a kinematic fold program.
+
+``animate=True`` makes the file play in any glTF viewer: the fold program and every mechanism sweep
+are sampled with the studio preview's pose (``glb_motion``), each keyframe becomes a morph target
+(POSITION and NORMAL deltas, per face corner, so faces stay rigid), and each clip is a glTF
+animation (``fold-program``, ``control:<id>``) of the mesh weights with LINEAR interpolation between
+one-hot keyframes, which blends exactly from one keyframe to the next. The base state (all weights
+0) is the static export's state. A document with nothing to animate exports as the static file. The
+morph data is bounded (``MAX_TARGETS``, ``MORPH_BUDGET``): over it, steps are sampled once each,
+then the sweeps are dropped, then the animation is skipped; ``asset.extras["pliego:animation"]``
+says which.
 """
 
 from __future__ import annotations
@@ -29,6 +39,8 @@ FLOAT, UINT = 5126, 5125
 ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER = 34962, 34963
 GLB_MAGIC, GLB_VERSION = 0x46546C67, 2
 CHUNK_JSON, CHUNK_BIN = 0x4E4F534A, 0x004E4942
+MAX_TARGETS = 256
+MORPH_BUDGET = 16 << 20   # bytes of morph target data (positions + normals, both sides)
 
 
 def _srgb_to_linear(hex_color: str) -> list[float]:
@@ -122,28 +134,71 @@ class _Bin:
         self.views: list[dict[str, Any]] = []
         self.accessors: list[dict[str, Any]] = []
 
-    def add(self, fmt: str, values: list, comp: int, typ: str, count: int, target: int,
+    def add(self, fmt: str, values: list, comp: int, typ: str, count: int, target: int | None,
             minmax: bool = False) -> int:
         while len(self.data) % 4:
             self.data.append(0)
         raw = struct.pack(f"<{len(values)}{fmt}", *values)
-        self.views.append({"buffer": 0, "byteOffset": len(self.data), "byteLength": len(raw),
-                           "target": target})
+        view: dict[str, Any] = {"buffer": 0, "byteOffset": len(self.data), "byteLength": len(raw)}
+        if target is not None:  # animation data is not vertex data: no buffer target
+            view["target"] = target
+        self.views.append(view)
         self.data += raw
         acc: dict[str, Any] = {"bufferView": len(self.views) - 1, "componentType": comp,
                                "count": count, "type": typ}
         if minmax:
-            cols = [[_f32(v) for v in values[k::3]] for k in range(3)]
+            width = 3 if typ == "VEC3" else 1
+            cols = [[_f32(v) for v in values[k::width]] for k in range(width)]
             acc["min"] = [min(c) for c in cols]
             acc["max"] = [max(c) for c in cols]
         self.accessors.append(acc)
         return len(self.accessors) - 1
 
 
+def _animation(d: dict[str, Any], n_corners: int, n_prims: int):
+    """(per-face corner targets, target names, clips, extras) for ``animate=True``."""
+    from . import glb_motion
+
+    # per target: both sides' POSITION + NORMAL deltas (float32 × 3 per corner), plus the JSON of
+    # two accessors and two buffer views per primitive and a target name per mesh
+    per_target = 2 * n_corners * 24 + n_prims * 2 * 320 + n_prims * 20
+    limit = max(0, min(MAX_TARGETS, MORPH_BUDGET // max(1, per_target)))
+    reduced = False
+    for detail, sweeps in ((2, True), (1, True), (0, False)):
+        clips = glb_motion.clips(d, detail=detail, sweeps=sweeps)
+        keys = {tuple(sorted(c.items())) for _n, ks in clips for _t, c in ks}
+        if len(keys) <= limit:
+            break
+        reduced = True
+    else:
+        return [], [], [], {"skipped": f"more than {limit} keyframes fit the morph budget"}
+    if not clips:
+        return [], [], [], None
+    pose = glb_motion.PreviewPose(d)
+    index: dict[tuple, int] = {}
+    targets, names, out_clips = [], [], []
+    for name, ks in clips:
+        frames = []
+        for t, controls in ks:
+            key = tuple(sorted(controls.items()))
+            if key not in index:
+                index[key] = len(targets)
+                targets.append(pose.corners(controls))
+                names.append(f"{name}@{t:.3f}")
+            frames.append((t, index[key]))
+        out_clips.append((name, frames))
+    extras = {"clips": [n for n, _ in out_clips], "targets": len(targets),
+              "pose": "studio preview (engine-stub)", "reduced": reduced}
+    return targets, names, out_clips, extras
+
+
 def to_glb(doc: Any, frame: str = "initial", state: list | None = None,
-           morph: list | None = None, unit_scale: float = 0.001) -> bytes:
-    """Render a 3-D state of a sheet document to GLB bytes (two-sided sheets, flat shading)."""
+           morph: list | None = None, unit_scale: float = 0.001, animate: bool = False) -> bytes:
+    """Render a 3-D state of a sheet document to GLB bytes (two-sided sheets, flat shading);
+    ``animate`` adds the fold program and mechanism sweeps as morph-target animations."""
     d = as_document(doc)
+    if animate and (state is not None or morph):
+        raise ValueError("animate builds its own morph targets; pass neither state nor morph")
     base = [tuple(map(float, p)) for p in state] if state is not None else (
         frame_state(d, frame) or flat_state(d))
     targets = [frame_state(d, m) if isinstance(m, str) else [tuple(map(float, p)) for p in m]
@@ -154,6 +209,17 @@ def to_glb(doc: Any, frame: str = "initial", state: list | None = None,
     for s in [base, *targets]:
         if len(s) != n_vert:  # type: ignore[arg-type]
             raise ValueError("3-D state length does not match vertices_coords")
+    # every state per face corner: a vertex state is the same point for each face that uses it,
+    # an animation keyframe poses each (rigid) face on its own
+    faces_all = d["faces_vertices"]
+    base_c = [[base[v] for v in f] for f in faces_all]
+    targets_c = [[[t[v] for v in f] for f in faces_all] for t in targets]  # type: ignore[index]
+    names: list[str] = []
+    clips: list = []
+    anim_extras = None
+    if animate:
+        n_prims = 2 * len({s for s in (d.get("pliego:faces_sheet") or [0] * len(faces_all))})
+        targets_c, names, clips, anim_extras = _animation(d, sum(map(len, faces_all)), n_prims)
     layout = [(float(x), float(y)) for x, y, *_ in d["vertices_coords"]]
     sheets = d.get("pliego:sheets") or [{"id": "sheet-0", "front": {"color": "#f6f3ec"},
                                          "back": {"color": "#f6f3ec"}}]
@@ -161,7 +227,7 @@ def to_glb(doc: Any, frame: str = "initial", state: list | None = None,
     binbuf = _Bin()
     materials, meshes, nodes = [], [], []
     for si, sheet in enumerate(sheets):
-        faces = [f for f, s in zip(d["faces_vertices"], fsheet, strict=True) if s == si]
+        faces = [fi for fi, s in enumerate(fsheet) if s == si]
         if not faces:
             continue
         prims = []
@@ -175,16 +241,21 @@ def to_glb(doc: Any, frame: str = "initial", state: list | None = None,
             pos: list[float] = []
             nrm: list[float] = []
             ind: list[int] = []
-            deltas: list[list[float]] = [[] for _ in targets]
-            for face in faces:
+            deltas: list[list[float]] = [[] for _ in targets_c]
+            ndeltas: list[list[float]] = [[] for _ in targets_c]
+            for fi in faces:
+                face = faces_all[fi]
                 start = len(pos) // 3
-                for v in face:
-                    pos.extend(c * unit_scale for c in base[v])
-                    for t, tgt in enumerate(targets):
-                        deltas[t].extend((tgt[v][k] - base[v][k]) * unit_scale  # type: ignore
-                                         for k in range(3))
-                n = _newell([base[v] for v in face])
+                for k3, p in enumerate(base_c[fi]):
+                    pos.extend(c * unit_scale for c in p)
+                    for t, tgt in enumerate(targets_c):
+                        deltas[t].extend((tgt[fi][k3][k] - p[k]) * unit_scale for k in range(3))
+                n = _newell(base_c[fi])
                 nrm.extend([sign * n[0], sign * n[1], sign * n[2]] * len(face))
+                if names:  # animation keyframes also rotate the normals
+                    for t, tgt in enumerate(targets_c):
+                        tn = _newell(tgt[fi])
+                        ndeltas[t].extend([sign * (tn[k] - n[k]) for k in range(3)] * len(face))
                 for a, b, c in _ear_clip([layout[v] for v in face]):
                     ind.extend((start + a, start + b, start + c) if sign > 0
                                else (start + a, start + c, start + b))
@@ -198,21 +269,42 @@ def to_glb(doc: Any, frame: str = "initial", state: list | None = None,
                 "material": len(materials) - 1,
                 "mode": 4,
             }
-            if targets:
-                prim["targets"] = [{"POSITION": binbuf.add("f", dl, FLOAT, "VEC3", count,
-                                                           ARRAY_BUFFER, True)}
-                                   for dl in deltas]
+            if targets_c:
+                prim["targets"] = []
+                for t, dl in enumerate(deltas):
+                    tgt_attrs = {"POSITION": binbuf.add("f", dl, FLOAT, "VEC3", count,
+                                                        ARRAY_BUFFER, True)}
+                    if names:
+                        tgt_attrs["NORMAL"] = binbuf.add("f", ndeltas[t], FLOAT, "VEC3", count,
+                                                         ARRAY_BUFFER)
+                    prim["targets"].append(tgt_attrs)
             prims.append(prim)
         mesh: dict[str, Any] = {"name": sheet["id"], "primitives": prims}
-        if targets:
-            mesh["weights"] = [0.0] * len(targets)
+        if targets_c:
+            mesh["weights"] = [0.0] * len(targets_c)
+        if names:
+            mesh["extras"] = {"targetNames": names}
         meshes.append(mesh)
         nodes.append({"name": sheet["id"], "mesh": len(meshes) - 1})
+    animations = []
+    for name, frames in clips:
+        times = [t for t, _k in frames]
+        weights: list[float] = []
+        for _t, k in frames:
+            weights.extend(1.0 if j == k else 0.0 for j in range(len(targets_c)))
+        sampler = {"input": binbuf.add("f", times, FLOAT, "SCALAR", len(times), None, True),
+                   "output": binbuf.add("f", weights, FLOAT, "SCALAR", len(weights), None),
+                   "interpolation": "LINEAR"}
+        animations.append({"name": name, "samplers": [sampler],
+                           "channels": [{"sampler": 0, "target": {"node": n, "path": "weights"}}
+                                        for n in range(len(nodes))]})
     while len(binbuf.data) % 4:
         binbuf.data.append(0)
+    extras: dict[str, Any] = {"pliego:unit_scale": unit_scale}
+    if anim_extras is not None:
+        extras["pliego:animation"] = anim_extras
     gltf = {
-        "asset": {"version": "2.0", "generator": "pliego-kernel export/glb",
-                  "extras": {"pliego:unit_scale": unit_scale}},
+        "asset": {"version": "2.0", "generator": "pliego-kernel export/glb", "extras": extras},
         "scene": 0,
         "scenes": [{"nodes": list(range(len(nodes)))}],
         "nodes": nodes,
@@ -222,6 +314,8 @@ def to_glb(doc: Any, frame: str = "initial", state: list | None = None,
         "bufferViews": binbuf.views,
         "buffers": [{"byteLength": len(binbuf.data)}],
     }
+    if animations:
+        gltf["animations"] = animations
     js = json.dumps(gltf, separators=(",", ":"), ensure_ascii=True).encode()
     js += b" " * (-len(js) % 4)
     total = 12 + 8 + len(js) + 8 + len(binbuf.data)

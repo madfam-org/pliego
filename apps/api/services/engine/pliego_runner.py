@@ -174,7 +174,9 @@ def export_bytes(pliego, doc, fmt: str, doc_text: str) -> bytes:
     func = getattr(module, f"to_{fmt}", None)
     if not callable(func):
         raise CartridgeError("kernel-api", f"pliego.export.{fmt} exposes no to_{fmt}(document)")
-    out = func(doc)
+    # GLB plays the fold program and the mechanism sweeps (morph-target animations); every other
+    # exporter takes the document alone
+    out = func(doc, animate=True) if fmt == "glb" else func(doc)
     return out.encode("utf-8") if isinstance(out, str) else bytes(out)
 
 

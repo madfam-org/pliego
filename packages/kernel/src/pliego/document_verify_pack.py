@@ -93,3 +93,29 @@ def _rule13_packaging(d: dict, coords: list, out: Any) -> None:
             problems.append("sheet does not resolve")
         for pr in problems:
             out.err(13, "artwork", f"pliego:artwork[{k}]: {pr}")
+
+
+def rule30_circuit(d: dict, out: Any) -> None:
+    """Rule 30 (§5.30): the paper circuit the trace finishes draw, by `pliego.press.circuit`,
+    with every fold switch open and then closed (a document does not say which state is meant;
+    a short or a reversed LED in either is a fault). Traces that rule 13 refuses are left to
+    rule 13. An issue found in both states is reported once."""
+    from .press import check_finish, circuit
+
+    fins = d.get("pliego:finishes")
+    traces = [f for f in fins if isinstance(f, dict) and f.get("kind") == "trace"] \
+        if isinstance(fins, list) else []
+    if not traces or any(check_finish(f) for f in traces):
+        return
+    switches = sorted({pd["part"] for f in traces for pd in f.get("pads") or []
+                       if pd.get("pin") == "contact"})
+    seen = set()
+    for closed in ([], switches) if switches else ([],):
+        for i in circuit(traces, closed)["issues"]:
+            key = (i["level"], i["kind"], i["detail"])
+            if key in seen:
+                continue
+            seen.add(key)
+            state = " (fold switches closed)" if closed else ""
+            (out.err if i["level"] == "error" else out.warn)(
+                30, i["kind"], f"circuit{state}: {i['detail']}")

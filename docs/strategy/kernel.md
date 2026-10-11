@@ -320,6 +320,59 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   (valley), midline −35° (mountain), the program is the collapse alone.
 <!-- FL2 (wave 3, flat operations) end -->
 
+<!-- FL3 (wave 4, fold-program robustness) begin -->
+**Wave-4 fold-program robustness (lane FL3).**
+
+- **Rigid steps through turned-over layers** (spec §5.35). `FoldProgram.kinematic(...,
+  frame="sheet" | "folded")`: `"sheet"` (default, as before) gives every layer's crease on a
+  segment the angle in the sheet's sense — the two layers of a model folded in half turn as
+  mirror images (the fox puppet's mouth); `"folded"` reads the angle in the folded frame and
+  signs each layer by its orientation (`foldpose.layer_signs`: the paper on the side that stays
+  shows its front → as given, its back → opposite), so the layers turn as one stack. A crease
+  folded flat starts at ±180° by its layer order (it read the sign of round-off before), and
+  collinear creases the pattern merges into one edge are matched together (a drive along the
+  canard's keel found one of its two layers before). Proof: the jumping frog's spring pleat, the
+  canard's fuselage opening (its nose roll is turned over) and the ring wing's roll (its folded
+  leading edge), each equal to the composed hinge poses the commons uses today
+  (`tests/test_foldpose.py`, `flat_models.ring_wing`, `canard_plane(kinematic_open=True)`).
+- **Branch independent of sampling** (spec §5.36). `foldpose.solve_step` checks the solved path
+  (`branch_jump`: a hinted crease back across its start, a free crease flipping sides) and
+  solves a failing path again with 2, 4, 8, 16 internal states per sample, keeping the samples.
+  Proof: the masu box folds its gussets in at every `substeps` from 1 to 8 (5, 7 and 8 folded a
+  bottom gusset out, 1 had no path), and substeps 5 and 10 give the same states where their
+  fractions agree (`test_masu_gussets_fold_in_at_any_substep_count`).
+- **Off the grid** (spec §5.37). `foldpose.exact_arrangement(arr, state)` puts the snapped
+  arrangement's vertices back on the state's exact points; `Pose3.kinematic` solves on it and
+  `FoldProgram.build` reads penetration on it. Proof: the masu lid at its real size
+  (200 + 4√2·1.5 mm, no 8 µm rounding) and a 123.4567 mm box fold and build.
+- **Speed.** Profiled on the masu box: 90 % of a rigid step was `motion._rank`, two SVDs of
+  the whole pattern's closure Jacobian per `solve()` for `KinematicPath.dof`/`free_dof`,
+  which fold programs never read. They are now computed on first read (same values).
+  `flatmotion.mat_mul3` is `space.mat_mul` without generators (the builtin `sum` of the same
+  products, bit for bit), used by `flatmotion.compose` and the closure loops. An end-wall
+  step went from about 15.8 s to 1.1 s, the kernel's masu test from 43 s to 7 s, and the
+  commons masu-box render in the runner from 33 s to about 5 s (a busy laptop; ±50 %).
+  Documents are byte-identical.
+- **Signs at ±180°** (spec §5.38). `preview.approach_signs`: a crease that reaches ±180° from
+  open within one sample takes its halfway sign. `sample_step(..., end_follows_motion=,
+  keep=)`: a tuck's end takes the motion's sign where its layer order says the other, and
+  `FoldProgram.build` keeps those creases' sign in later steps while they stay at ±180°.
+  `Pose3._start_angle` reads a crease that a 3-D step folded flat by that step's halfway sign.
+  Proof: the waterbomb balloon's eight tuck creases end at the sign they approach with and no
+  target swings past 180° (`test_tucked_points_end_turned_towards_the_viewer`); the masu's
+  flaps build the same angles with or without the commons' [0.5, 1] samples.
+- **Hinge flaps by name** (spec §5.39). `hinge(..., sheet_points=, faces=)` and the same keys
+  in a `hinges` spec. Proof: the traditional dart (`flat_models.dart_plane`) opens its fuselage
+  with each corner flap, whose crease lies on the keel, turning with its own half.
+- **Contract wiring.** `Document.verify()` runs rule 30 (`document_verify_pack.rule30_circuit`:
+  `press.circuit` with every fold switch open, then closed; one report per issue; traces that
+  rule 13 refuses are left to it). `PreviewTree(arr, root=)` roots the replica at the §5.16
+  `root_face`; `FoldProgram.build(root=sheet point)` presents the sheet there and fits the
+  samples on that tree. Proof: a circuit card's reversed LED, short and missing cell fail
+  `verify()`; the crane built with its root at (140, 20) reports 17.6 mm of tear, what a
+  preview holding that face draws, where the face-0 report said 2.5e-5 mm for the same program.
+<!-- FL3 (wave 4, fold-program robustness) end -->
+
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,
 crease parity, four-fold symmetry — and a crane valid at every vertex), `test_foldprogram.py`; sequences in
 `tests/flat_models.py`.

@@ -37,7 +37,8 @@ from typing import Any
 
 from . import linalg
 from .arrangement import GRID_MM
-from .space import IDENTITY3, Mat3, Vec3, axis_rotation, cross, mat_mul, mat_vec, unit
+from .flatmotion import mat_mul3
+from .space import IDENTITY3, Mat3, Vec3, axis_rotation, cross, mat_vec, unit
 
 NEWTON_TOL_RAD = 1e-13     # Newton stops below this max |r_v|
 ACCEPT_TOL_RAD = 1e-10     # a state is on the closure manifold below this (or the snap floor)
@@ -60,17 +61,36 @@ class KinematicPath(list):
     Attributes: ``edges`` (the crease variables), ``dof`` (rigid DOF m − rank C at the path's
     middle state), ``free_dof`` (freedom left once the drive and fixed creases are imposed: 0 =
     the drive determines the motion), ``max_residual_rad`` (worst vertex loop residual over the
-    path) and ``branch_steps`` (substeps that started on a bifurcation and chose a branch)."""
+    path) and ``branch_steps`` (substeps that started on a bifurcation and chose a branch).
+    ``dof`` and ``free_dof`` are computed on first read: the rank of the closure Jacobian is
+    an SVD of the whole pattern, which a caller that only follows the path does not need."""
 
     edges: list[int]
-    dof: int
-    free_dof: int
     max_residual_rad: float
     branch_steps: list[int]
 
     def __init__(self, states: Iterable[dict[int, float]], **info: Any):
         super().__init__(states)
         self.__dict__.update(info)
+
+    def _ranks(self) -> None:
+        sysm, mid_state, free = self.__dict__.pop("_rank_at")
+        n = len(sysm.edges)
+        _, ells = _residual(sysm, mid_state)
+        self.__dict__["dof"] = n - _rank(_jacobian(sysm, ells, list(range(n))), n)
+        self.__dict__["free_dof"] = len(free) - _rank(_jacobian(sysm, ells, free), len(free))
+
+    @property
+    def dof(self) -> int:
+        if "dof" not in self.__dict__:
+            self._ranks()
+        return self.__dict__["dof"]
+
+    @property
+    def free_dof(self) -> int:
+        if "free_dof" not in self.__dict__:
+            self._ranks()
+        return self.__dict__["free_dof"]
 
 
 @dataclass
@@ -192,7 +212,7 @@ def _loop_state(loop: _Loop, rho: Sequence[float]) -> tuple[Vec3, list[Vec3]]:
     ell = []
     for c, d in zip(loop.cols, loop.dirs, strict=True):
         ell.append(mat_vec(p, d))
-        p = mat_mul(p, axis_rotation(d, rho[c]))
+        p = mat_mul3(p, axis_rotation(d, rho[c]))
     return log_vee(p), ell
 
 
@@ -454,13 +474,8 @@ def solve(system: Any, start: Mapping, drive: Mapping, fixed: Iterable = (), ste
                                       "(beyond ±180°, the faces would pass through each other)")
             out[e] = max(-180.0, min(180.0, deg))
         states.append(out)
-    _, ells = _residual(sysm, mid_state)
-    c_all = _jacobian(sysm, ells, list(range(n)))
-    rank_all = _rank(c_all, n)
-    rank_free = _rank(_jacobian(sysm, ells, free), len(free))
-    return KinematicPath(states, edges=list(sysm.edges), dof=n - rank_all,
-                         free_dof=len(free) - rank_free, max_residual_rad=worst,
-                         branch_steps=branch_steps)
+    return KinematicPath(states, edges=list(sysm.edges), max_residual_rad=worst,
+                         branch_steps=branch_steps, _rank_at=(sysm, mid_state, list(free)))
 
 
 def _rank(c: list[list[float]], n: int) -> int:

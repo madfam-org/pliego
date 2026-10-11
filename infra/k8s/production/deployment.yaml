@@ -97,6 +97,10 @@ spec:
               value: CF-Connecting-IP
             - name: PLIEGO_METRICS_PORT
               value: "9090"
+            # Heavy cartridges (paper-doily, kaleidocycle) need 20–30 s of CPU on a first render; the render
+            # cache answers repeats in milliseconds. 60 s keeps first renders from timing out (504).
+            - name: PLIEGO_RENDER_TIMEOUT_S
+              value: "60"
             # From the intake (Secret pliego-secrets; names in secrets-template.yaml). Optional until the intake
             # writes them: the app fails closed (sign-in answers 503) while a key is absent.
             - name: AUTH_JANUA_CLIENT_ID
@@ -113,8 +117,9 @@ spec:
             - name: tmp
               mountPath: /tmp
           resources:
-            requests: { cpu: 50m, memory: 128Mi }
-            limits: { cpu: 500m, memory: 384Mi }
+            # Renders are bursty CPU work (one per worker): a low request, a burst limit of 2 cores.
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 2000m, memory: 384Mi }
           # Liveness is a static 200 with no dependency checks.
           livenessProbe:
             httpGet: { path: /health, port: http }

@@ -191,16 +191,11 @@ export class BlockCholesky {
         // y = L_ii^{-1} x_i (forward substitution, L_ii lower triangular)
         const li = 9 * Lp[i];
         const l00 = Lx[li], l10 = Lx[li + 3], l11 = Lx[li + 4], l20 = Lx[li + 6], l21 = Lx[li + 7], l22 = Lx[li + 8];
-        const y = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for (let col = 0; col < 3; col++) {
-          const b0 = x[i9 + col], b1 = x[i9 + 3 + col], b2 = x[i9 + 6 + col];
-          const y0 = b0 / l00;
-          const y1 = (b1 - l10 * y0) / l11;
-          const y2 = (b2 - l20 * y0 - l21 * y1) / l22;
-          y[col] = y0; y[3 + col] = y1; y[6 + col] = y2;
-        }
+        // (column by column, unrolled: no allocation in the inner loop)
+        const y0 = x[i9] / l00, y1 = x[i9 + 1] / l00, y2 = x[i9 + 2] / l00;
+        const y3 = (x[i9 + 3] - l10 * y0) / l11, y4 = (x[i9 + 4] - l10 * y1) / l11, y5 = (x[i9 + 5] - l10 * y2) / l11;
+        const y6 = (x[i9 + 6] - l20 * y0 - l21 * y3) / l22, y7 = (x[i9 + 7] - l20 * y1 - l21 * y4) / l22, y8 = (x[i9 + 8] - l20 * y2 - l21 * y5) / l22;
         for (let q = 0; q < 9; q++) x[i9 + q] = 0;
-        const y0 = y[0], y1 = y[1], y2 = y[2], y3 = y[3], y4 = y[4], y5 = y[5], y6 = y[6], y7 = y[7], y8 = y[8];
         // x_r -= L_ri * y for rows r already in column i (r < k)
         const end = c[i];
         for (let p = Lp[i] + 1; p < end; p++) {

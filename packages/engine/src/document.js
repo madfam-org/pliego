@@ -6,6 +6,9 @@
  */
 import { BUILTIN_STOCKS, DERIVED_KEYS } from './material.js';
 import { checkGeometry, checkJoinsAndFrames } from './docrules.js';
+import { checkKeyedMechanisms } from './keyed.js';
+import { checkJoinGates } from './gates.js';
+import { documentDigest } from './digest.js';
 
 export class DocumentError extends Error {
   /** @param {string[]} problems */
@@ -35,7 +38,7 @@ const JOIN_TYPES = new Set(['glue', 'pivot', 'string', 'pin', 'slider']);
  * @property {Record<string, number>} derived @property {number} grainDeg
  * @property {[number, number]} offset @property {{origin:number[], rotation:number[]}} placement
  * @property {{color:string, art:string|null}} front @property {{color:string, art:string|null}} back
- * @property {{mechanism:string}|null} kinematic @property {any} label
+ * @property {{mechanism:string}|null} kinematic @property {any} label @property {any} presentation spec §5.16 (or null)
  */
 
 /**
@@ -234,8 +237,17 @@ function parseCore(d, plainFold, P) {
       offset: isVec(s.offset, 2) ? [s.offset[0], s.offset[1]] : [0, 0],
       placement: { origin: pl && isVec(pl.origin, 3) ? pl.origin.slice() : [0, 0, 0], rotation },
       front: s.front ?? { color: '#ffffff', art: null }, back: s.back ?? { color: '#ffffff', art: null },
-      kinematic: kin, label: s.label,
+      kinematic: kin, label: s.label, presentation: s.presentation ?? null,
     });
+    // rule 17 (§5.16): presentation has only root_face (a face of this sheet, checked below) and end
+    if (s.presentation !== undefined && s.presentation !== null) {
+      const pr = s.presentation;
+      if (typeof pr !== 'object' || Object.keys(pr).some((k) => k !== 'root_face' && k !== 'end')) P.push(`rule 17: ${where}.presentation has only root_face and end`);
+      else {
+        if (pr.root_face !== undefined && !(isInt(pr.root_face) && pr.root_face < nF && fSheet[pr.root_face] === i)) P.push(`rule 17: ${where}.presentation.root_face ${JSON.stringify(pr.root_face)} is not a face of this sheet`);
+        if (pr.end !== undefined && !(pr.end && isVec(pr.end.origin, 3) && isVec(pr.end.rotation, 4) && Math.abs(Math.hypot(...pr.end.rotation) - 1) < 1e-6)) P.push(`rule 17: ${where}.presentation.end needs a finite origin and a unit quaternion rotation`);
+      }
+    }
   });
   if (!sheets.length && !P.length) P.push('pliego:sheets must not be empty');
   const nS = sheets.length;
@@ -268,7 +280,15 @@ function parseCore(d, plainFold, P) {
   const seq = d['pliego:sequence'] ?? null;
   checkRefs({ joins, mechanisms, controls, seq, sheets, sheetIndex, assignment, nE }, P);
   if (d['pliego:meta'] && d['pliego:meta'].min_feature_mm !== undefined && !(isNum(d['pliego:meta'].min_feature_mm) && d['pliego:meta'].min_feature_mm > 0)) P.push('pliego:meta.min_feature_mm must be a number > 0');
-  if (d['pliego:meta'] && d['pliego:meta'].digest != null && !/^sha256:[0-9a-f]{64}$/.test(d['pliego:meta'].digest)) P.push('rule 10: pliego:meta.digest must be "sha256:<64 hex>" or null');
+  if (d['pliego:meta'] && d['pliego:meta'].digest != null) {
+    if (!/^sha256:[0-9a-f]{64}$/.test(d['pliego:meta'].digest)) P.push('rule 10: pliego:meta.digest must be "sha256:<64 hex>" or null');
+    else if (!plainFold) {
+      // rule 10: recompute over the canonical serialisation (spec §5.15, RFC 8785) with digest null
+      let got = null;
+      try { got = documentDigest(d); } catch (e) { P.push(`rule 10: the document has no canonical serialisation (${/** @type {Error} */(e).message})`); }
+      if (got && got !== d['pliego:meta'].digest) P.push(`rule 10: pliego:meta.digest ${d['pliego:meta'].digest} does not match the document (canonical digest ${got})`);
+    }
+  }
 
   return {
     plainFold, nV, nE, nF, coords, edges, assignment, foldAngle, treatment, restAngle, faces, edgeNames: names,
@@ -359,6 +379,7 @@ function checkRefs(c, P) {
       }
     }
   });
+  checkKeyedMechanisms(mechanisms, P); // spec §5.18, rule 19
   for (const s of sheets) {
     if (!s.kinematic) continue;
     const m = mech.get(s.kinematic.mechanism);
@@ -398,6 +419,7 @@ function checkRefs(c, P) {
       if (j.mechanism !== undefined) { const m = mech.get(j.mechanism); if (!m || m.type !== 'slide') P.push(`rule 7: ${w}.mechanism ${JSON.stringify(j.mechanism)} is not a slide mechanism`); }
     }
   });
+  checkJoinGates(joins, seq, P); // spec §5.19–§5.20, rules 20–21
   if (seq !== null) {
     if (typeof seq !== 'object' || (seq.mode !== 'physical' && seq.mode !== 'kinematic')) P.push('pliego:sequence.mode must be physical|kinematic');
     if (!Array.isArray(seq.steps) || !seq.steps.length) P.push('pliego:sequence.steps must be a non-empty array');

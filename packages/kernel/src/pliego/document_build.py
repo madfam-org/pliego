@@ -262,6 +262,8 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
                               "note": st.note})
             if st.remove:
                 out_steps[-1]["remove"] = list(st.remove)
+            if st.release_joins:
+                out_steps[-1]["release_joins"] = list(st.release_joins)
         data["pliego:sequence"] = {"mode": seq.mode, "steps": out_steps}
         if not any(c.get("kind") == "sequence" for c in controls):
             controls.append(sequence_control())

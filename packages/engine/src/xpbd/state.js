@@ -16,7 +16,10 @@ export function snapshotWorld(w) {
     fixedTarget: Float64Array.from(w.fixedTarget), userForce: Float64Array.from(w.userForce),
     time: w.time, acc: w._acc, substepsRun: w.substepsRun, framesRun: w.framesRun, dirty: w.dirty, asleep: !!w._asleep, quiet: w._quiet, pcgFail: w._pcgFail,
     stringTaut: Uint8Array.from(w._stringTaut),
-    terms: { active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode), verts: Int32Array.from(T.verts), info: T.info.map((/** @type {any} */ i) => ({ target: i.target ? i.target.slice() : undefined, s: i.s, driven: i.driven, offset: i.offset })) },
+    terms: { active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode), verts: Int32Array.from(T.verts), info: T.info.map((/** @type {any} */ i) => ({ target: i.target ? i.target.slice() : undefined, s: i.s, driven: i.driven, offset: i.offset,
+      unheld: i.unheld, slid: i.slid, held: i.held ? i.held.slice() : undefined, since: i.since })),
+      gateOff: T.gateOff ? Uint8Array.from(T.gateOff) : null, coef: Float64Array.from(T.coef) },
+    gates: w.gates ? w.gates.state() : [],
     drivers: { value: [...w.drivers.value], goal: [...w.drivers.goal], seqPos: w.drivers.seqPos, entry: [...w.drivers.entry], entryStep: w.drivers.entryStep, wind: w.drivers.wind,
       program: w.drivers.program ? { rho: Float64Array.from(w.drivers.program.rho), free: Uint8Array.from(w.drivers.program.free), entry: Float64Array.from(w.drivers.program.entry), entryStep: w.drivers.program.entryStep } : null,
       kin: w.drivers.kin ? { a: Float64Array.from(w.drivers.kin.a), b: Float64Array.from(w.drivers.kin.b), n: w.drivers.kin.n, i: w.drivers.kin.i } : null },
@@ -34,7 +37,13 @@ export function restoreWorld(w, s) {
   w.time = s.time; w._acc = s.acc; w.substepsRun = s.substepsRun; w.framesRun = s.framesRun;
   w._stringTaut.set(s.stringTaut);
   const T = w.terms;
-  s.terms.info.forEach((/** @type {any} */ i, /** @type {number} */ t) => { if (i.target) T.info[t].target = i.target.slice(); T.info[t].s = i.s; T.info[t].driven = i.driven; T.info[t].offset = i.offset; });
+  s.terms.info.forEach((/** @type {any} */ i, /** @type {number} */ t) => {
+    if (i.target) T.info[t].target = i.target.slice(); T.info[t].s = i.s; T.info[t].driven = i.driven; T.info[t].offset = i.offset;
+    T.info[t].unheld = i.unheld; T.info[t].slid = i.slid; if (i.held) T.info[t].held = i.held.slice(); T.info[t].since = i.since;
+  });
+  if (s.terms.gateOff && T.gateOff) T.gateOff.set(s.terms.gateOff);
+  T.coef.set(s.terms.coef);
+  if (w.gates) w.gates.restore(w, s.gates);
   w.drivers.value = new Map(s.drivers.value); w.drivers.goal = new Map(s.drivers.goal);
   w.drivers.seqPos = s.drivers.seqPos; w.drivers.entry = new Map(s.drivers.entry); w.drivers.entryStep = s.drivers.entryStep; w.drivers.wind = s.drivers.wind;
   const pr = w.drivers.program, ps = s.drivers.program;

@@ -314,7 +314,7 @@
       }
     },
     "pliego:finishes": {
-      "description": "Pressing and burning regions (spec §5.10).",
+      "description": "Pressing, burning and conductive-trace regions (spec §5.10, §5.30).",
       "type": "array",
       "items": {
         "$ref": "#/$defs/finish"
@@ -1805,7 +1805,8 @@
             "foil",
             "varnish",
             "letterpress",
-            "burn"
+            "burn",
+            "trace"
           ]
         },
         "sheet": {
@@ -1863,6 +1864,68 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "material": {
+          "enum": [
+            "copper-tape",
+            "conductive-ink"
+          ]
+        },
+        "width_mm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 50
+        },
+        "path": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/vec2"
+          }
+        },
+        "pads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "at",
+              "size_mm"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/slug"
+              },
+              "at": {
+                "$ref": "#/$defs/vec2"
+              },
+              "size_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "part": {
+                "$ref": "#/$defs/slug"
+              },
+              "pin": {
+                "enum": [
+                  "plus",
+                  "minus",
+                  "anode",
+                  "cathode",
+                  "contact"
+                ]
+              }
+            },
+            "dependentRequired": {
+              "part": [
+                "pin"
+              ],
+              "pin": [
+                "part"
+              ]
+            },
+            "additionalProperties": false
+          }
         }
       },
       "allOf": [
@@ -1930,6 +1993,23 @@
             "required": [
               "process",
               "char"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "trace"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "material",
+              "width_mm",
+              "path",
+              "pads"
             ]
           }
         }

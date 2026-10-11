@@ -7,7 +7,8 @@ order, each with a spot colour (name, CMYK alternate, RGB preview, DXF ACI):
 
 Artwork · Bleed · Safe area · Glue · Crease · Perforation · Half-cut · Cut (``CutContour``) ·
 the finish plates (emboss die/counter, deboss die/counter, foil, varnish, letterpress, branding
-iron, engrave vector/raster) · Dimensions · Panel labels · Grain/flute arrow.
+iron, engrave vector/raster) · the conductive traces (copper tape or conductive ink: outline and
+centre line; contact pads) · Dimensions · Panel labels · Grain/flute arrow.
 
 ``CutContour`` is the conventional spot name print-and-cut RIPs look for; every other name here
 is a plain, descriptive spot — converters keep their own lists, so confirm names with the shop.
@@ -52,6 +53,17 @@ SPOTS: dict[str, tuple[str, tuple[float, float, float, float], str, str, int, fl
                          0.2),
     "Engrave (raster)": ("Engrave raster", (0, 0.7, 0.9, 0.5), "#6b2a12", "Engrave-raster", 14,
                          0.1),
+    # conductive traces (spec §5.30, lane X): what a cutter cuts from tape or an ink pen fills,
+    # the centre line a plotter follows to lay it, and the pads where parts sit
+    "Copper tape (outline)": ("Copper tape", (0, 0.45, 0.8, 0.2), "#b8732e", "Copper-tape", 30,
+                              0.25),
+    "Copper tape (centre line)": ("Copper tape path", (0, 0.35, 0.6, 0.35), "#8a5320",
+                                  "Copper-tape-path", 32, 0.2),
+    "Conductive ink (outline)": ("Conductive ink", (0, 0, 0, 0.6), "#5f6366", "Conductive-ink",
+                                 9, 0.25),
+    "Conductive ink (centre line)": ("Conductive ink path", (0, 0, 0, 0.85), "#2f3133",
+                                     "Conductive-ink-path", 250, 0.2),
+    "Contact pads": ("Contact pads", (0.85, 0, 0.6, 0), "#00a37a", "Contact-pads", 94, 0.25),
     "Dimensions": ("Dimensions", (0, 0, 0, 1), "#1a1a1a", "Dimensions", 7, 0.15),
     "Panel labels": ("Panel labels", (0, 0, 0, 0.7), "#4d4d4d", "Panel-labels", 7, 0.0),
     "Grain/flute arrow": ("Grain arrow", (0.5, 0.5, 0, 0.3), "#5b5b8f", "Grain-arrow", 7, 0.25),
@@ -168,10 +180,14 @@ def build(doc: Any) -> DielinePlan:
         for name, polys, mode in plates(f, calipers.get(sid, _caliper(d, sid))):
             lay = layers[name]
             for poly in polys:
-                lay.polylines.append((tuple(g(sid, q) for q in poly), True))
+                lay.polylines.append((tuple(g(sid, q) for q in poly), mode != "path"))
             if mode == "raster":
                 for a, b in hatch(polys):
                     lay.polylines.append(((g(sid, a), g(sid, b)), False))
+        if f["kind"] == "trace":
+            notes.append(f"trace '{f['id']}' on the {f['side']} of {sid}: {f['material']}, "
+                         f"{f['width_mm']:g} mm wide, {len(f.get('pads') or [])} pads")
+            continue
         notes.append(f"{f['kind']} '{f['id']}' on the {f['side']} of {sid}: depth "
                      f"{f.get('depth_mm', 0):g} mm" + (f", {f['process']}" if "process" in f
                                                        else ""))

@@ -19,6 +19,7 @@ from .manifest import PayloadError, resolve_request
 from .metrics import Metrics
 from .ratelimit import RateLimiter, client_key
 from .render import TRANSPORT, Renderer, RenderError
+from .render_cache import RenderCache
 from .render_limits import RETRY_AFTER_S, RenderBusy, RenderSlot
 from .thumbnails import ThumbnailStore
 
@@ -66,7 +67,7 @@ def kernel_status() -> tuple[bool, str | None, str]:
 
 def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
                      metrics: Metrics, limiter: RateLimiter, slot: RenderSlot,
-                     thumbnails: ThumbnailStore, *, version: str, require_commons: bool, trusted_header: str) -> Blueprint:
+                     thumbnails: ThumbnailStore, cache: RenderCache, *, version: str, require_commons: bool, trusted_header: str) -> Blueprint:
     bp = Blueprint("api_v1", __name__)
 
     @bp.get("/health")
@@ -152,6 +153,11 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             metrics.inc("pliego_rate_limited_total")
             raise RateLimited(retry)
         kind = "export" if formats else "document"
+        key = cache.key(cart, mode, effective, formats) if cache.enabled else None
+        if key is not None:
+            cached, tier = cache.get(key)
+            if cached is not None:  # exact bytes of a previous render: no slot, no subprocess
+                return cart, mode, cached, f"hit-{tier}"
         try:
             with slot.acquire():
                 result = renderer.run(cart, mode, effective, formats)
@@ -163,7 +169,9 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             raise
         metrics.inc("pliego_renders_total", kind=kind, outcome="ok")
         metrics.inc("pliego_render_seconds_total", result.seconds, kind=kind)
-        return cart, mode, result
+        if key is not None:
+            cache.put(key, result)
+        return cart, mode, result, "miss" if key is not None else "off"
 
     def _guarded(handler):
         try:
@@ -181,9 +189,10 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
     @bp.post("/api/v1/documents")
     def documents():
         def handler():
-            _cart, _mode, result = _render(g.json_body, DOCUMENT_KEYS, ())
+            _cart, _mode, result, cache_state = _render(g.json_body, DOCUMENT_KEYS, ())
             resp = Response(result.document, content_type="application/json")
             resp.headers["X-Pliego-Verify"] = result.verify
+            resp.headers["X-Pliego-Cache"] = cache_state
             return resp
 
         return _guarded(handler)
@@ -194,12 +203,13 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             fmt = g.json_body.get("format")
             if not isinstance(fmt, str) or fmt not in TRANSPORT:
                 raise PayloadError(f"'format' must be one of {sorted(TRANSPORT)}")
-            cart, mode, result = _render(g.json_body, EXPORT_KEYS, (fmt,))
+            cart, mode, result, cache_state = _render(g.json_body, EXPORT_KEYS, (fmt,))
             content_type, ext = TRANSPORT[fmt]
             name = _SAFE_FILENAME.sub("-", f"{cart.slug}-{mode.id}.{ext}")
             resp = Response(result.exports[fmt], content_type=content_type)
             resp.headers["Content-Disposition"] = f'attachment; filename="{name}"'
             resp.headers["X-Pliego-Verify"] = result.verify
+            resp.headers["X-Pliego-Cache"] = cache_state
             return resp
 
         return _guarded(handler)

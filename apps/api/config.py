@@ -10,6 +10,7 @@ PLIEGO_TRUSTED_PROXY_HEADER, PLIEGO_METRICS_PORT; PLIEGO_DEV=1 is the local-deve
 from __future__ import annotations
 
 import os
+import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,6 +23,8 @@ HOST_API = "pliego-api.madfam.io"
 
 MAX_CONTENT_LENGTH = 256 * 1024  # bytes; POST bodies are small JSON objects
 RENDER_TIMEOUT_S = 30.0
+RENDER_CACHE_MB = 16.0       # per-worker memory tier (apps/api/render_cache.py)
+RENDER_CACHE_DISK_MB = 32.0  # shared disk tier under /tmp (an emptyDir of 128 Mi in production)
 DEFAULT_RATE_LIMIT = (30, 60.0)  # requests per window (seconds) per client, per worker
 
 
@@ -43,6 +46,20 @@ def _parse_rate(raw: str | None) -> tuple[int, float]:
     return limit, window_s
 
 
+def _megabytes(env: Mapping[str, str], name: str, default: float) -> float:
+    """A cache bound in MiB; 0 turns that tier off. A malformed value raises (no silent default)."""
+    raw = env.get(name)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        value = float(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} must be a number of MiB, got {raw!r}") from exc
+    if not value >= 0 or value == float("inf"):
+        raise RuntimeError(f"{name} must be a finite number >= 0, got {raw!r}")
+    return value
+
+
 @dataclass(frozen=True)
 class Settings:
     root: Path = DEFAULT_ROOT
@@ -59,6 +76,9 @@ class Settings:
     metrics_port: int = 9090
     require_commons: bool = True
     render_timeout_s: float = RENDER_TIMEOUT_S
+    render_cache_mb: float = RENDER_CACHE_MB
+    render_cache_disk_mb: float = RENDER_CACHE_DISK_MB
+    render_cache_dir: Path | None = None
     plausible_origin: str = ""
 
     # ── derived paths ────────────────────────────────────────────────────────
@@ -87,6 +107,10 @@ class Settings:
         return self.materials_dir or (self.root / "materials")
 
     @property
+    def render_cache_path(self) -> Path:
+        return self.render_cache_dir or (Path(tempfile.gettempdir()) / "pliego-render-cache")
+
+    @property
     def thumbnails(self) -> Path:
         """Built catalog previews (apps/api/thumbnails.py; the image builds them at build time)."""
         return self.thumbnails_dir or (self.root / "build" / "thumbnails")
@@ -100,6 +124,7 @@ class Settings:
         thumbnails = env.get("PLIEGO_THUMBNAILS_DIR")
         header = env.get("PLIEGO_TRUSTED_PROXY_HEADER")
         timeout = env.get("PLIEGO_RENDER_TIMEOUT_S")
+        cache_dir = env.get("PLIEGO_RENDER_CACHE_DIR")
         return cls(
             root=root,
             projects_dir=Path(projects) if projects else None,
@@ -116,5 +141,8 @@ class Settings:
             metrics_port=int(env.get("PLIEGO_METRICS_PORT") or 9090),
             require_commons=env.get("PLIEGO_REQUIRE_COMMONS", "1").strip() != "0",
             render_timeout_s=float(timeout) if timeout else RENDER_TIMEOUT_S,
+            render_cache_mb=_megabytes(env, "PLIEGO_RENDER_CACHE_MB", RENDER_CACHE_MB),
+            render_cache_disk_mb=_megabytes(env, "PLIEGO_RENDER_CACHE_DISK_MB", RENDER_CACHE_DISK_MB),
+            render_cache_dir=Path(cache_dir) if cache_dir else None,
             plausible_origin=(env.get("PLIEGO_PLAUSIBLE_ORIGIN") or "").strip(),
         )

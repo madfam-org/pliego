@@ -4,7 +4,7 @@
     "title": "Pliego API",
     "version": "0.1.0",
     "summary": "Sheet hyperobjects (origami, kirigami, papercut, pop-ups, books) as sheet documents and fabrication files.",
-    "description": "Public, anonymous, read-mostly API of the Pliego platform. Every route is also served on the\nlanding and studio hosts (same container); the canonical host is pliego-api.madfam.io.\n\nStrictness: unknown body keys, unknown query keys, unknown modes and out-of-contract parameter\nvalues are rejected with 400. POST bodies must be `application/json` objects of at most\n256 KiB (413 above), without NaN/Infinity or duplicate keys. Requests carrying an\n`Authorization` header are refused (401) until Janua verification is wired.\n\nRenders run the cartridge in a sandboxed subprocess (30 s timeout → 504). Each worker renders\none cartridge at a time (503 + `Retry-After: 1` when busy) and the render routes are\nrate-limited per client address (429 + `Retry-After`); the client address is the tunnel's\n`CF-Connecting-IP`, never `X-Forwarded-For`.\n\nThis file is checked against the Flask URL map by apps/api/tests/test_openapi.py and scripts/qa/verify_openapi.py.\n",
+    "description": "Public, anonymous, read-mostly API of the Pliego platform. Every route is also served on the\nlanding and studio hosts (same container); the canonical host is pliego-api.madfam.io.\n\nStrictness: unknown body keys, unknown query keys, unknown modes and out-of-contract parameter\nvalues are rejected with 400. POST bodies must be `application/json` objects of at most\n256 KiB (413 above), without NaN/Infinity or duplicate keys. Requests carrying an\n`Authorization` header are refused (401) until Janua verification is wired.\n\nRenders run the cartridge in a sandboxed subprocess (30 s timeout → 504). Each worker renders\none cartridge at a time (503 + `Retry-After: 1` when busy); a repeat of an earlier render is answered\nfrom the render cache with the same bytes (`X-Pliego-Cache`) without waiting for that slot and the render routes are\nrate-limited per client address (429 + `Retry-After`); the client address is the tunnel's\n`CF-Connecting-IP`, never `X-Forwarded-For`.\n\nThis file is checked against the Flask URL map by apps/api/tests/test_openapi.py and scripts/qa/verify_openapi.py.\n",
     "license": {
       "name": "AGPL-3.0-only",
       "identifier": "AGPL-3.0-only"
@@ -173,6 +173,9 @@
             "headers": {
               "X-Pliego-Verify": {
                 "$ref": "#/components/headers/Verify"
+              },
+              "X-Pliego-Cache": {
+                "$ref": "#/components/headers/Cache"
               }
             },
             "content": {
@@ -239,6 +242,9 @@
               },
               "X-Pliego-Verify": {
                 "$ref": "#/components/headers/Verify"
+              },
+              "X-Pliego-Cache": {
+                "$ref": "#/components/headers/Cache"
               }
             },
             "content": {
@@ -392,6 +398,17 @@
         "description": "The runner's read-proof line, e.g. `verify: sheets=1 vertices=4 edges=5 faces=2 joins=0 errors=0 warnings=0`.",
         "schema": {
           "type": "string"
+        }
+      },
+      "Cache": {
+        "description": "How the render was answered: `miss` (rendered now, then cached), `hit-memory` or `hit-disk` (the exact bytes of an earlier render with the same slug, mode, effective parameters, formats, cartridge source, commons pin and kernel; a hit does not take the worker's render slot), or `off` (the cache is disabled).",
+        "schema": {
+          "enum": [
+            "miss",
+            "hit-memory",
+            "hit-disk",
+            "off"
+          ]
         }
       }
     },

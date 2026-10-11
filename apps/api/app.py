@@ -25,6 +25,7 @@ from .config import MAX_CONTENT_LENGTH, Settings
 from .hosts import HostRouter
 from .ratelimit import RateLimiter
 from .render import Renderer
+from .render_cache import RenderCache
 from .render_limits import RenderSlot
 
 VERSION = "0.1.0"
@@ -60,9 +61,11 @@ def create_app(settings: Settings | None = None) -> Flask:
     catalog = Catalog(settings.projects, renderer.published_formats, previews.url)
     stocks = StockLibrary(settings.materials)
     limiter = RateLimiter(*settings.rate_limit)
+    cache = RenderCache(settings, metrics)
+    slot = RenderSlot(1)
     app.extensions["pliego"] = {"catalog": catalog, "stocks": stocks, "renderer": renderer,
                                 "limiter": limiter, "metrics": metrics, "hosts": hosts,
-                                "thumbnails": previews}
+                                "thumbnails": previews, "render_cache": cache, "slot": slot}
 
     # Order matters: the metrics-listener gate runs first; security headers apply to everything.
     metrics_mod.install(app, metrics, settings.metrics_port)
@@ -98,7 +101,8 @@ def create_app(settings: Settings | None = None) -> Flask:
                               "endpoints": [f"{m} {rule}" for rule, m in routes]})
 
     app.register_blueprint(create_blueprint(
-        catalog, stocks, renderer, metrics, limiter, RenderSlot(1), previews, version=VERSION,
+        catalog, stocks, renderer, metrics, limiter, slot, previews, cache,
+        version=VERSION,
         require_commons=settings.require_commons, trusted_header=settings.trusted_ip_header))
     thumbnails_mod.register(app, previews)  # before the static catch-all: /projects/<slug>.svg
     static_routes.register(app, settings, hosts, api_index)

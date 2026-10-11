@@ -117,7 +117,7 @@ def tree(tmp_path: Path) -> Path:
 def make_app(tree: Path):
     def factory(**overrides):
         fields = {"root": tree, "cors_origins_raw": ORIGINS, "dev": False,
-                  "require_commons": True}
+                  "require_commons": True, "render_cache_dir": tree / "render-cache"}
         fields.update(overrides)
         app = create_app(Settings(**fields))
         app.testing = True

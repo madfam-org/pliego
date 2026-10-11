@@ -29,6 +29,7 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 | `static_routes.py` | traversal-safe static serving, `?v=` cache-busting stamps, robots, sitemap, llms |
 | `catalog.py`, `manifest.py` | stat-signature-memoized catalog and stock cards; fail-closed manifest checks; strict params |
 | `render.py` | the sandbox runner as a killable subprocess (minimal env, own session, 30 s) |
+| `render_cache.py` | exact render cache: key = slug, mode, effective params, formats, cartridge source digest, commons pin, kernel identity; per-worker memory LRU + shared `/tmp` disk tier, both bounded by bytes; a hit skips the render slot (`X-Pliego-Cache`) |
 | `api_v1.py` | `/health`, `/ready`, `/api/v1/*` |
 | `thumbnails.py` | catalog previews: built at image build time (one crease-pattern SVG per cartridge, default mode, kernel SVG exporter, diagram palette), served at `/projects/<slug>.svg`; the coverage check (`build --strict`) |
 | `metrics.py` | Prometheus text on the metrics listener only (per-worker counters) |
@@ -47,6 +48,10 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 | `PLIEGO_RATE_LIMIT` | `30/60` | renders per window (s) per client, per worker |
 | `PLIEGO_REQUIRE_COMMONS` | `1` | `/ready` refuses an empty commons |
 | `PLIEGO_RENDER_TIMEOUT_S` | `30` | runner timeout |
+| `PLIEGO_RENDER_CACHE_MB` | `16` | render cache memory tier per worker, MiB (`0` turns it off) |
+| `PLIEGO_RENDER_CACHE_DISK_MB` | `32` | render cache disk tier shared by the pod's workers, MiB (`0` turns it off) |
+| `PLIEGO_RENDER_CACHE_DIR` | `$TMPDIR/pliego-render-cache` | the disk tier's directory (atomic writes; corrupt entries are ignored) |
+| `PLIEGO_COMMONS_SHA` | unset | the commons commit for the cache key when there is no `.git` (the image); the cartridge's source digest keeps the key exact without it |
 | `PLIEGO_PLAUSIBLE_ORIGIN` | unset | adds that https origin to `script-src`/`connect-src` on the landing host only |
 | `PLIEGO_DEV` | unset | local development switch |
 | `PLIEGO_ROOT`, `PLIEGO_PROJECTS_DIR`, `PLIEGO_MATERIALS_DIR` | repository paths | overrides (tests) |

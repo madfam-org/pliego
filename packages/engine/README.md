@@ -138,6 +138,12 @@ the mesher builds one side per twin (an unsplit cut is still split by the mesher
 copies share a contact group. Rule 3's area floor is measured per material face (faces joined
 across `J` edges), as the kernel's verify measures it. Test `split-cuts`.
 
+**Presentation** (spec §5.16, `src/xpbd/presentation.js`). A sheet's `presentation.end` blends in
+over the fold program about its root face's t = 0 centroid, in what the World shows: `render()`,
+`creaseLines()` and `pick()` are presented; `grab()`/`moveGrab()` points are mapped back. The
+simulation (`positions`, stats, contact, the ground) is untouched. Rule 17 is checked on load.
+Test `presentation`.
+
 **Perforation tearing.** Perforation lines are split like cuts. Their duplicated vertices are
 re-joined by welds, with a perforation hinge spanning the split. A weld breaks when its force
 exceeds `perf_factor·Y·tear_strain·(length it carries)`. Only the most loaded weld breaks in each

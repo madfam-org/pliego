@@ -24,6 +24,7 @@ import { RenderBuffers } from './render.js';
 import { pcgStep } from './pcg.js';
 import { snapshotWorld, restoreWorld } from './state.js';
 import { JoinGates } from './gates.js';
+import { Presentation } from './presentation.js';
 import * as K from '../constants.js';
 
 const G12 = new Float64Array(12);
@@ -113,6 +114,7 @@ export class World {
     this._grounded = 0;
     this._stringTaut = new Uint8Array(this.terms.count);
     this._factorState = null;
+    this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
   }
 
@@ -473,7 +475,8 @@ export class World {
     if (!(vertex >= 0 && vertex < this.mesh.nV) || this.invMass[vertex] === 0) return false;
     const T = this.terms, t = this.drivers.grabTerm;
     T.verts[T.start[t]] = vertex;
-    T.info[t].target = point.slice(0, 3);
+    this._grabSheet = this.mesh.vSheet[vertex];
+    T.info[t].target = this.presentation.unpresent(point, this._grabSheet); // points arrive in render space
     T.k[t] = this.opts.grabStiffness;
     T.active[t] = 1;
     this.dirty = true;
@@ -481,7 +484,7 @@ export class World {
     return true;
   }
   /** @param {number[]} point */
-  moveGrab(point) { const inf = this.terms.info[this.drivers.grabTerm]; inf.target = point.slice(0, 3); this._asleep = false; }
+  moveGrab(point) { const inf = this.terms.info[this.drivers.grabTerm]; inf.target = this.presentation.unpresent(point, this._grabSheet ?? 0); this._asleep = false; }
   release() {
     const T = this.terms, t = this.drivers.grabTerm;
     if (T.active[t]) { T.active[t] = 0; T.k[t] = 0; this.dirty = true; }

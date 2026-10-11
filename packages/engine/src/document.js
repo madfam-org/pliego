@@ -38,7 +38,7 @@ const JOIN_TYPES = new Set(['glue', 'pivot', 'string', 'pin', 'slider']);
  * @property {Record<string, number>} derived @property {number} grainDeg
  * @property {[number, number]} offset @property {{origin:number[], rotation:number[]}} placement
  * @property {{color:string, art:string|null}} front @property {{color:string, art:string|null}} back
- * @property {{mechanism:string}|null} kinematic @property {any} label
+ * @property {{mechanism:string}|null} kinematic @property {any} label @property {any} presentation spec §5.16 (or null)
  */
 
 /**
@@ -237,8 +237,17 @@ function parseCore(d, plainFold, P) {
       offset: isVec(s.offset, 2) ? [s.offset[0], s.offset[1]] : [0, 0],
       placement: { origin: pl && isVec(pl.origin, 3) ? pl.origin.slice() : [0, 0, 0], rotation },
       front: s.front ?? { color: '#ffffff', art: null }, back: s.back ?? { color: '#ffffff', art: null },
-      kinematic: kin, label: s.label,
+      kinematic: kin, label: s.label, presentation: s.presentation ?? null,
     });
+    // rule 17 (§5.16): presentation has only root_face (a face of this sheet, checked below) and end
+    if (s.presentation !== undefined && s.presentation !== null) {
+      const pr = s.presentation;
+      if (typeof pr !== 'object' || Object.keys(pr).some((k) => k !== 'root_face' && k !== 'end')) P.push(`rule 17: ${where}.presentation has only root_face and end`);
+      else {
+        if (pr.root_face !== undefined && !(isInt(pr.root_face) && pr.root_face < nF && fSheet[pr.root_face] === i)) P.push(`rule 17: ${where}.presentation.root_face ${JSON.stringify(pr.root_face)} is not a face of this sheet`);
+        if (pr.end !== undefined && !(pr.end && isVec(pr.end.origin, 3) && isVec(pr.end.rotation, 4) && Math.abs(Math.hypot(...pr.end.rotation) - 1) < 1e-6)) P.push(`rule 17: ${where}.presentation.end needs a finite origin and a unit quaternion rotation`);
+      }
+    }
   });
   if (!sheets.length && !P.length) P.push('pliego:sheets must not be empty');
   const nS = sheets.length;

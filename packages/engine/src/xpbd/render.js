@@ -1,8 +1,8 @@
 // @ts-check
 /**
  * Render-side views of a World: the render mesh (vertices split into smoothing groups along fold
- * hinges), crease/cut polylines for overlays, and ray picking. Buffers are allocated once and
- * refreshed in place.
+ * hinges), crease/cut polylines for overlays, and ray picking, all presented (spec §5.16,
+ * presentation.js). Buffers are allocated once and refreshed in place.
  */
 
 const KIND = /** @type {Record<string, number>} */ ({ score: 2, perforation: 3, cut: 4 });
@@ -55,18 +55,27 @@ export class RenderBuffers {
       const L = Math.hypot(N[3 * i], N[3 * i + 1], N[3 * i + 2]) || 1;
       N[3 * i] /= L; N[3 * i + 1] /= L; N[3 * i + 2] /= L;
     }
+    const pr = this.w.presentation;
+    if (pr && pr.update()) for (let i = 0; i < r.nR; i++) { pr.point(P, 3 * i, r.sheet[i]); pr.direction(N, 3 * i, r.sheet[i]); }
     return this.out;
   }
 
   creaseLines() {
     const x = this.w.x, S = this.segVerts, P = this.lines.positions;
     for (let i = 0; i < S.length; i++) { const v = 3 * S[i]; P[3 * i] = x[v]; P[3 * i + 1] = x[v + 1]; P[3 * i + 2] = x[v + 2]; }
+    const pr = this.w.presentation;
+    if (pr && pr.update()) for (let i = 0; i < S.length; i++) pr.point(P, 3 * i, this.w.mesh.vSheet[S[i]]);
     return this.lines;
   }
 
   /** Möller–Trumbore against the simulation triangles. @param {number[]} o @param {number[]} d */
   pick(o, d) {
-    const x = this.w.x, m = this.w.mesh, T = m.tris;
+    const m = this.w.mesh, T = m.tris, pr = this.w.presentation;
+    let x = this.w.x;
+    if (pr && pr.update()) { // pick what render() shows (spec §5.16)
+      x = Float64Array.from(x);
+      for (let v = 0; v < m.nV; v++) pr.point(x, 3 * v, m.vSheet[v]);
+    }
     let best = null, bestT = Infinity;
     for (let t = 0; t < m.nT; t++) {
       const a = 3 * T[3 * t], b = 3 * T[3 * t + 1], c = 3 * T[3 * t + 2];

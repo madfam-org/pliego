@@ -4,8 +4,10 @@
 > operational detail lives in MADFAM's private ops repository. See
 > [`docs/PUBLIC_REPO_BOUNDARY.md`](docs/PUBLIC_REPO_BOUNDARY.md).
 
-**Status: incubating** — built in the open, not yet deployed. [`docs/HONEST_STATUS.md`](docs/HONEST_STATUS.md)
-is the single truth for what works today.
+**Status: incubating, first deploy live** — the landing at <https://pliego.madfam.io/>, the studio at
+<https://pliego-app.madfam.io/studio/> and the API at <https://pliego-api.madfam.io/api/v1/catalog>
+(all answering on 2026-10-10). Production changes only when a build is dispatched; merges do not
+auto-deploy. [`docs/HONEST_STATUS.md`](docs/HONEST_STATUS.md) is the single truth for what works today.
 
 *Pliego* (Spanish): a sheet of paper folded in the middle — the printer's sheet that, folded and
 cut, becomes a book's signature.

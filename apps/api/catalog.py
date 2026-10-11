@@ -74,9 +74,11 @@ def _i18n_first_line(value) -> str:
 
 
 class Catalog:
-    def __init__(self, projects_dir: Path, formats_for: Callable[[Cartridge], list[str]]):
+    def __init__(self, projects_dir: Path, formats_for: Callable[[Cartridge], list[str]],
+                 thumbnail_for: Callable[[str], str | None] | None = None):
         self.projects_dir = projects_dir
         self._formats_for = formats_for
+        self._thumbnail_for = thumbnail_for or (lambda _slug: None)
         self._memo = _StatMemo(self._watched, self._load)
 
     def _manifests(self) -> list[Path]:
@@ -126,6 +128,8 @@ class Catalog:
             "slug": cart.slug,
             "name": project["name"],
             "summary": _i18n_first_line(project.get("description")),
+            # same-origin preview URL when the built thumbnail exists (apps/api/thumbnails.py)
+            "thumbnail": self._thumbnail_for(cart.slug),
             "difficulty": project.get("difficulty"),
             "tags": list(project.get("tags", [])),
             "domain": hyper.get("domain"),

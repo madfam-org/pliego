@@ -23,8 +23,10 @@ Three things make a sheet object here:
 The motion is the product: a page turn, a pop-up rising as the book opens, a papel picado banner
 in the wind. So the physics engine is a first-class, verified package, not a preview.
 
-Status (2026-10-10): incubating. Contract, kernel, engine and studio are being built in parallel
-lanes; nothing is deployed. docs/HONEST_STATUS.md is authoritative.
+Status (2026-10-10): incubating, first deploy live. The landing is at https://pliego.madfam.io/,
+the studio at https://pliego-app.madfam.io/studio/ and the API at https://pliego-api.madfam.io/api/v1/
+(one container serves all three). Production changes only when a build is dispatched; merges do
+not auto-deploy. docs/HONEST_STATUS.md is authoritative.
 
 ## Hard rules
 

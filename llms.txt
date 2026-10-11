@@ -3,7 +3,9 @@
 > MADFAM's open-source (AGPL-3.0-only) platform for sheet hyperobjects: origami, kirigami,
 > papercut, pop-up and paper engineering, book structures and interactive paper dioramas.
 > Parametric and fabricable (cut, score and fold files), simulated with real paper physics.
-> Status: incubating; built in the open, not deployed; see docs/HONEST_STATUS.md.
+> Status: incubating, first deploy live: landing https://pliego.madfam.io/, studio
+> https://pliego-app.madfam.io/studio/, API https://pliego-api.madfam.io/api/v1/ (2026-10-10);
+> see docs/HONEST_STATUS.md.
 
 Boundary: public repository. Operational detail lives in MADFAM's private ops repository under the
 repo-boundary contract (docs/PUBLIC_REPO_BOUNDARY.md).

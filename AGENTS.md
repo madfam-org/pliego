@@ -20,7 +20,9 @@ no secrets, no node or network identity, no private runbooks, no prices, no clie
 The platform for **sheet hyperobjects** — origami, kirigami, papercut, pop-up and paper engineering,
 book structures and interactive paper dioramas — with real paper physics. Sibling of Yantra4D
 (solids) and Fashion Cabinet (garments). Commons: `madfam-org/sheet-hyperobjects`, mounted at
-`projects/`. Status: **incubating** (built, not deployed). [`docs/HONEST_STATUS.md`](docs/HONEST_STATUS.md)
+`projects/`. Status: **incubating, first deploy live** (landing `pliego.madfam.io`, studio
+`pliego-app.madfam.io`, API `pliego-api.madfam.io`; builds are dispatched, merges do not deploy).
+[`docs/HONEST_STATUS.md`](docs/HONEST_STATUS.md)
 says what works today; keep it true when you change behaviour.
 
 Read first: [`docs/strategy/architecture.md`](docs/strategy/architecture.md) →
@@ -94,7 +96,8 @@ One container (root `Dockerfile`) serves everything: landing at `/`, studio at `
 modules at `/engine/`, API at `/api/v1/`, `llms.txt` at `/llms.txt`. gunicorn `apps.api.app:app` on
 8000; liveness `/health`, readiness `/ready`; `/metrics` on 9090, internal only. uid 1001, read-only
 root filesystem (only `/tmp` is writable), drop ALL, seccomp RuntimeDefault. Hosts (owner ruling
-2026-10-10; onboarding pending): `pliego.madfam.io`, `pliego-app.madfam.io`, `pliego-api.madfam.io`.
+2026-10-10; live since the first deploy): `pliego.madfam.io`, `pliego-app.madfam.io`,
+`pliego-api.madfam.io`.
 Env names are in [`.env.example`](.env.example) and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Licences

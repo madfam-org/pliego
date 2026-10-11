@@ -6,6 +6,12 @@ back through every layer (clipped to that layer), added to the sheet's arrangeme
 the fold creases, and each face is classified kept/removed by mapping an interior point forward.
 The kept region's boundary becomes the new outline and holes. Exact for polygonal regions (up to
 the 1e-6 mm grid).
+
+`papel_picado(...)` is the panel builder for tissue flags: fold in half (or quarters), cut the
+caller's motif through every layer, check the result (one piece, every bridge at least the
+stock's minimum feature, no face below the spec's area floor), iron it flat and add the top hem
+that folds over the string. Papel picado is the papercut tradition credited to San Salvador
+Huixcolotla, Puebla; cartridges cite it and draw their own motifs.
 """
 
 from __future__ import annotations
@@ -23,7 +29,7 @@ from .geometry import (
     polygon_area,
     polygon_centroid,
 )
-from .sheet import Sheet
+from .sheet import Mark, Placement, Sheet
 from .simplefold import FoldedState, apply, invert
 
 
@@ -198,3 +204,125 @@ def _cw_cmp(back: tuple[int, int], u: tuple[int, int], w: tuple[int, int]) -> in
 
     ku, kw = key(u), key(w)
     return -1 if ku < kw else (1 if ku > kw else 0)
+
+
+# ── papel picado panels ──────────────────────────────────────────────────────
+
+
+@dataclass
+class Picado:
+    """A cut papel picado panel: the ironed-flat sheet, its hem fold and the papercut report."""
+
+    sheet: Sheet
+    hem: Mark | None
+    hem_y: float
+    report: object
+    min_face_mm2: float
+
+    def hem_glue(self, id: str, inset: float = 0.5) -> dict:
+        """Glue join of the hem folded over the string onto the panel's own back (spec §5.3):
+        the hem strip, mirrored about its fold, welds to the back face below it."""
+        from .assembly import glue
+
+        if self.hem is None:
+            raise ValueError("papel_picado: this panel has no hem")
+        xs = [p.x for p in self.sheet.outline]
+        top = max(p.y for p in self.sheet.outline)
+        x0, x1 = min(xs) + inset, max(xs) - inset
+        y0, y1 = self.hem_y + inset, top - inset
+        if x1 - x0 <= 0 or y1 - y0 <= 0:
+            raise ValueError("papel_picado: the hem is too narrow to glue")
+        region = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+        return glue(id, self.sheet, region, self.sheet, (1.0, 0.0, 0.0, -1.0, 0.0,
+                                                         2.0 * self.hem_y), "back")
+
+
+def papel_picado(id: str, width: float, height: float, motif: list[list[PointLike]], *,
+                 hem: float = 12.0, symmetry: int = 1, stock: str = "papel-de-china",
+                 min_feature: float = 1.5, front: str | None = None, back: str | None = None,
+                 label: str | dict | None = None, placement: Placement | None = None,
+                 hem_name: str = "hem") -> Picado:
+    """A papel picado panel ``width`` × ``height`` cut by fold-and-cut.
+
+    The sheet is folded in half about x = width/2 (``symmetry`` 1), or then again about the
+    middle of the cut field y = (height − 2·hem)/2 (``symmetry`` 2, quarters). ``motif`` lists
+    the regions to remove, in the folded frame — the half x ≥ width/2 (and, for quarters, the
+    upper half of the cut field); every region must reach that part and stay below the folded
+    hem (y ≤ height − 2·hem − min_feature) so the hem lies on uncut paper. The cut sheet is
+    checked with `papercut.analyze` (one piece, bridges ≥ ``min_feature``) and the face-area
+    floor ``min_feature``² (spec §8.3), then ironed flat (the fold creases are not kept) and
+    given a mountain hem fold at y = height − hem (the strip that folds back over the string;
+    ``hem`` = 0 for none). Fails loud.
+    """
+    from .papercut import analyze
+
+    if not (width > 0 and height > 0 and hem >= 0 and min_feature > 0):
+        raise ValueError("papel_picado: width, height and min_feature must be positive, hem ≥ 0")
+    if symmetry not in (1, 2):
+        raise ValueError("papel_picado: symmetry must be 1 (half) or 2 (quarters)")
+    field_top = height - 2.0 * hem - (min_feature if hem > 0 else 0.0)
+    if field_top < 0.25 * height:
+        raise ValueError("papel_picado: the hem leaves too little paper to cut")
+    cx, cy = width / 2.0, (height - 2.0 * hem) / 2.0
+    regions = _regions(motif)
+    for k, reg in enumerate(regions):
+        if any(p.y > field_top + 1e-9 for p in reg):
+            raise ValueError(f"papel_picado: motif region {k} reaches the hem "
+                             f"(keep y ≤ {field_top:g})")
+        if not any(p.x > cx + 1e-6 and (symmetry == 1 or p.y > cy + 1e-6) for p in reg):
+            raise ValueError(f"papel_picado: motif region {k} lies outside the folded part "
+                             "(x > width/2" + (", y above the middle)" if symmetry == 2
+                                               else ")"))
+    state = FoldedState([Vec2(0, 0), Vec2(width, 0), Vec2(width, height), Vec2(0, height)])
+    state.fold(((cx, 0.0), (cx, height)), "valley")
+    if symmetry == 2:
+        state.fold(((width, cy), (cx, cy)), "valley")
+    res = cut(state, regions, id=f"{id}-cut", stock=stock)
+    if not res.connected:
+        raise ValueError(f"papel_picado: the cut leaves {len(res.islands)} loose piece(s)")
+    flat = Sheet(id, list(res.sheet.outline), stock=stock, grain_deg=90.0, label=label,
+                 front=front, back=back if back is not None else front, placement=placement)
+    for h in res.sheet.holes:
+        flat.hole(list(reversed(h)))
+    rep = analyze(flat, min_feature_mm=min_feature)
+    if not rep.ok:
+        raise ValueError("papel_picado: " + "; ".join(i["detail"] for i in rep.issues
+                                                       if i["level"] == "error"))
+    hem_mark = None
+    if hem > 0:
+        hem_mark = flat.mountain((0.0, height - hem), (width, height - hem), 180.0,
+                                 name=hem_name)
+    smallest = material_min_area(flat.build())
+    floor = max(1.0, min_feature ** 2)
+    if smallest < floor:
+        raise ValueError(f"papel_picado: a face of {smallest:.2f} mm² is below the "
+                         f"{floor:.2f} mm² floor (spec §8.3); enlarge the panel or the motif")
+    return Picado(flat, hem_mark, height - hem, rep, smallest)
+
+
+def material_min_area(arr) -> float:
+    """Smallest material face area (mm²): faces joined across `J` edges (hole bridges, spec §2)
+    count as one region, as in the document's area floor (spec §8.3)."""
+    jset = {frozenset(e) for e, asg in zip(arr.edges, arr.assignment, strict=True) if asg == "J"}
+    parent = list(range(len(arr.faces)))
+
+    def find(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    owner: dict[frozenset, int] = {}
+    for i, f in enumerate(arr.faces):
+        for k in range(len(f)):
+            side = frozenset((f[k], f[(k + 1) % len(f)]))
+            if side in jset:
+                g = owner.setdefault(side, i)
+                ri, rg = find(i), find(g)
+                if ri != rg:
+                    parent[max(ri, rg)] = min(ri, rg)
+    area: dict[int, float] = {}
+    for i, f in enumerate(arr.faces):
+        r = find(i)
+        area[r] = area.get(r, 0.0) + abs(polygon_area([arr.vertices[v] for v in f]))
+    return min(area.values())

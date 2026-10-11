@@ -152,16 +152,40 @@ def _cross(a, b):
     return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
 
 
-def sample_step(tree, readout, poses_at, ts0, cur, end, folds, sid):
+FLAT_DEG = 1e-9      # a crease this close to 0° is open: it has no sign to keep at ±180°
+
+
+def _at_180(a: float) -> bool:
+    return abs(abs(a) - 180.0) < 1e-4
+
+
+def approach_signs(readout, poses_at, t0: float, t1: float, prev: dict, ang: dict) -> dict:
+    """`prev` with a sign for every crease that reads ±180° at t1 but was open at t0: the
+    sign of its angle halfway (spec §5.38) — a move from 0 to ±180° in one sample otherwise
+    takes its sign from round-off."""
+    flips = [e for e, a in ang.items() if _at_180(a) and abs(prev.get(e, 0.0)) < FLAT_DEG]
+    if not flips:
+        return prev
+    half = readout(poses_at((t0 + t1) / 2.0), prev)
+    return {**prev, **{e: half[e] for e in flips if abs(half[e]) > FLAT_DEG}}
+
+
+def sample_step(tree, readout, poses_at, ts0, cur, end, folds, sid, end_follows_motion=False,
+                keep=frozenset()):
+    """Angles at the sample times, refined (midpoints inserted) wherever the preview's
+    linear blend between two samples tears more than MID_TEAR_MM, up to MAX_SAMPLES. A crease
+    that reaches ±180° takes the sign it approaches with (`approach_signs`, spec §5.38); with
+    `end_follows_motion` (a tuck) so does the end state, whose layer order may say the other
+    sign for the same pose. The creases in `keep` (tucked earlier) keep their sign while they
+    stay at ±180°, whatever a later end state's layer order says."""
     from .flatstate import FlatStateError
 
-    """Angles at the sample times, refined (midpoints inserted) wherever the preview's
-    linear blend between two samples tears more than MID_TEAR_MM, up to MAX_SAMPLES."""
     ts = sorted(set(ts0))
     done = None
     while True:
         prev, seq, tears, mids, devs = dict(cur), [], [], [], []
         last = cur
+        t0 = 0.0
         for t in ts:
             poses = poses_at(min(t, 1.0))
             ang = readout(poses, end if (end is not None and t >= 1.0) else prev)
@@ -172,15 +196,29 @@ def sample_step(tree, readout, poses_at, ts0, cur, end, folds, sid):
                     raise FlatStateError(f"step '{sid}': the motion does not end in the "
                                          f"folded state ({bad:.3g}° off)")
                 ang = dict(end)
+                if end_follows_motion:
+                    seen = approach_signs(readout, poses_at, t0, min(t, 1.0), prev, ang)
+                    for e, a in end.items():
+                        if _at_180(a) and abs(seen.get(e, 0.0)) > FLAT_DEG \
+                                and (seen[e] > 0) != (a > 0):
+                            ang[e] = -a
             else:
+                guide = approach_signs(readout, poses_at, t0, min(t, 1.0), prev, ang)
+                if guide is not prev:
+                    ang = readout(poses, guide)
                 ang = tree.fit(poses, ang)
+            for e in keep:      # a tucked crease at ±180° keeps the sign it was tucked with
+                a, b = ang.get(e), last.get(e, 0.0)
+                if a is not None and a != b and abs(abs(a) - 180.0) < 1e-6 \
+                        and abs(abs(b) - 180.0) < 1e-6:
+                    ang[e] = b
             full = {**last, **ang}
             drawn = tree.pose(full)
             tears.append(tree.tear(drawn))
             devs.append(tree.deviation(drawn, _rooted(poses, drawn)))
             mids.append(tree.tear(tree.pose({e: (last[e] + full[e]) / 2.0 for e in folds})))
             seq.append(ang)
-            prev, last = ang, full
+            prev, last, t0 = ang, full, min(t, 1.0)
         if done is not None and max(mids) > 0.75 * max(done[2]):
             return done           # refining does not help: a jump the blend cannot follow
         done = (seq, tears, mids, devs)

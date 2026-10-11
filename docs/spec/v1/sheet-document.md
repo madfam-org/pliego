@@ -732,6 +732,28 @@ masu lid needed its square rounded to 8 µm).
   1e-5°).
 <!-- lane FL3 (w4/fold-robustness) §5.37: end -->
 
+<!-- lane FL3 (w4/fold-robustness) §5.38: begin -->
+### 5.38 Kernel fold programs: the sign of a crease at ±180°
+
+A crease folded flat is +180° (valley) or −180° (mountain): one pose for paper of no thickness,
+two layer orders. The preview blends angles linearly between steps, so a wrong sign swings
+the paper the long way round, through itself. The kernel signs a crease at ±180° as follows:
+
+- **By its motion.** A crease that goes from open (0°) to ±180° within one sample takes the sign
+  of its angle halfway through that sample. It took the sign of round-off before (the masu's
+  flap had to be sampled at 0.5 as well).
+- **A tuck's end.** A tuck turns its flap the simple fold's way and ends with it behind the
+  pocket's wall: its layer order may give the flap's crease the other sign than the motion
+  for the same pose. The step's end takes the motion's sign (the balloon's points end turned
+  towards the viewer), and later steps keep that sign while the crease stays at ±180°.
+- **At a rigid step's start** (`FoldProgram.kinematic`), a crease at ±180° whose faces keep
+  their flat-state placement takes the flat state's sign (§5.35). One that a 3-D step folded
+  takes the sign that step approached it with, read halfway.
+
+`Built.final_angles` and `target()` still give the layer order's signs; `pose_angles`, the
+sequence and `target(pose=True)` give the motion's.
+<!-- lane FL3 (w4/fold-robustness) §5.38: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any

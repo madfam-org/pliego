@@ -268,3 +268,17 @@ def test_mat_mul3_is_space_mat_mul_bit_for_bit():
         x, y = mat_mul(a, b), flatmotion.mat_mul3(a, b)
         assert all(struct.pack("d", x[i][j]) == struct.pack("d", y[i][j])
                    for i in range(3) for j in range(3))
+
+
+# ── spec §5.38: a crease reaching ±180° in one sample takes the sign of its motion ──
+
+def test_masu_flap_signs_do_not_need_a_halfway_sample():
+    # the commons read the masu flap's step at [0.5, 1] so its creases took their sign from
+    # the motion, not from round-off at 180°
+    plain = fm.masu_box()[0].build()
+    fp, _ = fm.masu_box()
+    for r in fp.recs:
+        if r.sid.startswith("flap"):
+            r.move.samples[:] = [0.5, 1.0]
+    halfway = fp.build()
+    assert plain.pose_angles == halfway.pose_angles

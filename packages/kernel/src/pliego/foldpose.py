@@ -546,18 +546,31 @@ class Pose3:
 
     def _start_angle(self, state: FlatState, f: int, g: int, a3, b3) -> float:
         """The fold angle of the crease a3 → b3 between faces f and g as posed now. A crease
-        folded flat reads ±180° by the sign of round-off; while its faces keep the relative
-        placement of the flat state, its sign is the flat state's (spec §5.35)."""
+        folded flat reads ±180° by the sign of round-off. While its faces keep the relative
+        placement of the flat state, its sign is the flat state's (spec §5.35); once a 3-D
+        step moved them, it is the sign the last such step approached it with, read halfway
+        (spec §5.38)."""
         rho = dihedral(self.world[f][0], self.world[g][0], a3, b3)
-        if abs(abs(rho) - 180.0) < 1e-6 and state.faces[f].flipped != state.faces[g].flipped:
-            rel = flatmotion.compose(flatmotion.invert(self.world[f]), self.world[g])
-            flat = flatmotion.compose(flatmotion.invert(embed3(state.faces[f].xf)),
-                                      embed3(state.faces[g].xf))
-            if rigid_dev(rel, flat) < 1e-9:
-                try:
-                    return state.crease_angle(f, g)
-                except FlatStateError:
-                    pass
+        if abs(abs(rho) - 180.0) >= 1e-6:
+            return rho
+        rel = flatmotion.compose(flatmotion.invert(self.world[f]), self.world[g])
+        flat = flatmotion.compose(flatmotion.invert(embed3(state.faces[f].xf)),
+                                  embed3(state.faces[g].xf))
+        if rigid_dev(rel, flat) < 1e-9 and state.faces[f].flipped != state.faces[g].flipped:
+            try:
+                return state.crease_angle(f, g)
+            except FlatStateError:
+                pass
+        cf, cg = centroid(state.poly(f)), centroid(state.poly(g))
+        for st_old, fn in reversed(self.history):
+            mf, mg = st_old.face_at(cf), st_old.face_at(cg)
+            w0, w1 = fn(0.0), fn(1.0)
+            if rigid_dev(flatmotion.compose(flatmotion.invert(w0[mf]), w0[mg]),
+                         flatmotion.compose(flatmotion.invert(w1[mf]), w1[mg])) < 1e-9:
+                continue
+            wh = fn(0.5)
+            half = dihedral(wh[mf][0], wh[mg][0], a3, b3)
+            return math.copysign(180.0, half) if abs(half) > 1e-9 else rho
         return rho
 
     # ── a flat fold inside a coplanar group ──

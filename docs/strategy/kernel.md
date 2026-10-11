@@ -353,6 +353,14 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   step went from about 15.8 s to 1.1 s, the kernel's masu test from 43 s to 7 s, and the
   commons masu-box render in the runner from 33 s to about 5 s (a busy laptop; ±50 %).
   Documents are byte-identical.
+- **Signs at ±180°** (spec §5.38). `preview.approach_signs`: a crease that reaches ±180° from
+  open within one sample takes its halfway sign. `sample_step(..., end_follows_motion=,
+  keep=)`: a tuck's end takes the motion's sign where its layer order says the other, and
+  `FoldProgram.build` keeps those creases' sign in later steps while they stay at ±180°.
+  `Pose3._start_angle` reads a crease that a 3-D step folded flat by that step's halfway sign.
+  Proof: the waterbomb balloon's eight tuck creases end at the sign they approach with and no
+  target swings past 180° (`test_tucked_points_end_turned_towards_the_viewer`); the masu's
+  flaps build the same angles with or without the commons' [0.5, 1] samples.
 <!-- FL3 (wave 4, fold-program robustness) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

@@ -452,6 +452,7 @@ class FoldProgram:
         start_angles = dict(cur)
         prev_state, prev_map = self.start, fmap(self.start)
         on_points = None
+        kept: set[int] = set()
         for rec in self.recs:
             # candidate motions: t ∈ (0, 1] ↦ intended poses of the pattern's faces
             cands: list = []
@@ -552,8 +553,10 @@ class FoldProgram:
                     emit, start_angles = True, dict(cur)
                 continue
             best = None
+            tucked = rec.move is not None and rec.move.kind == "tuck"
             for ci, poses_at in enumerate(cands):
-                res = sample_step(tree, readout, poses_at, ts0, cur, end, folds, rec.sid)
+                res = sample_step(tree, readout, poses_at, ts0, cur, end, folds, rec.sid,
+                                  end_follows_motion=tucked, keep=frozenset(kept))
                 score = max(res[1] + res[2])
                 if best is None or score < best[0] - 1e-9:
                     best = (score, res[0], max(res[1]), max(res[2]), max(res[3]), ci)
@@ -581,6 +584,12 @@ class FoldProgram:
                                       note=rec.note if k == 1 else None))
                 last = full
             cur = last
+            # a tuck's crease that ends at ±180° against its layer order keeps that sign while
+            # it stays there (spec §5.38)
+            kept = {e for e in kept if abs(abs(cur[e]) - 180.0) < 1e-6}
+            if tucked and end is not None:
+                kept |= {e for e in folds if abs(abs(cur[e]) - 180.0) < 1e-6
+                         and cur[e] == -end[e]}
             worst, worst_mid, worst_dev = max(worst, tear), max(worst_mid, mid), max(worst_dev, dev)
             if max(tear, mid) <= EXACT_MM:
                 exact += 1

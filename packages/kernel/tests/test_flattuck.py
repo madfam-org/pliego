@@ -83,3 +83,27 @@ def test_tuck_errors():
         tuck(st, line, "valley", pocket=((20.0, 5.0), 1), **sel)
     with pytest.raises(FlatStateError, match="layers over the pocket"):
         tuck(st, line, "valley", pocket=(m.info["pocket"][0], 40), **sel)
+
+
+def _runs(b):
+    """(step id, edge, angle before, target) for every target of a built program."""
+    run, out = dict(b.start_angles), []
+    for st in b.sequence.steps:
+        for ref, a in st.targets:
+            out.append((st.id, ref.edge, run.get(ref.edge, 0.0), a))
+            run[ref.edge] = a
+    return out
+
+
+def test_tucked_points_end_turned_towards_the_viewer():
+    # spec §5.38: the balloon's points go down over the front (+45 … +135 on the crease
+    # between point and face) and slide behind the pocket's wall: the layer order says −180,
+    # the motion +180 — the same pose. The end takes the motion's sign, so the preview does
+    # not swing the points back round through the paper, and later steps keep it.
+    fp, _ = fm.waterbomb_balloon()
+    b = fp.build()
+    runs = _runs(b)
+    assert not [r for r in runs if abs(r[3] - r[2]) > 180.0 + 1e-6]
+    tucks = [r for r in runs if "tuck" in r[0]]
+    ends = [r for r in tucks if abs(abs(r[3]) - 180.0) < 1e-9]
+    assert len(ends) == 8 and all(r[2] * r[3] > 0 for r in ends)     # same sign as at 135°

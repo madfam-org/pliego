@@ -109,8 +109,8 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
     rule30_circuit(d, out)  # §5.30 continuity (lane FL3 wiring)
     meta = d.get("pliego:meta") or {}
     extra = sorted(set(meta) - META_KEYS) if isinstance(meta, dict) else []
-    if extra:  # rule 16 (§5.7): the schema closes pliego:meta; a warning until the commons is clean
-        out.warn(16, "meta_unknown_key", f"pliego:meta has keys outside §5.7: {extra} (the "
+    if extra:  # rule 16 (§5.7): the schema closes pliego:meta (an error since 2026-10-11)
+        out.err(16, "meta_unknown_key", f"pliego:meta has keys outside §5.7: {extra} (the "
                  "schema rejects them; put cartridge data in params or step notes)")
     if meta.get("digest") is not None and meta["digest"] != doc.digest():
         out.err(10, "digest_mismatch", f"meta.digest {meta['digest']} != {doc.digest()}")

@@ -808,7 +808,9 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
 5. Sheets do not overlap in the layout frame.
 6. Every `stock` key resolves; every `derived` block is complete (§5.2 keys).
 7. Every join, mechanism and control reference resolves; glue regions lie inside sheet *a*; join
-   points lie inside their sheets.
+   points lie inside their sheets. A mechanism's control has a kind that mechanism accepts:
+   `angle` for `hinge`, `rotate` and `leaf`; `distance` or `angle` for `translate` and `slide`.
+   A `sequence` control drives the fold program, never a mechanism.
 8. Every sequence target references an `M`/`V`/`F` edge; angles are in [−180, 180].
 9. If `initial` is present, its edge lengths match the layout lengths within 1e-3 relative error
    (sheets are developable — folding never stretches paper), and every glue weld (except a
@@ -836,15 +838,14 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
 15. Mechanisms move only rigid sheets (§5.4): every sheet a `hinge`, `rotate` or `translate`
     lists in `sheets_moving` is kinematic on that mechanism (`kinematic.mechanism` = its id),
     and the sheet a `leaf` turns is physical (`kinematic: null`) — a leaf bends its page. The
-    engine refuses both mistakes; the kernel reports them as a warning
-    (`mechanism_moves_physical`, `leaf_on_kinematic`) until every landed cartridge is clean, then
-    as an error.
+    engine refuses both mistakes, and so does the kernel: an error (`mechanism_moves_physical`,
+    `leaf_on_kinematic`) since 2026-10-11, when the last landed cartridge was cleaned.
 <!-- lane H (w3/hardening) rule 15: end -->
 <!-- lane H (w3/hardening) rule 16: begin -->
 16. `pliego:meta` carries only the §5.7 keys (`cartridge`, `mode`, `params`, `kernel`,
     `min_feature_mm`, `digest`); the schema closes the object. Cartridge data belongs in
-    `params` or in step notes. The kernel reports extra keys as a warning (`meta_unknown_key`)
-    until the commons is clean, then as an error.
+    `params` or in step notes. The kernel reports extra keys as an error (`meta_unknown_key`)
+    since 2026-10-11, when the commons was cleaned.
 <!-- lane H (w3/hardening) rule 16: end -->
 <!-- lane H (w3/hardening) rule 17: begin -->
 17. Presentation (§5.16): a sheet's `presentation` has only `root_face` and `end`; `root_face`

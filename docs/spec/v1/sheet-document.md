@@ -634,6 +634,42 @@ book's ribbons are untied before it opens; a brad comes out; a pinned sheet is l
 
 <!-- lane E (wave 3) §5.18–§5.20: end -->
 
+<!-- lane X (w3/trace-finish) §5.30: begin -->
+### 5.30 Conductive traces — `pliego:finishes[k]` with `kind: "trace"`
+
+A paper circuit's conductors are finishes on one side of a sheet (`pliego.press.trace`):
+copper tape or conductive ink laid along a centre line, with contact pads where parts sit.
+
+```json
+{"id": "plus", "kind": "trace", "sheet": "card", "side": "front", "depth_mm": 0,
+ "material": "copper-tape", "width_mm": 6, "path": [[20, 20], [20, 80], [60, 80]],
+ "region": [[[23, 17], [23, 77], [63, 77], [63, 83], [17, 83], [17, 17]]],
+ "pads": [{"id": "cell-plus", "at": [20, 20], "size_mm": 10, "part": "cell", "pin": "plus"},
+          {"id": "led-a", "at": [60, 80], "size_mm": 6, "part": "led", "pin": "anode"}]}
+```
+
+- `material` ∈ `copper-tape conductive-ink`; `width_mm` ∈ (0, 50]; `depth_mm` is 0 (the layer
+  adds no relief the engine models).
+- `path` (≥ 2 points, sheet-local mm) is the centre line; `region` is the conductor's outline —
+  the path stroked by the width, square ends (the tape runs half a width past each end),
+  mitred joins, counter-clockwise — so rule 13 checks it lies on its sheet like any finish region. The kernel
+  refuses paths that turn sharper than 120° or cross themselves (split them into traces).
+- `pads[]`: `id` (unique in the trace), `at`, `size_mm` (a square pad), and optionally `part`
+  (a part id) with `pin` ∈ `plus minus` (a coin cell), `anode cathode` (an LED) or `contact`
+  (a fold switch: the switch is the `part`, its contacts are two pads). A pad touches its
+  trace (centre within half the width plus half the pad of the path).
+- **Exports.** The dieline export profile draws each trace on its own layers: the conductor's
+  outline (`Copper tape (outline)` / `Conductive ink (outline)` — what a cutter cuts from tape
+  or a pen fills with ink), its centre line (`… (centre line)`, an open polyline a plotter
+  follows to lay tape or ink) and the pads (`Contact pads`), each with its own spot colour and
+  DXF layer.
+- **Parts are not paper.** LEDs, coin cells, tape and ink are named by the pads only; they carry
+  no geometry or physics in v1. Linking them to the keystone's standard-parts catalogue is a
+  follow-up (the catalogue has no LED or coin cell entry yet).
+- **Engine.** v1 records the traces only: the engine does not stiffen taped areas and the studio
+  does not render the conductor.
+<!-- lane X (w3/trace-finish) §5.30: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -728,6 +764,21 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     `pin` join; no join is released twice; a join with `active_from` is released only by a later
     step.
 <!-- lane E (wave 3) rules 19–21: end -->
+<!-- lane X (w3/trace-finish) rule 30: begin -->
+30. Paper circuits (§5.30), checked by `pliego.press.circuit(finishes, closed=…)` — not yet
+    wired into `Document.verify()`: every trace finish passes §5.30 (rule 13 already applies
+    its record checks); traces on the same sheet and side whose conductors overlap form one
+    net, and a fold switch named closed joins its contact pads. With exactly one cell, whose
+    `plus` and `minus` pads sit on different nets (else `short`), the circuit is **closed**
+    when a path runs from `plus` to `minus` through LEDs, each crossed from `anode` to
+    `cathode`; a loop that closes only through an LED crossed backwards is `reversed`. A part
+    missing a pin (`part`), a pin given twice (`pin_twice`), a switch with fewer than two
+    contacts (`switch`) or not exactly one cell (`cell`) is an error; an LED with both pins on
+    one net (`led_shorted`) and more than one LED in series on the loop (`series_leds`: their
+    forward voltages add up) are warnings. `pliego.press.fold_switch_closes` checks the
+    geometry of a fold switch: folding the sheet by 180° on the line brings its two contacts
+    face to face on the side that folds inward.
+<!-- lane X (w3/trace-finish) rule 30: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

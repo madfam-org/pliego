@@ -195,7 +195,7 @@ function markdown(rows, sum, meta) {
     L.push(`## ${title} (${list.length})`, '');
     if (!list.length) { L.push('None.', ''); return; }
     L.push(`| doc | ${cols.join(' | ')} |`, `|---|${cols.map(() => '---').join('|')}|`);
-    for (const r of list.slice(0, 15)) L.push(`| ${r.doc} | ${cols.map((c) => String(csvCell(r[c])).replace(/\|/g, '\\|').slice(0, 140)).join(' | ')} |`);
+    for (const r of list.slice(0, 15)) L.push(`| ${r.doc} | ${cols.map((c) => String(csvCell(r[c])).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').slice(0, 140)).join(' | ')} |`);
     L.push('');
   };
   worst('Rejected', (r) => r.status === 'rejected', 'docVertices', ['rules', 'error']);

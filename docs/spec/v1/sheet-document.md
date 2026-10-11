@@ -692,6 +692,25 @@ drive. It changes no document field: the step's targets are signed fold angles (
   names `frame="folded"`.
 <!-- lane FL3 (w4/fold-robustness) §5.35: end -->
 
+<!-- lane FL3 (w4/fold-robustness) §5.36: begin -->
+### 5.36 Kernel fold programs: the branch of a rigid step does not depend on its sampling
+
+A kernel rigid step (`FoldProgram.kinematic`) is sampled at `4 × substeps` states on the chord
+continuation (§5.6, `kinematics.solve(..., along="chord")`). Where the rigid paths branch (a
+flat or flat-folded start), a coarse sampling could let the predictor jump to a neighbouring
+branch between two samples, so the folded result depended on `substeps` (a masu gusset folding
+out at 5).
+
+- After solving, the kernel checks the path: a hinted free crease must stay on its hinted side
+  of its start angle, and a free crease that has left flat on one side must not turn up on the
+  other.
+- A path that fails is solved again with 2, 4, 8, then 16 internal states per sample. The
+  states at the sample fractions are the same closed states of one branch, so the program keeps
+  them and drops the rest: every sampling gives the same states where their fractions agree.
+- A free crease that still flips at the finest refinement passes through flat for real, and the
+  path is kept. A hinted crease that still turns against its hint fails the step.
+<!-- lane FL3 (w4/fold-robustness) §5.36: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any

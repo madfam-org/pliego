@@ -391,7 +391,7 @@ def newspaper_hat(w: float = 380.0, h: float = 580.0) -> FoldProgram:
     return fp
 
 
-def masu_box(s: float = 200.0):
+def masu_box(s: float = 200.0, substeps: int = 6):
     """The traditional masu box: crease the square's midlines (it is turned to a diamond), blintz,
     crease each edge to the centre line through every layer, open the top and bottom corners;
     raise the side walls (hinge); raise each end wall while its corners fold in (a rigid step on
@@ -433,7 +433,7 @@ def masu_box(s: float = 200.0):
                      ((o(sx * q, sy * q), o(sx * q, sy * 3 * q)), "valley"),   # gusset in
                      (o(sx * q, sy * q), o(sx * 2 * q, sy * 2 * q))]
         fp.kinematic(f"end-{tag}", "end wall", [((o(-q, sy * q), o(q, sy * q)), 90.0)],
-                     free=free, fixed=(h, h))
+                     free=free, fixed=(h, h), substeps=substeps)
         line = (o(-lh, 2 * q), o(lh, 2 * q)) if sy > 0 else (o(lh, -2 * q), o(-lh, -2 * q))
         fp.fold(f"flap-{tag}", "flap", line, "valley",
                 within=flat.preimage(o(0.0, sy * 1.5 * q)), sheet_points=[corner[(0, sy)]],

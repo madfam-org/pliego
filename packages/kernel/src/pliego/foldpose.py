@@ -129,6 +129,29 @@ def components(state: FlatState, cut_segs: Sequence[tuple[Pt, Pt]]) -> list[int]
 
 NUDGES_DEG = (2.0, 5.0, 10.0, 20.0)   # a hinted free crease leaves a bifurcation by this
                                       # much first (the first that lets the chord path through)
+REFINE = (1, 2, 4, 8, 16)   # internal substeps per requested one, tried in turn (spec §5.36)
+FLIP_DEG = 1e-6             # a free crease further than this from flat has taken a side
+
+
+def branch_jump(path: list[dict[int, float]], cur: dict[int, float], free: Iterable[int],
+                hints: dict[int, int]) -> str | None:
+    """Why a solved path left its branch, or None (spec §5.36): a hinted crease back on the
+    wrong side of its start angle, or a free crease that, once off flat on one side, turns up on
+    the other — the chord predictor jumped to a neighbouring rigid branch between two samples."""
+    for e, sg in sorted(hints.items()):
+        for k, st in enumerate(path):
+            if (st[e] - cur[e]) * sg < -FLIP_DEG:
+                return f"hinted crease {e} turned against its hint at substep {k}"
+    for e in sorted(set(free) - set(hints)):
+        side = 0
+        for k, st in enumerate([cur] + path):
+            a = st[e]
+            if abs(a) <= FLIP_DEG or abs(a) >= 180.0 - FLIP_DEG:
+                continue
+            if side and (a > 0) != (side > 0):
+                return f"free crease {e} flipped from {'+' if side > 0 else '-'} at substep {k}"
+            side = 1 if a > 0 else -1
+    return None
 
 
 def solve_step(arr, cur: dict[int, float], drive: dict[int, float], free: Iterable[int],
@@ -137,11 +160,19 @@ def solve_step(arr, cur: dict[int, float], drive: dict[int, float], free: Iterab
     every other crease holds (`kinematics.solve`, chord continuation). `hints` (edge → ±1): at a
     start where the rigid paths branch (a gusset that may fold in or out), those free creases
     first turn the hinted way (valley +, mountain −) by the first of NUDGES_DEG that lets the
-    chord path through, the rest following."""
+    chord path through, the rest following.
+
+    The branch does not depend on `steps` (spec §5.36): a path that jumps branch between two
+    samples (`branch_jump`) is solved again with REFINE internal substeps per sample — the chord
+    continuation's states at the sample fractions are the same closed states on one branch, so
+    the samples are kept and the extra states dropped. A path that still flips a free crease at
+    the finest refinement is kept (that crease passes through flat); one that still turns a
+    hinted crease against its hint is refused."""
     from .kinematics import solve
     from .motion import KinematicsError
 
     free = set(free)
+    hints = dict(hints or {})
     fixed = [e for e in cur if e not in drive and e not in free]
     last = None
     for nud in (NUDGES_DEG if hints else (0.0,)):
@@ -154,11 +185,25 @@ def solve_step(arr, cur: dict[int, float], drive: dict[int, float], free: Iterab
                 first = solve(arr, start, nudge, fixed=fixed_n, steps=1, along="drive")
                 start = {**cur, **first[-1]}
                 out.append(dict(start))
-            path = solve(arr, start, drive, fixed=fixed, steps=steps, along="chord")
         except KinematicsError as exc:
             last = exc
             continue
-        return out + [{**start, **s} for s in path]
+        kept = None
+        for r in REFINE:
+            try:
+                path = solve(arr, start, drive, fixed=fixed, steps=steps * r, along="chord")
+            except KinematicsError as exc:
+                last = exc
+                continue
+            full = [{**start, **st} for st in path]
+            why = branch_jump(out[1:] + full, cur, free, hints)
+            if why is None:
+                return out + full[r - 1::r]
+            last = KinematicsError(why)
+            if not why.startswith("hinted"):
+                kept = full[r - 1::r]
+        if kept is not None:
+            return out + kept
     raise FlatStateError(f"kinematic step: no rigid path ({last})") from last
 
 
@@ -599,5 +644,5 @@ def _height(w: flatmotion.Rigid, lmap: flatmotion.Rigid, q: Pt, n) -> float:
     return dot(sub(p0, o), nf) / den
 
 
-__all__ = ["PENETRATION_MM", "Pose3", "components", "creases_on", "dihedral", "edges_on",
-           "hinge_line", "layer_signs", "penetration", "poses_of", "solve_step"]
+__all__ = ["PENETRATION_MM", "Pose3", "branch_jump", "components", "creases_on", "dihedral",
+           "edges_on", "hinge_line", "layer_signs", "penetration", "poses_of", "solve_step"]

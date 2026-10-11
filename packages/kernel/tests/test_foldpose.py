@@ -160,3 +160,42 @@ def test_kinematic_rolls_the_ring_wing_with_its_folded_leading_edge():
     assert worst_dev(kin, hin) < 1e-9
     row = kin.build("strip").report["rows"][-1]
     assert row["kind"] == "kinematic" and row["tear_mm"] < 1e-6
+
+
+# ── spec §5.36: the branch of a rigid step does not depend on its sampling ──
+
+def masu_inside(fp, g) -> float:
+    """How far the finished masu's paper reaches outside its walls (mm; 0 = a box)."""
+    q, h = g["q"], g["h"]
+    st, w = fp.state, fp.pose.world
+    pts = [flatmotion.apply(w[f], (st.points[v][0], 0.0, -st.points[v][1]))
+           for f in range(len(st.faces)) for v in st.faces[f].verts]
+    return max(max(abs(p[0] - h), abs(p[2] + h)) for p in pts) - q
+
+
+def test_masu_gussets_fold_in_at_any_substep_count(monkeypatch):
+    paths = {}
+    orig = foldpose.solve_step
+
+    def spy(arr, cur, drive, free, steps, hints=None):
+        out = orig(arr, cur, drive, free, steps, hints)
+        paths.setdefault(steps, []).append(out)
+        return out
+    monkeypatch.setattr(foldpose, "solve_step", spy)
+    for n in (5, 10):    # 5 folded a gusset of the bottom wall outward before
+        fp, g = fm.masu_box(substeps=n)
+        assert masu_inside(fp, g) < 1e-6
+    # the same closed states at the fractions both samplings share (after the hint's nudge)
+    for a, b in zip(paths[20], paths[40], strict=True):
+        for k in range(1, 21):
+            sa, sb = a[1 + k], b[1 + 2 * k]
+            assert max(abs(sa[e] - sb[e]) for e in sa) < 1e-6
+
+
+def test_branch_jump_names_the_crease():
+    cur = {1: 0.0, 2: 0.0}
+    assert foldpose.branch_jump([{1: 2.0, 2: -1.0}, {1: -3.0, 2: -2.0}], cur, [1, 2], {}) == \
+        "free crease 1 flipped from + at substep 2"
+    assert "against its hint" in foldpose.branch_jump([{1: -2.0, 2: 0.0}], cur, [1, 2], {1: 1})
+    assert foldpose.branch_jump([{1: 2.0, 2: 180.0}, {1: 5.0, 2: -180.0}], cur, [1, 2], {}) \
+        is None

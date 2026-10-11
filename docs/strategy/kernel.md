@@ -335,6 +335,12 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   canard's fuselage opening (its nose roll is turned over) and the ring wing's roll (its folded
   leading edge), each equal to the composed hinge poses the commons uses today
   (`tests/test_foldpose.py`, `flat_models.ring_wing`, `canard_plane(kinematic_open=True)`).
+- **Branch independent of sampling** (spec §5.36). `foldpose.solve_step` checks the solved path
+  (`branch_jump`: a hinted crease back across its start, a free crease flipping sides) and
+  solves a failing path again with 2, 4, 8, 16 internal states per sample, keeping the samples.
+  Proof: the masu box folds its gussets in at every `substeps` from 1 to 8 (5, 7 and 8 folded a
+  bottom gusset out, 1 had no path), and substeps 5 and 10 give the same states where their
+  fractions agree (`test_masu_gussets_fold_in_at_any_substep_count`).
 <!-- FL3 (wave 4, fold-program robustness) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

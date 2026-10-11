@@ -131,8 +131,14 @@ def _rule7_refs(d: dict, coords: list, out) -> None:
         if key is None:
             out.err(7, "mechanism_type", f"{where}: unknown type {t!r}")
             continue
-        if m.get(key) not in ctrls:
-            out.err(7, "control_reference", f"{where}: control {m.get(key)!r} is not declared")
+        ref = m.get(key)
+        if ref not in ctrls:
+            out.err(7, "control_reference", f"{where}: control {ref!r} is not declared")
+        elif (kind := (ctrls[ref] or {}).get("kind")) not in MECH_CONTROL_KINDS[t]:
+            # The engine refuses the same document (packages/engine/src/document.js, rule 7).
+            want = "|".join(MECH_CONTROL_KINDS[t])
+            out.err(7, "control_kind_for_mechanism",
+                    f"{where}: control {ref!r} has kind {kind!r}, expected {want}")
         for sid in m.get("sheets_moving") or []:
             if sid not in ids:
                 out.err(7, "sheet_reference", f"{where}: moving sheet {sid!r} does not exist")
@@ -175,9 +181,13 @@ def _rule7_refs(d: dict, coords: list, out) -> None:
                 "declared")
 
 
-# Rule 15 (§5.4) is a warning until every landed cartridge is clean, then an error: the engine
-# already refuses such documents.
-RULE15_LEVEL = "warning"
+# Rule 15 (§5.4) is an error: the engine refuses such documents, and every landed cartridge is clean
+# (tulip fixed in the commons, 2026-10-11).
+RULE15_LEVEL = "error"
+
+# The control kinds each mechanism type accepts, as the engine checks them (rule 7).
+MECH_CONTROL_KINDS = {"hinge": ("angle",), "rotate": ("angle",), "leaf": ("angle",),
+                      "slide": ("distance", "angle"), "translate": ("distance", "angle")}
 
 
 def _rule15_mechanism_sheets(d: dict, out) -> None:

@@ -120,7 +120,7 @@ state. Honest limit: multi-layer collapses run kinematically, and physics settle
 | `paper-hat` | folded hats | newspaper hat, pirate hat, sailor hat | R | W2b·L2 ✅ |
 | `waterbomb-balloon` | the water bomb | folded; inflated (air, W3) | R(+C) | W2b·L2 ✅ |
 | `paper-popper` | the banger | snap (C) | R+C | W2b·L2 ✅ |
-| `fox-puppet` | finger puppet | — | R | W2b·L2 |
+| `fox-puppet` | finger puppet | — | R | W2b·L2 ✅ |
 | `ninja-star` | two-unit shuriken (modular) | — | R | W2b·L2 ✅ |
 | `modular-origami` | interlocking-unit assemblies (generic units only) | triangular-unit forms, square-unit cube, ring | R | W2c ✅ |
 
@@ -227,26 +227,26 @@ and flap sizes include the board caliper.
 | `folding-carton` | **one family, the folding cartons** | straight tuck end, reverse tuck end, seal end, crash-lock (auto) bottom, 1-2-3 bottom (ECMA style families) | R+C | W2b·P ✅ |
 | `envelope` | **one family, every common envelope** | commercial, baronial, square, wallet, catalog, pocket, diamond flap, window; ISO 269 C4/C5/C6/DL, US #10/A2/A7 | R | W2b·P ✅ |
 | `mailer-box` | roll-end tuck-front mailer (FEFCO 0427 style) | mailer, pizza style | R+C | W2b·P ✅ |
-| `pillow-box` | curved-score pillow pack | — | C | W2c |
-| `gable-box` | gable-top handle box | — | R+C | W2c |
-| `sleeve-and-tray` | matchbox style | — | R+C | W2c |
-| `presentation-folder` | pocket folder | pockets, card slits, capacity spine | R | W2c |
-| `slotted-dividers` | interlocking partitions | cells | R | W2c |
-| `display-stand` | counter display and easel back | — | R+C | W2c |
+| `pillow-box` | curved-score pillow pack | — | C | W2c ✅ |
+| `gable-box` | gable-top handle box | — | R+C | W2c ✅ |
+| `sleeve-and-tray` | matchbox style | — | R+C | W2c ✅ |
+| `presentation-folder` | pocket folder | pockets, card slits, capacity spine | R | W2c ✅ |
+| `slotted-dividers` | interlocking partitions | cells | R | W2c ✅ |
+| `display-stand` | counter display and easel back | — | R+C | W2c ✅ |
 | `paper-bag` | flat-bottom (SOS) bag with gussets | — | R+C | W2c ✅ |
 | `gift-wrap` | wrapping a box | standard, diagonal (Japanese) wrap | C | W2c ✅ |
 | `embossed-stationery` | **pressing**: emboss, deboss, foil and letterpress on a card | blind emboss, registered emboss, deboss, hot foil, letterpress | R | W2b·P ✅ |
-| `branded-tag` | **branding**: artwork, pressed mark and heat/burn mark on a board tag | artwork, emboss, iron burn, laser burn | R | W2c |
-| `honeycomb-panel` | structural paper honeycomb core between liners | cell size, core height | C | W2c |
-| `cardboard-furniture` | slotted thick-board furniture (original) | stool, shelf, side table | R+C | W2c |
+| `branded-tag` | **branding**: artwork, pressed mark and heat/burn mark on a board tag | artwork, emboss, iron burn, laser burn | R | W2c ✅ |
+| `honeycomb-panel` | structural paper honeycomb core between liners | cell size, core height | C | W2c ✅ |
+| `cardboard-furniture` | slotted thick-board furniture (original) | stool, shelf, side table | R+C | W2c ✅ |
 
 ## Rung 11 — Paper models, nets and rolled paper
 
 | slug | object | variants | tier | wave |
 |---|---|---|---|---|
-| `platonic-solids` | the five solids as tabbed nets | tetra, cube, octa, dodeca, icosa | R | W2c |
+| `platonic-solids` | the five solids as tabbed nets | tetra, cube, octa, dodeca, icosa | R | W2c ✅ |
 | `paper-globe` | gores and the sphere | 12, 24 gores | C | W2c ✅ |
-| `paper-house` | cut-out house model with tabs (original) | — | R | W2c |
+| `paper-house` | cut-out house model with tabs (original) | — | R | W2c ✅ |
 | `low-poly-papercraft` | **one family, low-poly papercraft**: original models unfolded into tabbed, numbered nets on pages, with a program that folds each net into its model | animal heads, mask, vase, planet, heart, vehicle (original designs) | R | W2b·PC ✅ |
 | `papercraft-unfold` | any low-poly mesh unfolded to a tabbed net (the bridge to Yantra4D solids) | icosphere, torus, mesh asset | R | W2b·PC ✅ |
 | `quilling` | rolled strip shapes | tight and loose coil, teardrop, marquise, scroll | C | W2c ✅ |
@@ -275,15 +275,15 @@ and flap sizes include the board caliper.
 | `reveal-block` | **pre-cut memo-block sculpture**: each layer of a paper block is die-cut (or perforated) along the scene's contour, and the excess is torn away top to bottom to reveal it. Scenes (original): stepped pyramid, volcano, landscape, sphere, city skyline | stack, tear-away removal | W2b·R ✅ |
 | `shadow-box` | layered papercut frames with spacers | `glue_zone` | W2c ✅ |
 | `paper-theater` | proscenium, flats and backdrop | `tab`, `slot` | W2c ✅ |
-| `ofrenda-popup` | Día de Muertos ofrenda: step-fold tiers on a spread + `papel-picado-banner` strung across + kirigami marigold flowers + candle tent folds | `gutter`, `glue_flap`/`glue_zone`, pins on a line | W2c |
-| `tunnel-book-forest` | leporello walls + four layered cut frames of trees, opened by pulling the cover | `spine`, `page_edge`, `glue_zone` | W2c |
-| `carousel-village` | a carousel book whose six chambers are parallel-fold houses | `spine`, `gutter` | W2c |
+| `ofrenda-popup` | Día de Muertos ofrenda: step-fold tiers on a spread + `papel-picado-banner` strung across + kirigami marigold flowers + candle tent folds | `gutter`, `glue_flap`/`glue_zone`, pins on a line | W2c ✅ |
+| `tunnel-book-forest` | leporello walls + four layered cut frames of trees, opened by pulling the cover | `spine`, `page_edge`, `glue_zone` | W2c ✅ |
+| `carousel-village` | a carousel book whose six chambers are parallel-fold houses | `spine`, `gutter` | W2c ✅ |
 
 ## Rung 14 — Paper electronics (W2c)
 
 | slug | object | variants | tier | wave |
 |---|---|---|---|---|
-| `paper-circuit-card` | copper-tape and conductive-ink circuit on a card and pop-up, with a fold switch and an LED | flat card, pop-up, slider switch | R | W2c |
+| `paper-circuit-card` | copper-tape and conductive-ink circuit on a card and pop-up, with a fold switch and an LED | flat card, pop-up, slider switch | R | W2c ✅ |
 
 ## Rung 15 — Physics showcases (need the engine, W3)
 

@@ -95,3 +95,68 @@ def test_penetration_measures_a_crossing():
     poses[right] = stand            # stood up through the left panel along x = 15
     assert foldpose.penetration(arr, poses, {right}) == pytest.approx(100.0)
     assert foldpose.penetration(arr, flat, {right}) == 0.0
+
+
+# ── spec §5.35: a rigid step drives every layer, signed by its orientation ──
+
+def frog_pleat(kinematic: bool):
+    """The jumping frog's spring pleat opened by 35°: its two creases run through the body strip
+    and through both side flaps, which are turned over."""
+    fp, g = fm.jumping_frog()
+    w, yb = 76.2, g["yb"]
+    low = ((w / 4.0, yb / 2.0), (3.0 * w / 4.0, yb / 2.0))
+    top = ((w / 4.0, 3.0 * yb / 4.0), (3.0 * w / 4.0, 3.0 * yb / 4.0))
+    if kinematic:
+        fp.kinematic("spring", "spring", [(low, 145.0), (top, 145.0)], fixed=g["o"],
+                     frame="folded")
+    else:
+        on = (5.0 * w / 8.0, 0.6 * yb)
+        fp.hinge("spring", "spring", low, 35.0, at=on, layers=1)
+        fp.hinge("spring-2", "spring", top, 35.0, at=on, layers=1)
+    return fp, g, low
+
+
+def worst_dev(a, b) -> float:
+    return max(foldpose.rigid_dev(x, y) for x, y in zip(a.pose.world, b.pose.world, strict=True))
+
+
+def test_layer_signs_turn_the_turned_over_layers_the_other_way():
+    fp, g, low = frog_pleat(kinematic=False)
+    st = fp.recs[-1].state
+    signs = foldpose.layer_signs(st, low, st.face_at(g["o"]))
+    by_x = sorted((min(a[0], b[0]), sg) for (a, b), sg in signs)
+    # the side flaps (x < W/4 and x > 3W/4 on the sheet) show their back: −1; the body: +1
+    assert [sg for _, sg in by_x] == [-1, 1, -1]
+
+
+def test_the_sheet_frame_points_turned_over_layers_to_the_folded_frame():
+    fp, g = fm.jumping_frog()
+    w, yb = 76.2, g["yb"]
+    low = ((w / 4.0, yb / 2.0), (3.0 * w / 4.0, yb / 2.0))
+    with pytest.raises(FlatStateError, match="frame='folded'"):
+        fp.kinematic("spring", "spring", [(low, 145.0)], fixed=g["o"])
+    with pytest.raises(FlatStateError, match="frame must be"):
+        fp.kinematic("spring", "spring", [(low, 145.0)], fixed=g["o"], frame="world")
+
+
+def test_kinematic_opens_the_frog_pleat_through_every_layer():
+    kin, _, _ = frog_pleat(kinematic=True)
+    hin, _, _ = frog_pleat(kinematic=False)
+    assert worst_dev(kin, hin) < 1e-9
+    row = kin.build("card").report["rows"][-1]
+    assert row["kind"] == "kinematic" and row["tear_mm"] < 1e-6 and row["deviation_mm"] < 1e-6
+
+
+def test_kinematic_opens_the_canard_fuselage_with_its_nose_roll():
+    kin, hin = fm.canard_plane(kinematic_open=True)[0], fm.canard_plane()[0]
+    assert worst_dev(kin, hin) < 1e-9
+    rows = {r["id"]: r for r in kin.build().report["rows"]}
+    assert rows["open-fuselage"]["kind"] == "kinematic"
+    assert rows["open-fuselage"]["tear_mm"] < 1e-6
+
+
+def test_kinematic_rolls_the_ring_wing_with_its_folded_leading_edge():
+    kin, hin = fm.ring_wing(n=8), fm.ring_wing(n=8, kinematic=False)
+    assert worst_dev(kin, hin) < 1e-9
+    row = kin.build("strip").report["rows"][-1]
+    assert row["kind"] == "kinematic" and row["tear_mm"] < 1e-6

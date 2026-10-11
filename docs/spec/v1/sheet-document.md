@@ -670,6 +670,28 @@ copper tape or conductive ink laid along a centre line, with contact pads where 
   does not render the conductor.
 <!-- lane X (w3/trace-finish) §5.30: end -->
 
+<!-- lane FL3 (w4/fold-robustness) §5.35: begin -->
+### 5.35 Kernel fold programs: a rigid step through turned-over layers
+
+How the kernel's `FoldProgram.kinematic` (a rigid 3-D step on the whole crease pattern) reads its
+drive. It changes no document field: the step's targets are signed fold angles (§5.6) as before.
+
+- A drive or free segment names every layer's crease whose folded image lies on it. With
+  `frame="sheet"` (the default) each takes the angle as given, in the sheet's sense (valley > 0):
+  the layers of a model folded in half turn as mirror images.
+- With `frame="folded"` the angle is in the folded frame: valley > 0 turns the paper towards the
+  viewer, relative to the paper that stays. A layer whose paper on the staying side shows its
+  front takes the angle as given; a turned-over layer takes its opposite. For a crease folded
+  flat, the staying side is the face joined to the fixed face once the segment's creases are
+  cut; where the paper joins round the segment, the crease keeps the sheet's sense. Every layer
+  then turns as one stack (a frog's spring pleat, a plane's fuselage, a rolled ring).
+- A crease folded flat starts at ±180° by its layer order, not by the sign of round-off in the
+  posed faces. The pattern merges collinear creases into one edge; an edge whose creases would
+  take opposite signs is refused.
+- A sheet-frame drive that finds no rigid path across layers turned opposite ways says so and
+  names `frame="folded"`.
+<!-- lane FL3 (w4/fold-robustness) §5.35: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any

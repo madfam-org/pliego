@@ -40,6 +40,7 @@ from .flatstate import (
     as_line,
     centroid,
     embed3,
+    merge_segments,
     on_segments,
     pt,
 )
@@ -68,6 +69,32 @@ def creases_on(state: FlatState, segments: Iterable) -> list[tuple[Pt, Pt]]:
         a, b = state.segment_image(c.f, c.a, c.b)
         if on_segments(a, b, segs, 1e-5):
             out.append((state.points[c.a], state.points[c.b]))
+    return out
+
+
+def layer_signs(state: FlatState, segment, root: int) -> list[tuple[tuple[Pt, Pt], int]]:
+    """Every layer's crease on a folded-frame segment (sheet segments, as `creases_on`) with the
+    sign that carries an angle given in the folded frame onto that layer (spec §5.35): +1 where
+    the layer's paper on the side that stays (the side of face `root`) shows its front, −1 where
+    it shows its back (a turned-over layer: its valley is the viewer's mountain). A crease
+    folded flat has its two faces turned opposite ways; the side that stays is the one joined
+    to `root` once the segment's creases are cut. Where both or neither side is (the paper
+    joins round the segment), the crease keeps the sheet's sense (+1)."""
+    seg = [(pt(segment[0]), pt(segment[1]))]
+    found = [c for c in state.creases() if on_segments(*state.segment_image(c.f, c.a, c.b),
+                                                        seg, 1e-5)]
+    comp = None
+    out = []
+    for c in found:
+        ff, fg = state.faces[c.f].flipped, state.faces[c.g].flipped
+        flip = ff
+        if ff != fg:
+            if comp is None:
+                comp = components(state, [(state.points[x.a], state.points[x.b])
+                                          for x in found])
+            cf, cg, cr = comp[c.f], comp[c.g], comp[root]
+            flip = ff if cf == cr != cg else fg if cg == cr != cf else False
+        out.append(((state.points[c.a], state.points[c.b]), -1 if flip else 1))
     return out
 
 
@@ -341,9 +368,13 @@ class Pose3:
         self._commit(state, fn)
         return fn
 
-    def kinematic(self, state: FlatState, drive: list, free: list, fixed, steps: int):
+    def kinematic(self, state: FlatState, drive: list, free: list, fixed, steps: int,
+                  frame: str = "sheet"):
         """A rigid step on the whole crease pattern so far (`FoldProgram.kinematic`): t ↦ world
-        poses, and the sample times that fall on solved states."""
+        poses, and the sample times that fall on solved states. `drive`: [(folded segment,
+        degrees)]; `free`: [(folded segment, hint ±1 or 0)]. `frame="sheet"`: every layer's
+        crease on a segment takes the angle (and the hint) as given; `"folded"`: signed by its
+        layer's orientation (`layer_signs`)."""
         from .geometry import Vec2, point_in_polygon
         from .kinematics import face_adjacency, root_face
 
@@ -363,22 +394,48 @@ class Pose3:
         for f, lst in face_adjacency(arr).items():
             for g, e, a, b in lst:
                 if e not in cur:
-                    cur[e] = dihedral(self.world[rep[f]][0], self.world[rep[g]][0], u[a], u[b])
+                    cur[e] = self._start_angle(state, rep[f], rep[g], u[a], u[b])
+        root = root_face(arr, Vec2(*pt(fixed))) if fixed is not None else 0
+
+        def signed(seg) -> dict[int, int]:
+            # the pattern merges collinear creases into one edge: match each sign's segments
+            # together, and refuse an edge whose creases disagree
+            ls = layer_signs(state, seg, rep[root])
+            if frame == "sheet":
+                ls = [(x, 1) for x, _ in ls]
+            out = {}
+            for sg in (1, -1):
+                for e in edges_on(arr, merge_segments([x for x, k in ls if k == sg])):
+                    out[e] = sg
+            mixed = sorted(set(edges_on(arr, merge_segments([x for x, _ in ls]))) - set(out))
+            if mixed:
+                raise FlatStateError(f"kinematic: pattern edges {mixed} join creases of layers "
+                                     "turned opposite ways")
+            return out
         dr = {}
-        for segs, ang in drive:
-            for e in edges_on(arr, segs):
-                dr[e] = ang
-        plain = [seg for seg, _ in free]
-        fr = edges_on(arr, plain)
-        hints = {}
+        for seg, ang in drive:
+            sg = signed(seg)
+            for e in sorted(sg):
+                dr[e] = sg[e] * ang
+        fr, hints = set(), {}
         for seg, sign in free:
-            if sign:
-                for e in edges_on(arr, [seg]):
-                    hints[e] = sign
+            sg = signed(seg)
+            fr |= set(sg)
+            for e in sorted(sg):
+                if sign:
+                    hints[e] = sg[e] * sign
+        fr = sorted(fr)
         if not dr:
             raise FlatStateError("kinematic: the drive names no crease")
-        states = solve_step(arr, cur, dr, fr, steps, hints)
-        root = root_face(arr, Vec2(*pt(fixed))) if fixed is not None else 0
+        try:
+            states = solve_step(arr, cur, dr, fr, steps, hints)
+        except FlatStateError as exc:
+            turned = frame == "sheet" and any(
+                len({sg for _, sg in layer_signs(state, seg, rep[root])}) > 1 for seg, _ in drive)
+            if not turned:
+                raise
+            raise FlatStateError(f"{exc}; a drive segment crosses layers turned opposite ways: "
+                                 "frame='folded' turns them as one stack") from exc
         root_pose = self.world[rep[root]]
         p0 = poses_of(arr, states[0], root, root_pose)
         bad = max(rigid_dev(p0[a], self.world[f]) for f, a in enumerate(home))
@@ -398,6 +455,22 @@ class Pose3:
             return [ps[a] for a in home]
         self._commit(state, fn)
         return fn, samples
+
+    def _start_angle(self, state: FlatState, f: int, g: int, a3, b3) -> float:
+        """The fold angle of the crease a3 → b3 between faces f and g as posed now. A crease
+        folded flat reads ±180° by the sign of round-off; while its faces keep the relative
+        placement of the flat state, its sign is the flat state's (spec §5.35)."""
+        rho = dihedral(self.world[f][0], self.world[g][0], a3, b3)
+        if abs(abs(rho) - 180.0) < 1e-6 and state.faces[f].flipped != state.faces[g].flipped:
+            rel = flatmotion.compose(flatmotion.invert(self.world[f]), self.world[g])
+            flat = flatmotion.compose(flatmotion.invert(embed3(state.faces[f].xf)),
+                                      embed3(state.faces[g].xf))
+            if rigid_dev(rel, flat) < 1e-9:
+                try:
+                    return state.crease_angle(f, g)
+                except FlatStateError:
+                    pass
+        return rho
 
     # ── a flat fold inside a coplanar group ──
     def group(self, state: FlatState, within) -> tuple[list[int], flatmotion.Rigid, list]:
@@ -527,4 +600,4 @@ def _height(w: flatmotion.Rigid, lmap: flatmotion.Rigid, q: Pt, n) -> float:
 
 
 __all__ = ["PENETRATION_MM", "Pose3", "components", "creases_on", "dihedral", "edges_on",
-           "hinge_line", "penetration", "poses_of", "solve_step"]
+           "hinge_line", "layer_signs", "penetration", "poses_of", "solve_step"]

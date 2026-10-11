@@ -320,6 +320,23 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   (valley), midline −35° (mountain), the program is the collapse alone.
 <!-- FL2 (wave 3, flat operations) end -->
 
+<!-- FL3 (wave 4, fold-program robustness) begin -->
+**Wave-4 fold-program robustness (lane FL3).**
+
+- **Rigid steps through turned-over layers** (spec §5.35). `FoldProgram.kinematic(...,
+  frame="sheet" | "folded")`: `"sheet"` (default, as before) gives every layer's crease on a
+  segment the angle in the sheet's sense — the two layers of a model folded in half turn as
+  mirror images (the fox puppet's mouth); `"folded"` reads the angle in the folded frame and
+  signs each layer by its orientation (`foldpose.layer_signs`: the paper on the side that stays
+  shows its front → as given, its back → opposite), so the layers turn as one stack. A crease
+  folded flat starts at ±180° by its layer order (it read the sign of round-off before), and
+  collinear creases the pattern merges into one edge are matched together (a drive along the
+  canard's keel found one of its two layers before). Proof: the jumping frog's spring pleat, the
+  canard's fuselage opening (its nose roll is turned over) and the ring wing's roll (its folded
+  leading edge), each equal to the composed hinge poses the commons uses today
+  (`tests/test_foldpose.py`, `flat_models.ring_wing`, `canard_plane(kinematic_open=True)`).
+<!-- FL3 (wave 4, fold-program robustness) end -->
+
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,
 crease parity, four-fold symmetry — and a crane valid at every vertex), `test_foldprogram.py`; sequences in
 `tests/flat_models.py`.

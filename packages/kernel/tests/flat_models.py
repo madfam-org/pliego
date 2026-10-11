@@ -169,12 +169,15 @@ def frog_base(s: float = 150.0):
     return fp, (o, b, kl, kr, t)
 
 
-def canard_plane(trim: float = 10.0, dihedral: float = 6.0, W: float = 210.0, H: float = 297.0):
+def canard_plane(trim: float = 10.0, dihedral: float = 6.0, W: float = 210.0, H: float = 297.0,
+                 kinematic_open: bool = False):
     """The canard paper airplane (an original MADFAM design in the commons, folded by traditional
     dart-family moves): fold in half and open, roll the nose once, fold in half, cut a slit through
     both layers between the foreplane and the main wing, cut two short slits into each trailing
     edge (the elevator tabs) and crease the tab hinges, fold the wings and then the foreplanes
-    down, then open the plane in 3-D: fuselage spread, wings to their dihedral, tabs trimmed."""
+    down, then open the plane in 3-D: fuselage spread, wings to their dihedral, tabs trimmed.
+    `kinematic_open`: the fuselage opens as a rigid step on every layer's keel crease (the nose
+    roll's layers are turned over) instead of a hinge pose."""
     c = W / 2.0
     k = 0.10 * W
     depth = 0.06 * H
@@ -205,7 +208,11 @@ def canard_plane(trim: float = 10.0, dihedral: float = 6.0, W: float = 210.0, H:
     # foreplane opens to its dihedral, then the tabs turn by the trim
     spread = 16.0
     keel = ((c, -10.0), (c, H + 10.0))
-    fp.hinge("open-fuselage", "open", keel, spread, at=(c + k / 2, H / 3), layers=1)
+    if kinematic_open:
+        fp.kinematic("open-fuselage", "open", [(keel, 180.0 - spread)],
+                     fixed=(c + k / 2, H / 3), frame="folded")
+    else:
+        fp.hinge("open-fuselage", "open", keel, spread, at=(c + k / 2, H / 3), layers=1)
     wing_fold = 90.0 - spread / 2.0 - dihedral
     out = 180.0 - wing_fold
     low = (c + k - (W - c - k) / 2, y_slit / 2)
@@ -221,6 +228,30 @@ def canard_plane(trim: float = 10.0, dihedral: float = 6.0, W: float = 210.0, H:
         {"line": tab, "turn": trim, "at": tab_at, "layers": 1},
         {"line": tab, "turn": -trim, "at": tab_at, "layers": 1, "from_": "bottom"}])
     return fp, {"c": c, "k": k, "y_slit": y_slit, "x1": x1, "x2": x2, "e": e, "kc": kc}
+
+
+def ring_wing(length: float = 297.0, width: float = 45.0, bands: int = 2, n: int = 16,
+              kinematic: bool = True) -> FoldProgram:
+    """The ring wing (as in the commons' paper-airplane): a strip whose leading edge is folded
+    over `bands` times (6 mm each, so its layers alternate face up and face down), scored across
+    at n lines and rolled into a hoop, every segment turning 360/n° about its line — one rigid
+    step on every layer's crease (`kinematic`) or n composed hinge poses."""
+    over = 0.06 * length
+    fp = FoldProgram([(0.0, 0.0), (length, 0.0), (length, width), (0.0, width)])
+    for i in range(1, bands + 1):
+        y = width - 6.0 * i
+        fp.fold(f"leading-edge-{i}", "leading edge", ((-10.0, y), (length + 10.0, y)), "valley")
+    s = (length - over) / n
+    lines = [((i * s, -10.0), (i * s, width + 10.0)) for i in range(1, n + 1)]
+    for i, line in enumerate(lines):
+        fp.crease(f"score-{i + 1}", "score", line, "valley")
+    if kinematic:
+        fp.kinematic("roll", "roll", [(line, 360.0 / n) for line in lines], fixed=(1.0, 1.0),
+                     substeps=2, frame="folded")
+    else:
+        for i, line in enumerate(lines):
+            fp.hinge(f"roll-{i + 1}", "roll", line, 360.0 / n, at=(line[0][0] + s / 2.0, 1.0))
+    return fp
 
 
 def waterbomb_base(s: float = 150.0) -> FoldProgram:

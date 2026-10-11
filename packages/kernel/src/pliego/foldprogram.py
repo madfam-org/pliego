@@ -317,26 +317,36 @@ class FoldProgram:
         return self
 
     def kinematic(self, sid: str, label, drive, free=(), fixed=None, ms: int = 1500,
-                  substeps: int = 6, note=None) -> FoldProgram:
+                  substeps: int = 6, note=None, frame: str = "sheet") -> FoldProgram:
         """A rigid 3-D step on the whole crease pattern so far (`pliego.foldpose`): the creases
-        on the folded-frame segments of `drive` ([(segment, degrees)]) turn to those fold angles
-        (valley > 0, the sheet's sense), the creases on the `free` segments follow (a free item
-        may be (segment, "valley" | "mountain"): the way that crease leaves a start where the
-        rigid paths branch), every other crease holds; `fixed`: a sheet point on a face that
-        stays. Every layer's crease on a segment counts (creases through every layer turn
-        together)."""
+        on the folded-frame segments of `drive` ([(segment, degrees)]) turn to those fold angles,
+        the creases on the `free` segments follow (a free item may be (segment, "valley" |
+        "mountain"): the way that crease leaves a start where the rigid paths branch), every
+        other crease holds; `fixed`: a sheet point on a face that stays. Every layer's crease on
+        a segment counts (creases through every layer turn together). `frame` says how the
+        angles and hints reach each layer (spec §5.35):
+
+        - ``"sheet"`` (default): valley > 0 in the sheet's sense on every layer — the layers of
+          a model folded in half turn as mirror images (a puppet's mouth pleat);
+        - ``"folded"``: valley > 0 turns the paper towards the viewer, relative to the paper that
+          stays — the sheet's sense on a layer that shows its front, the opposite on a turned-over
+          layer (`foldpose.layer_signs`), so every layer turns as one stack (a frog's spring
+          pleat, a plane's fuselage opening, a rolled ring)."""
         from .foldpose import creases_on
 
-        drive_segs = [(creases_on(self.state, [seg]), float(a)) for seg, a in drive]
-        if any(not segs for segs, _ in drive_segs):
+        if frame not in ("sheet", "folded"):
+            raise FlatStateError(f"kinematic '{sid}': frame must be 'sheet' or 'folded'")
+
+        drive_segs = [((pt(seg[0]), pt(seg[1])), float(a)) for seg, a in drive]
+        if any(not creases_on(self.state, [seg]) for seg, _ in drive_segs):
             raise FlatStateError(f"kinematic '{sid}': a drive segment lies on no crease")
         free_segs = []
         for item in free:
             seg, hint = (item[0], item[1]) if isinstance(item[1], str) else (item, None)
-            sign = {"valley": 1, "mountain": -1, None: 0}[hint]
-            free_segs += [(x, sign) for x in creases_on(self.state, [seg])]
+            free_segs.append(((pt(seg[0]), pt(seg[1])),
+                              {"valley": 1, "mountain": -1, None: 0}[hint]))
         fn, samples = self.pose.kinematic(self.state, drive_segs, free_segs, fixed,
-                                          4 * int(substeps))
+                                          4 * int(substeps), frame)
         self._hinges = True
         self.recs.append(_Rec(sid, self._label(label), None, ms,
                               {"kin": True, "substeps": int(substeps), "samples": samples},

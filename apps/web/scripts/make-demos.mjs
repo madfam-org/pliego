@@ -150,7 +150,7 @@ function pliego() {
         duration_ms: 1500, targets: [[6, 180]], release: [], note: { en: 'This is a pliego: one fold, four pages.', es: 'Esto es un pliego: un doblez, cuatro páginas.', fr: 'Voici un pliego : un pli, quatre pages.', pt: 'Isto é um pliego: uma dobra, quatro páginas.' } },
     ] },
     meta: { cartridge: 'pliego-half-fold', mode: 'default', params: { width: W, height: H } },
-    needsInitial: false,
+    needsInitial: true,   // the sheet is placed off the origin: spec rule 9 needs an initial frame
   });
 }
 

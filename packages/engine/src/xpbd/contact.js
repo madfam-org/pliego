@@ -72,7 +72,7 @@ export class Contact {
   /** Rebuild candidate pairs. @param {Float64Array} x @param {Uint8Array} fixed @param {number} reach extra radius (mm) */
   broadPhase(x, fixed, reach) {
     const m = this.mesh, T = m.tris;
-    const cell = Math.max(this.cell, reach * 2, 1e-3);
+    let cell = Math.max(this.cell, reach * 2, 1e-3);
     // integer spatial hash of cells; the table is typed-array CSR rebuilt each call (no Map, no
     // per-cell arrays: backlog item 22). Entries keep their full 32-bit cell key, so a query sees
     // exactly its own cell's triangles, in ascending order — the same candidates, in the same
@@ -84,12 +84,19 @@ export class Contact {
     // bounding sphere of every triangle (centroid + farthest vertex), once per broad phase: the
     // narrow filter below is then one squared distance per candidate
     const S = this._sph ?? (this._sph = new Float64Array(4 * m.nT));
+    let ext = 0;
     for (let t = 0; t < m.nT; t++) {
       const a = 3 * T[3 * t], b = 3 * T[3 * t + 1], c = 3 * T[3 * t + 2];
       const cx = (x[a] + x[b] + x[c]) / 3, cy = (x[a + 1] + x[b + 1] + x[c + 1]) / 3, cz = (x[a + 2] + x[b + 2] + x[c + 2]) / 3;
       const ra = Math.hypot(x[a] - cx, x[a + 1] - cy, x[a + 2] - cz), rb = Math.hypot(x[b] - cx, x[b + 1] - cy, x[b + 2] - cz), rc = Math.hypot(x[c] - cx, x[c + 1] - cy, x[c + 2] - cz);
       S[4 * t] = cx; S[4 * t + 1] = cy; S[4 * t + 2] = cz; S[4 * t + 3] = Math.max(ra, rb, rc) + R;
+      if (S[4 * t + 3] > ext) ext = S[4 * t + 3];
     }
+    // a triangle blown up far beyond the mesh size (a diverged simulation) would fill billions of
+    // cells and abort the step with "Invalid typed array length": coarsen the grid so no triangle
+    // spans more than about four cells per axis. The sphere test below still decides the pairs; on a
+    // sane mesh (triangles ≤ 1.25 h, cells ≥ the longest edge) this never triggers.
+    if (2 * ext > 8 * cell) cell = (2 * ext) / 8;
     // pass 1: (cell key, triangle) entries, triangles ascending
     let ek = this._ek ?? new Uint32Array(8 * m.nT), et = this._et ?? new Int32Array(8 * m.nT);
     let ne = 0;

@@ -202,6 +202,51 @@
    "derived_basis": "hand-written demo snapshot (apps/web/scripts/make-demos.mjs); stock-card.md formulas, not pliego.stock.derive output"
   }
  },
+ "file_frames": [
+  {
+   "frame_title": "initial",
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_parent": 0,
+   "frame_inherit": true,
+   "vertices_coords": [
+    [
+     -100,
+     0,
+     70
+    ],
+    [
+     0,
+     0,
+     70
+    ],
+    [
+     100,
+     0,
+     70
+    ],
+    [
+     100,
+     0,
+     -70
+    ],
+    [
+     0,
+     0,
+     -70
+    ],
+    [
+     -100,
+     0,
+     -70
+    ]
+   ]
+  }
+ ],
  "pliego:controls": [
   {
    "id": "fold",

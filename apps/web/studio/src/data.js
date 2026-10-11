@@ -30,10 +30,27 @@ export function normalizeCatalog(j, base) {
       title: it.title || it.name || { en: it.slug },
       summary: it.summary || it.description || null,
       document: it.document ? new URL(it.document, base).href : null,
+      thumbnail: sameOrigin(it.thumbnail, base),
       parameters: Array.isArray(it.parameters) ? it.parameters : [],
       modes: normalizeModes(it.modes),
       exports: Array.isArray(it.export_formats) ? it.export_formats : DEFAULT_EXPORTS,
     }));
+}
+
+/**
+ * A catalog preview URL (`/projects/<slug>.svg`) resolved against `base`, kept only when it stays
+ * on the same origin (the CSP allows `img-src 'self'`; anything else would be blocked anyway).
+ * @param {any} url @param {string} base
+ * @returns {string|null}
+ */
+export function sameOrigin(url, base) {
+  if (typeof url !== 'string' || !url) return null;
+  try {
+    const u = new URL(url, base);
+    return u.origin === new URL(base).origin ? u.href : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

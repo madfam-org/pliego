@@ -32,9 +32,18 @@ export function renderCatalog(list, items, current, i18n, onSelect) {
   list.replaceChildren();
   if (!items.length) { list.append(h('li', { class: 'note', text: i18n.t('catalog.empty') })); return; }
   for (const it of items) {
+    const title = i18n.loc(it.title);
+    // The preview (the default crease pattern, built with the image) is labelled with the object's
+    // name; a preview that fails to load is removed rather than left as a broken image.
     const btn = h('button', { type: 'button', class: 'catalog-item', 'aria-current': it.slug === current ? 'true' : null },
-      h('span', { class: 'catalog-title', text: i18n.loc(it.title) }),
+      h('span', { class: 'catalog-title', text: title }),
       it.summary ? h('span', { class: 'catalog-summary', text: i18n.loc(it.summary) }) : null);
+    if (it.thumbnail) {
+      const thumb = h('img', { class: 'catalog-thumb', src: it.thumbnail, alt: title, width: 56, height: 56, loading: 'lazy', decoding: 'async' });
+      thumb.addEventListener('error', () => { thumb.remove(); btn.classList.remove('has-thumb'); });
+      btn.prepend(thumb);
+      btn.classList.add('has-thumb');
+    }
     btn.addEventListener('click', () => onSelect(it.slug));
     list.append(h('li', {}, btn));
   }

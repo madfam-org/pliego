@@ -4,7 +4,7 @@
     "title": "Pliego API",
     "version": "0.1.0",
     "summary": "Sheet hyperobjects (origami, kirigami, papercut, pop-ups, books) as sheet documents and fabrication files.",
-    "description": "Public, anonymous, read-mostly API of the Pliego platform. Every route is also served on the\nlanding and studio hosts (same container); the canonical host is pliego-api.madfam.io.\n\nStrictness: unknown body keys, unknown query keys, unknown modes and out-of-contract parameter\nvalues are rejected with 400. POST bodies must be `application/json` objects of at most\n256 KiB (413 above), without NaN/Infinity or duplicate keys. Requests carrying an\n`Authorization` header are refused (401) until Janua verification is wired.\n\nRenders run the cartridge in a sandboxed subprocess (30 s timeout → 504). Each worker renders\none cartridge at a time (503 + `Retry-After: 1` when busy) and the render routes are\nrate-limited per client address (429 + `Retry-After`); the client address is the tunnel's\n`CF-Connecting-IP`, never `X-Forwarded-For`.\n\nThis file is checked against the Flask URL map by apps/api/tests/test_openapi.py and scripts/qa/verify_openapi.py.\n",
+    "description": "Public, anonymous, read-mostly API of the Pliego platform. Every route is also served on the\nlanding and studio hosts (same container); the canonical host is pliego-api.madfam.io.\n\nStrictness: unknown body keys, unknown query keys, unknown modes and out-of-contract parameter\nvalues are rejected with 400. POST bodies must be `application/json` objects of at most\n256 KiB (413 above), without NaN/Infinity or duplicate keys. Requests carrying an\n`Authorization` header are refused (401) until Janua verification is wired.\n\nRenders run the cartridge in a sandboxed subprocess (30 s timeout → 504). Each worker renders\none cartridge at a time (503 + `Retry-After: 1` when busy); a repeat of an earlier render is answered\nfrom the render cache with the same bytes (`X-Pliego-Cache`) without waiting for that slot and the render routes are\nrate-limited per client address (429 + `Retry-After`); the client address is the tunnel's\n`CF-Connecting-IP`, never `X-Forwarded-For`.\n\nThis file is checked against the Flask URL map by apps/api/tests/test_openapi.py and scripts/qa/verify_openapi.py.\n",
     "license": {
       "name": "AGPL-3.0-only",
       "identifier": "AGPL-3.0-only"
@@ -173,6 +173,24 @@
             "headers": {
               "X-Pliego-Verify": {
                 "$ref": "#/components/headers/Verify"
+              },
+              "X-Pliego-Cache": {
+                "$ref": "#/components/headers/Cache"
+              },
+              "X-Generator-Instance-Id": {
+                "$ref": "#/components/headers/InstanceId"
+              },
+              "X-Generator-Variables-Sha256": {
+                "$ref": "#/components/headers/VariablesSha256"
+              },
+              "X-Generator-Complete": {
+                "$ref": "#/components/headers/Complete"
+              },
+              "X-Generator-Dropped-Params": {
+                "$ref": "#/components/headers/DroppedParams"
+              },
+              "X-Generator-Clamped-Params": {
+                "$ref": "#/components/headers/ClampedParams"
               }
             },
             "content": {
@@ -216,7 +234,7 @@
     "/api/v1/exports": {
       "post": {
         "operationId": "createExport",
-        "summary": "Run a cartridge and return one fabrication or interchange file.",
+        "summary": "Run a cartridge and return one fabrication or interchange file, or a GOC-1 bundle.",
         "requestBody": {
           "required": true,
           "content": {
@@ -229,7 +247,7 @@
         },
         "responses": {
           "200": {
-            "description": "The file, as an attachment named `<slug>-<mode>.<ext>`.",
+            "description": "The file, as an attachment named `<slug>-<mode>.<ext>`; for `format: \"bundle\"`, a zip named `<slug>-<mode>-<instance_id[:12]>.zip` holding the sheet document, the cut files (or `bundle_formats`) and `variables.json` (GOC-1, hyperobjects-spec generator-output: every member's sha256 and size). Same request, same bytes.",
             "headers": {
               "Content-Disposition": {
                 "schema": {
@@ -239,6 +257,30 @@
               },
               "X-Pliego-Verify": {
                 "$ref": "#/components/headers/Verify"
+              },
+              "X-Pliego-Cache": {
+                "$ref": "#/components/headers/Cache"
+              },
+              "X-Generator-Instance-Id": {
+                "$ref": "#/components/headers/InstanceId"
+              },
+              "X-Generator-Variables-Sha256": {
+                "$ref": "#/components/headers/VariablesSha256"
+              },
+              "X-Generator-Complete": {
+                "$ref": "#/components/headers/Complete"
+              },
+              "X-Generator-Dropped-Params": {
+                "$ref": "#/components/headers/DroppedParams"
+              },
+              "X-Generator-Clamped-Params": {
+                "$ref": "#/components/headers/ClampedParams"
+              },
+              "Repr-Digest": {
+                "description": "Bundles only (RFC 9530): `sha-256=:<base64>:` of the zip bytes.",
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "content": {
@@ -247,7 +289,8 @@
               "application/pdf": {},
               "application/vnd.hp-hpgl": {},
               "model/gltf-binary": {},
-              "application/json": {}
+              "application/json": {},
+              "application/zip": {}
             }
           },
           "400": {
@@ -341,6 +384,38 @@
           }
         }
       }
+    },
+    "/projects/{slug}.svg": {
+      "get": {
+        "operationId": "getThumbnail",
+        "summary": "The catalog preview of one cartridge (SVG, built at image build time).",
+        "description": "The cartridge's default mode at its manifest defaults, rendered through the sandboxed runner and drawn by the kernel's SVG exporter (`diagram` palette, fabrication profile, no registration marks or labels). Built once per image; never rendered on request. This is the path the commons manifests declare as `project.thumbnail`. Served on every host, same origin as the studio (CSP `img-src 'self'`).",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The SVG (mm units). `Cache-Control: no-cache` with an ETag: revalidation is a 304.",
+            "content": {
+              "image/svg+xml": {}
+            }
+          },
+          "304": {
+            "description": "Not modified (If-None-Match)."
+          },
+          "404": {
+            "description": "No such cartridge, or its preview could not be produced at build time (the build log and `build/thumbnails/index.json` name the reason)."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -358,6 +433,52 @@
     "headers": {
       "Verify": {
         "description": "The runner's read-proof line, e.g. `verify: sheets=1 vertices=4 edges=5 faces=2 joins=0 errors=0 warnings=0`.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Cache": {
+        "description": "How the render was answered: `miss` (rendered now, then cached), `hit-memory` or `hit-disk` (the exact bytes of an earlier render with the same slug, mode, effective parameters, formats, cartridge source, commons pin and kernel; a hit does not take the worker's render slot), or `off` (the cache is disabled).",
+        "schema": {
+          "enum": [
+            "miss",
+            "hit-memory",
+            "hit-disk",
+            "off"
+          ]
+        }
+      },
+      "InstanceId": {
+        "description": "GOC-1 `instance_id` of this render (hyperobjects-spec generator-output): sha256 of cartridge, mode, part (null), the cartridge's `hyperobjects-tree-v1` digest and `variables_sha256`. Deploy-independent: the kernel and build are not inputs.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "VariablesSha256": {
+        "description": "GOC-1 `variables_sha256`: every manifest-declared parameter's `[id, value]`, sorted by id, canonical JSON (integral floats hash as integers).",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "Complete": {
+        "description": "GOC-1 `complete`: `true` when the runner received every declared parameter; `false` when a parameter scoped to other modes was not injected (its cartridge literal was in force).",
+        "schema": {
+          "enum": [
+            "true",
+            "false"
+          ]
+        }
+      },
+      "DroppedParams": {
+        "description": "Parameters a platform dropped (`id=reason`, comma-separated). Never sent by Pliego: its API rejects unknown or invalid parameters with 400 instead of dropping them. Listed so the header means the same on every hyperobjects platform.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ClampedParams": {
+        "description": "Parameters a platform clamped into range. Never sent by Pliego: an out-of-range value is a 400.",
         "schema": {
           "type": "string"
         }
@@ -444,6 +565,10 @@
           },
           "stocks_invalid": {
             "type": "integer"
+          },
+          "thumbnails": {
+            "type": "integer",
+            "description": "Catalog previews built into this image (apps/api/thumbnails.py)."
           }
         }
       },
@@ -501,6 +626,13 @@
           },
           "summary": {
             "type": "string"
+          },
+          "thumbnail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Same-origin URL of the catalog preview (`/projects/<slug>.svg`): the default mode's crease pattern at its manifest defaults, drawn by the kernel's SVG exporter in the diagram palette. Null when the image was not built (the image build renders every cartridge; see GET /projects/{slug}.svg)."
           },
           "difficulty": {
             "type": [
@@ -679,7 +811,23 @@
             "type": "object"
           },
           "format": {
-            "$ref": "#/components/schemas/Format"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Format"
+              },
+              {
+                "const": "bundle",
+                "description": "A zip: the sheet document, the cut files and variables.json (GOC-1)."
+              }
+            ]
+          },
+          "bundle_formats": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/Format"
+            },
+            "description": "Only with `format: \"bundle\"`: the files to bundle besides the document (each must be published by the object; `fold` is implied, duplicates are ignored). Default: the published cut and plot formats (svg, dxf, pdf, hpgl)."
           }
         }
       }

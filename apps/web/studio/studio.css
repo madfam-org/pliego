@@ -95,6 +95,9 @@ input[type="text"] { width: 100%; font-size: 0.8rem; }
 .catalog-item[aria-current="true"] { border-color: var(--accent); background: var(--paper-2); }
 .catalog-title { font-weight: 600; }
 .catalog-summary { color: var(--ink-2); font-size: 0.82rem; }
+.catalog-item.has-thumb { grid-template-columns: 56px minmax(0, 1fr); column-gap: 10px; align-items: center; }
+.catalog-item.has-thumb .catalog-title, .catalog-item.has-thumb .catalog-summary { grid-column: 2; }
+.catalog-thumb { grid-row: 1 / span 2; width: 56px; height: 56px; object-fit: contain; background: #ffffff; border: 1px solid var(--line); border-radius: 6px; }
 
 .fields { display: grid; gap: 12px; }
 .field { display: grid; gap: 4px; }

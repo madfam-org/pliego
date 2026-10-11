@@ -186,6 +186,11 @@ def test_export_end_to_end(client, fmt, ctype, ext, magic):
     assert resp.data.lstrip().startswith(magic), resp.data[:20]
     if fmt == "glb":
         assert struct.unpack("<I", resp.data[8:12])[0] == len(resp.data)
+        jlen = struct.unpack("<I", resp.data[12:16])[0]
+        gltf = json.loads(resp.data[20:20 + jlen])
+        # the runner exports the fold program as a morph-target animation, not a static frame
+        assert [a["name"] for a in gltf["animations"]] == ["fold-program"]
+        assert gltf["asset"]["extras"]["pliego:animation"]["targets"] >= 2
 
 
 def test_failing_cartridge_is_422_with_verify_line(make_app, tree):

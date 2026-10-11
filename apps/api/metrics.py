@@ -71,6 +71,12 @@ def install(app: Flask, metrics: Metrics, metrics_port: int) -> None:
     metrics.describe("pliego_renders_total", "counter", "Sandbox renders by kind and outcome")
     metrics.describe("pliego_render_seconds_total", "counter", "Wall time spent in sandbox renders")
     metrics.describe("pliego_rate_limited_total", "counter", "Requests refused by the rate limit")
+    metrics.describe("pliego_render_cache_hits_total", "counter",
+                     "Renders answered from the render cache, by tier (memory, disk)")
+    metrics.describe("pliego_render_cache_misses_total", "counter",
+                     "Render requests the cache could not answer (a sandbox render followed)")
+    metrics.describe("pliego_render_cache_evictions_total", "counter",
+                     "Render cache entries evicted to stay under the byte bound, by tier")
 
     def on_metrics_listener() -> bool:
         return str(request.environ.get("SERVER_PORT", "")) == port

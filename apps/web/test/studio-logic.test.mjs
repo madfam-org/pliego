@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from '../studio/src/share.js';
-import { normalizeCatalog, normalizeModes, renderBody } from '../studio/src/data.js';
+import { normalizeCatalog, normalizeModes, renderBody, sameOrigin } from '../studio/src/data.js';
 import { lineKind } from '../studio/src/diagram.js';
 import { stepIndex, paramText } from '../studio/src/panels.js';
 import { triangulate, signedArea } from '../studio/src/geom.js';
@@ -92,6 +92,20 @@ test('catalog normalisation accepts demo and API shapes', () => {
   assert.equal(b[0].document, null);
   assert.deepEqual(b[0].exports, ['svg']);
   assert.deepEqual(normalizeCatalog([{ slug: 'c' }], base).map((x) => x.slug), ['c']);
+});
+
+test('catalog previews stay same-origin (CSP img-src self)', () => {
+  const base = 'https://pliego-app.madfam.io/api/v1/';
+  const [a, b, c] = normalizeCatalog({ items: [
+    { slug: 'a', thumbnail: '/projects/a.svg' },
+    { slug: 'b', thumbnail: 'https://elsewhere.example/b.svg' },
+    { slug: 'c', thumbnail: null },
+  ] }, base);
+  assert.equal(a.thumbnail, 'https://pliego-app.madfam.io/projects/a.svg');
+  assert.equal(b.thumbnail, null);
+  assert.equal(c.thumbnail, null);
+  assert.equal(sameOrigin('//elsewhere.example/x.svg', base), null);
+  assert.equal(sameOrigin(42, base), null);
 });
 
 test('diagram line kinds follow the fabrication conventions', () => {

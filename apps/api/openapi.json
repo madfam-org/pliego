@@ -438,10 +438,11 @@
         }
       },
       "Cache": {
-        "description": "How the render was answered: `miss` (rendered now, then cached), `hit-memory` or `hit-disk` (the exact bytes of an earlier render with the same slug, mode, effective parameters, formats, cartridge source, commons pin and kernel; a hit does not take the worker's render slot), or `off` (the cache is disabled).",
+        "description": "How the render was answered: `hit-prerendered` (rendered at image build time for every mode at its defaults and at every applicable preset: documents, and svg/dxf/hpgl exports), `miss` (rendered now, then cached), `hit-memory` or `hit-disk` (the exact bytes of an earlier render with the same slug, mode, effective parameters, formats, cartridge source, commons pin and kernel; a hit does not take the worker's render slot), or `off` (the cache is disabled).",
         "schema": {
           "enum": [
             "miss",
+            "hit-prerendered",
             "hit-memory",
             "hit-disk",
             "off"
@@ -569,6 +570,10 @@
           "thumbnails": {
             "type": "integer",
             "description": "Catalog previews built into this image (apps/api/thumbnails.py)."
+          },
+          "prerendered": {
+            "type": "integer",
+            "description": "Entries in the prerendered render-cache tier built into this image (apps/api/prerender.py)."
           }
         }
       },

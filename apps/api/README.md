@@ -12,7 +12,8 @@ at `/studio/`, engine modules at `/engine/`, `/schemas/*.schema.json`, `/llms.tx
 gunicorn -c apps/api/gunicorn.conf.py apps.api.app:app          # 8000 app, 9090 metrics
 PLIEGO_DEV=1 python -m flask --app apps.api.app:create_app run  # local, dev CORS origins
 python -m pytest apps/api/tests -q
-python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previews + coverage check
+python -m apps.api.prerender build --thumbnails build/thumbnails --strict  # warm tier + previews (what the image builds)
+python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previews alone
 ```
 
 ## Modules
@@ -30,7 +31,8 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 | `catalog.py`, `manifest.py` | stat-signature-memoized catalog and stock cards; fail-closed manifest checks; strict params |
 | `render.py` | the sandbox runner as a killable subprocess (minimal env, own session, 30 s) |
 | `generator.py`, `services/engine/generator_output.py` | GOC-1 (hyperobjects-spec generator output): `X-Generator-*` headers on every render, `variables.json`, and the deterministic, digest-stamped `format: "bundle"` zip (document + cut files + `variables.json`); the algorithms pin the keystone's golden vectors |
-| `render_cache.py` | exact render cache: key = slug, mode, effective params, formats, cartridge source digest, commons pin, kernel identity; per-worker memory LRU + shared `/tmp` disk tier, both bounded by bytes; a hit skips the render slot (`X-Pliego-Cache`) |
+| `render_cache.py` | exact render cache: key = slug, mode, effective params, formats, cartridge source digest, commons pin, kernel identity; per-worker memory LRU + shared `/tmp` disk tier, both bounded by bytes; a hit skips the render slot (`X-Pliego-Cache`); checked first, the read-only prerendered tier |
+| `prerender.py`, `prerender_store.py` | the warm tier: every cartridge, mode and applicable preset rendered at image build time (document, svg, dxf, hpgl) under the runtime cache key, content-addressed blobs, verified on read (`hit-prerendered`; a corrupt entry falls through); the same pass draws the thumbnails |
 | `api_v1.py` | `/health`, `/ready`, `/api/v1/*` |
 | `thumbnails.py` | catalog previews: built at image build time (one crease-pattern SVG per cartridge, default mode, kernel SVG exporter, diagram palette), served at `/projects/<slug>.svg`; the coverage check (`build --strict`) |
 | `metrics.py` | Prometheus text on the metrics listener only (per-worker counters) |
@@ -57,6 +59,7 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 | `PLIEGO_DEV` | unset | local development switch |
 | `PLIEGO_ROOT`, `PLIEGO_PROJECTS_DIR`, `PLIEGO_MATERIALS_DIR` | repository paths | overrides (tests) |
 | `PLIEGO_THUMBNAILS_DIR` | `<root>/build/thumbnails` | the built catalog previews (the image builds them into `/app/build/thumbnails`) |
+| `PLIEGO_PRERENDER_DIR` | `<root>/build/prerender` | the prerendered tier (the image builds it into `/app/build/prerender`). Its keys include the commons pin: setting `PLIEGO_COMMONS_SHA` at run time but not at build time makes every entry miss |
 
 Janua (`PLIEGO_JANUA_*`, `AUTH_JANUA_*`, `PLIEGO_SESSION_SECRET`) and Selva (`SELVA_*`) are not read
 yet: requests that carry `Authorization` are refused with 401 and there are no AI routes, so nothing

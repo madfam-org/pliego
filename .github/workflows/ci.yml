@@ -274,7 +274,7 @@ jobs:
   api:
     name: API (pytest, OpenAPI drift)
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30  # the strict prerender renders every mode and preset (~640 renders on 4 cores)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -303,11 +303,16 @@ jobs:
       - name: Test (pytest)
         if: steps.detect.outputs.present == 'true'
         run: python -m pytest apps/api/tests -q
-      - name: Catalog thumbnails cover the commons (every cartridge's preview renders)
+      - name: Prerender and thumbnails cover the commons (every mode, default and preset renders)
         if: steps.detect.outputs.present == 'true'
-        # The same build the image runs (Dockerfile), strict: one line per cartridge whose preview cannot be
-        # produced, and a failure on any (or on zero cartridges read).
-        run: python -m apps.api.thumbnails build "$RUNNER_TEMP/thumbnails" --strict
+        # The same build the image runs (Dockerfile), strict: one FAIL line per variant or preview that cannot be
+        # produced, and a failure on any (or on zero cartridges read). The sizes are what the image layer adds.
+        run: |
+          set -eu
+          python -m apps.api.prerender build --out "$RUNNER_TEMP/prerender" \
+            --thumbnails "$RUNNER_TEMP/thumbnails" --strict
+          echo "prerender-size: $(du -sk "$RUNNER_TEMP/prerender" | cut -f1) KiB" \
+               "gzip=$(tar -C "$RUNNER_TEMP" -cf - prerender thumbnails | gzip -6 | wc -c) bytes"
       - name: OpenAPI matches the served routes
         if: steps.detect.outputs.present == 'true'
         env:

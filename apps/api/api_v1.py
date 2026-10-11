@@ -11,22 +11,44 @@ from __future__ import annotations
 import json
 import math
 import re
+from dataclasses import dataclass
 
 from flask import Blueprint, Response, abort, g, request
 
+from . import generator
 from .catalog import Catalog, StockLibrary
-from .manifest import PayloadError, resolve_request
+from .manifest import Cartridge, Mode, PayloadError, resolve_request
 from .metrics import Metrics
 from .ratelimit import RateLimiter, client_key
-from .render import TRANSPORT, Renderer, RenderError
+from .render import TRANSPORT, Renderer, RenderError, RenderResult
 from .render_cache import RenderCache
 from .render_limits import RETRY_AFTER_S, RenderBusy, RenderSlot
 from .thumbnails import ThumbnailStore
 
 DOCUMENT_KEYS = frozenset({"slug", "mode", "params"})
-EXPORT_KEYS = DOCUMENT_KEYS | {"format"}
+EXPORT_KEYS = DOCUMENT_KEYS | {"format", "bundle_formats"}
+RENDER_HEADERS = ("X-Pliego-Verify", "X-Pliego-Cache", *generator.GENERATOR_HEADERS)
+# What the OpenAPI document must say beyond its routes (scripts/qa/verify_openapi.py checks it):
+# the format enum the API transports, and the headers every successful render response carries.
+OPENAPI_CONTRACT = {
+    "enums": {"Format": tuple(TRANSPORT)},
+    "response_headers": {
+        ("POST", "/api/v1/documents"): RENDER_HEADERS,
+        ("POST", "/api/v1/exports"): (*RENDER_HEADERS, "Content-Disposition", "Repr-Digest"),
+    },
+}
 CATALOG_QUERY_KEYS = frozenset({"q", "domain", "class", "difficulty", "tag"})
 _SAFE_FILENAME = re.compile(r"[^a-z0-9._-]+")
+
+
+@dataclass(frozen=True)
+class Rendered:
+    cart: Cartridge
+    mode: Mode
+    requested: dict
+    effective: dict
+    result: RenderResult
+    cache_state: str
 
 
 class RateLimited(Exception):
@@ -145,9 +167,10 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
         mode, effective = resolve_request(cart, body.get("mode"), body["params"])
         if formats:
             published = renderer.published_formats(cart)
-            if formats[0] not in published:
-                raise PayloadError(f"{cart.slug!r} does not publish format {formats[0]!r} "
-                                   f"(publishes: {published or 'none'})")
+            for fmt in formats:
+                if fmt not in published:
+                    raise PayloadError(f"{cart.slug!r} does not publish format {fmt!r} "
+                                       f"(publishes: {published or 'none'})")
         allowed, retry = limiter.hit(client_key(request, trusted_header))
         if not allowed:
             metrics.inc("pliego_rate_limited_total")
@@ -157,7 +180,7 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
         if key is not None:
             cached, tier = cache.get(key)
             if cached is not None:  # exact bytes of a previous render: no slot, no subprocess
-                return cart, mode, cached, f"hit-{tier}"
+                return Rendered(cart, mode, body["params"], effective, cached, f"hit-{tier}")
         try:
             with slot.acquire():
                 result = renderer.run(cart, mode, effective, formats)
@@ -171,7 +194,19 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
         metrics.inc("pliego_render_seconds_total", result.seconds, kind=kind)
         if key is not None:
             cache.put(key, result)
-        return cart, mode, result, "miss" if key is not None else "off"
+        return Rendered(cart, mode, body["params"], effective, result,
+                        "miss" if key is not None else "off")
+
+    def _provenance(r: Rendered) -> generator.Provenance:
+        return generator.provenance(r.cart, r.mode, r.requested, r.effective,
+                                    commons=cache.commons(), kernel=f"pliego-kernel {cache.kernel()}")
+
+    def _common_headers(resp: Response, r: Rendered, doc: dict) -> Response:
+        resp.headers["X-Pliego-Verify"] = r.result.verify
+        resp.headers["X-Pliego-Cache"] = r.cache_state
+        for key, value in generator.headers(doc).items():
+            resp.headers[key] = value
+        return resp
 
     def _guarded(handler):
         try:
@@ -189,30 +224,52 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
     @bp.post("/api/v1/documents")
     def documents():
         def handler():
-            _cart, _mode, result, cache_state = _render(g.json_body, DOCUMENT_KEYS, ())
-            resp = Response(result.document, content_type="application/json")
-            resp.headers["X-Pliego-Verify"] = result.verify
-            resp.headers["X-Pliego-Cache"] = cache_state
-            return resp
+            r = _render(g.json_body, DOCUMENT_KEYS, ())
+            doc = generator.document(_provenance(r), [("fold", r.result.document)])
+            return _common_headers(Response(r.result.document, content_type="application/json"),
+                                   r, doc)
 
         return _guarded(handler)
 
     @bp.post("/api/v1/exports")
     def exports():
         def handler():
-            fmt = g.json_body.get("format")
-            if not isinstance(fmt, str) or fmt not in TRANSPORT:
-                raise PayloadError(f"'format' must be one of {sorted(TRANSPORT)}")
-            cart, mode, result, cache_state = _render(g.json_body, EXPORT_KEYS, (fmt,))
-            content_type, ext = TRANSPORT[fmt]
-            name = _SAFE_FILENAME.sub("-", f"{cart.slug}-{mode.id}.{ext}")
-            resp = Response(result.exports[fmt], content_type=content_type)
+            body = g.json_body
+            fmt = body.get("format")
+            if not isinstance(fmt, str) or (fmt not in TRANSPORT and fmt != generator.BUNDLE):
+                raise PayloadError(f"'format' must be one of {sorted(TRANSPORT)} or "
+                                   f"{generator.BUNDLE!r}")
+            if fmt == generator.BUNDLE:
+                return _bundle(body)
+            if "bundle_formats" in body:
+                raise PayloadError("'bundle_formats' applies only to format 'bundle'")
+            r = _render(body, EXPORT_KEYS, (fmt,))
+            payload = r.result.exports[fmt]
+            doc = generator.document(_provenance(r), [(fmt, payload)])
+            resp = Response(payload, content_type=TRANSPORT[fmt][0])
+            name = _SAFE_FILENAME.sub("-", generator.file_name(r.cart, r.mode, fmt))
             resp.headers["Content-Disposition"] = f'attachment; filename="{name}"'
-            resp.headers["X-Pliego-Verify"] = result.verify
-            resp.headers["X-Pliego-Cache"] = cache_state
-            return resp
+            return _common_headers(resp, r, doc)
 
         return _guarded(handler)
+
+    def _bundle(body: dict) -> Response:
+        cart = catalog.get(body.get("slug")) if isinstance(body.get("slug"), str) else None
+        if cart is None:  # the full checks (and their messages) are _render's; this only picks formats
+            r = _render(body, EXPORT_KEYS, ())
+            cart = r.cart
+        try:
+            formats = generator.bundle_formats(body.get("bundle_formats"),
+                                               renderer.published_formats(cart))
+        except ValueError as exc:
+            raise PayloadError(str(exc)) from None
+        r = _render(body, EXPORT_KEYS, formats)
+        data, doc, name = generator.bundle(_provenance(r), r.result.document, r.result.exports,
+                                           formats)
+        resp = Response(data, content_type=generator.BUNDLE_MEDIA_TYPE)
+        resp.headers["Content-Disposition"] = f'attachment; filename="{_SAFE_FILENAME.sub("-", name)}"'
+        resp.headers["Repr-Digest"] = generator.repr_digest(data)
+        return _common_headers(resp, r, doc)
 
     @bp.get("/api/v1/stocks")
     def stock_list():

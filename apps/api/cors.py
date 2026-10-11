@@ -49,7 +49,9 @@ def install(app: Flask, origins: tuple[str, ...]) -> None:
             resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
             resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
             resp.headers["Access-Control-Expose-Headers"] = (
-                "Content-Disposition, Retry-After, X-Pliego-Verify"
+                "Content-Disposition, Retry-After, X-Pliego-Verify, X-Pliego-Cache, Repr-Digest, "
+                "X-Generator-Instance-Id, X-Generator-Variables-Sha256, X-Generator-Complete, "
+                "X-Generator-Dropped-Params, X-Generator-Clamped-Params"
             )
             resp.headers["Access-Control-Max-Age"] = "600"
         return resp

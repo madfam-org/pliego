@@ -29,6 +29,7 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 | `static_routes.py` | traversal-safe static serving, `?v=` cache-busting stamps, robots, sitemap, llms |
 | `catalog.py`, `manifest.py` | stat-signature-memoized catalog and stock cards; fail-closed manifest checks; strict params |
 | `render.py` | the sandbox runner as a killable subprocess (minimal env, own session, 30 s) |
+| `generator.py`, `services/engine/generator_output.py` | GOC-1 (hyperobjects-spec generator output): `X-Generator-*` headers on every render, `variables.json`, and the deterministic, digest-stamped `format: "bundle"` zip (document + cut files + `variables.json`); the algorithms pin the keystone's golden vectors |
 | `render_cache.py` | exact render cache: key = slug, mode, effective params, formats, cartridge source digest, commons pin, kernel identity; per-worker memory LRU + shared `/tmp` disk tier, both bounded by bytes; a hit skips the render slot (`X-Pliego-Cache`) |
 | `api_v1.py` | `/health`, `/ready`, `/api/v1/*` |
 | `thumbnails.py` | catalog previews: built at image build time (one crease-pattern SVG per cartridge, default mode, kernel SVG exporter, diagram palette), served at `/projects/<slug>.svg`; the coverage check (`build --strict`) |

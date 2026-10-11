@@ -19,7 +19,7 @@ from werkzeug.exceptions import HTTPException
 from . import cors, security, static_routes
 from . import metrics as metrics_mod
 from . import thumbnails as thumbnails_mod
-from .api_v1 import create_blueprint, error, json_response
+from .api_v1 import OPENAPI_CONTRACT, create_blueprint, error, json_response
 from .catalog import Catalog, StockLibrary, strict_json_loads
 from .config import MAX_CONTENT_LENGTH, Settings
 from .hosts import HostRouter
@@ -32,6 +32,7 @@ VERSION = "0.1.0"
 log = logging.getLogger("pliego.api")
 
 _JSON_PATHS = ("/api/", "/health", "/ready", "/metrics")
+__all__ = ["OPENAPI_CONTRACT", "VERSION", "create_app"]  # the contract: scripts/qa/verify_openapi.py
 
 
 def _ensure_kernel_importable(settings: Settings) -> None:

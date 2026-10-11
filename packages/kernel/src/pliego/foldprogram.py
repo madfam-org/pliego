@@ -390,7 +390,7 @@ class FoldProgram:
         `rest_memory` (deg) the creases open at the start that remember a fold get that rest
         angle, signed by their last fold (a pre-creased sheet: `pliego:edges_restAngle`)."""
         from .assembly import EdgeRef, Sequence, Step
-        from .foldpose import check_penetration
+        from .foldpose import check_penetration, exact_arrangement
         from .kinematics import face_adjacency
         from .preview import PreviewTree, sample_step
 
@@ -451,6 +451,7 @@ class FoldProgram:
             raise FlatStateError(f"start_after: no step '{start_after}'")
         start_angles = dict(cur)
         prev_state, prev_map = self.start, fmap(self.start)
+        on_points = None
         for rec in self.recs:
             # candidate motions: t ∈ (0, 1] ↦ intended poses of the pattern's faces
             cands: list = []
@@ -558,10 +559,14 @@ class FoldProgram:
                     best = (score, res[0], max(res[1]), max(res[2]), max(res[3]), ci)
             _, seq, tear, mid, dev, which = best
             pen = None
-            if start_poses is not None:
-                pen = check_penetration(arr, cands[0], start_poses, ts0, rec.sid)
-            elif rec.move is not None and rec.move.kind == "tuck":
-                pen = check_penetration(arr, cands[0], cands[0](0.0), ts0, rec.sid, fail=False)
+            if start_poses is not None or (rec.move is not None and rec.move.kind == "tuck"):
+                if on_points is None:     # faces on the state's points, as posed (§5.37)
+                    on_points = exact_arrangement(arr, final)
+                if start_poses is not None:
+                    pen = check_penetration(on_points, cands[0], start_poses, ts0, rec.sid)
+                else:
+                    pen = check_penetration(on_points, cands[0], cands[0](0.0), ts0, rec.sid,
+                                            fail=False)
             n = len(seq)
             last = cur
             for k, ang in enumerate(seq, 1):

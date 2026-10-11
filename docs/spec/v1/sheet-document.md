@@ -711,6 +711,27 @@ out at 5).
   path is kept. A hinted crease that still turns against its hint fails the step.
 <!-- lane FL3 (w4/fold-robustness) §5.36: end -->
 
+<!-- lane FL3 (w4/fold-robustness) §5.37: begin -->
+### 5.37 Kernel fold programs: rigid steps solve on exact geometry, not on the grid
+
+A document's vertices lie on the 1e-6 mm grid (§1). The kernel's fold-program state keeps exact
+coordinates. A rigid step that ends where rigid branches meet (the masu's end wall standing with
+its gussets folded flat) could not reach that end on the snapped pattern when the vertices fell
+off the grid: the solver landed on another branch and the next step's start did not close (the
+masu lid needed its square rounded to 8 µm).
+
+- A kernel rigid step (`FoldProgram.kinematic`) solves loop closure on the arrangement's
+  topology with each vertex off the grid put back on the state's exact point (within 1e-5 mm;
+  `foldpose.exact_arrangement`). A vertex on the grid up to round-off (1e-9 mm) keeps the
+  grid's value, so the solver has no float noise to chase there.
+- The build's penetration check (§5.6 report, `penetration_mm`) reads the faces on the same
+  exact points, so touching faces off the grid do not count as crossing.
+- The document keeps its vertices on the grid and its targets rounded as before. A pattern on
+  the grid gives the same programs. Off the grid, a step's angles now close on the exact
+  pattern instead of the snapped one, which moves step targets by the snapping misfit (about
+  1e-5°).
+<!-- lane FL3 (w4/fold-robustness) §5.37: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any

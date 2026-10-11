@@ -31,6 +31,7 @@ import math
 from collections.abc import Iterable, Sequence
 
 from . import flatmotion
+from .arrangement import Arrangement
 from .flatstate import (
     Affine,
     Face,
@@ -152,6 +153,48 @@ def branch_jump(path: list[dict[int, float]], cur: dict[int, float], free: Itera
                 return f"free crease {e} flipped from {'+' if side > 0 else '-'} at substep {k}"
             side = 1 if a > 0 else -1
     return None
+
+
+SNAP_BACK_MM = 1e-5   # an arrangement vertex this close to a state point takes its exact place
+ON_GRID_MM = 1e-9     # … unless the point is on the grid up to round-off
+
+
+def exact_arrangement(arr, state: FlatState):
+    """The arrangement with its vertices back on the state's exact points (spec §5.37). The
+    arrangement snaps them to the 1e-6 mm grid, which moves a vertex by up to 0.7 µm: off-grid
+    patterns then miss closure where a rigid step ends at a branch point (the masu lid's end
+    wall with its gussets folded flat) and the solver ends on another branch. The kinematic
+    step solves on exact geometry; the document keeps the grid."""
+    from .geometry import Vec2
+
+    cells: dict[tuple[int, int], list[Pt]] = {}
+    for p in state.points:
+        cells.setdefault((round(p[0]), round(p[1])), []).append(p)
+    verts = []
+    for v in arr.vertices:
+        best = None
+        for i in (-1, 0, 1):
+            for j in (-1, 0, 1):
+                for p in cells.get((round(v.x) + i, round(v.y) + j), ()):
+                    d = math.hypot(p[0] - v.x, p[1] - v.y)
+                    if d <= SNAP_BACK_MM and (best is None or d < best[0]):
+                        best = (d, p)
+        # a point on the grid up to round-off keeps the grid's clean value (no float noise
+        # for the solver to chase); one off it takes its exact place
+        verts.append(v if best is None or best[0] <= ON_GRID_MM else Vec2(*best[1]))
+
+    out = _ExactArrangement(arr.grid, arr.edges, arr.assignment, arr.fold_angle, arr.treatment,
+                            arr.tags, arr.faces, arr.hole_faces, arr.warnings)
+    out.__dict__["_exact"] = verts
+    return out
+
+
+class _ExactArrangement(Arrangement):
+    """An arrangement whose `vertices` are given exactly, not read off the grid."""
+
+    @property
+    def vertices(self):
+        return list(self.__dict__["_exact"])
 
 
 def solve_step(arr, cur: dict[int, float], drive: dict[int, float], free: Iterable[int],
@@ -423,7 +466,7 @@ class Pose3:
         from .geometry import Vec2, point_in_polygon
         from .kinematics import face_adjacency, root_face
 
-        arr = state.unfold("kinematic").build()
+        arr = exact_arrangement(state.unfold("kinematic").build(), state)
         rings = [[arr.vertices[v] for v in cyc] for cyc in arr.faces]
         home = []
         for f in range(len(state.faces)):

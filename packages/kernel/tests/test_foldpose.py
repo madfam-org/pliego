@@ -199,3 +199,34 @@ def test_branch_jump_names_the_crease():
     assert "against its hint" in foldpose.branch_jump([{1: -2.0, 2: 0.0}], cur, [1, 2], {1: 1})
     assert foldpose.branch_jump([{1: 2.0, 2: 180.0}, {1: 5.0, 2: -180.0}], cur, [1, 2], {}) \
         is None
+
+
+# ── spec §5.37: a rigid step solves on the state's exact points, not the 1e-6 mm grid ──
+
+def test_masu_lid_off_the_grid_folds_without_rounding():
+    # the lid's square is the box's plus 4·√2·gap: 208.485281… mm puts the pattern's vertices
+    # off the grid (the commons rounded it to 8 µm); the second end wall's start did not close
+    s = 200.0 + 4.0 * math.sqrt(2.0) * 1.5
+    fp, g = fm.masu_box(s=s)
+    assert masu_inside(fp, g) < 1e-6
+    b = fp.build()
+    rows = {r["id"]: r for r in b.report["rows"]}
+    for sid in ("end-top", "flap-top", "end-bottom", "flap-bottom"):
+        assert rows[sid]["tear_mm"] < 1e-5 and rows[sid]["penetration_mm"] <= 0.05
+
+
+def test_exact_arrangement_puts_vertices_back_on_the_state():
+    fp, _ = fm.masu_box(s=123.4567)
+    st = fp.recs[-1].state
+    arr = st.unfold("x").build()
+    ex = foldpose.exact_arrangement(arr, st)
+    assert ex.edges == arr.edges and ex.faces == arr.faces
+    pts = set(st.points)
+    moved = 0
+    for a, b in zip(ex.vertices, arr.vertices, strict=True):
+        d = abs(a.x - b.x) + abs(a.y - b.y)
+        assert d < 2e-6
+        if d:       # off the grid: back on the state's exact point
+            assert (a.x, a.y) in pts
+            moved += 1
+    assert moved > 0

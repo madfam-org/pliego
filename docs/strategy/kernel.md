@@ -341,6 +341,10 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
   Proof: the masu box folds its gussets in at every `substeps` from 1 to 8 (5, 7 and 8 folded a
   bottom gusset out, 1 had no path), and substeps 5 and 10 give the same states where their
   fractions agree (`test_masu_gussets_fold_in_at_any_substep_count`).
+- **Off the grid** (spec §5.37). `foldpose.exact_arrangement(arr, state)` puts the snapped
+  arrangement's vertices back on the state's exact points; `Pose3.kinematic` solves on it and
+  `FoldProgram.build` reads penetration on it. Proof: the masu lid at its real size
+  (200 + 4√2·1.5 mm, no 8 µm rounding) and a 123.4567 mm box fold and build.
 <!-- FL3 (wave 4, fold-program robustness) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

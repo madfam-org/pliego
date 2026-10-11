@@ -61,14 +61,14 @@ demonstrates it. Until then, its row names the wave that will.
 | C5 | Transformations: dissolves, venetian blinds | C K | `dissolve-scene` | ✅ landed |
 | C6 | Linkages and levers: four-bar, scissor and lazy-tongs extenders | C (pivots) K (closure) | `card-linkages` | ✅ landed |
 | C7 | Automata: cams, cranks, followers, gears in card | C (rotate + follower) K E | `paper-automaton` | ✅ landed |
-| C8 | Tunnel, carousel and peepshow structures | C (spine, gutter) | `tunnel-book`, `carousel-book`, `tunnel-book-forest`, `carousel-village` | ✅ partly (2/4) · 🟡 W2c |
+| C8 | Tunnel, carousel and peepshow structures | C (spine, gutter) | `tunnel-book`, `carousel-book`, `tunnel-book-forest`, `carousel-village` | ✅ landed |
 
 ## D. Bending, rolling, curling, twisting
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
 | D1 | Rolling: cones, tubes, beads, coils | K (developable rolls) E | `party-hat`, `paper-beads`, `quilling`, `paper-rose`, `paper-chain` | ✅ landed |
-| D2 | Curved scoring and curling | K (curved score) E | `pillow-box`, `quilling` (curl) | ✅ partly (1/2) · 🟡 W2c |
+| D2 | Curved scoring and curling | K (curved score) E | `pillow-box`, `quilling` (curl) | ✅ landed |
 | D3 | Bending-active structures: strip gridshells, bent plates | E (large deflection) | `bending-active-shell` | 🔬 W3 |
 | D4 | Crumpling | E (contact, plasticity) | `crumpled-sheet` | 🔬 W3 |
 | D5 | Springs and twisting: witch's ladder, paper yarn and rope | K E | `paper-spring`, `paper-yarn` (paper textiles link to Fashion Cabinet, RFC 0045) | ✅ landed |
@@ -78,19 +78,19 @@ demonstrates it. Until then, its row names the wave that will.
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
 | E1 | Corrugation: fluted medium between liners (A/B/C/E/F; single face to triple wall) | K (`pliego.corrugate`) stock (corrugation model) E (orthotropy, caliper) | `corrugated-board` | ✅ landed |
-| E2 | Paper honeycomb: decorative and structural cores | K E | `honeycomb-decoration`, `honeycomb-panel` | ✅ partly (1/2) · 🟡 W2b L4 · W2c |
-| E3 | Slotted and interlocking structures: dividers, furniture | C (slot contact) K | `slotted-dividers`, `cardboard-furniture`, `tab-and-slot` | ✅ partly (1/3) · ✅ · 🟡 W2c |
+| E2 | Paper honeycomb: decorative and structural cores | K E | `honeycomb-decoration`, `honeycomb-panel` | ✅ landed |
+| E3 | Slotted and interlocking structures: dividers, furniture | C (slot contact) K | `slotted-dividers`, `cardboard-furniture`, `tab-and-slot` | ✅ landed |
 | E4 | Load-bearing paper: bridges, columns, box compression | E (load, buckling) | `paper-bridge`, `corrugated-shipper` (stacking) | ✅ partly (1/2) · 🔬 W3 |
 
 ## F. Packaging and print finishing
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| F1 | Dielines and box styles, thickness-compensated | K (`pliego.dieline`) X (dieline profile) | `corrugated-shipper`, `folding-carton`, `mailer-box`, `pillow-box`, `gable-box`, `sleeve-and-tray`, `presentation-folder`, `display-stand`, `paper-bag` | ✅ partly (4/9) · 🟡 W2b P · W2c |
+| F1 | Dielines and box styles, thickness-compensated | K (`pliego.dieline`) X (dieline profile) | `corrugated-shipper`, `folding-carton`, `mailer-box`, `pillow-box`, `gable-box`, `sleeve-and-tray`, `presentation-folder`, `display-stand`, `paper-bag` | ✅ landed |
 | F2 | Envelopes | K (`pliego.envelope`) | `envelope` | ✅ landed |
 | F3 | Print folds and imposition | K | `print-folds`, `codex-signatures`, `pocket-zine` | ✅ landed |
 | F4 | Pressing: emboss, deboss, foil, letterpress | C (finish regions) X (plates) S (relief) | `embossed-stationery` | ✅ landed |
-| F5 | Branding: artwork on dielines, pressed marks, heat and burn branding (RFC 0045 S4) | C X S | `embossed-stationery`, `branded-tag`, `folding-carton` (artwork preset) | ✅ partly (2/3) · 🟡 W2b P · W2c |
+| F5 | Branding: artwork on dielines, pressed marks, heat and burn branding (RFC 0045 S4) | C X S | `embossed-stationery`, `branded-tag`, `folding-carton` (artwork preset) | ✅ landed |
 | F6 | Coatings and laminates: varnish, spot UV, film, bookcloth | C (finishes, laminates; RFC 0045 §5.3) | `case-binding`, `embossed-stationery` | ✅ partly (1/2) · 🟡 W2c |
 | F7 | Wrapping a solid: gift wrap, furoshiki-like paper wraps | E (contact with a body) | `gift-wrap` | ✅ landed |
 
@@ -127,16 +127,16 @@ demonstrates it. Until then, its row names the wave that will.
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| J1 | Polyhedral nets with glue tabs | K (unfolder) | `platonic-solids` | 🟡 W2c |
+| J1 | Polyhedral nets with glue tabs | K (unfolder) | `platonic-solids` | ✅ landed |
 | J2 | **Low-poly papercraft**: any mesh unfolded into tabbed, numbered nets laid out on pages, with an assembly program that folds the net into the model | K (`pliego.unfold`: cut tree, overlap splitting, tabs, edge numbers, page layout) C (cartridge mesh assets) S (net-to-model animation) X | `low-poly-papercraft` (original models), `papercraft-unfold` (any mesh, including Yantra4D solids) | ✅ landed |
 | J3 | Gores: globes and balloons | K | `paper-globe` | ✅ landed |
-| J4 | Paper models: architecture and vehicles | K | `paper-house`, `low-poly-papercraft` (designs) | ✅ partly (1/2) · 🟡 W2c |
+| J4 | Paper models: architecture and vehicles | K | `paper-house`, `low-poly-papercraft` (designs) | ✅ landed |
 
 ## K. Paper electronics and interaction
 
 | # | Mode | Layers | Hyperobjects | Status |
 |---|---|---|---|---|
-| K1 | Paper circuits: copper-tape and conductive-ink traces, fold switches, LEDs on cards and pop-ups | C (trace finish layer) X (trace plate) BOM (keystone standard parts) | `paper-circuit-card` | 🟡 W2c |
+| K1 | Paper circuits: copper-tape and conductive-ink traces, fold switches, LEDs on cards and pop-ups | C (trace finish layer) X (trace plate) BOM (keystone standard parts) | `paper-circuit-card` | ✅ landed |
 
 ## L. Physics phenomena (the engine's showcase, all 🔬 W3)
 

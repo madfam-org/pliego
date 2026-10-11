@@ -15,7 +15,7 @@ import hashlib
 import json
 from typing import Any
 
-KERNEL_VERSION = "0.2.0"
+KERNEL_VERSION = "0.3.0"
 KERNEL_ID = f"pliego-kernel {KERNEL_VERSION}"
 PER_VERTEX = ("vertices_coords", "pliego:vertices_sheet")
 PER_EDGE = ("edges_vertices", "edges_assignment", "edges_foldAngle", "pliego:edges_sheet",

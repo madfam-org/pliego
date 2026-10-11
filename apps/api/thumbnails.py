@@ -113,14 +113,29 @@ def _ensure_kernel(settings: Settings) -> None:
             sys.path.insert(0, src)
 
 
-def render_svg(renderer: Renderer, cart: Cartridge) -> bytes:
-    """The thumbnail of one cartridge: default mode, manifest defaults, diagram palette."""
+def svg_from_document(document: bytes) -> bytes:
+    """The thumbnail drawn from a rendered sheet document (diagram palette, no marks or labels)."""
     from pliego.export.svg import to_svg
 
+    return to_svg(json.loads(document), **SVG_OPTIONS).encode("utf-8")
+
+
+def render_svg(renderer: Renderer, cart: Cartridge) -> bytes:
+    """The thumbnail of one cartridge: default mode, manifest defaults, diagram palette."""
     mode, params = resolve_request(cart, cart.modes[0].id, {})
-    result = renderer.run(cart, mode, params, ())
-    svg = to_svg(json.loads(result.document), **SVG_OPTIONS)
-    return svg.encode("utf-8")
+    return svg_from_document(renderer.run(cart, mode, params, ()).document)
+
+
+def finish(out_dir: Path, all_slugs, report: BuildReport, *, full: bool) -> None:
+    """Drop previews of cartridges that left the commons (a full build) and write ``index.json``."""
+    if full:
+        for stale in out_dir.glob("*.svg"):
+            if stale.stem not in all_slugs:
+                stale.unlink()
+    index = {"format": INDEX_FORMAT, "version": 1, "svg": SVG_OPTIONS,
+             "cartridges": report.cartridges, "produced": sorted(report.produced),
+             "failed": report.failed}
+    _write_atomic(out_dir / INDEX, (json.dumps(index, indent=1, sort_keys=True) + "\n").encode())
 
 
 def _write_atomic(path: Path, data: bytes) -> None:
@@ -163,15 +178,8 @@ def build(settings: Settings, out_dir: Path, *, only: set[str] | None = None, jo
             else:
                 _write_atomic(out_dir / f"{slug}.svg", svg)
                 report.produced.append(slug)
-    if only is None:  # a full build owns the directory: drop previews of cartridges that left
-        for stale in out_dir.glob("*.svg"):
-            if stale.stem not in carts:
-                stale.unlink()
     report.seconds = time.monotonic() - started
-    index = {"format": INDEX_FORMAT, "version": 1, "svg": SVG_OPTIONS,
-             "cartridges": report.cartridges, "produced": report.produced,
-             "failed": report.failed}
-    _write_atomic(out_dir / INDEX, (json.dumps(index, indent=1, sort_keys=True) + "\n").encode())
+    finish(out_dir, carts, report, full=only is None)
     return report
 
 

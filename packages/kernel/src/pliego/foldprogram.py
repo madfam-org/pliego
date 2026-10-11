@@ -398,16 +398,20 @@ class FoldProgram:
 
     # ── build ──
     def build(self, id: str = "square", *, start_after: str | None = None,
-              rest_memory: float | None = None) -> Built:
+              rest_memory: float | None = None, root=None) -> Built:
         """The crease pattern, the fold program and the report (see the module docstring).
         `start_after` (a step id): the program starts after that operation — the earlier moves
         only shape the starting pose (`Built.start_angles`, `Built.initial()`), e.g. a finished
         model whose program is an operating cycle, or a sheet creased beforehand. With
         `rest_memory` (deg) the creases open at the start that remember a fold get that rest
-        angle, signed by their last fold (a pre-creased sheet: `pliego:edges_restAngle`)."""
+        angle, signed by their last fold (a pre-creased sheet: `pliego:edges_restAngle`).
+        `root` (a sheet point): the face the preview holds still (spec §5.16 `root_face`, set on
+        the sheet with `Sheet.present`); the program's samples are fitted on the preview's face
+        tree rooted there (default: the sheet's first face)."""
         from .assembly import EdgeRef, Sequence, Step
         from .foldpose import check_penetration, exact_arrangement
-        from .kinematics import face_adjacency
+        from .geometry import Vec2
+        from .kinematics import face_adjacency, root_face
         from .preview import PreviewTree, sample_step
 
         final = self.state
@@ -422,6 +426,9 @@ class FoldProgram:
             start_state = rec0.move.state
         sheet = final.unfold(id, rest_memory=rest_memory, memory_from=start_state,
                              **self.sheet_kwargs)
+        if root is not None:
+            pr = sheet.presentation or {}
+            sheet.present(root=root, end=pr.get("end"))
         arr = sheet.build()
         nf = len(arr.faces)
         cents = face_points(arr)
@@ -430,7 +437,7 @@ class FoldProgram:
             for g, e, a, b in lst:
                 edge_faces.setdefault(e, (f, g, a, b))
         folds = sorted(edge_faces)
-        tree = PreviewTree(arr)
+        tree = PreviewTree(arr, 0 if root is None else root_face(arr, Vec2(*pt(root))))
         unpl = tree.unplaced
 
         def fmap(state: FlatState) -> list[int]:

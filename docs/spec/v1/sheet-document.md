@@ -546,7 +546,10 @@ tilting the flat sheet at t = 0.
   rotates about the root face's t = 0 centroid, then translates by `origin`. Mechanisms apply
   before it.
 
-The studio stub implements both. **Ground:** the preview also keeps the posed paper above the
+The studio stub implements both. The kernel's replica of the preview (`pliego.preview.PreviewTree`,
+which a fold program fits its samples on) roots at `root_face` too: `FoldProgram.build(root=)`
+sets the sheet's presentation root and fits on the tree held there. <!-- lane FL3
+(w4/fold-robustness) item 7 --> **Ground:** the preview also keeps the posed paper above the
 table (`y = 0`, §1): when a rigid preview would swing any visible point below it, the whole scene
 is lifted until its lowest point rests on the table. The physics engine needs no clamp (contact
 with the ground does this). Rule 17 (§8) checks the field.
@@ -866,8 +869,10 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     step.
 <!-- lane E (wave 3) rules 19–21: end -->
 <!-- lane X (w3/trace-finish) rule 30: begin -->
-30. Paper circuits (§5.30), checked by `pliego.press.circuit(finishes, closed=…)` — not yet
-    wired into `Document.verify()`: every trace finish passes §5.30 (rule 13 already applies
+30. Paper circuits (§5.30), checked by `pliego.press.circuit(finishes, closed=…)` — wired into
+    `Document.verify()`, which checks the circuit with every fold switch open and then closed
+    and leaves traces that rule 13 refuses to rule 13 <!-- lane FL3 (w4/fold-robustness) item
+    7: was "not yet wired into `Document.verify()`" -->: every trace finish passes §5.30 (rule 13 already applies
     its record checks); traces on the same sheet and side whose conductors overlap form one
     net, and a fold switch named closed joins its contact pads. With exactly one cell, whose
     `plus` and `minus` pads sit on different nets (else `short`), the circuit is **closed**

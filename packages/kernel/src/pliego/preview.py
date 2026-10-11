@@ -1,7 +1,8 @@
 """What the studio preview draws for a fold state (`pliego.preview`).
 
 The studio's preview engine (``apps/web/studio/src/engine-stub.js``) poses a single sheet as a
-face tree: breadth-first from face 0 through every hinge edge (M, V, F, U, J), each child face
+face tree: breadth-first from the sheet's root face (spec §5.16 ``presentation.root_face``, else
+its first face) through every hinge edge (M, V, F, U, J), each child face
 rotated about its shared edge by that edge's fold angle. Creases outside the tree are not used,
 so a fold state whose angles do not close shows as a tear there. This module replicates that tree
 (same traversal order, same rotation convention, no display clamp) so a fold program can measure
@@ -24,10 +25,15 @@ MAX_SAMPLES = 24
 
 
 class PreviewTree:
-    """The preview's face tree of one built sheet (`pliego.Arrangement`)."""
+    """The preview's face tree of one built sheet (`pliego.Arrangement`), rooted at face `root`
+    — the sheet's §5.16 `presentation.root_face` (on this sheet), the face the preview holds
+    still; default its first face."""
 
-    def __init__(self, arr):
+    def __init__(self, arr, root: int = 0):
         self.arr = arr
+        if arr.faces and not 0 <= root < len(arr.faces):
+            raise ValueError(f"preview root face {root} is not a face of the sheet")
+        self.root = root
         self.unplaced = [(v.x, 0.0, -v.y) for v in arr.vertices]
         key = {}
         for e, (a, b) in enumerate(arr.edges):
@@ -46,8 +52,8 @@ class PreviewTree:
         self.order: list[int] = []
         seen = [False] * n
         if n:
-            queue = deque([0])
-            seen[0] = True
+            queue = deque([root])
+            seen[root] = True
             while queue:
                 f = queue.popleft()
                 self.order.append(f)
@@ -87,7 +93,7 @@ class PreviewTree:
         drawn: list[flatmotion.Rigid] = [flatmotion.ID_RIGID] * len(self.arr.faces)
         u = self.unplaced
         if self.order:
-            drawn[0] = intended[0]
+            drawn[self.root] = intended[self.root]
         for f in self.order:
             par = self.parent[f]
             if par is None:
@@ -215,7 +221,7 @@ def sample_step(tree, readout, poses_at, ts0, cur, end, folds, sid, end_follows_
             full = {**last, **ang}
             drawn = tree.pose(full)
             tears.append(tree.tear(drawn))
-            devs.append(tree.deviation(drawn, _rooted(poses, drawn)))
+            devs.append(tree.deviation(drawn, _rooted(poses, drawn, tree.root)))
             mids.append(tree.tear(tree.pose({e: (last[e] + full[e]) / 2.0 for e in folds})))
             seq.append(ang)
             prev, last, t0 = ang, full, min(t, 1.0)
@@ -230,8 +236,8 @@ def sample_step(tree, readout, poses_at, ts0, cur, end, folds, sid, end_follows_
         ts = sorted(set(ts) | {(t_prev[k] + ts[k]) / 2.0 for k in bad_iv})[:MAX_SAMPLES]
 
 
-def _rooted(intended: list, drawn: list) -> list:
-    """Intended poses moved so face 0 sits where the preview draws it (the preview keeps face 0
-    fixed; the intended motion may move it)."""
-    fix = flatmotion.compose(drawn[0], flatmotion.invert(intended[0]))
+def _rooted(intended: list, drawn: list, root: int = 0) -> list:
+    """Intended poses moved so the root face sits where the preview draws it (the preview keeps
+    the root face fixed; the intended motion may move it)."""
+    fix = flatmotion.compose(drawn[root], flatmotion.invert(intended[root]))
     return [flatmotion.compose(fix, p) for p in intended]

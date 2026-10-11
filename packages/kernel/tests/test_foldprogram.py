@@ -207,3 +207,30 @@ def test_hinge_faces_names_the_flap_exactly():
         fp.hinge("open", "open", keel, 16.0, at=at, faces=left[:1])
     fp.hinge("open", "open", keel, 16.0, at=at, faces=left)
     assert fp.recs[-1].hinge["specs"][0]["faces"] == left
+
+
+# ── spec §5.16: the preview replica roots where the sheet's presentation says ──
+
+def test_program_fits_the_preview_rooted_at_root_face():
+    from pliego.geometry import Vec2
+    from pliego.kinematics import root_face
+
+    def replay(b, root):
+        tree, cur, worst = PreviewTree(b.arr, root), dict(b.start_angles), 0.0
+        for st in b.sequence.steps:
+            cur.update({r.edge: a for r, a in st.targets})
+            worst = max(worst, tree.tear(tree.pose(cur)))
+        return worst
+    fp, _ = fm.crane(wings="spread")
+    at = (140.0, 20.0)                         # a face far from face 0 (the reverse folds)
+    b = fp.build(root=at)
+    rf = root_face(b.arr, Vec2(*at))
+    assert rf != 0 and b.sheet.presentation["root"] == Vec2(*at)
+    # the report is what the preview draws holding that face still, not face 0
+    assert b.report["max_tear_mm"] == pytest.approx(replay(b, rf), abs=1e-5)
+    assert replay(b, 0) > 5.0 * b.report["max_tear_mm"]       # drawn from face 0: not this
+    doc = doc_of(b)
+    assert doc.data["pliego:sheets"][0]["presentation"]["root_face"] == rf
+    assert [i for i in doc.verify() if i["level"] == "error"] == []
+    with pytest.raises(ValueError, match="not a face"):
+        PreviewTree(b.arr, len(b.arr.faces))

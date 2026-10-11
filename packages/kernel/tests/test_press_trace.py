@@ -167,3 +167,28 @@ def test_stroke_is_byte_stable():
     b = press.trace("t", "card", [(0, 0), (33.3, 0.0), (50, 20)], 3.0)
     assert json.dumps(a) == json.dumps(b)
     assert all(math.isfinite(c) for p in a["region"][0] for c in p)
+
+
+def test_document_verify_runs_rule_30():
+    def doc(traces):
+        card = pliego.Sheet("card", [(0, 0), (160, 0), (160, 100), (0, 100)],
+                            stock="cardstock-250")
+        card.valley((80, 0), (80, 100), angle=0)
+        return pliego.Assembly([card], finishes=traces, title="Circuit card").build()
+
+    def rule30(d):
+        return [(i["level"], i["kind"], i["detail"]) for i in d.verify() if i["rule"] == 30]
+    assert rule30(doc(card_circuit())) == []           # open with the switch up, lit when shut
+    rev = rule30(doc(card_circuit(flip_led=True)))
+    assert rev == [("error", "reversed", "circuit (fold switches closed): the loop closes only "
+                    "through an LED wired backwards (anode and cathode swapped)")]
+    short = card_circuit() + [press.trace("bridge", "card", [(20, 25), (32, 25)], W)]
+    # once, though both states short the cell (closing the switch shorts the LED too)
+    assert [(lv, k) for lv, k, _ in rule30(doc(short))] == [("error", "short"),
+                                                            ("warning", "led_shorted")]
+    no_cell = [t for t in card_circuit() if t["id"] != "plus"]
+    assert ("error", "cell") in {(lv, k) for lv, k, _ in rule30(doc(no_cell))}
+    off = json.loads(doc(card_circuit()).to_json())
+    off["pliego:finishes"][0]["region"] = [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0]]]
+    issues = pliego.Document(off).verify()
+    assert [i for i in issues if i["rule"] == 13] and not [i for i in issues if i["rule"] == 30]

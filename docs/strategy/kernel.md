@@ -364,6 +364,13 @@ differed by ~1e-6°) are no longer reported as a strictly smallest sector.
 - **Hinge flaps by name** (spec §5.39). `hinge(..., sheet_points=, faces=)` and the same keys
   in a `hinges` spec. Proof: the traditional dart (`flat_models.dart_plane`) opens its fuselage
   with each corner flap, whose crease lies on the keel, turning with its own half.
+- **Contract wiring.** `Document.verify()` runs rule 30 (`document_verify_pack.rule30_circuit`:
+  `press.circuit` with every fold switch open, then closed; one report per issue; traces that
+  rule 13 refuses are left to it). `PreviewTree(arr, root=)` roots the replica at the §5.16
+  `root_face`; `FoldProgram.build(root=sheet point)` presents the sheet there and fits the
+  samples on that tree. Proof: a circuit card's reversed LED, short and missing cell fail
+  `verify()`; the crane built with its root at (140, 20) reports 17.6 mm of tear, what a
+  preview holding that face draws, where the face-0 report said 2.5e-5 mm for the same program.
 <!-- FL3 (wave 4, fold-program robustness) end -->
 
 Tests: `test_flatstate.py`, `test_flatcompound.py` (bird base and frog base by operations — layer order,

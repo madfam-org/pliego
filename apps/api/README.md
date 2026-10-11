@@ -4,13 +4,15 @@
 
 One Flask 3 app serves everything (docs/strategy/architecture.md §3): the landing at `/`, the studio
 at `/studio/`, engine modules at `/engine/`, `/schemas/*.schema.json`, `/llms.txt`,
-`/llms-full.txt`, host-aware `/robots.txt` and `/sitemap.xml`, and the JSON API (`/health`,
-`/ready`, `/api/v1/*`, described in [`openapi.json`](openapi.json)).
+`/llms-full.txt`, host-aware `/robots.txt` and `/sitemap.xml`, the catalog previews at
+`/projects/<slug>.svg`, and the JSON API (`/health`, `/ready`, `/api/v1/*`, described in
+[`openapi.json`](openapi.json)).
 
 ```bash
 gunicorn -c apps/api/gunicorn.conf.py apps.api.app:app          # 8000 app, 9090 metrics
 PLIEGO_DEV=1 python -m flask --app apps.api.app:create_app run  # local, dev CORS origins
 python -m pytest apps/api/tests -q
+python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previews + coverage check
 ```
 
 ## Modules
@@ -28,6 +30,7 @@ python -m pytest apps/api/tests -q
 | `catalog.py`, `manifest.py` | stat-signature-memoized catalog and stock cards; fail-closed manifest checks; strict params |
 | `render.py` | the sandbox runner as a killable subprocess (minimal env, own session, 30 s) |
 | `api_v1.py` | `/health`, `/ready`, `/api/v1/*` |
+| `thumbnails.py` | catalog previews: built at image build time (one crease-pattern SVG per cartridge, default mode, kernel SVG exporter, diagram palette), served at `/projects/<slug>.svg`; the coverage check (`build --strict`) |
 | `metrics.py` | Prometheus text on the metrics listener only (per-worker counters) |
 | `services/engine/pliego_runner.py` | the cartridge runner: sandbox, `verify:` read-proof line, exports |
 | `services/engine/sandbox_policy.py` | import allowlist, AST policy, module proxies (on top of `commons_sandbox`) |
@@ -47,6 +50,7 @@ python -m pytest apps/api/tests -q
 | `PLIEGO_PLAUSIBLE_ORIGIN` | unset | adds that https origin to `script-src`/`connect-src` on the landing host only |
 | `PLIEGO_DEV` | unset | local development switch |
 | `PLIEGO_ROOT`, `PLIEGO_PROJECTS_DIR`, `PLIEGO_MATERIALS_DIR` | repository paths | overrides (tests) |
+| `PLIEGO_THUMBNAILS_DIR` | `<root>/build/thumbnails` | the built catalog previews (the image builds them into `/app/build/thumbnails`) |
 
 Janua (`PLIEGO_JANUA_*`, `AUTH_JANUA_*`, `PLIEGO_SESSION_SECRET`) and Selva (`SELVA_*`) are not read
 yet: requests that carry `Authorization` are refused with 401 and there are no AI routes, so nothing

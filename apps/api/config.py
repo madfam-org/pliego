@@ -48,6 +48,7 @@ class Settings:
     root: Path = DEFAULT_ROOT
     projects_dir: Path | None = None
     materials_dir: Path | None = None
+    thumbnails_dir: Path | None = None
     host_landing: str = HOST_LANDING
     host_app: str = HOST_APP
     host_api: str = HOST_API
@@ -85,18 +86,25 @@ class Settings:
     def materials(self) -> Path:
         return self.materials_dir or (self.root / "materials")
 
+    @property
+    def thumbnails(self) -> Path:
+        """Built catalog previews (apps/api/thumbnails.py; the image builds them at build time)."""
+        return self.thumbnails_dir or (self.root / "build" / "thumbnails")
+
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Settings:
         env = os.environ if env is None else env
         root = Path(env.get("PLIEGO_ROOT") or DEFAULT_ROOT)
         projects = env.get("PLIEGO_PROJECTS_DIR")
         materials = env.get("PLIEGO_MATERIALS_DIR")
+        thumbnails = env.get("PLIEGO_THUMBNAILS_DIR")
         header = env.get("PLIEGO_TRUSTED_PROXY_HEADER")
         timeout = env.get("PLIEGO_RENDER_TIMEOUT_S")
         return cls(
             root=root,
             projects_dir=Path(projects) if projects else None,
             materials_dir=Path(materials) if materials else None,
+            thumbnails_dir=Path(thumbnails) if thumbnails else None,
             host_landing=(env.get("PLIEGO_PUBLIC_LANDING_HOST") or HOST_LANDING).strip().lower(),
             host_app=(env.get("PLIEGO_PUBLIC_APP_HOST") or HOST_APP).strip().lower(),
             host_api=(env.get("PLIEGO_PUBLIC_API_HOST") or HOST_API).strip().lower(),

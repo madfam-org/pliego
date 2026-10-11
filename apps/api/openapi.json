@@ -341,6 +341,38 @@
           }
         }
       }
+    },
+    "/projects/{slug}.svg": {
+      "get": {
+        "operationId": "getThumbnail",
+        "summary": "The catalog preview of one cartridge (SVG, built at image build time).",
+        "description": "The cartridge's default mode at its manifest defaults, rendered through the sandboxed runner and drawn by the kernel's SVG exporter (`diagram` palette, fabrication profile, no registration marks or labels). Built once per image; never rendered on request. This is the path the commons manifests declare as `project.thumbnail`. Served on every host, same origin as the studio (CSP `img-src 'self'`).",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The SVG (mm units). `Cache-Control: no-cache` with an ETag: revalidation is a 304.",
+            "content": {
+              "image/svg+xml": {}
+            }
+          },
+          "304": {
+            "description": "Not modified (If-None-Match)."
+          },
+          "404": {
+            "description": "No such cartridge, or its preview could not be produced at build time (the build log and `build/thumbnails/index.json` name the reason)."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -444,6 +476,10 @@
           },
           "stocks_invalid": {
             "type": "integer"
+          },
+          "thumbnails": {
+            "type": "integer",
+            "description": "Catalog previews built into this image (apps/api/thumbnails.py)."
           }
         }
       },
@@ -501,6 +537,13 @@
           },
           "summary": {
             "type": "string"
+          },
+          "thumbnail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Same-origin URL of the catalog preview (`/projects/<slug>.svg`): the default mode's crease pattern at its manifest defaults, drawn by the kernel's SVG exporter in the diagram palette. Null when the image was not built (the image build renders every cartridge; see GET /projects/{slug}.svg)."
           },
           "difficulty": {
             "type": [

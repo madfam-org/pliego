@@ -303,6 +303,11 @@ jobs:
       - name: Test (pytest)
         if: steps.detect.outputs.present == 'true'
         run: python -m pytest apps/api/tests -q
+      - name: Catalog thumbnails cover the commons (every cartridge's preview renders)
+        if: steps.detect.outputs.present == 'true'
+        # The same build the image runs (Dockerfile), strict: one line per cartridge whose preview cannot be
+        # produced, and a failure on any (or on zero cartridges read).
+        run: python -m apps.api.thumbnails build "$RUNNER_TEMP/thumbnails" --strict
       - name: OpenAPI matches the served routes
         if: steps.detect.outputs.present == 'true'
         env:

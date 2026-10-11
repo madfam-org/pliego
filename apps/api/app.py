@@ -16,7 +16,9 @@ import sys
 from flask import Flask, g, request
 from werkzeug.exceptions import HTTPException
 
-from . import cors, metrics as metrics_mod, security, static_routes
+from . import cors, security, static_routes
+from . import metrics as metrics_mod
+from . import thumbnails as thumbnails_mod
 from .api_v1 import create_blueprint, error, json_response
 from .catalog import Catalog, StockLibrary, strict_json_loads
 from .config import MAX_CONTENT_LENGTH, Settings
@@ -54,11 +56,13 @@ def create_app(settings: Settings | None = None) -> Flask:
     hosts = HostRouter(settings)
     metrics = metrics_mod.Metrics()
     renderer = Renderer(settings)
-    catalog = Catalog(settings.projects, renderer.published_formats)
+    previews = thumbnails_mod.ThumbnailStore(settings.thumbnails)
+    catalog = Catalog(settings.projects, renderer.published_formats, previews.url)
     stocks = StockLibrary(settings.materials)
     limiter = RateLimiter(*settings.rate_limit)
     app.extensions["pliego"] = {"catalog": catalog, "stocks": stocks, "renderer": renderer,
-                                "limiter": limiter, "metrics": metrics, "hosts": hosts}
+                                "limiter": limiter, "metrics": metrics, "hosts": hosts,
+                                "thumbnails": previews}
 
     # Order matters: the metrics-listener gate runs first; security headers apply to everything.
     metrics_mod.install(app, metrics, settings.metrics_port)
@@ -94,8 +98,9 @@ def create_app(settings: Settings | None = None) -> Flask:
                               "endpoints": [f"{m} {rule}" for rule, m in routes]})
 
     app.register_blueprint(create_blueprint(
-        catalog, stocks, renderer, metrics, limiter, RenderSlot(1), version=VERSION,
+        catalog, stocks, renderer, metrics, limiter, RenderSlot(1), previews, version=VERSION,
         require_commons=settings.require_commons, trusted_header=settings.trusted_ip_header))
+    thumbnails_mod.register(app, previews)  # before the static catch-all: /projects/<slug>.svg
     static_routes.register(app, settings, hosts, api_index)
 
     @app.errorhandler(HTTPException)

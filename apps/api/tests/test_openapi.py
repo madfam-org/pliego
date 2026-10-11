@@ -1,5 +1,6 @@
-"""apps/api/openapi.json describes exactly the routes the app serves under /api/v1 plus /health and
-/ready (the verify_openapi pattern; scripts/qa/verify_openapi.py checks /api/v1 in CI).
+"""apps/api/openapi.json describes exactly the routes the app serves under /api/v1 plus /health,
+/ready and the catalog previews under /projects/ (the verify_openapi pattern;
+scripts/qa/verify_openapi.py checks /api/v1 in CI).
 
 JSON rather than YAML: the CI job has no YAML parser and the scaffold's gate reads openapi.json
 first (a YAML draft of this file already lost two descriptions to flow-mapping commas)."""
@@ -23,7 +24,8 @@ def documented_operations() -> set[tuple[str, str]]:
 def served_operations(app) -> set[tuple[str, str]]:
     ops = set()
     for rule in app.url_map.iter_rules():
-        if not (rule.rule.startswith("/api/v1/") or rule.rule in ("/health", "/ready")):
+        if not (rule.rule.startswith(("/api/v1/", "/projects/"))
+                or rule.rule in ("/health", "/ready")):
             continue
         path = re.sub(r"<(?:[^:<>]+:)?([^<>]+)>", r"{\1}", rule.rule)
         for method in rule.methods - {"HEAD", "OPTIONS"}:

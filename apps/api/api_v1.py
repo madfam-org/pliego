@@ -20,6 +20,7 @@ from .metrics import Metrics
 from .ratelimit import RateLimiter, client_key
 from .render import TRANSPORT, Renderer, RenderError
 from .render_limits import RETRY_AFTER_S, RenderBusy, RenderSlot
+from .thumbnails import ThumbnailStore
 
 DOCUMENT_KEYS = frozenset({"slug", "mode", "params"})
 EXPORT_KEYS = DOCUMENT_KEYS | {"format"}
@@ -65,7 +66,7 @@ def kernel_status() -> tuple[bool, str | None, str]:
 
 def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
                      metrics: Metrics, limiter: RateLimiter, slot: RenderSlot,
-                     *, version: str, require_commons: bool, trusted_header: str) -> Blueprint:
+                     thumbnails: ThumbnailStore, *, version: str, require_commons: bool, trusted_header: str) -> Blueprint:
     bp = Blueprint("api_v1", __name__)
 
     @bp.get("/health")
@@ -82,6 +83,7 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             "kernel": kernel_version,
             "stocks": len(stock_state["cards"]),
             "stocks_invalid": len(stock_state["invalid"]),
+            "thumbnails": thumbnails.count(),
         })
 
     @bp.get("/ready")

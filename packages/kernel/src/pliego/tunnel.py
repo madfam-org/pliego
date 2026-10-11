@@ -157,6 +157,7 @@ def _cross3(a, b):
 def _split_seam(poly: list[V2]) -> tuple[list[V2] | None, list[V2] | None]:
     """Clip a polygon at x = 0 into its left (x < 0) and right (x ≥ 0) parts; a polygon may
     cross the seam at most once each way."""
+    poly = [(0.0 if abs(p[0]) <= 1e-9 else p[0], p[1]) for p in poly]   # on the seam: x = 0
     left = [p[0] < 0.0 for p in poly]
     n = len(poly)
     crossings = sum(left[i] != left[(i + 1) % n] for i in range(n))

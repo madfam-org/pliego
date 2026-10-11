@@ -129,6 +129,14 @@ def test_pleated_tunnel_frames_stand_parallel_and_the_cover_halves_meet():
     assert math.dist(a, b) < 1e-9 and abs(a[0]) < 1e-12
 
 
+def test_pleated_tunnel_snaps_vertices_on_the_seam():
+    """A vertex a rounding error off the seam must not split the window twice."""
+    win = [(-30.0, 20.0), (-1e-15, 20.0), (30.0, 20.0), (30.0, 60.0), (0.0, 60.0),
+           (-30.0, 60.0)]
+    t = book.pleated_tunnel(windows=[[win], [], [], []])
+    assert len(t.sheets[1].holes) == len(t.sheets[2].holes) == 1
+
+
 def test_pleated_tunnel_rejects_bad_windows():
     with pytest.raises(ValueError, match="edge"):
         book.pleated_tunnel(windows=[[[(-59.0, 20.0), (0.0, 20.0), (0.0, 40.0)]], [], [], []])

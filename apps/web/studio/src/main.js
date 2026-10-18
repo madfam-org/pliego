@@ -3,7 +3,7 @@
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
-import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, loadPreview, fetchObject } from './data.js';
+import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, loadPreview, fetchObject, latestOnly } from './data.js';
 import { engineOptions, estimateVertices, physicsFits, tooSlow } from './physics.js';
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, legendKinds, LINE_STYLE } from './diagram.js';
@@ -17,6 +17,8 @@ const $ = (id) => /** @type {any} */ (document.getElementById(id));
 const i18n = createI18n(STUDIO_STRINGS);
 const reducedMotion = globalThis.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
 const STEP = 1 / 60;
+// Only the latest document request (a regeneration or an object pick) may replace what is shown.
+const latestDocument = latestOnly();
 
 const state = {
   share: parseShare(location.search, location.hash),
@@ -208,13 +210,15 @@ function activeParams() {
 
 async function regenerateCurrent() {
   if (state.catalog?.source !== 'api') return;
+  const current = latestDocument.begin();
   status(i18n.t('params.regenerating'));
   try {
     const json = await regenerate(state.item.slug, state.params, state.mode);
+    if (!current()) return;   // a newer change is on its way: this answer is stale
     await useDocument(json);
     status('');
   } catch (e) {
-    status(i18n.t('params.failed', { error: e instanceof Error ? e.message : String(e) }));
+    if (current()) status(i18n.t('params.failed', { error: e instanceof Error ? e.message : String(e) }));
   }
 }
 
@@ -365,11 +369,14 @@ async function selectItem(slug, rawParams, rawMode) {
   state.mode = modes.some((m) => m.id === rawMode) ? rawMode : modes.length ? modes[0].id : null;
   state.params = coerceParams(activeParams(), rawParams || {});
   renderAll();
+  const current = latestDocument.begin();
   try {
     const custom = hasParams(rawParams) ? state.params : null;
-    await useDocument(await fetchDocument(item, state.catalog.source, custom, state.mode));
+    const json = await fetchDocument(item, state.catalog.source, custom, state.mode);
+    if (!current()) return;   // the visitor picked another object or changed a parameter meanwhile
+    await useDocument(json);
   } catch (e) {
-    fail('error.document', e);
+    if (current()) fail('error.document', e);
   }
   updateShare();
 }

@@ -48,3 +48,9 @@ node --test apps/web/test/                       # picks up apps/web/.engine-tmp
 {slug, params}` (parameter changes), `POST /api/v1/exports {slug, params, format}` (cut/score/fold
 files). Without the API, parameters and exports are visibly disabled; the crease-pattern SVG export
 works offline.
+
+Busy answers: a render worker that is already rendering answers `503`, the rate limiter `429`, both
+with `Retry-After`. The studio waits and retries a render request up to 3 times (the n-th wait is
+n × Retry-After; a Retry-After above 5 s or a busy answer without one is shown, not retried), and
+only the latest document request (a parameter change, a mode change or an object pick) may replace
+the document on screen (`studio/src/data.js`: `postRender`, `latestOnly`).

@@ -95,8 +95,13 @@ export function buildDiagram(json, opts) {
   return svg;
 }
 
+/** The step each diagram shows highlighted: playback asks every frame, the walk runs on a change. */
+const shownStep = new WeakMap();
+
 /** Mark the edges a sequence step drives (index = step, or −1 for none). */
 export function highlightStep(svg, json, stepIndex) {
+  if (shownStep.get(svg) === stepIndex) return;
+  shownStep.set(svg, stepIndex);
   const step = json['pliego:sequence']?.steps?.[stepIndex];
   const active = new Set(step ? [...step.targets.map((t) => t[0]), ...(step.release || [])] : []);
   for (const line of svg.querySelectorAll('line[data-edge]')) {
@@ -146,6 +151,32 @@ export function createOverlay(json, world) {
         positions[i * 6 + 3] = P[q * 3]; positions[i * 6 + 4] = P[q * 3 + 1]; positions[i * 6 + 5] = P[q * 3 + 2];
       });
       return { positions, colors };
+    },
+  };
+}
+
+/** Segment kinds of the paper engine's creaseLines() (render.js in @pliego/engine). */
+const ENGINE_LINE_KINDS = /** @type {const} */ (['mountain', 'valley', 'score', 'perforation', 'cut']);
+
+/**
+ * The crease overlay from a paper-engine World: its creaseLines() polylines (simulation vertices,
+ * presented like render()), coloured like the stub overlay. Null when the world has no creases.
+ * @param {any} world
+ */
+export function createEngineOverlay(world) {
+  if (!world || typeof world.creaseLines !== 'function') return null;
+  const first = world.creaseLines();
+  if (!first || !first.count) return null;
+  const colors = new Float32Array(first.count * 6);
+  for (let i = 0; i < first.count; i++) {
+    const rgb = OVERLAY_RGB[ENGINE_LINE_KINDS[first.kinds[i]] || 'flat'];
+    colors.set(rgb, i * 6); colors.set(rgb, i * 6 + 3);
+  }
+  return {
+    available: () => true,
+    build() {
+      const L = world.creaseLines();
+      return L && L.positions && L.positions.length === colors.length ? { positions: L.positions, colors } : null;
     },
   };
 }

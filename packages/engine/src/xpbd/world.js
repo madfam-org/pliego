@@ -406,10 +406,10 @@ export class World {
     // leaving the paper stretched (twist folds, Kresling collapses: the hand drives fight the membrane).
     // A pass that corrected no edge left the positions as they were, so every later pass would do the
     // same: stop there (bit-identical; most substeps of a settled sheet end after one pass).
-    let moved = 1, touched = 1;
+    let moved = 1, touched = 1, worst = 0;
     for (let pass = 0; pass < K.STRAIN_PASSES_MAX && (moved || pass < K.STRAIN_PASSES); pass++) {
       if (!touched) { this.passesSkipped += Math.max(0, K.STRAIN_PASSES - pass); break; }
-      moved = 0; touched = 0;
+      moved = 0; touched = 0; worst = 0;
       for (let e = 0; e < this.mesh.nE; e++) {
       const a = E[2 * e], b = E[2 * e + 1];
       const wa = w[a], wb = w[b];
@@ -423,10 +423,13 @@ export class World {
       x[3 * a] += wa * s * dx; x[3 * a + 1] += wa * s * dy; x[3 * a + 2] += wa * s * dz;
       x[3 * b] -= wb * s * dx; x[3 * b + 1] -= wb * s * dy; x[3 * b + 2] -= wb * s * dz;
       touched = 1;
-      if (Math.abs(L - target) > K.SETTLE_STRAIN * L0[e]) moved = 1;
+      const c = Math.abs(L - target) / L0[e];
+      if (c > K.SETTLE_STRAIN) moved = 1;
+      if (c > worst) worst = c;
       }
     }
-    this._easeHand(moved === 1);
+    // the hand eases only on a real residual (HAND_EASE_STRAIN), not on round-off nudges
+    this._easeHand(worst > K.HAND_EASE_STRAIN);
     // a final contact + ground pass: the stretch guard must not push layers through each other
     if (this.contact) {
       if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
@@ -437,7 +440,7 @@ export class World {
 
   /**
    * A hand gives way rather than stretch paper. When the stretch guard cannot settle (its last pass
-   * still moved an edge) while a hand drives creases, the drives are asking for a motion the sheet
+   * still corrected an edge by more than HAND_EASE_STRAIN) while a hand drives creases, the drives are asking for a motion the sheet
    * cannot make without stretching (a twist fold, a Kresling collapse driven all at once): the hand
    * eases to half its stiffness, down to HAND_EASE_MIN. After HAND_CALM_SUBSTEPS settled substeps it
    * firms up again, doubling back to full. A world whose guard always settles never eases, so its

@@ -23,6 +23,15 @@ export const HAND_FACTOR = 50;
 /** Lowest share of HAND_FACTOR a hand eases to when its drives would stretch the paper (World._easeHand). Test `hand-ease`. */
 export const HAND_EASE_MIN = 1 / 16;
 
+/**
+ * A hand eases only when the stretch guard, after all its passes, still leaves an edge more than this
+ * strain beyond its target (lane E3). The guard's own "moved more than SETTLE_STRAIN" test is a
+ * hair-trigger: on the deckle-tear card strip it fired on 39 % of substeps whose guard had in fact
+ * converged (largest remaining correction < 1e-4), the hand sat at 1/16 for most of the fold and the
+ * strip peaked at 1.26 % stretch (0.53 % with a firm hand). Tests `hand-ease`, `hand-ease-deckle`.
+ */
+export const HAND_EASE_STRAIN = 1e-4;
+
 /** Settled substeps before an eased hand doubles its stiffness again. Test `hand-ease`. */
 export const HAND_CALM_SUBSTEPS = 30;
 

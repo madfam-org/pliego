@@ -141,7 +141,11 @@ drives creases, the drives are asking for a motion the sheet cannot make without
 fold or a Kresling collapse driven all at once). The hand then eases to half its stiffness, down to
 1/16 of `HAND_FACTOR`, and doubles back after 30 settled substeps. A world whose guard always settles
 never eases. Triangle twist (steep): 26 % peak stretch with a fixed hand, 2.8 % with the easing hand
-(test `hand-ease`).
+(test `hand-ease`). Lane E3 (2026-10-18): the hand eases only when the guard's last pass still corrects an edge by
+more than `HAND_EASE_STRAIN` (1e-4 of its length). Its first trigger ("moved an edge by more than
+1e-6") also fired on guards that had converged: on the deckle-tear card strip the hand sat at 1/16
+for most of the fold and the strip peaked at 1.26 % (0.66 % before #40); now 0.53 %, while the
+twist keeps its eased hand (2.7 %). Test `hand-ease-deckle`.
 
 **Next engine milestones** (measured, not implemented): `rotating-squares` needs in-plane
 plasticity of its kirigami ligaments (46–218 % stretch today); contact-induced stretch (a final
@@ -242,7 +246,7 @@ Tests: `determinism-replay` and `determinism-snapshot`.
 | `PANEL_YIELD_DEG` | 60 | `crease-unfold` (panels stay elastic) |
 | `STRAIN_LIMIT` / `STRAIN_PASSES` | 0.45 % guard target (keeps measured stretch below 0.5 %) / 4 | `inextensible`, `mesh-sweep` |
 | `STRAIN_PASSES_MAX` / `SETTLE_STRAIN` | 16 passes at most, continued while a pass moves an edge by more than 1e-6 of its length | `strain-guard` |
-| `HAND_EASE_MIN` / `HAND_CALM_SUBSTEPS` | 1/16 of `HAND_FACTOR` / 30 substeps before the hand firms up again | `hand-ease` |
+| `HAND_EASE_MIN` / `HAND_CALM_SUBSTEPS` / `HAND_EASE_STRAIN` | 1/16 of `HAND_FACTOR` / 30 substeps before the hand firms up again / 1e-4 guard residual before it eases | `hand-ease`, `hand-ease-deckle` |
 | `MEMBRANE_CAP_LENGTH` | 1e7 mm | `inextensible`, E1 (stability of the Newton step) |
 | `MEMBRANE_COMPRESSION` | 0.05 | `E1-peirce` (membrane locking) |
 | `CONTACT_PASSES` | 3 | `contact-stack` |

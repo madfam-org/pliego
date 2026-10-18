@@ -1,0 +1,397 @@
+{
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "F",
+  "B",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   0,
+   2
+  ],
+  [
+   1,
+   3
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   2,
+   4
+  ],
+  [
+   3,
+   5
+  ],
+  [
+   4,
+   5
+  ]
+ ],
+ "faces_vertices": [
+  [
+   0,
+   2,
+   3,
+   1
+  ],
+  [
+   2,
+   4,
+   5,
+   3
+  ]
+ ],
+ "file_classes": [
+  "singleModel"
+ ],
+ "file_creator": "pliego-kernel 0.3.0",
+ "file_spec": 1.2,
+ "file_title": "Deckle tear",
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "noJoins"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_unit": "mm",
+ "pliego:controls": [
+  {
+   "default": 0,
+   "id": "sequence",
+   "kind": "sequence",
+   "label": {
+    "en": "Crease and tear",
+    "es": "Marcar y rasgar",
+    "fr": "Marquer et déchirer",
+    "pt": "Vincar e rasgar"
+   },
+   "max": 5,
+   "min": 0,
+   "unit": "step"
+  }
+ ],
+ "pliego:edges_name": [
+  null,
+  null,
+  null,
+  "tear-line",
+  null,
+  null,
+  null
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "halfcut",
+  "none",
+  "none",
+  "none"
+ ],
+ "pliego:faces_sheet": [
+  0,
+  0
+ ],
+ "pliego:meta": {
+  "cartridge": "deckle-tear",
+  "digest": "sha256:838c5474392ee15ecf37ab170ec9b57016b37ac8ba2fd7ba21bd49bc5428235f",
+  "kernel": "pliego-kernel 0.3.0",
+  "mode": "crease",
+  "params": {
+   "all_edges": false,
+   "grain": "along",
+   "height": 150,
+   "roughness": 1,
+   "seed": 7,
+   "stock": "cardstock-160",
+   "strip": 20,
+   "width": 100
+  }
+ },
+ "pliego:pieces": [
+  {
+   "faces": [
+    0
+   ],
+   "id": "body",
+   "label": {
+    "en": "Sheet",
+    "es": "Hoja",
+    "fr": "Feuille",
+    "pt": "Folha"
+   },
+   "role": "keep",
+   "sheet": "sheet"
+  },
+  {
+   "faces": [
+    1
+   ],
+   "id": "strip",
+   "label": {
+    "en": "Torn-off strip",
+    "es": "Tira rasgada",
+    "fr": "Bande déchirée",
+    "pt": "Tira rasgada"
+   },
+   "pull": [
+    0.45,
+    1,
+    0
+   ],
+   "role": "excess",
+   "sheet": "sheet"
+  }
+ ],
+ "pliego:sequence": {
+  "mode": "physical",
+  "steps": [
+   {
+    "duration_ms": 1400,
+    "id": "fold-over",
+    "label": {
+     "en": "Fold the strip over along the line",
+     "es": "Dobla la tira hacia delante por la línea",
+     "fr": "Rabattre la bande le long de la ligne",
+     "pt": "Dobre a tira para a frente pela linha"
+    },
+    "note": {
+     "en": "Press the fold hard with a bone folder or a thumbnail.",
+     "es": "Marca el doblez con fuerza, con una plegadera o con la uña.",
+     "fr": "Marquez fortement le pli à l'os à plier ou à l'ongle.",
+     "pt": "Vinque a dobra com força, com uma dobradeira ou com a unha."
+    },
+    "release": [],
+    "targets": [
+     [
+      3,
+      180
+     ]
+    ]
+   },
+   {
+    "duration_ms": 900,
+    "id": "open",
+    "label": {
+     "en": "Open it",
+     "es": "Ábrela",
+     "fr": "L'ouvrir",
+     "pt": "Abra"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      3,
+      0
+     ]
+    ]
+   },
+   {
+    "duration_ms": 1400,
+    "id": "fold-back",
+    "label": {
+     "en": "Fold it back the other way",
+     "es": "Dóblala hacia atrás, al otro lado",
+     "fr": "La replier dans l'autre sens",
+     "pt": "Dobre para trás, para o outro lado"
+    },
+    "note": {
+     "en": "Folding both ways breaks the fibres along the line.",
+     "es": "Doblar hacia los dos lados rompe las fibras a lo largo de la línea.",
+     "fr": "Plier dans les deux sens casse les fibres le long de la ligne.",
+     "pt": "Dobrar para os dois lados quebra as fibras ao longo da linha."
+    },
+    "release": [],
+    "targets": [
+     [
+      3,
+      -180
+     ]
+    ]
+   },
+   {
+    "duration_ms": 900,
+    "id": "open-again",
+    "label": {
+     "en": "Open it again",
+     "es": "Ábrela de nuevo",
+     "fr": "La rouvrir",
+     "pt": "Abra de novo"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      3,
+      0
+     ]
+    ]
+   },
+   {
+    "duration_ms": 1800,
+    "id": "tear",
+    "label": {
+     "en": "Tear the strip off along the crease",
+     "es": "Desprende la tira por el pliegue",
+     "fr": "Détacher la bande le long du pli",
+     "pt": "Destaque a tira pelo vinco"
+    },
+    "note": {
+     "en": "Start at one end and pull slowly, close to the line.",
+     "es": "Empieza por un extremo y jala despacio, cerca de la línea.",
+     "fr": "Commencer par un bout et tirer lentement, près de la ligne.",
+     "pt": "Comece por uma ponta e puxe devagar, perto da linha."
+    },
+    "release": [],
+    "remove": [
+     "strip"
+    ],
+    "targets": []
+   }
+  ]
+ },
+ "pliego:sheets": [
+  {
+   "back": {
+    "art": null,
+    "color": "#f4efe6"
+   },
+   "front": {
+    "art": null,
+    "color": "#f4efe6"
+   },
+   "grain_deg": 90,
+   "id": "sheet",
+   "kinematic": null,
+   "label": {
+    "en": "Sheet",
+    "es": "Hoja",
+    "fr": "Feuille",
+    "pt": "Folha"
+   },
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "stock": "cardstock-160"
+  }
+ ],
+ "pliego:stocks": {
+  "cardstock-160": {
+   "appearance": {
+    "back": "#f4efe6",
+    "front": "#f4efe6"
+   },
+   "caliper_mm": 0.2,
+   "derived": {
+    "D_cd": 1458550,
+    "D_md": 3281730,
+    "E_cd": 2000000000,
+    "E_md": 4500000000,
+    "G12": 1161000000,
+    "areal_density": 0.00016,
+    "collision_thickness": 0.2,
+    "crease_k": 54695.6,
+    "crease_set_rate": 0.5,
+    "crease_yield_deg": 35,
+    "friction": 0.4,
+    "nu": 0.293,
+    "perf_bridge_mm": 1,
+    "perf_cut_mm": 3,
+    "perf_factor": 0.25,
+    "score_factor": 0.35,
+    "score_yield_deg": 12.25,
+    "tear_strain": 0.015,
+    "thickness": 0.2
+   },
+   "derived_basis": "pliego.stock.derive v1",
+   "gsm": 160,
+   "name": {
+    "en": "Cardstock 160 g/m²",
+    "es": "Cartulina 160 g/m²",
+    "fr": "Bristol 160 g/m²",
+    "pt": "Cartolina 160 g/m²"
+   }
+  }
+ },
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   150
+  ],
+  [
+   80,
+   0
+  ],
+  [
+   80,
+   150
+  ],
+  [
+   100,
+   0
+  ],
+  [
+   100,
+   150
+  ]
+ ]
+}

@@ -1,6 +1,6 @@
 # The Pliego engine — design, physics and verification contract
 
-> Last Updated: 2026-10-10
+> Last Updated: 2026-10-18
 > Boundary: public-safe design document. Policy: [`../PUBLIC_REPO_BOUNDARY.md`](../PUBLIC_REPO_BOUNDARY.md).
 
 `packages/engine` (`@pliego/engine`, private, zero runtime dependencies) loads a
@@ -158,7 +158,10 @@ Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle
 
 - **Driving** (sequence step active on this hinge): the constraint uses `θ_target(t)` (eased from the
   angle at step start to the target over `duration_ms`) and stiffness `k_c × hand_factor`
-  (`hand_factor` default 50 — a folding hand overpowers paper).
+  (`hand_factor` default 50 — a folding hand overpowers paper). The hand eases (halves, down to
+  1/16) while the stretch guard's last pass still corrects an edge by more than `HAND_EASE_STRAIN`
+  (1e-4 of its length), and firms up after 30 calm substeps (lane E2; residual threshold lane E3,
+  tests `hand-ease`, `hand-ease-deckle`).
 - **Plastic set** (rate-independent, Narain et al. 2013): after each substep, if
   `|θ − θ_rest| > θ_y` then `θ_rest ← θ − sign(θ − θ_rest)·θ_y`, `θ_y = crease_yield_deg`
   (default 35° for paper: a crease pressed flat and released rests ~35° open, matching Lechenault's

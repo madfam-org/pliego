@@ -147,7 +147,9 @@ def test_derive_returns_exactly_the_spec_keys():
         assert keys[:len(stock.DERIVED_KEYS)] == list(stock.DERIVED_KEYS)
         assert set(keys[len(stock.DERIVED_KEYS):]) <= set(stock.OPTIONAL_DERIVED_KEYS)
     assert set(stock.DERIVED_KEYS) == set(required)
-    assert set(stock.OPTIONAL_DERIVED_KEYS) == optional
+    assert set(stock.OPTIONAL_DERIVED_KEYS) | set(stock.LAMINATE_DERIVED_KEYS) == optional
+    for slug in EXPECTED_SLUGS:      # laminate-only keys (spec §5.40) never come from one card
+        assert not set(stock.derive(_card(slug))) & set(stock.LAMINATE_DERIVED_KEYS)
 
 
 def test_optional_derived_keys_from_existing_card_fields():

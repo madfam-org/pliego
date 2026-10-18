@@ -74,6 +74,8 @@ python3 scripts/qa/verify_compliance.py              # doctrine gates (AST level
 python3 scripts/qa/verify_deploy_paths.py            # deploy path filter == Dockerfile COPYs
 python3 scripts/qa/verify_canonical_host.py          # enclii.yaml hosts == CORS / host env
 python3 scripts/qa/verify_rollout_safety.py          # 2 replicas, surge rollout, PDB, probes (docs/DEPLOYMENT.md)
+python3 scripts/qa/verify_sheet_behaviour.py         # carried sheet_behaviour + vendored snapshot + laminate goldens == keystone (needs hyperobjects-spec at SPEC_PIN)
+python3 scripts/qa/refresh_hardware_snapshot.py --check  # vendored yantra4d slice covers every commons hardware_ref claim
 python3 -m unittest discover -s scripts/qa/tests -v  # tests for the lanes above
 ```
 
@@ -84,7 +86,8 @@ GitHub-hosted `ubuntu-24.04` only (fork PRs must never reach self-hosted runners
 comment, no `secrets: inherit`. A lane whose code does not exist yet prints `skip: <reason>` and
 exits 0 — that line is the read-proof, never a silent pass. Jobs: `agent-docs`, `quality-gates`
 (byte gate + file-size gate 600/800 against `scripts/size-limit-baseline.json`), `guards` (the
-`scripts/qa` tests and lanes), `kernel`, `engine`, `web`, `api`, `stocks`, `secrets` (gitleaks over
+`scripts/qa` tests and lanes), `kernel`, `engine`, `web`, `api`, `stocks` (derive drift, then the sheet-behaviour drift gate and
+the hardware snapshot check against the keystone at `SPEC_PIN`), `secrets` (gitleaks over
 the full history). `codeql.yml` scans Python and JavaScript. Any job that reads `projects/` runs
 `verify_commons_pin.py --require` first.
 

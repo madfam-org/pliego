@@ -347,6 +347,9 @@ class Assembly:
     spec §5.9–§5.11) written as ``pliego:dielines``, ``pliego:finishes`` and ``pliego:artwork``.
     `face_orders`: complete layer orders written as FOLD ``faceOrders`` — sheet (or id) →
     the `Built` of a `pliego.FoldProgram` (`Built.face_orders()`) or sheet-local [f, g, s].
+    `stocks`: stock snapshots the assembly defines itself, id → snapshot — a laminate of
+    layers (``pliego.laminate.stock``; spec §5.40). A sheet whose ``stock`` names one uses it;
+    every other stock id resolves to a committed card as before.
     `pages`: print pages in the layout frame (spec §5.12 ``pliego:pages``) — {"size": [w, h],
     "margin": mm, "pages": [{"id", "origin": [x, y]}]}; give a dict `layout` that puts every
     sheet inside a page's printable area.
@@ -372,6 +375,8 @@ class Assembly:
     pages: dict | None = None
     # complete layer orders (FOLD faceOrders): sheet → foldprogram.Built or [[f, g, s], …]
     face_orders: dict = field(default_factory=dict)
+    # stocks this assembly defines itself: id → §5.2 snapshot (a laminate, `pliego.laminate`)
+    stocks: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.pages is not None:

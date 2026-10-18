@@ -1,0 +1,23 @@
+{
+  "laminate": "1.0",
+  "name": "cloth-popelina-on-kraft",
+  "description": "Book cloth for a case binding: cotton poplin glued to a 120 g/m2 kraft backing (the paper-backed cloth a binder turns over greyboard), both with axis 1 along the spine. The kraft is the bottom layer (the glued side); the cloth is the outside. The glue line is not modelled. Written for Pliego's laminate golden (case-binding cartridge).",
+  "layers": [
+    {
+      "material_ref": {
+        "platform": "pliego",
+        "material_slug": "kraft-120",
+        "behaviour": "sheet"
+      },
+      "angle_deg": 0
+    },
+    {
+      "material_ref": {
+        "platform": "fashion-cabinet",
+        "material_slug": "popelina-algodon",
+        "behaviour": "sheet"
+      },
+      "angle_deg": 0
+    }
+  ]
+}

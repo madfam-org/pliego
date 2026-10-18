@@ -1,0 +1,77 @@
+{
+  "_comment": "Pinned slice of yantra4d's docs/commons-catalog.json that Pliego hardware_ref blocks resolve against, name-level (spec §5.42). The slug set is DERIVED from the commons' own claims plus the slugs already here; refresh with scripts/qa/refresh_hardware_snapshot.py and record the upstream commit. Do NOT hand-edit an entry. Data from an AGPL-3.0 platform repository; the parts themselves are commons objects under the licence each entry states.",
+  "upstream_repo": "https://github.com/madfam-org/yantra4d",
+  "upstream_commit": "4f398d9885a48f652b6b3ca4cfde11c873435bbe",
+  "catalog_schema_version": "commons_catalog_v1",
+  "cartridges": {
+    "magnetic-clasp": {
+      "slug": "magnetic-clasp",
+      "name": "Magnetic Clasp",
+      "domain": "wearable",
+      "mode_ids": [
+        "set",
+        "half"
+      ],
+      "parameter_ids": [
+        "disc_dia",
+        "disc_h",
+        "magnet_dia",
+        "magnet_h",
+        "sew_holes"
+      ],
+      "parameter_contracts": {
+        "disc_dia": {
+          "type": "slider",
+          "min": 10.0,
+          "max": 40.0,
+          "step": 0.5,
+          "modes": [
+            "set",
+            "half"
+          ]
+        },
+        "disc_h": {
+          "type": "slider",
+          "min": 2.5,
+          "max": 10.0,
+          "step": 0.2,
+          "modes": [
+            "set",
+            "half"
+          ]
+        },
+        "magnet_dia": {
+          "type": "slider",
+          "min": 4.0,
+          "max": 36.0,
+          "step": 0.5,
+          "modes": [
+            "set",
+            "half"
+          ]
+        },
+        "magnet_h": {
+          "type": "slider",
+          "min": 1.0,
+          "max": 9.0,
+          "step": 0.2,
+          "modes": [
+            "set",
+            "half"
+          ]
+        },
+        "sew_holes": {
+          "type": "slider",
+          "min": 0,
+          "max": 8,
+          "step": 1,
+          "modes": [
+            "set",
+            "half"
+          ]
+        }
+      },
+      "commons_license": "CERN-OHL-W-2.0"
+    }
+  }
+}

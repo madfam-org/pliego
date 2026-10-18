@@ -94,3 +94,21 @@ of the corrugation model; formulas and sources in the module docstring and in th
 - The `derived` block keeps exactly the §5.2 keys: the engine needs nothing new to load a board.
 - Scored board cards use `crease_length_scale_t` 50–100 (physics memo §a3).
 <!-- lane P (wave 2b) draft — end -->
+
+<!-- lane T3 (geo-stab, RFC 0045 phase 2): begin -->
+## The carried `sheet_behaviour` block (spec §5.40)
+
+A card may carry `sheet_behaviour`: the keystone's cross-commons description of the sheet
+(hyperobjects-spec `docs/SHEET_BEHAVIOUR.md`), **derived** from this card by the keystone's rule
+`pliego-stock/1` and never hand-edited. Its `source` is `{platform: "pliego", material_slug:
+<this slug>, rule: "pliego-stock/1", card_basis: "pliego.stock.derive v1"}`. With it, the card is a
+laminate layer (`pliego.laminate`), and the keystone's `resolve_material_ref` answers `carries`
+without consulting its mapping. All 28 committed cards carry it.
+
+`python3 scripts/qa/verify_sheet_behaviour.py` (the stocks lane, keystone installed at
+`SPEC_PIN`) fails when a carried block differs from the rule applied to the card without it;
+`--write` rewrites them. `pliego.stock` checks only the block's shape (version and source), since
+the kernel never imports the keystone. A card edit that changes a derived value therefore needs
+both `python -m pliego.stock --write materials` and `verify_sheet_behaviour.py --write`.
+<!-- lane T3 (geo-stab, RFC 0045 phase 2): end -->
+

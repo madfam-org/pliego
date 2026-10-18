@@ -239,6 +239,26 @@ class DeployPathsTest(TmpCase):
     def test_repo_files_agree(self) -> None:
         code, out = run_main(paths, "--root", str(REPO))
         self.assertEqual(code, 0, out)
+        self.assertRegex(out, r"image_paths=[1-9]")
+
+    def _image(self, *entries: str) -> None:
+        lines = "".join(f"      - {e}\n" for e in entries)
+        write(self.tmp, ".github/workflows/image.yml", "on:\n  pull_request:\n    paths:\n" + lines)
+
+    def test_image_workflow_paths_cover_every_copy_source(self) -> None:
+        root = self._tree("Dockerfile .dockerignore packages/kernel apps/api llms.txt llms-full.txt")
+        self._image("Dockerfile", "packages/**", "apps/**", "llms.txt", "llms-full.txt")
+        code, out = run_main(paths, "--root", str(root))
+        self.assertEqual(code, 0, out)
+        self.assertIn("image_paths=5", out)
+
+    def test_image_workflow_missing_a_source_fails(self) -> None:
+        root = self._tree("Dockerfile .dockerignore packages/kernel apps/api llms.txt llms-full.txt")
+        self._image("packages/**", "apps/api/**", "llms.txt")
+        code, out = run_main(paths, "--root", str(root))
+        self.assertEqual(code, 1)
+        self.assertIn("image.yml: `Dockerfile` is not in pull_request paths", out)
+        self.assertIn("image.yml: `llms-full.txt` is not in pull_request paths", out)
 
 
 class CanonicalHostTest(TmpCase):

@@ -1,0 +1,174 @@
+# Nightly: the simulation corpus, the keystone over every document, and the simulation matrix (public repository).
+#
+# Per pull request, CI tests the kernel, the engine and the API, and the api job's strict prerender renders every
+# mode and preset. Nothing ran the corpus through the keystone or the engine's simulation matrix on a schedule
+# (A3 audit, 2026-10-18: no nightly anywhere). This workflow does, once a day and on dispatch:
+#
+#   corpus      scripts/qa/sim_corpus.py over the pinned commons (projects/), every cartridge in every mode and
+#               preset with this commit's kernel, then `pliego-spec check sheet-document` at SPEC_PIN over every
+#               document. FAILS on any build failure, any kernel verify error or any keystone failure.
+#   sim-matrix  scripts/qa/sim-matrix.mjs over a deterministic third of the corpus (every 3rd document of the
+#               C-sorted list, the A3 subset: 244 of 732 at 2026-10-18). INFORMATIONAL: the counts go to the job
+#               summary and the sim-matrix artifact and no physics status fails the job, because there is no CI
+#               baseline yet to set a threshold against. The job is red only when the harness itself breaks or the
+#               subset does not finish inside its budget (then the summary says INCOMPLETE and how far it got).
+#
+# Nothing here builds an image, deploys or dispatches build-deploy.yml.
+#
+# GitHub-hosted runners only, pinned to ubuntu-24.04 (ruling R116). Every action is pinned to a full commit SHA (tag
+# in the comment); permissions are read-only (scripts/qa/verify_supply_chain.py checks this file too).
+
+name: Nightly
+
+on:
+  schedule:
+    # 10:23Z daily (04:23 in Mexico City), off the top of the hour and after the commons' own nightly.
+    - cron: "23 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # The keystone (madfam-org/hyperobjects-spec) at a full commit SHA on its main: package 0.15.0 (#64, all 28 Pliego
+  # stock cards and seven fabric bend classes, plus #65, its own CI runners). The commons pins the same SHA in its
+  # ci.yml. Move both together.
+  SPEC_PIN: "70fe8213de20bc9a699b2bde2c32ee0b02a6d52d"
+
+jobs:
+  corpus:
+    name: Corpus (every cartridge, mode and preset) and pliego-spec on every document
+    runs-on: ubuntu-24.04
+    # 139 cartridges, 732 documents: 8.5 min on 4 jobs on a loaded workstation (A3, 2026-10-18).
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Commons pin guard (first)
+        run: python scripts/qa/verify_commons_pin.py --require --min-cartridges 1
+      - name: Build the corpus (sim_corpus.py, this commit's kernel and materials)
+        # pipefail: without it `sim_corpus.py | tee` exits with tee's 0 and a failing build reads green.
+        run: |
+          set -euo pipefail
+          python scripts/qa/sim_corpus.py --out "$RUNNER_TEMP/corpus" --jobs 4 2>&1 | tee "$RUNNER_TEMP/corpus.log"
+      - name: pliego-spec check sheet-document (every document)
+        run: |
+          set -euo pipefail
+          [[ "${SPEC_PIN}" =~ ^[0-9a-f]{40}$ ]] || { echo "nightly: FAIL SPEC_PIN is not a full 40-hex SHA"; exit 1; }
+          python -m pip install --quiet "hyperobjects-spec @ git+https://github.com/madfam-org/hyperobjects-spec@${SPEC_PIN}"
+          mapfile -t docs < <(find "$RUNNER_TEMP/corpus" -mindepth 2 -maxdepth 2 -name '*.fold' | LC_ALL=C sort)
+          echo "nightly: documents=${#docs[@]} spec=${SPEC_PIN:0:12}"
+          [ "${#docs[@]}" -gt 0 ] || { echo "nightly: FAIL 0 documents to check"; exit 1; }
+          pliego-spec check sheet-document "${docs[@]}" 2>&1 | tee "$RUNNER_TEMP/spec.log"
+      - name: Counts to the job summary
+        if: always()
+        run: |
+          {
+            echo "### Corpus and keystone"
+            echo ""
+            echo '```'
+            grep -E '^sim-corpus: cartridges=' "$RUNNER_TEMP/corpus.log" || echo "sim-corpus: no summary line (the build did not finish)"
+            grep -E '^pliego-spec check: ' "$RUNNER_TEMP/spec.log" 2>/dev/null || echo "pliego-spec: not run"
+            echo '```'
+            grep -E '^(sim-corpus: .* rc=[^0]|sim-corpus: .* verify-errors=[^0]|  (FAIL|ERROR) )' \
+              "$RUNNER_TEMP/corpus.log" "$RUNNER_TEMP/spec.log" 2>/dev/null | head -40 || true
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the corpus (the sim-matrix job reads it) and its logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sim-corpus
+          path: |
+            ${{ runner.temp }}/corpus
+            ${{ runner.temp }}/corpus.log
+            ${{ runner.temp }}/spec.log
+          retention-days: 7
+          if-no-files-found: error
+
+  sim-matrix:
+    name: Simulation matrix (every 3rd document; informational)
+    needs: corpus
+    # A corpus with a keystone failure still has documents worth simulating; a corpus that uploaded nothing makes
+    # the download fail, which is red and visible.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    # A3 measured about 13 documents a minute on a loaded workstation with 6 workers: 244 documents is about 20 min.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: sim-corpus
+          path: ${{ runner.temp }}/in
+      - name: The subset (every 3rd document of the C-sorted corpus)
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/in/corpus"
+          find . -mindepth 2 -maxdepth 2 -name '*.fold' | sed 's|^\./||' | LC_ALL=C sort > "$RUNNER_TEMP/all.txt"
+          awk 'NR % 3 == 1' "$RUNNER_TEMP/all.txt" > "$RUNNER_TEMP/subset.txt"
+          echo "sim-subset: corpus=$(wc -l < "$RUNNER_TEMP/all.txt") subset=$(wc -l < "$RUNNER_TEMP/subset.txt")"
+          [ -s "$RUNNER_TEMP/subset.txt" ] || { echo "sim-subset: FAIL 0 documents"; exit 1; }
+      - name: Run the matrix (50 min budget inside the 60 min job)
+        id: sim
+        run: |
+          set -uo pipefail
+          rc=0
+          timeout --kill-after=60s 50m node scripts/qa/sim-matrix.mjs "$RUNNER_TEMP/in/corpus" \
+            --out "$RUNNER_TEMP/sim" --list "$RUNNER_TEMP/subset.txt" --jobs 4 \
+            --label "nightly ${GITHUB_SHA:0:7}" 2>&1 | tee "$RUNNER_TEMP/sim.log" || rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          echo "sim-matrix: exit=$rc"
+      - name: Counts to the job summary (INCOMPLETE fails the job; physics statuses never do)
+        if: always() && steps.sim.outcome != 'skipped'
+        env:
+          RC: ${{ steps.sim.outputs.rc }}
+        run: |
+          set -uo pipefail
+          json="$RUNNER_TEMP/sim/sim-matrix.json"
+          want=$(wc -l < "$RUNNER_TEMP/subset.txt" | tr -d ' ')
+          if [ "${RC:-1}" = 0 ] && [ -f "$json" ]; then
+            {
+              echo "### Simulation matrix (informational, no threshold until a CI baseline exists)"
+              echo ""
+              jq -r '.summary | "documents=\(.documents) loads=\(.loads) stable=\(.stable) interactive=\(.interactive) falls-back=\(.fallsBack) rejected=\(.rejected) unstable=\(.unstable) errors=\(.worldError + .stepError + .timeout + .harnessError)"' "$json" | sed 's/^/`/; s/$/`/'
+              echo ""
+              cat "$RUNNER_TEMP/sim/sim-matrix.md"
+            } >> "$GITHUB_STEP_SUMMARY"
+            got=$(jq '.summary.documents' "$json")
+            [ "$got" = "$want" ] || { echo "sim-matrix: FAIL documents=$got, subset=$want"; exit 1; }
+            exit 0
+          fi
+          done_n=$(grep -cE '^sim-matrix: \S+ status=' "$RUNNER_TEMP/sim.log" || true)
+          {
+            echo "### Simulation matrix: INCOMPLETE"
+            echo ""
+            echo "\`exit=${RC:-unknown} finished=${done_n} of ${want}\` (exit 124 is the 50 min budget). The harness writes"
+            echo "sim-matrix.json only at the end; the per-document lines are in sim.log in the sim-matrix artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "sim-matrix: FAIL incomplete (exit=${RC:-unknown} finished=${done_n} of ${want})"
+          exit 1
+      - name: Upload sim-matrix.json, .csv, .md and the log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sim-matrix
+          path: |
+            ${{ runner.temp }}/sim
+            ${{ runner.temp }}/sim.log
+            ${{ runner.temp }}/subset.txt
+          retention-days: 30
+          if-no-files-found: warn

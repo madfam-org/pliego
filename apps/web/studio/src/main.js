@@ -529,7 +529,7 @@ function frame(now) {
     $('st-contacts').textContent = s ? i18n.t('status.contacts', { n: s.contacts || 0 }) : '';
   }
   if (running) kick();
-  else { last = 0; acc = 0; if (world instanceof WorkerWorld) world.resetPacing(); }
+  else { last = 0; acc = 0; if (world instanceof WorkerWorld && !world.pending) world.resetPacing(); }   // pending: its pose kicks
 }
 
 function wireStatic() {

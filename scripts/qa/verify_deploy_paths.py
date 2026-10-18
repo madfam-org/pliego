@@ -10,6 +10,10 @@ pushes rebuild for nothing. So for every service:
   covered by a `paths` entry (directory prefix or exact file), and
 * every `paths` entry covers at least one COPY source, or is the Dockerfile / `.dockerignore`.
 
+When `.github/workflows/image.yml` (the pull-request image build) exists, its `pull_request.paths`
+must also cover every COPY source and the Dockerfile: a source it misses is a change whose broken
+image CI would never build.
+
 Read-proof: prints the services, COPY sources and paths it compared; zero of any is a failure.
 """
 
@@ -112,6 +116,23 @@ def compare(root: Path, workflow_path: Path) -> tuple[list[str], dict[str, int]]
     return errors, counts
 
 
+def image_workflow_errors(root: Path, image_path: Path, dockerfile: str = "Dockerfile") -> tuple[list[str], int]:
+    """Every COPY source and the Dockerfile are covered by the image workflow's pull_request paths."""
+    workflow = yaml.safe_load(image_path.read_text(encoding="utf-8")) or {}
+    on = workflow.get("on", workflow.get(True)) or {}  # YAML 1.1 reads a bare `on:` key as True
+    pr = on.get("pull_request") if isinstance(on, dict) else None
+    entries = [str(e).removesuffix("/**") for e in ((pr or {}).get("paths") or [])]
+    name = image_path.name
+    if not entries:
+        return [f"{name}: no pull_request paths (the image build would never run, or run on everything)"], 0
+    errors = []
+    sources = dockerfile_copy_sources((root / dockerfile).read_text(encoding="utf-8"))
+    for src in [dockerfile, *sources]:
+        if not any(covers(entry, src) for entry in entries):
+            errors.append(f"{name}: `{src}` is not in pull_request paths (a broken image from it would not be built)")
+    return errors, len(entries)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--root", default=".")
@@ -119,6 +140,10 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     root = Path(args.root).resolve()
     errors, counts = compare(root, root / args.workflow)
+    image = root / ".github" / "workflows" / "image.yml"
+    if image.is_file():
+        image_errors, counts["image_paths"] = image_workflow_errors(root, image)
+        errors += image_errors
     print("deploy-paths: " + " ".join(f"{k}={v}" for k, v in counts.items()) + f" errors={len(errors)}")
     for err in errors:
         print(f"  FAIL {err}")

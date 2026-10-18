@@ -1,6 +1,6 @@
 # Pliego — agent operating guide
 
-> Last Updated: 2026-10-10
+> Last Updated: 2026-10-18
 
 <!-- MADFAM-AGENTS-CANONICAL v1 -->
 
@@ -87,6 +87,22 @@ exits 0 — that line is the read-proof, never a silent pass. Jobs: `agent-docs`
 `scripts/qa` tests and lanes), `kernel`, `engine`, `web`, `api`, `stocks`, `secrets` (gitleaks over
 the full history). `codeql.yml` scans Python and JavaScript. Any job that reads `projects/` runs
 `verify_commons_pin.py --require` first.
+
+`image.yml` runs on pull requests that touch any Dockerfile COPY source, the Dockerfile or itself:
+it builds the production image with the commons and the build-time prerender (`push: false`), then
+boots it read-only as uid 1001 and requires `/health` (commons, stocks, prerendered, thumbnails,
+`revision` equal to the built SHA) and `/ready` 200. `verify_deploy_paths.py` fails when its paths
+miss a COPY source.
+
+`nightly.yml` (daily 10:23Z and on dispatch; no deploys, no build dispatch): job `corpus` builds
+every cartridge in every mode and preset (`scripts/qa/sim_corpus.py`) and runs `pliego-spec check
+sheet-document` at its `SPEC_PIN` (the same keystone SHA as the commons' `ci.yml`; move both
+together) over every document, and FAILS on any error. Job `sim-matrix` runs
+`scripts/qa/sim-matrix.mjs` on every third document of the C-sorted corpus (244 of 732) and writes
+loads / stable / interactive / falls back / rejected / unstable / errors to the job summary and the
+`sim-matrix` artifact. It is informational: no physics status fails it until a CI baseline exists to
+set a threshold against. It is red only when the harness breaks or the subset does not finish in
+its 50-minute budget (the summary then says INCOMPLETE and how many documents finished).
 
 `build-deploy.yml` is **dispatch-only** until the project is onboarded to Enclii; it calls Enclii's
 reusable `build-publish.yml` pinned to a full commit SHA on Enclii `main`, with named secrets only.

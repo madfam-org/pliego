@@ -36,6 +36,12 @@ node --test packages/engine/test/*.test.js                                      
 python3 -m unittest discover -s scripts/qa/tests -v                    # compliance lanes
 ```
 
+CI: `ci.yml` on every pull request (guards, compliance, kernel, stocks, engine, web, API with the
+strict prerender, manifests, secrets); `image.yml` builds the production image (no push) and boots it
+on every pull request that can change it; `nightly.yml` runs daily: the whole corpus through
+`pliego-spec`, then the simulation matrix on every third document (informational). The table is in
+[`docs/HONEST_STATUS.md`](docs/HONEST_STATUS.md) and the lane rules in [`AGENTS.md`](AGENTS.md).
+
 Agents and contributors: read [`AGENTS.md`](AGENTS.md) first (doctrine, ownership, lanes), then
 [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports go through GitHub's private vulnerability
 reporting ([`SECURITY.md`](SECURITY.md)). Which MADFAM service owns which capability:

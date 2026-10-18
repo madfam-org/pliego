@@ -23,9 +23,12 @@ import { orient, pointInPolygon, distPointSeg } from './geom.js';
  * @param {number[]} poly boundary points, flat [x0,y0,…], CCW
  * @param {number[]} interior interior points, flat (refinement appends to it)
  * @param {number} [hmax] split interior edges longer than this
+ * @param {number} [nFixed] the first nFixed interior points are fixed (document vertices): never smoothed
+ * @param {number} [clear] a refinement midpoint closer than this to the boundary is not inserted (a
+ *   chord across a face narrower than h would otherwise fill it with slivers)
  * @returns {number[]} triangles as index triples into [boundary…, interior…]
  */
-export function triangulateFace(poly, interior, hmax = Infinity) {
+export function triangulateFace(poly, interior, hmax = Infinity, nFixed = 0, clear = 0) {
   const nb = poly.length / 2;
   const pts = poly.concat(interior);
   const tris = earClip(poly);
@@ -53,17 +56,30 @@ export function triangulateFace(poly, interior, hmax = Infinity) {
       if (L > hmax) longs.push([L, a, b]);
     }
     longs.sort((x, y) => y[0] - x[0] || x[1] - y[1] || x[2] - y[2]);
+    let added = 0;
     for (const [, a, b] of longs) {
+      const mx = (pts[2 * a] + pts[2 * b]) / 2, my = (pts[2 * a + 1] + pts[2 * b + 1]) / 2;
+      if (clear > 0 && boundaryDistance(mx, my, poly) < clear) continue;
       const k = pts.length / 2;
-      pts.push((pts[2 * a] + pts[2 * b]) / 2, (pts[2 * a + 1] + pts[2 * b + 1]) / 2);
+      added++;
+      pts.push(mx, my);
       interior.push(pts[2 * k], pts[2 * k + 1]);
       T.insert(k);
     }
+    if (!added) break;
   }
-  smooth(T, pts, nb, SMOOTH_ITERS);
+  smooth(T, pts, nb + nFixed, SMOOTH_ITERS);
   // keep the caller's interior list in sync with smoothed positions
   for (let k = 0; k < interior.length / 2; k++) { interior[2 * k] = pts[2 * (nb + k)]; interior[2 * k + 1] = pts[2 * (nb + k) + 1]; }
   return T.result();
+}
+
+/** Distance from (x, y) to the closed polygon P (flat). @param {number} x @param {number} y @param {number[]} P */
+function boundaryDistance(x, y, P) {
+  let d = Infinity;
+  const n = P.length / 2;
+  for (let k = 0, l = n - 1; k < n; l = k++) d = Math.min(d, distPointSeg(x, y, P[2 * l], P[2 * l + 1], P[2 * k], P[2 * k + 1]));
+  return d;
 }
 
 /** Laplacian smoothing passes over interior points (boundary fixed), each followed by Delaunay flips. */

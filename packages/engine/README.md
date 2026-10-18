@@ -147,8 +147,10 @@ never eases. Triangle twist (steep): 26 % peak stretch with a fixed hand, 2.8 % 
 plasticity of its kirigami ligaments (46–218 % stretch today); contact-induced stretch (a final
 contact pass after the guard re-stretches light paper under heavy or stacked layers: `paper-spring`,
 `accordion-fan`, `paper-bridge-load`) needs contact in the implicit solve rather than a position
-projection; sliver triangles from close document vertices (`jianzhi-window-flower`,
-`lattice-kirigami`) need the mesher to merge them or the kernel warning for edges under 0.5 mm.
+projection; short document edges (0.1–1.3 mm outline, cut and notch segments in `jianzhi-window-flower`,
+`paper-doily`, `stencil`, `fastener-joins` stitch) peak the stretch measure and need either a local
+mesh size (finer triangles where the paper is that detailed) or the kernel warning for edges under
+0.5 mm; lane E3's sliver hygiene removes split-point slivers but not these.
 
 **Digest** (spec §5.7 and rule 10, canonical serialisation per lane H's §5.15, `src/digest.js`).
 When `pliego:meta.digest` is present, `loadDocument` recomputes "sha256:" + SHA-256 of the RFC 8785
@@ -201,6 +203,20 @@ exact (∇E = f_ext) whatever the age of the factorisation, and test `E12-subste
   clipped, then a grain-aligned equilateral lattice is inserted with Delaunay flips. Long edges
   are split (to at most 1.25 h) and the result is Laplacian-smoothed. Crease and cut lines stay
   exact mesh edges. Cut edges duplicate their vertices; cut tips stay shared.
+- **Sliver hygiene** (`src/meshmerge.js`, lane E3, 2026-10-18). Faces are joined across plain-paper
+  lines (`F`/`U`/`J` with treatment `none`, `F` `halfcut`) that no fold step, join, mechanism or set
+  rest angle names, that are flat in the initial frame within 10°, in documents without a kinematic
+  program, when the union stays one simple polygon; those lines stop being mesh constraints, and an
+  outline vertex that only ended them on a straight stretch is not a mesh corner. No split point
+  stays within h/4 of another line's point (it is dropped; the line keeps its geometry), and a
+  refinement midpoint closer than h/4 to the boundary is not inserted. On the A3 subset this
+  changes 81 of 244 meshes, 6.3 % fewer vertices there (kusudama washi-large 6780 → 5940), and
+  lowers several peak stretches (corrugated f-microflute 17.4 → 4.9 %, kusudama washi-large 22.1 →
+  8.7 %), but turns no stretched document stable, and stencil (stable → stretched), pinwheel
+  (stretched → exploded) and kusudama flower (exploded → step error) get worse. Most of E2's 22
+  "sliver" documents peak on a short **document** edge (0.1–1.3 mm outline, cut or notch
+  segments), which the mesher must keep exact; the mesh cannot remove that cause. Tests
+  `mesh-slivers`.
 - **Bending.** Each hinge carries `k_b = C_B·D_eff(φ)·|e|²/(A₁+A₂)`. `D_eff` is the orthotropic
   D(φ), Fourier-deconvolved so that hinge sums reproduce D(φ) in every bending direction.
 - **Membrane.** Per-edge springs use `E(φ)·t·w_e/l₀`, with the modulus capped at

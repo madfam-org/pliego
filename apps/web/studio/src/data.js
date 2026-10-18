@@ -9,11 +9,57 @@ export const DEFAULT_EXPORTS = ['svg', 'dxf', 'pdf', 'glb'];
 
 /** @param {string} url @param {RequestInit} [init] */
 export async function fetchJson(url, init) {
-  const res = await fetch(url, { ...init, headers: { Accept: 'application/json', ...(init && init.headers) } });
+  return readJson(await fetch(url, { ...init, headers: { Accept: 'application/json', ...(init && init.headers) } }), url);
+}
+
+/** @param {Response} res @param {string} url */
+async function readJson(res, url) {
   if (!res.ok) throw new Error(`${res.status} ${res.statusText || 'error'} (${url})`);
   const ct = res.headers.get('content-type') || '';
   if (!/json/.test(ct)) throw new Error(`not JSON (${url})`);
   return res.json();
+}
+
+// The API's busy contract (apps/api/api_v1.py): a worker that is already rendering answers 503 and
+// the rate limiter 429, both with Retry-After in whole seconds. A render request waits that long
+// and tries again, at most BUSY_RETRIES times, the n-th wait being n × Retry-After so that two
+// clients that collided do not collide again. A wait longer than MAX_RETRY_AFTER_S, or a busy
+// answer without Retry-After, is not hidden: the caller gets the response and reports it.
+export const BUSY_RETRIES = 3;
+export const MAX_RETRY_AFTER_S = 5;
+
+/** Whole seconds from a Retry-After header within [0, MAX_RETRY_AFTER_S], else null (do not retry). */
+export function retryAfterSeconds(raw) {
+  const t = String(raw ?? '').trim();
+  if (!/^\d+$/.test(t)) return null;
+  const s = Number(t);
+  return s <= MAX_RETRY_AFTER_S ? s : null;
+}
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * POST a JSON render request, retrying busy answers (503/429 with a short Retry-After).
+ * @param {string} url @param {string} body
+ * @param {{fetchImpl?: typeof fetch, sleep?: (ms: number) => Promise<void>, accept?: string}} [opts]
+ * @returns {Promise<Response>} the first answer that is not a retryable busy one
+ */
+export async function postRender(url, body, { fetchImpl = fetch, sleep = wait, accept = '*/*' } = {}) {
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetchImpl(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: accept }, body });
+    const s = (res.status === 503 || res.status === 429) && attempt <= BUSY_RETRIES ? retryAfterSeconds(res.headers.get('retry-after')) : null;
+    if (s === null) return res;
+    await sleep(s * 1000 * attempt);
+  }
+}
+
+/**
+ * Last-request-wins: `begin()` returns a check that stays true only until the next `begin()`, so a
+ * slow response for an older parameter set (or an object the visitor has left) is dropped.
+ */
+export function latestOnly() {
+  let n = 0;
+  return { begin() { const id = ++n; return () => id === n; } };
 }
 
 /**
@@ -112,22 +158,23 @@ export function renderBody(slug, params, mode, extra = {}) {
   return JSON.stringify({ slug, ...(mode ? { mode } : {}), params, ...extra });
 }
 
-/** POST /api/v1/documents {slug, mode?, params} → sheet document. */
-export function regenerate(slug, params, mode) {
-  return fetchJson(`${API}/documents`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: renderBody(slug, params, mode),
-  });
+/**
+ * POST /api/v1/documents {slug, mode?, params} → sheet document (busy answers retried).
+ * @param {string} slug @param {Record<string, any>} params @param {string|null|undefined} mode
+ * @param {Parameters<typeof postRender>[2]} [opts]
+ */
+export async function regenerate(slug, params, mode, opts = {}) {
+  const url = `${API}/documents`;
+  return readJson(await postRender(url, renderBody(slug, params, mode), { accept: 'application/json', ...opts }), url);
 }
 
-/** POST /api/v1/exports {slug, mode?, params, format} → Blob. */
-export async function exportFile(slug, params, format, mode) {
-  const res = await fetch(`${API}/exports`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: renderBody(slug, params, mode, { format }),
-  });
+/**
+ * POST /api/v1/exports {slug, mode?, params, format} → Blob (busy answers retried).
+ * @param {string} slug @param {Record<string, any>} params @param {string} format @param {string|null|undefined} mode
+ * @param {Parameters<typeof postRender>[2]} [opts]
+ */
+export async function exportFile(slug, params, format, mode, opts = {}) {
+  const res = await postRender(`${API}/exports`, renderBody(slug, params, mode, { format }), opts);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText || 'error'}`);
   return res.blob();
 }

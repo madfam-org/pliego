@@ -309,7 +309,17 @@ Calibration constants (`c_b`, default `hand_factor`, panel yield) live in one fi
 
 **Out of scope for v0.1:**
 
-- WebGPU or supernodal factorisation (the block Cholesky in plain JS is today's bottleneck);
+- WebGPU or supernodal factorisation. <!-- lane E4 (geo-stab, 2026-10-18) --> Measured
+  (`packages/engine/bench/profile-docs.mjs`, CPU self time): on single sheets the triangular solves,
+  PCG and the factorisation lead (35–50 % together), then the stretch guard; on contact-heavy
+  documents the contact broad phase leads (56–74 % on kusudama and ofrenda: the query radius is twice
+  the largest displacement of any vertex in the substep, so a fast fold program makes 0.7–2.5 M
+  candidate pairs) and the contact projection follows (31 %). The < 8 ms/frame target of the
+  `perf-budget` row is not met: 1838 vertices at S = 20 fold at about 820 ms/frame, 726 vertices at
+  about 200 ms/frame (after lane E4's exact speed-ups; 910 and 250 before, loaded machine). Exact
+  (bit-identical) speed-ups are what remain cheap; the next big steps change the solver (WASM SIMD or
+  WebGPU for the factorisation and solves, a per-pair contact radius instead of one global reach),
+  so they need a physics re-baseline;
 - quality-mode orthotropic membrane;
 - logarithmic crease relaxation;
 - in-plane plasticity, which kirigami ligaments need (`rotating-squares` stretches today);

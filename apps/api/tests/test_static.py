@@ -38,6 +38,21 @@ def test_api_root_is_a_json_index(client):
     assert "GET /health" in body["endpoints"]
 
 
+def test_api_index_links_an_openapi_document_the_api_serves(client):
+    """The index used to link apps/api/openapi.yaml on GitHub, a 404 (the file is openapi.json),
+    and no host served the document. The link must be a path this API answers with the spec."""
+    link = client.get("/", base_url=API).get_json()["openapi"]
+    assert link == "/api/v1/openapi.json"
+    for base in (API, APP, LANDING):
+        resp = client.get(link, base_url=base)
+        assert resp.status_code == 200, base
+        assert resp.headers["Content-Type"] == "application/json"
+        spec = resp.get_json()
+        assert spec["openapi"].startswith("3.1") and "/api/v1/documents" in spec["paths"]
+        assert "/api/v1/openapi.json" in spec["paths"]  # the document describes itself
+        assert client.get(link, base_url=base, headers={"If-None-Match": resp.headers["ETag"]}).status_code == 304
+
+
 def test_unknown_host_root_falls_back_to_landing_page(client):
     resp = client.get("/", base_url="http://localhost:8000")
     assert resp.status_code == 200 and b"<a href=" in resp.data

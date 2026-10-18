@@ -6,7 +6,8 @@ One Flask 3 app serves everything (docs/strategy/architecture.md §3): the landi
 at `/studio/`, engine modules at `/engine/`, `/schemas/*.schema.json`, `/llms.txt`,
 `/llms-full.txt`, host-aware `/robots.txt` and `/sitemap.xml`, the catalog previews at
 `/projects/<slug>.svg`, and the JSON API (`/health`, `/ready`, `/api/v1/*`, described in
-[`openapi.json`](openapi.json)).
+[`openapi.json`](openapi.json), which the API serves at `/api/v1/openapi.json` and links from the
+index at `/` on the API host).
 
 ```bash
 gunicorn -c apps/api/gunicorn.conf.py apps.api.app:app          # 8000 app, 9090 metrics

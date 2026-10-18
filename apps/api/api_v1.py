@@ -3,7 +3,8 @@
 Strict from day one (the yantra4d/Fashion Cabinet lesson: malformed render payloads rendered
 defaults under HTTP 200): unknown body keys, unknown query keys, unknown modes and out-of-contract
 parameters are 400s with a precise message — nothing is silently defaulted except the cartridge's
-own declared parameter defaults. Described in apps/api/openapi.yaml (checked against the URL map).
+own declared parameter defaults. Described in apps/api/openapi.json (checked against the URL map),
+which the API serves at /api/v1/openapi.json.
 """
 
 from __future__ import annotations
@@ -13,8 +14,9 @@ import logging
 import math
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
-from flask import Blueprint, Response, abort, g, request
+from flask import Blueprint, Response, abort, g, request, send_file
 
 from . import generator
 from .catalog import Catalog, StockLibrary
@@ -41,6 +43,7 @@ OPENAPI_CONTRACT = {
 log = logging.getLogger("pliego.api.v1")
 CATALOG_QUERY_KEYS = frozenset({"q", "domain", "class", "difficulty", "tag"})
 _SAFE_FILENAME = re.compile(r"[^a-z0-9._-]+")
+OPENAPI_FILE = Path(__file__).with_name("openapi.json")
 
 
 @dataclass(frozen=True)
@@ -134,6 +137,13 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             payload["reasons"] = reasons
             return json_response(payload, 503)
         return json_response(payload)
+
+    @bp.get("/api/v1/openapi.json")
+    def openapi_document():
+        if not OPENAPI_FILE.is_file():
+            return error(404, "the OpenAPI document is not in this build")
+        return send_file(OPENAPI_FILE, mimetype="application/json", conditional=True, etag=True,
+                         max_age=None)
 
     @bp.get("/api/v1/catalog")
     def catalog_search():

@@ -113,6 +113,8 @@ export class World {
     if (this.edgeContact && !this.edgeContact.enabled) this.warnings.push(`edge contact: ${this.edgeContact.pairs} lip × triangle pairs exceed the limit; interlocking slits are not held`);
     if (this.edgeContact && this.edgeContact.enabled && this.contact) this.contact.lipVert = this.edgeContact.lipVert;
     this._edgeContacts = 0;
+    /** passes skipped because the one before changed nothing (diagnostics); a counter render() follows: step() and restore() advance it */
+    this.passesSkipped = 0; this.poseVersion = 0;
     this.wind = new Wind(this.opts.seed, this.opts.windDir);
     this.time = 0;
     this._acc = 0;
@@ -200,8 +202,11 @@ export class World {
     }
   }
 
-  /** Simulation positions (Float64Array xyz, live view). */
+  /** Simulation positions (Float64Array xyz, live view; write through it only before stepping, or render() may serve a stale pose). */
   get positions() { return this.x; }
+
+  /** Whether the world sleeps (steps skip the solver until something wakes it); O(1), unlike stats(). */
+  get asleep() { return !!this._asleep; }
 
   /** @param {string} id @param {number|boolean} value */
   setControl(id, value) { this.drivers.setControl(id, value); this._asleep = false; }
@@ -225,6 +230,7 @@ export class World {
     this.framesRun++;
     if (this._asleep) { this.time += n * this.dt; return n; }
     this._frame(n);
+    this.poseVersion++;
     for (let i = 0; i < n; i++) this._substep();
     this._sleepCheck();
     return n;
@@ -368,10 +374,12 @@ export class World {
     const H = this.mesh.hinges;
     for (let h = 0; h < this.mesh.nH; h++) {
       if (this.mesh.hingeKind[h] === HINGE_PANEL) continue;
-      const raw = dihedral(x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], G12);
+      // the angle alone first; its gradient only for a hinge past its limit (the angle is the same either way)
+      const raw = dihedral(x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], null);
       const th = unwrap(this.theta[h], raw);
       const C = Math.abs(th) - this.foldLimit[h];
       if (C <= 0) continue;
+      dihedral(x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], G12);
       let den = 0;
       for (let i = 0; i < 4; i++) { const q = w[H[4 * h + i]]; den += q * (G12[3 * i] ** 2 + G12[3 * i + 1] ** 2 + G12[3 * i + 2] ** 2); }
       if (den === 0) continue;
@@ -386,6 +394,8 @@ export class World {
         if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
         if (this.edgeContact) this._edgeContacts = this.edgeContact.project(x, this.xs, w);
         if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
+        // a pass that pushed nothing moved nothing: the passes left would repeat it exactly
+        if (!(this.opts.contact && this._contacts) && !(this.edgeContact && this._edgeContacts) && !(this.opts.ground && this._grounded)) { this.passesSkipped += K.CONTACT_PASSES - 1 - pass; break; }
       }
     }
     // stretch guard after contact and friction, so they never leave the paper stretched
@@ -394,21 +404,28 @@ export class World {
     // still had to move an edge by more than SETTLE_STRAIN of its length. A guard that settles within
     // STRAIN_PASSES gives exactly the positions it gave before; one that does not keeps going instead of
     // leaving the paper stretched (twist folds, Kresling collapses: the hand drives fight the membrane).
-    let moved = 1;
-    for (let pass = 0; pass < K.STRAIN_PASSES_MAX && (moved || pass < K.STRAIN_PASSES); pass++) { moved = 0; for (let e = 0; e < this.mesh.nE; e++) {
+    // A pass that corrected no edge left the positions as they were, so every later pass would do the
+    // same: stop there (bit-identical; most substeps of a settled sheet end after one pass).
+    let moved = 1, touched = 1;
+    for (let pass = 0; pass < K.STRAIN_PASSES_MAX && (moved || pass < K.STRAIN_PASSES); pass++) {
+      if (!touched) { this.passesSkipped += Math.max(0, K.STRAIN_PASSES - pass); break; }
+      moved = 0; touched = 0;
+      for (let e = 0; e < this.mesh.nE; e++) {
       const a = E[2 * e], b = E[2 * e + 1];
       const wa = w[a], wb = w[b];
       if (wa + wb === 0) continue;
       const dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
-      const L = Math.hypot(dx, dy, dz);
+      const L = hypot3(dx, dy, dz);
       const lo = L0[e] * (1 - K.COMPRESSION_LIMIT), hi = L0[e] * (1 + lim);
       if (L >= lo && L <= hi) continue;
       const target = L > hi ? hi : lo;
       const s = (L - target) / (L * (wa + wb));
       x[3 * a] += wa * s * dx; x[3 * a + 1] += wa * s * dy; x[3 * a + 2] += wa * s * dz;
       x[3 * b] -= wb * s * dx; x[3 * b + 1] -= wb * s * dy; x[3 * b + 2] -= wb * s * dz;
+      touched = 1;
       if (Math.abs(L - target) > K.SETTLE_STRAIN * L0[e]) moved = 1;
-    } }
+      }
+    }
     this._easeHand(moved === 1);
     // a final contact + ground pass: the stretch guard must not push layers through each other
     if (this.contact) {
@@ -549,11 +566,11 @@ export class World {
    */
   pick(o, d) { return this.renderBuffers.pick(o, d); }
 
-  /** Render mesh buffers (reused): positions, normals (Float32), uvs, sheetIds, indices. */
-  render() { return this.renderBuffers.update(); }
+  /** Render mesh (reused buffers, recomputed only when `poseVersion` moved; or into `out`'s Float32Arrays). @param {{positions?: Float32Array, normals?: Float32Array}} [out] */
+  render(out) { return this.renderBuffers.update(out); }
 
-  /** Crease/score/perforation/cut polylines in the current pose (reused buffers). */
-  creaseLines() { return this.renderBuffers.creaseLines(); }
+  /** Crease/score/perforation/cut polylines in the current pose (reused buffers, or `out.positions`). @param {{positions?: Float32Array}} [out] */
+  creaseLines(out) { return this.renderBuffers.creaseLines(out); }
 
   /** Document vertex → (first) simulation vertex. */
   docVertexMap() { return this.mesh.docVertex; }
@@ -588,5 +605,5 @@ export class World {
   snapshot() { return snapshotWorld(this); }
 
   /** Restore a snapshot (bit-exact, including the factorisation). @param {any} s */
-  restore(s) { restoreWorld(this, s); }
+  restore(s) { restoreWorld(this, s); this.poseVersion++; }
 }

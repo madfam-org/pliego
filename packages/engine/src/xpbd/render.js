@@ -3,7 +3,13 @@
  * Render-side views of a World: the render mesh (vertices split into smoothing groups along fold
  * hinges), crease/cut polylines for overlays, and ray picking, all presented (spec §5.16,
  * presentation.js). Buffers are allocated once and refreshed in place.
+ *
+ * Lane E4 (2026-10-18), for the Studio's engine Worker: `update()` and `creaseLines()` recompute only
+ * when the World's `poseVersion` moved since they last did (an asleep or paused world costs nothing
+ * per frame), or write into caller-provided Float32Arrays (`out`), which skips the copy a Worker
+ * would otherwise make before transferring them; `pick()` reuses one scratch array.
  */
+import { hypot3 } from '../fastmath.js';
 
 const KIND = /** @type {Record<string, number>} */ ({ score: 2, perforation: 3, cut: 4 });
 
@@ -17,6 +23,9 @@ export class RenderBuffers {
     this.uvs = r.uv;
     this.sheetIds = Float32Array.from(r.sheet);
     this.indices = r.indices;
+    /** pose version the shared buffers show (-1: none yet) */
+    this._version = -1; this._linesVersion = -1;
+    /** @type {Float64Array|null} */ this._pickX = null;
     this.out = { positions: this.positions, normals: this.normals, uvs: this.uvs, sheetIds: this.sheetIds, indices: this.indices, vertexCount: r.nR, triangleCount: w.mesh.nT };
     // crease polylines
     const doc = w.doc;
@@ -39,8 +48,14 @@ export class RenderBuffers {
     };
   }
 
-  update() {
-    const x = this.w.x, r = this.w.mesh.render, T = this.w.mesh.tris, P = this.positions, N = this.normals;
+  /**
+   * @param {{positions?: Float32Array, normals?: Float32Array}} [out] write here (3·vertexCount floats each) instead of the shared buffers
+   */
+  update(out) {
+    const own = !out || (!out.positions && !out.normals);
+    if (own && this._version === this.w.poseVersion) return this.out;
+    const x = this.w.x, r = this.w.mesh.render, T = this.w.mesh.tris;
+    const P = (out && out.positions) || this.positions, N = (out && out.normals) || this.normals;
     for (let i = 0; i < r.nR; i++) { const v = 3 * r.src[i]; P[3 * i] = x[v]; P[3 * i + 1] = x[v + 1]; P[3 * i + 2] = x[v + 2]; }
     N.fill(0);
     const C = r.triCorner;
@@ -52,28 +67,37 @@ export class RenderBuffers {
       for (let i = 0; i < 3; i++) { const q = 3 * C[3 * t + i]; N[q] += nx; N[q + 1] += ny; N[q + 2] += nz; }
     }
     for (let i = 0; i < r.nR; i++) {
-      const L = Math.hypot(N[3 * i], N[3 * i + 1], N[3 * i + 2]) || 1;
+      const L = hypot3(N[3 * i], N[3 * i + 1], N[3 * i + 2]) || 1;
       N[3 * i] /= L; N[3 * i + 1] /= L; N[3 * i + 2] /= L;
     }
     const pr = this.w.presentation;
     if (pr && pr.update()) for (let i = 0; i < r.nR; i++) { pr.point(P, 3 * i, r.sheet[i]); pr.direction(N, 3 * i, r.sheet[i]); }
-    return this.out;
+    if (own) { this._version = this.w.poseVersion; return this.out; }
+    // a caller's buffers: the shared ones were not refreshed, so they no longer match any version
+    if (P === this.positions || N === this.normals) this._version = -1;
+    return { ...this.out, positions: P, normals: N };
   }
 
-  creaseLines() {
-    const x = this.w.x, S = this.segVerts, P = this.lines.positions;
+  /** @param {{positions?: Float32Array}} [out] write the segment ends here (3·2·count floats) instead of the shared buffer */
+  creaseLines(out) {
+    const own = !out || !out.positions;
+    if (own && this._linesVersion === this.w.poseVersion) return this.lines;
+    const x = this.w.x, S = this.segVerts, P = (out && out.positions) || this.lines.positions;
     for (let i = 0; i < S.length; i++) { const v = 3 * S[i]; P[3 * i] = x[v]; P[3 * i + 1] = x[v + 1]; P[3 * i + 2] = x[v + 2]; }
     const pr = this.w.presentation;
     if (pr && pr.update()) for (let i = 0; i < S.length; i++) pr.point(P, 3 * i, this.w.mesh.vSheet[S[i]]);
-    return this.lines;
+    if (own) { this._linesVersion = this.w.poseVersion; return this.lines; }
+    return { ...this.lines, positions: P };
   }
 
   /** Möller–Trumbore against the simulation triangles. @param {number[]} o @param {number[]} d */
   pick(o, d) {
     const m = this.w.mesh, T = m.tris, pr = this.w.presentation;
     let x = this.w.x;
-    if (pr && pr.update()) { // pick what render() shows (spec §5.16)
-      x = Float64Array.from(x);
+    if (pr && pr.update()) { // pick what render() shows (spec §5.16), in a reused scratch copy
+      const X = this._pickX ?? (this._pickX = new Float64Array(x.length));
+      X.set(x);
+      x = X;
       for (let v = 0; v < m.nV; v++) pr.point(x, 3 * v, m.vSheet[v]);
     }
     let best = null, bestT = Infinity;

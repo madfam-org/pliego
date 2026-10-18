@@ -19,6 +19,7 @@ import { buildSystem, assembleAndFactor, gradient, unwrap, TERM_STRING, termResi
 import { resolveJoins, updateTerms, TK_STRING, TK_PERF } from './joins.js';
 import { Drivers } from '../drivers.js';
 import { Contact } from './contact.js';
+import { EdgeContact } from './edgecontact.js';
 import { Wind, addAirForces } from './air.js';
 import { RenderBuffers } from './render.js';
 import { pcgStep } from './pcg.js';
@@ -34,7 +35,7 @@ export class World {
    * @param {any} docOrJson a loaded document (from loadDocument) or raw JSON
    * @param {{meshEdge?:number, substeps?:number, contact?:boolean, ground?:boolean, gravity?:boolean|number, seed?:number,
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
-   *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number}} [opts]
+   *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -68,7 +69,7 @@ export class World {
     let kmax = 0;
     for (let e = 0; e < mesh.nE; e++) kmax = Math.max(kmax, this.kMem[e]);
     this.kHard = K.HARD_FACTOR * kmax;
-    const { terms, pins, weldSheet, warnings: joinWarnings } = resolveJoins(doc, mesh, this.kHard);
+    const { terms, pins, weldSheet, warnings: joinWarnings } = resolveJoins(doc, mesh, this.kHard, { glueSamples: opts.glueSamples ?? false });
     this.weldSheet = weldSheet;
     // perforations: breakable welds between the duplicated vertices (tear at the stock's tear strain)
     for (let i = 0; i < mesh.perfPairs.length / 2; i++) {
@@ -106,6 +107,11 @@ export class World {
     this.factorCount = 0;
     this.dirty = true;
     this.contact = this.opts.contact || this.opts.ground ? new Contact(this) : null;
+    // edge–face contact for interlocking slits: only documents that name an edge `interlock…`
+    this.edgeContact = this.contact && this.opts.contact && EdgeContact.wanted(doc) ? new EdgeContact(this) : null;
+    if (this.edgeContact && !this.edgeContact.enabled) this.warnings.push(`edge contact: ${this.edgeContact.pairs} lip × triangle pairs exceed the limit; interlocking slits are not held`);
+    if (this.edgeContact && this.edgeContact.enabled && this.contact) this.contact.lipVert = this.edgeContact.lipVert;
+    this._edgeContacts = 0;
     this.wind = new Wind(this.opts.seed, this.opts.windDir);
     this.time = 0;
     this._acc = 0;
@@ -372,12 +378,17 @@ export class World {
     if (this.contact) {
       for (let pass = 0; pass < K.CONTACT_PASSES; pass++) {
         if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
+        if (this.edgeContact) this._edgeContacts = this.edgeContact.project(x, this.xs, w);
         if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
       }
     }
     // stretch guard after contact and friction, so they never leave the paper stretched
     const lim = K.STRAIN_LIMIT;
-    for (let pass = 0; pass < K.STRAIN_PASSES; pass++) for (let e = 0; e < this.mesh.nE; e++) {
+    // Gauss–Seidel until a pass changes nothing, at most STRAIN_PASSES_MAX passes. A guard that settles
+    // within STRAIN_PASSES passes gives the same positions as the old fixed STRAIN_PASSES (a pass with
+    // nothing outside the band moves nothing); one that does not keeps going instead of leaving the
+    // paper stretched (twist folds, Kresling collapses: the hand drives fight the membrane).
+    for (let pass = 0, moved = 1; pass < K.STRAIN_PASSES_MAX && moved; pass++) { moved = 0; for (let e = 0; e < this.mesh.nE; e++) {
       const a = E[2 * e], b = E[2 * e + 1];
       const wa = w[a], wb = w[b];
       if (wa + wb === 0) continue;
@@ -389,10 +400,12 @@ export class World {
       const s = (L - target) / (L * (wa + wb));
       x[3 * a] += wa * s * dx; x[3 * a + 1] += wa * s * dy; x[3 * a + 2] += wa * s * dz;
       x[3 * b] -= wb * s * dx; x[3 * b + 1] -= wb * s * dy; x[3 * b + 2] -= wb * s * dz;
-    }
+      moved = 1;
+    } }
     // a final contact + ground pass: the stretch guard must not push layers through each other
     if (this.contact) {
       if (this.opts.contact) this._contacts = this.contact.project(x, this.xs, w);
+      if (this.edgeContact) this._edgeContacts = this.edgeContact.project(x, this.xs, w);
       if (this.opts.ground) this._grounded = this.contact.ground(x, this.xs, w);
     }
   }
@@ -526,7 +539,7 @@ export class World {
     let nan = false;
     for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i])) { nan = true; break; }
     return {
-      maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, grounded: this._grounded,
+      maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, edgeContacts: this._edgeContacts, grounded: this._grounded,
       substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
       unheldWelds: this.gates.unheld(this),

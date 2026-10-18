@@ -29,6 +29,13 @@ export const STRAIN_LIMIT = 0.0045;
 /** Gauss–Seidel passes of the strain-limit guard per substep (it runs after contact and friction). */
 export const STRAIN_PASSES = 4;
 
+/**
+ * Upper bound of the guard's passes: it stops at the first pass that moves nothing, so a guard that
+ * settles within STRAIN_PASSES is unchanged, and one that does not (a hand forcing a non-developable
+ * twist) keeps projecting up to this many passes. Test `strain-guard`.
+ */
+export const STRAIN_PASSES_MAX = 16;
+
 /** Compressive guard of the strain-limit pass (compression is soft, see MEMBRANE_COMPRESSION). */
 export const COMPRESSION_LIMIT = 0.01;
 

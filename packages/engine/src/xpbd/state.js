@@ -24,6 +24,7 @@ export function snapshotWorld(w) {
       program: w.drivers.program ? { rho: Float64Array.from(w.drivers.program.rho), free: Uint8Array.from(w.drivers.program.free), entry: Float64Array.from(w.drivers.program.entry), entryStep: w.drivers.program.entryStep } : null,
       kin: w.drivers.kin ? { a: Float64Array.from(w.drivers.kin.a), b: Float64Array.from(w.drivers.kin.b), n: w.drivers.kin.n, i: w.drivers.kin.i } : null },
     contactSide: w.contact ? [...w.contact.side] : [],
+    edgeSide: w.edgeContact ? [...w.edgeContact.side] : [],
     factor: w._factorState,
     factorDir: Float64Array.from(w.factorDir),
   };
@@ -50,6 +51,7 @@ export function restoreWorld(w, s) {
   if (pr && ps) { pr.rho.set(ps.rho); pr.free = Uint8Array.from(ps.free); pr.entry = Float64Array.from(ps.entry); pr.entryStep = ps.entryStep; }
   if (s.drivers.kin) w.drivers.kin = { ...s.drivers.kin, a: Float64Array.from(s.drivers.kin.a), b: Float64Array.from(s.drivers.kin.b), verts: w.drivers.kinVerts ?? w.drivers.program?.ownedVertices(w.mesh) ?? [] };
   if (w.contact) w.contact.side = new Map(s.contactSide);
+  if (w.edgeContact) w.edgeContact.side = new Map(s.edgeSide ?? []);
   // rebuild the factorisation exactly as it was
   if (s.factor && w.sys.ch) {
     w.edgeComp.set(s.factor.edgeComp);

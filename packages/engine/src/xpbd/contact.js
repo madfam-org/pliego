@@ -42,6 +42,8 @@ export class Contact {
     this.weldSheet = new Int32Array(mesh.nV);
     this.setWeldExclusion(w.weldSheet);
     this.mark = new Int32Array(mesh.nV).fill(-1);
+    /** @type {Uint8Array|null} lip vertices of interlocking slits (edgecontact.js holds them against other sheets) */
+    this.lipVert = null;
     // faceOrders [f, g, s] (FOLD: f lies on side s of g's normal; partial in v1 — a missing pair is
     // "unknown"): seeds the sidedness of a vertex of face f against a triangle of face g
     /** @type {Map<number, number>} */
@@ -129,29 +131,35 @@ export class Contact {
     for (let e = 0; e < ne; e++) items[fill[ek[e] & mask]++] = e;
     let PV = this._pvBuf ?? new Int32Array(1024), PT = this._ptBuf ?? new Int32Array(1024);
     let np = 0;
-    const mark = this.mark;
+    const mark = this.mark, vGroup = m.vGroup, weld = this.weldSheet, triSheet = m.triSheet, vSheet = m.vSheet;
+    // triangles whose three vertices are all driven: a driven vertex never pairs with them
+    const triFixed = this._triFixed ?? (this._triFixed = new Uint8Array(m.nT));
+    for (let t = 0; t < m.nT; t++) triFixed[t] = fixed[T[3 * t]] && fixed[T[3 * t + 1]] && fixed[T[3 * t + 2]] ? 1 : 0;
+    // The pair filters are pure predicates joined by AND, so their order does not change the pairs or
+    // their order; the cheapest rejections (bounding sphere, driven triangle) run first (backlog
+    // item 22: the broad phase was 60 % of a 3,900-vertex step).
     for (let v = 0; v < m.nV; v++) {
-      const kv = key(Math.floor(x[3 * v] / cell), Math.floor(x[3 * v + 1] / cell), Math.floor(x[3 * v + 2] / cell));
+      const vx = x[3 * v], vy = x[3 * v + 1], vz = x[3 * v + 2];
+      const kv = key(Math.floor(vx / cell), Math.floor(vy / cell), Math.floor(vz / cell));
       const b = kv & mask, q0 = start[b], q1 = start[b + 1];
       if (q0 === q1) continue;
       mark[v] = v;
       for (let q = this.adjStart[v]; q < this.adjStart[v + 1]; q++) mark[this.adj[q]] = v;
+      const fv = fixed[v], g = vGroup[v], ws = weld[v], sv = vSheet[v], lip = this.lipVert !== null && this.lipVert[v] === 1;
       for (let q = q0; q < q1; q++) {
         const e = items[q];
         if (ek[e] !== kv) continue;
         const t = et[e];
+        // outside the triangle's bounding sphere grown by R (same test as distance − radius > R)
+        const dx = vx - S[4 * t], dy = vy - S[4 * t + 1], dz = vz - S[4 * t + 2], rr = S[4 * t + 3];
+        if (dx * dx + dy * dy + dz * dz > rr * rr) continue;
+        if (fv && triFixed[t]) continue;
+        if (ws >= 0 && triSheet[t] === ws) continue;
+        if (lip && triSheet[t] !== sv) continue;
         const a = T[3 * t], b = T[3 * t + 1], c = T[3 * t + 2];
         if (mark[a] === v || mark[b] === v || mark[c] === v) continue;
-        const g = m.vGroup[v];
-        if (m.vGroup[a] === g || m.vGroup[b] === g || m.vGroup[c] === g) continue;
-        if (fixed[v] && fixed[a] && fixed[b] && fixed[c]) continue;
-        const ws = this.weldSheet[v];
-        if (ws >= 0 && m.triSheet[t] === ws) continue;
-        const sv = m.vSheet[v];
-        if (this.weldSheet[a] === sv && this.weldSheet[b] === sv && this.weldSheet[c] === sv) continue;
-        // outside the triangle's bounding sphere grown by R (same test as distance − radius > R)
-        const dx = x[3 * v] - S[4 * t], dy = x[3 * v + 1] - S[4 * t + 1], dz = x[3 * v + 2] - S[4 * t + 2], rr = S[4 * t + 3];
-        if (dx * dx + dy * dy + dz * dz > rr * rr) continue;
+        if (vGroup[a] === g || vGroup[b] === g || vGroup[c] === g) continue;
+        if (weld[a] === sv && weld[b] === sv && weld[c] === sv) continue;
         if (np === PV.length) { const a2 = new Int32Array(2 * np); a2.set(PV); PV = a2; const b2 = new Int32Array(2 * np); b2.set(PT); PT = b2; }
         PV[np] = v; PT[np] = t; np++;
       }

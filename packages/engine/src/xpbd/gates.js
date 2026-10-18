@@ -79,7 +79,8 @@ export class JoinGates {
     for (const gj of this.list) {
       if (!gj.on || gj.join.type !== 'glue') continue;
       const sb = /** @type {number} */(w.doc.sheetIndex.get(gj.join.b.sheet));
-      for (const t of gj.terms) out[T.verts[T.start[t]]] = sb;
+      // the a side of a weld: one mesh vertex, or a triangle for a sampled weld (all but b's last three)
+      for (const t of gj.terms) for (let i = T.start[t]; i < T.start[t + 1] - 3; i++) out[T.verts[i]] = sb;
     }
     return out;
   }

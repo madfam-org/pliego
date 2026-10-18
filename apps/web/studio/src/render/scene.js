@@ -27,10 +27,19 @@ export function computeBounds(pos) {
   return { center, radius, min, max };
 }
 
+/**
+ * Half-size (mm) of the light's orthographic box for a scene; the box is 2·r wide and its depth
+ * runs from 0.5·r to 5.5·r, so shadow-map depth 0…1 spans 5·r mm.
+ * @param {{radius: number}} bounds
+ */
+export function lightExtent(bounds) {
+  return bounds.radius * 1.25 + 5;
+}
+
 /** Orthographic light view-projection enclosing the bounding sphere (and the ground under it). */
 export function lightViewProj(bounds, out = new Float32Array(16)) {
   const c = [bounds.center[0], Math.max(bounds.center[1], 0) / 2, bounds.center[2]];
-  const r = bounds.radius * 1.25 + 5;
+  const r = lightExtent(bounds);
   const eye = vec3.add(c, vec3.scale(LIGHT_DIR, r * 3));
   const view = mat4.lookAt(eye, c, Math.abs(LIGHT_DIR[1]) > 0.99 ? [0, 0, 1] : [0, 1, 0]);
   const proj = mat4.ortho(-r, r, -r, r, r * 0.5, r * 5.5);

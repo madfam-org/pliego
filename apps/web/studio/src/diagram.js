@@ -149,3 +149,29 @@ export function createOverlay(json, world) {
     },
   };
 }
+
+/** Segment kinds of the paper engine's creaseLines() (render.js in @pliego/engine). */
+const ENGINE_LINE_KINDS = /** @type {const} */ (['mountain', 'valley', 'score', 'perforation', 'cut']);
+
+/**
+ * The crease overlay from a paper-engine World: its creaseLines() polylines (simulation vertices,
+ * presented like render()), coloured like the stub overlay. Null when the world has no creases.
+ * @param {any} world
+ */
+export function createEngineOverlay(world) {
+  if (!world || typeof world.creaseLines !== 'function') return null;
+  const first = world.creaseLines();
+  if (!first || !first.count) return null;
+  const colors = new Float32Array(first.count * 6);
+  for (let i = 0; i < first.count; i++) {
+    const rgb = OVERLAY_RGB[ENGINE_LINE_KINDS[first.kinds[i]] || 'flat'];
+    colors.set(rgb, i * 6); colors.set(rgb, i * 6 + 3);
+  }
+  return {
+    available: () => true,
+    build() {
+      const L = world.creaseLines();
+      return L && L.positions && L.positions.length === colors.length ? { positions: L.positions, colors } : null;
+    },
+  };
+}

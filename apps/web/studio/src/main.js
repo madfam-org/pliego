@@ -1,12 +1,18 @@
 // @ts-check
 // Pliego Studio — wiring: catalog → document → engine World → renderer, panels, share URL, i18n.
+// The paper engine steps in a Worker when it can (world-proxy.js; `?worker=off` keeps it on the
+// main thread), and the frame loop draws only when the pose or the view changed and stops asking
+// for frames when nothing moves (frame-loop.js).
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
 import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, loadPreview, fetchObject } from './data.js';
 import { engineOptions, estimateVertices, physicsFits, tooSlow } from './physics.js';
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
-import { buildDiagram, highlightStep, serializeDiagram, createOverlay, legendKinds, LINE_STYLE } from './diagram.js';
+import { buildDiagram, highlightStep, serializeDiagram, createOverlay, createEngineOverlay, legendKinds, LINE_STYLE } from './diagram.js';
+import { createChangeTracker, keepRunning, planSteps } from './frame-loop.js';
+import { WorkerWorld, sharedEngineWorker, retireEngineWorker } from './world-proxy.js';
+import { probeStep } from './engine-worker.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
 import { createRenderer, rendererOverride } from './render/index.js';
 import { attachInput } from './render/input.js';
@@ -46,6 +52,7 @@ const state = {
   fitted: false,
   failed: false,
   fps: 0,
+  where: /** @type {'worker'|'main'|null} */ (null),   // where the paper engine steps
 };
 
 function status(msg) { $('st-msg').textContent = msg || ''; }
@@ -95,7 +102,9 @@ function renderAll() {
 
 function renderStatusStatic() {
   $('st-engine').textContent = state.engine ? i18n.t(state.engine.kind === 'engine' ? 'status.engine.real' : 'status.engine.stub') : '';
-  $('st-engine').title = state.engine ? state.engine.reason : '';
+  const where = state.engine && state.engine.kind === 'engine' && state.where
+    ? (state.where === 'worker' ? ' · steps in a Worker (off the main thread)' : ' · steps on the main thread') : '';
+  $('st-engine').title = state.engine ? state.engine.reason + where : '';
   $('st-renderer').textContent = i18n.t('status.renderer', { name: state.renderer ? (state.renderer.kind === 'webgl2' ? 'WebGL2' : 'Canvas 2D') : i18n.t('status.renderer.none') });
 }
 
@@ -145,6 +154,7 @@ function onControl(id, value) {
   if (!state.world) return;
   try { state.world.setControl(id, value); } catch (e) { fail('error.engine', e); }
   syncSteps();
+  kick();
 }
 
 function setPrimary(v, stop) {
@@ -171,6 +181,7 @@ function setPlaying(on) {
     if (state.controls.sequenceId) { state.playDir = 1; if (v >= hi) setPrimary(lo, false); }
     else state.playDir = v >= hi ? -1 : v <= lo ? 1 : state.playDir;
   }
+  if (state.playing) kick();
 }
 
 function advancePlayback(dt) {
@@ -255,22 +266,6 @@ function fail(key, e) {
   console.error(e);
 }
 
-/**
- * Wall time of a warmed step (ms). The first step pays for the initial factorisation, and the next
- * ones may still be settling, so the probe returns the faster of steps two and three. The probe
- * advances the world by all three steps.
- */
-function probeStep(world) {
-  world.step(STEP);
-  let best = Infinity;
-  for (let i = 0; i < 2; i++) {
-    const t0 = performance.now();
-    world.step(STEP);
-    best = Math.min(best, performance.now() - t0);
-  }
-  return best;
-}
-
 // Live speed watch: the paper engine sleeps at rest, so only awake steps (≥ 1 ms) are averaged. A
 // sustained average above SLOW_STEP_MS falls back to the preview, unless physics was asked for.
 const speed = { n: 0, avg: 0, fired: false };
@@ -297,12 +292,37 @@ function syncPhysicsButton() {
   btn.setAttribute('aria-pressed', String(!!(state.engine && state.engine.kind === 'engine')));
 }
 
+/**
+ * The paper engine in the shared Worker, with the document's control defaults applied and (unless
+ * physics was asked for) the speed probe run there. Rejects when Workers are unavailable or the
+ * Worker cannot start the engine; the caller then steps the engine on the main thread.
+ * @param {any} json
+ */
+function startWorkerWorld(json) {
+  if (state.share.worker === 'off') return Promise.reject(new Error('?worker=off'));
+  const worker = sharedEngineWorker(new URL('./engine-worker.js', import.meta.url));
+  if (!worker) return Promise.reject(new Error('module Workers are not available'));
+  return WorkerWorld.create(worker, {
+    engineUrl: new URL('/engine/index.js', location.href).href,
+    json,
+    opts: engineOptions(json),
+    controls: (json['pliego:controls'] || []).map((c) => [c.id, c.default]),
+    probe: !state.physicsForced,
+    onFrame: kick,
+    onStep: noteStep,
+  });
+}
+
+let docGen = 0;
 async function useDocument(json, opts = {}) {
+  const gen = ++docGen;
   state.json = json;
   state.failed = false;
   notice('');
   setPlaying(false);
+  if (state.world && typeof state.world.dispose === 'function') state.world.dispose();
   state.world = null;
+  state.where = null;
   state.overlay = null;
   speed.n = 0; speed.avg = 0; speed.fired = false;
   const physicsOk = !!(state.physics && state.physics.kind === 'engine');
@@ -311,27 +331,46 @@ async function useDocument(json, opts = {}) {
   const real = state.engine.kind === 'engine';
   const heavyNotice = physicsOk && state.physicsWanted && !opts.preview && !fits
     ? i18n.t('physics.heavy', { n: estimateVertices(json, engineOptions(json).meshEdge) }) : '';
+  /** @type {WorkerWorld | null} */
+  let remote = null;
+  if (real) {
+    try {
+      remote = await startWorkerWorld(json);
+    } catch (e) {
+      if (state.share.worker !== 'off') { console.warn(`Paper engine on the main thread: ${e instanceof Error ? e.message : e}`); retireEngineWorker(); }
+    }
+    if (gen !== docGen) { if (remote) remote.dispose(); return; }   // a newer document took over
+  }
   try {
-    const doc = state.engine.mod.loadDocument(json);
-    state.world = new state.engine.mod.World(doc, real ? engineOptions(json) : { seed: 1 });
+    if (remote) { state.world = remote; state.where = 'worker'; }
+    else {
+      const doc = state.engine.mod.loadDocument(json);
+      state.world = new state.engine.mod.World(doc, real ? engineOptions(json) : { seed: 1 });
+      state.where = 'main';
+    }
   } catch (e) {
     fail(state.world ? 'error.engine' : 'error.document', e);
   }
   state.controls = renderControls($('controls'), json, i18n, { needsEngine, onChange: onControl });
   if (state.world) {
-    for (const c of json['pliego:controls'] || []) {
-      if (!needsEngine(c.id)) { try { state.world.setControl(c.id, c.default); } catch (e) { fail('error.engine', e); } }
+    // the Worker applied the defaults (and ran the probe) before its first pose
+    if (!remote) {
+      for (const c of json['pliego:controls'] || []) {
+        if (!needsEngine(c.id)) { try { state.world.setControl(c.id, c.default); } catch (e) { fail('error.engine', e); } }
+      }
     }
     if (real && !state.physicsForced) {
       let ms = NaN;
-      try { ms = probeStep(state.world); } catch (e) { fail('error.engine', e); }
+      if (remote) ms = remote.probeMs;
+      else try { ms = probeStep(state.world, STEP, () => performance.now()); } catch (e) { fail('error.engine', e); }
       if (tooSlow(ms)) {
         await useDocument(json, { preview: true });
         notice(i18n.t('physics.slow', { ms: Math.round(ms) }));
         return;
       }
     }
-    state.overlay = createOverlay(json, state.world);
+    const docOverlay = createOverlay(json, state.world);
+    state.overlay = docOverlay && docOverlay.available() ? docOverlay : createEngineOverlay(state.world);
     if (state.renderer) state.renderer.setSheets(sheetsFromDocument(json), state.item.document || location.href);
   }
   syncPhysicsButton();
@@ -342,8 +381,11 @@ async function useDocument(json, opts = {}) {
   ovBtn.disabled = !ovOk;
   if (!ovOk) { state.overlayOn = false; ovBtn.setAttribute('aria-pressed', 'false'); }
   state.fitted = false;
+  tracker.reset();
+  shownOverlay = null;
   renderAll();
   if (!state.renderer || !state.world) setView('2d', false);
+  invalidate();
 }
 
 async function selectItem(slug, rawParams, rawMode) {
@@ -384,6 +426,7 @@ function setView(view, share = true) {
   if (state.renderer) state.renderer.canvas.hidden = state.view !== '3d';
   $('diagram').hidden = state.view !== '2d';
   if (share) updateShare();
+  invalidate();
 }
 
 function setupInput() {
@@ -399,6 +442,7 @@ function setupInput() {
       if (!hit) return false;
       state.world.grab(hit.vertex, hit.point);
       state.grabbing = { plane: hit.point, normal: r.camera.forward() };
+      kick();
       return true;
     },
     onGrabMove(ndc) {
@@ -406,51 +450,84 @@ function setupInput() {
       const ray = r.camera.ray(ndc[0], ndc[1]);
       const p = rayPlane(ray.origin, ray.dir, state.grabbing.plane, state.grabbing.normal);
       if (p) state.world.moveGrab(p);
+      kick();
     },
-    onGrabEnd() { if (state.world) state.world.release(); state.grabbing = null; },
+    onGrabEnd() { if (state.world) state.world.release(); state.grabbing = null; kick(); },
+    onChange: invalidate,
   });
 }
 
+// The loop runs while something moves: playback, a grab, a pose that changed in the last frames,
+// a view that needs drawing, or a Worker step in flight. Otherwise it stops asking for frames, and
+// kick() (controls, input, a Worker pose, resize, theme, a visible tab) starts it again.
+const tracker = createChangeTracker();
+const ovView = { positions: new Float32Array(0), colors: new Float32Array(0), faint: true };
+/** @type {{positions: Float32Array, colors: Float32Array} | null} */
+let shownOverlay = null;
+let scheduled = false, redraw = true, quiet = 0;
 let last = 0, acc = 0, frames = 0, fpsT = 0;
-function frame(now) {
+
+function kick() {
+  if (scheduled || document.hidden) return;
+  scheduled = true;
   requestAnimationFrame(frame);
+}
+
+/** The view must be drawn again (camera, size, theme, overlay, printed art). */
+function invalidate() { redraw = true; kick(); }
+
+function frame(now) {
+  scheduled = false;
   const dt = last ? Math.min(0.25, (now - last) / 1000) : STEP;
   last = now;
   const world = state.world;
-  if (!world || state.failed) return;
+  if (!world || state.failed) { last = 0; return; }
+  let changed = false;
   try {
     if (state.playing) advancePlayback(dt);
-    acc += dt;
     // The paper engine takes one fixed step per frame at most: its steps are the expensive part, and
-    // catching up would only make a slow frame slower. The preview may catch up to four.
-    const maxSteps = state.engine && state.engine.kind === 'engine' ? 1 : 4;
-    let n = 0;
-    while (acc >= STEP && n < maxSteps) {
+    // catching up would only make a slow frame slower. The preview may catch up to four. A Worker
+    // engine takes the next step only when the last one has arrived.
+    const remote = world instanceof WorkerWorld;
+    const maxSteps = remote ? (world.pending ? 0 : 1) : state.engine && state.engine.kind === 'engine' ? 1 : 4;
+    const plan = planSteps(acc, dt, STEP, maxSteps);
+    acc = plan.acc;
+    for (let i = 0; i < plan.n; i++) {
       const t0 = performance.now();
       world.step(STEP);
-      noteStep(performance.now() - t0);
-      acc -= STEP; n++;
+      if (!remote) noteStep(performance.now() - t0);
     }
-    if (n === maxSteps) acc = 0;   // never spiral: drop time rather than run variable steps
-    if (state.view === '3d' && state.renderer) {
-      const r = world.render();
-      const ov = state.overlayOn && state.overlay ? state.overlay.build() : null;
-      const bounds = state.renderer.draw(r, ov);
-      if (!state.fitted && bounds) { state.renderer.camera.fit(bounds.center, bounds.radius); state.fitted = true; }
+    const r = world.render();
+    changed = tracker.changed(r);
+    if (state.view === '3d' && state.renderer && (changed || redraw)) {
+      if (changed || !shownOverlay) shownOverlay = state.overlay ? state.overlay.build() : null;
+      let ov = null;
+      if (shownOverlay) { ovView.positions = shownOverlay.positions; ovView.colors = shownOverlay.colors; ovView.faint = !state.overlayOn; ov = ovView; }
+      const bounds = state.renderer.draw(r, ov, changed);
+      redraw = false;
+      if (!state.fitted && bounds) { state.renderer.camera.fit(bounds.center, bounds.radius); state.fitted = true; redraw = true; }
     }
   } catch (e) {
     fail('error.engine', e);
     return;
   }
+  quiet = changed ? 0 : quiet + 1;
   frames++;
-  if (now - fpsT > 500) {
+  const running = keepRunning({
+    playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing,
+    pending: world instanceof WorkerWorld && world.pending, quietFrames: quiet,
+    engine: state.engine ? state.engine.kind : 'stub', hidden: document.hidden,
+  });
+  if (now - fpsT > 500 || !running) {
     state.fps = (frames * 1000) / (now - fpsT || 1);
     frames = 0; fpsT = now;
     const s = world.stats ? world.stats() : null;
-    $('st-fps').textContent = i18n.t('status.fps', { fps: Math.round(state.fps) });
+    $('st-fps').textContent = running ? i18n.t('status.fps', { fps: Math.round(state.fps) }) : i18n.t('status.idle');
     $('st-strain').textContent = s ? i18n.t('status.strain', { value: ((s.maxStrain || 0) * 100).toFixed(2) }) : '';
     $('st-contacts').textContent = s ? i18n.t('status.contacts', { n: s.contacts || 0 }) : '';
   }
+  if (running) kick();
+  else { last = 0; acc = 0; quiet = 0; }
 }
 
 function wireStatic() {
@@ -464,9 +541,9 @@ function wireStatic() {
   $('btn-back').addEventListener('click', () => stepButton(-1));
   $('btn-forward').addEventListener('click', () => stepButton(1));
   $('btn-restart').addEventListener('click', () => { const c = state.controls; if (c && c.primaryId) setPrimary(c.range(c.primaryId)[0], true); });
-  $('btn-reset').addEventListener('click', () => state.renderer && state.renderer.camera.reset());
+  $('btn-reset').addEventListener('click', () => { if (state.renderer) { state.renderer.camera.reset(); invalidate(); } });
   $('btn-grab').addEventListener('click', () => { state.grabMode = !state.grabMode; $('btn-grab').setAttribute('aria-pressed', String(state.grabMode)); $('viewer').classList.toggle('grab', state.grabMode); });
-  $('btn-overlay').addEventListener('click', () => { state.overlayOn = !state.overlayOn; $('btn-overlay').setAttribute('aria-pressed', String(state.overlayOn)); });
+  $('btn-overlay').addEventListener('click', () => { state.overlayOn = !state.overlayOn; $('btn-overlay').setAttribute('aria-pressed', String(state.overlayOn)); invalidate(); });
   $('btn-physics').addEventListener('click', async () => {
     const on = !(state.engine && state.engine.kind === 'engine');
     state.physicsWanted = on;
@@ -479,7 +556,9 @@ function wireStatic() {
     catch { input.select(); status(i18n.t('share.copyFailed')); }
   });
   const scheme = globalThis.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
-  if (scheme) scheme.addEventListener('change', () => state.renderer && state.renderer.refreshTheme());
+  if (scheme) scheme.addEventListener('change', () => { if (state.renderer) { state.renderer.refreshTheme(); invalidate(); } });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) invalidate(); });
+  globalThis.addEventListener('resize', invalidate);
   if (reducedMotion && reducedMotion.matches) document.documentElement.classList.add('reduced-motion');
 }
 
@@ -493,7 +572,8 @@ async function init() {
   state.physicsForced = state.share.engine === 'physics';
   state.engine = state.physicsWanted ? state.physics : state.preview;
   const canvas = $('view-canvas');
-  state.renderer = createRenderer(canvas, { prefer: rendererOverride(state.share.renderer), onWarn: (m) => console.warn(m) });
+  state.renderer = createRenderer(canvas, { prefer: rendererOverride(state.share.renderer), onWarn: (m) => console.warn(m), onInvalidate: invalidate });
+  if (state.renderer && typeof ResizeObserver === 'function') new ResizeObserver(invalidate).observe(state.renderer.canvas);
   if (!state.renderer) notice(i18n.t('viewer.none'));
   else if (state.renderer.kind === 'canvas2d' && rendererOverride(state.share.renderer) !== 'canvas2d') notice(i18n.t('viewer.canvas2d'));
   const noticeText = $('viewer-notice').textContent;
@@ -510,7 +590,7 @@ async function init() {
   await selectItem(state.share.slug || state.catalog.items[0]?.slug, state.share.params, state.share.mode);
   if (!$('viewer-notice').textContent && noticeText) notice(noticeText);
   setView(state.share.view, false);
-  requestAnimationFrame(frame);
+  kick();
 }
 
 init();

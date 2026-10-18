@@ -2,7 +2,9 @@
 // Canvas2D 3-D fallback renderer for browsers without WebGL2. Draws the same world.render() mesh
 // with the same OrbitCamera: per-triangle projection, back-face aware two-sided colours, flat
 // Lambert shading (with paper translucency), painter's-algorithm depth sort, planar projected
-// shadows on the ground plane, and the optional crease overlay. Same interface as webgl.js.
+// shadows on the ground plane, and the optional crease overlay. Same interface as webgl.js. Not
+// drawn here: the darkened paper edges and pressed creases (`overlay.faint`, which needs a depth
+// test this painter's algorithm has no cheap equivalent for) and the soft table shadow.
 // Printed content degrades: `art` and placed artwork are not drawn (flat paper colours only);
 // annotation texts are pinned on the folded paper (painted right after their triangle, only when
 // it shows its front), mapped through the triangle's affine UV → screen map.
@@ -11,6 +13,7 @@ import { OrbitCamera } from './camera.js';
 import { hexToLinear } from './math.js';
 import { computeBounds, readTheme, LIGHT_DIR } from './scene.js';
 import { baryWeights, locateUv, localToUv, CAP_HEIGHT_EM, INK, TEXT_EM_PX } from './printed.js';
+import { backingSize, coarsePointer } from '../frame-loop.js';
 
 const CAP_UNITS = TEXT_EM_PX * CAP_HEIGHT_EM;
 
@@ -27,6 +30,7 @@ export function createCanvas2DRenderer(canvas) {
   const ctx = canvas.getContext('2d', { alpha: false });
   if (!ctx) throw new Error('Canvas2D unavailable');
   const camera = new OrbitCamera();
+  const coarse = coarsePointer();
   let theme = readTheme(canvas);
   let sheets = [];
   let destroyed = false;
@@ -83,9 +87,8 @@ export function createCanvas2DRenderer(canvas) {
     refreshTheme() { theme = readTheme(canvas); },
 
     resize() {
-      const dpr = Math.min(globalThis.devicePixelRatio || 1, 2);
-      // Capped: a runaway layout must never allocate a giant backing buffer.
-      const w = Math.min(4096, Math.max(1, Math.round(canvas.clientWidth * dpr))), h = Math.min(4096, Math.max(1, Math.round(canvas.clientHeight * dpr)));
+      // Pixel ratio capped (1.5 on touch devices) and a pixel budget: see frame-loop.js.
+      const [w, h] = backingSize(canvas.clientWidth, canvas.clientHeight, globalThis.devicePixelRatio || 1, coarse);
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     },
 
@@ -218,7 +221,7 @@ export function createCanvas2DRenderer(canvas) {
         }
       }
 
-      if (overlay && overlay.positions.length) {
+      if (overlay && !overlay.faint && overlay.positions.length) {
         const O = overlay.positions, C = overlay.colors;
         ctx.lineWidth = Math.max(1, (globalThis.devicePixelRatio || 1) * 1.1);
         for (let i = 0; i + 5 < O.length; i += 6) {

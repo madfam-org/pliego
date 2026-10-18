@@ -1,15 +1,24 @@
 // @ts-check
 // WebGL2 paper renderer: two-sided paper (front/back colour, printed content via sheet UVs and
 // gl_FrontFacing — `art`, placed artwork and annotations composited per side by printed.js),
-// hemisphere + key light with translucency and procedural grain, one directional PCF shadow map
-// (pop-ups cast shadows), a ground plane, and an optional crease overlay.
-// Buffers are allocated once per mesh size and refreshed with bufferSubData every frame.
+// hemisphere + key light with translucency and procedural grain, one directional shadow map (pop-ups
+// cast shadows; on the table the penumbra widens with height, plus contact occlusion), a ground
+// plane, darkened paper edges (outline from the topology, edges.js) and pressed creases, or the
+// coloured crease overlay. One draw call for all the paper.
+// Buffers are allocated once per mesh size and refreshed in place with bufferSubData, only when the
+// pose changed: a frame where only the camera moved re-uses the uploaded mesh and the shadow map.
 
 import { OrbitCamera } from './camera.js';
 import { hexToLinear, DEG } from './math.js';
 import { MAX_SHEETS, PAPER_VS, PAPER_FS, GROUND_VS, GROUND_FS, DEPTH_VS, DEPTH_FS, LINE_VS, LINE_FS } from './shaders.js';
-import { computeBounds, lightViewProj, computeNormals, normalsMissing, readTheme, LIGHT_DIR } from './scene.js';
+import { computeBounds, lightViewProj, lightExtent, computeNormals, normalsMissing, readTheme, LIGHT_DIR } from './scene.js';
 import { artLayerSize, drawLayer, hasPrinted, planSheet } from './printed.js';
+import { outlineEdges } from './edges.js';
+import { backingSize, coarsePointer } from '../frame-loop.js';
+
+/** Darkening (multiplicative) of paper edges and of pressed creases. */
+export const EDGE_SHADE = 0.58;
+export const CREASE_SHADE = 0.8;
 
 /** @param {HTMLCanvasElement} [canvas] */
 export function hasWebGL2(canvas) {
@@ -52,11 +61,13 @@ function program(gl, vs, fs) {
 
 /**
  * @param {HTMLCanvasElement} canvas
- * @param {{onWarn?: (msg: string) => void}} [opts]
+ * @param {{onWarn?: (msg: string) => void, onInvalidate?: () => void}} [opts]
  * @returns {import('./index.js').Renderer}
  */
 export function createWebGLRenderer(canvas, opts = {}) {
   const warn = opts.onWarn || (() => {});
+  const invalidate = opts.onInvalidate || (() => {});
+  const coarse = coarsePointer();
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false, preserveDrawingBuffer: false });
   if (!gl) throw new Error('WebGL2 unavailable');
   const camera = new OrbitCamera();
@@ -77,6 +88,13 @@ export function createWebGLRenderer(canvas, opts = {}) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
+  // The same depth texture read without comparison (the table's blocker search).
+  const depthSampler = gl.createSampler();
+  gl.samplerParameteri(depthSampler, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.samplerParameteri(depthSampler, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.samplerParameteri(depthSampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.samplerParameteri(depthSampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.samplerParameteri(depthSampler, gl.TEXTURE_COMPARE_MODE, gl.NONE);
   const shadowFbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFbo);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, shadowTex, 0);
@@ -113,6 +131,16 @@ export function createWebGLRenderer(canvas, opts = {}) {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufs.idx);
   gl.bindVertexArray(null);
 
+  // --- paper edges: pairs of render vertices over the paper's own position buffer ---
+  const edgeVao = gl.createVertexArray(), edgeIdx = gl.createBuffer();
+  gl.bindVertexArray(edgeVao);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pos);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, edgeIdx);
+  gl.bindVertexArray(null);
+  let edgeCount = 0;
+
   // --- ground quad (rebuilt when the scene radius changes notably) ---
   const groundVao = gl.createVertexArray(), groundBuf = gl.createBuffer();
   gl.bindVertexArray(groundVao);
@@ -130,11 +158,17 @@ export function createWebGLRenderer(canvas, opts = {}) {
   gl.bindBuffer(gl.ARRAY_BUFFER, lineCol); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
   gl.bindVertexArray(null);
   let lineCap = 0;
+  /** @type {ArrayLike<number> | null} */ let linesUploaded = null;
+  let lineCount = 0;
 
   const front = new Float32Array(MAX_SHEETS * 3), back = new Float32Array(MAX_SHEETS * 3), info = new Float32Array(MAX_SHEETS * 4);
   const lightMat = new Float32Array(16);
   let destroyed = false;
   let generation = 0;   // bumps on every setSheets: late image loads of an older document are ignored
+  /** @type {ReturnType<typeof computeBounds> | null} */ let bounds = null;
+  let groundR = 0, shadowDirty = true;
+  /** Work counters (tests and profiling): frames drawn, mesh uploads, shadow passes. */
+  const stats = { frames: 0, meshUploads: 0, shadowPasses: 0 };
 
   function uploadMesh(r) {
     const nv = r.positions.length / 3;
@@ -165,11 +199,18 @@ export function createWebGLRenderer(canvas, opts = {}) {
       else gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, idx);
       indexCount = idx.length;
       lastIndices = r.indices;
+      const edges = outlineEdges(r.uvs, r.sheetIds, idx);
+      gl.bindVertexArray(null);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, edgeIdx);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, edges, gl.STATIC_DRAW);
+      edgeCount = edges.length;
     }
+    stats.meshUploads++;
   }
 
   function uploadOverlay(ov) {
     const n = ov.positions.length;
+    linesUploaded = ov.positions; lineCount = n;
     gl.bindBuffer(gl.ARRAY_BUFFER, linePos);
     if (n > lineCap) { lineCap = n; gl.bufferData(gl.ARRAY_BUFFER, n * 4, gl.DYNAMIC_DRAW); gl.bindBuffer(gl.ARRAY_BUFFER, lineCol); gl.bufferData(gl.ARRAY_BUFFER, n * 4, gl.DYNAMIC_DRAW); gl.bindBuffer(gl.ARRAY_BUFFER, linePos); }
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, ov.positions);
@@ -194,6 +235,7 @@ export function createWebGLRenderer(canvas, opts = {}) {
     setSheets(sheets, baseUrl) {
       const gen = ++generation;
       front.fill(0); back.fill(0); info.fill(0);
+      if (sheets.length > MAX_SHEETS) warn(`This document has ${sheets.length} sheets; the 3-D view colours the first ${MAX_SHEETS} and draws the rest like the last one.`);
       const list = sheets.slice(0, MAX_SHEETS);
       list.forEach((s, i) => {
         front.set(hexToLinear(s.front), i * 3); back.set(hexToLinear(s.back), i * 3);
@@ -230,6 +272,7 @@ export function createWebGLRenderer(canvas, opts = {}) {
           gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
           gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
           info[L.sheet * 4 + 3] = (info[L.sheet * 4 + 3] | L.bit);
+          invalidate();
         } catch (e) {
           if (!uploadWarned) warn(`Printed content upload failed: ${e instanceof Error ? e.message : e}`);
           uploadWarned = true;
@@ -257,49 +300,65 @@ export function createWebGLRenderer(canvas, opts = {}) {
     refreshTheme() { theme = readTheme(canvas); },
 
     resize() {
-      const dpr = Math.min(globalThis.devicePixelRatio || 1, 2);
-      // Capped: a runaway layout must never allocate a giant backing buffer.
-      const w = Math.min(4096, Math.max(1, Math.round(canvas.clientWidth * dpr))), h = Math.min(4096, Math.max(1, Math.round(canvas.clientHeight * dpr)));
+      // Pixel ratio capped (1.5 on touch devices) and a pixel budget: see frame-loop.js.
+      const [w, h] = backingSize(canvas.clientWidth, canvas.clientHeight, globalThis.devicePixelRatio || 1, coarse);
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     },
 
+    stats,
+
     /**
      * @param {{positions: ArrayLike<number>, normals?: ArrayLike<number>, uvs: ArrayLike<number>, sheetIds: ArrayLike<number>, indices: ArrayLike<number>}} r
-     * @param {{positions: Float32Array, colors: Float32Array} | null} overlay
+     * @param {{positions: Float32Array, colors: Float32Array, faint?: boolean} | null} overlay
+     * @param {boolean} [meshChanged] false when the pose is the one drawn last time (only the
+     *   view changed): the mesh, the bounds and the shadow map are re-used
      */
-    draw(r, overlay) {
+    draw(r, overlay, meshChanged = true) {
       if (destroyed) return;
       renderer.resize();
-      uploadMesh(r);
-      const bounds = computeBounds(r.positions);
+      const fresh = meshChanged || !bounds || r.indices !== lastIndices || r.indices.length !== indexCount;
+      if (fresh) {
+        uploadMesh(r);
+        bounds = computeBounds(r.positions);
+        lightViewProj(bounds, lightMat);
+        groundR = setGround(bounds);
+        shadowDirty = true;
+      }
       camera.update(canvas.width / canvas.height);
-      lightViewProj(bounds, lightMat);
-      const groundR = setGround(bounds);
+      stats.frames++;
 
-      // 1. shadow pass
-      gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFbo);
-      gl.viewport(0, 0, SHADOW, SHADOW);
-      gl.clear(gl.DEPTH_BUFFER_BIT);
-      gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
-      gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1.5, 3);
-      gl.useProgram(depth.p);
-      gl.uniformMatrix4fv(depth.u.uLightViewProj, false, lightMat);
-      gl.bindVertexArray(vao);
-      gl.drawElements(gl.TRIANGLES, indexCount, indexType, 0);
-      gl.disable(gl.POLYGON_OFFSET_FILL);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      // 1. shadow pass (only when the paper moved: the light is fixed in the world)
+      if (shadowDirty) {
+        stats.shadowPasses++;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFbo);
+        gl.viewport(0, 0, SHADOW, SHADOW);
+        gl.clear(gl.DEPTH_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+        gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1.5, 3);
+        gl.useProgram(depth.p);
+        gl.uniformMatrix4fv(depth.u.uLightViewProj, false, lightMat);
+        gl.bindVertexArray(vao);
+        gl.drawElements(gl.TRIANGLES, indexCount, indexType, 0);
+        gl.disable(gl.POLYGON_OFFSET_FILL);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        shadowDirty = false;
+      }
 
       // 2. main pass
       gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.enable(gl.DEPTH_TEST);
       gl.clearColor(...theme.clear.map((c) => c ** (1 / 2.2)), 1);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, shadowTex);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D_ARRAY, artTex);
+      gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, shadowTex); gl.bindSampler(2, depthSampler);
+      const extent = lightExtent(bounds);
 
       gl.useProgram(ground.p);
       gl.uniformMatrix4fv(ground.u.uViewProj, false, camera.viewProj);
       gl.uniformMatrix4fv(ground.u.uLightViewProj, false, lightMat);
-      gl.uniform1i(ground.u.uShadow, 0); gl.uniform1f(ground.u.uShadowTexel, 1.5 / SHADOW);
+      gl.uniform1i(ground.u.uShadow, 0); gl.uniform1i(ground.u.uShadowDepth, 2); gl.uniform1f(ground.u.uShadowTexel, 1 / SHADOW);
+      gl.uniform1f(ground.u.uDepthMm, 5 * extent); gl.uniform1f(ground.u.uTexelMm, (2 * extent) / SHADOW);
       gl.uniform3fv(ground.u.uTable, theme.table); gl.uniform3fv(ground.u.uClear, theme.clear);
       gl.uniform3fv(ground.u.uCenter, bounds.center); gl.uniform1f(ground.u.uRadius, groundR);
       gl.bindVertexArray(groundVao);
@@ -315,13 +374,26 @@ export function createWebGLRenderer(canvas, opts = {}) {
       gl.bindVertexArray(vao);
       gl.drawElements(gl.TRIANGLES, indexCount, indexType, 0);
 
+      // 3. lines: paper edges and pressed creases darken the paper under them (multiplicative
+      // blending, so any paper colour works); the crease overlay draws in its own colours.
+      gl.useProgram(line.p);
+      gl.uniformMatrix4fv(line.u.uViewProj, false, camera.viewProj);
+      gl.depthMask(false);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.DST_COLOR, gl.ZERO);
+      if (edgeCount) {
+        gl.uniform1f(line.u.uShade, EDGE_SHADE);
+        gl.bindVertexArray(edgeVao);
+        gl.drawElements(gl.LINES, edgeCount, gl.UNSIGNED_INT, 0);
+      }
       if (overlay && overlay.positions.length) {
-        uploadOverlay(overlay);
-        gl.useProgram(line.p);
-        gl.uniformMatrix4fv(line.u.uViewProj, false, camera.viewProj);
+        if (fresh || linesUploaded !== overlay.positions || lineCount !== overlay.positions.length) uploadOverlay(overlay);
+        if (!overlay.faint) gl.disable(gl.BLEND);
+        gl.uniform1f(line.u.uShade, overlay.faint ? CREASE_SHADE : -1);
         gl.bindVertexArray(lineVao);
         gl.drawArrays(gl.LINES, 0, overlay.positions.length / 3);
       }
+      gl.disable(gl.BLEND);
+      gl.depthMask(true);
       gl.bindVertexArray(null);
       return bounds;
     },
@@ -329,8 +401,9 @@ export function createWebGLRenderer(canvas, opts = {}) {
     destroy() {
       destroyed = true;
       for (const b of Object.values(bufs)) gl.deleteBuffer(b);
-      [groundBuf, linePos, lineCol].forEach((b) => gl.deleteBuffer(b));
-      [vao, groundVao, lineVao].forEach((v) => gl.deleteVertexArray(v));
+      [groundBuf, linePos, lineCol, edgeIdx].forEach((b) => gl.deleteBuffer(b));
+      [vao, groundVao, lineVao, edgeVao].forEach((v) => gl.deleteVertexArray(v));
+      gl.deleteSampler(depthSampler);
       [paper, ground, depth, line].forEach((pr) => gl.deleteProgram(pr.p));
       gl.deleteTexture(shadowTex); gl.deleteTexture(artTex); gl.deleteFramebuffer(shadowFbo);
     },

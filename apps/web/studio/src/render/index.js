@@ -1,7 +1,8 @@
 // @ts-check
 // Renderer factory: WebGL2 by default, Canvas2D 3-D fallback when WebGL2 is unavailable (or when
 // `?renderer=canvas2d` forces it for testing), and `null` when even Canvas2D fails — the studio then
-// shows the SVG crease-pattern diagram with a message.
+// shows the SVG crease-pattern diagram with a message. The Canvas 2D fallback is simpler on purpose:
+// flat paper colours, a hard planar shadow, no printed art, no darkened edges or pressed creases.
 
 import { createWebGLRenderer, hasWebGL2 } from './webgl.js';
 import { createCanvas2DRenderer } from './canvas2d.js';
@@ -14,7 +15,8 @@ import { createCanvas2DRenderer } from './canvas2d.js';
  * @property {(sheets: any[], baseUrl?: string) => void} setSheets
  * @property {() => void} refreshTheme
  * @property {() => void} resize
- * @property {(r: any, overlay: {positions: Float32Array, colors: Float32Array} | null) => any} draw
+ * @property {(r: any, overlay: {positions: Float32Array, colors: Float32Array, faint?: boolean} | null, meshChanged?: boolean) => any} draw
+ * @property {{frames: number, meshUploads: number, shadowPasses: number}} [stats]
  * @property {() => void} destroy
  */
 
@@ -25,14 +27,14 @@ export function rendererOverride(v) {
 
 /**
  * @param {HTMLCanvasElement} canvas
- * @param {{prefer?: 'webgl2'|'canvas2d'|null, onWarn?: (msg: string) => void}} [opts]
+ * @param {{prefer?: 'webgl2'|'canvas2d'|null, onWarn?: (msg: string) => void, onInvalidate?: () => void}} [opts]
  * @returns {Renderer | null}
  */
 export function createRenderer(canvas, opts = {}) {
   const warn = opts.onWarn || (() => {});
   if (opts.prefer !== 'canvas2d' && hasWebGL2(canvas)) {
     try {
-      return createWebGLRenderer(canvas, { onWarn: warn });
+      return createWebGLRenderer(canvas, { onWarn: warn, onInvalidate: opts.onInvalidate });
     } catch (e) {
       warn(`WebGL2 renderer failed: ${e instanceof Error ? e.message : e}`);
     }

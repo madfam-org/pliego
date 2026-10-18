@@ -22,6 +22,7 @@ export function parseShare(search, hash) {
     view: h.get('_view') === '2d' ? '2d' : '3d',
     renderer: q.get('renderer'),
     engine: q.get('engine'),
+    worker: q.get('worker'),
   };
 }
 
@@ -34,7 +35,7 @@ export function buildShare(base, { slug, mode = null, params = {}, view = '3d', 
   const q = new URLSearchParams();
   q.set('slug', slug);
   if (mode) q.set('mode', mode);
-  if (keep) for (const k of ['renderer', 'engine', 'lang']) { const v = keep.get(k); if (v) q.set(k, v); }
+  if (keep) for (const k of ['renderer', 'engine', 'worker', 'lang']) { const v = keep.get(k); if (v) q.set(k, v); }
   u.search = q.toString();
   const h = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null) h.set(k, String(v));

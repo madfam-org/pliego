@@ -239,11 +239,19 @@ exact (∇E = f_ext) whatever the age of the factorisation, and test `E12-subste
   within two mesh rings of a weld, and `side` is a rendering hint. A glue zone narrower than the
   mesh holds fewer than three mesh vertices, often none (35 of the 50 glued documents in the
   2026-10-18 sim subset had such a zone at the studio's mesh size): `world.warnings` now says so.
-  `World({glueSamples: true})` welds sample points of such a zone instead (the centroid and points
-  along the zone's inset outline, each a barycentric point of a triangle). It is off by default:
-  closed models that then really close (platonic solids, paper houses, low-poly masks) stretch more
-  under their fold programs (for example 11 → 27 % on the glued dodecahedron), so it waits for drive
-  compliance on closing models.
+  Such a zone welds sample points instead (the centroid and points along the zone's inset outline,
+  each a barycentric point of a triangle), **on by default since lane E3 (2026-10-18)**;
+  `World({glueSamples: false})` keeps the old behaviour and its warning. Lane E2 had left it off
+  because three closed models stretched more with it (glued dodecahedron 11 → 29 %). Over the 59
+  glued documents of the A3 subset it is a net gain: 4 documents become stable (V-fold pop-up
+  6.3 → 0.66 %, parallel-fold cube, tunnel-book forest, glued barn) and 1 stops being stable
+  (honeycomb panel thick-core 0.26 → 10.8 %); glued townhouse and kusudama ball explode (they were
+  stretched 63 % and 11 %), and the kusudama ball's 120 sampled zones make it about 10× slower per
+  step. The dodecahedron's extra stretch is not the glue: its program only lets go, and with its
+  tabs welded it falls freely at 0.5 % peak stretch; on the table it stretches because position-level
+  ground friction drags back the stretch guard's corrections every substep (contact.js; lane E3
+  found that holding resting vertices in the guard fixes the dodecahedron, 0.8 %, but makes the
+  tab-and-slot cross topple, so it is not in this change). Test `glue-samples`.
 
 ## Determinism contract
 

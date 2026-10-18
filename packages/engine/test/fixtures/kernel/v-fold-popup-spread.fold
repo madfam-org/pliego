@@ -1,0 +1,746 @@
+{
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "V",
+  "B",
+  "B",
+  "M",
+  "B",
+  "V",
+  "B",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  105.092561,
+  0,
+  0,
+  -90,
+  0,
+  105.092561,
+  0,
+  0,
+  0
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   0,
+   2
+  ],
+  [
+   1,
+   3
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   4,
+   6
+  ],
+  [
+   5,
+   7
+  ],
+  [
+   6,
+   7
+  ],
+  [
+   8,
+   9
+  ],
+  [
+   8,
+   10
+  ],
+  [
+   9,
+   11
+  ],
+  [
+   9,
+   12
+  ],
+  [
+   10,
+   11
+  ],
+  [
+   11,
+   12
+  ],
+  [
+   11,
+   13
+  ],
+  [
+   11,
+   14
+  ],
+  [
+   12,
+   14
+  ],
+  [
+   13,
+   15
+  ],
+  [
+   14,
+   15
+  ]
+ ],
+ "faces_vertices": [
+  [
+   0,
+   2,
+   3,
+   1
+  ],
+  [
+   4,
+   6,
+   7,
+   5
+  ],
+  [
+   8,
+   10,
+   11,
+   9
+  ],
+  [
+   9,
+   11,
+   12
+  ],
+  [
+   11,
+   13,
+   15,
+   14
+  ],
+  [
+   11,
+   14,
+   12
+  ]
+ ],
+ "file_classes": [
+  "multiModel"
+ ],
+ "file_creator": "pliego-kernel 0.3.0",
+ "file_frames": [
+  {
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_inherit": true,
+   "frame_parent": 0,
+   "frame_title": "initial",
+   "vertices_coords": [
+    [
+     -150,
+     0,
+     0
+    ],
+    [
+     -150,
+     0,
+     -200
+    ],
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     -200
+    ],
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     -200
+    ],
+    [
+     0,
+     150,
+     0
+    ],
+    [
+     0,
+     150,
+     -200
+    ],
+    [
+     -39.799824,
+     0,
+     -71.874346
+    ],
+    [
+     -32.13938,
+     0,
+     -78.302222
+    ],
+    [
+     -7.660444,
+     0,
+     -33.572124
+    ],
+    [
+     0,
+     0,
+     -40
+    ],
+    [
+     -49.649247,
+     49.649246,
+     -78.339336
+    ],
+    [
+     0,
+     7.660445,
+     -33.572124
+    ],
+    [
+     0,
+     32.139381,
+     -78.302222
+    ],
+    [
+     0,
+     39.799825,
+     -71.874346
+    ]
+   ]
+  }
+ ],
+ "file_spec": 1.2,
+ "file_title": "V-fold",
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "joins"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_unit": "mm",
+ "pliego:controls": [
+  {
+   "default": 90,
+   "id": "open",
+   "kind": "angle",
+   "label": {
+    "en": "Open",
+    "es": "Abrir",
+    "fr": "Ouvrir",
+    "pt": "Abrir"
+   },
+   "max": 180,
+   "min": 0,
+   "unit": "deg"
+  }
+ ],
+ "pliego:edges_restAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  105.092561,
+  0,
+  0,
+  -89.999999,
+  0,
+  105.092559,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "score",
+  "none",
+  "none",
+  "score",
+  "none",
+  "score",
+  "none",
+  "none",
+  "none"
+ ],
+ "pliego:faces_sheet": [
+  0,
+  1,
+  2,
+  2,
+  2,
+  2
+ ],
+ "pliego:joins": [
+  {
+   "a": {
+    "region": [
+     [
+      34.897777,
+      6.042584
+     ],
+     [
+      4.043972,
+      42.812718
+     ],
+     [
+      10.938372,
+      48.597806
+     ],
+     [
+      41.792177,
+      11.827673
+     ]
+    ],
+    "sheet": "v-fold"
+   },
+   "b": {
+    "sheet": "page-left"
+   },
+   "id": "v-fold-left",
+   "map": [
+    1,
+    0,
+    0,
+    1,
+    106.86062,
+    29
+   ],
+   "side": "front",
+   "type": "glue"
+  },
+  {
+   "a": {
+    "region": [
+     [
+      44.486584,
+      11.827673
+     ],
+     [
+      75.340389,
+      48.597806
+     ],
+     [
+      82.234789,
+      42.812718
+     ],
+     [
+      51.380984,
+      6.042584
+     ]
+    ],
+    "sheet": "v-fold"
+   },
+   "b": {
+    "sheet": "page-right"
+   },
+   "id": "v-fold-right",
+   "map": [
+    1,
+    0,
+    0,
+    1,
+    -43.13938,
+    29
+   ],
+   "side": "front",
+   "type": "glue"
+  }
+ ],
+ "pliego:mechanisms": [
+  {
+   "angle_control": "open",
+   "axis": {
+    "direction": [
+     0,
+     0,
+     -1
+    ],
+    "origin": [
+     0,
+     0,
+     0
+    ]
+   },
+   "id": "spread",
+   "rest": 180,
+   "sheets_moving": [
+    "page-right"
+   ],
+   "type": "hinge"
+  }
+ ],
+ "pliego:meta": {
+  "cartridge": "v-fold-popup",
+  "digest": "sha256:dde1900e53c6468693f26f06cc1343c258886f354b8918613a21c34f00b92a60",
+  "kernel": "pliego-kernel 0.3.0",
+  "mode": "spread",
+  "params": {
+   "glue_angle": 40,
+   "glue_length": 50,
+   "opening": 90,
+   "page_height": 200,
+   "page_width": 150,
+   "piece_height": 80,
+   "piece_offset": 40,
+   "tab_width": 10
+  }
+ },
+ "pliego:sheets": [
+  {
+   "back": {
+    "art": null,
+    "color": "#f2ede3"
+   },
+   "front": {
+    "art": null,
+    "color": "#f2ede3"
+   },
+   "grain_deg": 90,
+   "id": "page-left",
+   "kinematic": {
+    "mechanism": "spread"
+   },
+   "label": {
+    "en": "Left page",
+    "es": "Página izquierda",
+    "fr": "Page de gauche",
+    "pt": "Página esquerda"
+   },
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     -150,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "stock": "cardstock-300"
+  },
+  {
+   "back": {
+    "art": null,
+    "color": "#f2ede3"
+   },
+   "front": {
+    "art": null,
+    "color": "#f2ede3"
+   },
+   "grain_deg": 90,
+   "id": "page-right",
+   "kinematic": {
+    "mechanism": "spread"
+   },
+   "label": {
+    "en": "Right page",
+    "es": "Página derecha",
+    "fr": "Page de droite",
+    "pt": "Página direita"
+   },
+   "offset": [
+    160,
+    0
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "stock": "cardstock-300"
+  },
+  {
+   "back": {
+    "art": null,
+    "color": "#f4efe6"
+   },
+   "front": {
+    "art": null,
+    "color": "#f4efe6"
+   },
+   "grain_deg": 90,
+   "id": "v-fold",
+   "kinematic": null,
+   "label": {
+    "en": "V-fold piece",
+    "es": "Pieza en V",
+    "fr": "Pièce en V",
+    "pt": "Peça em V"
+   },
+   "offset": [
+    316.660444,
+    -4.572124
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "stock": "cardstock-250"
+  }
+ ],
+ "pliego:stocks": {
+  "cardstock-250": {
+   "appearance": {
+    "back": "#f4efe6",
+    "front": "#f4efe6"
+   },
+   "caliper_mm": 0.3,
+   "derived": {
+    "D_cd": 4922600,
+    "D_md": 11075900,
+    "E_cd": 2000000000,
+    "E_md": 4500000000,
+    "G12": 1161000000,
+    "areal_density": 0.00025,
+    "collision_thickness": 0.3,
+    "crease_k": 123065,
+    "crease_set_rate": 0.5,
+    "crease_yield_deg": 35,
+    "friction": 0.4,
+    "nu": 0.293,
+    "perf_bridge_mm": 1,
+    "perf_cut_mm": 3,
+    "perf_factor": 0.25,
+    "score_factor": 0.35,
+    "score_yield_deg": 12.25,
+    "tear_strain": 0.015,
+    "thickness": 0.3
+   },
+   "derived_basis": "pliego.stock.derive v1",
+   "gsm": 250,
+   "name": {
+    "en": "Cardstock 250 g/m²",
+    "es": "Cartulina 250 g/m²",
+    "fr": "Bristol 250 g/m²",
+    "pt": "Cartolina 250 g/m²"
+   }
+  },
+  "cardstock-300": {
+   "appearance": {
+    "back": "#f2ede3",
+    "front": "#f2ede3"
+   },
+   "caliper_mm": 0.36,
+   "derived": {
+    "D_cd": 8506250,
+    "D_md": 19139100,
+    "E_cd": 2000000000,
+    "E_md": 4500000000,
+    "G12": 1161000000,
+    "areal_density": 0.0003,
+    "collision_thickness": 0.36,
+    "crease_k": 177214,
+    "crease_set_rate": 0.5,
+    "crease_yield_deg": 35,
+    "friction": 0.4,
+    "nu": 0.293,
+    "perf_bridge_mm": 1,
+    "perf_cut_mm": 3,
+    "perf_factor": 0.25,
+    "score_factor": 0.35,
+    "score_yield_deg": 12.25,
+    "tear_strain": 0.015,
+    "thickness": 0.36
+   },
+   "derived_basis": "pliego.stock.derive v1",
+   "gsm": 300,
+   "name": {
+    "en": "Cardstock 300 g/m²",
+    "es": "Cartulina 300 g/m²",
+    "fr": "Bristol 300 g/m²",
+    "pt": "Cartolina 300 g/m²"
+   }
+  }
+ },
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   200
+  ],
+  [
+   150,
+   0
+  ],
+  [
+   150,
+   200
+  ],
+  [
+   160,
+   0
+  ],
+  [
+   160,
+   200
+  ],
+  [
+   310,
+   0
+  ],
+  [
+   310,
+   200
+  ],
+  [
+   320,
+   38.302222
+  ],
+  [
+   327.660444,
+   44.730098
+  ],
+  [
+   352.13938,
+   0
+  ],
+  [
+   359.799824,
+   6.427876
+  ],
+  [
+   359.799824,
+   86.427876
+  ],
+  [
+   367.460269,
+   0
+  ],
+  [
+   391.939205,
+   44.730098
+  ],
+  [
+   399.599649,
+   38.302222
+  ]
+ ]
+}

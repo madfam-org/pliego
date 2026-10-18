@@ -115,7 +115,7 @@ and not accuracy.
 | **Crease** | `θ − θ_rest` (or `θ − θ_target` while driven) | `k_c = (D(φ)/L*)·|e|`, `L* = √(D11·D22) / crease_k` from the stock (`crease_k` is per mm) ⇒ `k_c = crease_k · |e| · D(φ)/√(D11·D22)`: along the grain softer than across it by D_md/D_cd (as built since lane E3, 2026-10-18; v0.1 used the mean `crease_k · |e|`, test `crease-grain`) | Lechenault et al. 2014 |
 | Score / perforation hinge | as crease | `k_c × score_factor` / `× perf_factor` | stock |
 | **Fold limit** | `|θ| ≤ π − θ_t` (unilateral) | hard | rsE §a3.5 |
-| **Glue weld** | `x_a − Σ β_k x_bk = 0` (vector; point on triangle of sheet b, barycentric β), made at **zero offset**: the join's `side` is a rendering hint, because a thickness offset along a board's normal broke the V-fold linkage (8 % strain) | hard (α = 0) | doc §5.3 |
+| **Glue weld** | `x_a − Σ β_k x_bk = 0` (vector; point on triangle of sheet b, barycentric β), made at **zero offset**: the join's `side` is a rendering hint, because a thickness offset along a board's normal broke the V-fold linkage (8 % strain). A zone narrower than the mesh welds sample points of the zone instead (barycentric on sheet a), on by default since lane E3 (2026-10-18); `World({glueSamples: false})` turns it off | hard (α = 0) | doc §5.3 |
 | Pivot | `x_a(β) − x_b(β′) = 0` | hard | doc §5.3 |
 | String | `|x_a − x_b| − L ≤ 0` (unilateral) | hard | doc §5.3 |
 | Pin | vertex `w = 0`, position follows the pin | — | doc §5.3 |

@@ -89,7 +89,9 @@ Each fixed substep, of length Δt = 1/(60·S), runs these stages in order:
    page turns keep converging. The engine refactorises when PCG stalls, when the stiffness set
    changes (drives, grabs, strings, torn perforations) or past a 0.3 rad rotation safety cap.
 4. **Gauss–Seidel projections.** Fold limits, layer contact and the ground (3 passes, Coulomb
-   friction, remembered sidedness), then the 0.5 % stretch limiter last.
+   friction, remembered sidedness; edge–face contact for `interlock` slits when the document opts
+   in), then the 0.5 % stretch limiter last: 4 passes, continued up to 16 only while a pass still
+   moves an edge (a guard that settles in 4 passes gives the same positions as before).
 5. **Bookkeeping.** `v = (x − x_start)/Δt`, unwrapped hinge angles, and rate-independent crease
    plasticity (Narain et al. 2013): `θ_rest ← θ − sign·θ_y`.
 
@@ -119,10 +121,34 @@ paper around them: `pull-tab-slider` `straight` stretched 8–16 % and `dissolve
 0.3 mm above the backing where 0.33 mm is the contact distance, so the sliding strip drags the
 free backing by friction). Test `start-pose`.
 
+**Edge–face contact for interlocking slits** (`src/xpbd/edgecontact.js`, opt-in by document). The
+lips of a slit (the boundary edges of a document edge whose `pliego:edges_name` starts with
+`interlock`) are held against every other sheet's faces over their whole length: the lip is clipped
+to the face's prism, the deepest end of the clip is pushed out along the face normal (frictionless,
+position level), and each (lip, face) pair remembers its side. A lip that starts in the face's plane
+takes the side its own paper lies on, so the two lips of a slit hold the other card between them.
+Vertex–triangle contact between lip vertices and other sheets is left to this narrow phase. Bounded:
+lips × other-sheet triangles above 250,000 turns it off with a `world.warnings` line;
+`World({edgeContact: false})` turns it off. A document without such names builds none, so its
+simulation is unchanged. On `tab-and-slot` (cards named `interlock-slot`) a 1.5 mN push at the top of
+one card for 1 s leaves it 1.1 mm out of plumb with a 3.9 % peak stretch, against 6.6 mm and 8.5 %
+without (test `edge-contact`). In the simulation matrix the three `tab-and-slot` documents still
+count as stretched (5.5 / 1.4 / 7.0 % peak, against 8.9 / 1.6 / 6.9 % without) and the narrow phase
+doubles their step time (all lips against all faces, every pass).
+
+**A hand that gives way** (`World._easeHand`). When the stretch guard cannot settle while a hand
+drives creases, the drives are asking for a motion the sheet cannot make without stretching (a twist
+fold or a Kresling collapse driven all at once). The hand then eases to half its stiffness, down to
+1/16 of `HAND_FACTOR`, and doubles back after 30 settled substeps. A world whose guard always settles
+never eases. Triangle twist (steep): 26 % peak stretch with a fixed hand, 2.8 % with the easing hand
+(test `hand-ease`).
+
 **Next engine milestones** (measured, not implemented): `rotating-squares` needs in-plane
-plasticity of its kirigami ligaments (46–218 % stretch today), and `tab-and-slot` needs
-edge–edge contact (10–13 % stretch, 1.5 % in `low-cross`), because vertex–triangle contact lets a
-tab's edge pass a slot's edge.
+plasticity of its kirigami ligaments (46–218 % stretch today); contact-induced stretch (a final
+contact pass after the guard re-stretches light paper under heavy or stacked layers: `paper-spring`,
+`accordion-fan`, `paper-bridge-load`) needs contact in the implicit solve rather than a position
+projection; sliver triangles from close document vertices (`jianzhi-window-flower`,
+`lattice-kirigami`) need the mesher to merge them or the kernel warning for edges under 0.5 mm.
 
 **Digest** (spec §5.7 and rule 10, canonical serialisation per lane H's §5.15, `src/digest.js`).
 When `pliego:meta.digest` is present, `loadDocument` recomputes "sha256:" + SHA-256 of the RFC 8785
@@ -183,7 +209,14 @@ exact (∇E = f_ext) whatever the age of the factorisation, and test `E12-subste
 - **Clamp lines.** A hinge whose edge and one wing are fixed has its stiffness doubled, because
   only half of its lever region bends.
 - **Glue welds.** A welded vertex sits exactly on its zone, with zero offset. Contact is skipped
-  within two mesh rings of a weld, and `side` is a rendering hint.
+  within two mesh rings of a weld, and `side` is a rendering hint. A glue zone narrower than the
+  mesh holds fewer than three mesh vertices, often none (35 of the 50 glued documents in the
+  2026-10-18 sim subset had such a zone at the studio's mesh size): `world.warnings` now says so.
+  `World({glueSamples: true})` welds sample points of such a zone instead (the centroid and points
+  along the zone's inset outline, each a barycentric point of a triangle). It is off by default:
+  closed models that then really close (platonic solids, paper houses, low-poly masks) stretch more
+  under their fold programs (for example 11 → 27 % on the glued dodecahedron), so it waits for drive
+  compliance on closing models.
 
 ## Determinism contract
 
@@ -208,6 +241,8 @@ Tests: `determinism-replay` and `determinism-snapshot`.
 | `HAND_FACTOR` | 50 | `crease-drive` |
 | `PANEL_YIELD_DEG` | 60 | `crease-unfold` (panels stay elastic) |
 | `STRAIN_LIMIT` / `STRAIN_PASSES` | 0.45 % guard target (keeps measured stretch below 0.5 %) / 4 | `inextensible`, `mesh-sweep` |
+| `STRAIN_PASSES_MAX` / `SETTLE_STRAIN` | 16 passes at most, continued while a pass moves an edge by more than 1e-6 of its length | `strain-guard` |
+| `HAND_EASE_MIN` / `HAND_CALM_SUBSTEPS` | 1/16 of `HAND_FACTOR` / 30 substeps before the hand firms up again | `hand-ease` |
 | `MEMBRANE_CAP_LENGTH` | 1e7 mm | `inextensible`, E1 (stability of the Newton step) |
 | `MEMBRANE_COMPRESSION` | 0.05 | `E1-peirce` (membrane locking) |
 | `CONTACT_PASSES` | 3 | `contact-stack` |

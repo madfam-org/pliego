@@ -28,8 +28,8 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 | `render_limits.py` | one render per worker (503 + `Retry-After: 1`) |
 | `hosts.py` | landing / app / api / other host classification |
 | `static_routes.py` | traversal-safe static serving, `?v=` cache-busting stamps, robots, sitemap, llms |
-| `catalog.py`, `manifest.py` | stat-signature-memoized catalog and stock cards; fail-closed manifest checks; strict params |
-| `render.py` | the sandbox runner as a killable subprocess (minimal env, own session, 30 s) |
+| `catalog.py`, `manifest.py` | stat-signature-memoized catalog and stock cards (one stat walk per request); fail-closed manifest checks; strict params |
+| `render.py` | the sandbox runner as a killable subprocess (minimal env, own session, 30 s); render errors carry a stable `code` and a `request_id`, and the runner's stderr is logged server-side under that id, never returned |
 | `generator.py`, `services/engine/generator_output.py` | GOC-1 (hyperobjects-spec generator output): `X-Generator-*` headers on every render, `variables.json`, and the deterministic, digest-stamped `format: "bundle"` zip (document + cut files + `variables.json`); the algorithms pin the keystone's golden vectors |
 | `render_cache.py` | exact render cache: key = slug, mode, effective params, formats, cartridge source digest, commons pin, kernel identity; per-worker memory LRU + shared `/tmp` disk tier, both bounded by bytes; a hit skips the render slot (`X-Pliego-Cache`); checked first, the read-only prerendered tier |
 | `prerender.py`, `prerender_store.py` | the warm tier: every cartridge, mode and applicable preset rendered at image build time (document, svg, dxf, hpgl) under the runtime cache key, content-addressed blobs, verified on read (`hit-prerendered`; a corrupt entry falls through); the same pass draws the thumbnails |

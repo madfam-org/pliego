@@ -165,7 +165,7 @@ def build(settings: Settings, out_dir: Path, *, only: set[str] | None = None, jo
         try:
             return slug, render_svg(renderer, carts[slug]), ""
         except RenderError as exc:
-            return slug, None, f"render failed ({exc.status}): {exc}"
+            return slug, None, f"render failed ({exc.status}): {exc.server_detail()}"
         except Exception as exc:  # noqa: BLE001 — every failure is reported, none stops the build
             return slug, None, f"{type(exc).__name__}: {exc}"
 

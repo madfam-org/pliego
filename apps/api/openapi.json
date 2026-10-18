@@ -502,6 +502,20 @@
           "retry_after": {
             "type": "integer"
           },
+          "code": {
+            "type": "string",
+            "enum": [
+              "render_timeout",
+              "render_invalid",
+              "render_failed"
+            ],
+            "description": "Render errors only: render_timeout (504, the runner was killed at the timeout), render_invalid (422, the document failed; `issues` say why), render_failed (422, the runner failed without issues; its stderr is logged server-side, never returned)."
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Render errors only: the id the server logged this failure under (quote it when reporting a failure)."
+          },
           "verify": {
             "type": "string"
           },
@@ -877,7 +891,7 @@
         }
       },
       "RenderFailed": {
-        "description": "The cartridge failed (exception, sandbox policy, verify errors, zero sheets); carries the verify line and issues.",
+        "description": "The cartridge failed (exception, sandbox policy, verify errors, zero sheets); carries the verify line, the issues, a stable `code` and a `request_id`. The runner's stderr is never returned.",
         "content": {
           "application/json": {
             "schema": {

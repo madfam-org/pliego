@@ -221,7 +221,7 @@ def test_runner_crash_never_sends_stderr_to_the_client(make_app, tree, monkeypat
                                                        path, extra):
     """A runner that fails without issues (crash, limits, policy) answers a stable code and a
     request id; its stderr (paths, tracebacks) is logged server-side under that id only."""
-    import apps.api.render as render
+    from apps.api import render
 
     crash = tree / "crashing_runner.py"
     crash.write_text(CRASHING_RUNNER, encoding="utf-8")

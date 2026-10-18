@@ -123,6 +123,22 @@ def test_catalog_filters_and_search(client, tree):
     assert facets["class"] == {"base": 1}
 
 
+@pytest.mark.parametrize("query", ["", "q=crane", "class=base", "tag=bird&q=paper"])
+def test_catalog_walks_the_files_once_per_request(client, tree, monkeypatch, query):
+    """One state snapshot per request: before, matches() re-ran the stat walk for every record
+    (139 cartridges → 140 walks and 4.6 s per live request)."""
+    for slug in ("preliminary-base", "paper-crane", "water-bomb", "square-base"):
+        _add_cartridge(tree, slug, tags=("bird",) if slug == "paper-crane" else ("base",))
+    client.get("/api/v1/catalog", base_url=API)  # first parse
+    memo = client.application.extensions["pliego"]["catalog"]._memo
+    walks = []
+    original = memo._files
+    monkeypatch.setattr(memo, "_files", lambda: walks.append(1) or original())
+    resp = client.get(f"/api/v1/catalog?{query}", base_url=API)
+    assert resp.status_code == 200, resp.get_json()
+    assert len(walks) <= 1, f"{len(walks)} file walks for one catalog request"
+
+
 @pytest.mark.parametrize("query", ["limit=5", "sort=name", "q=a&evil=1"])
 def test_catalog_unknown_query_is_400(client, query):
     resp = client.get(f"/api/v1/catalog?{query}", base_url=API)

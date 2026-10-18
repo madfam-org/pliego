@@ -142,11 +142,14 @@ class Catalog:
         }
 
     def search(self, q: str = "", **filters: str) -> dict:
-        records = [self.record(c) for _, c in sorted(self.state()["cartridges"].items())]
+        # ONE snapshot per request: every state() call is a stat walk of every manifest and script
+        # (139 cartridges → 140 walks per request when matches() called it per record).
+        cartridges = self.state()["cartridges"]
+        records = [self.record(c) for _, c in sorted(cartridges.items())]
         needle = q.strip().lower()
 
         def matches(rec: dict) -> bool:
-            cart = self.state()["cartridges"][rec["slug"]]
+            cart = cartridges[rec["slug"]]
             if needle:
                 desc = cart.manifest["project"].get("description")
                 desc_text = [str(v) for v in desc.values()] if isinstance(desc, dict) else []

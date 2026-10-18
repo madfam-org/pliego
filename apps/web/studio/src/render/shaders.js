@@ -148,17 +148,20 @@ void main() {
   float sh = 1.0, occl = 0.0;
   if (p.x > 0.0 && p.x < 1.0 && p.y > 0.0 && p.y < 1.0 && p.z < 1.0) {
     float bias = 0.002;
+    // a per-pixel rotation of the disk (interleaved gradient noise) turns banding into fine grain
+    float a = 6.2831853 * fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+    mat2 rot = mat2(cos(a), sin(a), -sin(a), cos(a));
     float search = clamp(8.0 / uTexelMm, 2.0, 48.0) * uShadowTexel;   // look 8 mm around
     float zb = 0.0, nb = 0.0;
     for (int i = 0; i < 12; i++) {
-      float d = texture(uShadowDepth, p.xy + DISK[i] * search).r;
+      float d = texture(uShadowDepth, p.xy + rot * DISK[i] * search).r;
       if (d < p.z - bias) { zb += d; nb += 1.0; }
     }
     if (nb > 0.0) {
       float height = (p.z - zb / nb) * uDepthMm;                    // mm between paper and table
-      float pen = clamp(height * LIGHT_SLOPE / uTexelMm, 1.0, 48.0) * uShadowTexel;
+      float pen = clamp(height * LIGHT_SLOPE / uTexelMm, 1.0, 32.0) * uShadowTexel;
       float s = 0.0;
-      for (int i = 0; i < 12; i++) s += texture(uShadow, vec3(p.xy + DISK[i] * pen, p.z - bias));
+      for (int i = 0; i < 12; i++) s += texture(uShadow, vec3(p.xy + rot * DISK[i] * pen, p.z - bias));
       sh = s / 12.0;
       occl = (nb / 12.0) * exp(-height / 12.0);                      // paper lying close above
     }

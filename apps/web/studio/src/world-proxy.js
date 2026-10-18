@@ -6,6 +6,8 @@
 // render() returns the newest pose that has arrived. Pose buffers are transferred both ways, so a
 // running sheet allocates nothing per frame.
 
+import { planSteps } from './frame-loop.js';
+
 /** @typedef {{postMessage(msg: any, transfer?: Transferable[]): void, addEventListener(type: string, fn: (ev: any) => void): void, removeEventListener(type: string, fn: (ev: any) => void): void}} WorkerLike */
 
 let nextGen = 1;
@@ -113,6 +115,22 @@ export class WorkerWorld {
     this._wantStats = false;
     return 1;
   }
+
+  /**
+   * Step when no step is in flight and a step's worth of time has passed since the last request
+   * (called when a pose lands and on every frame): a slow engine keeps its Worker busy back to
+   * back, a fast one is paced at real time.
+   * @param {number} dt fixed step (s) @param {number} [now] ms
+   */
+  pump(dt, now = performance.now()) {
+    if (this.pending) return 0;
+    const plan = planSteps(this._acc || 0, this._last ? Math.min(0.25, (now - this._last) / 1000) : dt, dt, 1);
+    this._acc = plan.acc; this._last = now;
+    return plan.n ? this.step(dt) : 0;
+  }
+
+  /** Forget the pacing clock (the loop went idle): the next pump steps at once. */
+  resetPacing() { this._acc = 0; this._last = 0; }
 
   /** The newest pose: {positions, normals, uvs, sheetIds, indices} (indices, uvs and sheet ids never change). */
   render() { return this._r; }

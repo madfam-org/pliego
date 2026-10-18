@@ -1,8 +1,7 @@
 // @ts-check
 // Pliego Studio — wiring: catalog → document → engine World → renderer, panels, share URL, i18n.
-// The paper engine steps in a Worker when it can (world-proxy.js; `?worker=off` keeps it on the
-// main thread), and the frame loop draws only when the pose or the view changed and stops asking
-// for frames when nothing moves (frame-loop.js).
+// The paper engine steps in a Worker when it can (world-proxy.js; `?worker=off`: main thread); frames
+// are drawn only when the pose or the view changed, and the loop sleeps when nothing moves.
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
@@ -137,8 +136,7 @@ function syncSteps() {
   const id = state.controls.sequenceId;
   const v = id ? Number(state.controls.get(id)) : 0;
   state.updateSteps(v);
-  // The diagram walks every line to highlight a step: only when the step changes (playback calls
-  // this every frame).
+  // highlightStep walks every diagram line: only when the step changes (playback runs every frame)
   const k = id ? stepIndex(v, state.json['pliego:sequence'].steps.length) : -1;
   if (state.diagram && (state.diagram !== highlighted.svg || k !== highlighted.step)) {
     highlightStep(state.diagram, state.json, k);
@@ -321,7 +319,7 @@ async function useDocument(json, opts = {}) {
   let remote = null;
   if (real) {
     try {
-      remote = await startEngineWorker({ off: state.share.worker === 'off', json, opts: engineOptions(json), probe: !state.physicsForced, onFrame: kick, onStep: noteStep });
+      remote = await startEngineWorker({ off: state.share.worker === 'off', json, opts: engineOptions(json), probe: !state.physicsForced, onFrame: () => { pumpRemote(); kick(); }, onStep: noteStep });
     } catch (e) {
       if (state.share.worker !== 'off') { console.warn(`Paper engine on the main thread: ${e instanceof Error ? e.message : e}`); retireEngineWorker(); }
     }
@@ -444,9 +442,8 @@ function setupInput() {
   });
 }
 
-// The loop runs while something moves: playback, a grab, a pose that changed in the last frames,
-// a view that needs drawing, or a Worker step in flight. Otherwise it stops asking for frames, and
-// kick() (controls, input, a Worker pose, resize, theme, a visible tab) starts it again.
+// The loop runs while something moves (playback, a grab, a pose that changed lately) or the view
+// needs drawing; otherwise it sleeps until kick() (controls, input, a Worker pose, resize, theme).
 const tracker = createChangeTracker();
 const ovView = { positions: new Float32Array(0), colors: new Float32Array(0), faint: true };
 /** @type {{positions: Float32Array, colors: Float32Array} | null} */
@@ -464,7 +461,18 @@ function kick() {
 function invalidate() { redraw = true; kick(); }
 
 /** The world may move again (a control, a grab, playback, a new document): step it. */
-function wake() { quiet = 0; kick(); }
+function wake() { quiet = 0; pumpRemote(); kick(); }
+
+/** A settled world (the same pose for a while, nothing driving it) is not stepped until woken. */
+function settled() {
+  return quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing;
+}
+
+/** A Worker engine is stepped when its last pose lands (WorkerWorld.pump), not at the next frame. */
+function pumpRemote() {
+  const w = state.world;
+  if (w instanceof WorkerWorld && !state.failed && !settled()) try { w.pump(STEP); } catch (e) { fail('error.engine', e); }
+}
 
 function frame(now) {
   scheduled = false;
@@ -477,18 +485,18 @@ function frame(now) {
     if (state.playing) advancePlayback(dt);
     // The paper engine takes one fixed step per frame at most: its steps are the expensive part, and
     // catching up would only make a slow frame slower. The preview may catch up to four. A Worker
-    // engine takes the next step only when the last one has arrived.
-    // A settled world (the same pose for a while, nothing driving it) is not stepped until woken.
+    // engine is stepped by pumpRemote, one step in flight at most.
     const remote = world instanceof WorkerWorld;
-    const kind = state.engine ? state.engine.kind : 'stub';
-    const settled = quiet >= quietLimit(kind) && !state.playing && !state.grabbing;
-    const maxSteps = settled ? 0 : remote ? (world.pending ? 0 : 1) : kind === 'engine' ? 1 : 4;
-    const plan = planSteps(acc, dt, STEP, maxSteps);
-    acc = plan.acc;
-    for (let i = 0; i < plan.n; i++) {
-      const t0 = performance.now();
-      world.step(STEP);
-      if (!remote) noteStep(performance.now() - t0);
+    if (remote) pumpRemote();
+    else {
+      const maxSteps = settled() ? 0 : state.engine && state.engine.kind === 'engine' ? 1 : 4;
+      const plan = planSteps(acc, dt, STEP, maxSteps);
+      acc = plan.acc;
+      for (let i = 0; i < plan.n; i++) {
+        const t0 = performance.now();
+        world.step(STEP);
+        noteStep(performance.now() - t0);
+      }
     }
     const r = world.render();
     changed = tracker.changed(r);
@@ -522,7 +530,7 @@ function frame(now) {
     $('st-contacts').textContent = s ? i18n.t('status.contacts', { n: s.contacts || 0 }) : '';
   }
   if (running) kick();
-  else { last = 0; acc = 0; }
+  else { last = 0; acc = 0; if (world instanceof WorkerWorld) world.resetPacing(); }
 }
 
 function wireStatic() {

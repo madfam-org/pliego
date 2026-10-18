@@ -285,3 +285,20 @@ test('the crease overlay works with the paper engine (creaseLines), and picking 
   assert.ok(hit && hit.point[1] < 500);
   assert.equal(createEngineOverlay(new stub.World(stub.loadDocument(json), { seed: 1 })), null, 'the stub keeps its document overlay');
 });
+
+test('a Worker engine is paced at real time when fast and stepped back to back when slow', async () => {
+  const json = demo('pliego-half-fold.fold');
+  const w = await WorkerWorld.create(fakeWorker(), { engineUrl: '', json, opts: engineOptions(json), controls: [['fold', 1]], probe: false });
+  assert.equal(w.pump(1 / 60, 1000), 1, 'the first pump steps');
+  assert.equal(w.pump(1 / 60, 1001), 0, 'never two steps in flight');
+  await settle(w);
+  assert.equal(w.pump(1 / 60, 1005), 0, 'a fast step waits for the next 1/60 s');
+  assert.equal(w.pump(1 / 60, 1017), 1);
+  await settle(w);
+  assert.equal(w.pump(1 / 60, 1400), 1, 'a slow step is followed at once');
+  await settle(w);
+  w.resetPacing();
+  assert.equal(w.pump(1 / 60, 9000), 1, 'after an idle pause the clock restarts');
+  await settle(w);
+  w.dispose();
+});

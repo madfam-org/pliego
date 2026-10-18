@@ -136,13 +136,13 @@ def build(settings: Settings, out_dir: Path, thumbs_dir: Path | None, *, presets
             return v, renderer.run(v.cart, v.mode, v.params, formats), formats, ""
         except RenderError as exc:
             if not formats:
-                return v, None, (), f"render failed ({exc.status}): {exc}"
+                return v, None, (), f"render failed ({exc.status}): {exc.server_detail()}"
         except Exception as exc:  # noqa: BLE001 — every failure is reported, none stops the build
             return v, None, (), f"{type(exc).__name__}: {exc}"
         try:  # an export failed: keep at least the document
             return v, renderer.run(v.cart, v.mode, v.params, ()), (), ""
         except RenderError as exc:
-            return v, None, (), f"render failed ({exc.status}): {exc}"
+            return v, None, (), f"render failed ({exc.status}): {exc.server_detail()}"
 
     thumbs = thumbnails.BuildReport(cartridges=len(selected)) if thumbs_dir is not None else None
     if thumbs_dir is not None:

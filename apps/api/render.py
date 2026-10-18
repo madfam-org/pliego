@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -40,10 +41,27 @@ if _MISSING:  # fail at import, not on the first request
     raise RuntimeError(f"pliego_runner emits {_MISSING} but render.py has no media type for them")
 
 
+# Stable codes in every render error body (openapi.json, Error.code).
+CODE_TIMEOUT = "render_timeout"   # 504: the runner hit the timeout and was killed
+CODE_INVALID = "render_invalid"   # 422: the document failed verify; the issues say why
+CODE_FAILED = "render_failed"     # 422: the runner failed without issues (crash, policy, limits)
+
+
 class RenderError(Exception):
-    def __init__(self, message: str, status: int = 422, report: dict | None = None):
+    """A render that produced no document. ``str(exc)`` is what a client may read: never the
+    runner's stderr. ``diagnostic`` carries the stderr tail for server-side logs and build
+    reports only, under ``request_id`` (the id the client gets in the body)."""
+
+    def __init__(self, message: str, status: int = 422, report: dict | None = None, *,
+                 code: str = CODE_FAILED, diagnostic: str = ""):
         super().__init__(message)
         self.status, self.report = status, report or {}
+        self.code, self.diagnostic = code, diagnostic
+        self.request_id = uuid.uuid4().hex
+
+    def server_detail(self) -> str:
+        """The message plus the stderr tail, for logs and build reports (never a response)."""
+        return f"{self}; stderr: {self.diagnostic}" if self.diagnostic else str(self)
 
 
 @dataclass(frozen=True)
@@ -109,14 +127,18 @@ class Renderer:
             except subprocess.TimeoutExpired:
                 _kill_group(proc)
                 proc.communicate()
-                raise RenderError(f"render timed out after {timeout:g} s", status=504) from None
+                raise RenderError(f"render timed out after {timeout:g} s", status=504,
+                                  code=CODE_TIMEOUT) from None
             seconds = time.monotonic() - started
             report = _read_json(out / "report.json")
             verify = report.get("verify") or _verify_from(stdout)
             if proc.returncode != 0:
-                detail = _failure_detail(report, stderr)
-                raise RenderError(detail, status=422,
-                                  report={"verify": verify, "issues": report.get("issues", [])})
+                public = {"verify": verify, "issues": report.get("issues", [])}
+                detail = _issues_detail(report)
+                if detail:
+                    raise RenderError(detail, status=422, report=public, code=CODE_INVALID)
+                raise RenderError("render failed", status=422, report=public, code=CODE_FAILED,
+                                  diagnostic=_stderr_tail(stderr))
             document = (out / "document.fold").read_bytes()
             exports = {f: (out / f"export.{f}").read_bytes() for f in formats}
             return RenderResult(document, exports, verify, report, seconds)
@@ -144,9 +166,12 @@ def _verify_from(stdout: bytes) -> str:
     return ""
 
 
-def _failure_detail(report: dict, stderr: bytes) -> str:
+def _issues_detail(report: dict) -> str:
+    """The runner's error issues (kernel verify, cartridge, export): the contract's own reasons."""
     errors = [i for i in report.get("issues", []) if i.get("level") == "error"]
-    if errors:
-        return "; ".join(f"{i.get('kind')}: {i.get('detail')}" for i in errors[:4])
-    tail = stderr.decode("utf-8", "replace").strip().splitlines()[-3:]
-    return "; ".join(tail) or "render failed"
+    return "; ".join(f"{i.get('kind')}: {i.get('detail')}" for i in errors[:4])
+
+
+def _stderr_tail(stderr: bytes, lines: int = 20) -> str:
+    """The last lines of the runner's stderr, for the server log only (paths, tracebacks)."""
+    return "\n".join(stderr.decode("utf-8", "replace").strip().splitlines()[-lines:])

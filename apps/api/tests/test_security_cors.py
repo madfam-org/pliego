@@ -130,3 +130,20 @@ def test_settings_from_env_uses_the_scaffold_env_contract():
     assert Settings.from_env({"PLIEGO_METRICS_PORT": "9191"}).metrics_port == 9191
     with pytest.raises(RuntimeError):
         Settings.from_env({"PLIEGO_RATE_LIMIT": "lots"})
+
+
+def test_unhandled_error_log_line_cannot_be_forged(make_app, caplog):
+    """CR/LF in the (percent-decoded) path are escaped in the log line (CodeQL py/log-injection)."""
+    app = make_app()
+
+    def boom(rest):
+        raise RuntimeError("boom")
+
+    app.add_url_rule("/api/v1/boom/<rest>", "boom", boom)
+    with caplog.at_level("ERROR", logger="pliego.api"):
+        resp = app.test_client().get("/api/v1/boom/x%0D%0AFORGED%20entry", base_url=API)
+    assert resp.status_code == 500
+    assert resp.get_json()["error"] == "internal error"
+    lines = [r.getMessage() for r in caplog.records if "unhandled error" in r.getMessage()]
+    assert lines and "\n" not in lines[0] and "\r" not in lines[0]
+    assert "x\\r\\nFORGED entry" in lines[0]

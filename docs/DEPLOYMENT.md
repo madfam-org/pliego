@@ -16,8 +16,9 @@ the tunnel to Service `pliego` on port 80, i.e. container port 8000:
 | `pliego-app.madfam.io` | studio `/studio/`, engine modules `/engine/`, OAuth callback `/auth/callback` |
 | `pliego-api.madfam.io` | API `/api/v1/` |
 
-Health: liveness `/health` (static 200), readiness `/ready` (503 until the catalog, stock cards and
-commons load). Metrics: `/metrics` on 9090, scraped through Service `pliego-metrics`, never routed.
+Health: liveness `/health` (static 200; its `revision` is the git commit the image was built from,
+passed by `build-deploy.yml` as the `PLIEGO_REVISION` build arg, `null` on a local build), readiness
+`/ready` (503 until the catalog, stock cards and commons load). Metrics: `/metrics` on 9090, scraped through Service `pliego-metrics`, never routed.
 
 ## Configuration contract
 

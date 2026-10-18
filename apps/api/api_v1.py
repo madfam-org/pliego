@@ -9,6 +9,7 @@ own declared parameter defaults. Described in apps/api/openapi.yaml (checked aga
 from __future__ import annotations
 
 import json
+import logging
 import math
 import re
 from dataclasses import dataclass
@@ -20,7 +21,7 @@ from .catalog import Catalog, StockLibrary
 from .manifest import Cartridge, Mode, PayloadError, resolve_request
 from .metrics import Metrics
 from .ratelimit import RateLimiter, client_key
-from .render import TRANSPORT, Renderer, RenderError, RenderResult
+from .render import CODE_FAILED, TRANSPORT, Renderer, RenderError, RenderResult
 from .render_cache import RenderCache
 from .render_limits import RETRY_AFTER_S, RenderBusy, RenderSlot
 from .thumbnails import ThumbnailStore
@@ -37,6 +38,7 @@ OPENAPI_CONTRACT = {
         ("POST", "/api/v1/exports"): (*RENDER_HEADERS, "Content-Disposition", "Repr-Digest"),
     },
 }
+log = logging.getLogger("pliego.api.v1")
 CATALOG_QUERY_KEYS = frozenset({"q", "domain", "class", "difficulty", "tag"})
 _SAFE_FILENAME = re.compile(r"[^a-z0-9._-]+")
 
@@ -89,7 +91,8 @@ def kernel_status() -> tuple[bool, str | None, str]:
 
 def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
                      metrics: Metrics, limiter: RateLimiter, slot: RenderSlot,
-                     thumbnails: ThumbnailStore, cache: RenderCache, *, version: str, require_commons: bool, trusted_header: str) -> Blueprint:
+                     thumbnails: ThumbnailStore, cache: RenderCache, *, version: str, require_commons: bool, trusted_header: str,
+                     revision: str | None = None) -> Blueprint:
     bp = Blueprint("api_v1", __name__)
 
     @bp.get("/health")
@@ -108,6 +111,7 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             "stocks_invalid": len(stock_state["invalid"]),
             "thumbnails": thumbnails.count(),
             "prerendered": cache.prerendered.count() if cache.prerendered is not None else 0,
+            "revision": revision,
         })
 
     @bp.get("/ready")
@@ -190,6 +194,10 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             raise
         except RenderError as exc:
             metrics.inc("pliego_renders_total", kind=kind, outcome=f"http_{exc.status}")
+            # The runner's stderr stays here (the client gets the code and this request id).
+            log.log(logging.ERROR if exc.code == CODE_FAILED else logging.WARNING,
+                    "render error request_id=%s code=%s status=%s slug=%s mode=%s detail=%r",
+                    exc.request_id, exc.code, exc.status, cart.slug, mode.id, exc.server_detail())
             raise
         metrics.inc("pliego_renders_total", kind=kind, outcome="ok")
         metrics.inc("pliego_render_seconds_total", result.seconds, kind=kind)
@@ -220,7 +228,8 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             return error(503, "this worker is already rendering; retry shortly",
                          retry_after=RETRY_AFTER_S)
         except RenderError as exc:
-            return error(exc.status, str(exc), **exc.report)
+            return error(exc.status, str(exc), code=exc.code, request_id=exc.request_id,
+                         **exc.report)
 
     @bp.post("/api/v1/documents")
     def documents():

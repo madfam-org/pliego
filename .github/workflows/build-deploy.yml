@@ -73,9 +73,10 @@ jobs:
       build_runner: ubuntu-24.04
       # `paths` are directories (prefix match) plus exact files, and mirror the root Dockerfile's COPY sources
       # exactly (scripts/qa/verify_deploy_paths.py). `projects` is the gitlink itself (exact match on a pin bump).
+      # `build_args` bakes the built commit into the image (Dockerfile ARG PLIEGO_REVISION → /health `revision`).
       services: |
         [
-          {"name":"pliego", "dockerfile":"Dockerfile", "paths":"Dockerfile .dockerignore packages/kernel apps/api apps/web packages/engine/src packages/schemas docs/spec materials projects llms.txt llms-full.txt"}
+          {"name":"pliego", "dockerfile":"Dockerfile", "paths":"Dockerfile .dockerignore packages/kernel apps/api apps/web packages/engine/src packages/schemas docs/spec materials projects llms.txt llms-full.txt", "build_args":"PLIEGO_REVISION=${{ github.sha }}"}
         ]
     # Named secrets only, never `inherit`: the reusable workflow sees exactly what is listed here. A public
     # repository sees only the org secrets DOCKER_USERNAME and DOCKER_TOKEN plus its own repository secrets.

@@ -27,12 +27,24 @@ const files = walk(WEB);
 const html = files.filter((f) => f.endsWith('.html'));
 const js = files.filter((f) => /\.(m?js)$/.test(f) && !f.includes(`${join('apps', 'web', 'test')}`) && !relative(WEB, f).startsWith('test'));
 
+// A script element, including end tags browsers accept with whitespace or junk before `>`
+// (`</script >`, `</script foo>`): a stricter end-tag pattern would let such a block skip the lint.
+const SCRIPT_ELEMENT = /<script\b([^>]*)>([\s\S]*?)<\/script\b[^>]*>/gi;
+
+test('the script-element pattern sees every end-tag form', () => {
+  for (const end of ['</script>', '</SCRIPT>', '</script >', '</script\t\n>', '</script foo>']) {
+    const m = [...`<p></p><script>alert(1)${end}<p></p>`.matchAll(SCRIPT_ELEMENT)];
+    assert.equal(m.length, 1, end);
+    assert.equal(m[0][2], 'alert(1)', end);
+  }
+});
+
 test('HTML is CSP-clean', () => {
   const problems = [];
   for (const f of html) {
     const src = readFileSync(f, 'utf8');
     const rel = relative(WEB, f);
-    for (const m of src.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    for (const m of src.matchAll(SCRIPT_ELEMENT)) {
       const attrs = m[1], body = m[2].trim();
       if (/type=["']application\/ld\+json["']/.test(attrs)) { JSON.parse(body); continue; }
       if (body) problems.push(`${rel}: inline <script> body`);

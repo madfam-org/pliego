@@ -35,6 +35,11 @@ _JSON_PATHS = ("/api/", "/health", "/ready", "/metrics")
 __all__ = ["OPENAPI_CONTRACT", "VERSION", "create_app"]  # the contract: scripts/qa/verify_openapi.py
 
 
+def _log_safe(value: str) -> str:
+    """A request value fit for one log line: CR and LF escaped (no forged log entries)."""
+    return value.replace("\r", "\\r").replace("\n", "\\n")
+
+
 def _ensure_kernel_importable(settings: Settings) -> None:
     """A source checkout imports the kernel from packages/kernel/src (the image pip-installs it)."""
     try:
@@ -103,7 +108,7 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     app.register_blueprint(create_blueprint(
         catalog, stocks, renderer, metrics, limiter, slot, previews, cache,
-        version=VERSION,
+        version=VERSION, revision=settings.revision,
         require_commons=settings.require_commons, trusted_header=settings.trusted_ip_header))
     thumbnails_mod.register(app, previews)  # before the static catch-all: /projects/<slug>.svg
     static_routes.register(app, settings, hosts, api_index)
@@ -116,7 +121,8 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     @app.errorhandler(Exception)
     def _unhandled(exc: Exception):
-        log.exception("unhandled error on %s %s", request.method, request.path)
+        log.exception("unhandled error on %s %s", _log_safe(request.method),
+                      _log_safe(request.path))
         return error(500, "internal error")
 
     return app

@@ -123,6 +123,22 @@ def test_catalog_filters_and_search(client, tree):
     assert facets["class"] == {"base": 1}
 
 
+@pytest.mark.parametrize("query", ["", "q=crane", "class=base", "tag=bird&q=paper"])
+def test_catalog_walks_the_files_once_per_request(client, tree, monkeypatch, query):
+    """One state snapshot per request: before, matches() re-ran the stat walk for every record
+    (139 cartridges → 140 walks and 4.6 s per live request)."""
+    for slug in ("preliminary-base", "paper-crane", "water-bomb", "square-base"):
+        _add_cartridge(tree, slug, tags=("bird",) if slug == "paper-crane" else ("base",))
+    client.get("/api/v1/catalog", base_url=API)  # first parse
+    memo = client.application.extensions["pliego"]["catalog"]._memo
+    walks = []
+    original = memo._files
+    monkeypatch.setattr(memo, "_files", lambda: walks.append(1) or original())
+    resp = client.get(f"/api/v1/catalog?{query}", base_url=API)
+    assert resp.status_code == 200, resp.get_json()
+    assert len(walks) <= 1, f"{len(walks)} file walks for one catalog request"
+
+
 @pytest.mark.parametrize("query", ["limit=5", "sort=name", "q=a&evil=1"])
 def test_catalog_unknown_query_is_400(client, query):
     resp = client.get(f"/api/v1/catalog?{query}", base_url=API)
@@ -170,9 +186,37 @@ def test_health_contract(client):
     assert '"status": "ok"' in text  # the Enclii status probes assert this literal
     assert "localhost:" not in text
     body = resp.get_json()
-    for key in ("version", "commons", "kernel", "stocks", "commons_invalid", "stocks_invalid"):
+    for key in ("version", "commons", "kernel", "stocks", "commons_invalid", "stocks_invalid",
+                "thumbnails", "prerendered", "revision"):
         assert key in body
     assert body["commons"] == 1
+    assert body["revision"] is None  # no PLIEGO_REVISION: a source checkout or a local build
+
+
+def test_health_reports_the_build_revision(make_app):
+    sha = "43e1c757857171099a75acdbace5ec0f1694adef"
+    body = make_app(revision=sha).test_client().get("/health").get_json()
+    assert body["revision"] == sha
+
+
+@pytest.mark.parametrize("raw,expected", [
+    (None, None), ("", None), ("  ", None),
+    ("43e1c75", "43e1c75"),
+    ("43e1c757857171099a75acdbace5ec0f1694adef", "43e1c757857171099a75acdbace5ec0f1694adef"),
+])
+def test_revision_from_env(raw, expected):
+    from apps.api.config import Settings
+
+    env = {} if raw is None else {"PLIEGO_REVISION": raw}
+    assert Settings.from_env(env).revision == expected
+
+
+@pytest.mark.parametrize("raw", ["main", "43E1C75", "abc", "43e1c75 ; rm", "g" * 40, "a" * 41])
+def test_revision_that_is_not_a_commit_fails_the_boot(raw):
+    from apps.api.config import Settings
+
+    with pytest.raises(RuntimeError, match="PLIEGO_REVISION"):
+        Settings.from_env({"PLIEGO_REVISION": raw})
 
 
 def test_ready_contract(client):

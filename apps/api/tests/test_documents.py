@@ -4,6 +4,7 @@ renders through the sandbox runner with the real kernel."""
 from __future__ import annotations
 
 import json
+import re
 import struct
 
 import pytest
@@ -202,6 +203,44 @@ def test_failing_cartridge_is_422_with_verify_line(make_app, tree):
     body = resp.get_json()
     assert body["verify"].startswith("verify: sheets=0 ") and "errors=1" in body["verify"]
     assert any(i["kind"] == "stock" for i in body["issues"])
+    assert body["code"] == "render_invalid"
+    assert re.fullmatch(r"[0-9a-f]{32}", body["request_id"])
+
+
+CRASHING_RUNNER = """import sys
+sys.stderr.write(
+    "Traceback (most recent call last):\\n"
+    '  File "/app/apps/api/services/engine/pliego_runner.py", line 1, in <module>\\n'
+    "RuntimeError: STDERR-MARKER-7f3a at /srv/private/path\\n")
+sys.exit(3)
+"""
+
+
+@pytest.mark.parametrize("path,extra", [(DOC, {}), (EXP, {"format": "fold"})])
+def test_runner_crash_never_sends_stderr_to_the_client(make_app, tree, monkeypatch, caplog,
+                                                       path, extra):
+    """A runner that fails without issues (crash, limits, policy) answers a stable code and a
+    request id; its stderr (paths, tracebacks) is logged server-side under that id only."""
+    from apps.api import render
+
+    crash = tree / "crashing_runner.py"
+    crash.write_text(CRASHING_RUNNER, encoding="utf-8")
+    monkeypatch.setattr(render, "RUNNER", crash)
+    app = make_app(render_cache_mb=0.0, render_cache_disk_mb=0.0)
+    monkeypatch.setattr(app.extensions["pliego"]["renderer"], "published_formats",
+                        lambda _cart: ["fold"])
+    with caplog.at_level("ERROR", logger="pliego.api.v1"):
+        resp = post(app.test_client(), path, {"slug": "valley-fold", "params": {}, **extra})
+    assert 400 <= resp.status_code < 600
+    text = resp.get_data(as_text=True)
+    for leaked in ("STDERR-MARKER", "Traceback", "/srv/private", "pliego_runner.py", "/app/"):
+        assert leaked not in text, f"{leaked!r} reached the client: {text}"
+    body = resp.get_json()
+    assert body["error"] == "render failed"
+    assert body["code"] == "render_failed"
+    assert re.fullmatch(r"[0-9a-f]{32}", body["request_id"])
+    logged = [r.getMessage() for r in caplog.records if body["request_id"] in r.getMessage()]
+    assert logged and "STDERR-MARKER-7f3a" in logged[0]
 
 
 def test_render_timeout_is_504(make_app, tree):
@@ -212,6 +251,7 @@ def test_render_timeout_is_504(make_app, tree):
                 {"slug": "valley-fold", "params": {}})
     assert resp.status_code == 504
     assert "timed out" in resp.get_json()["error"]
+    assert resp.get_json()["code"] == "render_timeout"
 
 
 @pytest.mark.skipif(HAS_KERNEL, reason="only meaningful without the kernel")

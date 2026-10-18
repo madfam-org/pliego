@@ -77,6 +77,12 @@ ENV PATH=/opt/venv/bin:$PATH \
     TMPDIR=/tmp \
     PLIEGO_ENV=production
 
+# The git commit this image was built from, reported as `revision` by /health (null when unset).
+# .github/workflows/build-deploy.yml passes it as a build arg (`build_args`: PLIEGO_REVISION=github.sha);
+# declared last so a new commit rebuilds only this layer.
+ARG PLIEGO_REVISION=""
+ENV PLIEGO_REVISION=${PLIEGO_REVISION}
+
 WORKDIR /app
 USER 1001:1001
 

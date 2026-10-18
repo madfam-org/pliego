@@ -1,0 +1,1550 @@
+{
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "B",
+  "V",
+  "B",
+  "B",
+  "F",
+  "B",
+  "B",
+  "F",
+  "B",
+  "B",
+  "F",
+  "B",
+  "B",
+  "B",
+  "B",
+  "F",
+  "V",
+  "B",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  90,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  90,
+  0,
+  0,
+  0
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   0,
+   2
+  ],
+  [
+   1,
+   3
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   4,
+   7
+  ],
+  [
+   5,
+   6
+  ],
+  [
+   5,
+   8
+  ],
+  [
+   6,
+   9
+  ],
+  [
+   7,
+   8
+  ],
+  [
+   8,
+   9
+  ],
+  [
+   8,
+   10
+  ],
+  [
+   9,
+   11
+  ],
+  [
+   10,
+   11
+  ],
+  [
+   10,
+   12
+  ],
+  [
+   11,
+   13
+  ],
+  [
+   12,
+   13
+  ],
+  [
+   12,
+   15
+  ],
+  [
+   13,
+   16
+  ],
+  [
+   14,
+   15
+  ],
+  [
+   14,
+   17
+  ],
+  [
+   15,
+   16
+  ],
+  [
+   15,
+   18
+  ],
+  [
+   16,
+   19
+  ],
+  [
+   17,
+   18
+  ],
+  [
+   18,
+   19
+  ]
+ ],
+ "faces_vertices": [
+  [
+   0,
+   2,
+   3,
+   1
+  ],
+  [
+   4,
+   7,
+   8,
+   5
+  ],
+  [
+   5,
+   8,
+   9,
+   6
+  ],
+  [
+   8,
+   10,
+   11,
+   9
+  ],
+  [
+   10,
+   12,
+   13,
+   11
+  ],
+  [
+   12,
+   15,
+   16,
+   13
+  ],
+  [
+   14,
+   17,
+   18,
+   15
+  ],
+  [
+   15,
+   18,
+   19,
+   16
+  ]
+ ],
+ "file_classes": [
+  "multiModel"
+ ],
+ "file_creator": "pliego-kernel 0.3.0",
+ "file_frames": [
+  {
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_inherit": true,
+   "frame_parent": 0,
+   "frame_title": "initial",
+   "vertices_coords": [
+    [
+     -20,
+     0,
+     22
+    ],
+    [
+     -20,
+     0,
+     -58.679021
+    ],
+    [
+     84,
+     0,
+     22
+    ],
+    [
+     84,
+     0,
+     -58.679021
+    ],
+    [
+     -8,
+     0.36,
+     10
+    ],
+    [
+     -8,
+     0.36,
+     0
+    ],
+    [
+     -8,
+     30.36,
+     0
+    ],
+    [
+     0,
+     0.36,
+     10
+    ],
+    [
+     0,
+     0.36,
+     0
+    ],
+    [
+     0,
+     30.36,
+     0
+    ],
+    [
+     34.417729,
+     0.36,
+     -36.268719
+    ],
+    [
+     34.417729,
+     30.36,
+     -36.268719
+    ],
+    [
+     54.598358,
+     0.36,
+     -45.028981
+    ],
+    [
+     54.598358,
+     30.36,
+     -45.028981
+    ],
+    [
+     64,
+     0.36,
+     10
+    ],
+    [
+     64,
+     0.36,
+     0
+    ],
+    [
+     64,
+     30.36,
+     0
+    ],
+    [
+     72,
+     0.36,
+     10
+    ],
+    [
+     72,
+     0.36,
+     0
+    ],
+    [
+     72,
+     30.36,
+     0
+    ]
+   ]
+  }
+ ],
+ "file_spec": 1.2,
+ "file_title": "Card linkages",
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "joins"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_unit": "mm",
+ "pliego:controls": [
+  {
+   "default": 0,
+   "id": "sequence",
+   "kind": "sequence",
+   "label": {
+    "en": "Swing the input link",
+    "es": "Mover el eslabón de entrada",
+    "fr": "Balancer la biellette d'entrée",
+    "pt": "Balançar o elo de entrada"
+   },
+   "max": 24,
+   "min": 0,
+   "unit": "step"
+  }
+ ],
+ "pliego:edges_name": [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  "foot",
+  null,
+  null,
+  "hinge",
+  null,
+  null,
+  "hinge",
+  null,
+  null,
+  "hinge",
+  null,
+  null,
+  null,
+  null,
+  "hinge",
+  "foot",
+  null,
+  null,
+  null
+ ],
+ "pliego:edges_restAngle": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  90,
+  0,
+  0,
+  -46.5,
+  0,
+  0,
+  23.034691,
+  0,
+  0,
+  101.671896,
+  0,
+  0,
+  0,
+  0,
+  -78.206587,
+  90,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "score",
+  "none",
+  "none",
+  "score",
+  "none",
+  "none",
+  "score",
+  "none",
+  "none",
+  "score",
+  "none",
+  "none",
+  "none",
+  "none",
+  "score",
+  "score",
+  "none",
+  "none",
+  "none"
+ ],
+ "pliego:faces_sheet": [
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "pliego:joins": [
+  {
+   "a": {
+    "region": [
+     [
+      0.5,
+      -9.5
+     ],
+     [
+      7.5,
+      -9.5
+     ],
+     [
+      7.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ]
+    ],
+    "sheet": "strip"
+   },
+   "b": {
+    "sheet": "base"
+   },
+   "id": "foot-input",
+   "map": [
+    1,
+    0,
+    0,
+    1,
+    12,
+    22
+   ],
+   "side": "front",
+   "type": "glue"
+  },
+  {
+   "a": {
+    "region": [
+     [
+      126.5,
+      -9.5
+     ],
+     [
+      133.5,
+      -9.5
+     ],
+     [
+      133.5,
+      -0.5
+     ],
+     [
+      126.5,
+      -0.5
+     ]
+    ],
+    "sheet": "strip"
+   },
+   "b": {
+    "sheet": "base"
+   },
+   "id": "foot-output",
+   "map": [
+    1,
+    0,
+    0,
+    1,
+    -42,
+    22
+   ],
+   "side": "front",
+   "type": "glue"
+  }
+ ],
+ "pliego:meta": {
+  "cartridge": "card-linkages",
+  "digest": "sha256:7df44276bb2405a178c1b3cc5e91946167c67839196ce0f5525041df2eb55152",
+  "kernel": "pliego-kernel 0.3.0",
+  "mode": "four-bar",
+  "params": {
+   "cells": 4,
+   "link_width": 14,
+   "scale": 1,
+   "wall": 30
+  }
+ },
+ "pliego:sequence": {
+  "mode": "physical",
+  "steps": [
+   {
+    "duration_ms": 450,
+    "id": "pose-1",
+    "label": {
+     "en": "Input link at 50°",
+     "es": "Eslabón de entrada a 50°",
+     "fr": "Biellette d'entrée à 50°",
+     "pt": "Elo de entrada a 50°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -50.25
+     ],
+     [
+      13,
+      33.772307
+     ],
+     [
+      16,
+      92.730215
+     ],
+     [
+      21,
+      -76.252521
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-2",
+    "label": {
+     "en": "Input link at 54°",
+     "es": "Eslabón de entrada a 54°",
+     "fr": "Biellette d'entrée à 54°",
+     "pt": "Elo de entrada a 54°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -54
+     ],
+     [
+      13,
+      44.327282
+     ],
+     [
+      16,
+      83.356067
+     ],
+     [
+      21,
+      -73.68335
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-3",
+    "label": {
+     "en": "Input link at 58°",
+     "es": "Eslabón de entrada a 58°",
+     "fr": "Biellette d'entrée à 58°",
+     "pt": "Elo de entrada a 58°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -57.75
+     ],
+     [
+      13,
+      54.940228
+     ],
+     [
+      16,
+      73.322182
+     ],
+     [
+      21,
+      -70.512411
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-4",
+    "label": {
+     "en": "Input link at 62°",
+     "es": "Eslabón de entrada a 62°",
+     "fr": "Biellette d'entrée à 62°",
+     "pt": "Elo de entrada a 62°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -61.5
+     ],
+     [
+      13,
+      65.925914
+     ],
+     [
+      16,
+      62.257032
+     ],
+     [
+      21,
+      -66.682947
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-5",
+    "label": {
+     "en": "Input link at 65°",
+     "es": "Eslabón de entrada a 65°",
+     "fr": "Biellette d'entrée à 65°",
+     "pt": "Elo de entrada a 65°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -65.25
+     ],
+     [
+      13,
+      77.828897
+     ],
+     [
+      16,
+      49.421969
+     ],
+     [
+      21,
+      -62.000866
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-6",
+    "label": {
+     "en": "Input link at 69°",
+     "es": "Eslabón de entrada a 69°",
+     "fr": "Biellette d'entrée à 69°",
+     "pt": "Elo de entrada a 69°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -69
+     ],
+     [
+      13,
+      92.079663
+     ],
+     [
+      16,
+      32.740467
+     ],
+     [
+      21,
+      -55.82013
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-7",
+    "label": {
+     "en": "Input link at 65°",
+     "es": "Eslabón de entrada a 65°",
+     "fr": "Biellette d'entrée à 65°",
+     "pt": "Elo de entrada a 65°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -65.25
+     ],
+     [
+      13,
+      77.828897
+     ],
+     [
+      16,
+      49.421969
+     ],
+     [
+      21,
+      -62.000866
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-8",
+    "label": {
+     "en": "Input link at 62°",
+     "es": "Eslabón de entrada a 62°",
+     "fr": "Biellette d'entrée à 62°",
+     "pt": "Elo de entrada a 62°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -61.5
+     ],
+     [
+      13,
+      65.925914
+     ],
+     [
+      16,
+      62.257032
+     ],
+     [
+      21,
+      -66.682947
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-9",
+    "label": {
+     "en": "Input link at 58°",
+     "es": "Eslabón de entrada a 58°",
+     "fr": "Biellette d'entrée à 58°",
+     "pt": "Elo de entrada a 58°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -57.75
+     ],
+     [
+      13,
+      54.940228
+     ],
+     [
+      16,
+      73.322182
+     ],
+     [
+      21,
+      -70.512411
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-10",
+    "label": {
+     "en": "Input link at 54°",
+     "es": "Eslabón de entrada a 54°",
+     "fr": "Biellette d'entrée à 54°",
+     "pt": "Elo de entrada a 54°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -54
+     ],
+     [
+      13,
+      44.327282
+     ],
+     [
+      16,
+      83.356067
+     ],
+     [
+      21,
+      -73.68335
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-11",
+    "label": {
+     "en": "Input link at 50°",
+     "es": "Eslabón de entrada a 50°",
+     "fr": "Biellette d'entrée à 50°",
+     "pt": "Elo de entrada a 50°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -50.25
+     ],
+     [
+      13,
+      33.772307
+     ],
+     [
+      16,
+      92.730215
+     ],
+     [
+      21,
+      -76.252521
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-12",
+    "label": {
+     "en": "Input link at 46°",
+     "es": "Eslabón de entrada a 46°",
+     "fr": "Biellette d'entrée à 46°",
+     "pt": "Elo de entrada a 46°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -46.5
+     ],
+     [
+      13,
+      23.034691
+     ],
+     [
+      16,
+      101.671896
+     ],
+     [
+      21,
+      -78.206587
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-13",
+    "label": {
+     "en": "Input link at 43°",
+     "es": "Eslabón de entrada a 43°",
+     "fr": "Biellette d'entrée à 43°",
+     "pt": "Elo de entrada a 43°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -42.75
+     ],
+     [
+      13,
+      11.884417
+     ],
+     [
+      16,
+      110.344264
+     ],
+     [
+      21,
+      -79.47868
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-14",
+    "label": {
+     "en": "Input link at 39°",
+     "es": "Eslabón de entrada a 39°",
+     "fr": "Biellette d'entrée à 39°",
+     "pt": "Elo de entrada a 39°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -39
+     ],
+     [
+      13,
+      0.058933
+     ],
+     [
+      16,
+      118.886117
+     ],
+     [
+      21,
+      -79.94505
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-15",
+    "label": {
+     "en": "Input link at 35°",
+     "es": "Eslabón de entrada a 35°",
+     "fr": "Biellette d'entrée à 35°",
+     "pt": "Elo de entrada a 35°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -35.25
+     ],
+     [
+      13,
+      -12.78653
+     ],
+     [
+      16,
+      127.441962
+     ],
+     [
+      21,
+      -79.405432
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-16",
+    "label": {
+     "en": "Input link at 32°",
+     "es": "Eslabón de entrada a 32°",
+     "fr": "Biellette d'entrée à 32°",
+     "pt": "Elo de entrada a 32°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -31.5
+     ],
+     [
+      13,
+      -27.165102
+     ],
+     [
+      16,
+      136.202223
+     ],
+     [
+      21,
+      -77.537121
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-17",
+    "label": {
+     "en": "Input link at 28°",
+     "es": "Eslabón de entrada a 28°",
+     "fr": "Biellette d'entrée à 28°",
+     "pt": "Elo de entrada a 28°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -27.75
+     ],
+     [
+      13,
+      -43.962144
+     ],
+     [
+      16,
+      145.494476
+     ],
+     [
+      21,
+      -73.782333
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-18",
+    "label": {
+     "en": "Input link at 24°",
+     "es": "Eslabón de entrada a 24°",
+     "fr": "Biellette d'entrée à 24°",
+     "pt": "Elo de entrada a 24°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -24
+     ],
+     [
+      13,
+      -65.145005
+     ],
+     [
+      16,
+      156.116839
+     ],
+     [
+      21,
+      -66.971835
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-19",
+    "label": {
+     "en": "Input link at 28°",
+     "es": "Eslabón de entrada a 28°",
+     "fr": "Biellette d'entrée à 28°",
+     "pt": "Elo de entrada a 28°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -27.75
+     ],
+     [
+      13,
+      -43.962144
+     ],
+     [
+      16,
+      145.494476
+     ],
+     [
+      21,
+      -73.782333
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-20",
+    "label": {
+     "en": "Input link at 32°",
+     "es": "Eslabón de entrada a 32°",
+     "fr": "Biellette d'entrée à 32°",
+     "pt": "Elo de entrada a 32°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -31.5
+     ],
+     [
+      13,
+      -27.165102
+     ],
+     [
+      16,
+      136.202223
+     ],
+     [
+      21,
+      -77.537121
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-21",
+    "label": {
+     "en": "Input link at 35°",
+     "es": "Eslabón de entrada a 35°",
+     "fr": "Biellette d'entrée à 35°",
+     "pt": "Elo de entrada a 35°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -35.25
+     ],
+     [
+      13,
+      -12.78653
+     ],
+     [
+      16,
+      127.441962
+     ],
+     [
+      21,
+      -79.405432
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-22",
+    "label": {
+     "en": "Input link at 39°",
+     "es": "Eslabón de entrada a 39°",
+     "fr": "Biellette d'entrée à 39°",
+     "pt": "Elo de entrada a 39°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -39
+     ],
+     [
+      13,
+      0.058933
+     ],
+     [
+      16,
+      118.886117
+     ],
+     [
+      21,
+      -79.94505
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-23",
+    "label": {
+     "en": "Input link at 43°",
+     "es": "Eslabón de entrada a 43°",
+     "fr": "Biellette d'entrée à 43°",
+     "pt": "Elo de entrada a 43°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -42.75
+     ],
+     [
+      13,
+      11.884417
+     ],
+     [
+      16,
+      110.344264
+     ],
+     [
+      21,
+      -79.47868
+     ]
+    ]
+   },
+   {
+    "duration_ms": 450,
+    "id": "pose-24",
+    "label": {
+     "en": "Input link at 46°",
+     "es": "Eslabón de entrada a 46°",
+     "fr": "Biellette d'entrée à 46°",
+     "pt": "Elo de entrada a 46°"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      10,
+      -46.5
+     ],
+     [
+      13,
+      23.034691
+     ],
+     [
+      16,
+      101.671896
+     ],
+     [
+      21,
+      -78.206587
+     ]
+    ]
+   }
+  ]
+ },
+ "pliego:sheets": [
+  {
+   "back": {
+    "art": null,
+    "color": "#f2ede3"
+   },
+   "front": {
+    "art": null,
+    "color": "#f2ede3"
+   },
+   "grain_deg": 90,
+   "id": "base",
+   "kinematic": null,
+   "label": {
+    "en": "Base",
+    "es": "Base",
+    "fr": "Base",
+    "pt": "Base"
+   },
+   "offset": [
+    0,
+    0
+   ],
+   "placement": {
+    "origin": [
+     -20,
+     0,
+     22
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "stock": "cardstock-300"
+  },
+  {
+   "back": {
+    "art": null,
+    "color": "#f4efe6"
+   },
+   "front": {
+    "art": null,
+    "color": "#f4efe6"
+   },
+   "grain_deg": 90,
+   "id": "strip",
+   "kinematic": null,
+   "label": {
+    "en": "Linkage strip",
+    "es": "Tira del mecanismo",
+    "fr": "Bande du mécanisme",
+    "pt": "Tira do mecanismo"
+   },
+   "offset": [
+    114,
+    10
+   ],
+   "placement": {
+    "origin": [
+     -8,
+     0.36,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "stock": "cardstock-250"
+  }
+ ],
+ "pliego:stocks": {
+  "cardstock-250": {
+   "appearance": {
+    "back": "#f4efe6",
+    "front": "#f4efe6"
+   },
+   "caliper_mm": 0.3,
+   "derived": {
+    "D_cd": 4922600,
+    "D_md": 11075900,
+    "E_cd": 2000000000,
+    "E_md": 4500000000,
+    "G12": 1161000000,
+    "areal_density": 0.00025,
+    "collision_thickness": 0.3,
+    "crease_k": 123065,
+    "crease_set_rate": 0.5,
+    "crease_yield_deg": 35,
+    "friction": 0.4,
+    "nu": 0.293,
+    "perf_bridge_mm": 1,
+    "perf_cut_mm": 3,
+    "perf_factor": 0.25,
+    "score_factor": 0.35,
+    "score_yield_deg": 12.25,
+    "tear_strain": 0.015,
+    "thickness": 0.3
+   },
+   "derived_basis": "pliego.stock.derive v1",
+   "gsm": 250,
+   "name": {
+    "en": "Cardstock 250 g/m²",
+    "es": "Cartulina 250 g/m²",
+    "fr": "Bristol 250 g/m²",
+    "pt": "Cartolina 250 g/m²"
+   }
+  },
+  "cardstock-300": {
+   "appearance": {
+    "back": "#f2ede3",
+    "front": "#f2ede3"
+   },
+   "caliper_mm": 0.36,
+   "derived": {
+    "D_cd": 8506250,
+    "D_md": 19139100,
+    "E_cd": 2000000000,
+    "E_md": 4500000000,
+    "G12": 1161000000,
+    "areal_density": 0.0003,
+    "collision_thickness": 0.36,
+    "crease_k": 177214,
+    "crease_set_rate": 0.5,
+    "crease_yield_deg": 35,
+    "friction": 0.4,
+    "nu": 0.293,
+    "perf_bridge_mm": 1,
+    "perf_cut_mm": 3,
+    "perf_factor": 0.25,
+    "score_factor": 0.35,
+    "score_yield_deg": 12.25,
+    "tear_strain": 0.015,
+    "thickness": 0.36
+   },
+   "derived_basis": "pliego.stock.derive v1",
+   "gsm": 300,
+   "name": {
+    "en": "Cardstock 300 g/m²",
+    "es": "Cartulina 300 g/m²",
+    "fr": "Bristol 300 g/m²",
+    "pt": "Cartolina 300 g/m²"
+   }
+  }
+ },
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   80.679021
+  ],
+  [
+   104,
+   0
+  ],
+  [
+   104,
+   80.679021
+  ],
+  [
+   114,
+   0
+  ],
+  [
+   114,
+   10
+  ],
+  [
+   114,
+   40
+  ],
+  [
+   122,
+   0
+  ],
+  [
+   122,
+   10
+  ],
+  [
+   122,
+   40
+  ],
+  [
+   172,
+   10
+  ],
+  [
+   172,
+   40
+  ],
+  [
+   194,
+   10
+  ],
+  [
+   194,
+   40
+  ],
+  [
+   240,
+   0
+  ],
+  [
+   240,
+   10
+  ],
+  [
+   240,
+   40
+  ],
+  [
+   248,
+   0
+  ],
+  [
+   248,
+   10
+  ],
+  [
+   248,
+   40
+  ]
+ ]
+}

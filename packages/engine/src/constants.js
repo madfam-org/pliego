@@ -20,6 +20,12 @@ export const C_B = 1.0244;
 /** Default hand factor: a folding hand is this many times stiffer than the crease. Test `crease-drive`. */
 export const HAND_FACTOR = 50;
 
+/** Lowest share of HAND_FACTOR a hand eases to when its drives would stretch the paper (World._easeHand). Test `hand-ease`. */
+export const HAND_EASE_MIN = 1 / 16;
+
+/** Settled substeps before an eased hand doubles its stiffness again. Test `hand-ease`. */
+export const HAND_CALM_SUBSTEPS = 30;
+
 /** Panel-hinge plastic yield, degrees (paper takes a permanent curl only past this). Test `crease-unfold` (panels stay elastic). */
 export const PANEL_YIELD_DEG = 60;
 
@@ -35,6 +41,9 @@ export const STRAIN_PASSES = 4;
  * twist) keeps projecting up to this many passes. Test `strain-guard`.
  */
 export const STRAIN_PASSES_MAX = 16;
+
+/** A guard pass that moved no edge by more than this strain counts as settled (round-off, not stretch). */
+export const SETTLE_STRAIN = 1e-6;
 
 /** Compressive guard of the strain-limit pass (compression is soft, see MEMBRANE_COMPRESSION). */
 export const COMPRESSION_LIMIT = 0.01;

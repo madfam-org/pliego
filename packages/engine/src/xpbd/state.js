@@ -15,7 +15,7 @@ export function snapshotWorld(w) {
     driveOn: Uint8Array.from(w.driveOn), driveTarget: Float64Array.from(w.driveTarget),
     fixedTarget: Float64Array.from(w.fixedTarget), userForce: Float64Array.from(w.userForce),
     time: w.time, acc: w._acc, substepsRun: w.substepsRun, framesRun: w.framesRun, dirty: w.dirty, asleep: !!w._asleep, quiet: w._quiet, pcgFail: w._pcgFail,
-    stringTaut: Uint8Array.from(w._stringTaut),
+    stringTaut: Uint8Array.from(w._stringTaut), handScale: w.handScale, handCalm: w._handCalm,
     terms: { active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode), verts: Int32Array.from(T.verts), info: T.info.map((/** @type {any} */ i) => ({ target: i.target ? i.target.slice() : undefined, s: i.s, driven: i.driven, offset: i.offset,
       unheld: i.unheld, slid: i.slid, held: i.held ? i.held.slice() : undefined, since: i.since })),
       gateOff: T.gateOff ? Uint8Array.from(T.gateOff) : null, coef: Float64Array.from(T.coef) },
@@ -37,6 +37,7 @@ export function restoreWorld(w, s) {
   w.fixedTarget.set(s.fixedTarget); w.userForce.set(s.userForce);
   w.time = s.time; w._acc = s.acc; w.substepsRun = s.substepsRun; w.framesRun = s.framesRun;
   w._stringTaut.set(s.stringTaut);
+  w.handScale = s.handScale ?? 1; w._handCalm = s.handCalm ?? 0;
   const T = w.terms;
   s.terms.info.forEach((/** @type {any} */ i, /** @type {number} */ t) => {
     if (i.target) T.info[t].target = i.target.slice(); T.info[t].s = i.s; T.info[t].driven = i.driven; T.info[t].offset = i.offset;

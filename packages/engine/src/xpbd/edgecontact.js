@@ -29,10 +29,7 @@ export const EDGE_PAIR_LIMIT = 250000;
 export const INTERLOCK_PREFIX = 'interlock';
 
 export class EdgeContact {
-  /**
-   * @param {any} w World (mesh, doc, x)
-   * @returns {EdgeContact}
-   */
+  /** @param {any} w World (mesh, doc, x) */
   constructor(w) {
     const mesh = w.mesh, doc = w.doc, names = doc.edgeNames;
     /** @type {number[]} */

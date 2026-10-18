@@ -26,3 +26,11 @@ test('hand-ease: a hand forcing a twist fold eases instead of stretching the pap
   assert.ok(r.peak < 0.05, `peak stretch ${r.peak}`);
   assert.equal(r.end, 1, 'the hand is back to full stiffness once the paper settles');
 });
+
+test('hand-ease-deckle: a guard that has converged does not ease the hand (deckle-tear card strip)', async () => {
+  const { simulateDocument, STRETCH_FAIL } = await import('./helpers/sim-matrix.js');
+  const rec = simulateDocument(kernelDoc('deckle-tear-crease-card-strip'));
+  const pass = rec.loads && rec.finite && rec.maxStretch <= STRETCH_FAIL;
+  proof('hand-ease-deckle', rec.maxStretch, `≤ ${STRETCH_FAIL}`, 'peak stretch (sim-matrix drive)', pass, 'main before: 1.26 % (pliego#40 regression, 0.66 % before #40)');
+  assert.ok(pass);
+});

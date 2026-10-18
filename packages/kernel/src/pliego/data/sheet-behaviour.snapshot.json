@@ -1,0 +1,210 @@
+{
+  "_comment": "Vendored sheet_behaviour documents of materials other platforms own, for Pliego laminate layers given by material_ref (spec §5.41). Each entry is the keystone's (hyperobjects-spec) own mapping of the source card named in it, computed by scripts/qa/verify_sheet_behaviour.py --write at the keystone commit `keystone`, and drift-checked by the same script in CI (the stocks lane installs the keystone at SPEC_PIN). The kernel reads this file and never imports the keystone. Do NOT hand-edit an entry. Source cards: byte copies under scripts/qa/fixtures/sheet-behaviour/, verified 2026-10-18 by git blob id against madfam-org/fashion-cabinet main and identical to the keystone's own fixtures (tests/fixtures/sheet-behaviour/cards/fashion-cabinet). They are data from an AGPL-3.0 platform repository.",
+  "snapshot": "pliego.sheet-behaviour-snapshot v1",
+  "materials": {
+    "fashion-cabinet/manta-cruda": {
+      "material_ref": {
+        "platform": "fashion-cabinet",
+        "material_slug": "manta-cruda",
+        "behaviour": "sheet"
+      },
+      "rule": "fc-fabric/1",
+      "keystone": "73f092cfa95a739af0a3cb22daaa119eec178358",
+      "keystone_version": "0.17.0",
+      "card": {
+        "repo": "madfam-org/fashion-cabinet",
+        "path": "materials/manta-cruda/material.json",
+        "commit": "22d147b5519921564ff5aa22fe95a699af5e396b",
+        "git_blob": "2b4eb8af97ce5f0c76cbe8447940b610d01ef4d1",
+        "vendored": "scripts/qa/fixtures/sheet-behaviour/fashion-cabinet/manta-cruda/material.json",
+        "sha256": "cd5103ce5e4a5fcd5fe7270faaabc4a9e3c69927e3968031090538408c89d97d"
+      },
+      "sheet_behaviour": {
+        "sheet_behaviour": "1.0",
+        "units": {
+          "caliper": "mm",
+          "areal_density": "kg/m^2",
+          "membrane": "N/m",
+          "bending": "N*m",
+          "angle": "deg"
+        },
+        "axis_1": "warp",
+        "caliper_mm": 0.35,
+        "areal_density_kg_m2": 0.14,
+        "source": {
+          "platform": "fashion-cabinet",
+          "material_slug": "manta-cruda",
+          "rule": "fc-fabric/1",
+          "card_basis": "fabric-card v1"
+        },
+        "membrane": {
+          "E1t": 49033.2,
+          "E2t": 24516.6,
+          "G12t": 56.188,
+          "nu12": 0.3
+        },
+        "bending": {
+          "D11": 1.96133e-05,
+          "D22": 1.96133e-05,
+          "D12": 5.88399e-06,
+          "D66": 6.86465e-06
+        },
+        "regime": {
+          "inextensible": true,
+          "stretchy": false,
+          "compressible": false,
+          "layered": false,
+          "self_folding": false
+        },
+        "provenance": {
+          "caliper_mm": {
+            "status": "measured",
+            "basis": "card physical.thickness_mm; fabric-card v1 records no test method; fashion-cabinet's preset sidecar treats card values as measured"
+          },
+          "areal_density_kg_m2": {
+            "status": "measured",
+            "basis": "card weight_gsm / 1000; fabric-card v1 records no test method; fashion-cabinet's preset sidecar treats card values as measured"
+          },
+          "E1t": {
+            "status": "estimated",
+            "basis": "secant: assumed test load 500 gf/cm = 490.33 N/m (the KES-FB1 tensile maximum; FAST's 100 gf/cm would give 5× less) ÷ the card's stretch strain; the card does not record the load its stretch % was measured under; warp 1 %"
+          },
+          "E2t": {
+            "status": "estimated",
+            "basis": "secant: assumed test load 500 gf/cm = 490.33 N/m (the KES-FB1 tensile maximum; FAST's 100 gf/cm would give 5× less) ÷ the card's stretch strain; the card does not record the load its stretch % was measured under; weft 2 %"
+          },
+          "G12t": {
+            "status": "estimated",
+            "basis": "assumed shear rigidity 1 gf/(cm·deg) (= 56.19 N/m), an order of magnitude typical of apparel fabrics in KES-FB1; the card has no shear datum"
+          },
+          "nu12": {
+            "status": "estimated",
+            "basis": "assumed ν12 = 0.3; fabric Poisson ratios vary widely and the card records none"
+          },
+          "D11": {
+            "status": "estimated",
+            "basis": "bend_stiffness_class 'medium-stiff' → 0.2 gf·cm²/cm (KES-FB2 B) on the keystone's geometric ladder across ≈0.01–1 gf·cm²/cm; one class for both directions"
+          },
+          "D22": {
+            "status": "estimated",
+            "basis": "bend_stiffness_class 'medium-stiff' → 0.2 gf·cm²/cm (KES-FB2 B) on the keystone's geometric ladder across ≈0.01–1 gf·cm²/cm; one class for both directions"
+          },
+          "D12": {
+            "status": "estimated",
+            "basis": "isotropic plate relation ν·D with ν = 0.3"
+          },
+          "D66": {
+            "status": "estimated",
+            "basis": "isotropic plate relation (1−ν)/2·D with ν = 0.3"
+          }
+        },
+        "notes": [
+          "contact: the card records no friction or damping; the contact block is left out rather than invented",
+          "regime: inextensible when the larger stretch is ≤ 2 %, stretchy when it is ≥ 10 % (keystone convention)"
+        ]
+      }
+    },
+    "fashion-cabinet/popelina-algodon": {
+      "material_ref": {
+        "platform": "fashion-cabinet",
+        "material_slug": "popelina-algodon",
+        "behaviour": "sheet"
+      },
+      "rule": "fc-fabric/1",
+      "keystone": "73f092cfa95a739af0a3cb22daaa119eec178358",
+      "keystone_version": "0.17.0",
+      "card": {
+        "repo": "madfam-org/fashion-cabinet",
+        "path": "materials/popelina-algodon/material.json",
+        "commit": "22d147b5519921564ff5aa22fe95a699af5e396b",
+        "git_blob": "51e626712681d22d2a2dfeee6010c7264e4dd810",
+        "vendored": "scripts/qa/fixtures/sheet-behaviour/fashion-cabinet/popelina-algodon/material.json",
+        "sha256": "2898de8cf63d09ecf393fe522e106c4fed454cbc8da6dac2c7fa8518efb696a3"
+      },
+      "sheet_behaviour": {
+        "sheet_behaviour": "1.0",
+        "units": {
+          "caliper": "mm",
+          "areal_density": "kg/m^2",
+          "membrane": "N/m",
+          "bending": "N*m",
+          "angle": "deg"
+        },
+        "axis_1": "warp",
+        "caliper_mm": 0.25,
+        "areal_density_kg_m2": 0.115,
+        "source": {
+          "platform": "fashion-cabinet",
+          "material_slug": "popelina-algodon",
+          "rule": "fc-fabric/1",
+          "card_basis": "fabric-card v1"
+        },
+        "membrane": {
+          "E1t": 98066.5,
+          "E2t": 49033.2,
+          "G12t": 56.188,
+          "nu12": 0.3
+        },
+        "bending": {
+          "D11": 1.96133e-05,
+          "D22": 1.96133e-05,
+          "D12": 5.88399e-06,
+          "D66": 6.86465e-06
+        },
+        "regime": {
+          "inextensible": true,
+          "stretchy": false,
+          "compressible": false,
+          "layered": false,
+          "self_folding": false
+        },
+        "provenance": {
+          "caliper_mm": {
+            "status": "measured",
+            "basis": "card physical.thickness_mm; fabric-card v1 records no test method; fashion-cabinet's preset sidecar treats card values as measured"
+          },
+          "areal_density_kg_m2": {
+            "status": "measured",
+            "basis": "card weight_gsm / 1000; fabric-card v1 records no test method; fashion-cabinet's preset sidecar treats card values as measured"
+          },
+          "E1t": {
+            "status": "estimated",
+            "basis": "secant: assumed test load 500 gf/cm = 490.33 N/m (the KES-FB1 tensile maximum; FAST's 100 gf/cm would give 5× less) ÷ the card's stretch strain; the card does not record the load its stretch % was measured under; warp 0.5 %"
+          },
+          "E2t": {
+            "status": "estimated",
+            "basis": "secant: assumed test load 500 gf/cm = 490.33 N/m (the KES-FB1 tensile maximum; FAST's 100 gf/cm would give 5× less) ÷ the card's stretch strain; the card does not record the load its stretch % was measured under; weft 1 %"
+          },
+          "G12t": {
+            "status": "estimated",
+            "basis": "assumed shear rigidity 1 gf/(cm·deg) (= 56.19 N/m), an order of magnitude typical of apparel fabrics in KES-FB1; the card has no shear datum"
+          },
+          "nu12": {
+            "status": "estimated",
+            "basis": "assumed ν12 = 0.3; fabric Poisson ratios vary widely and the card records none"
+          },
+          "D11": {
+            "status": "estimated",
+            "basis": "bend_stiffness_class 'medium-stiff' → 0.2 gf·cm²/cm (KES-FB2 B) on the keystone's geometric ladder across ≈0.01–1 gf·cm²/cm; one class for both directions"
+          },
+          "D22": {
+            "status": "estimated",
+            "basis": "bend_stiffness_class 'medium-stiff' → 0.2 gf·cm²/cm (KES-FB2 B) on the keystone's geometric ladder across ≈0.01–1 gf·cm²/cm; one class for both directions"
+          },
+          "D12": {
+            "status": "estimated",
+            "basis": "isotropic plate relation ν·D with ν = 0.3"
+          },
+          "D66": {
+            "status": "estimated",
+            "basis": "isotropic plate relation (1−ν)/2·D with ν = 0.3"
+          }
+        },
+        "notes": [
+          "contact: the card records no friction or damping; the contact block is left out rather than invented",
+          "regime: inextensible when the larger stretch is ≤ 2 %, stretchy when it is ≥ 10 % (keystone convention)"
+        ]
+      }
+    }
+  }
+}

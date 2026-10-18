@@ -1,0 +1,153 @@
+{
+  "sheet_behaviour": "1.0",
+  "units": {
+    "caliper": "mm",
+    "areal_density": "kg/m^2",
+    "membrane": "N/m",
+    "bending": "N*m",
+    "angle": "deg",
+    "laminate": "A N/m, B N, D N*m"
+  },
+  "axis_1": "laminate",
+  "caliper_mm": 0.51,
+  "areal_density_kg_m2": 0.26,
+  "source": {
+    "platform": "hyperobjects-spec",
+    "material_slug": "cloth-manta-on-kraft",
+    "rule": "laminate/1"
+  },
+  "membrane": {
+    "E1t": 167612,
+    "E2t": 79155.2,
+    "G12t": 17513.2,
+    "nu12": 0.35636
+  },
+  "bending": {
+    "D11": 0.00564049,
+    "D22": 0.00265056,
+    "D12": 0.0009587,
+    "D66": 0.000574058
+  },
+  "regime": {
+    "inextensible": true,
+    "stretchy": false,
+    "compressible": false,
+    "layered": true,
+    "self_folding": false
+  },
+  "laminate": {
+    "layers": [
+      {
+        "material": "pliego/kraft-120",
+        "angle_deg": 0,
+        "thickness_mm": 0.16,
+        "own_bending": "card"
+      },
+      {
+        "material": "fashion-cabinet/manta-cruda",
+        "angle_deg": 0,
+        "thickness_mm": 0.35,
+        "own_bending": "card"
+      }
+    ],
+    "A": [
+      [
+        1189010,
+        226481,
+        0
+      ],
+      [
+        226481,
+        515744,
+        0
+      ],
+      [
+        0,
+        0,
+        264216
+      ]
+    ],
+    "B": [
+      [
+        -194.984,
+        -37.6702,
+        0
+      ],
+      [
+        -37.6702,
+        -83.7089,
+        0
+      ],
+      [
+        0,
+        0,
+        -46.2235
+      ]
+    ],
+    "D": [
+      [
+        0.0376163,
+        0.00722201,
+        0
+      ],
+      [
+        0.00722201,
+        0.0162379,
+        0
+      ],
+      [
+        0,
+        0,
+        0.00866067
+      ]
+    ],
+    "coupled": true,
+    "coupling_ratio": 0.921974
+  },
+  "provenance": {
+    "caliper_mm": {
+      "status": "estimated",
+      "basis": "sum over the layers; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "areal_density_kg_m2": {
+      "status": "estimated",
+      "basis": "sum over the layers; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "E1t": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "E2t": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "G12t": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "nu12": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "D11": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "D22": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "D12": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    },
+    "D66": {
+      "status": "estimated",
+      "basis": "classical laminate theory (hyperobjects_sheet.laminate), free stack; laminate document 'cloth-manta-on-kraft', 2 layers"
+    }
+  },
+  "notes": [
+    "B is non-zero (|B|/√(|A|·|D|) = 0.922): stretching and bending are coupled, so the stack curls under in-plane load or layer pre-strain",
+    "crease and contact are not computed for a stack: a laminate's crease is not its layers' creases"
+  ]
+}

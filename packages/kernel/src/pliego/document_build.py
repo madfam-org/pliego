@@ -167,7 +167,9 @@ def build_document(assembly, stocks: dict[str, dict] | None = None,
             fv.append([i + vb for i in f])
             fs.append(si)
 
-    stock_snaps = {slug: resolve_stock(slug, stocks) for slug in sorted({s.stock for s in sheets})}
+    own = getattr(assembly, "stocks", None) or {}
+    pool = {**(stocks or {}), **own}           # an assembly's own laminates win (spec §5.40)
+    stock_snaps = {slug: resolve_stock(slug, pool) for slug in sorted({s.stock for s in sheets})}
     sheet_objs = []
     placements = world_placements(assembly, offsets)
     for s, off, pl in zip(sheets, offsets, placements, strict=True):

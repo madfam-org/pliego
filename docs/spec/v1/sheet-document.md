@@ -206,6 +206,7 @@ mapping from paper measurements to physics exists in exactly one place (`pliego.
 | `G12` (optional) | g/(mm·s²) | in-plane shear modulus; when absent the engine uses 0.387·√(E_md·E_cd) (Baum et al.) |
 | `score_yield_deg` (optional) | deg | yield angle of a scored hinge; when absent the engine uses `crease_yield_deg × score_factor` |
 | `perf_cut_mm`, `perf_bridge_mm` (optional) | mm | perforation pattern (cut length and bridge length); `perf_factor` = bridge / (cut + bridge) |
+| `D12`, `D66` (optional, laminate only) | g·mm²/s² | the free stack's D*12 and D*66 (§5.40); when absent the engine uses ν·√(D_md·D_cd) and G12·t³/12 |
 
 A snapshot may also carry `appearance: {"front": "#rrggbb", "back": "#rrggbb"}` (from the stock card)
 — the default face colours a sheet inherits when its `front`/`back` are not authored.
@@ -219,7 +220,7 @@ independent of mesh resolution.
 | `type` | Fields | Physics |
 |---|---|---|
 | `glue` | `a: {sheet, region: [[u,v]…]}`, `b: {sheet}`, `map: [a, b, c, d, tx, ty]`, `side: "front"\|"back"` | every engine vertex of sheet *a* inside `region` is welded to the point `M·(u,v)+t` on sheet *b* (2×2 matrix `[[a,b],[c,d]]` row-major, translation `[tx,ty]`); `side` says which face of *b* the tab lies on |
-| `pivot` | `a: {sheet, at: [u,v]}`, `b: {sheet, at: [u,v]}`, `hardware_ref?` | the two points coincide; rotation is free (a brad / split pin). `hardware_ref` follows the bridge contract to yantra4d: the `hardwareRef` shape in `packages/schemas/sheet-document.schema.json` (`{platform: "yantra4d", project_slug, mode?, linked?, params_map?}`), which is Fashion Cabinet's `hardware_ref` shape; hyperobjects-spec owns the bridge (its `hardware-ref` contract and `docs/BRIDGE_HANDSHAKE.md`). Pliego checks the shape only; resolving the slug and `params_map` against the solid commons is not wired yet. (There is no §9: the earlier pointer named a section that was never written.) |
+| `pivot` | `a: {sheet, at: [u,v]}`, `b: {sheet, at: [u,v]}`, `hardware_ref?` | the two points coincide; rotation is free (a brad / split pin). `hardware_ref` follows the bridge contract to yantra4d: the `hardwareRef` shape in `packages/schemas/sheet-document.schema.json` (`{platform: "yantra4d", project_slug, mode?, linked?, params_map?}`), which is Fashion Cabinet's `hardware_ref` shape; hyperobjects-spec owns the bridge (its `hardware-ref` contract and `docs/BRIDGE_HANDSHAKE.md`). The kernel checks it name-level against a vendored Yantra4D snapshot (§5.42, rule 41); the physical half of the bridge is out of scope. (There is no §9: the earlier pointer named a section that was never written.) |
 | `string` | `a: {sheet, at}`, `b: {sheet, at} \| {world: [x,y,z]}`, `length` | unilateral distance ≤ `length` (thread, ribbon, the line a papel picado banner hangs from) |
 | `pin` | `a: {sheet, at} \| {sheet, along: [[u,v],[u,v]]}`, `world: [x,y,z] \| null`, `mechanism?` | the point (or every vertex within `collision_thickness` of the segment) is fixed in the world (`world: null` means "where it starts"); with `mechanism` naming a `translate` driver, the pinned points move with it (kirigami pulled open, a banner line raised) |
 | `slider` | `a: {sheet, at}`, `track: {sheet, from: [u,v], to: [u,v]}`, `mechanism?` | the point stays on the track segment of the track sheet; if `mechanism` names a `slide` driver, the point's position along the track is driven |
@@ -774,6 +775,98 @@ flood leaves it behind.
   step, and may be joined to the rest only along the line.
 <!-- lane FL3 (w4/fold-robustness) §5.39: end -->
 
+<!-- lane T3 (geo-stab, RFC 0045 phase 2) §5.40–§5.42: begin -->
+### 5.40 Laminate stocks — `pliego:stocks[id].laminate`
+
+A stock may be a **laminate**: layers bonded face to face, bottom first (cover cloth backed with
+paper, a covered board). Each layer is a committed Pliego stock (`stock: <slug>`) or another
+platform's material by `material_ref` (§5.41), with its `thickness_mm` (default: the layer's
+caliper) and `angle_deg` (the layer's axis 1 from the sheet's grain, counter-clockwise). The
+kernel writes it with `pliego.laminate.stock(name, layers)`; a cartridge passes it as
+`Assembly(stocks={id: snapshot})` and names `id` as the sheets' `stock`.
+
+```json
+"case-cloth": {
+  "name": {"en": "Case cloth", "es": "Tela de encuadernar", "fr": "Toile de reliure", "pt": "Tecido de encadernação"},
+  "gsm": 260, "caliper_mm": 0.51,
+  "derived": {"thickness": 0.51, "E_md": 3.2865e8, "D_md": 5.64049e6, "D12": 958700, "D66": 574058, "…": "…"},
+  "derived_basis": "pliego.laminate v1",
+  "laminate": {
+    "layers": [
+      {"stock": "kraft-120", "thickness_mm": 0.16, "angle_deg": 0, "own_bending": "card",
+       "basis": "card-carried sheet_behaviour (rule pliego-stock/1)"},
+      {"material_ref": {"platform": "fashion-cabinet", "material_slug": "manta-cruda", "behaviour": "sheet"},
+       "thickness_mm": 0.35, "angle_deg": 0, "own_bending": "card", "basis": "vendored snapshot (rule fc-fabric/1, …)"}
+    ],
+    "A": [[…]], "B": [[…]], "D": [[…]], "coupled": true, "coupling_ratio": 0.921974, "governing_layer": 0
+  }
+}
+```
+
+- **Every layer's physics is a `sheet_behaviour` document**, the keystone's cross-commons
+  contract (hyperobjects-spec `docs/SHEET_BEHAVIOUR.md`). A Pliego stock layer reads the block
+  its card carries (`materials/<slug>/stock.json` → `sheet_behaviour`, written by the keystone
+  rule `pliego-stock/1`; stock-card.md). A card that carries none cannot be a layer. The kernel
+  never imports the keystone: `scripts/qa/verify_sheet_behaviour.py` (stocks lane, keystone at
+  `SPEC_PIN`) fails when a carried block drifts from the rule.
+- **Classical laminate theory** (`pliego.laminate`, the keystone's `hyperobjects_sheet.laminate`
+  restated): engineering shear strain, Voigt order (1, 2, 6), `z` from the bottom face;
+  `A = Σ Q̄ₖtₖ`, `B = Σ Q̄ₖtₖz̄ₖ`, `D = Σ (ownₖ + Q̄ₖtₖz̄ₖ²)`, where a layer's own bending is its
+  card's bending, rotated (a fabric bends far below the plate value of its membrane modulus).
+  `A`, `B`, `D` are written in engine units (g/s², g·mm/s², g·mm²/s²). The kernel agrees with
+  the keystone's calculator on the same layers to its six significant digits (golden test,
+  `tests/test_laminate.py`).
+- **`derived` is the free stack** (the engine reads it and nothing else, §5.2): membrane
+  constants from the inverse of the 6 × 6 ABD matrix, bending `D* = D − B·A⁻¹·B` (`D_md` =
+  D*11, `D_cd` = D*22, and the optional laminate-only `D12` = D*12, `D66` = D*66, which the
+  engine reads in place of its plate relations); `nu` = √(ν12·ν21), `G12` = G12t / t.
+- **Crease, tear, perforation and friction** are not laminate quantities. `pliego.laminate v1`
+  takes them from the **governing layer** — the Pliego stock layer with the largest own bending
+  √(D11·D22) — so a laminate needs at least one Pliego stock layer: `crease_k` = √(D_md·D_cd)/L*
+  with L* = that layer's `crease_length_scale_t` × the stack's caliper, its yield, set rate and
+  score factor, and its card's `tear_strain` and `perf_factor`. `friction` is the mean of the
+  two face layers that state one (else the governing layer's). All are estimates.
+- **Coupling.** A non-zero `B` (an asymmetric stack: stretching bends it — the warp of a covered
+  board when the glue shrinks the cloth) is flagged `coupled` with `coupling_ratio` =
+  max|B| / √(max|A|·max|D|), never failed. The engine reads the free stack's bending and
+  membrane today; the curl that `B` drives under in-plane load or pre-strain is a follow-up.
+
+### 5.41 `material_ref` — another platform's material as a layer
+
+`{"platform": "fashion-cabinet" | "pliego" | "yantra4d", "material_slug": <slug>, "behaviour":
+"sheet"}` (the keystone's shape; the sheet manifest's `material_ref` items carry the same keys
+plus an optional `role`). Pliego never copies another platform's card into `materials/`.
+Cross-platform data enters as data: `packages/kernel/src/pliego/data/sheet-behaviour.snapshot.json`
+holds, per referenced card, the `sheet_behaviour` document the keystone's own rule wrote
+(`fc-fabric/1` for a Fashion Cabinet fabric), with its provenance — keystone commit and version,
+the source card's repository, path, commit, git blob id and sha-256 — and the source card itself
+is vendored byte-identical under `scripts/qa/fixtures/sheet-behaviour/`. The drift gate fails
+when an entry differs from the keystone's mapping of that card. A `pliego` reference reads the
+card's carried block; a `yantra4d` filament is a sheet only through a thin-print descriptor
+(keystone rule `y4d-thin-print/1`), which `pliego.laminate v1` does not take.
+
+A document records the references it uses in its laminate layers (`pliego.laminate.material_refs`
+lists them). `python -m pliego.cartridge` fails when a laminate layer's `material_ref` is not
+declared in the manifest's `material_ref` (with `behaviour: "sheet"`), or when a declared one is
+not a usable layer, and prints `refs: cartridge=… hardware_ref=H material_ref=M unresolved=U`.
+
+### 5.42 `hardware_ref` — a Yantra4D part, name-level
+
+A cartridge names a printed part it needs (a magnetic clasp, a brad, a stand) by a top-level
+`hardware_ref` in its manifest (`{platform: "yantra4d", project_slug, mode?, linked,
+params_map?}`), and a `pivot` join may carry one (§5.3). Pliego never models the solid. The
+kernel checks every reference **name-level** — the bridge handshake's rule 1 (hyperobjects-spec
+`docs/BRIDGE_HANDSHAKE.md`) — against a vendored, version-pinned slice of Yantra4D's published
+`docs/commons-catalog.json` (`packages/kernel/src/pliego/data/yantra4d-hardware.snapshot.json`,
+refreshed by `scripts/qa/refresh_hardware_snapshot.py` with the upstream commit recorded; the
+slug set is derived from the commons' claims): the slug exists; `mode`, when given, is one of the
+part's modes; every `params_map` key is a parameter of the part; every value parses as an
+expression (numbers, arithmetic and `round`/`ceil`/`floor`/`int`/`min`/`max`/`abs`) that reads
+only the cartridge's own parameters. Expressions are parsed, never evaluated. The physical half
+of the handshake (render the part at the mapped values, check that it fits) needs the solid
+kernel; it stays with Yantra4D's and the keystone's tooling and is out of scope here.
+<!-- lane T3 (geo-stab, RFC 0045 phase 2) §5.40–§5.42: end -->
+
 ## 6. `file_frames` — 3-D states
 
 - **`initial`** (required when any sheet is non-planar at t = 0, when any join exists, or when any
@@ -886,6 +979,16 @@ drives every `M`/`V` edge to its `edges_foldAngle`.
     geometry of a fold switch: folding the sheet by 180° on the line brings its two contacts
     face to face on the side that folds inward.
 <!-- lane X (w3/trace-finish) rule 30: end -->
+<!-- lane T3 (geo-stab, RFC 0045 phase 2) rules 40–41: begin -->
+40. Laminate stocks (§5.40): a stock with a `laminate` block has `derived_basis`
+    `pliego.laminate v1` (and only such a stock does); every layer is exactly one of `stock`,
+    `material_ref`; the layers' `thickness_mm` add up to `caliper_mm` and `derived.thickness`;
+    `A`, `B` and `D` are 3 × 3 numbers; `coupled` is true exactly when `B` has a non-zero
+    entry; `governing_layer` indexes a Pliego stock layer.
+41. Hardware references (§5.42): every join's `hardware_ref` resolves name-level in the
+    vendored Yantra4D snapshot — the slug exists, `mode` is one of its modes, every
+    `params_map` key is one of its parameters and every value is a safe expression.
+<!-- lane T3 (geo-stab, RFC 0045 phase 2) rules 40–41: end -->
 
 The kernel prints a read-proof line for every document it verifies:
 `verify: sheets=N vertices=V edges=E faces=F joins=J errors=0 warnings=W` — `sheets=0` is a failure.

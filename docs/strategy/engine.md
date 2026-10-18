@@ -112,7 +112,7 @@ and not accuracy.
 | **Membrane (default: per-edge)** | `|x_i − x_j| − l₀` | `k = E(φ_e)·t·w_e / l₀` with `w_e` the Voronoi width ≈ `(A₁+A₂)/(1.5·l₀)` (or 2A/l₀ for boundary edges) | rsE §a3.1 cheap mode |
 | Membrane (quality mode, optional) | Green strain per triangle, 3×3 block | `t·A·Q` orthotropic plane stress | rsE §a3.1 |
 | **Panel bending** | `θ − θ̄` (signed dihedral) | `k_b = c_b · D(φ) · |e|² / (A₁+A₂)`; `c_b` **calibrated by test E1** (start at 6, Grinspun's normalisation) | rsE §a3.2 |
-| **Crease** | `θ − θ_rest` (or `θ − θ_target` while driven) | `k_c = (D(φ)/L*)·|e|`, `L* = D / crease_k` from the stock (`crease_k` is per mm) ⇒ `k_c = crease_k · |e|` | Lechenault et al. 2014 |
+| **Crease** | `θ − θ_rest` (or `θ − θ_target` while driven) | `k_c = (D(φ)/L*)·|e|`, `L* = √(D11·D22) / crease_k` from the stock (`crease_k` is per mm) ⇒ `k_c = crease_k · |e| · D(φ)/√(D11·D22)`: along the grain softer than across it by D_md/D_cd (as built since lane E3, 2026-10-18; v0.1 used the mean `crease_k · |e|`, test `crease-grain`) | Lechenault et al. 2014 |
 | Score / perforation hinge | as crease | `k_c × score_factor` / `× perf_factor` | stock |
 | **Fold limit** | `|θ| ≤ π − θ_t` (unilateral) | hard | rsE §a3.5 |
 | **Glue weld** | `x_a − Σ β_k x_bk = 0` (vector; point on triangle of sheet b, barycentric β), made at **zero offset**: the join's `side` is a rendering hint, because a thickness offset along a board's normal broke the V-fold linkage (8 % strain) | hard (α = 0) | doc §5.3 |
@@ -153,7 +153,13 @@ with φ_e the angle between MD and the edge direction.
 
 ### 3.3 Crease plasticity and memory
 
-Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle`, default 0),
+Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle`, default 0;
+since lane E3, 2026-10-18, also a panel hinge on a plain `F`/`U` line the kernel set in the initial
+frame (spec §5.14), and every hinge's starting angle is taken on the branch of its rest angle, so a
+crease folded flat starts at +180° when it is a valley, not −180°: the fox-puppet `talk` started
+360° from rest and blew apart in its first substep. A document with no joins, mechanisms or
+kinematic sheets whose initial pose dips below the table is lifted onto it, with a warning; test
+`set-rest`),
 `θ_target` (set while a sequence step drives it), `memory ∈ [0, 1]`.
 
 - **Driving** (sequence step active on this hinge): the constraint uses `θ_target(t)` (eased from the
@@ -173,8 +179,18 @@ Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle
   forced (a fold made by grabbing produces a soft roll, as real paper does without a bone folder).
 - Slow logarithmic relaxation (Thiria & Adda-Bedia 2011) is a later option (`relaxation: true`), off
   by default until measured stock data exists.
+- **Bending damping** (lane E3, 2026-10-18): every hinge adds `½(β/Δt)·k·(θ − θ_start)²` to the
+  implicit step, a backward-Euler Rayleigh term (`β·k·θ̇`), with β = `BEND_DAMPING` = η/ω,
+  η = 0.025 at 4 Hz [E]. It does not move any equilibrium (test `flap-settle`: rest drop within
+  0.1 %; `E12-substeps` unchanged) and makes a released flap settle about 17 % sooner.
 - The stock card's `crease_set_rate` is **not used** in v0.1, because the plasticity above is
-  rate-independent. A rate model would be a later, measured option.
+  rate-independent. A rate model would be a later, measured option. Lane E3 (2026-10-18) checked
+  it against the spec's reading ("fraction of the excess beyond yield that becomes permanent per
+  second of hold"): at the cards' 0.5 per second a 1.5 s fold step would set about 40 % of the
+  excess, so every programmed crease would spring back far more than the card's own
+  `crease_yield_deg` (27–43° rest opening, Lechenault et al. 2014) says. It stays unused until a
+  hold-time curve is measured on a stock. The springback a viewer sees is the card's yield: a crease
+  pressed to 180° and released rests at 180° − `crease_yield_deg` (test `crease-drive`, 143.8°).
 
 ### 3.4 Contact
 

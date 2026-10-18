@@ -57,6 +57,20 @@ export const SETTLE_STRAIN = 1e-6;
 /** Compressive guard of the strain-limit pass (compression is soft, see MEMBRANE_COMPRESSION). */
 export const COMPRESSION_LIMIT = 0.01;
 
+/**
+ * Bending damping (Rayleigh, stiffness-proportional), seconds: every hinge also resists its own
+ * rate of turn with β·k·θ̇ (the "Rayleigh-like damping β" of the physics memo §a3, never built until
+ * now). Paper is viscoelastic: its loss factor in bending is a few per cent (η ≈ 0.02–0.07 for
+ * machine-made paper at room humidity, rising with moisture [E: literature range, not measured on our
+ * stocks]); β = η/ω at a reference flap frequency gives that loss to a hanging flap, more to the
+ * fast mesh-scale ripples (which real paper does not show) and none to rigid motion or to a resting
+ * pose (the equilibrium does not change). η = 0.025 at 4 Hz, the low end of the range: the damping
+ * also stiffens the sheet against position-level contact within a substep, and at η = 0.05 the
+ * tab-and-slot push (test `edge-contact`) peaked at 4.8 % stretch instead of 3.9 %; contact inside
+ * the implicit solve would remove that coupling. Test `flap-settle`.
+ */
+export const BEND_DAMPING = 0.025 / (2 * Math.PI * 4);
+
 /** Air density, g/mm³ (1.2 kg/m³). */
 export const RHO_AIR = 1.2e-6;
 

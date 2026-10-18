@@ -3,7 +3,7 @@
  * The implicit block of Tier C: stiff sheet energies solved jointly each substep.
  *
  * Energies (engine units): membrane springs ½k(l − l₀)², hinges ½k(θ − θ̄)² (+ ½k_d(θ − θ*)² while a
- * hand drives them), and point terms ½k|Π r|² (glue welds, pivots, sliders, drive points, grabs) or
+ * hand drives them, + the bending damping ½(β/Δt)k(θ − θ_start)², a backward-Euler Rayleigh term), and point terms ½k|Π r|² (glue welds, pivots, sliders, drive points, grabs) or
  * ½k(|r| − L)² for taut strings. Each substep takes one Gauss–Newton step from the inertial
  * prediction x̃: H δ = −∇E(x̃), with H = M/Δt² + Σ k ∇C ∇Cᵀ factorised by `BlockCholesky`.
  *
@@ -126,7 +126,7 @@ export function assembleAndFactor(w, x) {
   }
   const Hg = w.mesh.hinges;
   for (let h = 0; h < w.mesh.nH; h++) {
-    const k = w.hingeK[h] + (w.driveOn[h] ? w.driveK[h] * w.handScale : 0);
+    const k = w.hingeK[h] * (1 + w.bendDamp) + (w.driveOn[h] ? w.driveK[h] * w.handScale : 0);
     if (k === 0) continue;
     dihedral(x, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
     for (let i = 0; i < 4; i++) addOuter(ch, S.diagSlot[Hg[4 * h + i]], k, G12, 3 * i, G12, 3 * i);
@@ -214,7 +214,8 @@ export function gradient(w, x, g) {
     const th = unwrap(w.theta[h], raw);
     w.thetaPred[h] = th;
     HG.set(G12, 12 * h);
-    let f = w.hingeK[h] * (th - w.restTheta[h]);
+    // bending damping: β·k·θ̇ with θ̇ = (θ − θ at the substep start)/Δt (w.theta holds it until _hingeUpdate)
+    let f = w.hingeK[h] * (th - w.restTheta[h] + w.bendDamp * (th - w.theta[h]));
     if (w.driveOn[h]) f += w.driveK[h] * w.handScale * (th - w.driveTarget[h]);
     if (f === 0) continue;
     for (let i = 0; i < 4; i++) {

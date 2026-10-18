@@ -79,6 +79,16 @@ export function bendingDeff(m, phi) {
   return Math.max(v, 0.05 * Math.min(m.D11, m.D22));
 }
 
+/**
+ * Grain factor of a crease's stiffness: D(φ)/√(D11·D22), φ between MD and the curvature direction
+ * (perpendicular to the crease). The stock's `crease_k` is √(D_md·D_cd)/L*, the geometric mean; a
+ * crease parallel to the grain bends the paper in CD and is √(D_cd/D_md) of it, one across the grain
+ * √(D_md/D_cd). Isotropic stock ⇒ 1. @param {Material} m @param {number} phi
+ */
+export function creaseGrainFactor(m, phi) {
+  return bendingD(m, phi) / Math.sqrt(m.D11 * m.D22);
+}
+
 /** Membrane modulus along an edge at angle φ to MD (engine.md §3.2). @param {Material} m @param {number} phi */
 export function membraneE(m, phi) {
   const c = Math.cos(phi), s = Math.sin(phi);

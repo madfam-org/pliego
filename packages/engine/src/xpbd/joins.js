@@ -55,8 +55,9 @@ export class TermList {
 /**
  * Resolve the document's joins. Returns terms, pinned vertex groups and per-vertex weld sheet.
  * @param {any} doc @param {import('../mesh.js').Mesh} mesh @param {number} kHard
+ * @param {{glueSamples?: boolean}} [opts] glueSamples: weld sample points of glue zones that hold fewer than three mesh vertices
  */
-export function resolveJoins(doc, mesh, kHard) {
+export function resolveJoins(doc, mesh, kHard, opts = {}) {
   const terms = new TermList();
   /** @type {{verts:number[], world:number[]|null, mechanism:string|null, id:string}[]} */
   const pins = [];
@@ -94,7 +95,25 @@ export function resolveJoins(doc, mesh, kHard) {
         terms.add(TK_GLUE, TERM_FULL, [v, ...r.verts], [1, -r.w[0], -r.w[1], -r.w[2]], { join: j.id, tri: r.tri, offset: off, k: kHard });
         if (!gated.has(j.id)) weldSheet[v] = sb;
       }
+      // a glue zone narrower than the mesh (a 5 mm tab on a 10 mm mesh) holds fewer than three mesh
+      // vertices, often none: it would hold nothing, or turn like a pivot. Weld sample points of the
+      // zone instead, each a point of a's triangle (barycentric) on the mapped point of b, so the glue
+      // holds at every mesh size (backlog item 20, glue zones as welds).
+      const few = welded < 3;
+      if (few && !opts.glueSamples) warnings.push(`join ${j.id}: the glue zone holds ${welded} mesh point(s) of sheet ${doc.sheets[sa].id} at this mesh size (glueSamples welds sample points instead)`);
+      if (few && opts.glueSamples) {
+        for (const [u, w] of glueSamples(j.a.region, mesh.h)) {
+          const ra = locatePoint(mesh, sa, u, w) ?? snapPoint(mesh, sa, u, w, Math.max(doc.sheets[sa].derived.collision_thickness, 1e-3 * mesh.h));
+          if (!ra) continue;
+          const r = locatePoint(mesh, sb, ma * u + mb * w + tx, mc * u + md * w + ty) ?? snapPoint(mesh, sb, ma * u + mb * w + tx, mc * u + md * w + ty, tol);
+          if (!r) { open++; continue; }
+          welded++;
+          terms.add(TK_GLUE, TERM_FULL, [...ra.verts, ...r.verts], [...ra.w, -r.w[0], -r.w[1], -r.w[2]], { join: j.id, tri: r.tri, offset: off, k: kHard, sampled: true });
+          if (!gated.has(j.id)) for (const q of ra.verts) weldSheet[q] = sb;
+        }
+      }
       if (!welded && open) throw new Error(`join ${j.id}: no point of the glue region lands on the paper of sheet ${doc.sheets[sb].id}`);
+      if (!welded && opts.glueSamples) warnings.push(`join ${j.id}: the glue region is not on the paper of sheet ${doc.sheets[sa].id} and holds nothing`);
       if (open) warnings.push(`join ${j.id}: ${open} of ${open + welded} weld points land on an opening of sheet ${doc.sheets[sb].id} and hold nothing`);
     } else if (j.type === 'pivot') {
       const ra = loc(si(j.a.sheet), j.a.at, j.id), rb = loc(si(j.b.sheet), j.b.at, j.id);
@@ -134,6 +153,28 @@ export function resolveJoins(doc, mesh, kHard) {
     }
   }
   return { terms, pins, weldSheet, warnings };
+}
+
+/**
+ * Sample points of a glue zone for barycentric welds: the centroid, the zone's corners pulled a
+ * fifth of the way in, and points along that inset outline at most `h` apart. Deterministic.
+ * @param {number[][]} region polygon (sheet-local mm) @param {number} h mesh edge (mm)
+ * @returns {number[][]}
+ */
+export function glueSamples(region, h) {
+  const n = region.length;
+  let cx = 0, cy = 0;
+  for (const p of region) { cx += p[0]; cy += p[1]; }
+  cx /= n; cy /= n;
+  const inset = region.map((p) => [cx + 0.8 * (p[0] - cx), cy + 0.8 * (p[1] - cy)]);
+  /** @type {number[][]} */
+  const out = [[cx, cy]];
+  for (let i = 0; i < n; i++) {
+    const p = inset[i], q = inset[(i + 1) % n];
+    const k = Math.max(1, Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / h));
+    for (let s = 0; s < k; s++) out.push([p[0] + (s / k) * (q[0] - p[0]), p[1] + (s / k) * (q[1] - p[1])]);
+  }
+  return out;
 }
 
 /**

@@ -125,7 +125,7 @@ export function assembleAndFactor(w, x) {
   }
   const Hg = w.mesh.hinges;
   for (let h = 0; h < w.mesh.nH; h++) {
-    const k = w.hingeK[h] + (w.driveOn[h] ? w.driveK[h] : 0);
+    const k = w.hingeK[h] + (w.driveOn[h] ? w.driveK[h] * w.handScale : 0);
     if (k === 0) continue;
     dihedral(x, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
     for (let i = 0; i < 4; i++) addOuter(ch, S.diagSlot[Hg[4 * h + i]], k, G12, 3 * i, G12, 3 * i);
@@ -214,7 +214,7 @@ export function gradient(w, x, g) {
     w.thetaPred[h] = th;
     HG.set(G12, 12 * h);
     let f = w.hingeK[h] * (th - w.restTheta[h]);
-    if (w.driveOn[h]) f += w.driveK[h] * (th - w.driveTarget[h]);
+    if (w.driveOn[h]) f += w.driveK[h] * w.handScale * (th - w.driveTarget[h]);
     if (f === 0) continue;
     for (let i = 0; i < 4; i++) {
       const v = 3 * Hg[4 * h + i];

@@ -1,0 +1,634 @@
+{
+ "edges_assignment": [
+  "B",
+  "B",
+  "B",
+  "V",
+  "B",
+  "M",
+  "B",
+  "V",
+  "V",
+  "M",
+  "V",
+  "V",
+  "M",
+  "V",
+  "B",
+  "B",
+  "B",
+  "B"
+ ],
+ "edges_foldAngle": [
+  0,
+  0,
+  0,
+  180,
+  0,
+  -180,
+  0,
+  180,
+  180,
+  -180,
+  180,
+  180,
+  -180,
+  180,
+  0,
+  0,
+  0,
+  0
+ ],
+ "edges_vertices": [
+  [
+   0,
+   1
+  ],
+  [
+   0,
+   7
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   1,
+   4
+  ],
+  [
+   2,
+   3
+  ],
+  [
+   2,
+   6
+  ],
+  [
+   3,
+   9
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   4,
+   6
+  ],
+  [
+   4,
+   7
+  ],
+  [
+   5,
+   6
+  ],
+  [
+   5,
+   8
+  ],
+  [
+   5,
+   10
+  ],
+  [
+   6,
+   9
+  ],
+  [
+   7,
+   8
+  ],
+  [
+   8,
+   11
+  ],
+  [
+   9,
+   10
+  ],
+  [
+   10,
+   11
+  ]
+ ],
+ "faces_vertices": [
+  [
+   0,
+   7,
+   4,
+   1
+  ],
+  [
+   1,
+   4,
+   6,
+   2
+  ],
+  [
+   2,
+   6,
+   9,
+   3
+  ],
+  [
+   4,
+   5,
+   6
+  ],
+  [
+   4,
+   7,
+   8,
+   5
+  ],
+  [
+   5,
+   8,
+   11,
+   10
+  ],
+  [
+   5,
+   10,
+   9,
+   6
+  ]
+ ],
+ "file_classes": [
+  "singleModel"
+ ],
+ "file_creator": "pliego-kernel 0.3.0",
+ "file_frames": [
+  {
+   "frame_attributes": [
+    "3D"
+   ],
+   "frame_classes": [
+    "foldedForm"
+   ],
+   "frame_inherit": true,
+   "frame_parent": 0,
+   "frame_title": "target:flat-folded",
+   "vertices_coords": [
+    [
+     40,
+     0,
+     -10.717968
+    ],
+    [
+     40,
+     0,
+     -82.489314
+    ],
+    [
+     38.000381,
+     0,
+     -71.148909
+    ],
+    [
+     38.000378,
+     0,
+     -126.426278
+    ],
+    [
+     68.452995,
+     0,
+     -80
+    ],
+    [
+     64.980032,
+     0,
+     -60.303845
+    ],
+    [
+     83.773884,
+     0,
+     -67.144248
+    ],
+    [
+     87.871606,
+     0,
+     -38.356653
+    ],
+    [
+     77.050718,
+     0,
+     -34.418172
+    ],
+    [
+     100.15619,
+     0,
+     -90.540608
+    ],
+    [
+     91.334922,
+     0,
+     -97.94253
+    ],
+    [
+     139.206528,
+     0,
+     -70.303846
+    ]
+   ]
+  }
+ ],
+ "file_spec": 1.2,
+ "file_title": "Triangle twist",
+ "frame_attributes": [
+  "2D",
+  "noCuts",
+  "noJoins"
+ ],
+ "frame_classes": [
+  "creasePattern"
+ ],
+ "frame_unit": "mm",
+ "pliego:controls": [
+  {
+   "default": 0,
+   "id": "sequence",
+   "kind": "sequence",
+   "label": {
+    "en": "Fold program",
+    "es": "Secuencia de pliegues",
+    "fr": "Séquence de pliage",
+    "pt": "Sequência de dobras"
+   },
+   "max": 3,
+   "min": 0,
+   "unit": "step"
+  }
+ ],
+ "pliego:edges_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:edges_treatment": [
+  "none",
+  "none",
+  "none",
+  "crease",
+  "none",
+  "crease",
+  "none",
+  "crease",
+  "crease",
+  "crease",
+  "crease",
+  "crease",
+  "crease",
+  "crease",
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "pliego:faces_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "pliego:meta": {
+  "cartridge": "hexagonal-twist",
+  "digest": "sha256:39094f224b3d8f0193ea45a9d39c3839a5b10362774c98d85a79e605fc8a0052",
+  "kernel": "pliego-kernel 0.3.0",
+  "mode": "triangle",
+  "params": {
+   "alpha_hex": 35,
+   "alpha_tri": 55,
+   "inner": 20,
+   "sheet_size": 160,
+   "stock": "kami"
+  }
+ },
+ "pliego:sequence": {
+  "mode": "physical",
+  "steps": [
+   {
+    "duration_ms": 2000,
+    "id": "pre-fold-pleats",
+    "label": {
+     "en": "Pre-fold the pleats halfway, mountains and valleys",
+     "es": "Dobla los pliegues a medias, montes y valles",
+     "fr": "Préplier les plis à mi-course, montagnes et vallées",
+     "pt": "Dobre as pregas até a metade, montanhas e vales"
+    },
+    "note": null,
+    "release": [],
+    "targets": [
+     [
+      5,
+      -90
+     ],
+     [
+      3,
+      90
+     ],
+     [
+      9,
+      -90
+     ],
+     [
+      11,
+      90
+     ],
+     [
+      12,
+      -90
+     ],
+     [
+      13,
+      90
+     ],
+     [
+      8,
+      20
+     ],
+     [
+      7,
+      20
+     ],
+     [
+      10,
+      20
+     ]
+    ]
+   },
+   {
+    "duration_ms": 2500,
+    "id": "twist",
+    "label": {
+     "en": "Turn the centre triangle while the pleats close round it",
+     "es": "Gira el triángulo central mientras los pliegues se cierran a su alrededor",
+     "fr": "Tourner le triangle central pendant que les plis se referment autour",
+     "pt": "Gire o triângulo central enquanto as pregas se fecham à sua volta"
+    },
+    "note": {
+     "en": "The kernel's motion solver finds no rigid path: the panels bend on the way.",
+     "es": "El solucionador de movimiento del núcleo no encuentra una trayectoria rígida: los paneles se curvan por el camino.",
+     "fr": "Le solveur de mouvement du noyau ne trouve aucune trajectoire rigide : les panneaux se courbent en chemin.",
+     "pt": "O solucionador de movimento do núcleo não encontra trajetória rígida: os painéis curvam-se pelo caminho."
+    },
+    "release": [],
+    "targets": [
+     [
+      5,
+      -150
+     ],
+     [
+      3,
+      150
+     ],
+     [
+      9,
+      -150
+     ],
+     [
+      11,
+      150
+     ],
+     [
+      12,
+      -150
+     ],
+     [
+      13,
+      150
+     ],
+     [
+      8,
+      120
+     ],
+     [
+      7,
+      120
+     ],
+     [
+      10,
+      120
+     ]
+    ]
+   },
+   {
+    "duration_ms": 2000,
+    "id": "flatten",
+    "label": {
+     "en": "Press the twist flat",
+     "es": "Aplana la torsión",
+     "fr": "Aplatir le twist",
+     "pt": "Achate a torção"
+    },
+    "note": {
+     "en": "Flat-folded: every crease at 180°.",
+     "es": "Plegado en plano: todos los pliegues a 180°.",
+     "fr": "Replié à plat : tous les plis à 180°.",
+     "pt": "Dobrado rente: todas as dobras a 180°."
+    },
+    "release": [],
+    "targets": [
+     [
+      5,
+      -180
+     ],
+     [
+      3,
+      180
+     ],
+     [
+      9,
+      -180
+     ],
+     [
+      11,
+      180
+     ],
+     [
+      12,
+      -180
+     ],
+     [
+      13,
+      180
+     ],
+     [
+      8,
+      180
+     ],
+     [
+      7,
+      180
+     ],
+     [
+      10,
+      180
+     ]
+    ]
+   }
+  ]
+ },
+ "pliego:sheets": [
+  {
+   "back": {
+    "art": null,
+    "color": "#f6f3ec"
+   },
+   "front": {
+    "art": null,
+    "color": "#d9382b"
+   },
+   "grain_deg": 90,
+   "id": "twist",
+   "kinematic": null,
+   "label": {
+    "en": "Triangular sheet",
+    "es": "Hoja triangular",
+    "fr": "Feuille triangulaire",
+    "pt": "Folha triangular"
+   },
+   "offset": [
+    -40,
+    -10.717968
+   ],
+   "placement": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "rotation": [
+     0,
+     0,
+     0,
+     1
+    ]
+   },
+   "stock": "kami"
+  }
+ ],
+ "pliego:stocks": {
+  "kami": {
+   "appearance": {
+    "back": "#f6f3ec",
+    "front": "#d9382b"
+   },
+   "caliper_mm": 0.072,
+   "derived": {
+    "D_cd": 78257.5,
+    "D_md": 170125,
+    "E_cd": 2300000000,
+    "E_md": 5000000000,
+    "G12": 1312380000,
+    "areal_density": 6.3e-05,
+    "collision_thickness": 0.072,
+    "crease_k": 8012.81,
+    "crease_set_rate": 0.5,
+    "crease_yield_deg": 35,
+    "friction": 0.4,
+    "nu": 0.293,
+    "perf_bridge_mm": 1,
+    "perf_cut_mm": 3,
+    "perf_factor": 0.25,
+    "score_factor": 0.35,
+    "score_yield_deg": 12.25,
+    "tear_strain": 0.015,
+    "thickness": 0.072
+   },
+   "derived_basis": "pliego.stock.derive v1",
+   "gsm": 63,
+   "name": {
+    "en": "Kami origami paper",
+    "es": "Papel kami para origami",
+    "fr": "Papier kami pour origami",
+    "pt": "Papel kami para origami"
+   }
+  }
+ },
+ "pliego:version": 1,
+ "pliego:vertices_sheet": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "vertices_coords": [
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   71.771346
+  ],
+  [
+   0,
+   83.286695
+  ],
+  [
+   0,
+   138.564064
+  ],
+  [
+   28.452995,
+   69.282032
+  ],
+  [
+   45.773503,
+   59.282032
+  ],
+  [
+   45.773503,
+   79.282032
+  ],
+  [
+   47.871606,
+   27.638685
+  ],
+  [
+   57.84419,
+   33.396359
+  ],
+  [
+   62.15581,
+   102.678391
+  ],
+  [
+   72.128394,
+   96.920717
+  ],
+  [
+   120,
+   69.282032
+  ]
+ ]
+}

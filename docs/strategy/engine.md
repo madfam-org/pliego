@@ -313,7 +313,9 @@ Calibration constants (`c_b`, default `hand_factor`, panel yield) live in one fi
 - quality-mode orthotropic membrane;
 - logarithmic crease relaxation;
 - in-plane plasticity, which kirigami ligaments need (`rotating-squares` stretches today);
-- edge–edge contact, which `tab-and-slot` needs;
+- general edge–edge contact. <!-- lane E2 (geo-stab, 2026-10-18) --> Bounded edge–face contact for
+  slit lips is implemented and opt-in by edge name (`interlock…`, `src/xpbd/edgecontact.js`, test
+  `edge-contact`); `tab-and-slot` opts in;
 - Tier R thickness offsets;
 - developable page upsampling;
 - ~~verifying `meta.digest`~~ <!-- lane E (wave 3) --> done: the engine recomputes it over the

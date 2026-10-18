@@ -17,13 +17,21 @@ metadata:
     # A Secret change (intake or rotation) does not restart pods on its own.
     reloader.stakater.com/auto: "true"
 spec:
-  replicas: 1
+  # Two pods, so a rollout or a node drain never empties the Service (PodDisruptionBudget pliego keeps one).
+  # Both pods are interchangeable: each has its own render cache (memory + /tmp), the prerendered tier is baked
+  # into the image, the API holds no sign-in or session state, and rate limits are per worker (docs/RUNBOOK.md).
+  # ENCLII TRAP: Enclii's Argo Application ignores a Deployment's spec.replicas (RespectIgnoreDifferences), so
+  # this value does NOT reach the live object on sync; the owner scales once (docs/DEPLOYMENT.md "Rollouts").
+  # Keep it equal to runtime.replicas in enclii.yaml (scripts/qa/verify_rollout_safety.py).
+  replicas: 2
   revisionHistoryLimit: 3
+  # Surge, never unavailable: the new pod must pass /ready before an old one stops, so even at one live
+  # replica a rollout is not an outage.
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: pliego
@@ -38,6 +46,16 @@ spec:
         enclii.dev/service: pliego
     spec:
       automountServiceAccountToken: false
+      # Soft spread across nodes: a preference, not a rule, so a one-node pool still schedules both pods.
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: pliego
       # Kubernetes injects <SERVICE>_PORT=tcp://<ip>:<port> (and friends) for every Service in the namespace
       # unless this is false. The Service `pliego` produced PLIEGO_PORT=tcp://…:80, which collided with the
       # app's own PLIEGO_PORT and crash-looped the first deploy (gunicorn: invalid literal for int()).

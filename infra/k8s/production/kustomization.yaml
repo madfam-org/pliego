@@ -11,6 +11,7 @@ namespace: pliego
 
 resources:
 - deployment.yaml
+- poddisruptionbudget.yaml
 - service.yaml
 - service-metrics.yaml
 - network-policy.yaml

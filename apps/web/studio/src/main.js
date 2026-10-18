@@ -11,7 +11,7 @@ import { engineOptions, estimateVertices, physicsFits, tooSlow } from './physics
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, createEngineOverlay, legendKinds, LINE_STYLE } from './diagram.js';
 import { createChangeTracker, keepRunning, planSteps } from './frame-loop.js';
-import { WorkerWorld, sharedEngineWorker, retireEngineWorker } from './world-proxy.js';
+import { WorkerWorld, startEngineWorker, retireEngineWorker } from './world-proxy.js';
 import { probeStep } from './engine-worker.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
 import { createRenderer, rendererOverride } from './render/index.js';
@@ -137,8 +137,15 @@ function syncSteps() {
   const id = state.controls.sequenceId;
   const v = id ? Number(state.controls.get(id)) : 0;
   state.updateSteps(v);
-  if (state.diagram) highlightStep(state.diagram, state.json, id ? stepIndex(v, state.json['pliego:sequence'].steps.length) : -1);
+  // The diagram walks every line to highlight a step: only when the step changes (playback calls
+  // this every frame).
+  const k = id ? stepIndex(v, state.json['pliego:sequence'].steps.length) : -1;
+  if (state.diagram && (state.diagram !== highlighted.svg || k !== highlighted.step)) {
+    highlightStep(state.diagram, state.json, k);
+    highlighted.svg = state.diagram; highlighted.step = k;
+  }
 }
+const highlighted = { svg: /** @type {SVGSVGElement | null} */ (null), step: -2 };
 
 function updateShare() {
   if (!state.item) return;
@@ -292,27 +299,6 @@ function syncPhysicsButton() {
   btn.setAttribute('aria-pressed', String(!!(state.engine && state.engine.kind === 'engine')));
 }
 
-/**
- * The paper engine in the shared Worker, with the document's control defaults applied and (unless
- * physics was asked for) the speed probe run there. Rejects when Workers are unavailable or the
- * Worker cannot start the engine; the caller then steps the engine on the main thread.
- * @param {any} json
- */
-function startWorkerWorld(json) {
-  if (state.share.worker === 'off') return Promise.reject(new Error('?worker=off'));
-  const worker = sharedEngineWorker(new URL('./engine-worker.js', import.meta.url));
-  if (!worker) return Promise.reject(new Error('module Workers are not available'));
-  return WorkerWorld.create(worker, {
-    engineUrl: new URL('/engine/index.js', location.href).href,
-    json,
-    opts: engineOptions(json),
-    controls: (json['pliego:controls'] || []).map((c) => [c.id, c.default]),
-    probe: !state.physicsForced,
-    onFrame: kick,
-    onStep: noteStep,
-  });
-}
-
 let docGen = 0;
 async function useDocument(json, opts = {}) {
   const gen = ++docGen;
@@ -335,7 +321,7 @@ async function useDocument(json, opts = {}) {
   let remote = null;
   if (real) {
     try {
-      remote = await startWorkerWorld(json);
+      remote = await startEngineWorker({ off: state.share.worker === 'off', json, opts: engineOptions(json), probe: !state.physicsForced, onFrame: kick, onStep: noteStep });
     } catch (e) {
       if (state.share.worker !== 'off') { console.warn(`Paper engine on the main thread: ${e instanceof Error ? e.message : e}`); retireEngineWorker(); }
     }

@@ -195,6 +195,29 @@ export function sharedEngineWorker(url) {
   return shared;
 }
 
+/**
+ * The paper engine for a document in the shared Worker, with the document's control defaults
+ * applied and (with `probe`) the speed probe run there. Rejects when module Workers are unavailable,
+ * `off` is set (`?worker=off`), or the Worker cannot start the engine; the studio then steps the
+ * engine on the main thread.
+ * @param {{off?: boolean, json: any, opts: any, probe: boolean, onFrame?: () => void, onStep?: (ms: number) => void}} o
+ * @returns {Promise<WorkerWorld>}
+ */
+export function startEngineWorker(o) {
+  if (o.off) return Promise.reject(new Error('?worker=off'));
+  const worker = sharedEngineWorker(new URL('./engine-worker.js', import.meta.url));
+  if (!worker) return Promise.reject(new Error('module Workers are not available'));
+  return WorkerWorld.create(worker, {
+    engineUrl: new URL('/engine/index.js', location.href).href,
+    json: o.json,
+    opts: o.opts,
+    controls: (o.json['pliego:controls'] || []).map((/** @type {any} */ c) => [c.id, c.default]),
+    probe: o.probe,
+    onFrame: o.onFrame,
+    onStep: o.onStep,
+  });
+}
+
 /** Forget the shared Worker after it failed, so the studio stops offering it this session. */
 export function retireEngineWorker() {
   if (shared) { try { shared.terminate(); } catch { /* already gone */ } }

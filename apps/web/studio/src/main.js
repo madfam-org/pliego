@@ -136,9 +136,8 @@ function syncSteps() {
   const id = state.controls.sequenceId;
   const v = id ? Number(state.controls.get(id)) : 0;
   state.updateSteps(v);
-  // highlightStep walks every diagram line: only when the step changes (playback runs every frame)
   const k = id ? stepIndex(v, state.json['pliego:sequence'].steps.length) : -1;
-  if (state.diagram && (state.diagram !== highlighted.svg || k !== highlighted.step)) {
+  if (state.diagram && (state.diagram !== highlighted.svg || k !== highlighted.step)) {   // it walks every line
     highlightStep(state.diagram, state.json, k);
     highlighted.svg = state.diagram; highlighted.step = k;
   }
@@ -576,7 +575,8 @@ async function init() {
   state.engine = state.physicsWanted ? state.physics : state.preview;
   const canvas = $('view-canvas');
   state.renderer = createRenderer(canvas, { prefer: rendererOverride(state.share.renderer), onWarn: (m) => console.warn(m), onInvalidate: invalidate });
-  if (state.renderer && typeof ResizeObserver === 'function') new ResizeObserver(invalidate).observe(state.renderer.canvas);
+  const rd = state.renderer;   // the observer hands the size over: drawing never forces a layout
+  if (rd && typeof ResizeObserver === 'function') new ResizeObserver((es) => { rd.resize(es[0].contentRect.width, es[0].contentRect.height); invalidate(); }).observe(rd.canvas);
   if (!state.renderer) notice(i18n.t('viewer.none'));
   else if (state.renderer.kind === 'canvas2d' && rendererOverride(state.share.renderer) !== 'canvas2d') notice(i18n.t('viewer.canvas2d'));
   const noticeText = $('viewer-notice').textContent;

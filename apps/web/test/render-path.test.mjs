@@ -302,3 +302,16 @@ test('a Worker engine is paced at real time when fast and stepped back to back w
   await settle(w);
   w.dispose();
 });
+
+test('drawing never reads layout once the observer handed the canvas size over', () => {
+  const { gl } = fakeGl();
+  let reads = 0;
+  const canvas = { width: 0, height: 0, getContext: () => gl, get clientWidth() { reads++; return 640; }, get clientHeight() { reads++; return 480; } };
+  const r = createWebGLRenderer(/** @type {any} */ (canvas));
+  const world = new stub.World(stub.loadDocument(demo('pliego-half-fold.fold')), { seed: 1 });
+  r.resize(500, 400);
+  reads = 0;
+  for (let k = 0; k < 5; k++) r.draw(world.render(), null, k === 0);
+  assert.equal(reads, 0);
+  assert.deepEqual([canvas.width, canvas.height], [500, 400], 'Node has no devicePixelRatio: 1');
+});

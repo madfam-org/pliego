@@ -68,6 +68,7 @@ export function createWebGLRenderer(canvas, opts = {}) {
   const warn = opts.onWarn || (() => {});
   const invalidate = opts.onInvalidate || (() => {});
   const coarse = coarsePointer();
+  /** @type {number[] | null} */ let cssSize = null;
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false, preserveDrawingBuffer: false });
   if (!gl) throw new Error('WebGL2 unavailable');
   const camera = new OrbitCamera();
@@ -299,9 +300,16 @@ export function createWebGLRenderer(canvas, opts = {}) {
 
     refreshTheme() { theme = readTheme(canvas); },
 
-    resize() {
-      // Pixel ratio capped (1.5 on touch devices) and a pixel budget: see frame-loop.js.
-      const [w, h] = backingSize(canvas.clientWidth, canvas.clientHeight, globalThis.devicePixelRatio || 1, coarse);
+    /**
+     * Pixel ratio capped (1.5 on touch devices) and a pixel budget: see frame-loop.js. With a CSS
+     * size (from a ResizeObserver) it is remembered, so drawing never reads layout; without one the
+     * canvas is measured (a forced layout when the page changed since).
+     * @param {number} [cssW] @param {number} [cssH]
+     */
+    resize(cssW, cssH) {
+      if (cssW > 0 && cssH > 0) cssSize = [cssW, cssH];
+      const [cw, ch] = cssSize || [canvas.clientWidth, canvas.clientHeight];
+      const [w, h] = backingSize(cw, ch, globalThis.devicePixelRatio || 1, coarse);
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     },
 

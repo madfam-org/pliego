@@ -14,7 +14,7 @@ import { createCanvas2DRenderer } from './canvas2d.js';
  * @property {HTMLCanvasElement} canvas
  * @property {(sheets: any[], baseUrl?: string) => void} setSheets
  * @property {() => void} refreshTheme
- * @property {() => void} resize
+ * @property {(cssW?: number, cssH?: number) => void} resize
  * @property {(r: any, overlay: {positions: Float32Array, colors: Float32Array, faint?: boolean} | null, meshChanged?: boolean) => any} draw
  * @property {{frames: number, meshUploads: number, shadowPasses: number}} [stats]
  * @property {() => void} destroy

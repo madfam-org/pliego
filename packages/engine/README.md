@@ -207,6 +207,22 @@ exact (∇E = f_ext) whatever the age of the factorisation, and test `E12-subste
   exact mesh edges. Cut edges duplicate their vertices; cut tips stay shared.
 - **Bending.** Each hinge carries `k_b = C_B·D_eff(φ)·|e|²/(A₁+A₂)`. `D_eff` is the orthotropic
   D(φ), Fourier-deconvolved so that hinge sums reproduce D(φ) in every bending direction.
+- **Creases follow the grain** (lane E3, 2026-10-18). A crease, score or perforation hinge carries
+  `crease_k·|e|·factor·D(φ)/√(D11·D22)`: the stock's `crease_k` is the geometric mean
+  √(D_md·D_cd)/L*, and a crease bends the paper across it, so its stiffness follows D(φ) of that
+  direction (Lechenault et al. 2014, κ = D/L*). Folding along the grain is softer than folding
+  across it by the card's D_md/D_cd (2.2 for copy paper; a laminate uses its free stack's D11/D22).
+  Before, every crease had the mean stiffness whatever its direction. Test `crease-grain` (a flap
+  hanging from a crease sags 2.20× further along the grain than across it; 1.00× before).
+- **Bending damping** (`BEND_DAMPING`, lane E3). Every hinge also resists its own rate of turn,
+  β·k·θ̇ (backward-Euler Rayleigh term in the implicit step; the physics memo's "Rayleigh-like β").
+  β = η/ω with a loss factor η = 0.025 at 4 Hz, the low end of paper's few-per-cent range
+  [estimated, not measured on our stocks]. A released 100 mm copy-paper flap settles to ±0.5 mm in
+  1.60 s instead of 1.92 s, swings 15 times instead of 18, and the world goes to sleep at frame 586
+  (it never slept within 10 s before); the resting pose is unchanged (equilibrium independent of
+  β). Higher η stiffens the sheet against position-level contact inside a substep (the tab-and-slot
+  push peaked at 4.8 % stretch at η = 0.05 against 3.9 % without damping), so it waits for contact
+  inside the implicit solve. Test `flap-settle`.
 - **Membrane.** Per-edge springs use `E(φ)·t·w_e/l₀`, with the modulus capped at
   `MEMBRANE_CAP_LENGTH·ρ_A·g`. Compression is soft (5 % of tension stiffness), which removes
   membrane locking and matches fibre-scale buckling.
@@ -252,6 +268,7 @@ Tests: `determinism-replay` and `determinism-snapshot`.
 | `CONTACT_PASSES` | 3 | `contact-stack` |
 | `MODEL_COMPRESSION` | 0.25 | `E12-substeps`, `contact-stack` (Newton model never underestimates a stretched edge) |
 | `SLEEP_SPEED` / `SLEEP_FRAMES` | 1e-5 mm/s / 30 | `E2-cantilever` (µm deflections settle before sleeping) |
+| `BEND_DAMPING` | η/ω = 0.025/(2π·4 Hz) ≈ 1.0 ms (World option `bendDamping`) | `flap-settle`; kept low by `edge-contact` |
 | `PCG_MAX_ITER` / `PCG_REFACTOR_ITER` / `PCG_RTOL` / `REFACTOR_ANGLE` | 12 / 6 / 1e-3 / 0.3 rad | `E12-substeps` (equilibrium independent of these) |
 
 ## Board (corrugated and folding boxboard)

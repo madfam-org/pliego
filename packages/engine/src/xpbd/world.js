@@ -13,7 +13,7 @@
  */
 import { loadDocument } from '../document.js';
 import { buildMesh, HINGE_PANEL, HINGE_CREASE, HINGE_SCORE, HINGE_PERF } from '../mesh.js';
-import { fromDerived, bendingDeff, membraneE } from '../material.js';
+import { fromDerived, bendingDeff, membraneE, creaseGrainFactor } from '../material.js';
 import { dihedral } from './dihedral.js';
 import { buildSystem, assembleAndFactor, gradient, unwrap, TERM_STRING, termResidual } from './implicit.js';
 import { resolveJoins, updateTerms, TK_STRING, TK_PERF } from './joins.js';
@@ -36,7 +36,8 @@ export class World {
    * @param {any} docOrJson a loaded document (from loadDocument) or raw JSON
    * @param {{meshEdge?:number, substeps?:number, contact?:boolean, ground?:boolean, gravity?:boolean|number, seed?:number,
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
-   *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean}} [opts]
+   *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
+   *   bendDamping?:number}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -65,6 +66,8 @@ export class World {
     this.kCompFactor = opts.membraneCompression ?? K.MEMBRANE_COMPRESSION;
     this.kCompModel = Math.max(this.kCompFactor, K.MODEL_COMPRESSION);
     this.dt = 1 / (60 * this.opts.substeps);
+    /** Bending damping as a multiple of each hinge's stiffness per substep: β/Δt (constants.js BEND_DAMPING). */
+    this.bendDamp = (opts.bendDamping ?? K.BEND_DAMPING) / this.dt;
     this._initElements();
     // joins and drivers
     let kmax = 0;
@@ -167,7 +170,9 @@ export class World {
         this.yieldRad[h] = K.PANEL_YIELD_DEG * Math.PI / 180;
       } else {
         const f = kind === HINGE_SCORE ? m.scoreFactor : kind === HINGE_PERF ? m.perfFactor : 1;
-        this.hingeK[h] = m.creaseK * L * f;
+        // a crease bends the paper across it: its stiffness follows D(φ) of the curvature direction
+        // (Lechenault et al. 2014: κ = D/L*), so a fold along the grain is softer than one across it
+        this.hingeK[h] = m.creaseK * L * f * creaseGrainFactor(m, mesh.hingePhi[h]);
         this.yieldRad[h] = kind === HINGE_CREASE ? m.yieldRad : kind === HINGE_SCORE ? m.scoreYieldRad : m.perfYieldRad;
       }
       const d = mesh.hingeDoc[h];

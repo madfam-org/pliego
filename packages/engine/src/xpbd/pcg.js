@@ -98,7 +98,7 @@ export function hessianTimes(w, x, p, out) {
   }
   const H = w.mesh.hinges, G = w.hingeGrad;
   for (let h = 0; h < w.mesh.nH; h++) {
-    const k = w.hingeK[h] + (w.driveOn[h] ? w.driveK[h] * w.handScale : 0);
+    const k = w.hingeK[h] * (1 + w.bendDamp) + (w.driveOn[h] ? w.driveK[h] * w.handScale : 0);
     if (k === 0) continue;
     let s = 0;
     for (let i = 0; i < 4; i++) { const v = 3 * H[4 * h + i], g = 12 * h + 3 * i; s += G[g] * p[v] + G[g + 1] * p[v + 1] + G[g + 2] * p[v + 2]; }

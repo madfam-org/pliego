@@ -19,7 +19,7 @@
     "/health": {
       "get": {
         "operationId": "health",
-        "summary": "Liveness, with commons, kernel and stock counts.",
+        "summary": "Liveness, with commons, kernel and stock counts and the build revision.",
         "responses": {
           "200": {
             "description": "The process is alive. `kernel` is null when the kernel cannot be imported.",
@@ -574,6 +574,14 @@
           "prerendered": {
             "type": "integer",
             "description": "Entries in the prerendered render-cache tier built into this image (apps/api/prerender.py)."
+          },
+          "revision": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{7,40}$",
+            "description": "The git commit this image was built from (build arg PLIEGO_REVISION, set by build-deploy.yml); null when unset (a source checkout or a local build)."
           }
         }
       },

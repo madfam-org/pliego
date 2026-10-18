@@ -89,7 +89,8 @@ def kernel_status() -> tuple[bool, str | None, str]:
 
 def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
                      metrics: Metrics, limiter: RateLimiter, slot: RenderSlot,
-                     thumbnails: ThumbnailStore, cache: RenderCache, *, version: str, require_commons: bool, trusted_header: str) -> Blueprint:
+                     thumbnails: ThumbnailStore, cache: RenderCache, *, version: str, require_commons: bool, trusted_header: str,
+                     revision: str | None = None) -> Blueprint:
     bp = Blueprint("api_v1", __name__)
 
     @bp.get("/health")
@@ -108,6 +109,7 @@ def create_blueprint(catalog: Catalog, stocks: StockLibrary, renderer: Renderer,
             "stocks_invalid": len(stock_state["invalid"]),
             "thumbnails": thumbnails.count(),
             "prerendered": cache.prerendered.count() if cache.prerendered is not None else 0,
+            "revision": revision,
         })
 
     @bp.get("/ready")

@@ -186,9 +186,37 @@ def test_health_contract(client):
     assert '"status": "ok"' in text  # the Enclii status probes assert this literal
     assert "localhost:" not in text
     body = resp.get_json()
-    for key in ("version", "commons", "kernel", "stocks", "commons_invalid", "stocks_invalid"):
+    for key in ("version", "commons", "kernel", "stocks", "commons_invalid", "stocks_invalid",
+                "thumbnails", "prerendered", "revision"):
         assert key in body
     assert body["commons"] == 1
+    assert body["revision"] is None  # no PLIEGO_REVISION: a source checkout or a local build
+
+
+def test_health_reports_the_build_revision(make_app):
+    sha = "43e1c757857171099a75acdbace5ec0f1694adef"
+    body = make_app(revision=sha).test_client().get("/health").get_json()
+    assert body["revision"] == sha
+
+
+@pytest.mark.parametrize("raw,expected", [
+    (None, None), ("", None), ("  ", None),
+    ("43e1c75", "43e1c75"),
+    ("43e1c757857171099a75acdbace5ec0f1694adef", "43e1c757857171099a75acdbace5ec0f1694adef"),
+])
+def test_revision_from_env(raw, expected):
+    from apps.api.config import Settings
+
+    env = {} if raw is None else {"PLIEGO_REVISION": raw}
+    assert Settings.from_env(env).revision == expected
+
+
+@pytest.mark.parametrize("raw", ["main", "43E1C75", "abc", "43e1c75 ; rm", "g" * 40, "a" * 41])
+def test_revision_that_is_not_a_commit_fails_the_boot(raw):
+    from apps.api.config import Settings
+
+    with pytest.raises(RuntimeError, match="PLIEGO_REVISION"):
+        Settings.from_env({"PLIEGO_REVISION": raw})
 
 
 def test_ready_contract(client):

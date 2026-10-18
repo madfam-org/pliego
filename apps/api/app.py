@@ -103,7 +103,7 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     app.register_blueprint(create_blueprint(
         catalog, stocks, renderer, metrics, limiter, slot, previews, cache,
-        version=VERSION,
+        version=VERSION, revision=settings.revision,
         require_commons=settings.require_commons, trusted_header=settings.trusted_ip_header))
     thumbnails_mod.register(app, previews)  # before the static catch-all: /projects/<slug>.svg
     static_routes.register(app, settings, hosts, api_index)

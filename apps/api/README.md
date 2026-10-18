@@ -55,6 +55,7 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 | `PLIEGO_RENDER_CACHE_DISK_MB` | `32` | render cache disk tier shared by the pod's workers, MiB (`0` turns it off) |
 | `PLIEGO_RENDER_CACHE_DIR` | `$TMPDIR/pliego-render-cache` | the disk tier's directory (atomic writes; corrupt entries are ignored) |
 | `PLIEGO_COMMONS_SHA` | unset | the commons commit for the cache key when there is no `.git` (the image); the cartridge's source digest keeps the key exact without it |
+| `PLIEGO_REVISION` | unset | the git commit the image was built from, reported as `revision` by `/health` (`null` when unset). The Dockerfile's `ARG PLIEGO_REVISION` sets it; `build-deploy.yml` passes `github.sha`. A value that is not 7–40 lowercase hex fails the boot |
 | `PLIEGO_PLAUSIBLE_ORIGIN` | unset | adds that https origin to `script-src`/`connect-src` on the landing host only |
 | `PLIEGO_DEV` | unset | local development switch |
 | `PLIEGO_ROOT`, `PLIEGO_PROJECTS_DIR`, `PLIEGO_MATERIALS_DIR` | repository paths | overrides (tests) |

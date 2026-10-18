@@ -10,6 +10,7 @@ PLIEGO_TRUSTED_PROXY_HEADER, PLIEGO_METRICS_PORT; PLIEGO_DEV=1 is the local-deve
 from __future__ import annotations
 
 import os
+import re
 import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -26,6 +27,7 @@ RENDER_TIMEOUT_S = 30.0
 RENDER_CACHE_MB = 16.0       # per-worker memory tier (apps/api/render_cache.py)
 RENDER_CACHE_DISK_MB = 32.0  # shared disk tier under /tmp (an emptyDir of 128 Mi in production)
 DEFAULT_RATE_LIMIT = (30, 60.0)  # requests per window (seconds) per client, per worker
+_REVISION_RE = re.compile(r"^[0-9a-f]{7,40}$")
 
 
 def _truthy(value: str | None) -> bool:
@@ -60,6 +62,19 @@ def _megabytes(env: Mapping[str, str], name: str, default: float) -> float:
     return value
 
 
+def _revision(raw: str | None) -> str | None:
+    """The git commit the image was built from (``PLIEGO_REVISION``, set from the build arg).
+
+    Unset or empty → None (a source checkout, a local build). A value that is not 7-40 lowercase
+    hex raises: /health must never report a revision that is not a commit."""
+    value = (raw or "").strip()
+    if not value:
+        return None
+    if not _REVISION_RE.match(value):
+        raise RuntimeError(f"PLIEGO_REVISION must be a git commit SHA (7-40 hex), got {raw!r}")
+    return value
+
+
 @dataclass(frozen=True)
 class Settings:
     root: Path = DEFAULT_ROOT
@@ -81,6 +96,7 @@ class Settings:
     render_cache_disk_mb: float = RENDER_CACHE_DISK_MB
     render_cache_dir: Path | None = None
     plausible_origin: str = ""
+    revision: str | None = None
 
     # ── derived paths ────────────────────────────────────────────────────────
     @property
@@ -153,4 +169,5 @@ class Settings:
             render_cache_disk_mb=_megabytes(env, "PLIEGO_RENDER_CACHE_DISK_MB", RENDER_CACHE_DISK_MB),
             render_cache_dir=Path(cache_dir) if cache_dir else None,
             plausible_origin=(env.get("PLIEGO_PLAUSIBLE_ORIGIN") or "").strip(),
+            revision=_revision(env.get("PLIEGO_REVISION")),
         )

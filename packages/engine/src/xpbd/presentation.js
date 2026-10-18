@@ -8,6 +8,7 @@
  * (`root_face` only matters to a rigid preview, which holds that face still; the physics engine
  * holds nothing still, so here it only fixes the centroid the rotation turns about.)
  */
+import { hypot4 } from '../fastmath.js';
 
 export class Presentation {
   /** @param {any} w World (mesh built) */
@@ -76,7 +77,7 @@ export class Presentation {
 
 /** Rotation `q` (unit quaternion [x, y, z, w]) scaled to fraction `f` of its angle. @param {number[]} q @param {number} f */
 export function slerpFromIdentity(q, f) {
-  const L = Math.hypot(q[0], q[1], q[2], q[3]) || 1;
+  const L = hypot4(q[0], q[1], q[2], q[3]) || 1;
   let x = q[0] / L, y = q[1] / L, z = q[2] / L, s = q[3] / L;
   if (s < 0) { x = -x; y = -y; z = -z; s = -s; }
   const half = Math.acos(Math.min(1, s)), sh = Math.sin(half);

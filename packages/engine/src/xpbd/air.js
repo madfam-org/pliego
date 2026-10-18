@@ -7,6 +7,7 @@
  */
 import { RHO_AIR, DRAG_CD } from '../constants.js';
 import { mulberry32 } from '../geom.js';
+import { hypot3 } from '../fastmath.js';
 
 export class Wind {
   /** @param {number} seed @param {number[]} dir */
@@ -52,12 +53,13 @@ export function addAirForces(mesh, x, v, f, wind, speed, t) {
     const ux = x[b] - x[a], uy = x[b + 1] - x[a + 1], uz = x[b + 2] - x[a + 2];
     const qx = x[c] - x[a], qy = x[c + 1] - x[a + 1], qz = x[c + 2] - x[a + 2];
     let nx = uy * qz - uz * qy, ny = uz * qx - ux * qz, nz = ux * qy - uy * qx;
-    const n2 = Math.hypot(nx, ny, nz);
+    const n2 = hypot3(nx, ny, nz);
     if (n2 === 0) continue;
     const A = 0.5 * n2;
     nx /= n2; ny /= n2; nz /= n2;
     const cx = (x[a] + x[b] + x[c]) / 3, cy = (x[a + 1] + x[b + 1] + x[c + 1]) / 3, cz = (x[a + 2] + x[b + 2] + x[c + 2]) / 3;
-    wind.at(speed, t, cx, cy, cz, WV);
+    // still air (the usual case): skip the call, which returns zero (and boxes its four double arguments)
+    if (speed === 0) { WV[0] = 0; WV[1] = 0; WV[2] = 0; } else wind.at(speed, t, cx, cy, cz, WV);
     const rx = (v[a] + v[b] + v[c]) / 3 - WV[0], ry = (v[a + 1] + v[b + 1] + v[c + 1]) / 3 - WV[1], rz = (v[a + 2] + v[b + 2] + v[c + 2]) / 3 - WV[2];
     const vn = rx * nx + ry * ny + rz * nz;
     const mag = (-k * A * vn * Math.abs(vn)) / 3;

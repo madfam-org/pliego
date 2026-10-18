@@ -9,6 +9,7 @@
  * gradient is always exact.
  */
 import { termProjector, TERM_STRING } from './implicit.js';
+import { hypot4 } from '../fastmath.js';
 
 /**
  * Best-fit rotation R (row-major 3×3) taking positions X0 to X over the free vertices (Horn 1987,
@@ -19,37 +20,52 @@ import { termProjector, TERM_STRING } from './implicit.js';
  */
 export function bestRotation(X0, X, fi) {
   let n = 0;
-  const c0 = [0, 0, 0], c1 = [0, 0, 0];
+  const c0 = C0, c1 = C1;
+  c0.fill(0); c1.fill(0);
   for (let i = 0; i < fi.length; i++) { if (fi[i] < 0) continue; n++; for (let c = 0; c < 3; c++) { c0[c] += X0[3 * i + c]; c1[c] += X[3 * i + c]; } }
-  if (!n) return [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  const out = ROT;
+  if (!n) { out.fill(0); out[0] = 1; out[4] = 1; out[8] = 1; return out; }
   for (let c = 0; c < 3; c++) { c0[c] /= n; c1[c] /= n; }
-  const S = new Float64Array(9);
+  const S = S9;
+  S.fill(0);
   for (let i = 0; i < fi.length; i++) {
     if (fi[i] < 0) continue;
     const a0 = X0[3 * i] - c0[0], a1 = X0[3 * i + 1] - c0[1], a2 = X0[3 * i + 2] - c0[2];
     const b0 = X[3 * i] - c1[0], b1 = X[3 * i + 1] - c1[1], b2 = X[3 * i + 2] - c1[2];
     S[0] += a0 * b0; S[1] += a0 * b1; S[2] += a0 * b2; S[3] += a1 * b0; S[4] += a1 * b1; S[5] += a1 * b2; S[6] += a2 * b0; S[7] += a2 * b1; S[8] += a2 * b2;
   }
-  const [xx, xy, xz, yx, yy, yz, zx, zy, zz] = S;
-  const N = [xx + yy + zz, yz - zy, zx - xz, xy - yx, yz - zy, xx - yy - zz, xy + yx, zx + xz, zx - xz, xy + yx, -xx + yy - zz, yz + zy, xy - yx, zx + xz, yz + zy, -xx - yy + zz];
+  const xx = S[0], xy = S[1], xz = S[2], yx = S[3], yy = S[4], yz = S[5], zx = S[6], zy = S[7], zz = S[8];
+  const N = N16;
+  N[0] = xx + yy + zz; N[1] = yz - zy; N[2] = zx - xz; N[3] = xy - yx;
+  N[4] = yz - zy; N[5] = xx - yy - zz; N[6] = xy + yx; N[7] = zx + xz;
+  N[8] = zx - xz; N[9] = xy + yx; N[10] = -xx + yy - zz; N[11] = yz + zy;
+  N[12] = xy - yx; N[13] = zx + xz; N[14] = yz + zy; N[15] = -xx - yy + zz;
   let shift = 0;
   for (let i = 0; i < 16; i++) shift += Math.abs(N[i]);
-  let q = [1, 0, 0, 0];
+  // power iteration on two alternating buffers (the same arithmetic as fresh arrays, no garbage)
+  let q = QA, r = QB;
+  q[0] = 1; q[1] = 0; q[2] = 0; q[3] = 0;
   for (let it = 0; it < 60; it++) {
-    const r = [0, 0, 0, 0];
     for (let a = 0; a < 4; a++) { let sum = shift * q[a]; for (let b = 0; b < 4; b++) sum += N[4 * a + b] * q[b]; r[a] = sum; }
-    const L = Math.hypot(r[0], r[1], r[2], r[3]) || 1;
+    const L = hypot4(r[0], r[1], r[2], r[3]) || 1;
     let d = 0;
     for (let a = 0; a < 4; a++) { r[a] /= L; d += Math.abs(r[a] - q[a]); }
-    q = r;
+    const t = q; q = r; r = t;
     if (d < 1e-14) break;
   }
-  const [w, x, y, z] = q;
-  return [w * w + x * x - y * y - z * z, 2 * (x * y - w * z), 2 * (x * z + w * y), 2 * (x * y + w * z), w * w - x * x + y * y - z * z, 2 * (y * z - w * x), 2 * (x * z - w * y), 2 * (y * z + w * x), w * w - x * x - y * y + z * z];
+  const w = q[0], x = q[1], y = q[2], z = q[3];
+  out[0] = w * w + x * x - y * y - z * z; out[1] = 2 * (x * y - w * z); out[2] = 2 * (x * z + w * y);
+  out[3] = 2 * (x * y + w * z); out[4] = w * w - x * x + y * y - z * z; out[5] = 2 * (y * z - w * x);
+  out[6] = 2 * (x * z - w * y); out[7] = 2 * (y * z + w * x); out[8] = w * w - x * x - y * y + z * z;
+  return out;
 }
 
+// bestRotation's scratch (one solve at a time; the returned rotation is valid until the next call)
+const C0 = new Float64Array(3), C1 = new Float64Array(3), S9 = new Float64Array(9), N16 = new Float64Array(16);
+const QA = new Float64Array(4), QB = new Float64Array(4), ROT = new Float64Array(9);
+
 /** z ← R·P⁻¹·Rᵀ·z per 3-vector block (co-rotated stale preconditioner). */
-function precond(/** @type {any} */ ch, /** @type {Float64Array} */ z, /** @type {number[]|null} */ R) {
+function precond(/** @type {any} */ ch, /** @type {Float64Array} */ z, /** @type {ArrayLike<number>|null} */ R) {
   if (!R) { ch.solve(z); return; }
   for (let i = 0; i < z.length; i += 3) {
     const a = z[i], b = z[i + 1], c = z[i + 2];
@@ -110,7 +126,7 @@ export function hessianTimes(w, x, p, out) {
  */
 export function pcgStep(w, x, g, maxIter, rtol) {
   const S = w.sys, ch = S.ch, fi = S.freeIdx, nV = w.mesh.nV, n3 = 3 * S.nFree;
-  const W = w._pcg ?? (w._pcg = { r: new Float64Array(n3), z: new Float64Array(n3), p: new Float64Array(n3), d: new Float64Array(n3), pv: new Float64Array(3 * nV), Ap: new Float64Array(3 * nV) });
+  const W = w._pcg !== null ? w._pcg : (w._pcg = { r: new Float64Array(n3), z: new Float64Array(n3), p: new Float64Array(n3), d: new Float64Array(n3), pv: new Float64Array(3 * nV), Ap: new Float64Array(3 * nV) });
   const { r, z, p, d, pv, Ap } = W;
   for (let i = 0; i < nV; i++) { const k = fi[i]; if (k < 0) continue; r[3 * k] = -g[3 * i]; r[3 * k + 1] = -g[3 * i + 1]; r[3 * k + 2] = -g[3 * i + 2]; }
   d.fill(0);

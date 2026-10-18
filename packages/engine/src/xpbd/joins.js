@@ -20,6 +20,7 @@ import { locatePoint } from '../mesh.js';
 import { pointInPolygon, distPointSeg } from '../geom.js';
 import { TERM_FULL, TERM_PERP, TERM_STRING } from './implicit.js';
 import { joinGates } from '../gates.js';
+import { hypot3 } from '../fastmath.js';
 
 export const TK_GLUE = 1, TK_PIVOT = 2, TK_STRING = 3, TK_SLIDER = 4, TK_GRAB = 5, TK_DRIVE = 6, TK_PERF = 7, TK_ANCHOR = 8;
 
@@ -224,7 +225,7 @@ export function triNormal(mesh, x, t) {
   const ux = x[b] - x[a], uy = x[b + 1] - x[a + 1], uz = x[b + 2] - x[a + 2];
   const vx = x[c] - x[a], vy = x[c + 1] - x[a + 1], vz = x[c + 2] - x[a + 2];
   const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-  const L = Math.hypot(nx, ny, nz) || 1;
+  const L = hypot3(nx, ny, nz) || 1;
   return [nx / L, ny / L, nz / L];
 }
 
@@ -256,7 +257,7 @@ export function updateTerms(w, x) {
     } else if (inf.kind === TK_SLIDER) {
       const pf = baryPos(x, inf.from), pt = baryPos(x, inf.to);
       const dx = pt[0] - pf[0], dy = pt[1] - pf[1], dz = pt[2] - pf[2];
-      const L = Math.hypot(dx, dy, dz) || 1;
+      const L = hypot3(dx, dy, dz) || 1;
       T.dir[3 * t] = dx / L; T.dir[3 * t + 1] = dy / L; T.dir[3 * t + 2] = dz / L;
       if (inf.driven) {
         T.mode[t] = TERM_FULL;

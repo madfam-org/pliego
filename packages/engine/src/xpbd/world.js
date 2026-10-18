@@ -27,6 +27,7 @@ import { snapshotWorld, restoreWorld } from './state.js';
 import { JoinGates } from './gates.js';
 import { Presentation } from './presentation.js';
 import * as K from '../constants.js';
+import { hypot3 } from '../fastmath.js';
 
 const G12 = new Float64Array(12);
 
@@ -121,6 +122,8 @@ export class World {
     this._grounded = 0;
     this._stringTaut = new Uint8Array(this.terms.count);
     this._factorState = null;
+    // set later; declared here so a World keeps one hidden class and its hot methods stay optimised
+    /** @type {any} */ this._pcg = null; /** @type {number[]|null} */ this._perfTerms = null; /** @type {Map<number, number>|null} */ this._perfOf = null; this._grabSheet = 0;
     this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
   }
@@ -269,7 +272,7 @@ export class World {
       for (let e = 0; e < this.mesh.nE; e++) {
         const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
         const dx = x[b] - x[a], dy = x[b + 1] - x[a + 1], dz = x[b + 2] - x[a + 2];
-        const L = Math.hypot(dx, dy, dz) || 1;
+        const L = hypot3(dx, dy, dz) || 1;
         if ((dx * D[3 * e] + dy * D[3 * e + 1] + dz * D[3 * e + 2]) / L < c) { this.dirty = true; break; }
       }
     }
@@ -457,7 +460,7 @@ export class World {
     for (const t of this._perfTerms) {
       if (!T.active[t]) continue;
       const a = 3 * T.verts[T.start[t]], b = 3 * T.verts[T.start[t] + 1];
-      const f = T.k[t] * Math.hypot(x[a] - x[b], x[a + 1] - x[b + 1], x[a + 2] - x[b + 2]);
+      const f = T.k[t] * hypot3(x[a] - x[b], x[a + 1] - x[b + 1], x[a + 2] - x[b + 2]);
       const r = f / T.info[t].fBreak;
       if (r > ratio) { ratio = r; worst = t; }
     }
@@ -492,21 +495,29 @@ export class World {
     for (let t = 0; t < T.count; t++) {
       if (T.kind[t] !== TK_STRING) continue;
       termResidual(T, t, x, r);
-      const taut = Math.hypot(r[0], r[1], r[2]) > T.len[t] && !(T.gateOff && T.gateOff[t]) ? 1 : 0;
+      const taut = hypot3(r[0], r[1], r[2]) > T.len[t] && !(T.gateOff && T.gateOff[t]) ? 1 : 0;
       T.active[t] = taut;
       if (taut !== this._stringTaut[t]) { this._stringTaut[t] = taut; this.dirty = true; }
     }
     void TERM_STRING;
   }
 
-  /** Remember what the current factorisation was built from (bit-exact snapshot/restore). @param {Float64Array} x */
+  /**
+   * Remember what the current factorisation was built from (bit-exact snapshot/restore), in buffers
+   * reused from one factorisation to the next (snapshots copy them). @param {Float64Array} x
+   */
   _saveFactorState(x) {
-    const T = this.terms;
-    this._factorState = {
-      x: Float64Array.from(x), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
-      active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode),
-      verts: Int32Array.from(T.verts), c: Float64Array.from(T.c), dir: Float64Array.from(T.dir), len: Float64Array.from(T.len),
-    };
+    const T = this.terms, f = this._factorState;
+    if (!f) {
+      this._factorState = {
+        x: Float64Array.from(x), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
+        active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode),
+        verts: Int32Array.from(T.verts), c: Float64Array.from(T.c), dir: Float64Array.from(T.dir), len: Float64Array.from(T.len),
+      };
+      return;
+    }
+    f.x.set(x); f.driveOn.set(this.driveOn); f.edgeComp.set(this.edgeComp); f.active.set(T.active); f.k.set(T.k); f.mode.set(T.mode);
+    f.verts.set(T.verts); f.c.set(T.c); f.dir.set(T.dir); f.len.set(T.len);
   }
 
   // ------------------------------------------------------------------ interaction
@@ -553,7 +564,7 @@ export class World {
     let maxStrain = 0, maxCompression = 0, stretch = 0, bend = 0, crease = 0;
     for (let e = 0; e < this.mesh.nE; e++) {
       const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
-      const L = Math.hypot(x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]);
+      const L = hypot3(x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]);
       const s = (L - L0[e]) / L0[e];
       if (s > maxStrain) maxStrain = s;
       if (-s > maxCompression) maxCompression = -s;

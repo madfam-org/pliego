@@ -33,6 +33,7 @@ export class WorkerWorld {
     this.probeMs = NaN;
     this.warnings = /** @type {string[]} */ ([]);
     this.lastStepMs = NaN;
+    this.received = 0;             // poses received from the Worker
     /** @type {Error | null} */ this.error = null;
     /** @type {any} */ this._r = null;
     /** @type {any} */ this._lines = null;
@@ -63,6 +64,7 @@ export class WorkerWorld {
         if (m.frame.lines && this._lines) { this._recycle(this._lines.positions); this._lines = { ...this._lines, positions: m.frame.lines }; }
         if (m.stats) this._stats = m.stats;
         this.lastStepMs = m.stepMs;
+        this.received++;
         this.onStep(m.stepMs);
         this.onFrame();
       } else if (m.type === 'error') {

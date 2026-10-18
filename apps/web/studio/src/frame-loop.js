@@ -100,12 +100,19 @@ export function planSteps(acc, dt, step, maxSteps) {
   return { n, acc: a };
 }
 
+/** Identical poses in a row after which the world counts as settled and is not stepped. */
+export function quietLimit(engine) {
+  return engine === 'engine' ? QUIET_FRAMES_ENGINE : QUIET_FRAMES_PREVIEW;
+}
+
 /**
- * Whether the loop should ask for another animation frame.
+ * Whether the loop should ask for another animation frame. `pending`: a Worker step is in flight;
+ * its pose kicks the loop when it arrives, so there is nothing to poll for meanwhile.
  * @param {{playing: boolean, redraw: boolean, grabbing: boolean, pending: boolean, quietFrames: number, engine: 'engine'|'stub', hidden: boolean}} s
  */
 export function keepRunning(s) {
   if (s.hidden) return false;
-  if (s.playing || s.redraw || s.grabbing || s.pending) return true;
-  return s.quietFrames < (s.engine === 'engine' ? QUIET_FRAMES_ENGINE : QUIET_FRAMES_PREVIEW);
+  if (s.playing || s.redraw || s.grabbing) return true;
+  if (s.pending) return false;
+  return s.quietFrames < quietLimit(s.engine);
 }

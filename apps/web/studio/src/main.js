@@ -10,7 +10,7 @@ import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadE
 import { engineOptions, estimateVertices, physicsFits, tooSlow } from './physics.js';
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, createEngineOverlay, legendKinds, LINE_STYLE } from './diagram.js';
-import { createChangeTracker, keepRunning, planSteps } from './frame-loop.js';
+import { createChangeTracker, keepRunning, planSteps, quietLimit } from './frame-loop.js';
 import { WorkerWorld, startEngineWorker, retireEngineWorker } from './world-proxy.js';
 import { probeStep } from './engine-worker.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
@@ -161,7 +161,7 @@ function onControl(id, value) {
   if (!state.world) return;
   try { state.world.setControl(id, value); } catch (e) { fail('error.engine', e); }
   syncSteps();
-  kick();
+  wake();
 }
 
 function setPrimary(v, stop) {
@@ -188,7 +188,7 @@ function setPlaying(on) {
     if (state.controls.sequenceId) { state.playDir = 1; if (v >= hi) setPrimary(lo, false); }
     else state.playDir = v >= hi ? -1 : v <= lo ? 1 : state.playDir;
   }
-  if (state.playing) kick();
+  if (state.playing) wake();
 }
 
 function advancePlayback(dt) {
@@ -369,6 +369,7 @@ async function useDocument(json, opts = {}) {
   state.fitted = false;
   tracker.reset();
   shownOverlay = null;
+  quiet = 0; received = 0;
   renderAll();
   if (!state.renderer || !state.world) setView('2d', false);
   invalidate();
@@ -428,7 +429,7 @@ function setupInput() {
       if (!hit) return false;
       state.world.grab(hit.vertex, hit.point);
       state.grabbing = { plane: hit.point, normal: r.camera.forward() };
-      kick();
+      wake();
       return true;
     },
     onGrabMove(ndc) {
@@ -436,9 +437,9 @@ function setupInput() {
       const ray = r.camera.ray(ndc[0], ndc[1]);
       const p = rayPlane(ray.origin, ray.dir, state.grabbing.plane, state.grabbing.normal);
       if (p) state.world.moveGrab(p);
-      kick();
+      wake();
     },
-    onGrabEnd() { if (state.world) state.world.release(); state.grabbing = null; kick(); },
+    onGrabEnd() { if (state.world) state.world.release(); state.grabbing = null; wake(); },
     onChange: invalidate,
   });
 }
@@ -450,7 +451,7 @@ const tracker = createChangeTracker();
 const ovView = { positions: new Float32Array(0), colors: new Float32Array(0), faint: true };
 /** @type {{positions: Float32Array, colors: Float32Array} | null} */
 let shownOverlay = null;
-let scheduled = false, redraw = true, quiet = 0;
+let scheduled = false, redraw = true, quiet = 0, received = 0;
 let last = 0, acc = 0, frames = 0, fpsT = 0;
 
 function kick() {
@@ -461,6 +462,9 @@ function kick() {
 
 /** The view must be drawn again (camera, size, theme, overlay, printed art). */
 function invalidate() { redraw = true; kick(); }
+
+/** The world may move again (a control, a grab, playback, a new document): step it. */
+function wake() { quiet = 0; kick(); }
 
 function frame(now) {
   scheduled = false;
@@ -474,8 +478,11 @@ function frame(now) {
     // The paper engine takes one fixed step per frame at most: its steps are the expensive part, and
     // catching up would only make a slow frame slower. The preview may catch up to four. A Worker
     // engine takes the next step only when the last one has arrived.
+    // A settled world (the same pose for a while, nothing driving it) is not stepped until woken.
     const remote = world instanceof WorkerWorld;
-    const maxSteps = remote ? (world.pending ? 0 : 1) : state.engine && state.engine.kind === 'engine' ? 1 : 4;
+    const kind = state.engine ? state.engine.kind : 'stub';
+    const settled = quiet >= quietLimit(kind) && !state.playing && !state.grabbing;
+    const maxSteps = settled ? 0 : remote ? (world.pending ? 0 : 1) : kind === 'engine' ? 1 : 4;
     const plan = planSteps(acc, dt, STEP, maxSteps);
     acc = plan.acc;
     for (let i = 0; i < plan.n; i++) {
@@ -497,7 +504,9 @@ function frame(now) {
     fail('error.engine', e);
     return;
   }
-  quiet = changed ? 0 : quiet + 1;
+  // quiet counts identical poses: per frame on the main thread, per arrived pose for a Worker
+  if (!(world instanceof WorkerWorld)) quiet = changed ? 0 : quiet + 1;
+  else if (world.received !== received) { received = world.received; quiet = changed ? 0 : quiet + 1; }
   frames++;
   const running = keepRunning({
     playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing,
@@ -513,7 +522,7 @@ function frame(now) {
     $('st-contacts').textContent = s ? i18n.t('status.contacts', { n: s.contacts || 0 }) : '';
   }
   if (running) kick();
-  else { last = 0; acc = 0; quiet = 0; }
+  else { last = 0; acc = 0; }
 }
 
 function wireStatic() {

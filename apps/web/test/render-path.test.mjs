@@ -185,7 +185,8 @@ test('change tracking and when the loop sleeps', () => {
   assert.equal(keepRunning({ ...base, engine: 'engine', quietFrames: QUIET_FRAMES_ENGINE - 1 }), true);
   assert.equal(keepRunning({ ...base, engine: 'engine', quietFrames: QUIET_FRAMES_ENGINE }), false);
   assert.equal(keepRunning({ ...base, quietFrames: 99, playing: true }), true);
-  assert.equal(keepRunning({ ...base, quietFrames: 99, pending: true }), true);
+  assert.equal(keepRunning({ ...base, quietFrames: 0, pending: true }), false, 'a Worker step in flight kicks the loop when it lands: no polling');
+  assert.equal(keepRunning({ ...base, pending: true, redraw: true }), true);
   assert.equal(keepRunning({ ...base, playing: true, hidden: true }), false, 'a hidden tab never asks for frames');
 });
 

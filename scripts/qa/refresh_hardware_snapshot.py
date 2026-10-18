@@ -62,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--check", action="store_true", help="verify without refreshing")
     args = ap.parse_args(argv)
     old = json.loads(SNAPSHOT.read_text(encoding="utf-8")) if SNAPSHOT.is_file() else {}
-    wanted = claims() | set((old.get("cartridges") or {})) | set(args.slug)
+    wanted = claims() | set(old.get("cartridges") or {}) | set(args.slug)
     if args.check:
         parts = old.get("cartridges") or {}
         missing = sorted(wanted - set(parts))

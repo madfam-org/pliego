@@ -30,6 +30,10 @@ env:
   RUFF_VERSION: 0.17.0
   PYTEST_VERSION: 8.4.2
   TYPESCRIPT_VERSION: 5.9.3
+  # The keystone (madfam-org/hyperobjects-spec) at a full commit SHA: the same SPEC_PIN as nightly.yml and the
+  # commons' ci.yml (move them together). Only the stocks lane's sheet-behaviour drift gate installs it; the
+  # kernel never imports it (spec §5.40-§5.41).
+  SPEC_PIN: "70fe8213de20bc9a699b2bde2c32ee0b02a6d52d"
 
 jobs:
   agent-docs:
@@ -198,6 +202,14 @@ jobs:
           set -euo pipefail
           python -m pip install --quiet ./packages/kernel
           python -m pliego.stock --check materials
+      - name: Sheet behaviour and hardware snapshots against the keystone (spec §5.40-§5.42)
+        if: steps.detect.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          [[ "${SPEC_PIN}" =~ ^[0-9a-f]{40}$ ]] || { echo "stocks: FAIL SPEC_PIN is not a full 40-hex SHA"; exit 1; }
+          python -m pip install --quiet "hyperobjects-spec @ git+https://github.com/madfam-org/hyperobjects-spec@${SPEC_PIN}"
+          python scripts/qa/verify_sheet_behaviour.py
+          python scripts/qa/refresh_hardware_snapshot.py --check
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
         run: |

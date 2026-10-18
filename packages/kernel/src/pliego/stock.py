@@ -62,6 +62,9 @@ DERIVED_KEYS: tuple[str, ...] = (
 # carries), the perforation pattern when the card has ``fabrication.perforation``.
 OPTIONAL_DERIVED_KEYS: tuple[str, ...] = ("G12", "score_yield_deg", "perf_cut_mm",
                                           "perf_bridge_mm")
+# Optional keys only a laminate stock writes (spec §5.40, ``pliego.laminate``): its free stack's
+# D12 and D66. A single card never does; the engine falls back to the plate relations.
+LAMINATE_DERIVED_KEYS: tuple[str, ...] = ("D12", "D66")
 
 STATUSES = ("measured", "nominal", "estimated")
 CLASSES = (

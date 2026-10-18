@@ -53,8 +53,9 @@ def sha256(path: Path) -> str:
 
 def keystone():
     try:
-        import hyperobjects_sheet as hs
         from importlib.metadata import version
+
+        import hyperobjects_sheet as hs
     except ImportError as exc:
         print(f"sheet-behaviour: FAIL the keystone is not importable ({exc}); install "
               "hyperobjects-spec at SPEC_PIN", file=sys.stderr)

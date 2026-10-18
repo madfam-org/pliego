@@ -266,8 +266,9 @@ def main(argv: list[str] | None = None) -> int:
     for problem in ref_problems:
         print(f"  error refs: {problem}", file=sys.stderr)
     hw = 1 if isinstance(manifest.get("hardware_ref"), dict) else 0
-    print(f"refs: cartridge={slug} hardware_ref={hw} material_ref={len(declared)} "
-          f"unresolved={len(ref_problems)}")
+    if hw or declared or ref_problems:     # read-proof only where there is something to resolve
+        print(f"refs: cartridge={slug} hardware_ref={hw} material_ref={len(declared)} "
+              f"unresolved={len(ref_problems)}")
     if ref_problems:
         failures += 1
     if runs_done == 0:

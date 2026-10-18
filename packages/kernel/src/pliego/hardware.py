@@ -106,7 +106,8 @@ def ref_problems(ref: Any, param_ids: set[str] | None = None,
     return problems
 
 
-def manifest_problems(manifest: dict, parts: dict[str, dict] | None = None) -> tuple[int, list[str]]:
+def manifest_problems(manifest: dict,
+                      parts: dict[str, dict] | None = None) -> tuple[int, list[str]]:
     """(references checked, problems) for a cartridge manifest's top-level ``hardware_ref``."""
     ref = manifest.get("hardware_ref") if isinstance(manifest, dict) else None
     if ref is None:

@@ -96,7 +96,9 @@ spec:
 
   runtime:
     port: 8000
-    replicas: 1
+    # Equal to the Deployment's spec.replicas (scripts/qa/verify_rollout_safety.py). The live count is the
+    # owner's scale, not this value: Enclii's Argo Application ignores Deployment replicas (docs/DEPLOYMENT.md).
+    replicas: 2
     resources:
       requests:
         cpu: "50m"

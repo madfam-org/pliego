@@ -1,0 +1,21 @@
+# Keeps one pliego pod serving through voluntary disruptions (node drains, cluster upgrades). The selector is the
+# Service's selector (service.yaml), so "available" means "behind the Service". scripts/qa/verify_rollout_safety.py
+# keeps the two equal.
+#
+# With 2 live replicas this allows one eviction at a time. With 1 live replica it allows NONE: a drain of that
+# node waits until the pod is deleted by hand or the Deployment is scaled to 2. The git value of replicas is 2,
+# but Enclii's Argo Application ignores Deployment replicas, so the live count stays 1 until the owner scales
+# (docs/DEPLOYMENT.md "Rollouts").
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pliego
+  labels:
+    app: pliego
+    app.kubernetes.io/name: pliego
+    app.kubernetes.io/part-of: madfam-platform
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pliego

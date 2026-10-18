@@ -21,13 +21,13 @@ repo-boundary contract (docs/PUBLIC_REPO_BOUNDARY.md).
 
 ## Docs
 
-- [AGENTS.md](AGENTS.md): canonical instructions, doctrine, ownership, CI lanes
-- [docs/strategy/architecture.md](docs/strategy/architecture.md): platform architecture and commons classes
-- [docs/spec/v1/sheet-document.md](docs/spec/v1/sheet-document.md): the sheet-document contract
-- [docs/spec/v1/stock-card.md](docs/spec/v1/stock-card.md): paper stock cards and derived physics
-- [docs/HONEST_STATUS.md](docs/HONEST_STATUS.md): what works today
-- [ECOSYSTEM.md](ECOSYSTEM.md): which MADFAM service owns which capability
-- [docs/licenses/README.md](docs/licenses/README.md): licence split (code, docs, commons objects)
+- [AGENTS.md](https://github.com/madfam-org/pliego/blob/main/AGENTS.md): canonical instructions, doctrine, ownership, CI lanes
+- [docs/strategy/architecture.md](https://github.com/madfam-org/pliego/blob/main/docs/strategy/architecture.md): platform architecture and commons classes
+- [docs/spec/v1/sheet-document.md](https://github.com/madfam-org/pliego/blob/main/docs/spec/v1/sheet-document.md): the sheet-document contract
+- [docs/spec/v1/stock-card.md](https://github.com/madfam-org/pliego/blob/main/docs/spec/v1/stock-card.md): paper stock cards and derived physics
+- [docs/HONEST_STATUS.md](https://github.com/madfam-org/pliego/blob/main/docs/HONEST_STATUS.md): what works today
+- [ECOSYSTEM.md](https://github.com/madfam-org/pliego/blob/main/ECOSYSTEM.md): which MADFAM service owns which capability
+- [docs/licenses/README.md](https://github.com/madfam-org/pliego/blob/main/docs/licenses/README.md): licence split (code, docs, commons objects)
 
 ## Code
 

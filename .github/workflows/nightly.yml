@@ -34,10 +34,11 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The keystone (madfam-org/hyperobjects-spec) at a full commit SHA on its main: package 0.15.0 (#64, all 28 Pliego
-  # stock cards and seven fabric bend classes, plus #65, its own CI runners). The commons pins the same SHA in its
-  # ci.yml. Move both together.
-  SPEC_PIN: "70fe8213de20bc9a699b2bde2c32ee0b02a6d52d"
+  # The keystone (madfam-org/hyperobjects-spec) at a full commit SHA on its main: package 0.18.0 (#68, this
+  # platform's laminate schemas re-vendored from #37, `check cartridge --resolve`; after #64 stock cards, #65 runners,
+  # #66 body-count notes, #67 mesh oracle). The commons pins the same SHA in its ci.yml, as does ci.yml here. Move all
+  # three together.
+  SPEC_PIN: "b9823ee6c3bbc916d9d9a13799c707a9818c615b"
 
 jobs:
   corpus:

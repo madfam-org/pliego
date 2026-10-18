@@ -32,8 +32,9 @@ env:
   TYPESCRIPT_VERSION: 5.9.3
   # The keystone (madfam-org/hyperobjects-spec) at a full commit SHA: the same SPEC_PIN as nightly.yml and the
   # commons' ci.yml (move them together). Only the stocks lane's sheet-behaviour drift gate installs it; the
-  # kernel never imports it (spec §5.40-§5.41).
-  SPEC_PIN: "70fe8213de20bc9a699b2bde2c32ee0b02a6d52d"
+  # kernel never imports it (spec §5.40-§5.41). 0.18.0 = the merge of hyperobjects-spec#68 (this platform's
+  # laminate schemas re-vendored from #37; `check cartridge --resolve`).
+  SPEC_PIN: "b9823ee6c3bbc916d9d9a13799c707a9818c615b"
 
 jobs:
   agent-docs:

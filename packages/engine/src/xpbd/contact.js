@@ -9,7 +9,15 @@
  * one of its mesh neighbours, a copy of it (cut duplicates), or a tab welded to its sheet.
  * Only projections that fall inside the triangle are handled (edge–edge contact is out of scope
  * for v0.1, engine.md §8).
+ *
+ * Cost (lane E4, 2026-10-18; positions bit-identical to the version before, test `contact-sides`):
+ * the candidate pairs come out of the broad phase sorted by (vertex, triangle), so the memorised
+ * sides live in an Int8Array beside the pairs and carry over from one broad phase to the next by a
+ * merge, not a Map lookup per pair; the pair buffers are reused, not sliced; the hash entries are
+ * laid out in bucket order with their triangle's bounding sphere, so the scan reads them in order;
+ * Math.hypot (a builtin call that allocates) is replaced by fastmath.js's bit-identical hypot2/3.
  */
+import { hypot2, hypot3 } from '../fastmath.js';
 
 export class Contact {
   /** @param {any} w World */
@@ -34,10 +42,21 @@ export class Contact {
       this.tc[v] = Math.max(d.collision_thickness, 0.05);
       this.mu[v] = d.friction;
     }
-    /** candidate pairs */
-    this.pv = new Int32Array(0); this.pt = new Int32Array(0); this.nPairs = 0;
-    /** @type {Map<number, number>} memorised sidedness, key v·nT + t */
-    this.side = new Map();
+    /** candidate pairs (`nPairs` of them, sorted by vertex then triangle) and their memorised sides (0 unknown, ±1) */
+    this.pv = new Int32Array(1024); this.pt = new Int32Array(1024); this.ps = new Int8Array(1024); this.nPairs = 0;
+    /** @type {Int32Array|null} pair → first pair with the same (v, t); only when two cells of a triangle share a 32-bit key */
+    this.canon = null;
+    /** triangles that are in some pair (their normals are needed each pass) */
+    this.used = new Uint8Array(mesh.nT);
+    /** @type {{v: Int32Array, t: Int32Array, s: Int8Array, n: number}|null} sides of the previous candidates (reused) */
+    this._prev = null;
+    /** @type {{v: Int32Array, t: Int32Array, s: Int8Array, n: number}|null} sides restored from a snapshot, carried over by the next broad phase */
+    this._restored = null;
+    /** broad-phase scratch, declared here so a Contact keeps one hidden class */
+    /** @type {Float64Array|null} */ this._sph = null; /** @type {Uint32Array|null} */ this._ek = null; /** @type {Int32Array|null} */ this._et = null;
+    /** @type {Int32Array|null} */ this._bs = null; /** @type {Int32Array|null} */ this._bf = null; /** @type {Uint32Array|null} */ this._bk = null;
+    /** @type {Int32Array|null} */ this._bt = null; /** @type {Float64Array|null} */ this._bsph = null; /** @type {Uint8Array|null} */ this._triFixed = null;
+    /** @type {Float64Array|null} */ this._tn = null;
     this.active = 0;
     this.weldSheet = new Int32Array(mesh.nV);
     this.setWeldExclusion(w.weldSheet);
@@ -74,6 +93,9 @@ export class Contact {
   /** Rebuild candidate pairs. @param {Float64Array} x @param {Uint8Array} fixed @param {number} reach extra radius (mm) */
   broadPhase(x, fixed, reach) {
     const m = this.mesh, T = m.tris;
+    // the sides memorised on the previous candidates (or restored), sorted by (vertex, triangle)
+    const prev = this._restored ?? this._sided();
+    this._restored = null;
     let cell = Math.max(this.cell, reach * 2, 1e-3);
     // integer spatial hash of cells; the table is typed-array CSR rebuilt each call (no Map, no
     // per-cell arrays: backlog item 22). Entries keep their full 32-bit cell key, so a query sees
@@ -90,7 +112,7 @@ export class Contact {
     for (let t = 0; t < m.nT; t++) {
       const a = 3 * T[3 * t], b = 3 * T[3 * t + 1], c = 3 * T[3 * t + 2];
       const cx = (x[a] + x[b] + x[c]) / 3, cy = (x[a + 1] + x[b + 1] + x[c + 1]) / 3, cz = (x[a + 2] + x[b + 2] + x[c + 2]) / 3;
-      const ra = Math.hypot(x[a] - cx, x[a + 1] - cy, x[a + 2] - cz), rb = Math.hypot(x[b] - cx, x[b + 1] - cy, x[b + 2] - cz), rc = Math.hypot(x[c] - cx, x[c + 1] - cy, x[c + 2] - cz);
+      const ra = hypot3(x[a] - cx, x[a + 1] - cy, x[a + 2] - cz), rb = hypot3(x[b] - cx, x[b + 1] - cy, x[b + 2] - cz), rc = hypot3(x[c] - cx, x[c + 1] - cy, x[c + 2] - cz);
       S[4 * t] = cx; S[4 * t + 1] = cy; S[4 * t + 2] = cz; S[4 * t + 3] = Math.max(ra, rb, rc) + R;
       if (S[4 * t + 3] > ext) ext = S[4 * t + 3];
     }
@@ -126,12 +148,19 @@ export class Contact {
     let fill = this._bf;
     if (!fill || fill.length < B) fill = this._bf = new Int32Array(B);
     fill.set(start.subarray(0, B));
-    let items = this._bi;
-    if (!items || items.length < ne) items = this._bi = new Int32Array(ek.length);
-    for (let e = 0; e < ne; e++) items[fill[ek[e] & mask]++] = e;
-    let PV = this._pvBuf ?? new Int32Array(1024), PT = this._ptBuf ?? new Int32Array(1024);
-    let np = 0;
+    // the entries in bucket order, each with its triangle's sphere beside it (the scan reads them in order)
+    let bk = this._bk, bt = this._bt, bs = this._bsph;
+    if (!bk || !bt || !bs || bk.length < ne) { bk = this._bk = new Uint32Array(ek.length); bt = this._bt = new Int32Array(ek.length); bs = this._bsph = new Float64Array(4 * ek.length); }
+    for (let e = 0; e < ne; e++) { const q = fill[ek[e] & mask]++; bk[q] = ek[e]; bt[q] = et[e]; }
+    for (let q = 0; q < ne; q++) { const t = bt[q]; bs[4 * q] = S[4 * t]; bs[4 * q + 1] = S[4 * t + 1]; bs[4 * q + 2] = S[4 * t + 2]; bs[4 * q + 3] = S[4 * t + 3]; }
+    let PV = this.pv, PT = this.pt, PS = this.ps;
+    /** @type {Int32Array|null} */
+    let canon = null;
+    let np = 0, si = 0;
+    const SV = prev.v, ST = prev.t, SS = prev.s, ns = prev.n, used = this.used;
+    used.fill(0);
     const mark = this.mark, vGroup = m.vGroup, weld = this.weldSheet, triSheet = m.triSheet, vSheet = m.vSheet;
+    const adjStart = this.adjStart, adj = this.adj, lipVert = this.lipVert;
     // triangles whose three vertices are all driven: a driven vertex never pairs with them
     const triFixed = this._triFixed ?? (this._triFixed = new Uint8Array(m.nT));
     for (let t = 0; t < m.nT; t++) triFixed[t] = fixed[T[3 * t]] && fixed[T[3 * t + 1]] && fixed[T[3 * t + 2]] ? 1 : 0;
@@ -144,15 +173,14 @@ export class Contact {
       const b = kv & mask, q0 = start[b], q1 = start[b + 1];
       if (q0 === q1) continue;
       mark[v] = v;
-      for (let q = this.adjStart[v]; q < this.adjStart[v + 1]; q++) mark[this.adj[q]] = v;
-      const fv = fixed[v], g = vGroup[v], ws = weld[v], sv = vSheet[v], lip = this.lipVert !== null && this.lipVert[v] === 1;
+      for (let q = adjStart[v]; q < adjStart[v + 1]; q++) mark[adj[q]] = v;
+      const fv = fixed[v], g = vGroup[v], ws = weld[v], sv = vSheet[v], lip = lipVert !== null && lipVert[v] === 1;
       for (let q = q0; q < q1; q++) {
-        const e = items[q];
-        if (ek[e] !== kv) continue;
-        const t = et[e];
+        if (bk[q] !== kv) continue;
         // outside the triangle's bounding sphere grown by R (same test as distance − radius > R)
-        const dx = vx - S[4 * t], dy = vy - S[4 * t + 1], dz = vz - S[4 * t + 2], rr = S[4 * t + 3];
+        const dx = vx - bs[4 * q], dy = vy - bs[4 * q + 1], dz = vz - bs[4 * q + 2], rr = bs[4 * q + 3];
         if (dx * dx + dy * dy + dz * dz > rr * rr) continue;
+        const t = bt[q];
         if (fv && triFixed[t]) continue;
         if (ws >= 0 && triSheet[t] === ws) continue;
         if (lip && triSheet[t] !== sv) continue;
@@ -160,18 +188,60 @@ export class Contact {
         if (mark[a] === v || mark[b] === v || mark[c] === v) continue;
         if (vGroup[a] === g || vGroup[b] === g || vGroup[c] === g) continue;
         if (weld[a] === sv && weld[b] === sv && weld[c] === sv) continue;
-        if (np === PV.length) { const a2 = new Int32Array(2 * np); a2.set(PV); PV = a2; const b2 = new Int32Array(2 * np); b2.set(PT); PT = b2; }
-        PV[np] = v; PT[np] = t; np++;
+        if (np === PV.length) {
+          const n2 = 2 * np;
+          const a2 = new Int32Array(n2); a2.set(PV); PV = a2; const b2 = new Int32Array(n2); b2.set(PT); PT = b2; const s2 = new Int8Array(n2); s2.set(PS); PS = s2;
+          if (canon) { const c2 = new Int32Array(n2); c2.set(canon); canon = c2; }
+        }
+        PV[np] = v; PT[np] = t; used[t] = 1;
+        // a pair keeps the side it memorised as a candidate of the previous broad phase; one that was
+        // not a candidate then starts unknown (the Map this replaces kept exactly those)
+        while (si < ns && (SV[si] < v || (SV[si] === v && ST[si] < t))) si++;
+        let side = si < ns && SV[si] === v && ST[si] === t ? SS[si] : 0;
+        if (np > 0 && PV[np - 1] === v && PT[np - 1] === t) {
+          // two of the triangle's cells share this 32-bit key: the pair is a candidate twice (swept
+          // twice, as before) and both copies share one side, as they shared one Map key
+          if (!canon) { canon = new Int32Array(PV.length); for (let i = 0; i < np; i++) canon[i] = i; }
+          canon[np] = canon[np - 1];
+          side = 0;
+        } else if (canon) canon[np] = np;
+        PS[np] = side;
+        np++;
       }
     }
-    this._pvBuf = PV; this._ptBuf = PT;
     for (let v = 0; v < m.nV; v++) mark[v] = -1;
-    this.pv = PV.slice(0, np); this.pt = PT.slice(0, np); this.nPairs = np;
-    this._tuReady = false;
-    // forget sidedness of pairs that are no longer candidates
-    const keep = new Map();
-    for (let p = 0; p < this.nPairs; p++) { const k = this.pv[p] * m.nT + this.pt[p]; const s = this.side.get(k); if (s !== undefined) keep.set(k, s); }
-    this.side = keep;
+    this.pv = PV; this.pt = PT; this.ps = PS; this.canon = canon; this.nPairs = np;
+  }
+
+  /** The current candidates' memorised sides, compacted (sorted by vertex, then triangle). */
+  _sided() {
+    const n = this.nPairs, PV = this.pv, PT = this.pt, PS = this.ps;
+    let c = 0;
+    for (let p = 0; p < n; p++) if (PS[p] !== 0) c++;
+    let out = this._prev;
+    if (!out || out.v.length < c) { const k = Math.max(1024, 2 * c); out = this._prev = { v: new Int32Array(k), t: new Int32Array(k), s: new Int8Array(k), n: 0 }; }
+    let k = 0;
+    for (let p = 0; p < n; p++) if (PS[p] !== 0) { out.v[k] = PV[p]; out.t[k] = PT[p]; out.s[k] = PS[p]; k++; }
+    out.n = k;
+    return out;
+  }
+
+  /** Memorised sides as [v·nT + t, side] entries (World.snapshot). @returns {Array<[number, number]>} */
+  sideEntries() {
+    const nT = this.mesh.nT, r = this._restored ?? this._sided();
+    /** @type {Array<[number, number]>} */
+    const out = [];
+    for (let i = 0; i < r.n; i++) out.push([r.v[i] * nT + r.t[i], r.s[i]]);
+    return out;
+  }
+
+  /** Restore sides saved by sideEntries() (any order); the next broad phase carries them over. @param {Array<[number, number]>} entries */
+  restoreSides(entries) {
+    const nT = this.mesh.nT, e = entries.slice().sort((p, q) => p[0] - q[0]);
+    const v = new Int32Array(e.length), t = new Int32Array(e.length), s = new Int8Array(e.length);
+    for (let i = 0; i < e.length; i++) { v[i] = Math.floor(e[i][0] / nT); t[i] = e[i][0] - v[i] * nT; s[i] = e[i][1]; }
+    this._restored = { v, t, s, n: e.length };
+    this.nPairs = 0; this.canon = null;
   }
 
   /**
@@ -183,8 +253,7 @@ export class Contact {
     if (!this.nPairs) { this.active = 0; return 0; }
     // unit normals of the triangles in play, once per pass (cheap rejection by signed distance)
     const N = this._tn ?? (this._tn = new Float64Array(3 * m.nT));
-    const used = this._tu ?? (this._tu = new Uint8Array(m.nT));
-    if (!this._tuReady) { used.fill(0); for (let p = 0; p < this.nPairs; p++) used[this.pt[p]] = 1; this._tuReady = true; }
+    const used = this.used, PV = this.pv, PT = this.pt, PS = this.ps, canon = this.canon, tcv = this.tc, muv = this.mu;
     for (let t = 0; t < m.nT; t++) {
       if (!used[t]) continue;
       const a = 3 * T[3 * t], b = 3 * T[3 * t + 1], c = 3 * T[3 * t + 2];
@@ -197,9 +266,9 @@ export class Contact {
     }
     let active = 0;
     for (let p = 0; p < this.nPairs; p++) {
-      const v = this.pv[p], t = this.pt[p];
+      const v = PV[p], t = PT[p];
       const a = T[3 * t], b = T[3 * t + 1], c = T[3 * t + 2];
-      const tc = 0.5 * (this.tc[v] + this.tc[a]);
+      const tc = 0.5 * (tcv[v] + tcv[a]);
       const nx = N[3 * t], ny = N[3 * t + 1], nz = N[3 * t + 2];
       if (nx === 0 && ny === 0 && nz === 0) continue;
       const ax = x[3 * a], ay = x[3 * a + 1], az = x[3 * a + 2];
@@ -215,20 +284,20 @@ export class Contact {
       if (!(den > 1e-12 * d11 * d22)) continue; // degenerate triangle
       const bb = (d22 * p1 - d12 * p2) / den, bc = (d11 * p2 - d12 * p1) / den, ba = 1 - bb - bc;
       if (!(ba >= -1e-3 && bb >= -1e-3 && bc >= -1e-3)) continue;
-      const key = v * m.nT + t;
-      let s = this.side.get(key);
-      if (s === undefined && this.faceSide.size) {
+      const sp = canon === null ? p : canon[p];
+      let s = PS[sp];
+      if (s === 0 && this.faceSide.size) {
         const fs = this.faceSide.get(m.vFace[v] * this.nF + m.triFace[t]);
-        if (fs !== undefined) { s = fs; this.side.set(key, s); }
+        if (fs !== undefined) { s = fs; PS[sp] = s; }
       }
-      if (s === undefined) {
+      if (s === 0) {
         // sidedness from the substep start (before this substep's motion)
         const sx = xs[3 * v] - (ba * xs[3 * a] + bb * xs[3 * b] + bc * xs[3 * c]);
         const sy = xs[3 * v + 1] - (ba * xs[3 * a + 1] + bb * xs[3 * b + 1] + bc * xs[3 * c + 1]);
         const sz = xs[3 * v + 2] - (ba * xs[3 * a + 2] + bb * xs[3 * b + 2] + bc * xs[3 * c + 2]);
         const ds = sx * nx + sy * ny + sz * nz;
         s = ds >= 0 ? 1 : -1;
-        this.side.set(key, s);
+        PS[sp] = s;
       }
       const C = s * d - tc;
       if (C >= 0) continue;
@@ -243,13 +312,13 @@ export class Contact {
       x[3 * b] -= wb * bb * dnx; x[3 * b + 1] -= wb * bb * dny; x[3 * b + 2] -= wb * bb * dnz;
       x[3 * c] -= wc * bc * dnx; x[3 * c + 1] -= wc * bc * dny; x[3 * c + 2] -= wc * bc * dnz;
       // friction: relative tangential displacement over the substep
-      const mu = Math.max(this.mu[v], this.mu[a]);
+      const mu = Math.max(muv[v], muv[a]);
       let rx = (x[3 * v] - xs[3 * v]) - (ba * (x[3 * a] - xs[3 * a]) + bb * (x[3 * b] - xs[3 * b]) + bc * (x[3 * c] - xs[3 * c]));
       let ry = (x[3 * v + 1] - xs[3 * v + 1]) - (ba * (x[3 * a + 1] - xs[3 * a + 1]) + bb * (x[3 * b + 1] - xs[3 * b + 1]) + bc * (x[3 * c + 1] - xs[3 * c + 1]));
       let rz = (x[3 * v + 2] - xs[3 * v + 2]) - (ba * (x[3 * a + 2] - xs[3 * a + 2]) + bb * (x[3 * b + 2] - xs[3 * b + 2]) + bc * (x[3 * c + 2] - xs[3 * c + 2]));
       const rn = rx * nx + ry * ny + rz * nz;
       rx -= rn * nx; ry -= rn * ny; rz -= rn * nz;
-      const rt = Math.hypot(rx, ry, rz);
+      const rt = hypot3(rx, ry, rz);
       if (rt === 0) continue;
       const lim = mu * -C;
       const f = rt <= lim ? 1 : lim / rt;
@@ -275,7 +344,7 @@ export class Contact {
       const pen = r - y;
       x[3 * v + 1] = r;
       const dx = x[3 * v] - xs[3 * v], dz = x[3 * v + 2] - xs[3 * v + 2];
-      const dt = Math.hypot(dx, dz);
+      const dt = hypot2(dx, dz);
       if (dt === 0) continue;
       const lim = this.mu[v] * pen;
       const f = dt <= lim ? 1 : lim / dt;

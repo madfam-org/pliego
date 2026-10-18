@@ -316,6 +316,30 @@ get interactive rates:
 - `substeps` 8 (equilibria do not depend on S, test `E12-substeps`);
 - later, a supernodal factorisation or a WebGPU path.
 
+**Profiling and bit-identity tools** (`bench/`, lane E4, 2026-10-18). `bench/profile-docs.mjs`
+times documents at the studio's options on the CPU clock (ms/step, garbage-collector time, an exact
+position hash), records a V8 CPU profile of the timed steps with `--prof-dir` (the `.cpuprofile`
+files open in Chrome DevTools) and prints the self time per engine stage; `--compare` steps another
+checkout's engine in lockstep and prints the largest position difference. `bench/identity.mjs`
+drives a corpus exactly like `scripts/qa/sim-matrix.mjs` and hashes every bit of the positions
+after every step; `--diff` says, per document, whether two engines agree step for step. A change
+that is meant to be a pure speed-up must report `differ=0`.
+
+The first profile (main 91e19e3, studio options, 10 timed steps of the folding sequence, CPU
+self time):
+
+| document | V | ms/step | where the time goes |
+|---|---|---|---|
+| kusudama ball washi-large | 6780 | 6143 | contact broad phase 57 %, contact projection 31 % (2.5 M candidate pairs), factor 3 % |
+| kusudama ball | 2940 | 2779 | contact broad phase 56 %, contact projection 31 % (0.7 M pairs) |
+| paper doily fine-lace | 5196 | 501 | factor 23 %, broad phase 16 %, solves 14 %, contact projection 12 %, stretch guard 10 % |
+| ofrenda | 3886 | 251 | contact broad phase 74 % |
+
+Documents near the studio's 40 ms limit (page turn, valley fold, score vs crease, glue flap,
+lantern, stencil, dodecahedron, hexagonal twist) spend 15–34 % in the triangular solves and PCG,
+10–34 % in the stretch guard, 10–17 % in the broad phase even with no contact pair, and up to 26 %
+(page turn) in the garbage collector.
+
 ## Verification (engine.md §7)
 
 Every row of engine.md §7 is a test in `test/`. Each prints

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import re
+from pathlib import Path
 
 import pytest
 from conftest import API, APP, LANDING
@@ -36,6 +37,21 @@ def test_api_root_is_a_json_index(client):
     assert body["service"] == "pliego-api"
     assert "POST /api/v1/documents" in body["endpoints"]
     assert "GET /health" in body["endpoints"]
+
+
+def test_api_index_links_an_openapi_document_the_api_serves(client):
+    """The index used to link apps/api/openapi.yaml on GitHub, a 404 (the file is openapi.json),
+    and no host served the document. The link must be a path this API answers with the spec."""
+    link = client.get("/", base_url=API).get_json()["openapi"]
+    assert link == "/api/v1/openapi.json"
+    for base in (API, APP, LANDING):
+        resp = client.get(link, base_url=base)
+        assert resp.status_code == 200, base
+        assert resp.headers["Content-Type"] == "application/json"
+        spec = resp.get_json()
+        assert spec["openapi"].startswith("3.1") and "/api/v1/documents" in spec["paths"]
+        assert "/api/v1/openapi.json" in spec["paths"]  # the document describes itself
+        assert client.get(link, base_url=base, headers={"If-None-Match": resp.headers["ETag"]}).status_code == 304
 
 
 def test_unknown_host_root_falls_back_to_landing_page(client):
@@ -192,3 +208,19 @@ def test_schema_served(client):
 def test_missing_web_tree_is_404_not_500(make_app, tree):
     (tree / "apps" / "web" / "index.html").unlink()
     assert make_app().test_client().get("/", base_url=LANDING).status_code == 404
+
+
+REPO = Path(__file__).resolve().parents[3]
+MD_LINK = re.compile(r"\]\(([^)\s]+)\)")
+
+
+@pytest.mark.parametrize("name", ["llms.txt", "llms-full.txt"])
+def test_repo_llms_links_resolve_off_the_site_root(name):
+    """The repository's llms files are served at the root of all three hosts, so a relative link
+    such as ``[AGENTS.md](AGENTS.md)`` resolves to https://pliego.madfam.io/AGENTS.md, a 404.
+    Every Markdown link must be absolute (https) or a site path the routes serve."""
+    text = (REPO / name).read_text(encoding="utf-8")
+    links = MD_LINK.findall(text)
+    relative = [u for u in links if not u.startswith(("https://", "/llms", "/studio/", "#"))]
+    print(f"{name}: links={len(links)} relative={len(relative)}")
+    assert relative == [], f"{name} links that 404 when served from a host root: {relative}"

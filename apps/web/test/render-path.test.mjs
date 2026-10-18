@@ -15,7 +15,7 @@ import { outlineEdges } from '../studio/src/render/edges.js';
 import { backingSize, createChangeTracker, keepRunning, planSteps, DPR_CAP_COARSE, PIXEL_BUDGET_FINE, QUIET_FRAMES_ENGINE } from '../studio/src/frame-loop.js';
 import { createEngineHost, probeStep } from '../studio/src/engine-worker.js';
 import { WorkerWorld, pickRenderMesh } from '../studio/src/world-proxy.js';
-import { createEngineOverlay } from '../studio/src/diagram.js';
+import { createEngineOverlay, highlightStep } from '../studio/src/diagram.js';
 import { engineOptions } from '../studio/src/physics.js';
 import * as stub from '../studio/src/engine-stub.js';
 import * as engine from '../../../packages/engine/src/index.js';
@@ -314,4 +314,12 @@ test('drawing never reads layout once the observer handed the canvas size over',
   for (let k = 0; k < 5; k++) r.draw(world.render(), null, k === 0);
   assert.equal(reads, 0);
   assert.deepEqual([canvas.width, canvas.height], [500, 400], 'Node has no devicePixelRatio: 1');
+});
+
+test('playback re-highlights the crease diagram only when the step changes', () => {
+  let walks = 0;
+  const svg = { querySelectorAll: () => { walks++; return []; } };
+  const json = demo('pliego-half-fold.fold');
+  for (let f = 0; f < 60; f++) highlightStep(svg, json, f < 30 ? 0 : 1);
+  assert.equal(walks, 2);
 });

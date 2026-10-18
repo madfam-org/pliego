@@ -9,7 +9,7 @@ default-src 'none'`): no inline scripts or handlers, no `style=` attributes, no 
 | `index.html`, `assets/` | Landing (en/es/fr/pt), CSS-only paper-fold hero, OG/hreflang/JSON-LD, `<!-- ecosystem-banner slot -->` |
 | (none) | `llms.txt`/`llms-full.txt` live at the repo root (single source; the dev server and the API both serve them); `robots.txt` and `sitemap.xml` are generated per host by the API |
 | `shared/` | i18n runtime (`data-i18n`, `data-i18n-attr`, `pliego:lang` event), guarded storage, pre-paint `lang-boot.js` |
-| `studio/` | Studio: catalog, parameters, controls from `pliego:controls`, fold-program scrubber, 3-D view, SVG crease-pattern view, exports, share URL, status bar |
+| `studio/` | Studio: catalog (a height-bounded list that scrolls on its own, summaries clamped to 3 lines, the selected object scrolled into view), parameters, controls from `pliego:controls`, fold-program scrubber, 3-D view, SVG crease-pattern view, exports, share URL, status bar |
 | `studio/src/render/` | Self-contained renderers: WebGL2 (two-sided paper, grain, one shadow map: 3 × 3 PCF on paper, on the table a penumbra that widens with the paper's height plus contact occlusion; darkened paper edges from the topology (`edges.js`), pressed creases, the coloured crease overlay, printed faces; one draw call for all the paper) and a Canvas 2D 3-D fallback (flat colours, hard planar shadow, coloured overlay only: no art, no darkened edges or pressed creases, no soft shadow); shared orbit/pan/zoom/grab input |
 | `studio/src/frame-loop.js` | When a frame is drawn: the pose is compared with the last one, so a frame where only the camera moved re-uses the uploaded mesh and the shadow map, and the loop stops asking for frames when nothing moves (two quiet frames for the preview, 90 for the engine; a hidden tab never draws). Fixed steps tolerate coarsened rAF timestamps. Backing store: pixel ratio ≤ 2 (≤ 1.5 on touch devices) and a pixel budget (4.2 MP, 2 MP on touch) |
 | `studio/src/engine-worker.js`, `studio/src/world-proxy.js` | The paper engine steps in a module Worker (one per session, reused across documents); the main thread keeps a proxy with the World calls the studio makes, at most one step in flight, pose buffers transferred both ways and pooled. Same calls in the same order, so the pose is bit-identical to the main thread (node test). When the Worker cannot start (no module Workers, the engine fails to load in it) the engine steps on the main thread as before; the status bar's engine tooltip says which |
@@ -51,3 +51,9 @@ node --test apps/web/test/                       # picks up apps/web/.engine-tmp
 {slug, params}` (parameter changes), `POST /api/v1/exports {slug, params, format}` (cut/score/fold
 files). Without the API, parameters and exports are visibly disabled; the crease-pattern SVG export
 works offline.
+
+Busy answers: a render worker that is already rendering answers `503`, the rate limiter `429`, both
+with `Retry-After`. The studio waits and retries a render request up to 3 times (the n-th wait is
+n × Retry-After; a Retry-After above 5 s or a busy answer without one is shown, not retried), and
+only the latest document request (a parameter change, a mode change or an object pick) may replace
+the document on screen (`studio/src/data.js`: `postRender`, `latestOnly`).

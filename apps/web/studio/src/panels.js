@@ -25,10 +25,22 @@ export function paramText(v, p) {
 }
 
 /**
+ * The list's scrollTop that puts an item (offsetTop and height inside the list) in the middle of
+ * the list's visible height; an item taller than the list shows its top.
+ * @param {number} itemTop @param {number} itemHeight @param {number} listHeight
+ */
+export function catalogScrollTop(itemTop, itemHeight, listHeight) {
+  return Math.max(0, itemHeight >= listHeight ? itemTop : itemTop - (listHeight - itemHeight) / 2);
+}
+
+/**
  * @param {HTMLElement} list @param {any[]} items @param {string|null} current @param {I18n} i18n
  * @param {(slug: string) => void} onSelect
  */
 export function renderCatalog(list, items, current, i18n, onSelect) {
+  const keep = list.scrollTop;
+  const moved = list.dataset.current !== (current || '');
+  list.dataset.current = current || '';
   list.replaceChildren();
   if (!items.length) { list.append(h('li', { class: 'note', text: i18n.t('catalog.empty') })); return; }
   for (const it of items) {
@@ -48,6 +60,11 @@ export function renderCatalog(list, items, current, i18n, onSelect) {
     btn.addEventListener('click', () => onSelect(it.slug));
     list.append(h('li', {}, btn));
   }
+  // The list scrolls on its own (studio.css): bring a newly selected object into view, and keep the
+  // visitor's own scroll position when the panel is only re-rendered (language, parameters).
+  const sel = /** @type {HTMLElement|null} */ (list.querySelector('[aria-current="true"]'));
+  const li = sel && /** @type {HTMLElement} */ (sel.parentElement);
+  list.scrollTop = moved && li ? catalogScrollTop(li.offsetTop, li.offsetHeight, list.clientHeight) : keep;
 }
 
 /**

@@ -95,8 +95,13 @@ export function buildDiagram(json, opts) {
   return svg;
 }
 
+/** The step each diagram shows highlighted: playback asks every frame, the walk runs on a change. */
+const shownStep = new WeakMap();
+
 /** Mark the edges a sequence step drives (index = step, or −1 for none). */
 export function highlightStep(svg, json, stepIndex) {
+  if (shownStep.get(svg) === stepIndex) return;
+  shownStep.set(svg, stepIndex);
   const step = json['pliego:sequence']?.steps?.[stepIndex];
   const active = new Set(step ? [...step.targets.map((t) => t[0]), ...(step.release || [])] : []);
   for (const line of svg.querySelectorAll('line[data-edge]')) {

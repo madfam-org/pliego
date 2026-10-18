@@ -5,7 +5,7 @@
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
-import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, loadPreview, fetchObject } from './data.js';
+import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, loadPreview, fetchObject, latestOnly } from './data.js';
 import { engineOptions, estimateVertices, physicsFits, tooSlow } from './physics.js';
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, createEngineOverlay, legendKinds, LINE_STYLE } from './diagram.js';
@@ -22,6 +22,8 @@ const $ = (id) => /** @type {any} */ (document.getElementById(id));
 const i18n = createI18n(STUDIO_STRINGS);
 const reducedMotion = globalThis.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
 const STEP = 1 / 60;
+// Only the latest document request (a regeneration or an object pick) may replace what is shown.
+const latestDocument = latestOnly();
 
 const state = {
   share: parseShare(location.search, location.hash),
@@ -136,13 +138,8 @@ function syncSteps() {
   const id = state.controls.sequenceId;
   const v = id ? Number(state.controls.get(id)) : 0;
   state.updateSteps(v);
-  const k = id ? stepIndex(v, state.json['pliego:sequence'].steps.length) : -1;
-  if (state.diagram && (state.diagram !== highlighted.svg || k !== highlighted.step)) {   // it walks every line
-    highlightStep(state.diagram, state.json, k);
-    highlighted.svg = state.diagram; highlighted.step = k;
-  }
+  if (state.diagram) highlightStep(state.diagram, state.json, id ? stepIndex(v, state.json['pliego:sequence'].steps.length) : -1);
 }
-const highlighted = { svg: /** @type {SVGSVGElement | null} */ (null), step: -2 };
 
 function updateShare() {
   if (!state.item) return;
@@ -223,13 +220,15 @@ function activeParams() {
 
 async function regenerateCurrent() {
   if (state.catalog?.source !== 'api') return;
+  const current = latestDocument.begin();
   status(i18n.t('params.regenerating'));
   try {
     const json = await regenerate(state.item.slug, state.params, state.mode);
+    if (!current()) return;   // a newer change is on its way: this answer is stale
     await useDocument(json);
     status('');
   } catch (e) {
-    status(i18n.t('params.failed', { error: e instanceof Error ? e.message : String(e) }));
+    if (current()) status(i18n.t('params.failed', { error: e instanceof Error ? e.message : String(e) }));
   }
 }
 
@@ -391,11 +390,14 @@ async function selectItem(slug, rawParams, rawMode) {
   state.mode = modes.some((m) => m.id === rawMode) ? rawMode : modes.length ? modes[0].id : null;
   state.params = coerceParams(activeParams(), rawParams || {});
   renderAll();
+  const current = latestDocument.begin();
   try {
     const custom = hasParams(rawParams) ? state.params : null;
-    await useDocument(await fetchDocument(item, state.catalog.source, custom, state.mode));
+    const json = await fetchDocument(item, state.catalog.source, custom, state.mode);
+    if (!current()) return;   // the visitor picked another object or changed a parameter meanwhile
+    await useDocument(json);
   } catch (e) {
-    fail('error.document', e);
+    if (current()) fail('error.document', e);
   }
   updateShare();
 }
@@ -463,9 +465,7 @@ function invalidate() { redraw = true; kick(); }
 function wake() { quiet = 0; pumpRemote(); kick(); }
 
 /** A settled world (the same pose for a while, nothing driving it) is not stepped until woken. */
-function settled() {
-  return quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing;
-}
+const settled = () => quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing;
 
 /** A Worker engine is stepped when its last pose lands (WorkerWorld.pump), not at the next frame. */
 function pumpRemote() {

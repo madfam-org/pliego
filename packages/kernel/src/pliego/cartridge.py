@@ -27,7 +27,7 @@ from .sheet import Sheet
 
 RESULT_NAMES = ("result", "document", "assembly", "sheet")
 __all__ = ["ResultCheck", "check_result", "clamp", "execute", "find_result", "main",
-           "param"]
+           "manifest_ref_problems", "param"]
 
 
 @dataclass
@@ -147,6 +147,30 @@ def _script_for(manifest: dict, mode: str) -> str:
     return "main.py"
 
 
+def _declared_sheet_refs(manifest: dict) -> set[tuple[str, str]]:
+    refs = manifest.get("material_ref") if isinstance(manifest, dict) else None
+    return {(r.get("platform"), r.get("material_slug")) for r in refs or []
+            if isinstance(r, dict) and r.get("behaviour") == "sheet"}
+
+
+def manifest_ref_problems(manifest: dict) -> list[str]:
+    """Name-level problems of a manifest's ``hardware_ref`` (spec §5.42) and of its
+    ``material_ref`` items with ``behaviour: "sheet"`` (each must be a usable laminate layer:
+    a Pliego stock that carries sheet_behaviour, or a vendored snapshot entry; §5.41)."""
+    from . import hardware, laminate
+
+    _, problems = hardware.manifest_problems(manifest)
+    for ref in manifest.get("material_ref") or [] if isinstance(manifest, dict) else []:
+        if not isinstance(ref, dict) or ref.get("behaviour") != "sheet":
+            continue
+        try:
+            laminate.ref_behaviour(ref)
+        except (laminate.LaminateError, ValueError) as exc:
+            problems.append(f"material_ref {ref.get('platform')}/{ref.get('material_slug')}: "
+                            f"{exc}")
+    return problems
+
+
 def main(argv: list[str] | None = None) -> int:
     """`python -m pliego.cartridge <dir> [--params JSON] [--mode ID] [--out DIR]
     [--formats svg,pdf,…] [--stocks FILE]` — render, verify and print read-proof lines."""
@@ -189,6 +213,8 @@ def main(argv: list[str] | None = None) -> int:
     out_dir = Path(args.out) if args.out else None
     if out_dir is not None:
         out_dir.mkdir(parents=True, exist_ok=True)
+    ref_problems = manifest_ref_problems(manifest)
+    declared = _declared_sheet_refs(manifest)
     failures = runs_done = 0
     for mode, preset, params in _runs(manifest, args.mode, overrides):
         label = mode if preset is None else f"{mode}:{preset}"
@@ -209,6 +235,16 @@ def main(argv: list[str] | None = None) -> int:
         for issue in check.issues:
             if issue.get("level") == "error":
                 print(f"  error {issue.get('kind')}: {issue.get('detail')}", file=sys.stderr)
+        if check.ok and doc is not None:
+            from .laminate import material_refs
+
+            for ref in material_refs(doc.data.get("pliego:stocks") or {}):
+                key = (ref["platform"], ref["material_slug"])
+                if key not in declared:
+                    issue = (f"{label}: laminate layer material_ref {key[0]}/{key[1]} is not "
+                             "declared in the manifest's material_ref (behaviour: sheet)")
+                    if issue not in ref_problems:
+                        ref_problems.append(issue)
         if not check.ok:
             failures += 1
             continue
@@ -227,6 +263,13 @@ def main(argv: list[str] | None = None) -> int:
                     path.write_bytes(data)
                 else:
                     path.write_text(data, encoding="utf-8")
+    for problem in ref_problems:
+        print(f"  error refs: {problem}", file=sys.stderr)
+    hw = 1 if isinstance(manifest.get("hardware_ref"), dict) else 0
+    print(f"refs: cartridge={slug} hardware_ref={hw} material_ref={len(declared)} "
+          f"unresolved={len(ref_problems)}")
+    if ref_problems:
+        failures += 1
     if runs_done == 0:
         print(f"verify: cartridge={slug} mode=? sheets=0 vertices=0 edges=0 faces=0 joins=0 "
               "errors=1 warnings=0")

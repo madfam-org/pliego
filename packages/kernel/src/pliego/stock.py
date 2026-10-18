@@ -49,6 +49,8 @@ from pathlib import Path
 from typing import Any
 
 DERIVE_BASIS = "pliego.stock.derive v1"
+SHEET_BEHAVIOUR_VERSION = "1.0"          # the keystone's sheet_behaviour contract (spec §5.40)
+SHEET_BEHAVIOUR_RULE = "pliego-stock/1"  # the keystone rule that writes a card's carried block
 
 DERIVED_KEYS: tuple[str, ...] = (
     "areal_density", "thickness", "E_md", "E_cd", "nu", "D_md", "D_cd",
@@ -227,6 +229,31 @@ def validate(card: dict[str, Any], slug: str | None = None) -> list[dict[str, st
         issues.append(_issue("error", "derived_basis", f"unknown {card.get('derived_basis')!r}"))
     if "construction" in card:
         issues.extend(_construction_issues(card, physical))
+    if "sheet_behaviour" in card:
+        issues.extend(_sheet_behaviour_issues(card.get("sheet_behaviour"), card_slug, physical))
+    return issues
+
+
+def _sheet_behaviour_issues(sb: Any, slug: Any, physical: dict[str, Any]) -> list[dict[str, str]]:
+    """Shape of a carried ``sheet_behaviour`` block (spec §5.40). Its numbers are the keystone's
+    rule ``pliego-stock/1`` applied to this card; ``scripts/qa/verify_sheet_behaviour.py``
+    checks them against the keystone itself (the kernel never imports it)."""
+    if not isinstance(sb, dict) or sb.get("sheet_behaviour") != SHEET_BEHAVIOUR_VERSION:
+        return [_issue("error", "sheet_behaviour",
+                       f"sheet_behaviour must be a v{SHEET_BEHAVIOUR_VERSION} document")]
+    issues = []
+    src = sb.get("source") if isinstance(sb.get("source"), dict) else {}
+    want = {"platform": "pliego", "material_slug": slug, "rule": SHEET_BEHAVIOUR_RULE,
+            "card_basis": DERIVE_BASIS}
+    if src != want:
+        issues.append(_issue("error", "sheet_behaviour", f"sheet_behaviour.source {src!r} is not "
+                             f"{want!r}"))
+    for block in ("membrane", "bending", "provenance", "regime"):
+        if not isinstance(sb.get(block), dict):
+            issues.append(_issue("error", "sheet_behaviour", f"sheet_behaviour.{block} missing"))
+    cal = sb.get("caliper_mm")
+    if not isinstance(cal, int | float) or cal <= 0:
+        issues.append(_issue("error", "sheet_behaviour", "sheet_behaviour.caliper_mm must be > 0"))
     return issues
 
 

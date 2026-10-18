@@ -111,15 +111,18 @@ def import_kernel():
 
 
 def load_stocks(pliego, assembly, materials: str) -> dict:
-    """Stock snapshots for every sheet, from the committed ``materials/<slug>/stock.json``."""
+    """Stock snapshots for every sheet, from the committed ``materials/<slug>/stock.json``.
+
+    A stock the assembly defines itself (a laminate, spec §5.40) is left to the assembly."""
     import pliego.stock as stock_mod
 
     stocks: dict = {}
+    own = getattr(assembly, "stocks", None) or {}     # laminates the assembly defines (§5.40)
     for sheet in assembly.sheets:
         slug = getattr(sheet, "stock", None)
         if not isinstance(slug, str):
             raise CartridgeError("stock", f"sheet {getattr(sheet, 'id', '?')!r} has no stock id")
-        if slug not in stocks:
+        if slug not in stocks and slug not in own:
             try:
                 stocks[slug] = stock_mod.load_snapshot(slug, materials or None)
             except Exception as exc:  # noqa: BLE001 — StockError, a missing materials dir …

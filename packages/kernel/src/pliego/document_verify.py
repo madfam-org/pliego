@@ -107,6 +107,8 @@ def verify_document(doc: Document, min_face_area_mm2: float | None = None) -> li
         _rule9_initial(d, coords, out)
     _rule13_packaging(d, coords, out)
     rule30_circuit(d, out)  # §5.30 continuity (lane FL3 wiring)
+    rule40_laminates(d, out)  # §5.40–§5.41 laminate stocks (RFC 0045 phase 2)
+    rule41_hardware(d, out)  # §5.42 hardware_ref, name-level
     meta = d.get("pliego:meta") or {}
     extra = sorted(set(meta) - META_KEYS) if isinstance(meta, dict) else []
     if extra:  # rule 16 (§5.7): the schema closes pliego:meta (an error since 2026-10-11)
@@ -445,6 +447,7 @@ def _rule6_stocks(d: dict, out: _Issues) -> None:
 
 # rules 7–9 live in document_verify_refs (file-size gate)
 from .document_verify_engine import rules19_21  # noqa: E402
+from .document_verify_laminate import rule40_laminates, rule41_hardware  # noqa: E402
 from .document_verify_pack import _rule13_packaging, rule30_circuit  # noqa: E402
 from .document_verify_refs import (  # noqa: E402
     _rule7_refs,

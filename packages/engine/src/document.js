@@ -194,7 +194,7 @@ function parseCore(d, plainFold, P) {
       if (!SLUG.test(id)) P.push(`rule 6: stock id ${JSON.stringify(id)} is not kebab case`);
       const der = s && s.derived;
       if (!der || typeof der !== 'object') { P.push(`rule 6: stock ${id} has no derived block`); continue; }
-      for (const k of ['G12', 'score_yield_deg', 'perf_cut_mm', 'perf_bridge_mm']) {
+      for (const k of ['G12', 'score_yield_deg', 'perf_cut_mm', 'perf_bridge_mm', 'D12', 'D66']) {
         if (der[k] !== undefined && !(isNum(der[k]) && der[k] > 0)) P.push(`rule 6: stock ${id} derived.${k} (optional) must be a positive number`);
       }
       for (const k of DERIVED_KEYS) {

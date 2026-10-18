@@ -46,8 +46,9 @@ export function fromDerived(derived) {
   const t = derived.thickness, nu = derived.nu, Emd = derived.E_md, Ecd = derived.E_cd;
   const D11 = derived.D_md, D22 = derived.D_cd;
   const G12 = typeof derived.G12 === 'number' ? derived.G12 : 0.387 * Math.sqrt(Emd * Ecd);
-  const D12 = nu * Math.sqrt(D11 * D22);
-  const D66 = (G12 * t * t * t) / 12;
+  // A laminate stock (spec §5.40) writes its free stack's D12 / D66; a single sheet does not.
+  const D12 = typeof derived.D12 === 'number' ? derived.D12 : nu * Math.sqrt(D11 * D22);
+  const D66 = typeof derived.D66 === 'number' ? derived.D66 : (G12 * t * t * t) / 12;
   const H = D12 + 2 * D66;
   // D(φ) = D11 c⁴ + 2H s²c² + D22 s⁴ = a0 + a2 cos2φ + a4 cos4φ
   const a0 = (3 / 8) * (D11 + D22) + H / 4;

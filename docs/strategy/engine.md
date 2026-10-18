@@ -153,7 +153,13 @@ with φ_e the angle between MD and the edge direction.
 
 ### 3.3 Crease plasticity and memory
 
-Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle`, default 0),
+Per crease/score/perforation hinge: `θ_rest` (init from `pliego:edges_restAngle`, default 0;
+since lane E3, 2026-10-18, also a panel hinge on a plain `F`/`U` line the kernel set in the initial
+frame (spec §5.14), and every hinge's starting angle is taken on the branch of its rest angle, so a
+crease folded flat starts at +180° when it is a valley, not −180°: the fox-puppet `talk` started
+360° from rest and blew apart in its first substep. A document with no joins, mechanisms or
+kinematic sheets whose initial pose dips below the table is lifted onto it, with a warning; test
+`set-rest`),
 `θ_target` (set while a sequence step drives it), `memory ∈ [0, 1]`.
 
 - **Driving** (sequence step active on this hinge): the constraint uses `θ_target(t)` (eased from the

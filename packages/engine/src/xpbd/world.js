@@ -54,6 +54,14 @@ export class World {
     this.mesh = mesh;
     const nV = mesh.nV;
     this.materials = doc.sheets.map((/** @type {any} */ s) => fromDerived(s.derived));
+    // paper cannot start inside the table: a free document (no joins, mechanisms or kinematic sheets)
+    // whose initial pose dips below y = 0 is lifted onto it. Before, the first ground pass snapped
+    // the buried part up in one substep (fox-puppet `talk` starts 95 mm deep and blew apart)
+    let lift = 0;
+    if ((opts.ground ?? true) && !doc.joins.length && !doc.mechanisms.length && !doc.sheets.some((/** @type {any} */ s) => s.kinematic)) {
+      for (let v = 0; v < mesh.nV; v++) lift = Math.max(lift, -mesh.X0[3 * v + 1]);
+      if (lift > 0) for (let v = 0; v < mesh.nV; v++) mesh.X0[3 * v + 1] += lift;
+    }
     this.X0 = mesh.X0;
     this.x = Float64Array.from(mesh.X0);
     this.v = new Float64Array(3 * nV);
@@ -84,6 +92,7 @@ export class World {
     }
     this.drivers = new Drivers(this, terms, pins, opts);
     this.warnings = this.drivers.warnings;
+    if (lift > 0) this.warnings.push(`initial pose: ${lift.toFixed(2)} mm below the table; the document was lifted onto it`);
     this.warnings.push(...joinWarnings);
     this.terms = terms.finish();
     for (let t = 0; t < this.terms.count; t++) this.terms.k[t] = this.terms.info[t].k ?? 0;
@@ -176,8 +185,13 @@ export class World {
         this.yieldRad[h] = kind === HINGE_CREASE ? m.yieldRad : kind === HINGE_SCORE ? m.scoreYieldRad : m.perfYieldRad;
       }
       const d = mesh.hingeDoc[h];
-      if (d >= 0 && kind !== HINGE_PANEL) this.restTheta[h] = (doc.restAngle[d] * Math.PI) / 180;
-      this.theta[h] = dihedral(this.x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], null);
+      // spec §5.14: a line folded in the initial frame is set; the kernel writes its signed dihedral,
+      // also for plain-paper F / U lines (panel hinges here; before, only creases read it)
+      if (d >= 0 && (kind !== HINGE_PANEL || doc.restAngle[d] !== 0)) this.restTheta[h] = (doc.restAngle[d] * Math.PI) / 180;
+      // a crease folded flat measures ±180° either way: take the branch of its rest angle (spec §5.14,
+      // "a crease folded flat takes its design sign"). Before, a flat valley could start at −180°,
+      // 360° from its rest, and the first substep blew the sheet apart (fox-puppet `talk`)
+      this.theta[h] = unwrap(this.restTheta[h], dihedral(this.x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], null));
       // fold limit |θ| ≤ π − θ_t, θ_t = 2·atan(t_c / (2·min wing height))
       // wing heights from the hinge's own vertices (perforation hinges span a split edge)
       const uv = mesh.uv, q0 = H[4 * h], q1 = H[4 * h + 1];

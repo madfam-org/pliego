@@ -214,6 +214,13 @@ exact (∇E = f_ext) whatever the age of the factorisation, and test `E12-subste
   across it by the card's D_md/D_cd (2.2 for copy paper; a laminate uses its free stack's D11/D22).
   Before, every crease had the mean stiffness whatever its direction. Test `crease-grain` (a flap
   hanging from a crease sags 2.20× further along the grain than across it; 1.00× before).
+- **Set creases start at rest** (spec §5.14, lane E3). A hinge's starting angle is measured on
+  the branch of its rest angle (a crease folded flat is ±180° to atan2; the design sign wins), plain
+  `F`/`U` lines the kernel set in the initial frame keep their rest angle, and a free document whose
+  initial pose dips below the table is lifted onto it (`world.warnings` says by how much). The
+  fox-puppet `talk` had all three: 95 mm buried, flat valleys measured at −180° against a +180° rest;
+  it moved 95 mm in its first substep and blew apart, now 0.6 mm (test `set-rest`). Provisional
+  contract call 3 ("the engine reads the signed rest angle") is closed by this.
 - **Bending damping** (`BEND_DAMPING`, lane E3). Every hinge also resists its own rate of turn,
   β·k·θ̇ (backward-Euler Rayleigh term in the implicit step; the physics memo's "Rayleigh-like β").
   β = η/ω with a loss factor η = 0.025 at 4 Hz, the low end of paper's few-per-cent range

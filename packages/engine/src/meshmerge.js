@@ -15,8 +15,10 @@
  * triangulates as one piece. Creases, scores, perforations, cuts and the outline stay exact mesh
  * edges (they are never merged across). An edge is merged only when
  *   - it is interior to one sheet (two faces) and plain paper (above);
- *   - no fold program step targets or releases it;
- *   - it is flat in the document's `initial` frame within MERGE_BEND_DEG (a triangle spanning a bent
+ *   - no fold program step targets or releases it, and no join or mechanism point or segment lies
+ *     on it (a pin along a clamp line, a glue region's border, a pivot at its end: those need the
+ *     line's mesh vertices);
+ *   - it has no set rest angle (spec §5.14) and is flat in the document's `initial` frame within MERGE_BEND_DEG (a triangle spanning a bent
  *     line starts with its chord shortened by about θ²/8: 0.4 % at 10°, inside the 0.45 % guard);
  *   - in a document with a kinematic fold program, it is not an `F` or `U` line (loop closure may fold
  *     those; `J` never folds);
@@ -53,11 +55,12 @@ export function meshRegions(doc, isCut) {
     for (const e of st.release ?? []) stepEdges.add(e);
   }
   const kinematic = doc.sequence?.mode === 'kinematic';
+  const touched = joinTouched(doc);
   const normals = doc.initial ? faceNormals(doc) : null;
   const cosBend = Math.cos((MERGE_BEND_DEG * Math.PI) / 180);
   const plain = (/** @type {number} */ e) => {
     const f0 = edgeFaces[2 * e], f1 = edgeFaces[2 * e + 1];
-    if (f0 < 0 || f1 < 0 || f0 === f1 || isCut(e) || stepEdges.has(e)) return false;
+    if (f0 < 0 || f1 < 0 || f0 === f1 || isCut(e) || stepEdges.has(e) || touched[e] || doc.restAngle[e] !== 0) return false;
     if (doc.fSheet[f0] !== doc.fSheet[f1]) return false;
     const a = assignment[e], t = treatment[e];
     if (!((t === 'none' && (a === 'F' || a === 'U' || a === 'J')) || (t === 'halfcut' && a === 'F'))) return false;
@@ -233,4 +236,59 @@ export function pruneSplits(doc, regions, split, U, sectorVertex, h, isCut) {
     }
   }
   return dropped;
+}
+
+/**
+ * Edges that a join or mechanism names geometrically: a point of it (pivot, string, pin, slider,
+ * rotate centre) on the edge, or a segment of it (pin `along`, glue region border, slider track,
+ * leaf spine) running along the edge. Such edges are never merged.
+ * @param {any} doc @returns {Uint8Array}
+ */
+function joinTouched(doc) {
+  /** @type {[number, number[], number[]][]} sheet, p, q (a point is p = q) */
+  const segs = [];
+  const si = (/** @type {string} */ id) => doc.sheetIndex.get(id);
+  const add = (/** @type {any} */ sheet, /** @type {any} */ p, /** @type {any} */ q) => {
+    const s = si(sheet);
+    if (s === undefined || !Array.isArray(p) || !Array.isArray(q)) return;
+    segs.push([s, p, q]);
+  };
+  for (const j of doc.joins ?? []) {
+    for (const side of [j.a, j.b]) {
+      if (!side || typeof side !== 'object') continue;
+      if (side.at) add(side.sheet, side.at, side.at);
+      if (side.along) add(side.sheet, side.along[0], side.along[1]);
+      if (Array.isArray(side.region)) side.region.forEach((/** @type {number[]} */ p, /** @type {number} */ i) => add(side.sheet, p, side.region[(i + 1) % side.region.length]));
+    }
+    if (j.track) add(j.track.sheet, j.track.from, j.track.to);
+  }
+  for (const m of doc.mechanisms ?? []) {
+    if (m.center && m.center.at) add(m.center.sheet, m.center.at, m.center.at);
+    if (m.spine) add(m.sheet, m.spine[0], m.spine[1]);
+  }
+  const out = new Uint8Array(doc.nE);
+  if (!segs.length) return out;
+  const C = doc.coords;
+  for (let e = 0; e < doc.nE; e++) {
+    const s = doc.eSheet[e];
+    const [ox, oy] = doc.sheets[s].offset;
+    const a = doc.edges[2 * e], b = doc.edges[2 * e + 1];
+    const ax = C[2 * a] - ox, ay = C[2 * a + 1] - oy, bx = C[2 * b] - ox, by = C[2 * b + 1] - oy;
+    const tol = 1e-6 * Math.max(1, Math.hypot(bx - ax, by - ay));
+    for (const [ss, p, q] of segs) {
+      if (ss !== s) continue;
+      // a point of the join on the edge, or the edge's midpoint on the join's segment
+      if (segDist(p[0], p[1], ax, ay, bx, by) <= tol || segDist(q[0], q[1], ax, ay, bx, by) <= tol
+        || (p !== q && segDist((ax + bx) / 2, (ay + by) / 2, p[0], p[1], q[0], q[1]) <= tol)) { out[e] = 1; break; }
+    }
+  }
+  return out;
+}
+
+/** Distance from (x, y) to segment (a, b). @param {number} x @param {number} y @param {number} ax @param {number} ay @param {number} bx @param {number} by */
+function segDist(x, y, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
+  let t = L2 > 0 ? ((x - ax) * dx + (y - ay) * dy) / L2 : 0;
+  t = t < 0 ? 0 : t > 1 ? 1 : t;
+  return Math.hypot(x - ax - t * dx, y - ay - t * dy);
 }

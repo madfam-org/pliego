@@ -17,6 +17,7 @@
  */
 import { BlockCholesky } from '../linalg/blockchol.js';
 import { dihedral } from './dihedral.js';
+import { hypot3 } from '../fastmath.js';
 
 /** Strain below which an edge switches to the compression model (hysteresis, see gradient()). */
 const MODEL_COMP_ENTER = 1e-4;
@@ -110,7 +111,7 @@ export function assembleAndFactor(w, x) {
   for (let e = 0; e < w.mesh.nE; e++) {
     const a = E[2 * e], b = E[2 * e + 1];
     let dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
-    const L = Math.hypot(dx, dy, dz) || 1;
+    const L = hypot3(dx, dy, dz) || 1;
     u[0] = dx / L; u[1] = dy / L; u[2] = dz / L;
     // model stiffness of the branch the edge is on. Compression is modelled at
     // max(MEMBRANE_COMPRESSION, MODEL_COMPRESSION)·k: never below the true stiffness (an
@@ -171,7 +172,7 @@ export function termProjector(T, t, x, P) {
   // string: ê = r/|r|
   const r = [0, 0, 0];
   termResidual(T, t, x, r);
-  const L = Math.hypot(r[0], r[1], r[2]) || 1;
+  const L = hypot3(r[0], r[1], r[2]) || 1;
   for (let a = 0; a < 3; a++) for (let c = 0; c < 3; c++) P[3 * a + c] = (r[a] / L) * (r[c] / L);
 }
 
@@ -194,7 +195,7 @@ export function gradient(w, x, g) {
   for (let e = 0; e < w.mesh.nE; e++) {
     const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
     const dx = x[b] - x[a], dy = x[b + 1] - x[a + 1], dz = x[b + 2] - x[a + 2];
-    const L = Math.hypot(dx, dy, dz);
+    const L = hypot3(dx, dy, dz);
     if (L === 0) continue;
     U[3 * e] = dx / L; U[3 * e + 1] = dy / L; U[3 * e + 2] = dz / L;
     // model branch with hysteresis: enter the compression model below −MODEL_COMP_ENTER strain,
@@ -229,7 +230,7 @@ export function gradient(w, x, g) {
     termResidual(T, t, x, r);
     let fx, fy, fz;
     if (T.mode[t] === TERM_STRING) {
-      const L = Math.hypot(r[0], r[1], r[2]);
+      const L = hypot3(r[0], r[1], r[2]);
       const ex = L - T.len[t];
       if (ex <= 0) continue;
       const s = (T.k[t] * ex) / L;

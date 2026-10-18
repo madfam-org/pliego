@@ -25,7 +25,7 @@ export function snapshotWorld(w) {
       kin: w.drivers.kin ? { a: Float64Array.from(w.drivers.kin.a), b: Float64Array.from(w.drivers.kin.b), n: w.drivers.kin.n, i: w.drivers.kin.i } : null },
     contactSide: w.contact ? [...w.contact.side] : [],
     edgeSide: w.edgeContact ? [...w.edgeContact.side] : [],
-    factor: w._factorState,
+    factor: w._factorState ? copyFactor(w._factorState) : null,
     factorDir: Float64Array.from(w.factorDir),
   };
 }
@@ -59,7 +59,7 @@ export function restoreWorld(w, s) {
     const f = s.factor;
     w.driveOn.set(f.driveOn); T.active.set(f.active); T.k.set(f.k); T.mode.set(f.mode); T.verts.set(f.verts); T.c.set(f.c); T.dir.set(f.dir); T.len.set(f.len);
     assembleAndFactor(w, f.x);
-    w._factorState = f;
+    w._factorState = copyFactor(f); // the World refills its own buffers; the snapshot stays as it was
   }
   w.driveOn.set(s.driveOn); w.driveTarget.set(s.driveTarget);
   T.active.set(s.terms.active); T.k.set(s.terms.k); T.mode.set(s.terms.mode); T.verts.set(s.terms.verts);
@@ -69,4 +69,12 @@ export function restoreWorld(w, s) {
   w._asleep = s.asleep;
   w._quiet = s.quiet;
   w._pcgFail = s.pcgFail;
+}
+
+/** A deep copy of a World's factorisation inputs (the World reuses its buffers). @param {any} f */
+function copyFactor(f) {
+  return {
+    x: Float64Array.from(f.x), driveOn: Uint8Array.from(f.driveOn), edgeComp: Uint8Array.from(f.edgeComp), active: Uint8Array.from(f.active),
+    k: Float64Array.from(f.k), mode: Uint8Array.from(f.mode), verts: Int32Array.from(f.verts), c: Float64Array.from(f.c), dir: Float64Array.from(f.dir), len: Float64Array.from(f.len),
+  };
 }

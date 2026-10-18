@@ -21,6 +21,7 @@
  * simulation is unchanged. Bounded: lips × candidate triangles is checked against EDGE_PAIR_LIMIT
  * at construction (World.warnings says when it is exceeded, and the contact is then off).
  */
+import { hypot3 } from '../fastmath.js';
 
 /** Largest lips × other-sheet triangles this narrow phase takes on (each pass is one sweep over them). */
 export const EDGE_PAIR_LIMIT = 250000;
@@ -75,7 +76,7 @@ export class EdgeContact {
       const e1x = x[b] - x[a], e1y = x[b + 1] - x[a + 1], e1z = x[b + 2] - x[a + 2];
       const e2x = x[c] - x[a], e2y = x[c + 1] - x[a + 1], e2z = x[c + 2] - x[a + 2];
       const nx = e1y * e2z - e1z * e2y, ny = e1z * e2x - e1x * e2z, nz = e1x * e2y - e1y * e2x;
-      const L = Math.hypot(nx, ny, nz), il = L > 0 ? 1 / L : 0;
+      const L = hypot3(nx, ny, nz), il = L > 0 ? 1 / L : 0;
       N[3 * t] = nx * il; N[3 * t + 1] = ny * il; N[3 * t + 2] = nz * il;
     }
     let active = 0;

@@ -102,8 +102,7 @@ def create_app(settings: Settings | None = None) -> Flask:
                          for m in r.methods - {"HEAD", "OPTIONS"}
                          if r.rule.startswith("/api/v1/") or r.rule in ("/health", "/ready")})
         return json_response({"service": "pliego-api", "version": VERSION,
-                              "openapi": "https://github.com/madfam-org/pliego/blob/main/"
-                                         "apps/api/openapi.yaml",
+                              "openapi": "/api/v1/openapi.json",
                               "endpoints": [f"{m} {rule}" for rule, m in routes]})
 
     app.register_blueprint(create_blueprint(

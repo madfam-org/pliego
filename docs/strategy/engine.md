@@ -1,6 +1,6 @@
 # The Pliego engine — design, physics and verification contract
 
-> Last Updated: 2026-10-10
+> Last Updated: 2026-10-18
 > Boundary: public-safe design document. Policy: [`../PUBLIC_REPO_BOUNDARY.md`](../PUBLIC_REPO_BOUNDARY.md).
 
 `packages/engine` (`@pliego/engine`, private, zero runtime dependencies) loads a
@@ -41,6 +41,11 @@ document's `pliego:sequence.mode` chooses which tier runs the fold program; mech
 4. **Refine** by longest-edge bisection (Rivara) until every triangle edge ≤ `h` and no triangle has
    an angle < ~20° where avoidable. Bisection of an edge that lies on an original edge stays on it, so
    crease and cut lines remain exact mesh edges.
+   <!-- lane E3 (2026-10-18) --> Before step 2, faces are joined across plain-paper lines that
+   nothing names (`src/meshmerge.js`), and a split point within h/4 of another line's point is
+   dropped; a refinement midpoint closer than h/4 to the boundary is not inserted. Creases, cuts
+   and the outline stay exact. Measured effect and limits: `packages/engine/README.md`
+   ("Sliver hygiene").
 5. **Cut edges** (`C`): vertices along a cut polyline are duplicated so the two sides are
    topologically separate (cut tips keep one shared vertex).
 6. **Hinges**: every interior mesh edge shared by two triangles becomes a hinge with a kind:

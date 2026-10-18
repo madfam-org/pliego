@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import re
+from pathlib import Path
 
 import pytest
 from conftest import API, APP, LANDING
@@ -207,3 +208,19 @@ def test_schema_served(client):
 def test_missing_web_tree_is_404_not_500(make_app, tree):
     (tree / "apps" / "web" / "index.html").unlink()
     assert make_app().test_client().get("/", base_url=LANDING).status_code == 404
+
+
+REPO = Path(__file__).resolve().parents[3]
+MD_LINK = re.compile(r"\]\(([^)\s]+)\)")
+
+
+@pytest.mark.parametrize("name", ["llms.txt", "llms-full.txt"])
+def test_repo_llms_links_resolve_off_the_site_root(name):
+    """The repository's llms files are served at the root of all three hosts, so a relative link
+    such as ``[AGENTS.md](AGENTS.md)`` resolves to https://pliego.madfam.io/AGENTS.md, a 404.
+    Every Markdown link must be absolute (https) or a site path the routes serve."""
+    text = (REPO / name).read_text(encoding="utf-8")
+    links = MD_LINK.findall(text)
+    relative = [u for u in links if not u.startswith(("https://", "/llms", "/studio/", "#"))]
+    print(f"{name}: links={len(links)} relative={len(relative)}")
+    assert relative == [], f"{name} links that 404 when served from a host root: {relative}"

@@ -1,6 +1,6 @@
 # Deployment
 
-> Last Updated: 2026-10-10
+> Last Updated: 2026-10-18
 > Boundary: public. Production operations are Enclii-first; this repository carries no break-glass
 > procedure. Operator procedures and secret handling live in MADFAM's private ops repository.
 
@@ -19,6 +19,33 @@ the tunnel to Service `pliego` on port 80, i.e. container port 8000:
 Health: liveness `/health` (static 200; its `revision` is the git commit the image was built from,
 passed by `build-deploy.yml` as the `PLIEGO_REVISION` build arg, `null` on a local build), readiness
 `/ready` (503 until the catalog, stock cards and commons load). Metrics: `/metrics` on 9090, scraped through Service `pliego-metrics`, never routed.
+
+## Rollouts and disruptions
+
+The Deployment declares **2 replicas**, a `RollingUpdate` with `maxSurge: 1` and `maxUnavailable: 0`, a
+soft anti-affinity across nodes, and PodDisruptionBudget `pliego` (`minAvailable: 1`, on the Service's
+selector). A new pod must pass `/ready` before an old one stops, so a rollout is never an outage, even at
+one live pod. `scripts/qa/verify_rollout_safety.py` fails the build if any of this regresses or if
+`runtime.replicas` in `enclii.yaml` drifts from the Deployment.
+
+Two pods are safe because neither holds anything the other needs: each has its own render cache (a
+per-worker memory tier and a disk tier in its private `/tmp`), so a repeat render may be cold once per
+pod; the prerendered tier is baked into the image, so a fresh pod serves default views at once; the API
+keeps no sign-in or session state (sign-in is not wired and the API refuses `Authorization` today; when
+sign-in lands, its PKCE state and session must live in a signed cookie or a shared store, never in one
+pod's memory); rate limits are per worker, per pod, so a client can reach `limit × workers × pods`
+(`apps/api/ratelimit.py`).
+
+**Enclii replica trap.** Enclii's Argo Application ignores `spec.replicas` on Deployments
+(`RespectIgnoreDifferences`), so the `2` in git does **not** reach the live object on sync. The strategy,
+the anti-affinity and the PodDisruptionBudget do. Until the owner scales, production runs **one** pod, and
+the PodDisruptionBudget allows **no** eviction: a node drain waits on that pod. After the manifests sync,
+the owner scales once, Enclii-first (`POST /v1/services/<id>/scale` with `{"replicas": 2, "env":
+"production"}`, admin role), or `kubectl -n pliego scale deploy/pliego --replicas=2`.
+
+Verify on the live objects, not in git: the Deployment's `spec.replicas` and `status.availableReplicas`
+are both 2; PodDisruptionBudget `pliego` shows `ALLOWED DISRUPTIONS 1`; and a `/health` sample (every
+second or two) taken across the next rollout shows no failed request and the `revision` changing over.
 
 ## Configuration contract
 

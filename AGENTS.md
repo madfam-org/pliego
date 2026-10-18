@@ -73,6 +73,7 @@ python3 scripts/qa/verify_commons_pin.py             # projects/ is a populated,
 python3 scripts/qa/verify_compliance.py              # doctrine gates (AST level)
 python3 scripts/qa/verify_deploy_paths.py            # deploy path filter == Dockerfile COPYs
 python3 scripts/qa/verify_canonical_host.py          # enclii.yaml hosts == CORS / host env
+python3 scripts/qa/verify_rollout_safety.py          # 2 replicas, surge rollout, PDB, probes (docs/DEPLOYMENT.md)
 python3 -m unittest discover -s scripts/qa/tests -v  # tests for the lanes above
 ```
 

@@ -39,6 +39,8 @@ export const MERGE_BEND_DEG = 10;
  * @property {number[]} loopE boundary: document edge from loopV[i] to loopV[i+1]
  * @property {number[]} loopF boundary: the face of the region that owns edge loopE[i]
  * @property {number[]} inner document vertices strictly inside the region
+ * @property {Uint8Array} skip skip[i] = 1: loopV[i] is not a mesh corner (it only ended merged lines
+ *   on a straight stretch of outline; the outline runs through it unchanged)
  */
 
 /**
@@ -114,7 +116,7 @@ export function meshRegions(doc, isCut) {
       loopV.push(h[0]); loopE.push(h[2]); loopF.push(h[3]); onLoop[h[0]] = 1;
       v = h[1];
     } while (v !== start);
-    regions.push({ faces: [], loopV, loopE, loopF, inner: [] });
+    regions.push({ faces: [], loopV, loopE, loopF, inner: [], skip: new Uint8Array(loopV.length) });
   }
   const regionOf = new Int32Array(nF);
   let k = 0;
@@ -126,6 +128,24 @@ export function meshRegions(doc, isCut) {
   for (let e = 0; e < nE; e++) {
     const f0 = edgeFaces[2 * e], f1 = edgeFaces[2 * e + 1];
     merged[e] = f0 >= 0 && f1 >= 0 && !onLoopE[e] && find(f0) === find(f1) ? 1 : 0;
+  }
+  // a loop vertex that only ended merged lines on a straight stretch of outline (B / none on both
+  // sides, collinear) is not a corner of the mesh: the split points of the two outline edges run
+  // through it, so the mesh does not keep a short outline segment (and a sliver) next to it
+  const incident = Array.from({ length: doc.nV }, () => /** @type {number[]} */ ([]));
+  for (let e = 0; e < nE; e++) { incident[doc.edges[2 * e]].push(e); incident[doc.edges[2 * e + 1]].push(e); }
+  for (const R of regions) {
+    const n = R.loopV.length;
+    for (let i = 0; i < n; i++) {
+      const v = R.loopV[i], ein = R.loopE[(i + n - 1) % n], eout = R.loopE[i];
+      if (ein === eout || !incident[v].some((e) => merged[e])) continue;
+      if (!incident[v].every((e) => e === ein || e === eout || merged[e])) continue;
+      if (!(assignment[ein] === 'B' && assignment[eout] === 'B' && treatment[ein] === 'none' && treatment[eout] === 'none')) continue;
+      const p = R.loopV[(i + n - 1) % n], q = R.loopV[(i + 1) % n], C = doc.coords;
+      const ux = C[2 * v] - C[2 * p], uy = C[2 * v + 1] - C[2 * p + 1], wx = C[2 * q] - C[2 * v], wy = C[2 * q + 1] - C[2 * v + 1];
+      if (Math.abs(ux * wy - uy * wx) > 1e-9 * Math.hypot(ux, uy) * Math.hypot(wx, wy) || ux * wx + uy * wy <= 0) continue;
+      R.skip[i] = 1;
+    }
   }
   const seen = new Uint8Array(doc.nV);
   for (const R of regions) {
@@ -210,7 +230,7 @@ export function pruneSplits(doc, regions, split, U, sectorVertex, h, isCut) {
       const e = R.loopE[i], fe = R.loopF[i];
       lines.push({ e, side: isCut(e) && doc.edgeFaces[2 * e + 1] === fe ? 1 : 0 });
     }
-    const corners = R.loopV.map((v, i) => /** @type {number} */ (sectorVertex[v].get(R.loopF[i])));
+    const corners = R.loopV.map((v, i) => (R.skip[i] ? -1 : /** @type {number} */ (sectorVertex[v].get(R.loopF[i]))));
     for (let i = 0; i < lines.length; i++) {
       const { e, side } = lines[i];
       const pts = split[e][side];
@@ -221,7 +241,7 @@ export function pruneSplits(doc, regions, split, U, sectorVertex, h, isCut) {
         let close = false;
         for (let j = 0; j < corners.length && !close; j++) {
           // the edge's own end points are at least h/2 away (uniform split); skip them anyway
-          if (j === i || j === (i + 1) % corners.length) continue;
+          if (j === i || j === (i + 1) % corners.length || corners[j] < 0) continue;
           close = near(corners[j]);
         }
         for (let j = 0; j < lines.length && !close; j++) {

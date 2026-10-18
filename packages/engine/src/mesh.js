@@ -140,25 +140,19 @@ export function buildMesh(doc, opts = {}) {
     const f = R.faces[0];
     const s = fSheet[f];
     const sheet = doc.sheets[s];
-    const ring = [];
+    const ring = [], ringE = []; // ringE[i]: document edge of the segment ring[i] → ring[i + 1]
     for (let i = 0; i < R.loopV.length; i++) {
       const v = R.loopV[i], e = R.loopE[i], fe = R.loopF[i];
-      ring.push(/** @type {number} */(sectorVertex[v].get(fe)));
+      if (!R.skip[i]) { ring.push(/** @type {number} */(sectorVertex[v].get(fe))); ringE.push(e); }
       const side = isCut(e) && edgeFaces[2 * e + 1] === fe ? 1 : 0;
       const pts = split[e][side];
       const forward = edges[2 * e] === v;
-      for (let q = 0; q < pts.length; q++) ring.push(forward ? pts[q] : pts[pts.length - 1 - q]);
+      for (let q = 0; q < pts.length; q++) { ring.push(forward ? pts[q] : pts[pts.length - 1 - q]); ringE.push(e); }
     }
     // record which document edge each boundary segment lies on
-    let pos = 0;
-    for (let i = 0; i < R.loopV.length; i++) {
-      const e = R.loopE[i];
-      const n = split[e][0].length + 1;
-      for (let q = 0; q < n; q++) {
-        const a = ring[(pos + q) % ring.length], b = ring[(pos + q + 1) % ring.length];
-        segDoc.set(Math.min(a, b) * NV_BIG + Math.max(a, b), e);
-      }
-      pos += n;
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length];
+      segDoc.set(Math.min(a, b) * NV_BIG + Math.max(a, b), ringE[i]);
     }
     const poly = [];
     for (const mv of ring) poly.push(U[2 * mv], U[2 * mv + 1]);
@@ -188,7 +182,7 @@ export function buildMesh(doc, opts = {}) {
       triF.push(R.faces.length > 1 ? faceAt(doc, R.faces, (U[2 * a] + U[2 * b] + U[2 * c]) / 3, (U[2 * a + 1] + U[2 * b + 1] + U[2 * c + 1]) / 3) : f);
     }
   }
-  compactOrphans(U, vS, vG, vF, tri, split, sectorVertex, docVertex);
+  compactOrphans(U, vS, vG, vF, tri, split, sectorVertex, docVertex, segDoc, NV_BIG);
   const nV = vS.length, nT = triS.length;
   const tris = Int32Array.from(tri);
   const uv = Float64Array.from(U);
@@ -329,8 +323,9 @@ function faceAt(doc, faces, x, y) {
  * (bit-identical mesh) when every vertex is used.
  * @param {number[]} U @param {number[]} vS @param {number[]} vG @param {number[]} vF @param {number[]} tri
  * @param {number[][][]} split @param {Map<number, number>[]} sectorVertex @param {Int32Array} docVertex
+ * @param {Map<number, number>} segDoc boundary segment (vertex pair key) → document edge @param {number} big key base
  */
-function compactOrphans(U, vS, vG, vF, tri, split, sectorVertex, docVertex) {
+function compactOrphans(U, vS, vG, vF, tri, split, sectorVertex, docVertex, segDoc, big) {
   const n = vS.length;
   const used = new Uint8Array(n);
   for (const v of tri) used[v] = 1;
@@ -357,6 +352,13 @@ function compactOrphans(U, vS, vG, vF, tri, split, sectorVertex, docVertex) {
   for (const per of split) for (const list of per) for (let i = 0; i < list.length; i++) list[i] = map[list[i]];
   for (const m of sectorVertex) for (const [f, v] of m) m.set(f, map[v]);
   for (let v = 0; v < docVertex.length; v++) if (docVertex[v] >= 0) docVertex[v] = map[docVertex[v]];
+  // boundary segments join used vertices only (a dropped vertex is on no triangle): re-key them
+  const old = [...segDoc];
+  segDoc.clear();
+  for (const [key, e] of old) {
+    const a = map[Math.floor(key / big)], b = map[key % big];
+    segDoc.set(Math.min(a, b) * big + Math.max(a, b), e);
+  }
 }
 
 /** Default target edge length: ~1/30 of the largest sheet dimension, clamped to [3, 8] mm. @param {any} doc */

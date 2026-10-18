@@ -13,6 +13,11 @@
  *   node packages/engine/bench/profile-docs.mjs [--steps 20] [--engine path/to/src/index.js]
  *        [--compare path/to/other/src/index.js] [--prof-dir dir] [--interval-us 250] <doc.fold>…
  *
+ * With `--compare`, both engines are also timed step by step (`ms/step2`, `ratio`), but in one
+ * process the garbage one engine makes is often collected during the other's step, and the CPU
+ * clock counts the JIT and GC threads of both: use the ratio as a hint, and time A against B in
+ * separate processes, alternated, for numbers.
+ *
  * `--prof-dir` records a V8 CPU profile of the timed steps only (node:inspector, the same sampler as
  * `node --cpu-prof`; the `.cpuprofile` files open in Chrome DevTools) and prints the self time by
  * engine stage and the top functions. `--compare` steps a second engine (another checkout's
@@ -133,7 +138,7 @@ async function main() {
     const w = prepare(E, json);
     const w2 = C ? prepare(C, json) : null;
     let maxDiff = w2 ? diff(w.x, w2.x) : 0;
-    const f0 = w.factorCount, ts = [];
+    const f0 = w.factorCount, ts = [], ts2 = [];
     let peak = 0;
     // let pending GC entries of the load drain before counting
     await new Promise((r) => setImmediate(r));
@@ -143,7 +148,7 @@ async function main() {
       const c0 = cpuMs();
       w.step(1 / 60);
       ts.push(cpuMs() - c0);
-      if (w2) { w2.step(1 / 60); maxDiff = Math.max(maxDiff, diff(w.x, w2.x)); }
+      if (w2) { const c1 = cpuMs(); w2.step(1 / 60); ts2.push(cpuMs() - c1); maxDiff = Math.max(maxDiff, diff(w.x, w2.x)); }
       if (!w2) peak = Math.max(peak, w.stats().maxStrain);
     }
     const prof = session ? (await post(session, 'Profiler.stop')).profile : null;
@@ -152,7 +157,8 @@ async function main() {
     const sorted = ts.slice().sort((p, q) => p - q);
     const mean = ts.reduce((p, q) => p + q, 0) / ts.length;
     const name = path.basename(file);
-    const cmp = w2 ? ` compare=${maxDiff === 0 ? 'bit-identical' : `maxDiff=${maxDiff.toExponential(3)}mm`} hash2=${exactHash(w2.x)}` : '';
+    const mean2 = ts2.length ? ts2.reduce((p, q) => p + q, 0) / ts2.length : NaN;
+    const cmp = w2 ? ` compare=${maxDiff === 0 ? 'bit-identical' : `maxDiff=${maxDiff.toExponential(3)}mm`} hash2=${exactHash(w2.x)} ms/step2=${mean2.toFixed(1)} ratio=${(mean / mean2).toFixed(3)}` : '';
     console.log(`profile ${name}: V=${w.mesh.nV} T=${w.mesh.nT} steps=${a.steps} ms/step mean=${mean.toFixed(1)} median=${sorted[sorted.length >> 1].toFixed(1)} ` +
       `gc=${gcMs.toFixed(1)}ms (${(100 * gcMs / Math.max(1e-9, mean * a.steps)).toFixed(1)}%) refactors=${w.factorCount - f0} pairs=${w.contact ? w.contact.nPairs : 0} ` +
       `peakStretch=${w2 ? 'n/a' : (100 * peak).toFixed(3) + '%'} hash=${exactHash(w.x)}${cmp}`);

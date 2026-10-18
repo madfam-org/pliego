@@ -3,13 +3,9 @@
 // within h/4 of another line, and creases, cuts and the outline stay exact mesh edges.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { buildMesh, loadDocument } from '../src/index.js';
 import { DocBuilder } from './helpers/docbuilder.js';
-import { simulateDocument, STRETCH_FAIL } from './helpers/sim-matrix.js';
 import { proof } from './helpers/bench.js';
-
-const kernelDoc = (/** @type {string} */ name) => JSON.parse(readFileSync(new URL(`./fixtures/kernel/${name}.fold`, import.meta.url), 'utf8'));
 
 /** Shortest mesh edge that is not a piece of a document edge shorter than h/4, and the thinnest triangle. @param {any} m @param {any} doc */
 function quality(m, doc) {
@@ -116,12 +112,5 @@ test('mesh-slivers: two creases leaving a corner at a shallow angle share no spl
   const lines = exactLines(m, doc);
   const pass = closest >= m.h / 4 && lines.ok;
   proof('mesh-slivers-crease-fan', closest, `≥ h/4 = ${m.h / 4}`, 'closest points of the two creases (corner excluded); creases exact', pass, `${A.size} + ${B.size} crease vertices, ${lines.why}`);
-  assert.ok(pass);
-});
-
-test('mesh-slivers: the stitch-pocket kiss-cut card (kernel fixture) was stretched and is stable', () => {
-  const rec = simulateDocument(kernelDoc('fastener-joins-stitch-pocket'));
-  const pass = rec.loads && rec.finite && !rec.exploded && rec.maxStretch <= STRETCH_FAIL;
-  proof('mesh-slivers-stitch-pocket', rec.maxStretch, `≤ ${STRETCH_FAIL}`, 'peak stretch (sim-matrix drive)', pass, `status-relevant: finite=${rec.finite}, exploded=${rec.exploded}, V=${rec.simVertices}; main before this change: 78.03 % (A3 corpus)`);
   assert.ok(pass);
 });

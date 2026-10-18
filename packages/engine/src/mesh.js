@@ -11,7 +11,8 @@
  * All arrays are typed and allocated once.
  */
 import { triangulateFace, latticePoints } from './triangulate.js';
-import { quatRotate, pointInPolygon } from './geom.js';
+import { quatRotate, pointInPolygon, distPointSeg } from './geom.js';
+import { meshRegions, pruneSplits } from './meshmerge.js';
 import { faceMap3 } from './docrules.js';
 import { LATTICE_MARGIN } from './constants.js';
 
@@ -51,6 +52,8 @@ export function buildMesh(doc, opts = {}) {
   // cut edges and perforations are split topologically; perforations are re-joined by breakable
   // welds and a perforation hinge in the World (they tear at the stock's tear strain)
   const isCut = (/** @type {number} */ e) => (assignment[e] === 'C' && treatment[e] === 'cut') || treatment[e] === 'perforation';
+  // faces joined across plain-paper lines (meshmerge.js): those lines are not mesh constraints
+  const { regions, merged } = meshRegions(doc, isCut);
   /** @type {number[]} */ const U = []; // sheet-local u, v
   /** @type {number[]} */ const vS = [], vG = [], vF = [];
   let groupCounter = 0;
@@ -106,7 +109,7 @@ export function buildMesh(doc, opts = {}) {
     const s = doc.eSheet[e];
     const [ox, oy] = doc.sheets[s].offset;
     const ax = coords[2 * a] - ox, ay = coords[2 * a + 1] - oy, bx = coords[2 * b] - ox, by = coords[2 * b + 1] - oy;
-    const k = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / h - 1e-9));
+    const k = merged[e] ? 1 : Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / h - 1e-9));
     // an unsplit cut is meshed on both sides here; a split cut (twin edges, spec §5.13) already
     // has one document edge per side, each bordering one face
     const sides = isCut(e) && edgeFaces[2 * e + 1] >= 0 ? 2 : 1;
@@ -127,28 +130,29 @@ export function buildMesh(doc, opts = {}) {
     }
     split.push(per);
   }
+  // no split point within h/4 of another line's point (slivers; meshmerge.js)
+  pruneSplits(doc, regions, split, U, sectorVertex, h, isCut);
   /** @type {number[]} */ const tri = [], triS = [], triF = [];
   /** @type {Map<number, number>} directed boundary segment key → document edge */
   const segDoc = new Map();
   const NV_BIG = 1 << 22;
-  for (let f = 0; f < faces.length; f++) {
-    const fv = faces[f];
+  for (const R of regions) {
+    const f = R.faces[0];
     const s = fSheet[f];
     const sheet = doc.sheets[s];
     const ring = [];
-    for (let i = 0; i < fv.length; i++) {
-      const v = fv[i];
-      const e = faceEdges[f][i];
-      ring.push(/** @type {number} */(sectorVertex[v].get(f)));
-      const side = isCut(e) && edgeFaces[2 * e + 1] === f ? 1 : 0;
+    for (let i = 0; i < R.loopV.length; i++) {
+      const v = R.loopV[i], e = R.loopE[i], fe = R.loopF[i];
+      ring.push(/** @type {number} */(sectorVertex[v].get(fe)));
+      const side = isCut(e) && edgeFaces[2 * e + 1] === fe ? 1 : 0;
       const pts = split[e][side];
       const forward = edges[2 * e] === v;
       for (let q = 0; q < pts.length; q++) ring.push(forward ? pts[q] : pts[pts.length - 1 - q]);
     }
     // record which document edge each boundary segment lies on
     let pos = 0;
-    for (let i = 0; i < fv.length; i++) {
-      const e = faceEdges[f][i];
+    for (let i = 0; i < R.loopV.length; i++) {
+      const e = R.loopE[i];
       const n = split[e][0].length + 1;
       for (let q = 0; q < n; q++) {
         const a = ring[(pos + q) % ring.length], b = ring[(pos + q + 1) % ring.length];
@@ -158,13 +162,33 @@ export function buildMesh(doc, opts = {}) {
     }
     const poly = [];
     for (const mv of ring) poly.push(U[2 * mv], U[2 * mv + 1]);
+    // document vertices left inside a merged region: fixed interior points, unless closer than h/4
+    // to the boundary or to one another (then they are not mesh vertices; docVertex maps them to the
+    // nearest one)
+    const fixedIds = [], fixedPts = [];
+    for (const v of R.inner) {
+      const mv = /** @type {number} */(sectorVertex[v].get(R.faces.find((g) => sectorVertex[v].has(g)) ?? f));
+      const x = U[2 * mv], y = U[2 * mv + 1];
+      if (clearance(x, y, poly, fixedPts) < 0.25 * h) continue;
+      fixedIds.push(mv); fixedPts.push(x, y);
+    }
     const grain = (sheet.grainDeg * Math.PI) / 180;
-    const inner = latticePoints(poly, h, grain + Math.PI / 2, LATTICE_MARGIN);
-    const local = triangulateFace(poly, inner, 1.25 * h);
-    const ids = ring.slice();
-    for (let k = 0; k < inner.length / 2; k++) ids.push(addVertex(inner[2 * k], inner[2 * k + 1], s, groupCounter++, f));
-    for (let k = 0; k < local.length; k += 3) { tri.push(ids[local[k]], ids[local[k + 1]], ids[local[k + 2]]); triS.push(s); triF.push(f); }
+    const lattice = latticePoints(poly, h, grain + Math.PI / 2, LATTICE_MARGIN);
+    const inner = fixedPts.slice();
+    for (let k = 0; k < lattice.length; k += 2) {
+      if (fixedPts.length && clearance(lattice[k], lattice[k + 1], [], fixedPts) < LATTICE_MARGIN * h) continue;
+      inner.push(lattice[k], lattice[k + 1]);
+    }
+    const local = triangulateFace(poly, inner, 1.25 * h, fixedIds.length, 0.25 * h);
+    const ids = ring.concat(fixedIds);
+    for (let k = fixedIds.length; k < inner.length / 2; k++) ids.push(addVertex(inner[2 * k], inner[2 * k + 1], s, groupCounter++, faceAt(doc, R.faces, inner[2 * k], inner[2 * k + 1])));
+    for (let k = 0; k < local.length; k += 3) {
+      const a = ids[local[k]], b = ids[local[k + 1]], c = ids[local[k + 2]];
+      tri.push(a, b, c); triS.push(s);
+      triF.push(R.faces.length > 1 ? faceAt(doc, R.faces, (U[2 * a] + U[2 * b] + U[2 * c]) / 3, (U[2 * a + 1] + U[2 * b + 1] + U[2 * c + 1]) / 3) : f);
+    }
   }
+  compactOrphans(U, vS, vG, vF, tri, split, sectorVertex, docVertex);
   const nV = vS.length, nT = triS.length;
   const tris = Int32Array.from(tri);
   const uv = Float64Array.from(U);
@@ -269,6 +293,70 @@ export function buildMesh(doc, opts = {}) {
     docVertex, docEdgeChain, render,
     perfPairs: Int32Array.from(PP), perfPairDoc: Int32Array.from(PD), perfPairLen: Float64Array.from(PL),
   };
+}
+
+/**
+ * Distance from (x, y) to the closed polygon `poly` (flat) and to the points `pts` (flat).
+ * @param {number} x @param {number} y @param {number[]} poly @param {number[]} pts
+ */
+function clearance(x, y, poly, pts) {
+  let d = Infinity;
+  const n = poly.length / 2;
+  for (let k = 0, l = n - 1; k < n; l = k++) d = Math.min(d, distPointSeg(x, y, poly[2 * l], poly[2 * l + 1], poly[2 * k], poly[2 * k + 1]));
+  for (let k = 0; k < pts.length; k += 2) d = Math.min(d, Math.hypot(x - pts[k], y - pts[k + 1]));
+  return d;
+}
+
+/**
+ * The document face (of `faces`, one sheet) containing the sheet-local point (x, y); the first face
+ * when none does within round-off. @param {any} doc @param {number[]} faces @param {number} x @param {number} y
+ */
+function faceAt(doc, faces, x, y) {
+  if (faces.length === 1) return faces[0];
+  const [ox, oy] = doc.sheets[doc.fSheet[faces[0]]].offset;
+  for (const f of faces) {
+    const poly = [];
+    for (const v of doc.faces[f]) poly.push(doc.coords[2 * v], doc.coords[2 * v + 1]);
+    if (pointInPolygon(x + ox, y + oy, poly, 1e-9)) return f;
+  }
+  return faces[0];
+}
+
+/**
+ * Drop vertices no triangle uses (document vertices inside a merged region that were too close to
+ * keep, see meshmerge.js) and renumber everything built so far. A dropped vertex is mapped, where it
+ * is still referenced (docVertex, sector vertices), to the nearest kept vertex of its sheet. No-op
+ * (bit-identical mesh) when every vertex is used.
+ * @param {number[]} U @param {number[]} vS @param {number[]} vG @param {number[]} vF @param {number[]} tri
+ * @param {number[][][]} split @param {Map<number, number>[]} sectorVertex @param {Int32Array} docVertex
+ */
+function compactOrphans(U, vS, vG, vF, tri, split, sectorVertex, docVertex) {
+  const n = vS.length;
+  const used = new Uint8Array(n);
+  for (const v of tri) used[v] = 1;
+  if (used.every((u) => u === 1)) return;
+  const map = new Int32Array(n).fill(-1);
+  let k = 0;
+  for (let v = 0; v < n; v++) if (used[v]) map[v] = k++;
+  for (let v = 0; v < n; v++) {
+    if (used[v]) continue;
+    let best = -1, bd = Infinity;
+    for (let w = 0; w < n; w++) {
+      if (!used[w] || vS[w] !== vS[v]) continue;
+      const d = Math.hypot(U[2 * w] - U[2 * v], U[2 * w + 1] - U[2 * v + 1]);
+      if (d < bd) { bd = d; best = w; }
+    }
+    map[v] = map[best];
+  }
+  for (let v = 0, o = 0; v < n; v++) {
+    if (!used[v]) continue;
+    U[2 * o] = U[2 * v]; U[2 * o + 1] = U[2 * v + 1]; vS[o] = vS[v]; vG[o] = vG[v]; vF[o] = vF[v]; o++;
+  }
+  U.length = 2 * k; vS.length = k; vG.length = k; vF.length = k;
+  for (let i = 0; i < tri.length; i++) tri[i] = map[tri[i]];
+  for (const per of split) for (const list of per) for (let i = 0; i < list.length; i++) list[i] = map[list[i]];
+  for (const m of sectorVertex) for (const [f, v] of m) m.set(f, map[v]);
+  for (let v = 0; v < docVertex.length; v++) if (docVertex[v] >= 0) docVertex[v] = map[docVertex[v]];
 }
 
 /** Default target edge length: ~1/30 of the largest sheet dimension, clamped to [3, 8] mm. @param {any} doc */

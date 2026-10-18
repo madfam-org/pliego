@@ -20,8 +20,9 @@
  *     line's mesh vertices);
  *   - it has no set rest angle (spec §5.14) and is flat in the document's `initial` frame within MERGE_BEND_DEG (a triangle spanning a bent
  *     line starts with its chord shortened by about θ²/8: 0.4 % at 10°, inside the 0.45 % guard);
- *   - in a document with a kinematic fold program, it is not an `F` or `U` line (loop closure may fold
- *     those; `J` never folds);
+ *   - the document has no kinematic fold program: that program poses every mesh vertex with its own
+ *     face's rigid transform, and between steps two faces across a `J` line need not share one (a
+ *     triangle spanning the line was measured stretching 216 % mid-program);
  *   - the union stays one simple polygon (each document vertex at most once on its boundary).
  * Document vertices left inside a region (every incident edge merged) are kept as fixed interior
  * points when they are at least a quarter of h from everything else, so `docVertex` stays exact.
@@ -64,7 +65,7 @@ export function meshRegions(doc, isCut) {
     if (doc.fSheet[f0] !== doc.fSheet[f1]) return false;
     const a = assignment[e], t = treatment[e];
     if (!((t === 'none' && (a === 'F' || a === 'U' || a === 'J')) || (t === 'halfcut' && a === 'F'))) return false;
-    if (kinematic && a !== 'J') return false;
+    if (kinematic) return false;
     if (normals) {
       const c = normals[3 * f0] * normals[3 * f1] + normals[3 * f0 + 1] * normals[3 * f1 + 1] + normals[3 * f0 + 2] * normals[3 * f1 + 2];
       if (!(c >= cosBend)) return false;

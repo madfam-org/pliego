@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from conftest import API, APP, LANDING
 
 from apps.api.config import Settings
 from apps.api.cors import DEV_ORIGINS, CorsConfigError, parse_origins
-from apps.api.security import build_csp
+from apps.api.security import build_csp, is_working_path
 
 STRICT_CSP = ("default-src 'self'; script-src 'self'; style-src 'self'; "
               "img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; "
@@ -44,6 +46,21 @@ def test_robots_tag_only_on_working_hosts(client):
     assert "X-Robots-Tag" not in client.get("/", base_url=LANDING).headers
     assert client.get("/studio/", base_url=APP).headers["X-Robots-Tag"] == "noindex, nofollow"
     assert client.get("/health", base_url=API).headers["X-Robots-Tag"] == "noindex, nofollow"
+
+
+def test_landing_copy_of_the_studio_is_noindex(client):
+    """The landing's CTAs open /studio/ on the landing host; that copy is a duplicate of the app
+    host's studio (its canonical) and a working surface, so it carries the same noindex (V3 P3-2)."""
+    resp = client.get("/studio/", base_url=LANDING)
+    assert resp.status_code == 200
+    assert resp.headers["X-Robots-Tag"] == "noindex, nofollow"
+    assert client.get("/studio", base_url=LANDING).headers["X-Robots-Tag"] == "noindex, nofollow"
+    assert [p for p in ("/studio", "/studio/", "/studio/src/main.js") if not is_working_path(p)] == []
+    assert [p for p in ("/", "/studios", "/llms.txt", "/engine/index.js") if is_working_path(p)] == []
+    studio_html = Path(__file__).resolve().parents[3] / "apps" / "web" / "studio" / "index.html"
+    assert 'rel="canonical" href="https://pliego-app.madfam.io/studio/"' in studio_html.read_text(encoding="utf-8")
+    for path in ("/", "/llms.txt", "/robots.txt", "/sitemap.xml", "/.well-known/security.txt"):
+        assert "X-Robots-Tag" not in client.get(path, base_url=LANDING).headers, path
 
 
 def test_plausible_origin_widens_landing_only(make_app):

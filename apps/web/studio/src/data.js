@@ -174,9 +174,54 @@ export async function regenerate(slug, params, mode, opts = {}) {
  * @param {Parameters<typeof postRender>[2]} [opts]
  */
 export async function exportFile(slug, params, format, mode, opts = {}) {
+  return (await exportDownload(slug, params, format, mode, opts)).blob;
+}
+
+// File names follow the API (apps/api/generator.py `file_name`: `<slug>-<mode>.<extension>`, the
+// extension from render.py TRANSPORT, so HPGL is `.plt`; the bundle is a `.zip`). The API's own
+// Content-Disposition name wins (the bundle's carries the instance id); this is the fallback.
+export const EXPORT_EXTENSIONS = Object.freeze({ fold: 'fold', svg: 'svg', dxf: 'dxf', pdf: 'pdf', hpgl: 'plt', glb: 'glb', bundle: 'zip' });
+// The bundle (POST /exports with format "bundle") holds the document plus every published cut file
+// (generator.py CUT_FORMATS) and variables.json; the API refuses it when no cut format is published.
+export const BUNDLE_CUT_FORMATS = Object.freeze(['svg', 'dxf', 'pdf', 'hpgl']);
+
+/** @param {string[]} formats an object's published export formats */
+export function canBundle(formats) {
+  return formats.some((f) => BUNDLE_CUT_FORMATS.includes(f));
+}
+
+/**
+ * The API's name for an export: `<slug>-<mode>.<extension>` (`<slug>.<extension>` while the mode
+ * is unknown). Same character rule as the API (`[^a-z0-9._-]` → `-`).
+ * @param {string} slug @param {string|null|undefined} mode @param {string} format
+ */
+export function exportFileName(slug, mode, format) {
+  const ext = EXPORT_EXTENSIONS[/** @type {keyof typeof EXPORT_EXTENSIONS} */ (format)] || format;
+  return `${mode ? `${slug}-${mode}` : slug}.${ext}`.replace(/[^a-z0-9._-]+/g, '-');
+}
+
+/**
+ * The file name of a Content-Disposition header (`attachment; filename="…"`), or null. Only a plain
+ * name is accepted: no path separators, nothing outside the API's character set.
+ * @param {string|null} header
+ */
+export function attachmentName(header) {
+  const m = /filename="([^"]+)"/i.exec(header || '') || /filename=([^;\s]+)/i.exec(header || '');
+  const name = m ? m[1] : '';
+  return /^[a-z0-9][a-z0-9._-]*$/.test(name) ? name : null;
+}
+
+/**
+ * POST /api/v1/exports {slug, mode?, params, format} → {blob, name} (busy answers retried). `format`
+ * may be "bundle". `name` is the API's Content-Disposition name, else exportFileName().
+ * @param {string} slug @param {Record<string, any>} params @param {string} format @param {string|null|undefined} mode
+ * @param {Parameters<typeof postRender>[2]} [opts]
+ */
+export async function exportDownload(slug, params, format, mode, opts = {}) {
   const res = await postRender(`${API}/exports`, renderBody(slug, params, mode, { format }), opts);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText || 'error'}`);
-  return res.blob();
+  const name = attachmentName(res.headers.get('content-disposition')) || exportFileName(slug, mode, format);
+  return { blob: await res.blob(), name };
 }
 
 /** Trigger a browser download of a Blob (same-origin blob: URL, revoked afterwards). */

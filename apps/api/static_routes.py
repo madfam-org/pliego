@@ -174,6 +174,22 @@ def _sitemap(settings: Settings) -> str:
             f"{body}</urlset>\n")
 
 
+# RFC 9116. Renew SECURITY_TXT_EXPIRES before it lapses and keep it less than a year ahead
+# (apps/api/tests/test_static.py fails once it is in the past). The contact is SECURITY.md's.
+SECURITY_TXT_EXPIRES = "2027-10-01T00:00:00.000Z"
+SECURITY_CONTACT = "https://github.com/madfam-org/pliego/security/advisories/new"
+SECURITY_POLICY = "https://github.com/madfam-org/pliego/blob/main/SECURITY.md"
+
+
+def _security_txt(settings: Settings) -> str:
+    hosts = (settings.host_landing, settings.host_app, settings.host_api)
+    lines = [f"Contact: {SECURITY_CONTACT}", f"Expires: {SECURITY_TXT_EXPIRES}",
+             "Preferred-Languages: es, en"]
+    lines += [f"Canonical: https://{h}/.well-known/security.txt" for h in hosts]
+    lines.append(f"Policy: {SECURITY_POLICY}")
+    return "\n".join(lines) + "\n"
+
+
 def _text(body: str, content_type: str = TEXT_PLAIN) -> Response:
     resp = Response(body, content_type=content_type)
     resp.add_etag()
@@ -239,6 +255,10 @@ def register(app: Flask, settings: Settings, hosts: HostRouter, api_index) -> St
     @app.get("/robots.txt")
     def robots():
         return _text(_robots(hosts.kind(), settings))
+
+    @app.get("/.well-known/security.txt")
+    def security_txt():
+        return _text(_security_txt(settings))
 
     @app.get("/sitemap.xml")
     def sitemap():

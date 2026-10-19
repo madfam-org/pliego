@@ -6,14 +6,17 @@ optional widening is the Plausible origin (``PLIEGO_PLAUSIBLE_ORIGIN``, the only
 allows), and only on the landing host, only when configured.
 
 Non-landing hosts (the studio and the API) also carry ``X-Robots-Tag: noindex, nofollow``: AI and
-search crawlers are welcome on the landing host and blocked on the working hosts (ruling R40).
+search crawlers are welcome on the landing host and blocked on the working hosts (ruling R40). The
+landing host also serves a copy of the studio at ``/studio/`` (its "Open the studio" links are
+same-origin); that copy carries the same noindex, because the studio's canonical is the app host
+(``<link rel="canonical">`` in apps/web/studio/index.html) and the studio is a working surface.
 """
 
 from __future__ import annotations
 
 from urllib.parse import urlsplit
 
-from flask import Flask, Response
+from flask import Flask, Response, request
 
 from .config import Settings
 from .hosts import HostRouter
@@ -65,6 +68,11 @@ def _validated_origin(raw: str) -> str:
     return f"https://{parts.netloc}"
 
 
+def is_working_path(path: str) -> bool:
+    """The studio's copy on the landing host (``/studio``, ``/studio/…``): noindex like the app host."""
+    return path == "/studio" or path.startswith("/studio/")
+
+
 def install(app: Flask, settings: Settings, hosts: HostRouter) -> None:
     strict_csp = build_csp()
     plausible = _validated_origin(settings.plausible_origin)
@@ -76,7 +84,7 @@ def install(app: Flask, settings: Settings, hosts: HostRouter) -> None:
         resp.headers["Content-Security-Policy"] = landing_csp if kind == "landing" else strict_csp
         for name, value in STATIC_HEADERS.items():
             resp.headers[name] = value
-        if kind != "landing":
+        if kind != "landing" or is_working_path(request.path):
             resp.headers["X-Robots-Tag"] = "noindex, nofollow"
         # Deploy-safe caching: every response revalidates (ETags keep that a cheap 304); a route
         # that set its own policy keeps it.

@@ -224,3 +224,37 @@ def test_repo_llms_links_resolve_off_the_site_root(name):
     relative = [u for u in links if not u.startswith(("https://", "/llms", "/studio/", "#"))]
     print(f"{name}: links={len(links)} relative={len(relative)}")
     assert relative == [], f"{name} links that 404 when served from a host root: {relative}"
+
+
+@pytest.mark.parametrize("base", [LANDING, APP, API])
+def test_security_txt_on_every_host(client, base):
+    """RFC 9116 at /.well-known/security.txt on all three hosts (V3 P3-3): the SECURITY.md contact,
+    an Expires in the future and less than a year ahead, and the three canonical URLs."""
+    import datetime as dt
+
+    resp = client.get("/.well-known/security.txt", base_url=base)
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/plain"
+    fields: dict[str, list[str]] = {}
+    for line in resp.get_data(as_text=True).splitlines():
+        key, _, value = line.partition(": ")
+        fields.setdefault(key, []).append(value)
+    assert fields["Contact"] == ["https://github.com/madfam-org/pliego/security/advisories/new"]
+    assert "https://github.com/madfam-org/pliego/security/advisories/new" in \
+        (REPO / "SECURITY.md").read_text(encoding="utf-8")
+    expires = dt.datetime.fromisoformat(fields["Expires"][0].replace("Z", "+00:00"))
+    now = dt.datetime.now(dt.timezone.utc)
+    assert now < expires < now + dt.timedelta(days=366), "renew SECURITY_TXT_EXPIRES (static_routes.py)"
+    assert fields["Canonical"] == [f"https://{h}/.well-known/security.txt" for h in
+                                   ("pliego.madfam.io", "pliego-app.madfam.io", "pliego-api.madfam.io")]
+    assert fields["Policy"] == ["https://github.com/madfam-org/pliego/blob/main/SECURITY.md"]
+
+
+def test_docs_do_not_link_the_api_host_at_api_v1(client):
+    """The API host's index is its root; GET /api/v1/ answers 404 (llms.txt linked it, V3/H5)."""
+    assert client.get("/api/v1/", base_url=API).status_code == 404
+    assert client.get("/", base_url=API).get_json()["service"] == "pliego-api"
+    dead = re.compile(r"https://pliego-api\.madfam\.io/api/v1/?(?![\w/.-])")
+    for name in ("llms.txt", "llms-full.txt", "README.md", "docs/HONEST_STATUS.md"):
+        hits = dead.findall((REPO / name).read_text(encoding="utf-8"))
+        assert hits == [], f"{name} links the API host at /api/v1/ (404): use https://pliego-api.madfam.io/"

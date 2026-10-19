@@ -4,7 +4,7 @@
 > papercut, pop-up and paper engineering, book structures and interactive paper dioramas.
 > Parametric and fabricable (cut, score and fold files), simulated with real paper physics.
 > Status: incubating, first deploy live: landing https://pliego.madfam.io/, studio
-> https://pliego-app.madfam.io/studio/, API https://pliego-api.madfam.io/api/v1/ (2026-10-10);
+> https://pliego-app.madfam.io/studio/, API https://pliego-api.madfam.io/ (routes under `/api/v1/`; 2026-10-10);
 > see docs/HONEST_STATUS.md.
 
 Boundary: public repository. Operational detail lives in MADFAM's private ops repository under the

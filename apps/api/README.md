@@ -4,7 +4,7 @@
 
 One Flask 3 app serves everything (docs/strategy/architecture.md §3): the landing at `/`, the studio
 at `/studio/`, engine modules at `/engine/`, `/schemas/*.schema.json`, `/llms.txt`,
-`/llms-full.txt`, host-aware `/robots.txt` and `/sitemap.xml`, the catalog previews at
+`/llms-full.txt`, host-aware `/robots.txt` and `/sitemap.xml`, `/.well-known/security.txt`, the catalog previews at
 `/projects/<slug>.svg`, and the JSON API (`/health`, `/ready`, `/api/v1/*`, described in
 [`openapi.json`](openapi.json), which the API serves at `/api/v1/openapi.json` and links from the
 index at `/` on the API host).
@@ -23,12 +23,12 @@ python -m apps.api.thumbnails build build/thumbnails --strict   # catalog previe
 |---|---|
 | `app.py` | `create_app(settings)`; lazy module attribute `app` for gunicorn; POST guard (JSON object, strict parse, 256 KiB); JSON errors |
 | `config.py` | settings from the env contract (below) |
-| `security.py` | CSP and the other security headers on every response; `X-Robots-Tag` on app/api hosts |
+| `security.py` | CSP and the other security headers on every response; `X-Robots-Tag` on app/api hosts and on the landing host's copy of the studio (`/studio/…`; canonical = app host) |
 | `cors.py` | explicit origin allowlist; wildcard, `null` or malformed entries raise |
 | `ratelimit.py` | fixed window keyed on the trusted proxy header (never `X-Forwarded-For`); per-worker trust model |
 | `render_limits.py` | one render per worker (503 + `Retry-After: 1`) |
 | `hosts.py` | landing / app / api / other host classification |
-| `static_routes.py` | traversal-safe static serving, `?v=` cache-busting stamps, robots, sitemap, llms |
+| `static_routes.py` | traversal-safe static serving, `?v=` cache-busting stamps, robots, sitemap, llms, `/.well-known/security.txt` (RFC 9116; renew `SECURITY_TXT_EXPIRES` before it lapses) |
 | `catalog.py`, `manifest.py` | stat-signature-memoized catalog and stock cards (one stat walk per request); fail-closed manifest checks; strict params |
 | `render.py` | the sandbox runner as a killable subprocess (minimal env, own session, 30 s); render errors carry a stable `code` and a `request_id`, and the runner's stderr is logged server-side under that id, never returned |
 | `generator.py`, `services/engine/generator_output.py` | GOC-1 (hyperobjects-spec generator output): `X-Generator-*` headers on every render, `variables.json`, and the deterministic, digest-stamped `format: "bundle"` zip (document + cut files + `variables.json`); the algorithms pin the keystone's golden vectors |

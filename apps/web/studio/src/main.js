@@ -5,7 +5,7 @@
 
 import { createI18n, LANG_EVENT } from '../../shared/i18n.js';
 import { STUDIO_STRINGS } from './strings.js';
-import { loadCatalog, fetchDocument, regenerate, exportFile, downloadBlob, loadEngine, loadPreview, fetchObject, latestOnly } from './data.js';
+import { loadCatalog, fetchDocument, regenerate, exportDownload, exportFileName, downloadBlob, loadEngine, loadPreview, fetchObject, latestOnly } from './data.js';
 import { engineOptions, estimateVertices, physicsFits, tooSlow } from './physics.js';
 import { parseShare, buildShare, coerceParams, paramsForMode, paramStrings, hasParams } from './share.js';
 import { buildDiagram, highlightStep, serializeDiagram, createOverlay, createEngineOverlay, legendKinds, LINE_STYLE } from './diagram.js';
@@ -248,15 +248,14 @@ async function onParam(id, value) {
 }
 
 async function onExport(format) {
-  const name = `${state.item.slug}.${format}`;
-  status(i18n.t('export.started', { name }));
-  try { downloadBlob(await exportFile(state.item.slug, state.params, format, state.mode), name); }
+  status(i18n.t('export.started', { name: exportFileName(state.item.slug, state.mode, format) }));
+  try { const { blob, name } = await exportDownload(state.item.slug, state.params, format, state.mode); downloadBlob(blob, name); }
   catch (e) { status(i18n.t('export.failed', { error: e instanceof Error ? e.message : String(e) })); }
 }
 
 function onLocalSvg() {
   if (!state.diagram) return;
-  const name = `${state.item.slug}-crease-pattern.svg`;
+  const name = `${state.mode ? `${state.item.slug}-${state.mode}` : state.item.slug}-crease-pattern.svg`;
   downloadBlob(new Blob([serializeDiagram(state.diagram)], { type: 'image/svg+xml' }), name);
   status(i18n.t('export.started', { name }));
 }

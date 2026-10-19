@@ -2,6 +2,8 @@
 // DOM builders for the studio panels. Every control is a native, labelled form element (keyboard
 // operable out of the box); no inline styles or handlers — listeners are attached here.
 
+import { canBundle } from './data.js';
+
 /** @typedef {ReturnType<typeof import('../../shared/i18n.js').createI18n>} I18n */
 
 const h = (tag, attrs = {}, ...kids) => {
@@ -214,6 +216,15 @@ export function renderSteps(ol, card, json, i18n, onJump) {
 }
 
 /**
+ * The export buttons for an object's published formats: each format, then the API's bundle (the
+ * document, every cut file and variables.json in one ZIP) when a cut format is published.
+ * @param {string[]} formats
+ */
+export function exportButtons(formats) {
+  return canBundle(formats) ? [...formats, 'bundle'] : [...formats];
+}
+
+/**
  * Export buttons. Without the API they stay focusable but aria-disabled, with a visible tooltip.
  * @param {HTMLElement} box @param {HTMLElement} note @param {string[]} formats @param {boolean} api
  * @param {I18n} i18n @param {(fmt: string) => void} onExport @param {() => void} onLocalSvg
@@ -223,8 +234,9 @@ export function renderExports(box, note, formats, api, i18n, onExport, onLocalSv
   note.textContent = api ? '' : i18n.t('export.offline');
   note.hidden = api;
   note.id = 'export-note';
-  for (const f of formats) {
-    const btn = h('button', { type: 'button', class: 'chip export', 'aria-disabled': api ? null : 'true', 'aria-describedby': api ? null : 'export-note', 'data-tip': api ? null : i18n.t('export.offline'), text: f.toUpperCase() });
+  for (const f of exportButtons(formats)) {
+    const text = f === 'bundle' ? i18n.t('export.bundle') : f.toUpperCase();
+    const btn = h('button', { type: 'button', class: 'chip export', 'data-format': f, 'aria-disabled': api ? null : 'true', 'aria-describedby': api ? null : 'export-note', 'data-tip': api ? null : i18n.t('export.offline'), title: api && f === 'bundle' ? i18n.t('export.bundleTip') : null, text });
     btn.addEventListener('click', () => { if (api) onExport(f); });
     box.append(btn);
   }

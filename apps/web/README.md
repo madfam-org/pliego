@@ -49,8 +49,11 @@ node --test apps/web/test/                       # picks up apps/web/.engine-tmp
 
 `GET /api/v1/catalog` (falls back to `studio/demo/catalog.json`), `POST /api/v1/documents
 {slug, params}` (parameter changes), `POST /api/v1/exports {slug, params, format}` (cut/score/fold
-files). Without the API, parameters and exports are visibly disabled; the crease-pattern SVG export
-works offline.
+files; `format: "bundle"`, offered when the object publishes a cut format, is the document, its cut
+files and `variables.json` in one ZIP). Downloads keep the API's file name (its
+`Content-Disposition`: `<slug>-<mode>.<extension>`, HPGL as `.plt`; `studio/src/data.js`
+`exportFileName` is the same rule when the header is missing). Without the API, parameters and
+exports are visibly disabled; the crease-pattern SVG export works offline.
 
 Busy answers: a render worker that is already rendering answers `503`, the rate limiter `429`, both
 with `Retry-After`. The studio waits and retries a render request up to 3 times (the n-th wait is

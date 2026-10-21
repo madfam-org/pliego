@@ -10,3 +10,4 @@ kept byte-for-byte so engine tests run on real catalog geometry without the kern
 | `four-bar-linkage.fold` | `card-linkages`, mode `four-bar`, defaults (commons 86a74fa) |
 | `deckle-tear-crease-card-strip.fold` | `deckle-tear`, mode `crease`, preset `card-strip` (commons 86a74fa, kernel 0.3.0): a hand folds a kiss-cut line over and back before the tear |
 | `fox-puppet-talk.fold` | `fox-puppet`, mode `talk`, defaults (commons 86a74fa, kernel 0.3.0): creases folded flat in the initial frame, which dips 95 mm below the table |
+| `v-fold-popup-spread.fold` | `v-fold-popup`, mode `spread`, defaults (commons 86a74fa, kernel 0.3.0): a cardstock V-fold glued across the gutter by two feet narrower than the studio mesh |

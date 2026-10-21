@@ -75,7 +75,7 @@ export class World {
     let kmax = 0;
     for (let e = 0; e < mesh.nE; e++) kmax = Math.max(kmax, this.kMem[e]);
     this.kHard = K.HARD_FACTOR * kmax;
-    const { terms, pins, weldSheet, warnings: joinWarnings } = resolveJoins(doc, mesh, this.kHard, { glueSamples: opts.glueSamples ?? false });
+    const { terms, pins, weldSheet, warnings: joinWarnings } = resolveJoins(doc, mesh, this.kHard, { glueSamples: opts.glueSamples ?? true });
     this.weldSheet = weldSheet;
     // perforations: breakable welds between the duplicated vertices (tear at the stock's tear strain)
     for (let i = 0; i < mesh.perfPairs.length / 2; i++) {

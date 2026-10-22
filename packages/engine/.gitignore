@@ -1,0 +1,4 @@
+# Written by scripts/prepare-package.mjs before `npm pack` / `npm publish`, never committed:
+# the declarations come from the JSDoc in src/, the licence is the repository's root LICENSE.
+/types/
+/LICENSE

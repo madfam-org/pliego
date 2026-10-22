@@ -57,6 +57,34 @@ hinges into smoothing groups, and the UVs span each sheet's local bounding box.
 (`degree4`, `degree4Multipliers`, `miuraDims`, `miuraPoisson`, `miuraFoldAngles`, `vfold`,
 `fourBar`).
 
+## Package
+
+Published to MADFAM's registry as **`@pliego/engine`** (owner ruling 2026-10-22). Anyone can install it; no token
+is needed to read:
+
+```bash
+# .npmrc of the consuming project
+@pliego:registry=https://npm.madfam.io/
+```
+
+```bash
+npm install @pliego/engine@0.1.0     # or pnpm add / yarn add
+```
+
+- **Contents.** `src/` (plain ES modules, JSDoc, zero dependencies), `types/` (declarations generated from the JSDoc),
+  this README, `CHANGELOG.md` and the AGPL-3.0-only licence. Tests, benchmarks and fixtures stay in the repository
+  (`scripts/prepare-package.mjs` checks the tarball against an allowlist).
+- **Public API.** What `src/index.js` exports, listed under «API» above. Deep imports into `src/` are not part
+  of the contract and are blocked by the `exports` map.
+- **Versioning.** Semver. While the major is 0, a minor bump may change the API or the simulated numbers (a new
+  calibration constant moves positions), and a patch keeps both. `ENGINE_VERSION` always equals the package version.
+- **Determinism.** The contract below holds for a given version: the same document, World options and calls give
+  bit-identical `positions` on the same JavaScript engine. Pin an exact version when replays must match across
+  installs.
+- **Licence.** AGPL-3.0-only. A service that lets people use a modified engine over a network must offer them its
+  source (AGPL §13). Stock cards and commons objects the engine reads are separate works under CERN-OHL-W-2.0.
+- **Publishing** (maintainers): the dispatch-only workflow `.github/workflows/publish-engine.yml`.
+
 ## Units
 
 All quantities are in mm, g and s. Force is g·mm/s² (µN) and energy is g·mm²/s² (nJ). Angles are

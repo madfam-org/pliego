@@ -1,0 +1,100 @@
+# Publish `@pliego/engine` to MADFAM's registry (npm.madfam.io). DISPATCH ONLY: a merge or a tag never publishes.
+#
+# Owner ruling 2026-10-22: Pliego's engine is a package other platforms consume (first consumer: cv). The registry of
+# record is the package's own `publishConfig.registry` (estate rule R38: one registry of record per package); the
+# `@pliego/*` rule in the registry makes it world-readable and immutable (`unpublish: false`), as `@janua/*`.
+#
+# The run: engine tests → tarball prepared and checked (licence, declarations, allowlist) → refuses a version that is
+# already published or that differs from the input → authenticates with the NAMED secret NPM_MADFAM_TOKEN (written
+# to a throwaway user config, never to the repository) → publishes. GitHub-hosted runner, read-only token.
+
+name: Publish engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version in packages/engine/package.json (e.g. 0.1.0); the run refuses anything else"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-engine
+  cancel-in-progress: false
+
+env:
+  REGISTRY: https://npm.madfam.io/
+
+jobs:
+  publish:
+    name: Publish @pliego/engine
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      - name: The input is the package version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./packages/engine/package.json').version")
+          if [ "$version" != "$INPUT_VERSION" ]; then
+            echo "publish-engine: FAIL input ${INPUT_VERSION} != package.json ${version}"; exit 1
+          fi
+          echo "publish-engine: version=${version}"
+      - name: Engine tests (node --test, zero dependencies)
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap packages/engine/test/*.test.js | tee "$RUNNER_TEMP/engine-tap.txt"
+          grep -Eq '^# tests [1-9]' "$RUNNER_TEMP/engine-tap.txt" || { echo "publish-engine: FAIL 0 tests ran"; exit 1; }
+          grep -Eq '^# fail 0$' "$RUNNER_TEMP/engine-tap.txt" || { echo "publish-engine: FAIL engine tests"; exit 1; }
+      - name: Prepare and check the tarball (licence, declarations, allowlist)
+        run: node packages/engine/scripts/prepare-package.mjs
+      - name: Refuse a version that is already published (anonymous read; versions are immutable)
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o "$RUNNER_TEMP/meta.json" -w '%{http_code}' "${REGISTRY}@pliego%2fengine")
+          case "$code" in
+            404) echo "publish-engine: @pliego/engine is new on the registry" ;;
+            200)
+              if node -e "const m=require(process.argv[1]); process.exit(m.versions && m.versions[process.argv[2]] ? 0 : 1)" \
+                "$RUNNER_TEMP/meta.json" "$INPUT_VERSION"; then
+                echo "publish-engine: FAIL @pliego/engine@${INPUT_VERSION} is already published"; exit 1
+              fi
+              echo "publish-engine: @pliego/engine@${INPUT_VERSION} not yet published" ;;
+            *) echo "publish-engine: FAIL registry answered HTTP ${code}"; exit 1 ;;
+          esac
+      - name: Authenticate (named secret, throwaway user config)
+        env:
+          NPM_MADFAM_TOKEN: ${{ secrets.NPM_MADFAM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NPM_MADFAM_TOKEN}" ]; then echo "publish-engine: FAIL secret NPM_MADFAM_TOKEN is not available to this repository"; exit 1; fi
+          umask 077
+          printf '//npm.madfam.io/:_authToken=%s\n' "${NPM_MADFAM_TOKEN}" > "$RUNNER_TEMP/npmrc"
+          echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/npmrc" >> "$GITHUB_ENV"
+          user=$(curl -s -H "Authorization: Bearer ${NPM_MADFAM_TOKEN}" "${REGISTRY}-/whoami" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{process.stdout.write(JSON.parse(s).username||'')}catch{}})")
+          if [ -z "$user" ]; then echo "publish-engine: FAIL the token does not authenticate (whoami returned no username)"; exit 1; fi
+          echo "publish-engine: authenticated"
+      - name: Publish
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          # `--access` is not what decides reads on Verdaccio: the registry's `@pliego/*` rule does (access: $all).
+          npm publish ./packages/engine --registry "${REGISTRY}" --ignore-scripts
+          npm view "@pliego/engine@${INPUT_VERSION}" version --registry "${REGISTRY}"
+          echo "publish-engine: published @pliego/engine@${INPUT_VERSION}"
+      - name: Remove the throwaway credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/npmrc"

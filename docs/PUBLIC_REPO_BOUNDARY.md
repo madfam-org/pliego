@@ -18,7 +18,8 @@ Never put here:
 - raw links into MADFAM's private ops repository (name a document, never link it);
 - hand-typed prices, tiers or quotes (pricing is ruled through Tulana and Dhanam; quotes come from Cotiza);
 - client identities, people's names beyond the public maintainer handles, or private evidence;
-- local packages named `@madfam/*` (use `@pliego/*` with `"private": true`).
+- local packages named `@madfam/*` (use `@pliego/*`; only `@pliego/engine` is published, to MADFAM's registry
+  per the owner ruling of 2026-10-22, and every other local package stays `"private": true`).
 
 Enclii owns routine deployment, observability and secret intake. Record missing platform
 capabilities privately; do not add a raw production-access fallback. Licensing, governance,

@@ -252,6 +252,9 @@ jobs:
           npx -y -p "typescript@${TYPESCRIPT_VERSION}" tsc --noEmit --allowJs --checkJs \
             --target es2022 --module nodenext --moduleResolution nodenext --lib es2022,dom \
             --skipLibCheck "${files[@]}"
+      - name: Package tarball (licence, declarations, allowlist; what publish-engine.yml would publish)
+        if: steps.detect.outputs.present == 'true'
+        run: node packages/engine/scripts/prepare-package.mjs
       - name: Skip notice
         if: steps.detect.outputs.present != 'true'
         run: |

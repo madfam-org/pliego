@@ -18,7 +18,8 @@ test('package: name, version and licence match the engine', () => {
   assert.equal(ENGINE_KIND, 'pliego-engine');
   assert.equal(pkg.license, 'AGPL-3.0-only');
   assert.equal(pkg.private, undefined, 'publishable');
-  assert.match(readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8'), new RegExp(`^## ${pkg.version.replace(/\./g, '\\.')} `, 'm'));
+  const changelog = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8').split('\n');
+  assert.ok(changelog.some((line) => line.startsWith(`## ${pkg.version} `)), 'CHANGELOG has an entry for this version');
 });
 
 test('package: entry points exist, deep imports are not exported, no runtime dependency', () => {

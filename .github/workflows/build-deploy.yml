@@ -63,7 +63,7 @@ jobs:
 
   build-publish:
     needs: preflight
-    uses: madfam-org/enclii/.github/workflows/build-publish.yml@613db4e77a0a9eae0a10a6d95980680e0c891a7f # enclii main 2026-10-10 (enclii#714: checkout_submodules)
+    uses: madfam-org/enclii/.github/workflows/build-publish.yml@68c1be008a085f7cbdf2039c4e8eadf49d66494e # enclii main 2026-10-10 (enclii#714: checkout_submodules)
     with:
       image_prefix: ghcr.io/madfam-org
       # projects/ (the commons) is a git submodule the image copies; populate it in the build job's checkout.

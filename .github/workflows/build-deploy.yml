@@ -51,7 +51,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - name: Install PyYAML (hashed)
@@ -63,7 +63,7 @@ jobs:
 
   build-publish:
     needs: preflight
-    uses: madfam-org/enclii/.github/workflows/build-publish.yml@613db4e77a0a9eae0a10a6d95980680e0c891a7f # enclii main 2026-10-10 (enclii#714: checkout_submodules)
+    uses: madfam-org/enclii/.github/workflows/build-publish.yml@cdf6548d7568e98977366b718608068f85b82cf0 # enclii main 2026-10-10 (enclii#714: checkout_submodules)
     with:
       image_prefix: ghcr.io/madfam-org
       # projects/ (the commons) is a git submodule the image copies; populate it in the build job's checkout.

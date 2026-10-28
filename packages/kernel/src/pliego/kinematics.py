@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import math
 from collections import deque
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 from .arrangement import Arrangement
 from .geometry import Vec2, point_in_polygon
@@ -72,9 +72,14 @@ def face_adjacency(arr: Arrangement) -> dict[int, list[tuple[int, int, int, int]
     return adj
 
 
-def face_transforms(arr: Arrangement, angles: dict[int, float], root: int = 0
+def face_transforms(arr: Arrangement, angles: dict[int, float], root: int = 0, *,
+                    axis_offset: Callable[[int, float], float] | None = None
                     ) -> list[Rigid | None]:
-    """Rigid transform of every face (BFS from `root`), un-placed world frame."""
+    """Rigid transform of every face (BFS from `root`), un-placed world frame.
+
+    `axis_offset(edge, angle_deg)` moves a crease's rotation axis off the mid-surface by that
+    many mm along the flat sheet's front normal (+Y); `None` keeps every axis on the
+    mid-surface (zero-thickness sheets). `pliego.thickness` uses it for board."""
     pts = [unplaced(v.x, v.y) for v in arr.vertices]
     adj = face_adjacency(arr)
     out: list[Rigid | None] = [None] * len(arr.faces)
@@ -85,9 +90,13 @@ def face_transforms(arr: Arrangement, angles: dict[int, float], root: int = 0
         for g, e, a, b in adj[f]:
             if out[g] is not None:
                 continue
-            rho = math.radians(angles.get(e, 0.0))
+            deg = angles.get(e, 0.0)
+            rho = math.radians(deg)
+            origin = pts[a]
+            if axis_offset is not None:
+                origin = add(origin, (0.0, axis_offset(e, deg), 0.0))
             # f is left of a→b; a positive (valley) angle lifts g toward +Y: rotate by −ρ
-            step = _rot_about_line(pts[a], unit(sub(pts[b], pts[a])), -rho)
+            step = _rot_about_line(origin, unit(sub(pts[b], pts[a])), -rho)
             out[g] = _compose(out[f], step)  # type: ignore[arg-type]
             queue.append(g)
     return out

@@ -237,8 +237,11 @@ The direction is the World option `windDir` (default +Z) until the contract adds
   - The `score` treatment with `score_factor` and the optional `score_yield_deg` folds a scored flap
     to 89.86° of 90° (test `board-scored-flap`).
   - It is stable up to `D` ≈ 2 N·m.
-  - Not yet resolved: Tier R offset-panel thickness accommodation, and the inner-liner buckling of a
-    thick board folded around its score. Today the score is a soft hinge on the mid-surface.
+  - Not yet resolved here: Tier R offset-panel thickness accommodation, and the inner-liner buckling
+    of a thick board folded around its score. Today the score is a soft hinge on the mid-surface.
+    The kernel reference exists (`pliego.thickness`, 2026-10-27): `inner` (crushed score), `outer`
+    (V-groove) and `mid` hinge axes on face trees, with the overlap, liner-arc and groove report the
+    engine should match when it adopts them.
 
 ---
 
@@ -345,7 +348,7 @@ Calibration constants (`c_b`, default `hand_factor`, panel yield) live in one fi
 - general edge–edge contact. <!-- lane E2 (geo-stab, 2026-10-18) --> Bounded edge–face contact for
   slit lips is implemented and opt-in by edge name (`interlock…`, `src/xpbd/edgecontact.js`, test
   `edge-contact`); `tab-and-slot` opts in;
-- Tier R thickness offsets;
+- Tier R thickness offsets in the engine (the kernel reference is `pliego.thickness`, face trees only);
 - developable page upsampling;
 - ~~verifying `meta.digest`~~ <!-- lane E (wave 3) --> done: the engine recomputes it over the
   canonical serialisation (spec §5.15 from lane H, RFC 8785) on load (rule 10, test `digest`);

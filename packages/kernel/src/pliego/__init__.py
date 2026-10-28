@@ -23,6 +23,7 @@ from . import (
     kinematics,
     papercut,
     simplefold,
+    thickness,
 )
 from .arrangement import Arrangement, ArrangementError, SegmentInput, build_arrangement
 from .assembly import (
@@ -104,6 +105,7 @@ __all__ = [
     "regular_polygon", "resolve_stock", "rotate", "sequence_control", "slide", "slider",
     "square", "string", "translate", "FoldedState", "load_fold", "axioms",
     "exact", "flatfold", "foldcut", "foldfile", "kinematics", "papercut", "simplefold",
+    "thickness",
     "clamp", "param", "piece", "stack", "FlatState", "FlatStateError", "FoldProgram",
     "flatops", "flatstate", "foldprogram",
 ]

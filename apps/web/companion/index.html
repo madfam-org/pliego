@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="light dark">
+  <title>Archive companion · Pliego</title>
+  <link rel="stylesheet" href="../studio/studio.css">
+  <link rel="stylesheet" href="companion.css">
+  <script type="module" src="companion.js"></script>
+</head>
+<body>
+  <a class="skip" href="#reading">Skip to reading</a>
+  <header class="topbar">
+    <a class="brand" href="/companion/">Pliego</a>
+    <span id="local-label">Local archive companion</span>
+    <div class="topbar-end"><label class="lang"><span id="language-label">Language</span>
+      <select id="language"><option value="en">English</option><option value="es">Español</option></select>
+    </label></div>
+  </header>
+  <main>
+    <div class="intro"><h1 id="title">Archive companion</h1><p id="scope">Loading the retained native book and its reading pages…</p></div>
+    <nav id="experience-links" class="experience-links" aria-label="Related edition" hidden>
+      <a id="gallery-link" target="_blank" rel="noopener noreferrer">View this edition in the gallery</a>
+      <a id="reveal-link" target="_blank" rel="noopener noreferrer">Open its reconstruction</a>
+    </nav>
+    <p id="error" role="alert" hidden></p>
+    <div id="workspace" class="companion-layout" hidden>
+      <section class="native-pane" aria-labelledby="native-title">
+        <h2 id="native-title">Native paper construction</h2>
+        <div class="book-view"><canvas id="book" tabindex="0" role="img" aria-label="Native authored booklet construction"></canvas></div>
+        <div class="book-controls"><label for="construction" id="construction-label">Construction state</label>
+          <select id="construction"><option value="0">Flat sheets</option><option value="1">Nested sheets</option><option value="2">Stapled</option><option value="3" selected>Shut booklet</option></select>
+          <button type="button" class="chip" id="reset">Reset view</button>
+        </div>
+        <p class="note" id="construction-note">The native sequence shows assembly. It does not turn reading pages independently.</p>
+        <p class="note" id="renderer-status" role="status"></p>
+      </section>
+      <section id="reading" class="reading-pane" aria-labelledby="reading-title">
+        <h2 id="reading-title">Read the companion</h2>
+        <nav class="page-nav" aria-label="Reading pages"><button class="chip" id="previous" type="button">Previous</button>
+          <label for="page" class="sr-only">Page</label><select id="page"></select><button class="chip" id="next" type="button">Next</button>
+        </nav>
+        <article id="page-content" aria-live="polite" aria-atomic="true"></article>
+        <p id="physical-location" class="note"></p>
+        <ul id="page-sources"></ul>
+        <details><summary id="page-image-title">Inspect this authored page image</summary>
+          <div id="page-image"></div>
+        </details>
+      </section>
+    </div>
+    <details id="evidence" hidden><summary id="evidence-title">Source and physical-page mapping</summary>
+      <p id="source-note"></p><p><a id="historical-record" target="_blank" rel="noopener noreferrer">Historical source record</a></p>
+      <div class="table-scroll"><table><caption id="mapping-caption">Logical pages and their native sheet sides</caption>
+        <thead><tr><th id="head-page">Page</th><th id="head-sheet">Sheet</th><th id="head-side">Side</th><th id="head-half">Half</th></tr></thead><tbody id="mapping"></tbody>
+      </table></div>
+      <p class="note" id="export-note">The native GLB is untextured and PDF omits artwork. This local viewer uses the art-bearing native FOLD and Pliego renderer. No print-ready guide export is claimed.</p>
+    </details>
+  </main>
+</body>
+</html>

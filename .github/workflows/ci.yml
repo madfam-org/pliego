@@ -33,8 +33,8 @@ env:
   # The keystone (madfam-org/hyperobjects-spec) at a full commit SHA: the same SPEC_PIN as nightly.yml and the
   # commons' ci.yml (move them together). Only the stocks lane's sheet-behaviour drift gate installs it; the
   # kernel never imports it (spec §5.40-§5.41). Package 0.20.0 adds reference objects,
-  # standard parts and edition contents/fit support, through hyperobjects-spec#73.
-  SPEC_PIN: "316287c00db2914c4b46b7c611e8a2af08e2c6ff"
+  # standard parts and edition contents/fit support, through hyperobjects-spec#78.
+  SPEC_PIN: "43ae9ae1f6d539123b95fd7ab77c3e8829ea49bd"
 
 jobs:
   agent-docs:

@@ -34,10 +34,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Keystone package 0.20.0, through hyperobjects-spec#73: reference objects,
+  # Keystone package 0.20.0, through hyperobjects-spec#78: reference objects,
   # standard parts and edition contents/fit support. The commons ci.yml and this
   # platform's ci.yml pin the identical SHA; move all three together.
-  SPEC_PIN: "316287c00db2914c4b46b7c611e8a2af08e2c6ff"
+  SPEC_PIN: "43ae9ae1f6d539123b95fd7ab77c3e8829ea49bd"
 
 jobs:
   corpus:

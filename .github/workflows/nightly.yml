@@ -34,11 +34,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The keystone (madfam-org/hyperobjects-spec) at a full commit SHA on its main: package 0.18.0 (#68, this
-  # platform's laminate schemas re-vendored from #37, `check cartridge --resolve`; after #64 stock cards, #65 runners,
-  # #66 body-count notes, #67 mesh oracle). The commons pins the same SHA in its ci.yml, as does ci.yml here. Move all
-  # three together.
-  SPEC_PIN: "b9823ee6c3bbc916d9d9a13799c707a9818c615b"
+  # Keystone package 0.20.0, through hyperobjects-spec#73: reference objects,
+  # standard parts and edition contents/fit support. The commons ci.yml and this
+  # platform's ci.yml pin the identical SHA; move all three together.
+  SPEC_PIN: "316287c00db2914c4b46b7c611e8a2af08e2c6ff"
 
 jobs:
   corpus:

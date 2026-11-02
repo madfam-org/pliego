@@ -10,7 +10,7 @@
 // tested under the real policy. Local development only: binds to 127.0.0.1.
 
 import { createServer } from 'node:http';
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, statSync, realpathSync } from 'node:fs';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +19,8 @@ const args = process.argv.slice(2);
 const arg = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(arg('--port') || process.env.PORT || 8090);
 const ENGINE_DIR = resolve(arg('--engine') || process.env.PLIEGO_ENGINE_DIR || join(HERE, '..', '..', 'packages', 'engine', 'src'));
+// Optional, explicitly selected local companion output; never a production mount.
+const COMPANION_DIR = arg('--companion') ? resolve(arg('--companion')) : null;
 // The repo-root llms files are the single source (the API and the image serve them too).
 const REPO_ROOT = resolve(join(HERE, '..', '..'));
 const ROOT_FILES = { '/llms.txt': join(REPO_ROOT, 'llms.txt'), '/llms-full.txt': join(REPO_ROOT, 'llms-full.txt') };
@@ -56,6 +58,8 @@ function inside(root, rel) {
   const p = normalize(join(root, decodeURIComponent(rel)));
   if (p !== root && !p.startsWith(root + sep)) return null;
   if (!existsSync(p)) return null;
+  const realRoot = realpathSync(root), real = realpathSync(p);
+  if (real !== realRoot && !real.startsWith(realRoot + sep)) return null;
   const st = statSync(p);
   if (st.isDirectory()) { const idx = join(p, 'index.html'); return existsSync(idx) ? idx : null; }
   return p;
@@ -64,6 +68,12 @@ function inside(root, rel) {
 const server = createServer((req, res) => {
   const url = new URL(req.url || '/', 'http://localhost');
   const path = url.pathname;
+  if (COMPANION_DIR) {
+    const data = /^\/companion-data\/(companion\.json|content\.json|handoff\.json|book-(en|es)\.fold|pages\/(en|es)\/page-[1-8]\.svg)$/.test(path);
+    const source = path.startsWith('/companion/') || path.startsWith('/studio/src/') || path === '/studio/studio.css';
+    if (!data && !source) { res.writeHead(404, HEADERS).end('not found'); return; }
+    if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, HEADERS).end(); return; }
+  }
   if (req.method !== 'GET' && req.method !== 'HEAD' && !path.startsWith('/api/')) { res.writeHead(405, HEADERS).end(); return; }
   if (path.startsWith('/api/')) {
     res.writeHead(404, { ...HEADERS, 'Content-Type': 'application/json; charset=utf-8' });
@@ -72,7 +82,9 @@ const server = createServer((req, res) => {
   }
   if (path === '/studio') { res.writeHead(301, { ...HEADERS, Location: '/studio/' }).end(); return; }
   const rootFile = ROOT_FILES[path] && existsSync(ROOT_FILES[path]) ? ROOT_FILES[path] : null;
-  const file = rootFile || (path.startsWith('/engine/') ? (existsSync(ENGINE_DIR) ? inside(ENGINE_DIR, path.slice('/engine/'.length)) : null) : inside(HERE, path.slice(1)));
+  const file = rootFile || (path.startsWith('/companion-data/')
+    ? (COMPANION_DIR ? inside(COMPANION_DIR, path.slice('/companion-data/'.length)) : null)
+    : path.startsWith('/engine/') ? (existsSync(ENGINE_DIR) ? inside(ENGINE_DIR, path.slice('/engine/'.length)) : null) : inside(HERE, path.slice(1)));
   const dotted = path.split('/').some((seg) => seg.startsWith('.'));   // never serve dot-dirs (.engine-tmp, .shots)
   if (!file || dotted) {
     res.writeHead(404, { ...HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }).end('not found');

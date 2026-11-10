@@ -58,6 +58,33 @@ test('BVH keeps moving prescribed crossings and prunes only exact stationary/sta
   console.log('swept-BVH-prescribed: moving fixed crossing retained; fully stationary nodes pruned; changed weld/free state refitted');
 });
 
+test('BVH exact-pose reuse invalidates on every live collision input and preserves ordered bounds/pairs', () => {
+  const m = mesh(24), tc = new Float64Array(24).fill(0.1), x = new Float64Array(72);
+  const fixed = new Uint8Array(24), weld = new Int32Array(24).fill(-1);
+  const reference = new SweptCandidates(m, tc), c = new SweptCandidates(m, tc, 'bvh');
+  let checks = 0;
+  const check = () => {
+    reference.build(x, x, fixed, weld); c.build(x, x, fixed, weld);
+    assert.equal(c.reusedLastBuild, false);
+    assert.deepEqual(result(c), result(reference));
+    for (const key of ['vertexBoxes', 'triangleBoxes', 'edgeBoxes']) assert.deepEqual(c[key], reference[key]);
+    c.build(x.slice(), x.slice(), fixed, weld); assert.equal(c.reusedLastBuild, false, 'sweep inputs are not cached');
+    c.build(x, x, fixed, weld); assert.equal(c.reusedLastBuild, false);
+    const copy = x.slice(); c.build(copy, copy, fixed.slice(), weld.slice());
+    assert.equal(c.reusedLastBuild, true, 'equal contents in new arrays reuse');
+    assert.equal(c.triangleTree.nodeTests + c.edgeTree.nodeTests, 0);
+    assert.deepEqual(result(c), result(reference)); checks++;
+  };
+  check();
+  for (const change of [() => { x[0] = -0; }, () => { x[1] = 1; }, () => { fixed[0] = 1; },
+    () => { weld[0] = 0; }, () => { tc[0] = 0.2; }, () => { m.vGroup[0] = 9; },
+    () => { m.vSheet[0] = 2; }, () => { m.triSheet[0] = 2; }]) { change(); check(); }
+  c.build(x, x, fixed, weld, false); assert.equal(c.reusedLastBuild, false, 'forced rebuild control');
+  x[2] = NaN; assert.throws(() => c.build(x, x, fixed, weld), /non-finite/);
+  x[2] = 0; check();
+  console.log(`swept-BVH-reuse: ${checks} input states; exact ordered pairs/bounds, signed zero, live filters, swept bypass and nonfinite recovery`);
+});
+
 test('BVH native leaf matches reference pose/forces/CCD diagnostics and restores exactly', () => {
   const options = { meshEdge: 12, substeps: 4, barrierContact: true, barrierIterations: 8, barrierLinearSolver: 'direct-local',
     consistentMembraneCurvature: true, gravity: false, ground: false, plasticity: false };

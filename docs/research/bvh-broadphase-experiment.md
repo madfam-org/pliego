@@ -13,8 +13,13 @@ motion endpoints, maximum primitive caliper and the existing outward roundoff
 margin. The BVH initially separates stationary and active primitives, then uses
 deterministic spatial medians within those groups. Changing stationary state
 does not preserve a stale exclusion: both groups' flags are fully refitted.
-Each call refits **every** leaf/internal bound, stationary flag and current rank;
-there is no approximate temporal cache or curvature-based contact suppression.
+Each full build refits **every** leaf/internal bound, stationary flag and current
+rank. The BVH may reuse an unswept candidate list only when every position, fixed
+flag, weld, caliper, vertex group, vertex sheet and triangle sheet value is exactly
+unchanged. Comparisons distinguish signed zero and snapshot contents independently
+of caller array identity. Connectivity and primitive counts remain immutable, as
+required by the constructor neighbor graph. Swept calls always rebuild and
+invalidate reuse. There is no approximate temporal cache or curvature suppression.
 
 An internal bound is the component-wise union of its children. Consequently a
 primitive whose bound overlaps the query cannot be removed by an ancestor's
@@ -44,7 +49,10 @@ retained 1592-stencil late-turn objective/search.
 `broadphase-pairs.mjs` compares cold first builds and alternating warm builds on
 native initial/late poses, a native sweep, a large synthetic prescribed sweep and
 deliberately dense synthetic bounds. It checks exact ordered pair bytes and
-records wall/process CPU time separately. Dense output can erase an index's
+records wall/process CPU time separately. Schema 0.2 separates forced BVH rebuild
+from allowed exact-pose reuse, so repeated identical poses do not masquerade as
+refit timings. `build(..., false)` supplies the force-build control; this is an
+internal candidate-builder argument, not a new World physics option. Dense output can erase an index's
 advantage; no universal speedup is assumed. Synthetic stress cases are not
 physical sheet simulations.
 
@@ -107,3 +115,17 @@ been exhausted.
 now defaults to LBVH and reports gains on its own benchmark scenes. That is an
 additional implementation candidate, not a measured comparison against Pliego's
 refit index; its performance claims have not been reproduced here.
+
+## Exact-pose reuse validation (in progress)
+
+The targeted suite retains ordered reference pairs/bounds through ten live-input
+states, including signed zero, in-place pose/filter/caliper changes, copied input
+arrays, swept bypass and recovery after nonfinite coordinates. Native replay and
+the retained late-turn objective/search remain exact. Candidate scratch arrays
+are internal and must not be mutated by consumers.
+
+`compare-paper-execution.mjs` compares whole campaign reports while allowing only
+the implementation commit/tree fingerprints and enumerated timing fields to
+differ. Unlike a model comparison, every recorded physics option, diagnostic,
+trajectory hash and non-time gate must agree. Full capped/uncapped runs and a
+clean source-pinned component report are required before reporting a speedup.

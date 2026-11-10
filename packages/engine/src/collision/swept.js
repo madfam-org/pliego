@@ -27,14 +27,27 @@ export class SweptCandidates {
     }
     this.vt = new Int32Array(2048); this.ee = new Int32Array(2048);
     this.vertexTriangleCount = 0; this.edgeEdgeCount = 0;
+    // Connectivity/counts are immutable, as for the constructor's neighbor graph.
+    // Cache only unswept Float64 poses; compare contents, never input identity.
+    this.cacheValid = false; this.reusedLastBuild = false;
+    this.cachedInputs = /** @type {Array<Float64Array>} */([]);
   }
   adjacent(a, b) { return a === b || this.mesh.vGroup[a] === this.mesh.vGroup[b] || this.neighbors[a].has(b); }
 
-  /** @param {ArrayLike<number>} from @param {ArrayLike<number>} to @param {Uint8Array} fixed @param {Int32Array} weld */
-  build(from, to, fixed, weld) {
+  /** @param {ArrayLike<number>} from @param {ArrayLike<number>} to @param {Uint8Array} fixed @param {Int32Array} weld @param {boolean} [reuse] */
+  build(from, to, fixed, weld, reuse = true) {
     const m = this.mesh, V = this.vertexBoxes, T = this.triangleBoxes, E = this.edgeBoxes, tc = this.thickness;
     const inactive = this.stationaryFixed;
     if (from.length !== 3 * m.nV || to.length !== from.length || fixed.length !== m.nV || weld.length !== m.nV) throw new RangeError('Swept contact: invalid buffer size');
+    const cacheable = this.mode === 'bvh' && from === to && from instanceof Float64Array;
+    const inputs = cacheable ? [from, fixed, weld, tc, m.vGroup, m.vSheet, m.triSheet] : [];
+    this.reusedLastBuild = false;
+    if (reuse && cacheable && this.cacheValid && inputs.every((a, i) => exactContents(a, this.cachedInputs[i]))) {
+      this.reusedLastBuild = true;
+      for (const tree of [this.triangleTree, this.edgeTree]) if (tree) { tree.nodeTests = 0; tree.rootContainmentTests = 0; }
+      return;
+    }
+    this.cacheValid = false;
     for (let v = 0; v < m.nV; v++) inactive[v] = fixed[v] && from[3 * v] === to[3 * v] && from[3 * v + 1] === to[3 * v + 1] && from[3 * v + 2] === to[3 * v + 2] ? 1 : 0;
     for (let v = 0; v < m.nV; v++) for (let k = 0; k < 3; k++) {
       const a = from[3 * v + k], b = to[3 * v + k];
@@ -46,7 +59,17 @@ export class SweptCandidates {
     for (let e = 0; e < m.nE; e++) unionBox(E, e, V, tc, m.edges, 2 * e, 2);
     this.triangleOrder.sort((a, b) => T[6 * a] - T[6 * b] || a - b);
     this.edgeOrder.sort((a, b) => E[6 * a] - E[6 * b] || a - b);
-    if (this.triangleTree && this.edgeTree) { this.indexed(weld); return; }
+    if (this.triangleTree && this.edgeTree) {
+      this.indexed(weld);
+      if (cacheable) {
+        for (let i = 0; i < inputs.length; i++) {
+          if (this.cachedInputs[i]?.length !== inputs[i].length) this.cachedInputs[i] = new Float64Array(inputs[i].length);
+          this.cachedInputs[i].set(inputs[i]);
+        }
+        this.cacheValid = true;
+      }
+      return;
+    }
     let nv = 0, ne = 0;
     for (let v = 0; v < m.nV; v++) {
       for (const t of this.triangleOrder) {
@@ -111,6 +134,12 @@ export class SweptCandidates {
     }
     this.vertexTriangleCount = nv; this.edgeEdgeCount = ne;
   }
+}
+
+function exactContents(a, b) {
+  if (!b || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (!Object.is(a[i], b[i])) return false;
+  return true;
 }
 
 function unionBox(out, index, vertices, thickness, ids, offset, count) {

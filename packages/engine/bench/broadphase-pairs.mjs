@@ -40,20 +40,20 @@ const digest = arrays => {
 const pairHash = c => digest([c.vt.subarray(0, 2 * c.vertexTriangleCount), c.ee.subarray(0, 2 * c.edgeEdgeCount)]);
 const results = [];
 for (const scene of scenes) {
-  const builders = { reference: new SweptCandidates(m, scene.thickness), bvh: new SweptCandidates(m, scene.thickness, 'bvh') };
+  const builders = { reference: new SweptCandidates(m, scene.thickness), bvh: new SweptCandidates(m, scene.thickness, 'bvh'), bvhReuse: new SweptCandidates(m, scene.thickness, 'bvh') };
   const coldFirstBuildMs = {};
   for (const [mode, c] of Object.entries(builders)) {
     // Build topology on the initial native pose, then refit to each supplied scene.
     const start = performance.now(); c.build(w.x, w.x, w.fixed, w.contact.weldSheet); coldFirstBuildMs[mode] = performance.now() - start;
-    for (let i = 0; i < 2; i++) c.build(scene.from, scene.to, scene.fixed, w.contact.weldSheet);
+    for (let i = 0; i < 2; i++) c.build(scene.from, scene.to, scene.fixed, w.contact.weldSheet, mode !== 'bvh');
   }
-  const times = { reference: [], bvh: [] }, cpu = { reference: [], bvh: [] };
-  for (let repeat = 0; repeat < repetitions; repeat++) for (const mode of repeat % 2 ? ['bvh', 'reference'] : ['reference', 'bvh']) {
-    const used = process.cpuUsage(), start = performance.now(); builders[mode].build(scene.from, scene.to, scene.fixed, w.contact.weldSheet);
+  const modes = Object.keys(builders), times = Object.fromEntries(modes.map(m => [m, []])), cpu = Object.fromEntries(modes.map(m => [m, []]));
+  for (let repeat = 0; repeat < repetitions; repeat++) for (const mode of repeat % 2 ? modes.toReversed() : modes) {
+    const used = process.cpuUsage(), start = performance.now(); builders[mode].build(scene.from, scene.to, scene.fixed, w.contact.weldSheet, mode !== 'bvh');
     times[mode].push(performance.now() - start); const delta = process.cpuUsage(used); cpu[mode].push((delta.user + delta.system) / 1000);
   }
   const reference = builders.reference, bvh = builders.bvh;
-  assert.equal(pairHash(reference), pairHash(bvh), 'all ordered pair bytes must agree');
+  for (const c of Object.values(builders)) assert.equal(pairHash(reference), pairHash(c), 'all ordered pair bytes must agree');
   let prefixAABBTests = 0;
   for (let v = 0; v < m.nV; v++) for (const t of reference.triangleOrder) {
     if (reference.triangleBoxes[6 * t] > reference.vertexBoxes[6 * v + 3]) break; prefixAABBTests++;
@@ -65,16 +65,19 @@ for (const scene of scenes) {
     vertexTrianglePairs: bvh.vertexTriangleCount, edgeEdgePairs: bvh.edgeEdgeCount, orderedPairsSHA256: pairHash(bvh), exactOrderedPairMatch: true,
     prefixPrimitiveAABBTests: prefixAABBTests, bvhNodeAABBTests: bvh.triangleTree.nodeTests + bvh.edgeTree.nodeTests,
     bvhRootEnclosureTests: bvh.triangleTree.rootContainmentTests + bvh.edgeTree.rootContainmentTests, coldFirstBuildMs,
-    timings: Object.fromEntries(['reference', 'bvh'].map(mode => [mode, { medianMs: percentile(times[mode], 0.5), p95Ms: percentile(times[mode], 0.95),
+    reusedLastBuild: builders.bvhReuse.reusedLastBuild,
+    reuseNodeAABBTests: builders.bvhReuse.triangleTree.nodeTests + builders.bvhReuse.edgeTree.nodeTests,
+    timings: Object.fromEntries(modes.map(mode => [mode, { medianMs: percentile(times[mode], 0.5), p95Ms: percentile(times[mode], 0.95),
       processCpuMedianMs: percentile(cpu[mode], 0.5), wallMs: times[mode], processCpuMs: cpu[mode] }])) };
   results.push(row);
-  console.error(`broadphase-pairs: ${row.name} VT=${row.vertexTrianglePairs} EE=${row.edgeEdgePairs} ordered bytes identical; reference=${row.timings.reference.medianMs.toFixed(3)}ms BVH=${row.timings.bvh.medianMs.toFixed(3)}ms`);
+  console.error(`broadphase-pairs: ${row.name} VT=${row.vertexTrianglePairs} EE=${row.edgeEdgePairs} ordered bytes identical; reference=${row.timings.reference.medianMs.toFixed(3)}ms BVH-rebuild=${row.timings.bvh.medianMs.toFixed(3)}ms reuse=${row.timings.bvhReuse.medianMs.toFixed(3)}ms`);
 }
 assert.equal(git(), source.git); assert.equal(status(), initialStatus, 'source status changed during run');
-const report = { schema: 'pliego-broadphase-pairs/0.1', recordedAt: new Date().toISOString(), source,
+const report = { schema: 'pliego-broadphase-pairs/0.2', recordedAt: new Date().toISOString(), source,
   runtime: { node: process.version, platform: platform(), arch: arch(), cpu: cpus()[0]?.model },
   mesh: { vertices: m.nV, triangles: m.nT, edges: m.nE, topologySHA256: digest([m.tris, m.edges, m.vGroup, m.vSheet, m.triSheet]) },
-  protocol: { repetitions, warmupBuilds: 2, order: 'alternated reference/BVH; sequential, same arrays',
+  protocol: { repetitions, warmupBuilds: 2, order: 'alternated reference/BVH-rebuild/BVH-reuse and reverse; sequential, same arrays',
+    execution: { reference: 'prefix scan, no reuse', bvh: 'forced full refit and candidate enumeration', bvhReuse: 'exact-content reuse allowed only for same-array Float64 unswept poses; swept inputs rebuild' },
     timingScope: 'candidate build only, separate wall and process CPU deltas including JIT/GC; exploratory local run',
     countScope: 'reference primitive AABB overlap tests vs BVH internal/leaf overlap tests plus separately counted root-enclosure tests; excludes rank/stationary pruning and bound generation',
     physicsAcceptance: 'not evaluated; synthetic dense/large-sweep scenes are culling stress cases, not native physics outcomes' }, results };

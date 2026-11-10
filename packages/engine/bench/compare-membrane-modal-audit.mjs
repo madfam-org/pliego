@@ -47,7 +47,7 @@ function commonInputs(report){
     });return out;
   });return common;
 }
-function forceOutcomes(report){return report.results.flatMap(c=>c.trajectories.map(t=>{
+function forceOutcomes(report){const outcomes=report.results.flatMap(c=>c.trajectories.map(t=>{
   assert.ok(Number.isSafeInteger(t.steps)&&t.steps>0&&Array.isArray(t.trace)&&t.trace.length===t.steps+1,'complete initial and requested poststep trace required');
   assert.equal(t.runtime.requestedSteps,t.steps);assert.equal(t.runtime.completedSteps,t.steps,'all requested actual substeps required');
   assert.ok(Number.isFinite(t.fixedForceScale)&&t.fixedForceScale>=0,'finite nonnegative fixed native force scale required');
@@ -71,7 +71,7 @@ function forceOutcomes(report){return report.results.flatMap(c=>c.trajectories.m
   assert.equal(t.gates.timeAccuracyAcceptance,false,'no narrowed arithmetic/time acceptance');
   return {geometry:c.geometry,level:t.level,budget:t.budget,seed:t.seed,amplitude:t.amplitude,poststeps:states.length,failedSteps:failed.length,
     firstFailedStep:failed[0]?.step??null,gates:t.gates,classification:t.classification,maxima:t.maxima};
-}));}
+}));assert.equal(report.gates.literalForceEverySubstep,outcomes.every(o=>o.failedSteps===0),'whole-report force gate must match every numeric poststep');return outcomes;}
 if(ablation){assert.equal(reports[0].protocol.instrument,false);assert.equal(reports[1].protocol.instrument,true);}
 let outcomes;
 if(arithmetic){

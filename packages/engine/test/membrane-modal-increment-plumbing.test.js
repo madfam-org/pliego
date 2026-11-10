@@ -134,7 +134,7 @@ function mockReport(arithmetic) {
   return { schema: 'pliego-membrane-modal-audit/0.1', recordedAt: 'first', source: { dirty: false, git: 'a'.repeat(40) }, runtime: { node: 'same' },
     protocol: { instrument: true, limits: { force: 1e-10 }, ...(arithmetic ? { lineSearchArithmetic: arithmetic } : {}) },
     referenceCapture: { sha: 'same' }, oracleSelfTest: { result: { passed: true } },
-    gates: { sourceClean: true, oracleValid: true, completeDeclaredMatrix: true, actualTimeAccuracyAcceptance: false },
+    gates: { sourceClean: true, oracleValid: true, completeDeclaredMatrix: true, literalForceEverySubstep: false, actualTimeAccuracyAcceptance: false },
     results: [{ geometry: { cells: 2 }, vertices: [[0, 0]], triangles: [[0, 0, 0]], material: { E: 1 }, mesh: { native: true },
       fixtureSHA256: 'same', meshSHA256: 'same', referenceCoefficients: { Q: 1 }, reference: { omega: 1 }, scalarResponseProof: { pass: true }, plan: { horizon: 1 / 60 }, trajectories: [t] }] };
 }
@@ -145,6 +145,7 @@ test('named arithmetic comparator binds exact common inputs while retaining chan
     const a = join(dir, 'a.json'), b = join(dir, 'b.json'), out = join(dir, 'proof.json');
     const first = mockReport(), second = mockReport(mode), row = second.results[0].trajectories[0];
     row.trace[1].residualInfinity = 0; row.trace[1].validation.converged = true; row.trace[1].literalForceGate = true; row.failedSteps = 0; row.firstFailedStep = null; row.gates.literalForceEverySubstep = true;
+    second.gates.literalForceEverySubstep = true;
     writeFileSync(a, JSON.stringify(first)); writeFileSync(b, JSON.stringify(second));
     const run = () => spawnSync(process.execPath, [join(bench, 'compare-membrane-modal-audit.mjs'), '--arithmetic-comparison', a, b, '--out', out], { encoding: 'utf8' });
     const pass = run(); assert.equal(pass.status, 0, pass.stderr);
@@ -169,11 +170,11 @@ test('named arithmetic comparator binds exact common inputs while retaining chan
       r => { r.results[0].trajectories[0].trace.push(structuredClone(r.results[0].trajectories[0].trace[1])); },
       r => { r.results[0].trajectories[0].trace.splice(1, 1); },
       r => { r.results[0].trajectories[0].runtime.completedSteps = 0; },
-      r => { r.results[0].trajectories[0].firstFailedStep = 1; }];
+      r => { r.results[0].trajectories[0].firstFailedStep = 1; }, r => { r.gates.literalForceEverySubstep = false; }];
     for (const change of changes) { const bad = structuredClone(second); change(bad); writeFileSync(b, JSON.stringify(bad)); assert.notEqual(run().status, 0, change.toString()); }
     assert.throws(() => runModalAudit({ lineSearchArithmetic: 'unknown' }), /unknown line-search arithmetic/);
     writeFileSync(b, JSON.stringify(second)); const exists = run(); assert.notEqual(exists.status, 0); assert.match(exists.stderr, /EEXIST/);
-    console.log('modal-increment-comparison: exact common inputs plus numeric residual/tolerance/status/step binding; changed outcomes separately retained; twenty-eight mutations refused');
+    console.log('modal-increment-comparison: exact common inputs plus numeric residual/tolerance/status/step and whole-report binding; changed outcomes separately retained; twenty-nine mutations refused');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 

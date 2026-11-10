@@ -109,3 +109,68 @@ budget isolation, expected error trend and broader geometry coverage. Bending,
 crease/join/hand/contact/friction support, measured stocks, richer coordinate
 representations, alternative formulations/backends and fixed-booklet/device
 acceptance remain part of the active campaign.
+
+## Clean-source outcome and remaining limits
+
+Source [`e96c592`](https://github.com/madfam-org/pliego/commit/e96c592ea6d56c47dfbddaaaa447d2c9655b6223)
+completes both 24-trajectory captures, a strict candidate repeat and observer
+ablation. [Complete lossless captures and independent proofs](evidence/membrane-double-double-2026-11-10/README.md)
+retain every failed step. The fresh binary64 report matches the prior 6cd
+increment-search capture exactly after excluding only source/recording metadata;
+a separate complete constitutive run preserves all 108 historical spring controls.
+
+| Evaluation | Force failures /7110 | Trajectories solved throughout /24 |
+|---|---:|---:|
+| Binary64 increment search |6973 |0 |
+| Two-word evaluation chain |6956 |0 |
+
+There are 49 newly passing steps and 32 lost prior passes: a net gain of 17.
+Only the coarsest refinement changes its count (337→320 failures of 474); every
+poststep at refinements 2/4/8 still fails. All 49770 observed DD Newton events
+are accounted for: 13332 computed accepted updates and 36438 precision-limited
+zero steps. This does not establish trajectory convergence. Maximum normalized
+discrete full-state error remains about 0.043004%; whole continuous-time accuracy
+is unaccepted. These are untimed experiments, with no new interaction certificate.
+
+Independent fixed-pose evaluation binds 85 archived poses in both modes,
+170 actual native evaluations with no stepping/solving. Raw repeat bytes agree.
+All 42502 parsed 80/100-digit proof leaves agree after excluding only the declared
+precision field; 29240 LE binary64 entries and native inertia/addition associations
+are independently verified. Stored-polynomial energy, elastic-gradient and full
+incremental-gradient component errors improve at all 85 poses:
+
+| Maximum absolute error over 85 poses |Binary64 |Two-word |
+|---|---:|---:|
+| Elastic energy, nJ |3.92882e-9 |4.08772e-13 |
+| Elastic gradient component, microN |2.19610e-6 |4.61901e-11 |
+| Full incremental gradient component, microN |2.19644e-6 |9.19009e-9 |
+
+Native inertia is unchanged; its maximum error against real stored M/h² remains
+5.59347e-9 microN. The frozen 49 stored-law slope error is 1.61013e-29 nJ against
+the predeclared 1e-27 target, versus 1.07850e-24 before. The old real-increase
+proposal backtracks. These evaluation gates do not accept a World trajectory.
+Independent UV/material projected-slope error improves at 59 poses, is unchanged
+at 16 zero-direction poses and worsens at 10: that meaning remains distinct.
+
+All 104 retained DD event roles deduplicate to 86 event IDs (59 accepted,
+27 precision-limited). Direct before/after energies at 80/100 digits agree over
+all 5334 parsed leaves, with 10148 lossless inputs checked. Among ONLY those
+59 retained accepted events, no stored-polynomial real Armijo failure is found.
+Two UV/material real increases of 4.1974630190980565e-25 nJ occur at the same
+physical state in two event IDs (level 2, budgets 4/16, predictor start,
+substepsRun 78). This is not a descent audit over all 13332 computed acceptances,
+and the changed sampled trajectories are not a matched frequency comparison
+with the old 69-event sample.
+
+The 32 native-rest DD probes have 16 computed acceptances and 16 rejections.
+All 16 accepted endpoints pass the stored-polynomial real Armijo check, while
+all 16 increase the UV/material potential at native rest. Complete 80/100 proofs
+agree over 1986 leaves. This preserves the rounded-reference/model distinction;
+more accurate evaluation does not silently redefine physical rest geometry.
+
+All 16 source CI checks pass, including 259 engine/123 web tests, 49 checked sources
+and 102 package files (49 source/49 type files, 663907 bytes unpacked and 206498 packed).
+Repository validation is separate from the unaccepted physics gates above.
+The next precision comparison must address authoritative coordinate representation
+and reference meaning while retaining these failures, literal force thresholds,
+physical inputs and the broader material/contact/booklet/device campaign.

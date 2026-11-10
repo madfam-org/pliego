@@ -276,6 +276,24 @@ The next precision implementation must distinguish stable objective subtraction
 from accurate base gradients and actual coordinate resolution; no ULP force
 allowance or claim of exhausted research is adopted.
 
+The next [two-word evaluation chain](membrane-double-double.md), clean `e96c592`,
+preserves stored material/reference coefficients and native inertia while carrying
+coordinate low words through Green strain, coherent derivatives and objective
+increments. Its frozen witness passes the predeclared slope-error gate and
+backtracks the old real-increase proposal. Independent paired fixed-pose errors
+improve against the stored polynomial, but UV/material meaning remains distinct.
+All 24 actual trajectories still contain strict force failures (6956/7110 steps,
+versus 6973 binary64; 49 gains/32 losses). Strict repeat, observer parity and all
+108 historical controls pass. Preserved captured-state checks cover 59 accepted
+event IDs, not the complete 13332 accepted updates; no stored-law Armijo failure
+appears in that sample, while two UV increases share one physical state. A
+separately versioned exact diagnostic-sum repair fixes the seven-ULP proof issue
+without changing objective/Armijo outputs or rewriting original failed evidence.
+The [full lossless evidence](evidence/membrane-double-double-2026-11-10/README.md)
+keeps force/time/calibration/contact/booklet/device gates open. Authoritative
+coordinate representation and physical reference meaning need their own
+controlled comparisons; higher evaluation precision is not global convergence.
+
 ## Separate gates
 
 **Interaction:** booklet frame/camera fixed throughout dragging; only exposed leaves

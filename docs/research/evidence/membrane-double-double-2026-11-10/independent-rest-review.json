@@ -1,0 +1,275 @@
+{
+  "schema": "pliego-dd-rest-probe-independent-review/1",
+  "sourceGit": "e96c592ea6d56c47dfbddaaaa447d2c9655b6223",
+  "sourceClean": true,
+  "sourceFilesMatched": 55,
+  "input": {
+    "file": "probes-dd.json",
+    "sha256": "9177ce617aaa2d433a9ab626e07b20b50a7de9672ea50b63c3e0c142ef34dc36",
+    "bytes": 107058
+  },
+  "precisionProofs": [
+    {
+      "file": "probes-dd-80.json",
+      "sha256": "cc5066a57c8a2a719fc5445cb0dc89a7ab1d98fbf9ce1eae58bb9afbe6ca923c",
+      "bytes": 112554
+    },
+    {
+      "file": "probes-dd-100.json",
+      "sha256": "9c2e3f9eb4690490375e96a4f75f769addc3d48c5d2339d7aa0c2ea1a7c3dd33",
+      "bytes": 112586
+    }
+  ],
+  "precisionComparison": {
+    "completeParsedEqualityPass": true,
+    "excludedFields": [
+      "cases[].decimalDigits"
+    ],
+    "parsedLeavesCompared": 1986,
+    "differences": []
+  },
+  "declaredCases": 32,
+  "decisions": {
+    "rejected": 16,
+    "accepted": 16
+  },
+  "losslessFloat64EntriesVerified": 1696,
+  "wrongRealArmijoAmongComputedAcceptedOnly": {
+    "storedCoefficientPolynomial": 0,
+    "independentExactUVMaterial": 16
+  },
+  "positiveRealPotentialAmongComputedAcceptedOnly": {
+    "storedCoefficientPolynomial": 0,
+    "independentExactUVMaterial": 16
+  },
+  "wrongAcceptanceDetails": {
+    "storedCoefficientPolynomial": [],
+    "independentExactUVMaterial": [
+      {
+        "caseIndex": 2,
+        "probe": {
+          "grain": 0,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -4.720214969694819e-22,
+        "realDeltaNJ": 8.070340555830444e-22,
+        "recordedArmijoMarginNJ": -8.071619611382996e-22,
+        "absoluteErrorNJ": 1.2790555525525262e-21
+      },
+      {
+        "caseIndex": 3,
+        "probe": {
+          "grain": 0,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -4.377692623805021e-22,
+        "realDeltaNJ": 2.017585138957611e-22,
+        "recordedArmijoMarginNJ": -2.0182246667338872e-22,
+        "absoluteErrorNJ": 6.395277762762632e-22
+      },
+      {
+        "caseIndex": 4,
+        "probe": {
+          "grain": 0,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -1.0261917132254285e-22,
+        "realDeltaNJ": 5.607658384850851e-22,
+        "recordedArmijoMarginNJ": -5.608321769860658e-22,
+        "absoluteErrorNJ": 6.633850098076279e-22
+      },
+      {
+        "caseIndex": 5,
+        "probe": {
+          "grain": 0,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -1.915010452825427e-22,
+        "realDeltaNJ": 1.4019145962127127e-22,
+        "recordedArmijoMarginNJ": -1.4022462887176164e-22,
+        "absoluteErrorNJ": 3.3169250490381395e-22
+      },
+      {
+        "caseIndex": 10,
+        "probe": {
+          "grain": 31,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -2.3634057859551407e-21,
+        "realDeltaNJ": 2.966831637627207e-21,
+        "recordedArmijoMarginNJ": -2.967364661369565e-21,
+        "absoluteErrorNJ": 5.330237423582347e-21
+      },
+      {
+        "caseIndex": 11,
+        "probe": {
+          "grain": 31,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -1.1471323785438867e-21,
+        "realDeltaNJ": 1.8542697735170043e-22,
+        "recordedArmijoMarginNJ": -1.8556023328729e-22,
+        "absoluteErrorNJ": 1.3325593558955872e-21
+      },
+      {
+        "caseIndex": 12,
+        "probe": {
+          "grain": 31,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -1.715524603815787e-21,
+        "realDeltaNJ": 2.5043679386453107e-21,
+        "recordedArmijoMarginNJ": -2.504789927899557e-21,
+        "absoluteErrorNJ": 4.219892542461098e-21
+      },
+      {
+        "caseIndex": 13,
+        "probe": {
+          "grain": 31,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -8.984501394499427e-22,
+        "realDeltaNJ": 1.5652299616533194e-22,
+        "recordedArmijoMarginNJ": -1.5662849347889345e-22,
+        "absoluteErrorNJ": 1.0549731356152746e-21
+      },
+      {
+        "caseIndex": 18,
+        "probe": {
+          "grain": 45,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -5.773430402951879e-22,
+        "realDeltaNJ": 6.838999470340647e-22,
+        "recordedArmijoMarginNJ": -6.840260713327976e-22,
+        "absoluteErrorNJ": 1.2612429873292526e-21
+      },
+      {
+        "caseIndex": 19,
+        "probe": {
+          "grain": 45,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -4.596465069061101e-22,
+        "realDeltaNJ": 1.7097498675851619e-22,
+        "recordedArmijoMarginNJ": -1.7103804890788263e-22,
+        "absoluteErrorNJ": 6.306214936646263e-22
+      },
+      {
+        "caseIndex": 20,
+        "probe": {
+          "grain": 45,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -5.773430402951877e-22,
+        "realDeltaNJ": 6.838999470340647e-22,
+        "recordedArmijoMarginNJ": -6.840260713327976e-22,
+        "absoluteErrorNJ": 1.2612429873292524e-21
+      },
+      {
+        "caseIndex": 21,
+        "probe": {
+          "grain": 45,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -4.5964650690611e-22,
+        "realDeltaNJ": 1.7097498675851619e-22,
+        "recordedArmijoMarginNJ": -1.7103804890788263e-22,
+        "absoluteErrorNJ": 6.306214936646262e-22
+      },
+      {
+        "caseIndex": 26,
+        "probe": {
+          "grain": 90,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -6.46221549197284e-23,
+        "realDeltaNJ": 1.4019145962127127e-22,
+        "recordedArmijoMarginNJ": -1.4021194098272536e-22,
+        "absoluteErrorNJ": 2.0481361454099966e-22
+      },
+      {
+        "caseIndex": 27,
+        "probe": {
+          "grain": 90,
+          "index": 0,
+          "direction": 1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -6.46221549197284e-23,
+        "realDeltaNJ": 1.4019145962127127e-22,
+        "recordedArmijoMarginNJ": -1.4021194098272536e-22,
+        "absoluteErrorNJ": 2.0481361454099966e-22
+      },
+      {
+        "caseIndex": 28,
+        "probe": {
+          "grain": 90,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 9.094947017729282e-13,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -1.1957381886472299e-21,
+        "realDeltaNJ": 3.2281362223321776e-21,
+        "recordedArmijoMarginNJ": -3.2285786097732755e-21,
+        "absoluteErrorNJ": 4.4238744109794075e-21
+      },
+      {
+        "caseIndex": 29,
+        "probe": {
+          "grain": 90,
+          "index": 2,
+          "direction": -1,
+          "magnitude": 8.881784197001252e-16,
+          "decision": "accepted"
+        },
+        "computedDeltaNJ": -9.042100888490909e-22,
+        "realDeltaNJ": 2.017585138957611e-22,
+        "recordedArmijoMarginNJ": -2.0186911075603558e-22,
+        "absoluteErrorNJ": 1.1059686027448519e-21
+      }
+    ]
+  },
+  "scope": "bounded32 declared native-rest fixed-pose searches; counts apply only this matrix, stored-coefficient and UV/material meanings separate; no timestep, arbitrary-state frequency, stock calibration or convergence/force-gate waiver"
+}

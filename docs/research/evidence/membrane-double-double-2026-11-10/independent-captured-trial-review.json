@@ -1,0 +1,99 @@
+{
+  "schema": "pliego-dd-captured-increment-independent-review/1",
+  "pass": true,
+  "inputReport": {
+    "file": "candidate.json",
+    "sha256": "b947d759ea707810e36fc766c05365234453ff5a88cc6d48ad559a5f68c66b79",
+    "bytes": 102050790,
+    "sourceGit": "e96c592ea6d56c47dfbddaaaa447d2c9655b6223",
+    "sourceDirty": false
+  },
+  "extractionProducerSHA256": "cef887e6a70435cb9334119d2f5ec3c5610880e87fa7fe4dcd34f75b2f3f45ad",
+  "captureInput": {
+    "file": "captured-trials-input.json",
+    "sha256": "4afcbb2ccc09a757212135cbc926e73e998a3f692fc7edbc9a6b7eaa681085fa",
+    "bytes": 521799
+  },
+  "precisionProofs": [
+    {
+      "file": "captured-trials-80.json",
+      "sha256": "6a80d63d0816507b8ead128468b0c7fde6abda835dc467f1060f87bbffe27aa2",
+      "bytes": 281771
+    },
+    {
+      "file": "captured-trials-100.json",
+      "sha256": "bc6b548cc8c0accfda64ce0bc5c6a6e0402a5bef0f6bc53dd8c703b5c45d689a",
+      "bytes": 281857
+    }
+  ],
+  "capturedRoleOccurrences": 104,
+  "distinctCapturedEvents": 86,
+  "sampledDecisions": {
+    "accepted": 59,
+    "precision-limited-zero-step": 27
+  },
+  "realArmijoWrongAcceptancesAmongCapturedAcceptedOnly": {
+    "storedCoefficientPolynomial": 0,
+    "independentExactUVMaterial": 2
+  },
+  "realPositivePotentialAmongCapturedAcceptedOnly": {
+    "storedCoefficientPolynomial": 0,
+    "independentExactUVMaterial": 2
+  },
+  "wrongAcceptanceDetails": {
+    "storedCoefficientPolynomial": [],
+    "independentExactUVMaterial": [
+      {
+        "caseIndex": 27,
+        "selection": {
+          "cells": 2,
+          "pattern": "forward",
+          "grain": 0,
+          "level": 2,
+          "budget": 4,
+          "seed": false,
+          "amplitude": 0.004,
+          "iteration": 315,
+          "substepsRun": 78,
+          "roles": [
+            "worstNominal"
+          ],
+          "runtimeDecision": "accepted"
+        },
+        "computedDeltaNJ": -1.426281030452841e-26,
+        "realDeltaNJ": 4.1974630190980565e-25,
+        "recordedArmijoMarginNJ": -4.197586706177108e-25,
+        "absoluteErrorNJ": 4.340091122143341e-25
+      },
+      {
+        "caseIndex": 35,
+        "selection": {
+          "cells": 2,
+          "pattern": "forward",
+          "grain": 0,
+          "level": 2,
+          "budget": 16,
+          "seed": false,
+          "amplitude": 0.004,
+          "iteration": 1251,
+          "substepsRun": 78,
+          "roles": [
+            "worstNominal"
+          ],
+          "runtimeDecision": "accepted"
+        },
+        "computedDeltaNJ": -1.426281030452841e-26,
+        "realDeltaNJ": 4.1974630190980565e-25,
+        "recordedArmijoMarginNJ": -4.197586706177108e-25,
+        "absoluteErrorNJ": 4.340091122143341e-25
+      }
+    ]
+  },
+  "complete80vs100ParsedEquality": true,
+  "excludedFields": [
+    "cases[].decimalDigits"
+  ],
+  "parsedLeavesCompared": 5334,
+  "losslessStateFloat64EntriesVerified": 10148,
+  "scope": "ALL retained full DD incrementTrial snapshots, deduplicated only by trajectory/iteration; no unsaved endpoint inferred; counts apply ONLY sampled captured acceptances, not all13332accepted events; no simulation, force-gate waiver or equilibrium/real-descent certificate"
+}

@@ -179,6 +179,17 @@ target and its old energy-increasing proposal backtracks. This bounded
 evaluation result does not establish trajectory force/time convergence.
 The separate diagnostic-sum oracle repair changes no objective/Armijo result;
 all original failed proofs remain retained.
+At clean `e96c592`, the same 24 trajectories retain 6956/7110 force failures
+versus 6973/7110 binary64: 49 steps gain and 32 regress; none is solved
+throughout. Strict repeat, observer parity and 108 historical controls pass.
+Independent paired evaluation improves stored-polynomial gradient errors on
+all 85 retained poses, with unchanged native inertia. Among 59 sampled accepted
+trajectory events, stored-polynomial real Armijo failures are zero, while two
+UV/material increases occur at the same physical state. Native-rest DD probes
+also retain that model-meaning difference. This does not certify all accepted
+updates, physical rest, a resolved time limit or booklet/device performance.
+The [complete preserved evidence](research/evidence/membrane-double-double-2026-11-10/README.md)
+keeps the earlier failures and the separate diagnostic-only repair.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

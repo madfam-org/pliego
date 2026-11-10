@@ -65,6 +65,48 @@ test('independent Decimal increment oracle proves analytical Green-plus-inertia 
   console.log('increment-precision-analytic: direct finite Green energy plus exact quadratic inertia, reversal and zero endpoint increment; three deterministic self-tests');
 });
 
+test('version2 diagnostic rounds exact stored products/remainders once with ties, cancellation and signed underflow controls', () => {
+  const tiny = Number.MIN_VALUE;
+  const cases = [
+    { label: 'tie to even lower', g: [1, 2**-53], d: [1, 1], mr: 0, ir: 0, expected: 1 },
+    { label: 'tie to even upper', g: [1, 3*2**-53], d: [1, 1], mr: 0, ir: 0, expected: 1+2**-51 },
+    { label: 'cancellation retains unit', g: [2**53, 1, -(2**53)], d: [1, 1, 1], mr: 0, ir: 0, expected: 1 },
+    { label: 'mixed sign remainders', g: [1e16, -1e16], d: [1, 1], mr: 1, ir: -.5, expected: .5 },
+    { label: 'overflowing products cancel exactly', g: [1e308, 1e308], d: [1e308, -1e308], mr: 1, ir: 0, expected: 1 },
+    { label: 'minimum subnormal retained', g: [tiny], d: [1], mr: 0, ir: 0, expected: tiny },
+    { label: 'positive subnormal midpoint to zero', g: [tiny], d: [.5], mr: 0, ir: 0, expected: 0 },
+    { label: 'negative subnormal midpoint to zero', g: [-tiny], d: [.5], mr: 0, ir: 0, expected: -0 },
+    { label: 'subnormal midpoint to even upper', g: [tiny], d: [.5], mr: tiny, ir: 0, expected: 2*tiny },
+    { label: 'negative strict underflow', g: [-tiny], d: [.25], mr: 0, ir: 0, expected: -0 },
+    { label: 'all negative zeros are rational zero', g: [-0, -0], d: [1, 1], mr: -0, ir: -0, expected: 0 },
+    { label: 'exact cancellation is positive zero', g: [-tiny, tiny], d: [1, 1], mr: 0, ir: 0, expected: 0 },
+  ];
+  const script = String.raw`
+import importlib.util,json,math,sys
+from decimal import localcontext
+spec=importlib.util.spec_from_file_location('increment_precision',sys.argv[1])
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+answer=[]
+for case in json.load(sys.stdin):
+    outputs=[]
+    for digits in (6,28,80,100):
+        with localcontext() as context:
+            context.prec=digits
+            value=module.correctly_rounded_runtime_term_sum(case['g'],case['d'],case['mr'],case['ir'])
+            outputs.append({'value':value,'hex':value.hex(),'negativeZero':value==0 and math.copysign(1,value)<0})
+    assert all(value==outputs[0] for value in outputs)
+    answer.append(outputs[0])
+print(json.dumps({'version':module.DIAGNOSTIC_SUM_VERSION,'outputs':answer}))
+`;
+  const result = JSON.parse(execFileSync(python, ['-c', script, oracle], { input: JSON.stringify(cases), encoding: 'utf8' }));
+  assert.equal(result.version, 'exact-rational-dot-plus-remainders/2');
+  result.outputs.forEach((value, i) => {
+    assert.ok(Object.is(value.value, cases[i].expected), `${cases[i].label}: got ${value.hex}`);
+    assert.equal(value.negativeZero, Object.is(cases[i].expected, -0), cases[i].label);
+  });
+  console.log('increment-diagnostic-v2:12 analytical exact-product/remainder controls; ties-even upper/lower, catastrophic/mixed-sign cancellation, overflowing products with finite sum, subnormals, canonical exact+0 and negative underflow-0; identical across Decimal6/28/80/100');
+});
+
 test('actual f64 tiny and larger increments retain absolute errors and resolve raw total-potential cancellation', () => {
   const cases = [];
   for (const grain of [0, 31, 90]) for (const step of [2**-10, 2**-30, 2**-37]) {

@@ -18,12 +18,34 @@ import math
 import struct
 import sys
 from decimal import Decimal, localcontext
+from fractions import Fraction
 from pathlib import Path
 
 SOURCE = Path(__file__).with_name("plane-stress-precision.py")
 SPEC = importlib.util.spec_from_file_location("increment_stvk_precision", SOURCE)
 STVK = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(STVK)
+DIAGNOSTIC_SUM_VERSION = "exact-rational-dot-plus-remainders/2"
+
+
+def correctly_rounded_runtime_term_sum(gradient, rounded_delta, membrane_r, inertia_r):
+    """Exact sum of stored f64 products/remainders, then one binary64 rounding.
+
+    Preserve the original diagnostic's mathematical meaning: the dot product
+    uses stored gradient and rounded endpoint differences, NOT runtime.slope.
+    Fraction arithmetic has no Decimal-context dependence or intermediate f64
+    products. float(Fraction) rounds once, nearest/ties-even. Exact rational zero
+    becomes +0; a negative nonzero value that underflows becomes -0. Stored zero
+    signs remain bound separately by state hashes, not real rational arithmetic.
+    This repairs only the diagnostic output, not objective/error/Armijo paths.
+    """
+    if len(gradient) != len(rounded_delta):
+        raise ValueError("diagnostic gradient/delta dimensions differ")
+    rational = lambda v: Fraction.from_float(float(STVK.exact(float(v))))
+    total = sum(
+        (rational(g) * rational(d) for g, d in zip(gradient, rounded_delta)), Fraction()
+    )
+    return float(total + rational(membrane_r) + rational(inertia_r))
 
 
 def sha(data):
@@ -306,7 +328,11 @@ def evaluate(case, digits=80):
             membrane_r = STVK.exact(runtime["membraneRemainder"])
             inertia_r = STVK.exact(runtime["inertiaRemainder"])
             recombined = gradient_slope + membrane_r + inertia_r
-            runtime_values["realSumOfStoredRuntimeTermsNJ"] = float(recombined)
+            runtime_values["realSumOfStoredRuntimeTermsNJ"] = (
+                correctly_rounded_runtime_term_sum(
+                    g, rounded_delta, membrane_r, inertia_r
+                )
+            )
             runtime_values["inertiaRemainderErrorNJ"] = float(
                 abs(inertia_r - inertia_remainder)
             )
@@ -335,6 +361,7 @@ def evaluate(case, digits=80):
                     )
         result = {
             "schema": "pliego-membrane-increment-precision/1",
+            "diagnosticSumVersion": DIAGNOSTIC_SUM_VERSION,
             "decimalDigits": digits,
             "meanings": values,
             "runtime": runtime_values,

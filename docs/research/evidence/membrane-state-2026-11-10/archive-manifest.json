@@ -1,0 +1,442 @@
+{
+  "schema": "pliego-state-recovery-archive/1",
+  "captureSourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "archiveKind": "new durable recovery captures and independent reviews",
+  "originalWholeCaptureRecovered": false,
+  "selectionSHA256": "93d18af996327e38cc6a406a066ada82bdb1b220e14f71ac4246041418ef1bbd",
+  "builderSHA256": "31b690887e746f9dfba2ddbd3d1c73a9c53ff40075497e86b0bada6d6ab5b643",
+  "files": [
+    {
+      "file": "README.md",
+      "bytes": 5733,
+      "sha256": "9bfb84eb6cfc8be8c1265b3991c7d0f3169e1c962ba8cbfca6e0b78bc1dfd8f4",
+      "encoding": "generated-readme",
+      "role": "new recovery scope and reproduction"
+    },
+    {
+      "file": "archive-builder-source.json",
+      "bytes": 16311,
+      "sha256": "a4a177ff8bf0b7276b951f9c194e19707c922500df986e6dac07fe9362f3e29c",
+      "inputIdentity": "archive-work/build-state-recovery-archive.py",
+      "inputBytes": 12036,
+      "inputSHA256": "31b690887e746f9dfba2ddbd3d1c73a9c53ff40075497e86b0bada6d6ab5b643",
+      "encoding": "base64-source",
+      "role": "exact new public-safe archive builder"
+    },
+    {
+      "file": "archive-selection.json",
+      "bytes": 9720,
+      "sha256": "93d18af996327e38cc6a406a066ada82bdb1b220e14f71ac4246041418ef1bbd",
+      "inputIdentity": "archive-work/selection-v2.json",
+      "inputBytes": 9720,
+      "inputSHA256": "93d18af996327e38cc6a406a066ada82bdb1b220e14f71ac4246041418ef1bbd",
+      "encoding": "raw",
+      "role": "explicit public archive selection, not complete recovery workspace inventory"
+    },
+    {
+      "file": "candidate-variants.json",
+      "bytes": 626,
+      "sha256": "a9e9a50b916090a526a44481a8a683d2268c6e58eeb3f7453f22861791d54f65",
+      "inputIdentity": "reconstructed-failure/candidate-variants.json",
+      "inputBytes": 626,
+      "inputSHA256": "a9e9a50b916090a526a44481a8a683d2268c6e58eeb3f7453f22861791d54f65",
+      "encoding": "raw",
+      "role": "all four inverse candidate hashes, including three mismatches"
+    },
+    {
+      "file": "capture-pipeline-source.json",
+      "bytes": 10235,
+      "sha256": "aa7c212958129c42c425c08773cb3126c1af93cd2beffa86e49c3811d1ed2a79",
+      "inputIdentity": "run-recovery-captures.py",
+      "inputBytes": 7460,
+      "inputSHA256": "c0dd32602c9a7d564f14a50fda355efae585d857065f8c3f5436f1b7af16f857",
+      "encoding": "base64-source",
+      "role": "exact new portable recovery pipeline; original old driver unavailable"
+    },
+    {
+      "file": "fixed-reference-state-source.json",
+      "bytes": 24415,
+      "sha256": "377042d7a8640087a57803dfe9e7a737ae59498d21623e382ea5f3719f9aa66b",
+      "inputIdentity": "reconstructed-failure/exact-reconstruction/current-reference-state.js",
+      "inputBytes": 18121,
+      "inputSHA256": "b339bb833b207cda24e8310d8b7db46ef081f2bff962231ea4d78a42cda0c1bc",
+      "encoding": "base64-source",
+      "role": "current committed fixed source"
+    },
+    {
+      "file": "independent-recovery-review-source.json",
+      "bytes": 38986,
+      "sha256": "8c6d94ee5976d4f5c7a40f912f1d370f6ab46861f67e63ff38a410cd77cf861f",
+      "inputIdentity": "independent-review/review-recovered-state.py",
+      "inputBytes": 29046,
+      "inputSHA256": "47bfabe4d7cb43dc5255b28e8c8e1059b7d5811f54363024e80679541b63efc3",
+      "encoding": "base64-source",
+      "role": "exact new independent reviewer program"
+    },
+    {
+      "file": "independent-recovery-review.json",
+      "bytes": 90866,
+      "sha256": "12c80f6d5d4066db6ded8b1c65bdc1ea559929fe5ef2bba019bd597ab1f7e49a",
+      "inputIdentity": "independent-review/recovered-state-review.json",
+      "inputBytes": 90866,
+      "inputSHA256": "12c80f6d5d4066db6ded8b1c65bdc1ea559929fe5ef2bba019bd597ab1f7e49a",
+      "encoding": "raw",
+      "role": "new independent recovery review; no impersonation of missing originals"
+    },
+    {
+      "file": "initial-reconstruction-source.json",
+      "bytes": 6829,
+      "sha256": "d77ae5219847df9e1b35653f6eb481fa23631e69c29954294a3051cf9f4ec536",
+      "inputIdentity": "reconstructed-failure/reconstruct-source.py",
+      "inputBytes": 4911,
+      "inputSHA256": "8afc49e6a6140799002e43ec7262d160a3c1b71053d48d9a8e158ed00e1828e2",
+      "encoding": "base64-source",
+      "role": "development inverse candidate that failed the recorded source hash"
+    },
+    {
+      "file": "initial-reconstruction.json",
+      "bytes": 676,
+      "sha256": "bab2ce59222fc0cc8ba844ca6530267a1586fb5ee40ab25a765804b6e671a0f4",
+      "inputIdentity": "reconstructed-failure/source-reconstruction.json",
+      "inputBytes": 676,
+      "inputSHA256": "bab2ce59222fc0cc8ba844ca6530267a1586fb5ee40ab25a765804b6e671a0f4",
+      "encoding": "raw",
+      "role": "preserved failed inverse-source identity check"
+    },
+    {
+      "file": "initial-reference-state-source.json",
+      "bytes": 22776,
+      "sha256": "79cd0ec2cfbd79a677532ab2c9a4f59bcae01a8ed086d750fe38092367a5c238",
+      "inputIdentity": "reconstructed-failure/reconstructed-reference-state.js",
+      "inputBytes": 16877,
+      "inputSHA256": "ae093cb293dac4a4cadbbad0654239d5748c3c4d8ddb8659390cea56b9c0883c",
+      "encoding": "base64-source",
+      "role": "exact failed initial inverse candidate source"
+    },
+    {
+      "file": "legacy-comparison.json",
+      "bytes": 1490,
+      "sha256": "1edc6d25ed8a039bb61f74868fc4e36a1b0a47d673f18860519c4c7ccff2b775",
+      "inputIdentity": "captures/legacy-comparison.json",
+      "inputBytes": 1490,
+      "inputSHA256": "1edc6d25ed8a039bb61f74868fc4e36a1b0a47d673f18860519c4c7ccff2b775",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "legacy-controls.json.gz",
+      "bytes": 1209538,
+      "sha256": "3039e139d338f9af534815aca193ab6e8715266b864672755d10f81308cf059c",
+      "inputIdentity": "captures/legacy-controls.json",
+      "inputBytes": 8380531,
+      "inputSHA256": "51c30376cfbbcb91970bc6ab05ee167ab638657e0e0e7d6426d75fcd5c8c1def",
+      "encoding": "gzip",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "legacy-controls.stderr.log",
+      "bytes": 113,
+      "sha256": "ac79367f45b94b6f6364c91317b809b569c5facffdbb65588b0df1508ec48f64",
+      "inputIdentity": "captures/legacy-controls.stderr.log",
+      "inputBytes": 113,
+      "inputSHA256": "ac79367f45b94b6f6364c91317b809b569c5facffdbb65588b0df1508ec48f64",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "legacy-controls.terminal.json",
+      "bytes": 181,
+      "sha256": "7b651d750b1865b894a8fc16f82cd12bdfad2bdaac0ca7b83b5ca0778a969b1e",
+      "inputIdentity": "captures/legacy-controls.terminal.json",
+      "inputBytes": 181,
+      "inputSHA256": "7b651d750b1865b894a8fc16f82cd12bdfad2bdaac0ca7b83b5ca0778a969b1e",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "missing-originals.json",
+      "bytes": 8188,
+      "sha256": "e91acc6fd2680bbbad8c9906a9a4b1c9d1d6865423544c10972641383a571ebe",
+      "inputIdentity": "archive-work/missing-originals.json",
+      "inputBytes": 8188,
+      "inputSHA256": "e91acc6fd2680bbbad8c9906a9a4b1c9d1d6865423544c10972641383a571ebe",
+      "encoding": "raw",
+      "role": "explicit missing original raw/formal evidence ledger"
+    },
+    {
+      "file": "oracle-100.json",
+      "bytes": 33038,
+      "sha256": "15f447da48e48697fa319f88b3578a815cc03882decbbfc96bbbeb4b9bffca7f",
+      "inputIdentity": "captures/oracle-100.json",
+      "inputBytes": 33038,
+      "inputSHA256": "15f447da48e48697fa319f88b3578a815cc03882decbbfc96bbbeb4b9bffca7f",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-100.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputIdentity": "captures/oracle-100.stderr.log",
+      "inputBytes": 0,
+      "inputSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-100.terminal.json",
+      "bytes": 218,
+      "sha256": "004170d0c5285af07aa60955d39500906a4c71f2cfa0518b071f58e657918dd4",
+      "inputIdentity": "captures/oracle-100.terminal.json",
+      "inputBytes": 218,
+      "inputSHA256": "004170d0c5285af07aa60955d39500906a4c71f2cfa0518b071f58e657918dd4",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-80.json",
+      "bytes": 33036,
+      "sha256": "4560bf6436332a2ce0f2b8ba148a0f5ffeb8b11a5eb60231225c15e2838803c7",
+      "inputIdentity": "captures/oracle-80.json",
+      "inputBytes": 33036,
+      "inputSHA256": "4560bf6436332a2ce0f2b8ba148a0f5ffeb8b11a5eb60231225c15e2838803c7",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-80.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputIdentity": "captures/oracle-80.stderr.log",
+      "inputBytes": 0,
+      "inputSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-80.terminal.json",
+      "bytes": 215,
+      "sha256": "5bf736963bc3f5e4b4f7488640e70fb1f9ad5c0ff5364b68335c69eb22f922cc",
+      "inputIdentity": "captures/oracle-80.terminal.json",
+      "inputBytes": 215,
+      "inputSHA256": "5bf736963bc3f5e4b4f7488640e70fb1f9ad5c0ff5364b68335c69eb22f922cc",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-self-test.json",
+      "bytes": 193,
+      "sha256": "8b69debae70e6116a2ebbfd433a453390c0c07bad8b61171381404506799bbde",
+      "inputIdentity": "captures/oracle-self-test.json",
+      "inputBytes": 193,
+      "inputSHA256": "8b69debae70e6116a2ebbfd433a453390c0c07bad8b61171381404506799bbde",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-self-test.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputIdentity": "captures/oracle-self-test.stderr.log",
+      "inputBytes": 0,
+      "inputSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "oracle-self-test.terminal.json",
+      "bytes": 214,
+      "sha256": "d84206f14277c78b9e0a52330a73666bd0e7f066350faeaa4e0cc41403e2b394",
+      "inputIdentity": "captures/oracle-self-test.terminal.json",
+      "inputBytes": 214,
+      "inputSHA256": "d84206f14277c78b9e0a52330a73666bd0e7f066350faeaa4e0cc41403e2b394",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "pipeline-terminal.json",
+      "bytes": 5335,
+      "sha256": "e649bcb582397d1ffe6e979cb7e0de0a737df97d1ea23c61847b94fbacb88e43",
+      "inputIdentity": "captures/pipeline-terminal.json",
+      "inputBytes": 5335,
+      "inputSHA256": "e649bcb582397d1ffe6e979cb7e0de0a737df97d1ea23c61847b94fbacb88e43",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "preflight-comparison.json",
+      "bytes": 1546,
+      "sha256": "8ca9a62d87a14477846458310450e59e99f3de0289c428f25566d7a88707eb01",
+      "inputIdentity": "captures/preflight-comparison.json",
+      "inputBytes": 1546,
+      "inputSHA256": "8ca9a62d87a14477846458310450e59e99f3de0289c428f25566d7a88707eb01",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "probe.json",
+      "bytes": 279198,
+      "sha256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243",
+      "inputIdentity": "captures/probe.json",
+      "inputBytes": 279198,
+      "inputSHA256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "probe.stderr.log",
+      "bytes": 144,
+      "sha256": "46b1192c99ac5cde72cfdce318170e50aeb208ba20cdccd35aecd3cd4071ec37",
+      "inputIdentity": "captures/probe.stderr.log",
+      "inputBytes": 144,
+      "inputSHA256": "46b1192c99ac5cde72cfdce318170e50aeb208ba20cdccd35aecd3cd4071ec37",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "probe.terminal.json",
+      "bytes": 201,
+      "sha256": "c21c2266f7acc87e847df0ca5e8f68b9160cabb6b4e91abc67e4ad091aa03e21",
+      "inputIdentity": "captures/probe.terminal.json",
+      "inputBytes": 201,
+      "inputSHA256": "c21c2266f7acc87e847df0ca5e8f68b9160cabb6b4e91abc67e4ad091aa03e21",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "reconstruct-source-v2-source.json",
+      "bytes": 7813,
+      "sha256": "63282c9ecc60ac8097663787c0fc36766268fe0b04d8550d76890b46b9fbf7d6",
+      "inputIdentity": "reconstructed-failure/reconstruct-source-v2.py",
+      "inputBytes": 5642,
+      "inputSHA256": "23345e6acb4d946335987297a1c3b05dbcba97ee16bdf76260b95f7761a48d5b",
+      "encoding": "base64-source",
+      "role": "exact portable inverse reconstruction matching recorded old source hash"
+    },
+    {
+      "file": "reconstructed-restore-proof.json",
+      "bytes": 3434,
+      "sha256": "8aed5eba0028121d4a20bd12dcc3013c133d272e3e7eb99aef2e6af2f5ed40a0",
+      "inputIdentity": "reconstructed-failure/reconstructed-restore-proof.json",
+      "inputBytes": 3434,
+      "inputSHA256": "8aed5eba0028121d4a20bd12dcc3013c133d272e3e7eb99aef2e6af2f5ed40a0",
+      "encoding": "raw",
+      "role": "NEW reconstructed failure and fixed refusal proof"
+    },
+    {
+      "file": "reconstruction-delivery.json",
+      "bytes": 2985,
+      "sha256": "e167d1e02ce0a1cf01e08131c7029c9bd6262c55e021b161dbb7ecd02c255461",
+      "inputIdentity": "reconstructed-failure/delivery-manifest.json",
+      "inputBytes": 2985,
+      "inputSHA256": "e167d1e02ce0a1cf01e08131c7029c9bd6262c55e021b161dbb7ecd02c255461",
+      "encoding": "raw",
+      "role": "new reconstruction delivery and explicit historical-context limits"
+    },
+    {
+      "file": "recovered-reference-state-source.json",
+      "bytes": 22861,
+      "sha256": "0a1c00ab8aae601dc484df387551b298ffa696f96b4343e780193a086180eabf",
+      "inputIdentity": "reconstructed-failure/exact-reconstruction/reconstructed-reference-state.js",
+      "inputBytes": 16908,
+      "inputSHA256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+      "encoding": "base64-source",
+      "role": "recovered old source matches full previously recordedSHA; not old complete runtime wrapper"
+    },
+    {
+      "file": "repeat.json",
+      "bytes": 279198,
+      "sha256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243",
+      "inputIdentity": "captures/repeat.json",
+      "inputBytes": 279198,
+      "inputSHA256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "repeat.stderr.log",
+      "bytes": 144,
+      "sha256": "46b1192c99ac5cde72cfdce318170e50aeb208ba20cdccd35aecd3cd4071ec37",
+      "inputIdentity": "captures/repeat.stderr.log",
+      "inputBytes": 144,
+      "inputSHA256": "46b1192c99ac5cde72cfdce318170e50aeb208ba20cdccd35aecd3cd4071ec37",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "repeat.terminal.json",
+      "bytes": 203,
+      "sha256": "c659c8f6625db5414ca9086891317225bd9b3a4ad6a9325bbf6c904b86748a35",
+      "inputIdentity": "captures/repeat.terminal.json",
+      "inputBytes": 203,
+      "inputSHA256": "c659c8f6625db5414ca9086891317225bd9b3a4ad6a9325bbf6c904b86748a35",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "file": "restore-archive-source.json",
+      "bytes": 4877,
+      "sha256": "ae1c5b3deb75043d18ab51c8ef78336be018dbd4d45957d4f01039f1bb219a55",
+      "inputIdentity": "archive-work/restore-state-archive.py",
+      "inputBytes": 3449,
+      "inputSHA256": "bb1493979598e2ed44f218337a4500e51cb46fd508574994dae6c8778c983567",
+      "encoding": "base64-source",
+      "role": "exact portable byte restoration helper; not a physics rerun"
+    },
+    {
+      "file": "restore-reconstruction-review-source.json",
+      "bytes": 7094,
+      "sha256": "799956165f2e232bf09198b945c2abbe303be09cf821c888171b6bb35ffef921",
+      "inputIdentity": "reconstructed-failure/prove-restore-reconstruction.mjs",
+      "inputBytes": 5112,
+      "inputSHA256": "30a18fc2d15a2dce5c81e342575cb51eb6c46f24eb610d2d72647f2a1595e4eb",
+      "encoding": "base64-source",
+      "role": "new portable synthetic corruption-control reproducer"
+    },
+    {
+      "file": "source-ci.json",
+      "bytes": 3759,
+      "sha256": "8ff786f486faea988c37321b2bc9c24b28db8857b3968f4cd24fc731eff0853a",
+      "inputIdentity": "source-ci.json",
+      "inputBytes": 3759,
+      "inputSHA256": "8ff786f486faea988c37321b2bc9c24b28db8857b3968f4cd24fc731eff0853a",
+      "encoding": "raw",
+      "role": "fresh authoritative source-commit CI observation"
+    },
+    {
+      "file": "source-reconstruction.json",
+      "bytes": 13397,
+      "sha256": "df79682d3f5a6ba63eaa77bc9d1a5e452bae9725234d3a4fa573e527ace2d8ed",
+      "inputIdentity": "reconstructed-failure/exact-reconstruction/source-reconstruction.json",
+      "inputBytes": 13397,
+      "inputSHA256": "df79682d3f5a6ba63eaa77bc9d1a5e452bae9725234d3a4fa573e527ace2d8ed",
+      "encoding": "raw",
+      "role": "new source reconstruction manifest and52-module identities"
+    }
+  ],
+  "omissions": [
+    {
+      "identity": "original temporary capture/formal-review artifacts",
+      "status": "unavailable, not a privacy omission or a recovered original",
+      "ledger": "missing-originals.json"
+    },
+    {
+      "identity": "derived isolated current/reconstructed runtime module trees",
+      "status": "reproducible duplicates, not unique originals",
+      "reason": "Archived exact old/current reference-state source, reconstruction manifest, portable builder and immutableGit92 reconstruct both module trees.52module hashes retained in source-reconstruction.json."
+    },
+    {
+      "identity": "__pycache__ compiler byproducts",
+      "status": "generated reproducible cache; not research evidence"
+    },
+    {
+      "identity": "source-engine-ci.log",
+      "status": "retained durable raw diagnostic log, not missing",
+      "bytes": 207509,
+      "sha256": "dc4d8b9e3082c6268b00e850113f852be66d1af558730be198aff44691306857",
+      "reason": "Raw CI diagnostic log may contain absolute runner paths. Public source-ci.json binds its digest and verified job/count details. This is not a numerical capture."
+    }
+  ],
+  "privacy": "selected originals and decoded source wrappers scanned for private absolute paths; missing artifacts are separately listed",
+  "scope": "bounded first-substep evidence only; public witness and whole-pose-subpublic gates remain false; fullmatrix/time/material/booklet/device gates open"
+}

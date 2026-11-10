@@ -1,0 +1,11 @@
+{
+  "name": "oracle-self-test",
+  "command": [
+    "python3",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--self-test"
+  ],
+  "input": null,
+  "output": "oracle-self-test.json",
+  "exitCode": 0
+}

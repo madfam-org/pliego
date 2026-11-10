@@ -1,0 +1,2268 @@
+{
+  "schema": "pliego-state-recovery-independent-review/1",
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "integrityPassed": true,
+  "reviewOrigin": "new independent recovery review; original temporary proofs unavailable and not impersonated",
+  "originalWholeReportEquality": {
+    "proven": false,
+    "reason": "complete original raw report/digest unavailable; only partial8c30...a243 was recorded",
+    "knownFullEndpointSnapshotHashesReproduced": true
+  },
+  "checks": 2404,
+  "decodedFloat64Words": 9336,
+  "sourceFiles": 68,
+  "wholeNewRepeatBytesEqual": true,
+  "complete80vs100": {
+    "equalExceptOnlyCasesDecimalDigits": true,
+    "leavesCompared": 1948,
+    "excludedFields": 2
+  },
+  "representedAccuracy": {
+    "maximumEnergyAbsoluteErrorNJ": 1.5377302978218865e-13,
+    "maximumGradientComponentErrorMicroN": 4.691861677854737e-11,
+    "energyLimitNJ": 1e-12,
+    "gradientLimitMicroN": 1e-09
+  },
+  "oldInputBinding": {
+    "oldReportSHA256": "796a80bbe6b47c784eea03a9f3545b24780743f9180002a8c7172879d98307de",
+    "oldObservedSHA256": "1e892f80e58244130c46d2c3cd4129568c00623e02efc4f444aa5875371a4938",
+    "selection": {
+      "geometryIndex": 0,
+      "trajectoryIndex": 22,
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 3,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step"
+    },
+    "originalPublicX_Xs_XtPreserved": true,
+    "newVelocityDifferentByContract": true,
+    "originalLiteralResidualMicroN": 0.005058552080299705
+  },
+  "outcomes": [
+    {
+      "fixture": "frozen-case80-first-substep",
+      "native": {
+        "authoritative": {
+          "residualInfinityMicroN": 6.976770237088203e-07,
+          "converged": true
+        },
+        "public": {
+          "residualInfinityMicroN": 0.005058552080299705,
+          "literalForceGate": false
+        }
+      },
+      "recordedEndpointSnapshotHashReproduced": true
+    },
+    {
+      "fixture": "exact-dyadic-rigid-translation",
+      "native": {
+        "authoritative": {
+          "residualInfinityMicroN": 0.0,
+          "converged": true
+        },
+        "public": {
+          "residualInfinityMicroN": 0.0,
+          "literalForceGate": true
+        }
+      },
+      "recordedEndpointSnapshotHashReproduced": true
+    }
+  ],
+  "allRetainedEvents": {
+    "rows": [
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 1,
+        "decision": "accepted",
+        "realStepZero": false,
+        "wholePublicPositionBytesUnchanged": false,
+        "rawSHA256": {
+          "beforeU": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "beforeX": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+          "candidateU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+          "candidatePublicBeforeFinish": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+          "afterU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+          "afterX": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "63f5f28433e0ca35ab8d1e67661c09d53b38b0c14e692b43c83f1b780e68374a"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": -0.5419927849482186,
+            "slopeNJ": -1.0839855699292713,
+            "armijoRhsNJ": -0.00010839855699292712,
+            "marginNJ": 0.5418843863912257,
+            "deltaExact": {
+              "numerator": "-1816733790000099494850273678698795474144358282416854278016730457857657424459228472115527158788239715278460523591337782665938922631540973405220990758980931",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            },
+            "slopeExact": {
+              "numerator": "-55442315370334734788424768037041886443352900201854232251931089533714572977881916111025387212918471367911763532821374743824905181736075692548284056295",
+              "denominator": "51146728248377216718956089012931236753385031969422887335676427626502090568823039920051095192592252455482604439493126109519019633529459266458258243584"
+            },
+            "marginExact": {
+              "numerator": "2045051312837963070986629971295685168480882553278802832909504607511326772913834231132665449576078605127547712838998979969609475693091815430300091292952584163623078299749",
+              "denominator": "3773962424821541352241554580988268890916921220416440428376206300245624162392148852086126725177658767541468375030763844899770584629924792632561434251432696043649395326976"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 3.7810871362905346e-11,
+            "acceptedStrictRealArmijo": true,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": -0.5419927849482186,
+            "slopeNJ": -1.0839855699292713,
+            "armijoRhsNJ": -0.00010839855699292712,
+            "marginNJ": 0.5418843863912257,
+            "deltaExact": {
+              "numerator": "-5596280584680610126406255217163071639468822241194647237978648354543986539112406773365031885401443954215897628866158704262857281808825527143962872790794104341619774041825710646338215139",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            },
+            "slopeExact": {
+              "numerator": "-55442315370334734788424768037041886443352900201854232251931089533714572977881916111025387212918471367911763532821374743824905181736075692548284056295",
+              "denominator": "51146728248377216718956089012931236753385031969422887335676427626502090568823039920051095192592252455482604439493126109519019633529459266458258243584"
+            },
+            "marginExact": {
+              "numerator": "6299591618599254725121518659496025919087340032264466755282786657916536730783017780125170356546065556775473948041668339921366113921309096934062108999673600112782338979878535470153165330763541811184581",
+              "denominator": "11625342557943941447853092408151126285263758278943304850747357194011490272923363440615162726696271191552519136844222826112231852903621789272097300577283659394231404494533712367405488765749020856418304"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 3.7810871362905346e-11,
+            "acceptedStrictRealArmijo": true,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 2,
+        "decision": "accepted",
+        "realStepZero": false,
+        "wholePublicPositionBytesUnchanged": false,
+        "rawSHA256": {
+          "beforeU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+          "beforeX": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "6546e6879d91ecae5613f8640442042729cdcf2ed97ae114d7933a969f633e42"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": -6.02585529023275e-16,
+            "slopeNJ": -1.205178825685845e-15,
+            "armijoRhsNJ": -1.205178825685845e-19,
+            "marginNJ": 6.024650111407064e-16,
+            "deltaExact": {
+              "numerator": "-31559964978542661878805561700851097592935053886281360658182763300601612886895420187141444228825461188461308679370020017646794544034974069",
+              "denominator": "52374249726338269920211035149241586435466272736689036631732661889538140742474792878132321477214466514414186946040961136147476104734166288853256441430016"
+            },
+            "slopeExact": {
+              "numerator": "-504962694250924300595070811514475297039115688022295002189194911215182793729843445990152835370203305210909988486704514970079051307553348245",
+              "denominator": "418993997810706159361688281193932691483730181893512293053861295116305125939798343025058571817715732115313495568327689089179808837873330310826051531440128"
+            },
+            "marginExact": {
+              "numerator": "18625989134866163960318137993209036540516128719740231094969434604567411428463673124075255951371427567091699820444422328778681016132221912078013080962059211983",
+              "denominator": "30916300184138066757562815127455898754391418637651479989257882011612153138316483396289550132655380623699708928252017417418920629288343901245943269387736645989575846518587392"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 8.167509941046632e-11,
+            "acceptedStrictRealArmijo": true,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": -6.025855290221043e-16,
+            "slopeNJ": -1.205178825684674e-15,
+            "armijoRhsNJ": -1.2051788256846742e-19,
+            "marginNJ": 6.024650111395358e-16,
+            "deltaExact": {
+              "numerator": "-13888222308978033066104738438839514615649899515526352635701344453195965917740854649763847093194257388982862361944904269037071439903506897213374340773160079729882830659",
+              "denominator": "23047719601757280056211153161750734217306787384376668356992399029846796146922465981381721483528279820113496550298619178828781617546271786494637662597393349632729110257995846990692352"
+            },
+            "slopeExact": {
+              "numerator": "-1555490924083907082291880666787790921250601680289541343934767209707290723295457446944591851113260734454994529287535856331247956928382190718361468094904875604674181156853",
+              "denominator": "1290672297698407683147824577058041116169180093525093427991574345671420584227658094957376403077583669926355806816722674014411770582591220043699709105454027579432830174447767431478771712"
+            },
+            "marginExact": {
+              "numerator": "57375638599046073424623735701062808081136986102720289896964525682391798298114243131395053164548971201305027638493980350639851346332759746376288186582540583957833795309457666605348479292143",
+              "denominator": "95234806234676768340812533007574026528880707821103553337322350133342128315788193305519413057095853601198236769027873391511403338986469697717021086329107737757543665619220171713785763969015978855778746368"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 3.779437808630418e-11,
+            "acceptedStrictRealArmijo": true,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 3,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 4,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 5,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 6,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 7,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 8,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 9,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 10,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 11,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 12,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 13,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 14,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 15,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "frozen-case80-first-substep",
+        "iteration": 16,
+        "decision": "precision-limited-zero-step",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "beforeX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+          "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+          "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+          "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 4.747885737475455e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 7.179247878726544e-11,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 1,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 2,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 3,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 4,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 5,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 6,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 7,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 8,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 9,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 10,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 11,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 12,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 13,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 14,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 15,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      },
+      {
+        "fixture": "exact-dyadic-rigid-translation",
+        "iteration": 16,
+        "decision": "stationary-noop",
+        "realStepZero": true,
+        "wholePublicPositionBytesUnchanged": true,
+        "rawSHA256": {
+          "beforeU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "beforeX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "candidateU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "candidatePublicBeforeFinish": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "afterU": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "afterX": "41427d04a1bae5ec50c013373ca6f8e2bc07c3621169d58426909cdc5e315383",
+          "ut": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "us": "ab0c500cb4e9771f61a4d0bb09551a8c683b14cd96f421f27b602fbf31038d1c",
+          "gradient": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+        },
+        "truth": {
+          "nativeCoefficient": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          },
+          "realMass": {
+            "deltaPotentialNJ": 0.0,
+            "slopeNJ": 0.0,
+            "armijoRhsNJ": 0.0,
+            "marginNJ": 0.0,
+            "deltaExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "slopeExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "marginExact": {
+              "numerator": "0",
+              "denominator": "1"
+            },
+            "capturedFullGradientMaximumComponentErrorMicroN": 0.0,
+            "acceptedStrictRealArmijo": null,
+            "positivePotentialChange": false
+          }
+        }
+      }
+    ],
+    "counts": {
+      "accepted": 2,
+      "precision-limited-zero-step": 14,
+      "stationary-noop": 16
+    },
+    "wrongAcceptedArmijo": {
+      "nativeCoefficient": 0,
+      "realMass": 0
+    },
+    "positiveAcceptedPotential": {
+      "nativeCoefficient": 0,
+      "realMass": 0
+    },
+    "minimumAcceptedMarginNJ": {
+      "nativeCoefficient": 6.024650111407064e-16,
+      "realMass": 6.024650111395358e-16
+    },
+    "maximumCapturedFullGradientErrorMicroN": {
+      "nativeCoefficient": 8.167509941046632e-11,
+      "realMass": 7.179247878726544e-11
+    },
+    "scope": "all32 retained final search endpoints and only2 accepted updates; native represented c1 interpreted exactly; no unretained backtracks/fulltrajectory certificate"
+  },
+  "legacy": {
+    "cases": 108,
+    "allOtherFieldsExact": true,
+    "excluded": [
+      "recordedAt",
+      "source.git",
+      "source.engineFiles",
+      "source.helperSHA256"
+    ],
+    "oldSHA256": "854db764d63a5fdaa5e2c51656e529563f746712230c0229e3477caa4b0a6a46",
+    "newSHA256": "51c30376cfbbcb91970bc6ab05ee167ab638657e0e0e7d6426d75fcd5c8c1def",
+    "gates": {
+      "oracleValid": true,
+      "sourceClean": true,
+      "completeMatrix": true,
+      "fixedTopologyAcrossGrainAndPolicies": true,
+      "noTimeIntegration": true,
+      "allExtractionValid": true,
+      "centralForceIdentityObserved": true,
+      "symmetricConstitutiveAccuracy": false,
+      "allSignedEnergiesWithin1Percent": false,
+      "meshAndTopology": false,
+      "physicalStockCalibration": "not measured",
+      "interactionPerformance": "not measured"
+    }
+  },
+  "terminal": {
+    "terminalSHA256": "e649bcb582397d1ffe6e979cb7e0de0a737df97d1ea23c61847b94fbacb88e43",
+    "allSixCommandsExitZero": true,
+    "allPayloadHashesVerified": true,
+    "originalDriverFailureAttestation": "conversation observation only; original raw files missing",
+    "priorDriverExitCode": 1,
+    "newRecoveryDriverSHA256": "c0dd32602c9a7d564f14a50fda355efae585d857065f8c3f5436f1b7af16f857",
+    "legacyComparisonSHA256": "1edc6d25ed8a039bb61f74868fc4e36a1b0a47d673f18860519c4c7ccff2b775",
+    "newRecoveryRunDistinctFromOriginal": true,
+    "recordedLegacyComparison": {
+      "schema": "pliego-state-recovery-legacy/1",
+      "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+      "freshRecoveryCapture": true,
+      "cases": 108,
+      "wholeComparisonEqual": true,
+      "excluded": [
+        "recordedAt",
+        "source.git",
+        "source.engineFiles",
+        "source.helperSHA256"
+      ],
+      "otherSourceDependenciesExact": true,
+      "runtimeFiles": 52,
+      "reviewedIntegrationFiles": [
+        "xpbd/energy-search.js",
+        "xpbd/implicit.js",
+        "xpbd/pcg.js",
+        "xpbd/state.js",
+        "xpbd/world.js"
+      ],
+      "reviewedAdditions": [
+        "xpbd/accurate-membrane.js",
+        "xpbd/double-double.js",
+        "xpbd/increment-search.js",
+        "xpbd/newton.js",
+        "xpbd/orthotropic-membrane.js",
+        "xpbd/reference-state.js",
+        "xpbd/uv-reference.js"
+      ],
+      "historicalBaseline": {
+        "path": "docs/research/evidence/paper-2026-11-10/membrane-run.json",
+        "sha256": "854db764d63a5fdaa5e2c51656e529563f746712230c0229e3477caa4b0a6a46"
+      },
+      "currentReportSHA256": "51c30376cfbbcb91970bc6ab05ee167ab638657e0e0e7d6426d75fcd5c8c1def",
+      "gates": {
+        "oracleValid": true,
+        "sourceClean": true,
+        "completeMatrix": true,
+        "fixedTopologyAcrossGrainAndPolicies": true,
+        "noTimeIntegration": true,
+        "allExtractionValid": true,
+        "centralForceIdentityObserved": true,
+        "symmetricConstitutiveAccuracy": false,
+        "allSignedEnergiesWithin1Percent": false,
+        "meshAndTopology": false,
+        "physicalStockCalibration": "not measured",
+        "interactionPerformance": "not measured"
+      }
+    }
+  },
+  "retainedFalseGates": [
+    "original-public-witness",
+    "accepted-whole-public-pose-unchanged",
+    "whole-time-accuracy"
+  ],
+  "pending": [
+    "same24trajectory-state-matrix",
+    "time/amplitude/solve isolation",
+    "physical paper calibration",
+    "new-model fixed-booklet and devices",
+    "8ms interaction performance"
+  ],
+  "inputs": [
+    {
+      "file": "probe.json",
+      "bytes": 279198,
+      "sha256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243"
+    },
+    {
+      "file": "repeat.json",
+      "bytes": 279198,
+      "sha256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243"
+    },
+    {
+      "file": "oracle-80.json",
+      "bytes": 33036,
+      "sha256": "4560bf6436332a2ce0f2b8ba148a0f5ffeb8b11a5eb60231225c15e2838803c7"
+    },
+    {
+      "file": "oracle-100.json",
+      "bytes": 33038,
+      "sha256": "15f447da48e48697fa319f88b3578a815cc03882decbbfc96bbbeb4b9bffca7f"
+    },
+    {
+      "file": "historical/observed.json",
+      "bytes": 1082557,
+      "sha256": "1e892f80e58244130c46d2c3cd4129568c00623e02efc4f444aa5875371a4938"
+    },
+    {
+      "file": "historical/candidate.json.gz",
+      "bytes": 9762288,
+      "sha256": "8a4a0baa6e8bbfde9b657d0bc41b2a7aaaa4e2522b845debcb9dda6b1cbe497d"
+    },
+    {
+      "file": "historical/membrane-run.json",
+      "bytes": 8379522,
+      "sha256": "854db764d63a5fdaa5e2c51656e529563f746712230c0229e3477caa4b0a6a46"
+    },
+    {
+      "file": "legacy-controls.json",
+      "bytes": 8380531,
+      "sha256": "51c30376cfbbcb91970bc6ab05ee167ab638657e0e0e7d6426d75fcd5c8c1def"
+    },
+    {
+      "file": "pipeline-terminal.json",
+      "bytes": 5335,
+      "sha256": "e649bcb582397d1ffe6e979cb7e0de0a737df97d1ea23c61847b94fbacb88e43"
+    },
+    {
+      "file": "probe.terminal.json",
+      "bytes": 201,
+      "sha256": "c21c2266f7acc87e847df0ca5e8f68b9160cabb6b4e91abc67e4ad091aa03e21"
+    },
+    {
+      "file": "repeat.terminal.json",
+      "bytes": 203,
+      "sha256": "c659c8f6625db5414ca9086891317225bd9b3a4ad6a9325bbf6c904b86748a35"
+    },
+    {
+      "file": "oracle-self-test.terminal.json",
+      "bytes": 214,
+      "sha256": "d84206f14277c78b9e0a52330a73666bd0e7f066350faeaa4e0cc41403e2b394"
+    },
+    {
+      "file": "oracle-80.terminal.json",
+      "bytes": 215,
+      "sha256": "5bf736963bc3f5e4b4f7488640e70fb1f9ad5c0ff5364b68335c69eb22f922cc"
+    },
+    {
+      "file": "oracle-100.terminal.json",
+      "bytes": 218,
+      "sha256": "004170d0c5285af07aa60955d39500906a4c71f2cfa0518b071f58e657918dd4"
+    },
+    {
+      "file": "legacy-controls.terminal.json",
+      "bytes": 181,
+      "sha256": "7b651d750b1865b894a8fc16f82cd12bdfad2bdaac0ca7b83b5ca0778a969b1e"
+    }
+  ],
+  "reviewerSourceSHA256": "47bfabe4d7cb43dc5255b28e8c8e1059b7d5811f54363024e80679541b63efc3",
+  "scope": "read-only captured-data validation and exact rational event postprocessing; no physics/oracle CLI/producer reruns by reviewer; no broad release/exhaustion claim"
+}

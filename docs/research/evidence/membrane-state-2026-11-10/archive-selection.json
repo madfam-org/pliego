@@ -1,0 +1,268 @@
+{
+  "schema": "pliego-state-archive-selection/1",
+  "files": [
+    {
+      "input": "captures/legacy-comparison.json",
+      "output": "legacy-comparison.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/legacy-controls.json",
+      "output": "legacy-controls.json.gz",
+      "encoding": "gzip",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/legacy-controls.stderr.log",
+      "output": "legacy-controls.stderr.log",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/legacy-controls.terminal.json",
+      "output": "legacy-controls.terminal.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-100.json",
+      "output": "oracle-100.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-100.stderr.log",
+      "output": "oracle-100.stderr.log",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-100.terminal.json",
+      "output": "oracle-100.terminal.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-80.json",
+      "output": "oracle-80.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-80.stderr.log",
+      "output": "oracle-80.stderr.log",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-80.terminal.json",
+      "output": "oracle-80.terminal.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-self-test.json",
+      "output": "oracle-self-test.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-self-test.stderr.log",
+      "output": "oracle-self-test.stderr.log",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/oracle-self-test.terminal.json",
+      "output": "oracle-self-test.terminal.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/pipeline-terminal.json",
+      "output": "pipeline-terminal.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/preflight-comparison.json",
+      "output": "preflight-comparison.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/probe.json",
+      "output": "probe.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/probe.stderr.log",
+      "output": "probe.stderr.log",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/probe.terminal.json",
+      "output": "probe.terminal.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/repeat.json",
+      "output": "repeat.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/repeat.stderr.log",
+      "output": "repeat.stderr.log",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "captures/repeat.terminal.json",
+      "output": "repeat.terminal.json",
+      "encoding": "raw",
+      "role": "fresh clean-source recovery capture/terminal record"
+    },
+    {
+      "input": "run-recovery-captures.py",
+      "output": "capture-pipeline-source.json",
+      "encoding": "base64-source",
+      "role": "exact new portable recovery pipeline; original old driver unavailable"
+    },
+    {
+      "input": "source-ci.json",
+      "output": "source-ci.json",
+      "encoding": "raw",
+      "role": "fresh authoritative source-commit CI observation"
+    },
+    {
+      "input": "independent-review/recovered-state-review.json",
+      "output": "independent-recovery-review.json",
+      "encoding": "raw",
+      "role": "new independent recovery review; no impersonation of missing originals"
+    },
+    {
+      "input": "independent-review/review-recovered-state.py",
+      "output": "independent-recovery-review-source.json",
+      "encoding": "base64-source",
+      "role": "exact new independent reviewer program"
+    },
+    {
+      "input": "reconstructed-failure/reconstruct-source.py",
+      "output": "initial-reconstruction-source.json",
+      "encoding": "base64-source",
+      "role": "development inverse candidate that failed the recorded source hash"
+    },
+    {
+      "input": "reconstructed-failure/source-reconstruction.json",
+      "output": "initial-reconstruction.json",
+      "encoding": "raw",
+      "role": "preserved failed inverse-source identity check"
+    },
+    {
+      "input": "reconstructed-failure/reconstructed-reference-state.js",
+      "output": "initial-reference-state-source.json",
+      "encoding": "base64-source",
+      "role": "exact failed initial inverse candidate source"
+    },
+    {
+      "input": "reconstructed-failure/candidate-variants.json",
+      "output": "candidate-variants.json",
+      "encoding": "raw",
+      "role": "all four inverse candidate hashes, including three mismatches"
+    },
+    {
+      "input": "reconstructed-failure/reconstruct-source-v2.py",
+      "output": "reconstruct-source-v2-source.json",
+      "encoding": "base64-source",
+      "role": "exact portable inverse reconstruction matching recorded old source hash"
+    },
+    {
+      "input": "reconstructed-failure/exact-reconstruction/source-reconstruction.json",
+      "output": "source-reconstruction.json",
+      "encoding": "raw",
+      "role": "new source reconstruction manifest and52-module identities"
+    },
+    {
+      "input": "reconstructed-failure/exact-reconstruction/reconstructed-reference-state.js",
+      "output": "recovered-reference-state-source.json",
+      "encoding": "base64-source",
+      "role": "recovered old source matches full previously recordedSHA; not old complete runtime wrapper"
+    },
+    {
+      "input": "reconstructed-failure/exact-reconstruction/current-reference-state.js",
+      "output": "fixed-reference-state-source.json",
+      "encoding": "base64-source",
+      "role": "current committed fixed source"
+    },
+    {
+      "input": "reconstructed-failure/prove-restore-reconstruction.mjs",
+      "output": "restore-reconstruction-review-source.json",
+      "encoding": "base64-source",
+      "role": "new portable synthetic corruption-control reproducer"
+    },
+    {
+      "input": "reconstructed-failure/reconstructed-restore-proof.json",
+      "output": "reconstructed-restore-proof.json",
+      "encoding": "raw",
+      "role": "NEW reconstructed failure and fixed refusal proof"
+    },
+    {
+      "input": "reconstructed-failure/delivery-manifest.json",
+      "output": "reconstruction-delivery.json",
+      "encoding": "raw",
+      "role": "new reconstruction delivery and explicit historical-context limits"
+    },
+    {
+      "input": "archive-work/missing-originals.json",
+      "output": "missing-originals.json",
+      "encoding": "raw",
+      "role": "explicit missing original raw/formal evidence ledger"
+    },
+    {
+      "input": "archive-work/build-state-recovery-archive.py",
+      "output": "archive-builder-source.json",
+      "encoding": "base64-source",
+      "role": "exact new public-safe archive builder"
+    },
+    {
+      "input": "archive-work/restore-state-archive.py",
+      "output": "restore-archive-source.json",
+      "encoding": "base64-source",
+      "role": "exact portable byte restoration helper; not a physics rerun"
+    },
+    {
+      "input": "archive-work/selection-v2.json",
+      "output": "archive-selection.json",
+      "encoding": "raw",
+      "role": "explicit public archive selection, not complete recovery workspace inventory"
+    }
+  ],
+  "omissions": [
+    {
+      "identity": "original temporary capture/formal-review artifacts",
+      "status": "unavailable, not a privacy omission or a recovered original",
+      "ledger": "missing-originals.json"
+    },
+    {
+      "identity": "derived isolated current/reconstructed runtime module trees",
+      "status": "reproducible duplicates, not unique originals",
+      "reason": "Archived exact old/current reference-state source, reconstruction manifest, portable builder and immutableGit92 reconstruct both module trees.52module hashes retained in source-reconstruction.json."
+    },
+    {
+      "identity": "__pycache__ compiler byproducts",
+      "status": "generated reproducible cache; not research evidence"
+    },
+    {
+      "identity": "source-engine-ci.log",
+      "status": "retained durable raw diagnostic log, not missing",
+      "bytes": 207509,
+      "sha256": "dc4d8b9e3082c6268b00e850113f852be66d1af558730be198aff44691306857",
+      "reason": "Raw CI diagnostic log may contain absolute runner paths. Public source-ci.json binds its digest and verified job/count details. This is not a numerical capture."
+    }
+  ]
+}

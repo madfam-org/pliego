@@ -1,0 +1,12 @@
+{
+  "name": "probe",
+  "command": [
+    "node",
+    "packages/engine/bench/membrane-state-probes.mjs",
+    "--out",
+    "{capture}/probe.json"
+  ],
+  "input": null,
+  "output": null,
+  "exitCode": 0
+}

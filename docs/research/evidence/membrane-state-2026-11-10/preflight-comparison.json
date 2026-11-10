@@ -1,0 +1,44 @@
+{
+  "schema": "pliego-state-recovery-preflight/1",
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "freshRecoveryCapture": true,
+  "originalTemporaryReportsAvailable": false,
+  "originalWholeReportEqualityProven": false,
+  "rawRepeatExact": true,
+  "full80and100EqualExceptCasesDecimalDigits": true,
+  "maximumRepresentedEnergyErrorNJ": 1.5377302978218865e-13,
+  "maximumRepresentedGradientComponentErrorMicroN": 4.691861677854737e-11,
+  "predeclaredLimits": {
+    "energyNJ": 1e-12,
+    "gradientMicroN": 1e-09
+  },
+  "priorConversationRecordedTypedEndpointHashes": [
+    "9e9226e6591dc2e0f1c75c70ed35fdc266b8db5bca1a9fa1ef2a5ecf895a22cb",
+    "ff971f2ee34390bb98f026c5d6530ec97a88600b212e76f0c66a5cb21dfe4ca3"
+  ],
+  "typedEndpointHashMatches": [
+    true,
+    true
+  ],
+  "priorPartialReportDigest": {
+    "prefix": "8c30",
+    "suffix": "a243",
+    "newDigest": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243",
+    "matchingPrefixAndSuffix": true,
+    "wholeOriginalDigestUnavailable": true,
+    "scope": "partial digest is not a proof of original whole-file equality"
+  },
+  "gates": {
+    "sourceClean": true,
+    "oldWitnessExactReplay": true,
+    "allObserverAndSnapshotParity": true,
+    "actualAcceptedSubPublicUpdate": false,
+    "authoritativeWitness": true,
+    "publicWitness": false,
+    "exactControlBothGates": true,
+    "wholeTimeAccuracyAcceptance": false,
+    "physicalStockCalibration": "not measured",
+    "newModelBooklet": "not measured",
+    "interactionPerformance": "not measured"
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "schema": "pliego-state-recovery-terminal/1",
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "freshRecoveryRunCompleted": true,
+  "originalTemporaryFilesAvailable": false,
+  "originalRunNotReconstructed": true,
+  "commands": [
+    {
+      "name": "probe",
+      "command": [
+        "node",
+        "packages/engine/bench/membrane-state-probes.mjs",
+        "--out",
+        "{capture}/probe.json"
+      ],
+      "input": null,
+      "output": null,
+      "exitCode": 0
+    },
+    {
+      "name": "repeat",
+      "command": [
+        "node",
+        "packages/engine/bench/membrane-state-probes.mjs",
+        "--out",
+        "{capture}/repeat.json"
+      ],
+      "input": null,
+      "output": null,
+      "exitCode": 0
+    },
+    {
+      "name": "oracle-self-test",
+      "command": [
+        "python3",
+        "packages/engine/bench/membrane-state-precision.py",
+        "--self-test"
+      ],
+      "input": null,
+      "output": "oracle-self-test.json",
+      "exitCode": 0
+    },
+    {
+      "name": "oracle-80",
+      "command": [
+        "python3",
+        "packages/engine/bench/membrane-state-precision.py",
+        "--digits",
+        "80"
+      ],
+      "input": "probe.json",
+      "output": "oracle-80.json",
+      "exitCode": 0
+    },
+    {
+      "name": "oracle-100",
+      "command": [
+        "python3",
+        "packages/engine/bench/membrane-state-precision.py",
+        "--digits",
+        "100"
+      ],
+      "input": "probe.json",
+      "output": "oracle-100.json",
+      "exitCode": 0
+    },
+    {
+      "name": "legacy-controls",
+      "command": [
+        "node",
+        "packages/engine/bench/membrane-audit.mjs"
+      ],
+      "input": null,
+      "output": "legacy-controls.json",
+      "exitCode": 0
+    }
+  ],
+  "currentSourceClean": true,
+  "pipelineSourceSHA256": "c0dd32602c9a7d564f14a50fda355efae585d857065f8c3f5436f1b7af16f857",
+  "files": [
+    {
+      "file": "legacy-comparison.json",
+      "bytes": 1490,
+      "sha256": "1edc6d25ed8a039bb61f74868fc4e36a1b0a47d673f18860519c4c7ccff2b775"
+    },
+    {
+      "file": "legacy-controls.json",
+      "bytes": 8380531,
+      "sha256": "51c30376cfbbcb91970bc6ab05ee167ab638657e0e0e7d6426d75fcd5c8c1def"
+    },
+    {
+      "file": "legacy-controls.stderr.log",
+      "bytes": 113,
+      "sha256": "ac79367f45b94b6f6364c91317b809b569c5facffdbb65588b0df1508ec48f64"
+    },
+    {
+      "file": "legacy-controls.terminal.json",
+      "bytes": 181,
+      "sha256": "7b651d750b1865b894a8fc16f82cd12bdfad2bdaac0ca7b83b5ca0778a969b1e"
+    },
+    {
+      "file": "oracle-100.json",
+      "bytes": 33038,
+      "sha256": "15f447da48e48697fa319f88b3578a815cc03882decbbfc96bbbeb4b9bffca7f"
+    },
+    {
+      "file": "oracle-100.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "oracle-100.terminal.json",
+      "bytes": 218,
+      "sha256": "004170d0c5285af07aa60955d39500906a4c71f2cfa0518b071f58e657918dd4"
+    },
+    {
+      "file": "oracle-80.json",
+      "bytes": 33036,
+      "sha256": "4560bf6436332a2ce0f2b8ba148a0f5ffeb8b11a5eb60231225c15e2838803c7"
+    },
+    {
+      "file": "oracle-80.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "oracle-80.terminal.json",
+      "bytes": 215,
+      "sha256": "5bf736963bc3f5e4b4f7488640e70fb1f9ad5c0ff5364b68335c69eb22f922cc"
+    },
+    {
+      "file": "oracle-self-test.json",
+      "bytes": 193,
+      "sha256": "8b69debae70e6116a2ebbfd433a453390c0c07bad8b61171381404506799bbde"
+    },
+    {
+      "file": "oracle-self-test.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "oracle-self-test.terminal.json",
+      "bytes": 214,
+      "sha256": "d84206f14277c78b9e0a52330a73666bd0e7f066350faeaa4e0cc41403e2b394"
+    },
+    {
+      "file": "preflight-comparison.json",
+      "bytes": 1546,
+      "sha256": "8ca9a62d87a14477846458310450e59e99f3de0289c428f25566d7a88707eb01"
+    },
+    {
+      "file": "probe.json",
+      "bytes": 279198,
+      "sha256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243"
+    },
+    {
+      "file": "probe.stderr.log",
+      "bytes": 144,
+      "sha256": "46b1192c99ac5cde72cfdce318170e50aeb208ba20cdccd35aecd3cd4071ec37"
+    },
+    {
+      "file": "probe.terminal.json",
+      "bytes": 201,
+      "sha256": "c21c2266f7acc87e847df0ca5e8f68b9160cabb6b4e91abc67e4ad091aa03e21"
+    },
+    {
+      "file": "repeat.json",
+      "bytes": 279198,
+      "sha256": "8c30ad29645e4cd0370176e5e003bb402252a9c3a0ac1dad014f7caf2674a243"
+    },
+    {
+      "file": "repeat.stderr.log",
+      "bytes": 144,
+      "sha256": "46b1192c99ac5cde72cfdce318170e50aeb208ba20cdccd35aecd3cd4071ec37"
+    },
+    {
+      "file": "repeat.terminal.json",
+      "bytes": 203,
+      "sha256": "c659c8f6625db5414ca9086891317225bd9b3a4ad6a9325bbf6c904b86748a35"
+    }
+  ],
+  "priorDriverFailure": {
+    "evidence": "conversation-observed only; original raw driver/terminal/proof files are unavailable",
+    "exitCode": 1,
+    "reason": "final comparison paired modal24 report with legacy108 report; prior comparison-only recovery was reported successful",
+    "currentRunUsesCorrectBaseline": true
+  }
+}

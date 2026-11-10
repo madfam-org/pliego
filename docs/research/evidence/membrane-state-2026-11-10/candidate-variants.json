@@ -1,0 +1,26 @@
+[
+  {
+    "length3": true,
+    "fixedDoc": true,
+    "sha256": "ae093cb293dac4a4cadbbad0654239d5748c3c4d8ddb8659390cea56b9c0883c",
+    "matches": false
+  },
+  {
+    "length3": true,
+    "fixedDoc": false,
+    "sha256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+    "matches": true
+  },
+  {
+    "length3": false,
+    "fixedDoc": true,
+    "sha256": "7ec1e59c78a074bb2f3056d0e578f1a18f129f3937376a185bf3da35c94da46e",
+    "matches": false
+  },
+  {
+    "length3": false,
+    "fixedDoc": false,
+    "sha256": "09c7bab066f05b4ebe02b86f4b01f725e78ee15ddec26c68a06a73d56699fba6",
+    "matches": false
+  }
+]

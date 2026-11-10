@@ -9,6 +9,11 @@ accuracy while retaining 6968/7110 force failures. Better force evaluation and a
 finer state/update representation are different hypotheses; those failures do
 not prove that equilibrium is unrepresentable on the existing grid.
 
+The [first completed bounded result](membrane-state-results.md) passes the latent
+witness gate while the original public endpoint still fails. The exact control
+passes both, and the declared whole-public-pose-unchanged accepted-update gate
+remains false. Both successes and failures are retained.
+
 ## Recommendation
 
 Implementation: `World({stateCoordinates:'reference-displacement', ...})` requires
@@ -100,3 +105,17 @@ Start with one frozen near-reference failure witness plus an exactly representab
 - [Official WebAssembly numeric/vector types](https://webassembly.github.io/spec/core/syntax/types.html#number-types): f64 is IEEE double; v128 packs numeric lanes. The same-state-grid conclusion above is an inference from these representations, not a backend benchmark.
 
 Full amplitude/time/solve isolation, material calibration, bending/buckling/creases/joins/hands/contact/friction, alternative formulations/backends, independent natural left/right booklet reading with its frame fixed, actual touch/device input-to-paint and the8msphysics gate remain open. Implementation began after the previous frozen accepted pipeline finished. This phase makes no optimality or exhausted-research claim.
+
+
+## Evidence persistence after the first state experiment
+
+Accepted captures and review programs must be written first to a persistent,
+access-restricted workspace directory outside the public checkout. Temporary
+folders are scratch space, not the sole copy of accepted or failed evidence.
+Checkpoint command identity, source pin, exit status and output SHA256/lengths
+as each command finishes; freeze and independently reconstruct the lossless
+public archive before any cleanup. Missing originals must be recorded explicitly,
+and regenerated captures or reconstructed source must never be labelled as the
+original artifact without a full matching digest. The first state experiment's
+[recovery ledger](evidence/membrane-state-2026-11-10/missing-originals.json) records
+this distinction.

@@ -1,0 +1,93 @@
+{
+  "schema": "pliego-restore-reconstructed-proof/1",
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "reconstructionSourceSHA256": "23345e6acb4d946335987297a1c3b05dbcba97ee16bdf76260b95f7761a48d5b",
+  "reproducerSHA256": "30a18fc2d15a2dce5c81e342575cb51eb6c46f24eb610d2d72647f2a1595e4eb",
+  "sourceManifestSHA256": "df79682d3f5a6ba63eaa77bc9d1a5e452bae9725234d3a4fa573e527ace2d8ed",
+  "node": "v20.19.5",
+  "oldReferenceStateRecordedHashMatched": true,
+  "oldReferenceStateSHA256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+  "fixedReferenceStateSHA256": "b339bb833b207cda24e8310d8b7db46ef081f2bff962231ea4d78a42cda0c1bc",
+  "sourceFilesPerRuntime": 52,
+  "fixtureHelpers": [
+    {
+      "path": "packages/engine/bench/membrane-patch.mjs",
+      "sha256": "c36818ef3b166ccf0299045c8466adda8cd38cc1880c507f3170e141e69afc11"
+    },
+    {
+      "path": "packages/engine/test/helpers/docbuilder.js",
+      "sha256": "49d2b22ec3809245c5f4cd2f90a270ebe69842eb2088c21a6713453ed9206df5"
+    }
+  ],
+  "sourceUnchangedAcrossReproduction": true,
+  "cases": [
+    {
+      "label": "reconstructed-pre-fix",
+      "fixture": {
+        "cells": 2,
+        "grainDegrees": 31,
+        "nu12": 0.293,
+        "substeps": 4000,
+        "newtonIterations": 4
+      },
+      "mutation": {
+        "incomingTime": 1,
+        "originalGateOffLength": 1,
+        "incomingGateOffLength": 2
+      },
+      "before": {
+        "time": 0,
+        "snapshotTypedBytesSHA256": "ebbaf870c90a69919fdbb5ee5d63c6e099fb8696cf48d282fd094ba82cf46817"
+      },
+      "after": {
+        "time": 1,
+        "snapshotTypedBytesSHA256": "af627b82f2895033342c2e5b02e845ca846ff5bdd97ecf510aea199432be3725"
+      },
+      "error": {
+        "name": "RangeError",
+        "message": "offset is out of bounds"
+      },
+      "boundarySnapshotUnchanged": false,
+      "worldSubstepsRun": 0,
+      "worldFramesRun": 0,
+      "expectedFailureReproduced": true,
+      "atomicRestore": false
+    },
+    {
+      "label": "fixed-92d",
+      "fixture": {
+        "cells": 2,
+        "grainDegrees": 31,
+        "nu12": 0.293,
+        "substeps": 4000,
+        "newtonIterations": 4
+      },
+      "mutation": {
+        "incomingTime": 1,
+        "originalGateOffLength": 1,
+        "incomingGateOffLength": 2
+      },
+      "before": {
+        "time": 0,
+        "snapshotTypedBytesSHA256": "ebbaf870c90a69919fdbb5ee5d63c6e099fb8696cf48d282fd094ba82cf46817"
+      },
+      "after": {
+        "time": 0,
+        "snapshotTypedBytesSHA256": "ebbaf870c90a69919fdbb5ee5d63c6e099fb8696cf48d282fd094ba82cf46817"
+      },
+      "error": {
+        "name": "Error",
+        "message": "Reference state: invalid snapshot gateOff array"
+      },
+      "boundarySnapshotUnchanged": true,
+      "worldSubstepsRun": 0,
+      "worldFramesRun": 0,
+      "expectedFailureRefusedBeforeMutation": true,
+      "atomicRestore": true
+    }
+  ],
+  "originalProofBytesAvailable": false,
+  "originalRuntimeWrapperBytesAvailable": false,
+  "fullOldExecutionContextAttested": false,
+  "scope": "NEW preserved reproduction of the recorded corruption mechanism in a newly authored synthetic fixture. Exact old reference-state.js file hash recovered; other51 runtime modules and helpers come from immutable92d. No claim that this is the original lost proof/reproducer/input or complete historical runtime snapshot. No World.step, Newton solve or physics trajectory was run."
+}

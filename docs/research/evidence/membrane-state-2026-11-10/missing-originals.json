@@ -1,0 +1,171 @@
+{
+  "schema": "pliego-state-missing-originals/1",
+  "status": "unpublished temporary evidence unavailable before archive publication",
+  "knownCommittedSourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "committedSourceAvailable": true,
+  "originalWholeCaptureRecovered": false,
+  "originalWholeReportDigestAvailable": false,
+  "digestProvenance": "Recorded in prior chat tool/subagent observations; unavailable original bytes are not reverified by this ledger. Null means no complete digest was retained.",
+  "artifacts": [
+    {
+      "identity": "prior-probe.json",
+      "previouslyRecordedSHA256": null,
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original whole report digest was recorded only partially as 8c30\u2026a243; no whole-file equality claim can be made."
+    },
+    {
+      "identity": "prior-repeat.json",
+      "previouslyRecordedSHA256": null,
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original raw repeat unavailable; new recovery repeat is a separate experiment."
+    },
+    {
+      "identity": "prior-oracle-80.json",
+      "previouslyRecordedSHA256": null,
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original proof bytes unavailable; new 80-digit proof is separately identified."
+    },
+    {
+      "identity": "prior-oracle-100.json",
+      "previouslyRecordedSHA256": null,
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original proof bytes unavailable; new 100-digit proof is separately identified."
+    },
+    {
+      "identity": "independent-preflight-review-v2.json",
+      "previouslyRecordedSHA256": "b3dadc168b1fecb73c8ff41cf72af9267062e91050ff63b5156bed4aeda76b19",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original formal review unavailable."
+    },
+    {
+      "identity": "review-state-preflight-v2.py",
+      "previouslyRecordedSHA256": "9f5d5bfbbe6ee2252a7e730f299c84b6ae6adc8c57057f1e7fc42a189dbdf18c",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original reviewer source unavailable; new reviewer is separately frozen."
+    },
+    {
+      "identity": "independent-terminal-review.json",
+      "previouslyRecordedSHA256": "1d33c70eb4a6a9dac981261f41f6ba4d5ec82b36dcec2a138b603c5e99fc491b",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original formal terminal review unavailable."
+    },
+    {
+      "identity": "review-state-terminal.py",
+      "previouslyRecordedSHA256": "fce1f129d0c0160f29ebe2171977ce150c93561234e29c600aed0d0949a2acc6",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original reviewer source unavailable."
+    },
+    {
+      "identity": "pliego-reference-state-events-review.json",
+      "previouslyRecordedSHA256": "c4c70687b3021651e9e4152a2f085d4fdca15a4a2682ec00b4c4c85cee9c6671",
+      "previouslyRecordedBytes": 462913,
+      "originalBytesAvailable": false,
+      "scope": "Original all-event proof unavailable; new independent proof must not reuse this identity."
+    },
+    {
+      "identity": "pliego-reference-state-events-review-source.json",
+      "previouslyRecordedSHA256": "d2f8396bff02218f3bc08b0865844088404616a99e1704380a34bfed4b549f77",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original source wrapper unavailable."
+    },
+    {
+      "identity": "reviewer.py",
+      "previouslyRecordedSHA256": "8e296ab6d93f2718e2429b3dd878905fa23f803d042420bb1cfe9c7b1d2d534e",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original all-event reviewer source unavailable."
+    },
+    {
+      "identity": "independent-runtime-review.json",
+      "previouslyRecordedSHA256": "3ffe73b6fcf51d20a0944afc107e4304bca263056c6732c118fd12be7a99205d",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original runtime review unavailable."
+    },
+    {
+      "identity": "review-current-runtime.py",
+      "previouslyRecordedSHA256": "e894bfae8eaad7ec3eea360567585d37339d2c1b748d4e525f5f96d235d15453",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original runtime reviewer source unavailable."
+    },
+    {
+      "identity": "restore-failure.json",
+      "previouslyRecordedSHA256": "e4d1b88e240da9aef4d2589921e85ae9fa3a2e98c5e1203c8299245bb6f6a1eb",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original failed proof unavailable; a new reconstructed failure is separate."
+    },
+    {
+      "identity": "runtime-source-snapshot.json",
+      "previouslyRecordedSHA256": "9a1b89f69dc73736e3fc027c14b2bbe4cb6883f863e6df390524b97708af9567",
+      "previouslyRecordedBytes": 669852,
+      "originalBytesAvailable": false,
+      "scope": "Original whole runtime wrapper unavailable; exact old reference-state.js may be recovered separately by its full recorded digest."
+    },
+    {
+      "identity": "pliego-reference-state-restore-review.mjs",
+      "previouslyRecordedSHA256": "b0470d24b956bf05d49b87762ef217778b1433eaee369e572fa11f2a5b618178",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original reproducer unavailable; new reconstructed reproducer is separate."
+    },
+    {
+      "identity": "pipeline-terminal.json",
+      "previouslyRecordedSHA256": "e99c20331fe5f0c3e223dacca624d209b430a1f5a987e19a728b276ceb6d80a2",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original terminal manifest unavailable."
+    },
+    {
+      "identity": "comparison-recovery.json",
+      "previouslyRecordedSHA256": "56491ddd21af0dfa7484f9a5f667343998afac934b4dc218877e6a03fa192d20",
+      "previouslyRecordedBytes": 2444,
+      "originalBytesAvailable": false,
+      "scope": "Original comparison-only recovery proof unavailable; fresh legacy comparison is separate."
+    },
+    {
+      "identity": "pliego-state-accepted-pipeline.py",
+      "previouslyRecordedSHA256": null,
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original driver unavailable. Prior tool observation recorded exit1 after a report-type mismatch; this is not a new terminal certificate."
+    },
+    {
+      "identity": "original-six-command-terminal-records",
+      "previouslyRecordedSHA256": null,
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original raw terminal records unavailable. Prior tool observations reported six exit0 commands; new records have new identities."
+    },
+    {
+      "identity": "pliego-reference-state-runtime-prefreeze-review.json",
+      "previouslyRecordedSHA256": "8270e9f134179ab40acbfcf6d962f115ad1cc0dafc7219dbcb867ebfe90beb36",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original prefreeze source review unavailable."
+    },
+    {
+      "identity": "pliego-reference-state-runtime-prefreeze-review.md",
+      "previouslyRecordedSHA256": "1014ef14e9d0e5c9c5cb235c8db70be5e8806c5f58c9842e284a4544e6591457",
+      "previouslyRecordedBytes": null,
+      "originalBytesAvailable": false,
+      "scope": "Original prefreeze memo unavailable."
+    }
+  ],
+  "recordedEndpointSnapshotTypedBytesSHA256": {
+    "witness": "9e9226e6591dc2e0f1c75c70ed35fdc266b8db5bca1a9fa1ef2a5ecf895a22cb",
+    "exactControl": "ff971f2ee34390bb98f026c5d6530ec97a88600b212e76f0c66a5cb21dfe4ca3"
+  },
+  "recordedOldReferenceStateSHA256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+  "recoveryPolicy": "Fresh captures/proofs and newly reconstructed executions have separate identities. A match to a complete old source digest recovers only that source file; it does not recover the original runtime wrapper, proof JSON or reviewer source. Source and durable evidence storage are separate from the public repository until independently checked."
+}

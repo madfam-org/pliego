@@ -1,0 +1,11 @@
+{
+  "schema": "pliego-reference-state-source-reconstruction/1",
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "scope": "new reconstruction from immutable committed source; not the lost original executable wrapper or reviewer JSON",
+  "recordedReferenceStateSHA256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+  "currentReferenceStateSHA256": "b339bb833b207cda24e8310d8b7db46ef081f2bff962231ea4d78a42cda0c1bc",
+  "reconstructedReferenceStateSHA256": "ae093cb293dac4a4cadbbad0654239d5748c3c4d8ddb8659390cea56b9c0883c",
+  "exactRecordedSourceHashMatched": false,
+  "inverseEdits": 8,
+  "originalTemporaryWrapperAndProofAvailable": false
+}

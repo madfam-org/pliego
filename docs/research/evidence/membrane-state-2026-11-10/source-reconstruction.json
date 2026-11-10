@@ -1,0 +1,339 @@
+{
+  "schema": "pliego-reference-state-source-reconstruction/1",
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "scope": "new reconstruction from immutable committed source; not the lost original executable wrapper or reviewer JSON",
+  "recordedReferenceStateSHA256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+  "currentReferenceStateSHA256": "b339bb833b207cda24e8310d8b7db46ef081f2bff962231ea4d78a42cda0c1bc",
+  "reconstructedReferenceStateSHA256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+  "exactRecordedSourceHashMatched": true,
+  "inverseEdits": 9,
+  "originalTemporaryWrapperAndProofAvailable": false,
+  "runtimeFiles": [
+    {
+      "path": "packages/engine/src/collision/accd.js",
+      "bytes": 5024,
+      "sha256": "8f7a942c2c42591172720cc13c84eaa813ab9f4f6fe67de3c3084c4ab9ab74ae",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/barrier.js",
+      "bytes": 10315,
+      "sha256": "e6d4eae996cc0e5e970230c0ab5ae19ae4e5dbb7f72bd60fb170d139111310b4",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/bounds-tree.js",
+      "bytes": 6555,
+      "sha256": "da8895327f9d71990d1f38a0f0dd0e7592e591bd0b743f9c03b1900e77d781e3",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/distance.js",
+      "bytes": 5545,
+      "sha256": "d0cd28674bc018eb5078dea271a53c7dd2cda7d2d26cc1af562e0a6d009be2ed",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/edge-mollifier.js",
+      "bytes": 2520,
+      "sha256": "92ecfc693115252d16952ee1b6a9779d4b4c1df03e24f608b4455ac5d4b0c088",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/motion-guard.js",
+      "bytes": 4191,
+      "sha256": "efaf2861ee434db6cb19fa403ea1ec8660352b5f8ec550597e088b47e2f7d8dc",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/surface-coverage.js",
+      "bytes": 2306,
+      "sha256": "ff917c18ede134c7c13b4732f4ccb0973fb174dab13e1738a9f96b605b5dbd61",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/swept.js",
+      "bytes": 13214,
+      "sha256": "3dccfbaf62f97e9ece10edce0833351864d43a78dfae1dd19f4f586836f90718",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/wasm-bounds-code.js",
+      "bytes": 2680,
+      "sha256": "0254329b8d1304d293340ad382481ce6372489b223a46f11385768a6aeebe713",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/collision/wasm-bounds-tree.js",
+      "bytes": 6056,
+      "sha256": "56fe95de452169fcdfc5f5a02553f45eebf236092f615b491e3dfb9afcac6fef",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/constants.js",
+      "bytes": 7549,
+      "sha256": "ba82c79e86505b83e4ad3586412f6f65be287f853c8e154ccee3525a7f8384cc",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/digest.js",
+      "bytes": 4816,
+      "sha256": "6324da4ba0fbcaf606e21594a4853531c7e2d5e8c8895da8a805445b9f0559ab",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/docrules.js",
+      "bytes": 16078,
+      "sha256": "49ea71a917903cdcbcdf790fe59c0fdd88aa8a53bc79f03c97ab4bfa066080d4",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/document.js",
+      "bytes": 28637,
+      "sha256": "e7ace1a75773c01c2d723a8f1e89fd4d23a139e069c6c18fbe11684064341b3f",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/drivers.js",
+      "bytes": 20324,
+      "sha256": "386ed1e20465ad00d02ffb7dcd7c73188f3a4baf000bdd2ce85401a13e45a30c",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/fastmath.js",
+      "bytes": 2966,
+      "sha256": "f16c1dbb9ec70ac3a533b9965ef7e1d5ea579b2f9ee8eb7223fa288e87b1fe7d",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/gates.js",
+      "bytes": 4448,
+      "sha256": "23b2581a15fc63fed9e7aa95613d806e5d2edba2cb63ac45ca4a9bb7a3a493c5",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/geom.js",
+      "bytes": 5172,
+      "sha256": "e4573e28b1c086ea8517639e7f510c5ea23bd7e0d3f9d19df02467c8185ef2c3",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/index.js",
+      "bytes": 747,
+      "sha256": "649271ca75c134eddf458d839a3d2da80946887c68d0f7029f04f06c503d2844",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/keyed.js",
+      "bytes": 4978,
+      "sha256": "aa34c6332b3e155384608a51deb438d572ec8457aff248a27c9e3731adc7799f",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/kinematics/closedform.js",
+      "bytes": 4468,
+      "sha256": "efc6361b6d2a0f7e231e37b64fc897536ddbd4163440286c88c9d34671135400",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/kinematics/facetree.js",
+      "bytes": 15207,
+      "sha256": "42b1edce8af1456a1e6e5c5998dcfa7c8334aabf9f75eeb40c26ae1f7559d1af",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/kinematics/index.js",
+      "bytes": 306,
+      "sha256": "4e42195b27333b1062fcdfa69e76068f765fcb21185d692903e18713cbe82624",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/kinematics/linalg.js",
+      "bytes": 3898,
+      "sha256": "036fb00907a8e0418e5a1fce5bc10e0ab334d1676b056ab42d4b25c70cd3c011",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/kinematics/program.js",
+      "bytes": 5914,
+      "sha256": "70dcb91733dd253eebfabee88836b9301e692cd115894494c98f04c5af0508b9",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/linalg/blockchol.js",
+      "bytes": 12391,
+      "sha256": "2759ae3e4f1d787b7bbc5495210bee19d0a40d579a500e75a823a1d00ad1e46e",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/material.js",
+      "bytes": 7056,
+      "sha256": "d7967d7c20f1485d299363fc470ca8e12a9f962bae8f2b2f9f23fbd905a13f88",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/mesh.js",
+      "bytes": 21410,
+      "sha256": "354a9ecbe6276a36cdda5e659021eef263074da91bb6a8f0f1be25990b0ee8a4",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/triangulate.js",
+      "bytes": 16351,
+      "sha256": "0e29f6c96221b24077e27a5e2674344ad9e3cb9bb7e379d65ff514b08047265f",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/accurate-membrane.js",
+      "bytes": 13732,
+      "sha256": "f5c193eaa879be1f43344bfe769ed410d013b11f7b3fe03723b80edb714b3f9b",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/air.js",
+      "bytes": 3513,
+      "sha256": "889b3da6c6c46011750e0b75238177b300d62b34b0005148420d28fa571f40e4",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/contact.js",
+      "bytes": 21448,
+      "sha256": "c42e2f61431c9a7919e9ee74aa4b991b869846dfb75148b0f974c9571e704f92",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/coupled-contact.js",
+      "bytes": 10898,
+      "sha256": "cc96dd7e1d95e60e4180fe3887f1882d0f36f5eb41114135ca8685193d974ba7",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/dihedral.js",
+      "bytes": 3620,
+      "sha256": "ed0142a5a2b450029b96a4c7c0ddd0200dec60d2fb7fea143cb96d896db7377c",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/double-double.js",
+      "bytes": 3491,
+      "sha256": "6b161c4b5bca8fdaefbed484f8114af6293de67e80d944f772574db6deaffa65",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/edgecontact.js",
+      "bytes": 9014,
+      "sha256": "78cd94005c701a0eefb270b89b420b191315d1b72b1fda69628250516cde4dd5",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/energy-search.js",
+      "bytes": 4280,
+      "sha256": "34ec6e80737dd0fa0503895a7db06c49e7dc5da3d8c9331652c22fa3152b60e2",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/gates.js",
+      "bytes": 10013,
+      "sha256": "0d6ff3718e71b4574c456b138c9e8576a3476634013f431a27f050f8ce3a8aca",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/implicit.js",
+      "bytes": 13784,
+      "sha256": "63ac356ab32e1e6b40786e7fd901a804423dd5032953934ae66950b02a3e9e41",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/increment-search.js",
+      "bytes": 15242,
+      "sha256": "9e29ec1eeb764a33e7bb1fd448df98b173e921f2ccc61ace9c2e2ad4071595f4",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/joins.js",
+      "bytes": 15327,
+      "sha256": "621e4d2adcccccabac8b01db9fd2752805b7576582268d8c3b65afad18665910",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/local-contact-solve.js",
+      "bytes": 3619,
+      "sha256": "4f6777b80e61a8564a398bf6f8bb5b472d97e39b9f39994a623e15e28eb992a0",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/newton.js",
+      "bytes": 2328,
+      "sha256": "a4eab49b9ab8b46518b4d132daded8f89840950e106f7b55f77dfdb0b54aa238",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/orthotropic-membrane.js",
+      "bytes": 23926,
+      "sha256": "9face55c1023872f47e3c6014a25feecde4aa137ceb0bef397044ad59b7203e2",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/pcg.js",
+      "bytes": 10343,
+      "sha256": "d54cdd3c85da1f0f92ae793e3c621f86209c08c55fa877123cd6c9affefba10f",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/presentation.js",
+      "bytes": 4669,
+      "sha256": "185ded5508ff841fe99a6dee95c74dd1c49047a2c07eeef60e794ae0f16e5965",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/reference-state.js",
+      "bytes": 16908,
+      "sha256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+      "origin": "recorded SHA-verified inverse reconstruction"
+    },
+    {
+      "path": "packages/engine/src/xpbd/render.js",
+      "bytes": 6774,
+      "sha256": "5db389f5d41ea35de160d56ab4d36a640ffce694d8224d64c3660187afddbd3c",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/setrest.js",
+      "bytes": 1524,
+      "sha256": "7d759b2c307e4e1bed12c5995ba0b8c70cfd4ab7381834874e6047f2d2387bc4",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/state.js",
+      "bytes": 8595,
+      "sha256": "c1f76ea7d83d285d7174d24c8015f77fa2ea9e1018b5da5b6d6417f88059aeee",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/uv-reference.js",
+      "bytes": 8630,
+      "sha256": "c5657434503e64a302c4e3e1cc7bd61e4575e7574a4a4ec3d4fbe1645b6a5195",
+      "origin": "exact immutable Git blob at sourceGit"
+    },
+    {
+      "path": "packages/engine/src/xpbd/world.js",
+      "bytes": 43460,
+      "sha256": "28e3f438cc43ee391cb6ab84fcc8cddcf3605bdf1310434299fd115e90abd9f4",
+      "origin": "exact immutable Git blob at sourceGit"
+    }
+  ],
+  "runtimeFileCount": 52,
+  "fullOldExecutionContextAttested": false,
+  "attestationLimit": "The recorded one-file hash is recovered exactly; the other51 runtime modules are copied from immutable92d. The lost original52-file snapshot and its JSON serialization are not reconstructed or claimed identical.",
+  "fixtureHelpers": [
+    {
+      "path": "packages/engine/bench/membrane-patch.mjs",
+      "sha256": "c36818ef3b166ccf0299045c8466adda8cd38cc1880c507f3170e141e69afc11"
+    },
+    {
+      "path": "packages/engine/test/helpers/docbuilder.js",
+      "sha256": "49d2b22ec3809245c5f4cd2f90a270ebe69842eb2088c21a6713453ed9206df5"
+    }
+  ],
+  "reconstructionSourceSHA256": "23345e6acb4d946335987297a1c3b05dbcba97ee16bdf76260b95f7761a48d5b"
+}

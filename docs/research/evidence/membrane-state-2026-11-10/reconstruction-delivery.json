@@ -1,0 +1,91 @@
+{
+  "schema": "pliego-reconstructed-failure-delivery/1",
+  "scope": "NEW durable recovery artifacts; no repository writes or physics/World.step runs",
+  "exactOldReferenceStateHashRecovered": true,
+  "oldReferenceStateSHA256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79",
+  "fixedReferenceStateSHA256": "b339bb833b207cda24e8310d8b7db46ef081f2bff962231ea4d78a42cda0c1bc",
+  "missingOriginals": [
+    {
+      "kind": "original failed proof",
+      "recordedSHA256": "e4d1b88e240da9aef4d2589921e85ae9fa3a2e98c5e1203c8299245bb6f6a1eb",
+      "bytesRecovered": false
+    },
+    {
+      "kind": "original runtime source wrapper",
+      "recordedSHA256": "9a1b89f69dc73736e3fc027c14b2bbe4cb6883f863e6df390524b97708af9567",
+      "bytesRecovered": false
+    },
+    {
+      "kind": "original reviewer/reproducer",
+      "recordedSHA256": "b0470d24b956bf05d49b87762ef217778b1433eaee369e572fa11f2a5b618178",
+      "bytesRecovered": false
+    }
+  ],
+  "newArtifacts": [
+    {
+      "path": "reconstruct-source.py",
+      "bytes": 4911,
+      "sha256": "8afc49e6a6140799002e43ec7262d160a3c1b71053d48d9a8e158ed00e1828e2"
+    },
+    {
+      "path": "source-reconstruction.json",
+      "bytes": 676,
+      "sha256": "bab2ce59222fc0cc8ba844ca6530267a1586fb5ee40ab25a765804b6e671a0f4"
+    },
+    {
+      "path": "candidate-variants.json",
+      "bytes": 626,
+      "sha256": "a9e9a50b916090a526a44481a8a683d2268c6e58eeb3f7453f22861791d54f65"
+    },
+    {
+      "path": "reconstruct-source-v2.py",
+      "bytes": 5642,
+      "sha256": "23345e6acb4d946335987297a1c3b05dbcba97ee16bdf76260b95f7761a48d5b"
+    },
+    {
+      "path": "exact-reconstruction/source-reconstruction.json",
+      "bytes": 13397,
+      "sha256": "df79682d3f5a6ba63eaa77bc9d1a5e452bae9725234d3a4fa573e527ace2d8ed"
+    },
+    {
+      "path": "exact-reconstruction/reconstructed-reference-state.js",
+      "bytes": 16908,
+      "sha256": "9bb01075fb6b3a1145d9fe65a2af8d0d4f22474490c7ee08185e2992f2b30e79"
+    },
+    {
+      "path": "exact-reconstruction/current-reference-state.js",
+      "bytes": 18121,
+      "sha256": "b339bb833b207cda24e8310d8b7db46ef081f2bff962231ea4d78a42cda0c1bc"
+    },
+    {
+      "path": "prove-restore-reconstruction.mjs",
+      "bytes": 5112,
+      "sha256": "30a18fc2d15a2dce5c81e342575cb51eb6c46f24eb610d2d72647f2a1595e4eb"
+    },
+    {
+      "path": "reconstructed-restore-proof.json",
+      "bytes": 3434,
+      "sha256": "8aed5eba0028121d4a20bd12dcc3013c133d272e3e7eb99aef2e6af2f5ed40a0"
+    }
+  ],
+  "reconstructedFailure": {
+    "error": {
+      "name": "RangeError",
+      "message": "offset is out of bounds"
+    },
+    "beforeTime": 0,
+    "afterTime": 1,
+    "atomic": false
+  },
+  "fixedRefusal": {
+    "error": {
+      "name": "Error",
+      "message": "Reference state: invalid snapshot gateOff array"
+    },
+    "beforeTime": 0,
+    "afterTime": 0,
+    "snapshotUnchanged": true
+  },
+  "fullOldExecutionContextAttested": false,
+  "publicPrivatePathScanPassed": true
+}

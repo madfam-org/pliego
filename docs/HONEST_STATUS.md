@@ -204,8 +204,13 @@ gap. Force/time, material, fixed-booklet/device and 8 ms acceptance remain open.
 The next bounded hypothesis, [authoritative displacement state](research/membrane-state-precision.md),
 now has an opt-in implementation with separate latent/public residual gates,
 exact initial-state conversion and boundary replay/refusal checks. Its first
-frozen-witness experiment remains separate from the still-unrun 24-trajectory
-state matrix. Reader and historical defaults remain unchanged.
+frozen-witness experiment [now passes the latent gate while the original public
+gate remains failed](research/membrane-state-results.md). The exact control passes
+both; the accepted-update-with-unchanged-whole-public-pose gate remains false.
+Fresh captures retain all 32 events and new independent proofs. Missing original
+temporary records, exact recovered pre-fix source and new failure reproductions
+are distinguished explicitly in the recovery ledger.
+The 24-trajectory state matrix remains unrun. Reader and historical defaults remain unchanged.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

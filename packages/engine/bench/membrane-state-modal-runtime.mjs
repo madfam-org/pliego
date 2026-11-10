@@ -45,20 +45,23 @@ function currentStateBinding(w){
 /** First preserve the actual historical native initialization, then convert once.
  * The extra absolute context is unstepped and supplies no predictor/oracle state.
  */
-export function createStateModalWorld(patch,{stateCoordinates=MODE,...parameters}={}){
+export function createStateModalWorld(patch,{stateCoordinates=MODE,membraneCurvature='gauss-newton',...parameters}={}){
   demand(stateCoordinates===MODE,'only explicitly named reference-displacement state supported');
+  demand(['gauss-newton','exact-hessian'].includes(membraneCurvature),'named membraneCurvature required');
+  // Exact curvature is a named candidate operator only; omission keeps the historical options/parameters bytes.
+  const exact=membraneCurvature==='exact-hessian';
   const required={lineSearchArithmetic:INC,membraneArithmetic:DD,membraneReference:UV};
   for(const [key,value]of Object.entries(required))demand(parameters[key]===undefined||parameters[key]===value,'incompatible '+key);
   const old=createModalWorld(patch,{...parameters,...required}),actualX=old.world.x.slice(),actualV=old.world.v.slice();
   const originalXs=old.world.xs.slice(),originalXt=old.world.xt.slice();
-  const options={...old.options,stateCoordinates:MODE},world=new World(patch.doc,options);
+  const options={...old.options,stateCoordinates:MODE,...(exact?{membraneCurvature}:{})},world=new World(patch.doc,options);
   world.setInitialReferencePose(actualX,actualV);
   demand(same(world.x,actualX)&&same(world.v,actualV)&&same(world.xs,originalXs)&&same(world.xt,originalXt),'conversion changed actual initialization/constructor buffers');
   demand(same(world.mass,old.world.mass)&&same(world.X0,old.world.X0)&&world.dt===old.world.dt,'native reference/mass/timestep changed');
   const a=world.authoritativeState(),words=referenceWords(world);
   demand(same(a.coefficients,words),'actual native reference words changed');
   const binding=encodeStateModalVectors({x:world.x,xs:world.xs,xt:world.xt,v:world.v,u:a.u,us:a.us,ut:a.ut,x0:a.x0,mass:world.mass,h:[world.dt],initialX:a.initialX,initialU:a.initialU,initialV:a.initialV,reference:words});
-  return {...old,world,options,parameters:{...old.parameters,stateCoordinates:MODE},stateCoordinates:MODE,
+  return {...old,world,options,parameters:{...old.parameters,stateCoordinates:MODE,...(exact?{membraneCurvature}:{})},stateCoordinates:MODE,...(exact?{membraneCurvature}:{}),
     referenceCoefficients:captureModalReference({world}),referenceWords:words,initialBinding:binding,
     initialization:{unsteppedHistoricalContextConstructed:true,physicalSolvesExecuted:0,
       actualInitialX:arr(actualX),actualInitialV:arr(actualV),constructorXs:arr(originalXs),constructorXt:arr(originalXt),
@@ -189,7 +192,10 @@ export function observeStateModalWorld(context,{step=0,initial=step===0,executio
     solver:{newtonIterations:w.opts.newtonIterations,substeps:w.opts.substeps,previousPoseStart:w.opts.previousPoseStart,
       factorizations:w.factorCount,lastPublicPcgIterations:w.pcgIterations,pcgMaxIterations:K.PCG_MAX_ITER,pcgRelativeTolerance:K.PCG_RTOL,lineSearchBacktracks:w.energySearch.backtracks,lineSearchRejected:w.energySearch.rejected,
       lineSearchArithmetic:w.opts.lineSearchArithmetic,membraneArithmetic:w.opts.membraneArithmetic,membraneReference:w.opts.membraneReference,
-      stateCoordinates:MODE,membraneArithmeticIdentity:structuredClone(w.orthotropicMembrane.configuration.arithmetic),membraneReferenceIdentity:structuredClone(w.orthotropicMembrane.configuration.reference),stateIdentity:structuredClone(w._referenceIdentity),linearDirectionResiduals:null,acceptedAlphaHistory:null},
+      stateCoordinates:MODE,membraneArithmeticIdentity:structuredClone(w.orthotropicMembrane.configuration.arithmetic),membraneReferenceIdentity:structuredClone(w.orthotropicMembrane.configuration.reference),stateIdentity:structuredClone(w._referenceIdentity),linearDirectionResiduals:null,acceptedAlphaHistory:null,
+      // Exact-only receipts: requested operator, effective factor operator and every counted event.
+      ...(w._exactCurvature?{membraneCurvature:w.opts.membraneCurvature,membraneCurvatureIdentity:structuredClone(w.orthotropicMembrane.configuration.curvaturePolicy),
+        factorCurvature:w._factorState?.curvature??null,membraneCurvatureCounters:structuredClone(w._exactCurvature.counters),lastCurvatureReceipt:structuredClone(w._exactCurvature.last)}:{})},
     measurementValid:errors.length===0,errors,
     scope:'boundary observation of actual reference-displacement World; public field meanings retained, authority separate; force failure is valid diagnostic data, never a tolerance waiver'};
 }

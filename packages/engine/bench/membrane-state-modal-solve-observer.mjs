@@ -62,15 +62,32 @@ function shadowWorld(w) {
   return shadow;
 }
 
-function measure(w, startU, direction, gradient) {
+/** The operator that actually produced this iteration's direction. Gauss–Newton
+ * Worlds return null (their records keep the historical shape and wording).
+ * Exact-curvature Worlds bind the loop's own receipt: an exact direction uses
+ * exact membrane curvature; a visible fallback uses Gauss–Newton.
+ * @param {any} w @param {string} source */
+function effectiveOperator(w, source) {
+  if (w.opts.membraneCurvature !== 'exact-hessian') return null;
+  const last = w._exactCurvature?.last;
+  demand(last && ['exact-hessian', 'gauss-newton-fallback'].includes(last.direction) && last.requested === 'exact-hessian', 'exact-curvature iteration receipt unavailable');
+  demand(last.source === (source === 'pcg' ? 'pcg' : 'direct') && (source !== 'direct-after-pcg-failure' || (last.pcg && last.pcg.reason !== 'converged')), 'exact-curvature receipt does not match the inferred direction source');
+  return { requested: 'exact-hessian', operator: last.direction === 'exact-hessian' ? 'exact-hessian' : 'gauss-newton', receipt: structuredClone(last),
+    scope: 'nominal/realized defects use the operator that produced this direction; a fallback is never labelled exact' };
+}
+
+function measure(w, startU, direction, gradient, curvature = null) {
   const product = new Float64Array(gradient.length);
-  hessianTimes(shadowWorld(w), startU, direction, product, MODE);
+  if (curvature) hessianTimes(shadowWorld(w), startU, direction, product, MODE, curvature);
+  else hessianTimes(shadowWorld(w), startU, direction, product, MODE);
   const residual = Array.from(product, (x, i) => x + gradient[i]), rhsNorm = norm(gradient), residualNorm = norm(residual);
   demand(product.every(finite) && residual.every(finite) && finite(rhsNorm) && finite(residualNorm), 'nonfinite latent Hessian product/residual');
   return { direction: Array.from(direction), product: Array.from(product), residual, residualInfinity: maximum(residual),
     residualNorm, rhsNorm, relativeResidual: rhsNorm > 0 ? residualNorm / rhsNorm : residualNorm === 0 ? 0 : null,
     zeroDirection: zero(direction), coordinates: MODE,
-    equation: 'actual incremental GN H(startU)*direction + actual latent solver gradient; not final nonlinear/public force' };
+    ...(curvature ? { operator: curvature } : {}),
+    equation: curvature === 'exact-hessian' ? 'actual incremental exact-membrane-curvature H(startU)*direction + actual latent solver gradient; not final nonlinear/public force'
+      : 'actual incremental GN H(startU)*direction + actual latent solver gradient; not final nonlinear/public force' };
 }
 
 function propertyDescriptor(search, name) {
@@ -178,8 +195,12 @@ export function attachStateModalSolveObserver(context, { onIteration, retain = '
       const zeroRhsSkip = record.source === 'pcg' && record.pcgIterations === 0 && zero(gradient) && zero(nominal);
       demand(zeroRhsSkip ? same(candidate, before.startU) : candidate.every((u, i) => Object.is(u, before.startU[i] + nominal[i])), 'nominal buffer does not reconstruct actual candidate');
       record.nominalUpdateApplied = !zeroRhsSkip;
-      record.nominal = measure(w, before.startU, nominal, gradient);
-      record.realized = measure(w, before.startU, Float64Array.from(candidate, (u, i) => u - before.startU[i]), gradient);
+      const curvature = effectiveOperator(w, record.source);
+      if (curvature) record.membraneCurvature = curvature;
+      record.nominal = measure(w, before.startU, nominal, gradient, curvature?.operator ?? null);
+      record.realized = measure(w, before.startU, Float64Array.from(candidate, (u, i) => u - before.startU[i]), gradient, curvature?.operator ?? null);
+      if (curvature?.operator === 'gauss-newton') record.requestedOperatorNominal = { ...measure(w, before.startU, nominal, gradient, 'exact-hessian'),
+        scope: 'additional named diagnostic: requested exact operator against the Gauss–Newton fallback direction; not the solved-system defect' };
       record.nominal.directionArithmetic = 'actual packed native binary64 solve buffer, unpacked in native free-index order';
       record.realized.directionArithmetic = 'native binary64 candidateU-startU; exact endpoint words are bound separately';
       record.roundingDifferenceInfinity = maximum(record.realized.direction.map((u, i) => u - nominal[i]));

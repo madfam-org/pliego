@@ -4,10 +4,14 @@ Started 2026-11-09. Status: active; research and implementation are **not exhaus
 Scope: Pliego only. Owner selected both interactive reading and engineering accuracy,
 with separate acceptance gates. No merge, deployment or whole-engine GA is implied.
 
-The active next experiment is the [actual-reference membrane candidate](membrane-uv-reference.md):
-a named UV-displacement strain law, with independent accuracy and native-trajectory
-checks. Implementation validation is in progress; no new accepted trajectory results
-are claimed. Earlier failed force, material and booklet gates remain open.
+The [actual-reference membrane study](membrane-uv-reference.md) now has independent
+accuracy and trajectory evidence. It removes stored-rest stress and improves
+ideal-UV component accuracy on all 85 frozen poses, while force failures worsen
+from 6956 to 6968 of 7110 steps. Its sampled real-descent result cannot certify
+every accepted update. The next bounded hypothesis is
+[authoritative displacement state](membrane-state-precision.md), with separate
+latent and public-position residual gates. Force, material, booklet and device
+acceptance remain open; the campaign is active.
 
 ## What would count as exhausted
 

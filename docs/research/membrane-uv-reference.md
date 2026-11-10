@@ -1,7 +1,6 @@
 # Actual-reference membrane candidate
 
-Research protocol, 2026-11-10. Status: implementation and independent validation
-in progress. This is a named change of represented constitutive polynomial,
+Research protocol and results, 2026-11-10. This is a named change of represented constitutive polynomial,
 following the retained [double-double study](membrane-double-double.md). It does
 not close the paper-physics campaign, accuracy or fixed-booklet interaction gates.
 
@@ -93,6 +92,11 @@ metric with exact rational kinematics before Decimal material rotation/Q. This
 preserves real placement strain and exact UV rest without an epsilon-zero filter.
 The represented stored-coefficient target is unchanged. Original failing 80/100
 development inputs/outputs are retained separately from accepted physics runs.
+The original untracked prototype executable bytes were not archived; only its
+hash and dirty `d9efde1` provenance survive with those original outputs. Checking
+out that commit cannot recover the prototype. The repaired committed oracle and
+its exact-zero regression are reproducible; do not claim full original-program
+reproduction from the preserved failure outputs.
 
 1. Numerical controls: exact stored-rest zero over multiple grains, finite 3D
    placements and deliberately non-isometric charts; exact/GN Hessian distinction;
@@ -123,6 +127,63 @@ development inputs/outputs are retained separately from accepted physics runs.
    controls, pin source, preserve complete artifacts, and independently review
    comparisons. No accepted benchmark is produced from a dirty or changing source.
 
-Accepted results are pending. Passing element tests or exact rest is not evidence
-of all-trajectory equilibrium, full material calibration, finite-rotation accuracy,
-booklet/contact behavior, device performance, or the lowest possible abstraction.
+## Captured results and limits
+
+Clean source `d739165c2f0d72382e2882715c33275c2967fff5` produced the
+[complete preserved evidence](evidence/membrane-reference-2026-11-10/README.md).
+The five complete reports retain every original byte through deterministic gzip.
+Independent review verifies the full precision proofs, lossless inputs/reference
+constants, native inertia, literal force formula and every gain/loss. These are
+untimed research results; no performance or release acceptance follows.
+The separate [archive review](membrane-reference-archive-review.json) and
+[frozen reviewer source](membrane-reference-archive-review-source.json) verify
+all 58 archive files without adding self-referential records to the archive.
+
+All 32 rest searches have exact zero initial energy/force and reject their
+nonzero proposals. The 85 paired frozen states preserve the old DD evaluation
+bit-exactly and use identical physical inputs. New represented energy/component
+errors are at most 4.254836328836703e-13 nJ / 5.633991074030091e-11 microN,
+passing the declared 1e-12 / 1e-9 bounds. Full 80/100-digit outputs agree after
+excluding only declared precision. Independent ideal-UV elastic component error
+improves on 85/85 poses: maximum 7.20201497e-7 → 1.82664515e-10 microN.
+Energy error improves on 81, ties on two and worsens on two. Full incremental
+projected-work error improves on 62, ties on 16 and worsens on seven; its maximum
+worsens from 3.42550989e-13 to 6.20336582e-13 nJ. Native inertia is unchanged.
+Do not turn the component gain into an all-metric accuracy claim.
+
+The 24 actual trajectories retain **6968/7110 force failures**, versus 6956/7110
+for old DD: 16 steps gain and 28 regress. Every trajectory has failures; all
+refined levels 2/4/8 still fail on every poststep. Computed accepted updates
+change from 13332 to 13354, and precision-limited zero steps from 36438 to 36416,
+over the same 49770 Newton observations. Maximum normalized full discrete state
+error is 0.00043003962280945495, while continuous error reaches
+0.22305306231936597. Measurement/discrete checks pass; literal force, continuous
+agreement and whole time-accuracy acceptance remain false.
+
+Complete strict repeat and transparent-observer comparisons pass. All 108
+historical controls remain exact. The old DD baseline also reproduces all
+recorded fields of the prior `e96c592` candidate after excluding only recording
+time/source metadata. The final comparison initially used an incorrect Nov9
+baseline path; only that comparison was rerun against the correct immutable
+Nov10 file. Original captures/oracle results stayed unchanged, and completion
+provenance explicitly retains the original driver failure and recovery.
+
+All 104 retained trial-role occurrences yield 85 distinct captured events:
+64 accepted and 21 precision-limited. Independent 80/100 checks agree fully.
+Among only those 64 accepted endpoints, real Armijo failures and positive
+potential changes are zero for all three reference meanings, with both native
+stored inertia coefficients and real M/h². This does not certify all 13354
+accepted updates or establish a matched acceptance rate against the earlier
+study's different 59-event sample.
+
+The capture commit's separate CodeQL finding concerned a test fixture's path
+stat/read sequence. Its later descriptor-based test repair preserves the
+original measurement source bytes and changes no runtime, producer or oracle.
+Passing source checks does not close physical failures.
+
+The next bounded hypothesis is a separately named
+[authoritative displacement state](membrane-state-precision.md), retaining both
+latent and literal public-position residual gates. Material calibration, finite
+rotations, contact/booklet behavior, devices, 8 ms performance, broader amplitude/
+geometry and optimal-abstraction claims remain open. This reference law stays
+experimental, and the shipping reader defaults are unchanged.

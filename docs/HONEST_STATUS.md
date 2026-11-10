@@ -191,12 +191,18 @@ updates, physical rest, a resolved time limit or booklet/device performance.
 The [complete preserved evidence](research/evidence/membrane-double-double-2026-11-10/README.md)
 keeps the earlier failures and the separate diagnostic-only repair.
 
-The next [actual-reference membrane candidate](research/membrane-uv-reference.md)
-introduces an explicit UV-displacement strain law relative to the stored X0,
-with tensor rotation into material axes. Numerical validation is in progress;
-no new accepted trajectory result is claimed. Exact stored-rest zero and passing
-element derivatives cannot close force/time, physical-material or fixed-booklet
-device acceptance. The shipping reader and historical membrane defaults are unchanged.
+The [actual-reference membrane study](research/membrane-uv-reference.md) now
+records exact stored-rest zero and improved ideal-UV component accuracy on all
+85 frozen poses, with retained energy/projected-work regressions. Actual force
+failures worsen from 6956 to 6968 of 7110 steps (16 gains, 28 losses); none of
+24 trajectories is solved throughout. Strict repeat, observer parity and 108
+historical controls pass. Among only 64 retained accepted endpoints, independent
+real Armijo failures are zero; this does not certify all 13354 accepted updates.
+The [complete evidence](research/evidence/membrane-reference-2026-11-10/README.md)
+preserves failures, the comparison-path recovery and a documented prototype-source
+gap. Force/time, material, fixed-booklet/device and 8 ms acceptance remain open.
+The next bounded hypothesis is [authoritative displacement state](research/membrane-state-precision.md),
+with separate latent/public residual gates. Reader and historical defaults remain unchanged.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

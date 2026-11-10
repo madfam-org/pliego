@@ -1,0 +1,28 @@
+{
+  "allOtherRecordedFieldsExactlyEqual": true,
+  "canonicalHashes": [
+    "6ed900663637d06312c4315e5c54570c11cf2ae1275f9dd0c8d79bdc1fc20d20",
+    "6ed900663637d06312c4315e5c54570c11cf2ae1275f9dd0c8d79bdc1fc20d20"
+  ],
+  "excludedFields": [
+    "recordedAt"
+  ],
+  "failures": [],
+  "inputs": {
+    "candidate.json": {
+      "bytes": 112658406,
+      "sha256": "796a80bbe6b47c784eea03a9f3545b24780743f9180002a8c7172879d98307de"
+    },
+    "repeat.json": {
+      "bytes": 112658406,
+      "sha256": "2796a63e8df7c862a730f8299951ee9ba7cf1acd81c043db1d3a508a9cc469e0"
+    }
+  },
+  "method": "sorted canonical parsed JSON preserves numeric types and signed float zero; complete object projection only",
+  "pass": true,
+  "reviewerScriptSHA256": "ec9f4731d9994e6ec31318ff4aea16715de3ee129b8c6b32ca24aafc39bf337c",
+  "schema": "pliego-independent-uv-repeat-review/1",
+  "scope": "whole captured report replay control only; force/time failures remain inside compared data; no physics or oracle rerun",
+  "sourceGit": "d739165c2f0d72382e2882715c33275c2967fff5",
+  "sourceHashChecks": 330
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, mkdtempSync, rmSync, symlinkSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync, symlinkSync, openSync, closeSync, fstatSync, readSync, constants } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -101,8 +101,17 @@ test('complete source fingerprints and mismatch guard bind producer, tests, kern
 test('public output is exclusive0600 outside checkout and refuses existing files, symlinks and malformed CLI',()=>{
   const dir=mkdtempSync(join(tmpdir(),'pliego-reference-probes-test-'));
   try{
-    const out=join(dir,'report.json'),value={schema:'test'};writeReferenceProbeReport(out,value);assert.equal(readFileSync(out,'utf8'),JSON.stringify(value)+'\n');assert.equal(statSync(out).mode&0o777,0o600);
-    assert.throws(()=>writeReferenceProbeReport(out,{changed:true}),/EEXIST/);assert.equal(readFileSync(out,'utf8'),JSON.stringify(value)+'\n');
+    const out=join(dir,'report.json'),value={schema:'test'};writeReferenceProbeReport(out,value);
+    const expected=Buffer.from(JSON.stringify(value)+'\n'),descriptor=openSync(out,constants.O_RDONLY|constants.O_NOFOLLOW);
+    try{
+      const originalInfo=fstatSync(descriptor,{bigint:true});assert.equal(originalInfo.mode&0o777n,0o600n);
+      const checkContent=fd=>{const content=Buffer.alloc(expected.length+1),n=readSync(fd,content,0,content.length,0);assert.deepEqual(content.subarray(0,n),expected);};
+      checkContent(descriptor);assert.throws(()=>writeReferenceProbeReport(out,{changed:true}),/EEXIST/);checkContent(descriptor);
+      const reopened=openSync(out,constants.O_RDONLY|constants.O_NOFOLLOW);
+      try{
+        const currentInfo=fstatSync(reopened,{bigint:true});assert.equal(currentInfo.dev,originalInfo.dev);assert.equal(currentInfo.ino,originalInfo.ino);checkContent(reopened);
+      }finally{closeSync(reopened);}
+    }finally{closeSync(descriptor);}
     const target=join(dir,'target'),link=join(dir,'link');writeFileSync(target,'retained');symlinkSync(target,link);assert.throws(()=>writeReferenceProbeReport(link,value),/EEXIST/);assert.equal(readFileSync(target,'utf8'),'retained');
     const inside=join(dir,'inside');symlinkSync(root,inside);assert.throws(()=>writeReferenceProbeReport(join(inside,'unused-probe-test.json'),value),/outside checkout/);
     for(const args of [['--kind'],['--kind','bad'],['--unknown'],['--out'],['--kind','rest','--kind','rest']]){

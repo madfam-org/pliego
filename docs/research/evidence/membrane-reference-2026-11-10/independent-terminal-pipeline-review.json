@@ -1,0 +1,44 @@
+{
+  "checks": 146,
+  "currentPinnedCheckoutClean": true,
+  "declaredStagesAllPresent": true,
+  "executionProvenance": {
+    "allRequiredCommandsCompletedAfterComparisonRecovery": true,
+    "capturesRepeated": false,
+    "comparisonRecoverySHA256": "e8668e94901622dbf943858f85504cca29eb22009c9e42bd5340765dbc0f4165",
+    "correctedComparisonInput": {
+      "file": "docs/research/evidence/paper-2026-11-10/membrane-run.json",
+      "sha256": "854db764d63a5fdaa5e2c51656e529563f746712230c0229e3477caa4b0a6a46"
+    },
+    "originalComparisonError": "ENOENT",
+    "originalComparisonInput": "docs/research/evidence/paper-2026-11-09/membrane-run.json",
+    "originalDriverCompleted": false,
+    "runtimeOrOracleOrSourceChanged": false
+  },
+  "failures": [],
+  "legacyControls": {
+    "allOtherRecordedFieldsCanonicalByteEqual": true,
+    "canonicalCurrentSHA256": "3bdd51d0f100e584ab831249132c6f066c8ffaad2878cc2c71d87289028398f6",
+    "canonicalHistoricalSHA256": "3bdd51d0f100e584ab831249132c6f066c8ffaad2878cc2c71d87289028398f6",
+    "cases": 108,
+    "currentCompositeRawSHA256": "be8922b1d118ee8cf06d8bf99c11e17ad565212bb5d1ba26a80e6e3203c70046",
+    "excludedFields": [
+      "recordedAt",
+      "source.git",
+      "source.engineFiles",
+      "source.helperSHA256"
+    ],
+    "historicalRawSHA256": "854db764d63a5fdaa5e2c51656e529563f746712230c0229e3477caa4b0a6a46"
+  },
+  "pass": true,
+  "pipelineManifest": {
+    "bytes": 3805,
+    "file": "pipeline-complete.json",
+    "sha256": "7ee6ba740481dc83a56d44a52e2cbd87a153576944f10eb0d1b6c8cbb0bf5667",
+    "verifiedFileEntries": 28
+  },
+  "reviewerScriptSHA256": "1fdae3134986e3f696d7d40a765a9ee7030352fdb058d5597294bdbb9bfde2c3",
+  "schema": "pliego-independent-uv-terminal-pipeline-review/1",
+  "scope": "terminal execution/provenance and unchanged old-law control proof only; new24 trajectories retain strict force/time failure; no force/timestep/material/booklet/device/performance acceptance",
+  "sourceGit": "d739165c2f0d72382e2882715c33275c2967fff5"
+}

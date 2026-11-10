@@ -1,0 +1,33 @@
+{
+  "allOtherRecordedFieldsExactlyEqual": true,
+  "canonicalHashes": [
+    "f0a0c716bc1075f2c4cd7af47e7811669ed4fe910df6843cae67c3bae216fd6f",
+    "f0a0c716bc1075f2c4cd7af47e7811669ed4fe910df6843cae67c3bae216fd6f"
+  ],
+  "excludedFields": [
+    "recordedAt",
+    "protocol.instrument",
+    "protocol.perNewtonLinearDiagnostics",
+    "gates.perNewtonLinearDiagnostics",
+    "results[].trajectories[].solveObservation",
+    "results[].trajectories[].gates.perNewtonLinearDiagnostics"
+  ],
+  "failures": [],
+  "inputs": {
+    "candidate.json": {
+      "bytes": 112658406,
+      "sha256": "796a80bbe6b47c784eea03a9f3545b24780743f9180002a8c7172879d98307de"
+    },
+    "control.json": {
+      "bytes": 28103024,
+      "sha256": "b1d5cb6a81c65f1f804654af3014df5400e685a0eb25a044f13fcb41574f0e5e"
+    }
+  },
+  "method": "sorted canonical parsed JSON preserves numeric types and signed float zero; complete object projection only",
+  "pass": true,
+  "reviewerScriptSHA256": "ec9f4731d9994e6ec31318ff4aea16715de3ee129b8c6b32ca24aafc39bf337c",
+  "schema": "pliego-independent-uv-observer-review/1",
+  "scope": "whole captured report replay control only; force/time failures remain inside compared data; no physics or oracle rerun",
+  "sourceGit": "d739165c2f0d72382e2882715c33275c2967fff5",
+  "sourceHashChecks": 330
+}

@@ -1,0 +1,807 @@
+{
+  "allMeasurementAndDiscreteGatesPass": true,
+  "allTrajectoriesForceFailed": 24,
+  "changedStrictForceOutcomes": [
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.84414475876838e-05,
+      "oldResidualMicroN": 8.723486098460853e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 23,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.710299152880907e-05,
+      "oldResidualMicroN": 8.902011904865503e-05,
+      "outcome": "gained",
+      "seed": false,
+      "step": 38,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.862580580171198e-05,
+      "oldResidualMicroN": 8.75171972438693e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 42,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.40759021230042e-05,
+      "oldResidualMicroN": 8.816272020339966e-05,
+      "outcome": "gained",
+      "seed": false,
+      "step": 51,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 9.384666191181168e-05,
+      "oldResidualMicroN": 8.327968316734768e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 55,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.326135889547004e-05,
+      "oldResidualMicroN": 9.079353350216479e-05,
+      "outcome": "gained",
+      "seed": false,
+      "step": 59,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 9.652520748204552e-05,
+      "oldResidualMicroN": 8.708341920282692e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 63,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 9.596184827387333e-05,
+      "oldResidualMicroN": 8.551802602596581e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 64,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 9.581063932273537e-05,
+      "oldResidualMicroN": 8.575693937018514e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 71,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.863478433340788e-05,
+      "oldResidualMicroN": 8.717124001123011e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 72,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 9.678787318989635e-05,
+      "oldResidualMicroN": 8.756271563470364e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 74,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.249972597695887e-05,
+      "oldResidualMicroN": 9.407094330526888e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 37,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.714344585314393e-05,
+      "oldResidualMicroN": 9.899024735204875e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 38,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.861251990310848e-05,
+      "oldResidualMicroN": 8.164218161255121e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 42,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.983633597381413e-05,
+      "oldResidualMicroN": 8.326655370183289e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 49,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.226616773754358e-05,
+      "oldResidualMicroN": 0.00010062236106023192,
+      "outcome": "gained",
+      "seed": true,
+      "step": 50,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 0.00010516993643250316,
+      "oldResidualMicroN": 8.505790174240246e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 56,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.018633525352925e-05,
+      "oldResidualMicroN": 9.209006384480745e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 57,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 8.683142368681729e-05,
+      "oldResidualMicroN": 9.862432489171624e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 62,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 0.00010494253365322948,
+      "oldResidualMicroN": 6.820139242336154e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 67,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 9.09309892449528e-05,
+      "oldResidualMicroN": 6.753305206075311e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 68,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "level": 1,
+      "newResidualMicroN": 0.00010032390127889812,
+      "oldResidualMicroN": 7.276516407728195e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 70,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.844869444146752e-05,
+      "oldResidualMicroN": 8.724210783839226e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 23,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.710412657819688e-05,
+      "oldResidualMicroN": 8.902253466658294e-05,
+      "outcome": "gained",
+      "seed": false,
+      "step": 38,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.862529648467898e-05,
+      "oldResidualMicroN": 8.751648420002311e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 42,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.407719724345952e-05,
+      "oldResidualMicroN": 8.816263289190829e-05,
+      "outcome": "gained",
+      "seed": false,
+      "step": 51,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 9.384648365085013e-05,
+      "oldResidualMicroN": 8.327963587362319e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 55,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.326130819114042e-05,
+      "oldResidualMicroN": 9.079306988724056e-05,
+      "outcome": "gained",
+      "seed": false,
+      "step": 59,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 9.652594599174336e-05,
+      "oldResidualMicroN": 8.708379027666524e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 63,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 9.596257586963475e-05,
+      "oldResidualMicroN": 8.551862993044779e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 64,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 9.581072663422674e-05,
+      "oldResidualMicroN": 8.575691026635468e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 71,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.863687980920076e-05,
+      "oldResidualMicroN": 8.717121090739965e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 72,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 9.678752394393086e-05,
+      "oldResidualMicroN": 8.75621335580945e-05,
+      "outcome": "lost",
+      "seed": false,
+      "step": 74,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.249960956163704e-05,
+      "oldResidualMicroN": 9.407123434357345e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 37,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.714356226846576e-05,
+      "oldResidualMicroN": 9.899053839035332e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 38,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.861243259161711e-05,
+      "oldResidualMicroN": 8.16419196780771e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 42,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.983639418147504e-05,
+      "oldResidualMicroN": 8.326559327542782e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 49,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.226610952988267e-05,
+      "oldResidualMicroN": 0.00010062073124572635,
+      "outcome": "gained",
+      "seed": true,
+      "step": 50,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 0.00010517003829590976,
+      "oldResidualMicroN": 8.505675214109942e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 56,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.018655353225768e-05,
+      "oldResidualMicroN": 9.208975097863004e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 57,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 8.684620843268931e-05,
+      "oldResidualMicroN": 9.862489241641015e-05,
+      "outcome": "gained",
+      "seed": true,
+      "step": 62,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 0.00010494168964214623,
+      "oldResidualMicroN": 6.820086855441332e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 67,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 9.093183325603604e-05,
+      "oldResidualMicroN": 6.753316847607493e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 68,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "level": 1,
+      "newResidualMicroN": 0.00010032468708232045,
+      "oldResidualMicroN": 7.276589167304337e-05,
+      "outcome": "lost",
+      "seed": true,
+      "step": 70,
+      "strictToleranceMicroN": 8.81400646629321e-05
+    }
+  ],
+  "checks": {
+    "checks": 55025,
+    "snapshotRoles": 1104,
+    "snapshotStateWords": 119232,
+    "sourceFilesVerified": 328,
+    "trajectories": 48
+  },
+  "computedNewtonDecisions": [
+    {
+      "accepted": 13332,
+      "precision-limited-zero-step": 36438
+    },
+    {
+      "accepted": 13354,
+      "precision-limited-zero-step": 36416
+    }
+  ],
+  "continuousAndTimeAcceptance": false,
+  "failures": [],
+  "forceCounts": {
+    "gained": 16,
+    "lost": 28,
+    "newFailed": 6968,
+    "oldFailed": 6956,
+    "steps": 7110
+  },
+  "inputs": {
+    "baseline.json": {
+      "bytes": 102051736,
+      "sha256": "0ee1272f3df98dcb2ce2db0f822a1dc982f4c7e617d6e8b9368c692adf807f92"
+    },
+    "candidate.json": {
+      "bytes": 112658406,
+      "sha256": "796a80bbe6b47c784eea03a9f3545b24780743f9180002a8c7172879d98307de"
+    },
+    "trajectory-recorded-outcomes.json": {
+      "bytes": 3469,
+      "sha256": "793374f4c0b1325362b91b3505a6cddda8f4bd2ef4938ec2e2b4975d998671a5"
+    }
+  },
+  "pass": true,
+  "perTrajectory": [
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 1,
+      "lost": 0,
+      "newFailed": 79,
+      "oldFailed": 79,
+      "seed": false,
+      "steps": 79
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 1,
+      "lost": 0,
+      "newFailed": 79,
+      "oldFailed": 79,
+      "seed": true,
+      "steps": 79
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 3,
+      "level": 1,
+      "lost": 8,
+      "newFailed": 43,
+      "oldFailed": 38,
+      "seed": false,
+      "steps": 79
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 5,
+      "level": 1,
+      "lost": 6,
+      "newFailed": 44,
+      "oldFailed": 43,
+      "seed": true,
+      "steps": 79
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 3,
+      "level": 1,
+      "lost": 8,
+      "newFailed": 43,
+      "oldFailed": 38,
+      "seed": false,
+      "steps": 79
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 5,
+      "level": 1,
+      "lost": 6,
+      "newFailed": 44,
+      "oldFailed": 43,
+      "seed": true,
+      "steps": 79
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 2,
+      "lost": 0,
+      "newFailed": 158,
+      "oldFailed": 158,
+      "seed": false,
+      "steps": 158
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 2,
+      "lost": 0,
+      "newFailed": 158,
+      "oldFailed": 158,
+      "seed": true,
+      "steps": 158
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 0,
+      "level": 2,
+      "lost": 0,
+      "newFailed": 158,
+      "oldFailed": 158,
+      "seed": false,
+      "steps": 158
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 0,
+      "level": 2,
+      "lost": 0,
+      "newFailed": 158,
+      "oldFailed": 158,
+      "seed": true,
+      "steps": 158
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 0,
+      "level": 2,
+      "lost": 0,
+      "newFailed": 158,
+      "oldFailed": 158,
+      "seed": false,
+      "steps": 158
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 0,
+      "level": 2,
+      "lost": 0,
+      "newFailed": 158,
+      "oldFailed": 158,
+      "seed": true,
+      "steps": 158
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 4,
+      "lost": 0,
+      "newFailed": 316,
+      "oldFailed": 316,
+      "seed": false,
+      "steps": 316
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 4,
+      "lost": 0,
+      "newFailed": 316,
+      "oldFailed": 316,
+      "seed": true,
+      "steps": 316
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 0,
+      "level": 4,
+      "lost": 0,
+      "newFailed": 316,
+      "oldFailed": 316,
+      "seed": false,
+      "steps": 316
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 0,
+      "level": 4,
+      "lost": 0,
+      "newFailed": 316,
+      "oldFailed": 316,
+      "seed": true,
+      "steps": 316
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 0,
+      "level": 4,
+      "lost": 0,
+      "newFailed": 316,
+      "oldFailed": 316,
+      "seed": false,
+      "steps": 316
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 0,
+      "level": 4,
+      "lost": 0,
+      "newFailed": 316,
+      "oldFailed": 316,
+      "seed": true,
+      "steps": 316
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 8,
+      "lost": 0,
+      "newFailed": 632,
+      "oldFailed": 632,
+      "seed": false,
+      "steps": 632
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 1,
+      "gained": 0,
+      "level": 8,
+      "lost": 0,
+      "newFailed": 632,
+      "oldFailed": 632,
+      "seed": true,
+      "steps": 632
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 0,
+      "level": 8,
+      "lost": 0,
+      "newFailed": 632,
+      "oldFailed": 632,
+      "seed": false,
+      "steps": 632
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 4,
+      "gained": 0,
+      "level": 8,
+      "lost": 0,
+      "newFailed": 632,
+      "oldFailed": 632,
+      "seed": true,
+      "steps": 632
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 0,
+      "level": 8,
+      "lost": 0,
+      "newFailed": 632,
+      "oldFailed": 632,
+      "seed": false,
+      "steps": 632
+    },
+    {
+      "amplitude": 0.004,
+      "budget": 16,
+      "gained": 0,
+      "level": 8,
+      "lost": 0,
+      "newFailed": 632,
+      "oldFailed": 632,
+      "seed": true,
+      "steps": 632
+    }
+  ],
+  "reviewerScriptSHA256": "63eeac1bf93813ea706abc391dae77755a2b06fd0369be1e84349315ea5aead4",
+  "schema": "pliego-independent-uv-trajectory-outcomes/1",
+  "scope": [
+    "complete recorded scalar outcome comparison of24 actualWorld trajectories and7110 poststeps",
+    "all retained snapshot vector roles verified against actual stored native mass/h and literal gradient-plus-inertia formula",
+    "retained snapshots do not expose all intermediate vector states; scalar outcomes and state hashes cover every recorded poststep",
+    "computed search decisions are not a real-descent certificate; independent sampled objective proof remains separate",
+    "no force/time/material/booklet/device/performance acceptance"
+  ],
+  "sourceGit": "d739165c2f0d72382e2882715c33275c2967fff5"
+}

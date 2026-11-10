@@ -1,0 +1,1 @@
+{"sourceGit":"d739165c2f0d72382e2882715c33275c2967fff5","restCases":32,"restAccepted":0,"frozenPairs":85,"complete80vs100Equal":true,"maximumRepresentedEnergyErrorNJ":4.254836328836703e-13,"maximumRepresentedElasticComponentErrorMicroN":5.633991074030091e-11,"scope":"bounded fixed-pose gates only; no trajectory force/time/material/booklet acceptance"}

@@ -1,0 +1,1837 @@
+{
+  "checks": {
+    "checks": 359237,
+    "decodedFloat64Words": 49224,
+    "referenceElementsVerified": 744,
+    "sourceFilesVerified": 132
+  },
+  "failures": [],
+  "inputs": {
+    "frozen-old-dd-100.json": {
+      "bytes": 555464,
+      "sha256": "ea26c5c68278a52ec6c774157e8af1fb99c95a3c45c56c0db221f643b51d4f47"
+    },
+    "frozen-old-dd-80.json": {
+      "bytes": 555379,
+      "sha256": "a4d7b0d63ed9a983a72970ba3c28d5d02e7463bb5db6e35d5ec5a3a73858c730"
+    },
+    "frozen-old-dd-input.json": {
+      "bytes": 608783,
+      "sha256": "0146217d3d71a63954a801337829f69f4fae15163134c50f9e02d16c87a9b576"
+    },
+    "frozen-repeat.json": {
+      "bytes": 1509647,
+      "sha256": "d73275613d334bbc980a08cdb8ce15e1168b9ea08da1054a00e56b6daccebc3d"
+    },
+    "frozen-uv-100.json": {
+      "bytes": 598467,
+      "sha256": "d7b1036b28e2c3cb6b553064f2fcf5fa1261e8377d589145e2fc50c747697142"
+    },
+    "frozen-uv-80.json": {
+      "bytes": 598382,
+      "sha256": "3c06a9735e2f5dff624781ba17bd72c37a10e7440eac90e440829c84da09082b"
+    },
+    "frozen-uv-input.json": {
+      "bytes": 890765,
+      "sha256": "bfd7fa5f0f3f6bbf089c815ffb74056db24dee4be52a833ea8c7e1edacc798e6"
+    },
+    "frozen.json": {
+      "bytes": 1509647,
+      "sha256": "d73275613d334bbc980a08cdb8ce15e1168b9ea08da1054a00e56b6daccebc3d"
+    },
+    "pretrajectory-gates.json": {
+      "bytes": 354,
+      "sha256": "8d56b681e1614579b9da8283ab3f02a7e96ffe42c80f186c209238e1b5c1f6b0"
+    },
+    "rest-100.json": {
+      "bytes": 198389,
+      "sha256": "0d1f3acab9980ea68ba976331b50ab65b76a0fbd789a6fa3bde693c93de1e5c8"
+    },
+    "rest-80.json": {
+      "bytes": 198357,
+      "sha256": "454355953a71eaf1c0621d45127d00fac4d16de1994182e52c3e79bdc99f5fbc"
+    },
+    "rest-repeat.json": {
+      "bytes": 209281,
+      "sha256": "52ea3e121437ba67ad209f8d227721a6f2fdc5f9983f76dfccc50cc6e3c5423d"
+    },
+    "rest.json": {
+      "bytes": 209281,
+      "sha256": "52ea3e121437ba67ad209f8d227721a6f2fdc5f9983f76dfccc50cc6e3c5423d"
+    }
+  },
+  "nativeInertiaUnchangedPairs": 85,
+  "nativePhysicalPairs": 85,
+  "pairedAccuracy": {
+    "idealUV/elasticL2MicroN": {
+      "cases": 85,
+      "improved": 85,
+      "newMaximum": 2.988515153091614e-10,
+      "oldMaximum": 1.4049427625161603e-06,
+      "unchanged": 0,
+      "worsened": 0,
+      "worsenedCases": []
+    },
+    "idealUV/elasticMaximumComponentMicroN": {
+      "cases": 85,
+      "improved": 85,
+      "newMaximum": 1.8266451502714406e-10,
+      "oldMaximum": 7.202014967777545e-07,
+      "unchanged": 0,
+      "worsened": 0,
+      "worsenedCases": []
+    },
+    "idealUV/elasticProjectedSlopeAbsoluteErrorNJ": {
+      "cases": 85,
+      "improved": 68,
+      "newMaximum": 5.528480208910702e-14,
+      "oldMaximum": 3.0094324267294913e-13,
+      "unchanged": 16,
+      "worsened": 1,
+      "worsenedCases": [
+        {
+          "inputIndex": 19,
+          "newError": 2.1136369722075947e-14,
+          "oldError": 2.0496496326369614e-14
+        }
+      ]
+    },
+    "idealUV/energyAbsoluteErrorNJ": {
+      "cases": 85,
+      "improved": 81,
+      "newMaximum": 1.3835035570325536e-12,
+      "oldMaximum": 3.4482433393359033e-12,
+      "unchanged": 2,
+      "worsened": 2,
+      "worsenedCases": [
+        {
+          "inputIndex": 4,
+          "newError": 1.9310598923538615e-13,
+          "oldError": 1.4795452392946193e-13
+        },
+        {
+          "inputIndex": 47,
+          "newError": 2.912234762996636e-13,
+          "oldError": 1.6352387458680055e-13
+        }
+      ]
+    },
+    "idealUV/nativeRoundedIncrementalMaximumComponentMicroN": {
+      "cases": 85,
+      "improved": 85,
+      "newMaximum": 9.188804447716535e-09,
+      "oldMaximum": 7.231377136267645e-07,
+      "unchanged": 0,
+      "worsened": 0,
+      "worsenedCases": []
+    },
+    "idealUV/nativeRoundedIncrementalProjectedSlopeAbsoluteErrorNJ": {
+      "cases": 85,
+      "improved": 62,
+      "newMaximum": 6.203365816525603e-13,
+      "oldMaximum": 3.4255098913572053e-13,
+      "unchanged": 16,
+      "worsened": 7,
+      "worsenedCases": [
+        {
+          "inputIndex": 4,
+          "newError": 1.757743690477898e-13,
+          "oldError": 2.193021778093842e-15
+        },
+        {
+          "inputIndex": 11,
+          "newError": 3.2732676356770047e-13,
+          "oldError": 3.8234744859922546e-14
+        },
+        {
+          "inputIndex": 32,
+          "newError": 6.203365816525603e-13,
+          "oldError": 2.504473285924928e-13
+        },
+        {
+          "inputIndex": 40,
+          "newError": 1.719589013867355e-13,
+          "oldError": 6.239154476186471e-14
+        },
+        {
+          "inputIndex": 54,
+          "newError": 1.5064810229940777e-13,
+          "oldError": 2.6728050806612668e-14
+        },
+        {
+          "inputIndex": 68,
+          "newError": 1.9468025640776285e-13,
+          "oldError": 4.6184336703250666e-14
+        },
+        {
+          "inputIndex": 75,
+          "newError": 3.545117947763727e-13,
+          "oldError": 3.4255098913572053e-13
+        }
+      ]
+    },
+    "representedDistinctLaws/elasticL2MicroN": {
+      "cases": 85,
+      "improved": 29,
+      "newMaximum": 7.639892700553084e-11,
+      "oldMaximum": 7.498026829865197e-11,
+      "unchanged": 0,
+      "worsened": 56,
+      "worsenedCases": [
+        {
+          "inputIndex": 0,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 2,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 5,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 6,
+          "newError": 1.6294682614292096e-11,
+          "oldError": 1.1808787239702521e-11
+        },
+        {
+          "inputIndex": 7,
+          "newError": 5.626276642938483e-11,
+          "oldError": 4.8208786924373654e-11
+        },
+        {
+          "inputIndex": 8,
+          "newError": 3.699037333311552e-11,
+          "oldError": 3.188009671949489e-11
+        },
+        {
+          "inputIndex": 9,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 11,
+          "newError": 4.469638263556184e-12,
+          "oldError": 3.6456995748196074e-12
+        },
+        {
+          "inputIndex": 13,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 14,
+          "newError": 4.397598637903047e-12,
+          "oldError": 2.4975937843425424e-12
+        },
+        {
+          "inputIndex": 17,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 21,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 22,
+          "newError": 5.5451788071598445e-11,
+          "oldError": 5.411205281721697e-11
+        },
+        {
+          "inputIndex": 23,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 26,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 27,
+          "newError": 6.2477613587373275e-12,
+          "oldError": 6.0247915391856304e-12
+        },
+        {
+          "inputIndex": 29,
+          "newError": 6.334111865309338e-11,
+          "oldError": 5.4755155748346734e-11
+        },
+        {
+          "inputIndex": 30,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 31,
+          "newError": 1.686153873583376e-11,
+          "oldError": 1.5400533893408292e-11
+        },
+        {
+          "inputIndex": 33,
+          "newError": 6.334111865309338e-11,
+          "oldError": 5.4755155748346734e-11
+        },
+        {
+          "inputIndex": 34,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 37,
+          "newError": 6.334111865309338e-11,
+          "oldError": 5.4755155748346734e-11
+        },
+        {
+          "inputIndex": 38,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 40,
+          "newError": 5.146358383397192e-12,
+          "oldError": 4.758047541066558e-12
+        },
+        {
+          "inputIndex": 41,
+          "newError": 6.334111865309338e-11,
+          "oldError": 5.4755155748346734e-11
+        },
+        {
+          "inputIndex": 42,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 43,
+          "newError": 7.137560093471343e-11,
+          "oldError": 5.2580963727570393e-11
+        },
+        {
+          "inputIndex": 45,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 46,
+          "newError": 6.25091977753782e-11,
+          "oldError": 5.283775814447918e-11
+        },
+        {
+          "inputIndex": 48,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 49,
+          "newError": 9.747904719610681e-12,
+          "oldError": 7.87941527316127e-12
+        },
+        {
+          "inputIndex": 50,
+          "newError": 6.070873874908407e-11,
+          "oldError": 5.48771874002399e-11
+        },
+        {
+          "inputIndex": 52,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 54,
+          "newError": 2.017495971946577e-12,
+          "oldError": 1.6086435992505285e-12
+        },
+        {
+          "inputIndex": 56,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 57,
+          "newError": 3.34831997712362e-11,
+          "oldError": 3.232360327004411e-11
+        },
+        {
+          "inputIndex": 59,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 61,
+          "newError": 2.8394366367442968e-11,
+          "oldError": 2.7647411399338583e-11
+        },
+        {
+          "inputIndex": 63,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 64,
+          "newError": 6.914554378173424e-11,
+          "oldError": 3.4025564991856455e-11
+        },
+        {
+          "inputIndex": 65,
+          "newError": 6.947628492015217e-11,
+          "oldError": 4.788341046977062e-11
+        },
+        {
+          "inputIndex": 66,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 67,
+          "newError": 7.580738768585588e-11,
+          "oldError": 5.065133964538779e-11
+        },
+        {
+          "inputIndex": 68,
+          "newError": 3.653941188457539e-11,
+          "oldError": 2.7244415070171493e-11
+        },
+        {
+          "inputIndex": 69,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 70,
+          "newError": 3.7838529101945254e-11,
+          "oldError": 2.2639424217655368e-11
+        },
+        {
+          "inputIndex": 71,
+          "newError": 6.174556807054878e-11,
+          "oldError": 4.204996925561618e-11
+        },
+        {
+          "inputIndex": 72,
+          "newError": 7.639892700553084e-11,
+          "oldError": 4.74984205913606e-11
+        },
+        {
+          "inputIndex": 73,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 74,
+          "newError": 1.1623263470386896e-12,
+          "oldError": 9.365441701685343e-13
+        },
+        {
+          "inputIndex": 75,
+          "newError": 4.680621557528568e-13,
+          "oldError": 3.916587836176658e-13
+        },
+        {
+          "inputIndex": 76,
+          "newError": 7.639892700553084e-11,
+          "oldError": 4.74984205913606e-11
+        },
+        {
+          "inputIndex": 77,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 80,
+          "newError": 7.639892700553084e-11,
+          "oldError": 4.74984205913606e-11
+        },
+        {
+          "inputIndex": 81,
+          "newError": 6.04694969181663e-11,
+          "oldError": 5.184889043253721e-11
+        },
+        {
+          "inputIndex": 84,
+          "newError": 7.639892700553084e-11,
+          "oldError": 4.74984205913606e-11
+        }
+      ]
+    },
+    "representedDistinctLaws/elasticMaximumComponentMicroN": {
+      "cases": 85,
+      "improved": 26,
+      "newMaximum": 5.633991074030091e-11,
+      "oldMaximum": 4.619013004137758e-11,
+      "unchanged": 0,
+      "worsened": 59,
+      "worsenedCases": [
+        {
+          "inputIndex": 0,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 2,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 5,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 6,
+          "newError": 1.1343365757589498e-11,
+          "oldError": 6.542524115934635e-12
+        },
+        {
+          "inputIndex": 7,
+          "newError": 2.8874157346367126e-11,
+          "oldError": 2.80023144779661e-11
+        },
+        {
+          "inputIndex": 8,
+          "newError": 2.259591162215396e-11,
+          "oldError": 2.0626866989876416e-11
+        },
+        {
+          "inputIndex": 9,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 11,
+          "newError": 3.021029995285736e-12,
+          "oldError": 2.0888011524343118e-12
+        },
+        {
+          "inputIndex": 13,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 14,
+          "newError": 3.3224055785997463e-12,
+          "oldError": 1.1680690872736485e-12
+        },
+        {
+          "inputIndex": 17,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 21,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 23,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 25,
+          "newError": 2.0157352710513163e-11,
+          "oldError": 1.5865291933266492e-11
+        },
+        {
+          "inputIndex": 26,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 27,
+          "newError": 4.677834039013378e-12,
+          "oldError": 2.601287186840929e-12
+        },
+        {
+          "inputIndex": 29,
+          "newError": 5.418477234120166e-11,
+          "oldError": 2.6847549605518765e-11
+        },
+        {
+          "inputIndex": 30,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 31,
+          "newError": 1.161393984061424e-11,
+          "oldError": 7.230244992936546e-12
+        },
+        {
+          "inputIndex": 32,
+          "newError": 6.135773289973757e-12,
+          "oldError": 5.398611456274745e-12
+        },
+        {
+          "inputIndex": 33,
+          "newError": 5.418477234120166e-11,
+          "oldError": 2.6847549605518765e-11
+        },
+        {
+          "inputIndex": 34,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 37,
+          "newError": 5.418477234120166e-11,
+          "oldError": 2.6847549605518765e-11
+        },
+        {
+          "inputIndex": 38,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 41,
+          "newError": 5.418477234120166e-11,
+          "oldError": 2.6847549605518765e-11
+        },
+        {
+          "inputIndex": 42,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 43,
+          "newError": 5.1150340697496905e-11,
+          "oldError": 2.6365512864080295e-11
+        },
+        {
+          "inputIndex": 45,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 46,
+          "newError": 3.972464445360485e-11,
+          "oldError": 2.3733511544447774e-11
+        },
+        {
+          "inputIndex": 48,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 49,
+          "newError": 6.839492981289975e-12,
+          "oldError": 3.407246111005975e-12
+        },
+        {
+          "inputIndex": 50,
+          "newError": 2.907568590018464e-11,
+          "oldError": 2.589917509453546e-11
+        },
+        {
+          "inputIndex": 51,
+          "newError": 3.592455690529387e-11,
+          "oldError": 2.2110163907880407e-11
+        },
+        {
+          "inputIndex": 52,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 54,
+          "newError": 1.605259751881199e-12,
+          "oldError": 8.502158378262987e-13
+        },
+        {
+          "inputIndex": 55,
+          "newError": 3.592455690529387e-11,
+          "oldError": 2.2110163907880407e-11
+        },
+        {
+          "inputIndex": 56,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 57,
+          "newError": 2.7378255256017218e-11,
+          "oldError": 1.9238793952738022e-11
+        },
+        {
+          "inputIndex": 58,
+          "newError": 3.592455690529387e-11,
+          "oldError": 2.2110163907880407e-11
+        },
+        {
+          "inputIndex": 59,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 61,
+          "newError": 1.3114116909238563e-11,
+          "oldError": 1.287727385924365e-11
+        },
+        {
+          "inputIndex": 62,
+          "newError": 3.592455690529387e-11,
+          "oldError": 2.2110163907880407e-11
+        },
+        {
+          "inputIndex": 63,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 64,
+          "newError": 5.2699951926353125e-11,
+          "oldError": 1.7915719480316105e-11
+        },
+        {
+          "inputIndex": 65,
+          "newError": 4.7768869645874726e-11,
+          "oldError": 2.8250727601499888e-11
+        },
+        {
+          "inputIndex": 66,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 67,
+          "newError": 5.633991074030091e-11,
+          "oldError": 2.8321261112172e-11
+        },
+        {
+          "inputIndex": 68,
+          "newError": 2.7258343390340018e-11,
+          "oldError": 1.2582243160626918e-11
+        },
+        {
+          "inputIndex": 69,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 70,
+          "newError": 2.5621389947742644e-11,
+          "oldError": 1.202751125244315e-11
+        },
+        {
+          "inputIndex": 71,
+          "newError": 3.0176794804265606e-11,
+          "oldError": 2.2935939838071934e-11
+        },
+        {
+          "inputIndex": 72,
+          "newError": 5.5175850341598644e-11,
+          "oldError": 2.7612373079329834e-11
+        },
+        {
+          "inputIndex": 73,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 74,
+          "newError": 6.922838741940523e-13,
+          "oldError": 5.711015635361096e-13
+        },
+        {
+          "inputIndex": 76,
+          "newError": 5.5175850341598644e-11,
+          "oldError": 2.7612373079329834e-11
+        },
+        {
+          "inputIndex": 77,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 80,
+          "newError": 5.5175850341598644e-11,
+          "oldError": 2.7612373079329834e-11
+        },
+        {
+          "inputIndex": 81,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 84,
+          "newError": 5.5175850341598644e-11,
+          "oldError": 2.7612373079329834e-11
+        }
+      ]
+    },
+    "representedDistinctLaws/elasticProjectedSlopeAbsoluteErrorNJ": {
+      "cases": 85,
+      "improved": 51,
+      "newMaximum": 2.6169518073344143e-15,
+      "oldMaximum": 5.660162579784252e-15,
+      "unchanged": 16,
+      "worsened": 18,
+      "worsenedCases": [
+        {
+          "inputIndex": 1,
+          "newError": 2.8575456949444066e-16,
+          "oldError": 1.9197737575975945e-16
+        },
+        {
+          "inputIndex": 3,
+          "newError": 1.202729045082742e-16,
+          "oldError": 6.533153622594377e-17
+        },
+        {
+          "inputIndex": 10,
+          "newError": 1.9713545178009974e-22,
+          "oldError": 1.8792335847310117e-22
+        },
+        {
+          "inputIndex": 14,
+          "newError": 1.4186603317720358e-24,
+          "oldError": 4.717650334006742e-25
+        },
+        {
+          "inputIndex": 22,
+          "newError": 1.9514315970482198e-16,
+          "oldError": 1.22779790151296e-16
+        },
+        {
+          "inputIndex": 24,
+          "newError": 2.569019260829551e-17,
+          "oldError": 9.927511520755812e-18
+        },
+        {
+          "inputIndex": 25,
+          "newError": 2.6169518073344143e-15,
+          "oldError": 6.80453121997749e-16
+        },
+        {
+          "inputIndex": 27,
+          "newError": 8.632054084124378e-25,
+          "oldError": 7.882931080698869e-25
+        },
+        {
+          "inputIndex": 43,
+          "newError": 2.751575729158572e-17,
+          "oldError": 3.126846494593282e-20
+        },
+        {
+          "inputIndex": 46,
+          "newError": 6.061320580754211e-17,
+          "oldError": 3.622541290401096e-17
+        },
+        {
+          "inputIndex": 54,
+          "newError": 4.278464804785535e-17,
+          "oldError": 1.4592776234899492e-17
+        },
+        {
+          "inputIndex": 60,
+          "newError": 1.0456943724733006e-25,
+          "oldError": 6.644546320102133e-26
+        },
+        {
+          "inputIndex": 64,
+          "newError": 2.3192346084618427e-17,
+          "oldError": 5.904639015756274e-18
+        },
+        {
+          "inputIndex": 67,
+          "newError": 3.995369428663246e-17,
+          "oldError": 5.480187814871083e-19
+        },
+        {
+          "inputIndex": 71,
+          "newError": 1.6902821619984875e-25,
+          "oldError": 1.438247570533442e-25
+        },
+        {
+          "inputIndex": 74,
+          "newError": 7.311350269280955e-26,
+          "oldError": 1.1827454670673807e-26
+        },
+        {
+          "inputIndex": 75,
+          "newError": 1.1748015309125872e-17,
+          "oldError": 6.981543601401104e-18
+        },
+        {
+          "inputIndex": 78,
+          "newError": 2.4491597299997094e-18,
+          "oldError": 3.017466165531964e-19
+        }
+      ]
+    },
+    "representedDistinctLaws/energyAbsoluteErrorNJ": {
+      "cases": 85,
+      "improved": 25,
+      "newMaximum": 4.254836328836703e-13,
+      "oldMaximum": 4.087723671311898e-13,
+      "unchanged": 0,
+      "worsened": 60,
+      "worsenedCases": [
+        {
+          "inputIndex": 0,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 2,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 4,
+          "newError": 3.5660939666617686e-14,
+          "oldError": 2.1359153083453703e-14
+        },
+        {
+          "inputIndex": 5,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 8,
+          "newError": 1.967130978651094e-13,
+          "oldError": 1.6138692265203995e-13
+        },
+        {
+          "inputIndex": 9,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 11,
+          "newError": 8.079803136483362e-16,
+          "oldError": 7.212660726946022e-16
+        },
+        {
+          "inputIndex": 12,
+          "newError": 8.490833847327928e-15,
+          "oldError": 7.197351896521946e-15
+        },
+        {
+          "inputIndex": 13,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 15,
+          "newError": 1.6870139491720152e-13,
+          "oldError": 3.439531044066894e-15
+        },
+        {
+          "inputIndex": 16,
+          "newError": 1.978532000431525e-13,
+          "oldError": 9.752879500654568e-14
+        },
+        {
+          "inputIndex": 17,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 18,
+          "newError": 3.777346038836409e-16,
+          "oldError": 9.063669680912387e-17
+        },
+        {
+          "inputIndex": 19,
+          "newError": 3.345129405084325e-15,
+          "oldError": 1.1686727135485164e-17
+        },
+        {
+          "inputIndex": 20,
+          "newError": 1.978532000431525e-13,
+          "oldError": 9.752879500654568e-14
+        },
+        {
+          "inputIndex": 21,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 23,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 24,
+          "newError": 2.0050706059575161e-13,
+          "oldError": 1.995566619174141e-13
+        },
+        {
+          "inputIndex": 25,
+          "newError": 5.3822591582299026e-14,
+          "oldError": 8.36189328435685e-15
+        },
+        {
+          "inputIndex": 26,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 27,
+          "newError": 2.0431739579550482e-15,
+          "oldError": 1.2032910075704992e-15
+        },
+        {
+          "inputIndex": 30,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 32,
+          "newError": 2.6418534925352893e-14,
+          "oldError": 1.6699523739900854e-14
+        },
+        {
+          "inputIndex": 34,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 35,
+          "newError": 4.325413709325272e-16,
+          "oldError": 3.8966824158392926e-16
+        },
+        {
+          "inputIndex": 36,
+          "newError": 1.206378509177306e-16,
+          "oldError": 5.4628299256657846e-17
+        },
+        {
+          "inputIndex": 38,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 40,
+          "newError": 1.798720925344432e-15,
+          "oldError": 1.507712795733878e-15
+        },
+        {
+          "inputIndex": 42,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 44,
+          "newError": 2.229784337009801e-13,
+          "oldError": 1.1164923438177472e-13
+        },
+        {
+          "inputIndex": 45,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 46,
+          "newError": 3.0176543555094723e-13,
+          "oldError": 1.968794565592748e-13
+        },
+        {
+          "inputIndex": 48,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 51,
+          "newError": 4.212410315949285e-13,
+          "oldError": 1.4879255238648223e-13
+        },
+        {
+          "inputIndex": 52,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 53,
+          "newError": 1.9635668279338544e-17,
+          "oldError": 1.373676270153276e-17
+        },
+        {
+          "inputIndex": 55,
+          "newError": 4.212410315949285e-13,
+          "oldError": 1.4879255238648223e-13
+        },
+        {
+          "inputIndex": 56,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 58,
+          "newError": 4.212410315949285e-13,
+          "oldError": 1.4879255238648223e-13
+        },
+        {
+          "inputIndex": 59,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 60,
+          "newError": 1.9902066903523017e-17,
+          "oldError": 1.3015179438685786e-18
+        },
+        {
+          "inputIndex": 61,
+          "newError": 2.1367419369752054e-13,
+          "oldError": 1.934897293771434e-13
+        },
+        {
+          "inputIndex": 62,
+          "newError": 4.212410315949285e-13,
+          "oldError": 1.4879255238648223e-13
+        },
+        {
+          "inputIndex": 63,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 64,
+          "newError": 4.254836328836703e-13,
+          "oldError": 1.0544603494735961e-13
+        },
+        {
+          "inputIndex": 65,
+          "newError": 3.460199359427579e-13,
+          "oldError": 2.9254658674224324e-13
+        },
+        {
+          "inputIndex": 66,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 67,
+          "newError": 3.8301588356693175e-13,
+          "oldError": 1.3331839512227788e-13
+        },
+        {
+          "inputIndex": 68,
+          "newError": 3.001752933677561e-14,
+          "oldError": 3.8275690064997525e-15
+        },
+        {
+          "inputIndex": 69,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 70,
+          "newError": 5.553810332931701e-14,
+          "oldError": 1.942188511338018e-14
+        },
+        {
+          "inputIndex": 72,
+          "newError": 2.804612021062013e-13,
+          "oldError": 6.125763061764508e-14
+        },
+        {
+          "inputIndex": 73,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 76,
+          "newError": 2.804612021062013e-13,
+          "oldError": 6.125763061764508e-14
+        },
+        {
+          "inputIndex": 77,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 79,
+          "newError": 2.99095081311791e-13,
+          "oldError": 2.1177595044720827e-13
+        },
+        {
+          "inputIndex": 80,
+          "newError": 2.804612021062013e-13,
+          "oldError": 6.125763061764508e-14
+        },
+        {
+          "inputIndex": 81,
+          "newError": 3.3814816811665034e-13,
+          "oldError": 2.288739680757557e-13
+        },
+        {
+          "inputIndex": 82,
+          "newError": 3.8067699324599127e-19,
+          "oldError": 2.9132573206576725e-20
+        },
+        {
+          "inputIndex": 84,
+          "newError": 2.804612021062013e-13,
+          "oldError": 6.125763061764508e-14
+        }
+      ]
+    },
+    "representedDistinctLaws/nativeRoundedIncrementalMaximumComponentMicroN": {
+      "cases": 85,
+      "improved": 29,
+      "newMaximum": 9.18941897503354e-09,
+      "oldMaximum": 9.19009327289724e-09,
+      "unchanged": 0,
+      "worsened": 56,
+      "worsenedCases": [
+        {
+          "inputIndex": 0,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 2,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 5,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 7,
+          "newError": 2.8874157346367126e-11,
+          "oldError": 2.80023144779661e-11
+        },
+        {
+          "inputIndex": 8,
+          "newError": 8.198604538917151e-11,
+          "oldError": 8.001700075689396e-11
+        },
+        {
+          "inputIndex": 9,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 11,
+          "newError": 8.412841958297621e-10,
+          "oldError": 8.318421117491153e-10
+        },
+        {
+          "inputIndex": 12,
+          "newError": 2.8099658637028257e-11,
+          "oldError": 2.0927825506646504e-11
+        },
+        {
+          "inputIndex": 13,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 17,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 18,
+          "newError": 6.257220364684387e-12,
+          "oldError": 3.071014319045184e-12
+        },
+        {
+          "inputIndex": 19,
+          "newError": 9.894944837399035e-10,
+          "oldError": 9.660976247450858e-10
+        },
+        {
+          "inputIndex": 21,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 23,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 26,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 30,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 34,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 35,
+          "newError": 2.6127416708977858e-12,
+          "oldError": 2.1697993759263602e-12
+        },
+        {
+          "inputIndex": 38,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 39,
+          "newError": 7.606769293577448e-12,
+          "oldError": 3.4486789692290242e-12
+        },
+        {
+          "inputIndex": 40,
+          "newError": 1.3155824728213182e-09,
+          "oldError": 1.2990933211236204e-09
+        },
+        {
+          "inputIndex": 42,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 43,
+          "newError": 5.1150340697496905e-11,
+          "oldError": 2.6365512864080295e-11
+        },
+        {
+          "inputIndex": 45,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 46,
+          "newError": 5.422179907143043e-11,
+          "oldError": 4.5363111143065926e-11
+        },
+        {
+          "inputIndex": 47,
+          "newError": 3.6166506176068343e-09,
+          "oldError": 3.5280857752694763e-09
+        },
+        {
+          "inputIndex": 48,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 49,
+          "newError": 1.0933757350346302e-11,
+          "oldError": 9.004344633324013e-12
+        },
+        {
+          "inputIndex": 50,
+          "newError": 2.907568590018464e-11,
+          "oldError": 2.589917509453546e-11
+        },
+        {
+          "inputIndex": 51,
+          "newError": 1.1742201357105666e-10,
+          "oldError": 7.012715883332292e-11
+        },
+        {
+          "inputIndex": 52,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 55,
+          "newError": 1.1742201357105666e-10,
+          "oldError": 7.012715883332292e-11
+        },
+        {
+          "inputIndex": 56,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 57,
+          "newError": 2.7378255256017218e-11,
+          "oldError": 1.9238793952738022e-11
+        },
+        {
+          "inputIndex": 58,
+          "newError": 1.1742201357105666e-10,
+          "oldError": 7.012715883332292e-11
+        },
+        {
+          "inputIndex": 59,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 60,
+          "newError": 6.327655739039516e-13,
+          "oldError": 4.475280233619418e-13
+        },
+        {
+          "inputIndex": 61,
+          "newError": 6.68602814103695e-11,
+          "oldError": 6.480997005630315e-11
+        },
+        {
+          "inputIndex": 62,
+          "newError": 1.1742201357105666e-10,
+          "oldError": 7.012715883332292e-11
+        },
+        {
+          "inputIndex": 63,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 64,
+          "newError": 5.2699951926353125e-11,
+          "oldError": 1.7915719480316105e-11
+        },
+        {
+          "inputIndex": 65,
+          "newError": 4.7768869645874726e-11,
+          "oldError": 2.8250727601499888e-11
+        },
+        {
+          "inputIndex": 66,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 69,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 70,
+          "newError": 2.5621389947742644e-11,
+          "oldError": 1.202751125244315e-11
+        },
+        {
+          "inputIndex": 71,
+          "newError": 6.999686262697863e-11,
+          "oldError": 2.6782702560024613e-11
+        },
+        {
+          "inputIndex": 72,
+          "newError": 7.441562182161025e-11,
+          "oldError": 4.962946363784998e-11
+        },
+        {
+          "inputIndex": 73,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 74,
+          "newError": 1.2768726588670663e-12,
+          "oldError": 1.1556903482091236e-12
+        },
+        {
+          "inputIndex": 76,
+          "newError": 7.441562182161025e-11,
+          "oldError": 4.962946363784998e-11
+        },
+        {
+          "inputIndex": 77,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 79,
+          "newError": 6.999686262697863e-11,
+          "oldError": 3.727910809969742e-11
+        },
+        {
+          "inputIndex": 80,
+          "newError": 7.441562182161025e-11,
+          "oldError": 4.962946363784998e-11
+        },
+        {
+          "inputIndex": 81,
+          "newError": 3.7810871362905346e-11,
+          "oldError": 3.1383805276820055e-11
+        },
+        {
+          "inputIndex": 83,
+          "newError": 1.2925828746505805e-10,
+          "oldError": 5.702469275026736e-11
+        },
+        {
+          "inputIndex": 84,
+          "newError": 7.441562182161025e-11,
+          "oldError": 4.962946363784998e-11
+        }
+      ]
+    },
+    "representedDistinctLaws/nativeRoundedIncrementalProjectedSlopeAbsoluteErrorNJ": {
+      "cases": 85,
+      "improved": 49,
+      "newMaximum": 6.379696266806745e-13,
+      "oldMaximum": 3.707567670292243e-13,
+      "unchanged": 16,
+      "worsened": 20,
+      "worsenedCases": [
+        {
+          "inputIndex": 1,
+          "newError": 2.8575456949444066e-16,
+          "oldError": 1.9197737575975945e-16
+        },
+        {
+          "inputIndex": 3,
+          "newError": 8.436125362956309e-16,
+          "oldError": 5.869666815212021e-16
+        },
+        {
+          "inputIndex": 10,
+          "newError": 3.473019080993592e-22,
+          "oldError": 3.7756902153841697e-23
+        },
+        {
+          "inputIndex": 11,
+          "newError": 3.190310019539586e-13,
+          "oldError": 1.1293580046824313e-13
+        },
+        {
+          "inputIndex": 22,
+          "newError": 1.9514315970482198e-16,
+          "oldError": 1.22779790151296e-16
+        },
+        {
+          "inputIndex": 24,
+          "newError": 5.006342943038833e-17,
+          "oldError": 3.4300748342848634e-17
+        },
+        {
+          "inputIndex": 27,
+          "newError": 6.458448200499844e-25,
+          "oldError": 5.709325197074338e-25
+        },
+        {
+          "inputIndex": 31,
+          "newError": 7.288038668802458e-22,
+          "oldError": 2.5290376333808968e-22
+        },
+        {
+          "inputIndex": 32,
+          "newError": 6.379696266806745e-13,
+          "oldError": 3.707567670292243e-13
+        },
+        {
+          "inputIndex": 40,
+          "newError": 1.6447661676743792e-13,
+          "oldError": 8.018589148865551e-14
+        },
+        {
+          "inputIndex": 43,
+          "newError": 2.751575729158572e-17,
+          "oldError": 3.126846494593282e-20
+        },
+        {
+          "inputIndex": 54,
+          "newError": 1.5195637714093878e-13,
+          "oldError": 8.715679601556577e-15
+        },
+        {
+          "inputIndex": 60,
+          "newError": 1.28430558817511e-25,
+          "oldError": 4.258434163084041e-26
+        },
+        {
+          "inputIndex": 61,
+          "newError": 1.2960264553748646e-22,
+          "oldError": 5.600599317097238e-23
+        },
+        {
+          "inputIndex": 64,
+          "newError": 2.3192346084618427e-17,
+          "oldError": 5.904639015756274e-18
+        },
+        {
+          "inputIndex": 68,
+          "newError": 2.0346251884238507e-13,
+          "oldError": 9.190198183127102e-14
+        },
+        {
+          "inputIndex": 71,
+          "newError": 1.8728960166472445e-25,
+          "oldError": 1.255633715884685e-25
+        },
+        {
+          "inputIndex": 74,
+          "newError": 6.721180882108377e-26,
+          "oldError": 1.7729148542399582e-26
+        },
+        {
+          "inputIndex": 78,
+          "newError": 2.4491597299997094e-18,
+          "oldError": 3.017466165531964e-19
+        },
+        {
+          "inputIndex": 82,
+          "newError": 5.912974662665313e-28,
+          "oldError": 5.154432266074595e-28
+        }
+      ]
+    }
+  },
+  "pass": true,
+  "precisionComparisons": [
+    {
+      "cases": 32,
+      "comparedLeaves": 5762,
+      "equal": true,
+      "excludedPaths": [
+        "/cases/0/decimalDigits",
+        "/cases/1/decimalDigits",
+        "/cases/2/decimalDigits",
+        "/cases/3/decimalDigits",
+        "/cases/4/decimalDigits",
+        "/cases/5/decimalDigits",
+        "/cases/6/decimalDigits",
+        "/cases/7/decimalDigits",
+        "/cases/8/decimalDigits",
+        "/cases/9/decimalDigits",
+        "/cases/10/decimalDigits",
+        "/cases/11/decimalDigits",
+        "/cases/12/decimalDigits",
+        "/cases/13/decimalDigits",
+        "/cases/14/decimalDigits",
+        "/cases/15/decimalDigits",
+        "/cases/16/decimalDigits",
+        "/cases/17/decimalDigits",
+        "/cases/18/decimalDigits",
+        "/cases/19/decimalDigits",
+        "/cases/20/decimalDigits",
+        "/cases/21/decimalDigits",
+        "/cases/22/decimalDigits",
+        "/cases/23/decimalDigits",
+        "/cases/24/decimalDigits",
+        "/cases/25/decimalDigits",
+        "/cases/26/decimalDigits",
+        "/cases/27/decimalDigits",
+        "/cases/28/decimalDigits",
+        "/cases/29/decimalDigits",
+        "/cases/30/decimalDigits",
+        "/cases/31/decimalDigits"
+      ],
+      "proof100": "rest-100.json",
+      "proof80": "rest-80.json"
+    },
+    {
+      "cases": 85,
+      "comparedLeaves": 20317,
+      "equal": true,
+      "excludedPaths": [
+        "/cases/0/decimalDigits",
+        "/cases/1/decimalDigits",
+        "/cases/2/decimalDigits",
+        "/cases/3/decimalDigits",
+        "/cases/4/decimalDigits",
+        "/cases/5/decimalDigits",
+        "/cases/6/decimalDigits",
+        "/cases/7/decimalDigits",
+        "/cases/8/decimalDigits",
+        "/cases/9/decimalDigits",
+        "/cases/10/decimalDigits",
+        "/cases/11/decimalDigits",
+        "/cases/12/decimalDigits",
+        "/cases/13/decimalDigits",
+        "/cases/14/decimalDigits",
+        "/cases/15/decimalDigits",
+        "/cases/16/decimalDigits",
+        "/cases/17/decimalDigits",
+        "/cases/18/decimalDigits",
+        "/cases/19/decimalDigits",
+        "/cases/20/decimalDigits",
+        "/cases/21/decimalDigits",
+        "/cases/22/decimalDigits",
+        "/cases/23/decimalDigits",
+        "/cases/24/decimalDigits",
+        "/cases/25/decimalDigits",
+        "/cases/26/decimalDigits",
+        "/cases/27/decimalDigits",
+        "/cases/28/decimalDigits",
+        "/cases/29/decimalDigits",
+        "/cases/30/decimalDigits",
+        "/cases/31/decimalDigits",
+        "/cases/32/decimalDigits",
+        "/cases/33/decimalDigits",
+        "/cases/34/decimalDigits",
+        "/cases/35/decimalDigits",
+        "/cases/36/decimalDigits",
+        "/cases/37/decimalDigits",
+        "/cases/38/decimalDigits",
+        "/cases/39/decimalDigits",
+        "/cases/40/decimalDigits",
+        "/cases/41/decimalDigits",
+        "/cases/42/decimalDigits",
+        "/cases/43/decimalDigits",
+        "/cases/44/decimalDigits",
+        "/cases/45/decimalDigits",
+        "/cases/46/decimalDigits",
+        "/cases/47/decimalDigits",
+        "/cases/48/decimalDigits",
+        "/cases/49/decimalDigits",
+        "/cases/50/decimalDigits",
+        "/cases/51/decimalDigits",
+        "/cases/52/decimalDigits",
+        "/cases/53/decimalDigits",
+        "/cases/54/decimalDigits",
+        "/cases/55/decimalDigits",
+        "/cases/56/decimalDigits",
+        "/cases/57/decimalDigits",
+        "/cases/58/decimalDigits",
+        "/cases/59/decimalDigits",
+        "/cases/60/decimalDigits",
+        "/cases/61/decimalDigits",
+        "/cases/62/decimalDigits",
+        "/cases/63/decimalDigits",
+        "/cases/64/decimalDigits",
+        "/cases/65/decimalDigits",
+        "/cases/66/decimalDigits",
+        "/cases/67/decimalDigits",
+        "/cases/68/decimalDigits",
+        "/cases/69/decimalDigits",
+        "/cases/70/decimalDigits",
+        "/cases/71/decimalDigits",
+        "/cases/72/decimalDigits",
+        "/cases/73/decimalDigits",
+        "/cases/74/decimalDigits",
+        "/cases/75/decimalDigits",
+        "/cases/76/decimalDigits",
+        "/cases/77/decimalDigits",
+        "/cases/78/decimalDigits",
+        "/cases/79/decimalDigits",
+        "/cases/80/decimalDigits",
+        "/cases/81/decimalDigits",
+        "/cases/82/decimalDigits",
+        "/cases/83/decimalDigits",
+        "/cases/84/decimalDigits"
+      ],
+      "proof100": "frozen-uv-100.json",
+      "proof80": "frozen-uv-80.json"
+    },
+    {
+      "cases": 85,
+      "comparedLeaves": 21252,
+      "equal": true,
+      "excludedPaths": [
+        "/cases/0/decimalDigits",
+        "/cases/1/decimalDigits",
+        "/cases/2/decimalDigits",
+        "/cases/3/decimalDigits",
+        "/cases/4/decimalDigits",
+        "/cases/5/decimalDigits",
+        "/cases/6/decimalDigits",
+        "/cases/7/decimalDigits",
+        "/cases/8/decimalDigits",
+        "/cases/9/decimalDigits",
+        "/cases/10/decimalDigits",
+        "/cases/11/decimalDigits",
+        "/cases/12/decimalDigits",
+        "/cases/13/decimalDigits",
+        "/cases/14/decimalDigits",
+        "/cases/15/decimalDigits",
+        "/cases/16/decimalDigits",
+        "/cases/17/decimalDigits",
+        "/cases/18/decimalDigits",
+        "/cases/19/decimalDigits",
+        "/cases/20/decimalDigits",
+        "/cases/21/decimalDigits",
+        "/cases/22/decimalDigits",
+        "/cases/23/decimalDigits",
+        "/cases/24/decimalDigits",
+        "/cases/25/decimalDigits",
+        "/cases/26/decimalDigits",
+        "/cases/27/decimalDigits",
+        "/cases/28/decimalDigits",
+        "/cases/29/decimalDigits",
+        "/cases/30/decimalDigits",
+        "/cases/31/decimalDigits",
+        "/cases/32/decimalDigits",
+        "/cases/33/decimalDigits",
+        "/cases/34/decimalDigits",
+        "/cases/35/decimalDigits",
+        "/cases/36/decimalDigits",
+        "/cases/37/decimalDigits",
+        "/cases/38/decimalDigits",
+        "/cases/39/decimalDigits",
+        "/cases/40/decimalDigits",
+        "/cases/41/decimalDigits",
+        "/cases/42/decimalDigits",
+        "/cases/43/decimalDigits",
+        "/cases/44/decimalDigits",
+        "/cases/45/decimalDigits",
+        "/cases/46/decimalDigits",
+        "/cases/47/decimalDigits",
+        "/cases/48/decimalDigits",
+        "/cases/49/decimalDigits",
+        "/cases/50/decimalDigits",
+        "/cases/51/decimalDigits",
+        "/cases/52/decimalDigits",
+        "/cases/53/decimalDigits",
+        "/cases/54/decimalDigits",
+        "/cases/55/decimalDigits",
+        "/cases/56/decimalDigits",
+        "/cases/57/decimalDigits",
+        "/cases/58/decimalDigits",
+        "/cases/59/decimalDigits",
+        "/cases/60/decimalDigits",
+        "/cases/61/decimalDigits",
+        "/cases/62/decimalDigits",
+        "/cases/63/decimalDigits",
+        "/cases/64/decimalDigits",
+        "/cases/65/decimalDigits",
+        "/cases/66/decimalDigits",
+        "/cases/67/decimalDigits",
+        "/cases/68/decimalDigits",
+        "/cases/69/decimalDigits",
+        "/cases/70/decimalDigits",
+        "/cases/71/decimalDigits",
+        "/cases/72/decimalDigits",
+        "/cases/73/decimalDigits",
+        "/cases/74/decimalDigits",
+        "/cases/75/decimalDigits",
+        "/cases/76/decimalDigits",
+        "/cases/77/decimalDigits",
+        "/cases/78/decimalDigits",
+        "/cases/79/decimalDigits",
+        "/cases/80/decimalDigits",
+        "/cases/81/decimalDigits",
+        "/cases/82/decimalDigits",
+        "/cases/83/decimalDigits",
+        "/cases/84/decimalDigits"
+      ],
+      "proof100": "frozen-old-dd-100.json",
+      "proof80": "frozen-old-dd-80.json"
+    }
+  ],
+  "predeclaredRepresentedGates": {
+    "elasticComponentLimitMicroN": 1e-09,
+    "energyLimitNJ": 1e-12,
+    "observedMaximumElasticComponentErrorMicroN": 5.633991074030091e-11,
+    "observedMaximumEnergyErrorNJ": 4.254836328836703e-13,
+    "pass": true
+  },
+  "referenceLosslessCases": 117,
+  "rest": {
+    "cases": 32,
+    "decisions": {
+      "rejected": 32
+    },
+    "restoredAfterRejection": true,
+    "zeroRuntimeAndRepresentedRest": true
+  },
+  "reviewerScriptSHA256": "f0f6aa1e1f5a02fcd4b4a17efe2e2f6cea19ecef76a0187b5ab6f5a454ec00ff",
+  "schema": "pliego-independent-uv-pretrajectory-review/1",
+  "scope": [
+    "read-only analysis of already captured inputs and proofs; no physics or oracle reruns",
+    "all 32 native rest calls and 85 paired frozen poses only",
+    "representedDistinctLaws compares accuracy against different mathematical reference polynomials, not equality of those laws",
+    "idealUV compares both implementations against the same independent exact UV/material truth",
+    "native binary64 inertia unchanged; no force, trajectory, material, booklet, performance or release acceptance follows from field accuracy"
+  ],
+  "sourceGit": "d739165c2f0d72382e2882715c33275c2967fff5"
+}

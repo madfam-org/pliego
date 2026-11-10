@@ -20,6 +20,7 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
     const m = mesh(size), random = mulberry32(734 + size), tc = Float64Array.from({ length: size }, () => random() * 2);
     const reference = new SweptCandidates(m, tc), indexed = new SweptCandidates(m, tc, 'bvh', 'auto');
     const active = new SweptCandidates(m, tc, 'bvh', 'active'), rank = new SweptCandidates(m, tc, 'bvh', 'rank');
+    const rankedActive = new SweptCandidates(m, tc, 'bvh', 'active-ranked');
     const fixed = new Uint8Array(size), weld = new Int32Array(size).fill(-1);
     let topology;
     for (let sample = 0; sample < 48; sample++) {
@@ -34,7 +35,7 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
         if (sample % 4 === 0 || (fixed[v] && random() > 0.5)) for (let k = 0; k < 3; k++) to[3 * v + k] = from[3 * v + k];
       }
       reference.build(from, to, fixed, weld); indexed.build(from, to, fixed, weld);
-      for (const c of [active, rank]) {
+      for (const c of [active, rank, rankedActive]) {
         c.build(from, to, fixed, weld); assert.deepEqual(result(c), result(reference), `forced ${c.edgeTraversal}, size=${size} sample=${sample}`);
       }
       assert.deepEqual(result(indexed), result(reference), `ordered pairs, size=${size} sample=${sample}`);
@@ -47,7 +48,7 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
   assert.ok(pairs > 10000);
   assert.throws(() => new SweptCandidates(mesh(0), new Float64Array(), 'invalid'), /broad phase/);
   assert.throws(() => new SweptCandidates(mesh(0), new Float64Array(), 'bvh', 'invalid'), /edge traversal/);
-  console.log(`swept-BVH-order: builds=${builds}, emitted pairs compared=${pairs}; reference/auto/rank/active ordered bytes exact across refits and exclusions`);
+  console.log(`swept-BVH-order: builds=${builds}, emitted pairs compared=${pairs}; reference/auto/rank/active/active-ranked ordered bytes exact across refits and exclusions`);
 });
 
 test('BVH keeps moving prescribed crossings and prunes only exact stationary/stationary nodes', () => {
@@ -94,15 +95,21 @@ test('BVH native leaf matches reference pose/forces/CCD diagnostics and restores
   const options = { meshEdge: 12, substeps: 4, barrierContact: true, barrierIterations: 8, barrierLinearSolver: 'direct-local',
     consistentMembraneCurvature: true, gravity: false, ground: false, plasticity: false };
   const a = new World(pageLeaf({ width: 30, height: 40 }), options), b = new World(pageLeaf({ width: 30, height: 40 }), { ...options, contactBroadPhase: 'bvh' });
+  const active = new World(pageLeaf({ width: 30, height: 40 }), { ...options, contactBroadPhase: 'bvh' });
+  active.coupledContact.potential.candidates.edgeTraversal = 'active-ranked';
+  active.coupledContact.guard.candidates.edgeTraversal = 'active-ranked';
   assert.equal(b.coupledContact.potential.candidates.mode, 'bvh'); assert.equal(b.coupledContact.guard.candidates.mode, 'bvh');
-  for (const w of [a, b]) w.setControl('turn', 45);
+  for (const w of [a, b, active]) w.setControl('turn', 45);
   for (let f = 0; f < 12; f++) {
-    a.step(); b.step(); assert.deepEqual(a.x, b.x); assert.deepEqual(a.v, b.v); assert.deepEqual(a.stats().coupledContact, b.stats().coupledContact);
+    a.step(); b.step(); active.step(); assert.deepEqual(a.x, active.x); assert.deepEqual(a.v, active.v);
+    assert.deepEqual(a.stats().coupledContact, active.stats().coupledContact); assert.deepEqual(a.x, b.x); assert.deepEqual(a.v, b.v); assert.deepEqual(a.stats().coupledContact, b.stats().coupledContact);
   }
-  const snapshot = b.snapshot(); for (let f = 0; f < 4; f++) b.step();
-  const x = b.x.slice(), diagnostics = b.stats().coupledContact;
-  b.restore(snapshot); for (let f = 0; f < 4; f++) b.step();
-  assert.deepEqual(b.x, x); assert.deepEqual(b.stats().coupledContact, diagnostics);
+  for (const w of [b, active]) {
+    const snapshot = w.snapshot(); for (let f = 0; f < 4; f++) w.step();
+    const x = w.x.slice(), diagnostics = w.stats().coupledContact;
+    w.restore(snapshot); for (let f = 0; f < 4; f++) w.step();
+    assert.deepEqual(w.x, x); assert.deepEqual(w.stats().coupledContact, diagnostics);
+  }
   console.log('swept-BVH-world: 12 native frames match reference exactly; indexed pose and diagnostic replay exact');
 });
 
@@ -133,7 +140,7 @@ test('active edge traversal retains prescribed crossings and excludes only stati
   const fixed = new Uint8Array(6).fill(1), weld = new Int32Array(6).fill(-1);
   const c = new SweptCandidates(m, new Float64Array(6).fill(0.1), 'bvh', 'auto');
   c.build(x, y, fixed, weld);
-  assert.equal(c.edgeTraversalUsed, 'active'); assert.equal(c.edgeTree.queries, 1);
+  assert.equal(c.edgeTraversalUsed, 'active-ranked'); assert.equal(c.edgeTree.queries, 1);
   assert.deepEqual(result(c).ee, new Int32Array([0, 1]));
   c.build(x, x, fixed, weld); assert.equal(c.edgeEdgeCount, 0); assert.equal(c.edgeTree.queries, 0);
   c.build(x, x, fixed, weld); assert.equal(c.reusedLastBuild, true); assert.equal(c.edgeTree.queries, 0);

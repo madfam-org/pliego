@@ -11,6 +11,7 @@ export class BoundsTree {
     this.left = new Int32Array(capacity); this.right = new Int32Array(capacity);
     this.primitive = new Int32Array(capacity).fill(-1);
     this.inactive = new Uint8Array(capacity); this.maximumRank = new Int32Array(capacity);
+    this.anyInactive = new Uint8Array(capacity);
     this.rank = new Int32Array(count); this.stack = new Int32Array(capacity); this.hits = new Int32Array(count);
     this.nodeTests = 0; this.rootContainmentTests = 0; this.queries = 0;
     this.order = /** @type {number[]} */([]);
@@ -37,7 +38,7 @@ export class BoundsTree {
       const id = this.primitive[n], target = 6 * n;
       if (id >= 0) {
         for (let k = 0; k < 6; k++) this.boxes[target + k] = boxes[6 * id + k];
-        this.inactive[n] = inactive[id]; this.maximumRank[n] = this.rank[id];
+        this.inactive[n] = inactive[id]; this.anyInactive[n] = inactive[id]; this.maximumRank[n] = this.rank[id];
       } else {
         const a = this.left[n], b = this.right[n];
         for (let k = 0; k < 3; k++) {
@@ -45,6 +46,7 @@ export class BoundsTree {
           this.boxes[target + 3 + k] = Math.max(this.boxes[6 * a + 3 + k], this.boxes[6 * b + 3 + k]);
         }
         this.inactive[n] = this.inactive[a] && this.inactive[b] ? 1 : 0;
+        this.anyInactive[n] = this.anyInactive[a] || this.anyInactive[b] ? 1 : 0;
         this.maximumRank[n] = Math.max(this.maximumRank[a], this.maximumRank[b]);
       }
     }
@@ -72,26 +74,31 @@ export class BoundsTree {
   }
 
   /** Inclusive AABB query. Skip stationary/stationary pairs and ranks <= after.
-   * @param {Float64Array} boxes @param {number} index @param {boolean|number} inactive @param {number} [after]
+   * stationaryBefore retains stationary leaves at ranks <= after, for an active
+   * query paired once with every stationary edge and later active ranks only.
+   * @param {Float64Array} boxes @param {number} index @param {boolean|number} inactive @param {number} [after] @param {boolean} [stationaryBefore]
    * @returns {number} number of sorted ranks in this.hits, valid until next query
    */
-  query(boxes, index, inactive, after = -1) {
+  query(boxes, index, inactive, after = -1, stationaryBefore = false) {
     this.queries++;
     let size = 0, count = 0;
-    if (!this.nodes || this.maximumRank[0] <= after || (inactive && this.inactive[0])) return 0;
+    if (!this.nodes || (this.maximumRank[0] <= after && !(stationaryBefore && this.anyInactive[0])) || (inactive && this.inactive[0])) return 0;
     // An enclosing query overlaps every leaf. Emit current ranks directly,
     // avoiding a full dense traversal and sort; still apply current inactivity.
     this.rootContainmentTests++;
     let encloses = true;
     for (let k = 0; k < 3; k++) if (boxes[6 * index + k] > this.boxes[k] || boxes[6 * index + 3 + k] < this.boxes[3 + k]) { encloses = false; break; }
     if (encloses) {
-      for (let rank = Math.max(0, Math.floor(after) + 1); rank < this.count; rank++) if (!(inactive && this.primitiveInactive[this.order[rank]])) this.hits[count++] = rank;
+      for (let rank = stationaryBefore ? 0 : Math.max(0, Math.floor(after) + 1); rank < this.count; rank++) {
+        const stationary = this.primitiveInactive[this.order[rank]];
+        if ((rank > after || (stationaryBefore && stationary)) && !(inactive && stationary)) this.hits[count++] = rank;
+      }
       return count;
     }
     if (this.nodes) this.stack[size++] = 0;
     while (size) {
       const n = this.stack[--size];
-      if (this.maximumRank[n] <= after || (inactive && this.inactive[n])) continue;
+      if ((this.maximumRank[n] <= after && !(stationaryBefore && this.anyInactive[n])) || (inactive && this.inactive[n])) continue;
       this.nodeTests++;
       let overlap = true;
       for (let k = 0; k < 3; k++) if (boxes[6 * index + k] > this.boxes[6 * n + 3 + k] || this.boxes[6 * n + k] > boxes[6 * index + 3 + k]) { overlap = false; break; }

@@ -182,9 +182,17 @@ preserves the reference's multiplicity, orientation and floating-point sum order
 Offsets are Float64 and indices remain separate integers, avoiding packed-index
 precision and uint32 total-count wrap. Scratch arrays allocate only when used.
 
-`rank` remains the internal default. `active` forces the experiment, while `auto`
-selects it below half edge mobility; this heuristic is experimental and not a new
-World option. Component schema 0.3 separates those three full-build policies from
+The first `active` variant queries all ranks then removes duplicate active pairs.
+A refined `active-ranked` query preserves maximum-rank pruning on nodes containing
+no stationary leaves. A node containing a stationary leaf cannot be removed solely
+by its maximum rank, because a lower-rank stationary partner still needs this
+active query. An additional any-stationary flag is fully refitted on every build;
+leaf and enclosing-root queries use the same eligibility rule. The outer/inner
+rank reconstruction is unchanged.
+
+The internal `auto` policy selects `active-ranked` below half edge mobility and
+`rank` otherwise. `rank`, `active` and `active-ranked` can be forced by the component
+experiment. This policy is inside the opt-in BVH and is not a new World option. Component schema 0.3 separates those three full-build policies from
 exact-pose reuse and records queries/node tests. Reduced query count alone does
 not establish reduced work: loss of rank pruning and ordering can dominate.
 Clean-source measurements and any refinement will be recorded before changing

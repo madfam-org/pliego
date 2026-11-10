@@ -18,10 +18,13 @@ The [first-update diagnosis](evidence/membrane-state-modal-2026-11-10/supplement
 identifies omitted geometric curvature in four unique starts; the
 [time-method assessment](implicit-midpoint-review.md) separates integration
 damping from nonlinear force convergence. No new exact-curvature or midpoint
-World implementation is claimed. Two design-only next steps define the smallest
+World implementation is claimed. Two next steps define the smallest
 testable change for each: [exact membrane curvature with visible GN fallback](exact-curvature-next-implementation.md)
 and [a named planar implicit-midpoint stage](implicit-midpoint-next-implementation.md),
-kept as separate ablations on the same 24-trajectory gates. Force/time, material, booklet and device
+kept as separate ablations on the same 24-trajectory gates. Exact curvature is now
+implemented as an opt-in World option with operator, fallback and replay tests
+(milestone 1); its frozen 24-trajectory comparison has not run, so no force,
+time or acceptance result is claimed. The midpoint stage remains design only. Force/time, material, booklet and device
 acceptance remain open; research and implementation are not exhausted.
 
 ## What would count as exhausted

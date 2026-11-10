@@ -33,6 +33,7 @@ import { validateIncrementDomain, getIncrementSearchSnapshot } from './increment
 import { MotionGuard } from '../collision/motion-guard.js';
 import { CoupledContact } from './coupled-contact.js';
 import { OrthotropicMembrane } from './orthotropic-membrane.js';
+import { initialiseExactCurvature, exactCurvatureStats } from './membrane-curvature.js';
 import * as K from '../constants.js';
 import { hypot3 } from '../fastmath.js';
 
@@ -47,7 +48,7 @@ export class World {
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
    *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
-   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement'}} [opts]
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton'|'exact-hessian',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -103,7 +104,7 @@ export class World {
     const nV = mesh.nV;
     this.materials = doc.sheets.map((/** @type {any} */ s) => fromDerived(s.derived));
     if (orthotropic) validateMembraneExperiment(doc, opts, mesh);
-    this.orthotropicMembrane = orthotropic ? new OrthotropicMembrane(mesh, this.materials, doc, opts.membraneNu12, opts.membraneArithmetic, opts.membraneReference) : null;
+    this.orthotropicMembrane = orthotropic ? new OrthotropicMembrane(mesh, this.materials, doc, opts.membraneNu12, opts.membraneArithmetic, opts.membraneReference, opts.membraneCurvature) : null;
     if (this.orthotropicMembrane && !this.orthotropicMembrane.diagnostics(mesh.X0).finite) throw new Error('Orthotropic membrane: invalid initial triangle metric/arithmetic: ' + (this.orthotropicMembrane.work.arithmeticError ?? ''));
     this.orthotropicMembraneSignature = this.orthotropicMembrane ? JSON.stringify(this.orthotropicMembrane.configuration) : null;
     const lift = (opts.ground ?? true) ? liftOntoTable(doc, mesh) : 0; // setrest.js
@@ -189,6 +190,7 @@ export class World {
     this.coupledContact?.initialise(this);
     this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
+    initialiseExactCurvature(this);
     if (this.opts.lineSearchArithmetic === 'membrane-inertia-increment') validateIncrementDomain(this, this.x);
     initialiseReferenceState(this);
   }
@@ -663,6 +665,7 @@ export class World {
       coupledContact: this.coupledContact?.snapshot() ?? null,
       ...(membrane ? { membrane: { model: 'orthotropic-stvk', convention: 'nu12', curvature: 'gauss-newton', projectionPolicy: 'none',
         nu12BySheet: this.opts.membraneNu12?.slice(), legacyEdgeMaxStrain, legacyEdgeMaxCompression, ...membrane } } : {}),
+      ...exactCurvatureStats(this),
     };
   }
 
@@ -689,9 +692,10 @@ export class World {
  */
 function validateMembraneExperiment(doc, opts, mesh) {
   if (opts.physicalMembrane !== true || opts.membraneCompression !== 1 || opts.membranePoissonConvention !== 'nu12' ||
-      opts.membraneCurvature !== 'gauss-newton' || opts.membraneProjection !== 'none' || opts.lineSearch !== true || opts.plasticity !== false) {
-    throw new Error('Orthotropic membrane: explicitly require physicalMembrane:true, membraneCompression:1, nu12 convention, gauss-newton curvature, membraneProjection:none, lineSearch:true and plasticity:false');
+      !['gauss-newton', 'exact-hessian'].includes(opts.membraneCurvature) || opts.membraneProjection !== 'none' || opts.lineSearch !== true || opts.plasticity !== false) {
+    throw new Error('Orthotropic membrane: explicitly require physicalMembrane:true, membraneCompression:1, nu12 convention, gauss-newton (or reference-domain exact-hessian) curvature, membraneProjection:none, lineSearch:true and plasticity:false');
   }
+  if (opts.membraneCurvature === 'exact-hessian' && opts.stateCoordinates !== 'reference-displacement') throw new Error('Orthotropic membrane: exact-hessian curvature is admitted only in the free planar reference-displacement domain (uv-displacement, double-double, membrane-inertia-increment)');
   if (doc.joins.length || doc.controls.length || doc.mechanisms.length || doc.sheets.some(s => s.kinematic) ||
       mesh.perfPairs.length || mesh.hingeKind.some(k => k !== HINGE_PANEL) || doc.restAngle.some(a => a !== 0)) throw new Error('Orthotropic membrane: joins, controls, mechanisms, kinematic sheets, creases, perforations and set angles are unsupported');
   if ((opts.contact !== false || opts.ground !== false) && opts.barrierContact !== true) throw new Error('Orthotropic membrane: positional contact/ground requires the coupled barrier path');

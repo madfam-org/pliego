@@ -19,6 +19,7 @@ import { BlockCholesky } from '../linalg/blockchol.js';
 import { dihedral } from './dihedral.js';
 import { hypot3 } from '../fastmath.js';
 import { projectReference } from './reference-state.js';
+import { selectCurvature } from './membrane-curvature.js';
 
 /** Strain below which an edge switches to the compression model (hysteresis, see gradient()). */
 const MODEL_COMP_ENTER = 1e-4;
@@ -95,20 +96,24 @@ function addOuter(/** @type {BlockCholesky} */ ch, /** @type {number} */ s, /** 
 }
 
 /**
- * Assemble H = M/Δt² + Σ k ∇C∇Cᵀ at positions x and factorise.
- * @param {any} w World @param {Float64Array} x
+ * Assemble H = M/Δt² + Σ k ∇C∇Cᵀ at positions x and factorise. The membrane
+ * curvature is an explicit selector; callers that omit it get Gauss–Newton.
+ * @param {any} w World @param {Float64Array} x @param {string} [coordinates]
+ * @param {'gauss-newton'|'exact-hessian'} [curvature]
  */
-export function assembleAndFactor(w, x, coordinates = 'absolute-position') {
-  assembleElastic(w, x, w.sys.ch, false, coordinates);
+export function assembleAndFactor(w, x, coordinates = 'absolute-position', curvature = 'gauss-newton') {
+  assembleElastic(w, x, w.sys.ch, false, coordinates, curvature);
   if (w.sys.ch) { w.sys.ch.factor(); w.factorCount++; }
 }
 
 /** Assemble into a compatible pattern without changing the saved elastic factor.
  * currentOperator omits slack strings, matching the matrix-free GN operator.
  * @param {any} w @param {Float64Array} x @param {BlockCholesky|null} ch
- * @param {boolean} [currentOperator]
+ * @param {boolean} [currentOperator] @param {string} [coordinates]
+ * @param {'gauss-newton'|'exact-hessian'} [curvature] membrane blocks only; hinges and terms are unchanged
  */
-export function assembleElastic(w, x, ch, currentOperator = false, coordinates = 'absolute-position') {
+export function assembleElastic(w, x, ch, currentOperator = false, coordinates = 'absolute-position', curvature = 'gauss-newton') {
+  const exact = selectCurvature(curvature, w.orthotropicMembrane);
   const pose = coordinates === 'reference-displacement' ? projectReference(w, x) : x;
   const S = w.sys;
   if (!ch) return;
@@ -125,7 +130,8 @@ export function assembleElastic(w, x, ch, currentOperator = false, coordinates =
   const E = w.mesh.edges, kM = w.kMem;
   const u = [0, 0, 0];
   if (w.orthotropicMembrane) {
-    w.orthotropicMembrane.addGaussNewtonBlocks(w, x, ch, coordinates);
+    if (exact) w.orthotropicMembrane.addExactHessianBlocks(w, x, ch, coordinates);
+    else w.orthotropicMembrane.addGaussNewtonBlocks(w, x, ch, coordinates);
     // Retain geometric factor reuse independently of the discarded spring law.
     if (ch === S.ch) for (let e = 0; e < w.mesh.nE; e++) {
       const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];

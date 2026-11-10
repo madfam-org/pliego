@@ -11,6 +11,7 @@ import { DOUBLE_DOUBLE_IDENTITY, add as addDD, rounded as roundedDD } from './do
 import { accurateTrialTerms } from './accurate-membrane.js';
 import { UV_REFERENCE_IDENTITY, describeUVReference } from './uv-reference.js';
 import { stateCoordinates, solverPositions, solverTarget, projectReference, projectCurrentReference, validateReferenceBinding } from './reference-state.js';
+import { validateCurvatureIdentity } from './membrane-curvature.js';
 
 export const INCREMENT_SEARCH_IDENTITY = Object.freeze({ name: 'membrane-inertia-increment', version: 1, armijo: 1e-4, maxBacktracks: 20 });
 
@@ -43,8 +44,10 @@ export function validateIncrementDomain(w, x) {
   const o = w.opts, D = w.drivers;
   validateMembraneArithmeticIdentity(w);
   if (o.lineSearchArithmetic !== 'membrane-inertia-increment' || !w.orthotropicMembrane || o.membraneModel !== 'orthotropic-stvk' || !o.lineSearch || !o.physicalMembrane ||
-      w.kCompFactor !== 1 || o.membranePoissonConvention !== 'nu12' || o.membraneCurvature !== 'gauss-newton' ||
+      w.kCompFactor !== 1 || o.membranePoissonConvention !== 'nu12' || !['gauss-newton', 'exact-hessian'].includes(o.membraneCurvature) ||
+      (o.membraneCurvature === 'exact-hessian' && stateCoordinates(w) !== 'reference-displacement') ||
       o.membraneProjection !== 'none' || o.plasticity !== false) fail('selected research membrane prerequisites changed');
+  validateCurvatureIdentity(w);
   if (o.damping !== 0 || w.bendDamp !== 0 || o.gravity !== false || o.ground !== false || o.contact !== false ||
       o.continuousContact || o.barrierContact || w.contact || w.motionGuard || w.coupledContact || w.edgeContact) fail('damping, gravity and contact are unsupported');
   if (!(w.dt > 0 && Number.isFinite(w.dt) && Number.isFinite(1 / (w.dt * w.dt)))) fail('invalid timestep');

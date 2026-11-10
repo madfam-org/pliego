@@ -4,8 +4,10 @@ import { gradient, assembleAndFactor } from './implicit.js';
 import { pcgStep } from './pcg.js';
 import { stateCoordinates, solverPositions, solverTarget } from './reference-state.js';
 import * as K from '../constants.js';
+import { exactNewtonStep } from './exact-newton.js';
 /** @param {any} w */
 export function newtonStep(w) {
+  if (w.opts.membraneCurvature === 'exact-hessian') return exactNewtonStep(w);
   const reference = stateCoordinates(w) === 'reference-displacement';
   if (reference && w._referenceNewtonActive) throw new Error('Reference state: recursive Newton solve is unsupported');
   if (reference) w._referenceNewtonActive = true;

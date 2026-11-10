@@ -176,7 +176,7 @@ export function prepareReferenceRestore(w, s) {
       orthotropicMembrane: observationMembrane(w), factorDir: w.factorDir.slice(),
       sys: { ...w.sys, ch: Object.assign(Object.create(Object.getPrototypeOf(w.sys.ch)), structuredClone(w.sys.ch)) } });
     validateIncrementDomain(factorWorld, factorWorld.x);
-    try { assembleAndFactor(factorWorld, f.x, 'reference-displacement'); }
+    try { assembleAndFactor(factorWorld, f.x, 'reference-displacement', f.curvature ?? 'gauss-newton'); }
     catch { throw new Error('Reference state: snapshot factor cannot be rebuilt'); }
   }
   const candidate = Object.assign(Object.create(w), { x: r.x, xs: r.xs, xt: r.xt, v: s.v,

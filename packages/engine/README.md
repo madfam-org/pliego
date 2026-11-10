@@ -148,6 +148,21 @@ substep is not a completed solve. See the
 [state experiment and independent gates](../../docs/research/membrane-state-precision.md).
 No force/time, material, booklet or device acceptance follows from selecting it.
 
+`membraneCurvature: 'exact-hessian'` (only with the reference-displacement state above)
+replaces the membrane's Gauss–Newton search blocks and products with **exact membrane
+curvature**: Gauss–Newton plus the geometric stress term, summed in two words before
+one binary64 rounding. Hinges, terms and inertia keep their operators. It may be
+indefinite: no shift, clipping or extra iterations are added. Its fixed policy runs PCG
+on the exact current operator with the saved factor as preconditioner (a nonfinite or
+non-descent direction is never written), and the direct path attempts an exact factor.
+A finite nonpositive pivot rebuilds the Gauss–Newton factor once, labelled as a
+fallback; a nonfinite pivot is refused. `stats().membraneCurvature` separates the
+requested, last-direction and factor operators and counts each event. Snapshots bind the
+curvature identity and rebuild the saved effective factor. Omission or explicit
+`'gauss-newton'` keeps every existing operator, metadata byte and trajectory. See
+[the design and its status](../../docs/research/exact-curvature-next-implementation.md);
+no accepted force/time comparison exists yet.
+
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
 `previousPoseStart` changes the legacy initial guess; `continuousContact` adds a

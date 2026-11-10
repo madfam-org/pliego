@@ -222,6 +222,16 @@ physical stock, new-model booklet/device and8 ms acceptance remain open.
 The [lossless archive](research/evidence/membrane-state-modal-2026-11-10/README.md)
 retains every judged step and explicit private-artifact exclusions. Reader and
 historical defaults remain unchanged; research and implementation are not exhausted.
+The first next step, [exact membrane curvature](research/exact-curvature-next-implementation.md),
+is now implemented as opt-in `membraneCurvature: 'exact-hessian'` in that same
+reference-displacement domain only (milestone 1). Its membrane blocks and products
+equal the element exact Hessian, finite differences and an exact-rational oracle;
+a finite nonpositive pivot rebuilds the Gauss–Newton factor once, visibly, and
+snapshots replay the saved effective factor. Gauss–Newton and legacy trajectories
+are byte-identical to the previous engine. A 3%-compression control converges
+further than Gauss–Newton after three steps; that is a mechanism check, not
+acceptance. The frozen 24-trajectory comparison against the closed capture has
+not run, and no force/time, material, booklet or device result follows.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

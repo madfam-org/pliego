@@ -7,6 +7,7 @@
 import { assembleAndFactor } from './implicit.js';
 import { referenceStateSnapshot, prepareReferenceRestore, restoreReferenceState } from './reference-state.js';
 import { getIncrementSearchSnapshot, restoreIncrementSearchSnapshot, INCREMENT_SEARCH_IDENTITY, validateMembraneArithmeticIdentity } from './increment-search.js';
+import { exactCurvatureSnapshot, validateCurvatureSnapshot, restoreExactCurvature } from './membrane-curvature.js';
 
 /** @param {any} w */
 export function snapshotWorld(w) {
@@ -33,13 +34,14 @@ export function snapshotWorld(w) {
     energySearch: w.energySearch ? { backtracks: w.energySearch.backtracks, rejected: w.energySearch.rejected, ...getIncrementSearchSnapshot(w.energySearch) } : null,
     motionGuard: w.motionGuard?.snapshot() ?? null,
     coupledContact: w.coupledContact?.snapshot() ?? null,
-    ...(w.orthotropicMembrane ? { membrane: { signature: w.orthotropicMembraneSignature, factorCount: w.factorCount, pcgIterations: w.pcgIterations } } : {}),
+    ...(w.orthotropicMembrane ? { membrane: { signature: w.orthotropicMembraneSignature, factorCount: w.factorCount, pcgIterations: w.pcgIterations, ...exactCurvatureSnapshot(w) } } : {}),
   };
 }
 
 /** Restore a state captured by snapshotWorld() (bit-exact, including the factorisation). @param {any} w @param {any} s */
 export function restoreWorld(w, s) {
   validateMembraneArithmeticIdentity(w);
+  validateCurvatureSnapshot(w, s);
   const preparedReference = prepareReferenceRestore(w, s);
   if (!!w.orthotropicMembrane !== !!s.membrane || (w.orthotropicMembrane && s.membrane.signature !== w.orthotropicMembraneSignature)) throw new Error('Orthotropic membrane: snapshot model/reference/material convention mismatch');
   // Historical snapshots without arithmetic metadata mean total-energy. Bind
@@ -82,7 +84,8 @@ export function restoreWorld(w, s) {
     w.edgeComp.set(s.factor.edgeComp);
     const f = s.factor;
     w.driveOn.set(f.driveOn); T.active.set(f.active); T.k.set(f.k); T.mode.set(f.mode); T.verts.set(f.verts); T.c.set(f.c); T.dir.set(f.dir); T.len.set(f.len);
-    assembleAndFactor(w, f.x, f.coordinates);
+    // The saved effective operator (an exact factor or its Gauss–Newton fallback), never the current option.
+    assembleAndFactor(w, f.x, f.coordinates, f.curvature ?? 'gauss-newton');
     w._factorState = copyFactor(f); // the World refills its own buffers; the snapshot stays as it was
   }
   w.driveOn.set(s.driveOn); w.driveTarget.set(s.driveTarget);
@@ -98,6 +101,7 @@ export function restoreWorld(w, s) {
   if (w.motionGuard && s.motionGuard) w.motionGuard.restore(s.motionGuard);
   if (w.coupledContact && s.coupledContact) w.coupledContact.restore(s.coupledContact);
   if (w.orthotropicMembrane) { w.factorCount = s.membrane.factorCount; w.pcgIterations = s.membrane.pcgIterations; }
+  restoreExactCurvature(w, s);
 }
 
 /** A deep copy of a World's factorisation inputs (the World reuses its buffers). @param {any} f */
@@ -105,5 +109,6 @@ function copyFactor(f) {
   return {
     x: Float64Array.from(f.x), ...(f.coordinates ? { coordinates: f.coordinates } : {}), driveOn: Uint8Array.from(f.driveOn), edgeComp: Uint8Array.from(f.edgeComp), active: Uint8Array.from(f.active),
     k: Float64Array.from(f.k), mode: Uint8Array.from(f.mode), verts: Int32Array.from(f.verts), c: Float64Array.from(f.c), dir: Float64Array.from(f.dir), len: Float64Array.from(f.len),
+    ...(f.curvature ? { curvature: f.curvature } : {}),
   };
 }

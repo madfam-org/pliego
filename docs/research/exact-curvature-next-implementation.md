@@ -1,9 +1,15 @@
 # Smallest next implementation: exact membrane curvature with visible GN fallback
 
-> Design only, not implemented. Inspected engine source: `3d778abc179988e1c1a31b43d8048aa6a08d00b1` (every inspected tracked file is
-> byte-identical at the publication head). No World, test, benchmark, oracle or capture call ran. Published
-> from the durable design memo with a provenance note and cross-links only. Campaign context:
-> [paper physics campaign](paper-physics-campaign.md).
+> Design inspected at engine source `3d778abc179988e1c1a31b43d8048aa6a08d00b1` (every inspected tracked file is
+> byte-identical at the publication head). Campaign context: [paper physics campaign](paper-physics-campaign.md).
+>
+> **Status (2026-11-10): milestone 1 implemented, not accepted.** `membraneCurvature: 'exact-hessian'` exists in
+> the reference-displacement domain only: `src/xpbd/membrane-curvature.js` (identity, receipts, snapshot checks),
+> `src/xpbd/exact-newton.js` (policy loop), exact blocks/products in `orthotropic-membrane.js` and
+> `accurate-membrane.js`, explicit selectors in `implicit.js`/`pcg.js`, identifiable pivots in `blockchol.js`.
+> Checks: `test/exact-curvature-operators.test.js` and `test/exact-curvature-world.test.js`; Gauss–Newton and legacy
+> trajectories were compared byte for byte against the previous engine. Not done (milestone 2): binding the
+> research Newton observer to the effective operator, and the frozen same-24 accepted comparison below.
 
 Read-only preparation at clean engine source `3d778abc`.
 No source edits, World steps, oracle calls or counterfactual exact solves ran.

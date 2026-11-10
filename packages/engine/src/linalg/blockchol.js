@@ -48,6 +48,18 @@ export function minimumDegreeOrder(n, adj) {
   return perm;
 }
 
+/** The historical error text, plus an identifiable pivot failure. A finite
+ * nonpositive pivot means the assembled matrix is not positive definite; a
+ * nonfinite pivot means invalid arithmetic. Neither is regularized here.
+ * @param {number} block elimination step (permuted block) @param {number} freeIndex original block row
+ * @param {number} component 0..2 within the 3x3 diagonal block @param {number} value */
+function pivotError(block, freeIndex, component, value) {
+  const error = new Error(`BlockCholesky: matrix not positive definite at block ${block}`);
+  const finite = Number.isFinite(value);
+  /** @type {any} */ (error).pivotFailure = Object.freeze({ kind: finite ? 'finite-nonpositive' : 'nonfinite', block, freeIndex, component, value: finite ? value : null });
+  return error;
+}
+
 export class BlockCholesky {
   /**
    * @param {number} n number of block rows (free vertices)
@@ -163,8 +175,10 @@ export class BlockCholesky {
     }
   }
 
-  /** Numeric factorisation. Throws if the matrix is not positive definite. */
+  /** Numeric factorisation. Throws if the matrix is not positive definite; the
+   * partially written factor is then unusable (solve refuses until a new factor). */
   factor() {
+    this.factored = false;
     const n = this.n, Ap = this.Ap, Ai = this.Ai, Ax = this.Ax, Lp = this.Lp, Li = this.Li, Lx = this.Lx;
     const parent = this.parent, flag = this._flag, c = this._c, s = this._s, x = this._x;
     for (let j = 0; j < n; j++) c[j] = Lp[j] + 1; // diagonal goes first
@@ -226,15 +240,15 @@ export class BlockCholesky {
         Lx[l + 6] = y2; Lx[l + 7] = y5; Lx[l + 8] = y8;
       }
       // L_kk = chol(d)
-      if (!(d0 > 0)) throw new Error(`BlockCholesky: matrix not positive definite at block ${k}`);
+      if (!(d0 > 0)) throw pivotError(k, this.perm[k], 0, d0);
       const m00 = Math.sqrt(d0);
       const m10 = d1 / m00, m20 = d2 / m00;
       const e11 = d4 - m10 * m10;
-      if (!(e11 > 0)) throw new Error(`BlockCholesky: matrix not positive definite at block ${k}`);
+      if (!(e11 > 0)) throw pivotError(k, this.perm[k], 1, e11);
       const m11 = Math.sqrt(e11);
       const m21 = (d5 - m20 * m10) / m11;
       const e22 = d8 - m20 * m20 - m21 * m21;
-      if (!(e22 > 0)) throw new Error(`BlockCholesky: matrix not positive definite at block ${k}`);
+      if (!(e22 > 0)) throw pivotError(k, this.perm[k], 2, e22);
       const m22 = Math.sqrt(e22);
       const l = 9 * Lp[k];
       Li[Lp[k]] = k;

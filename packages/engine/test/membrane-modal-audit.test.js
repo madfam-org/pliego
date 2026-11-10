@@ -24,7 +24,7 @@ test('modal report comparator preserves failed gates and refuses hidden instrume
         solveObservation:{enabled:false},gates:{literalForceEverySubstep:false,perNewtonLinearDiagnostics:'missing'}}]}]};
     const a=join(dir,'a.json'),b=join(dir,'b.json'),out=join(dir,'out.json');writeFileSync(a,JSON.stringify(r));
     const s=structuredClone(r);s.recordedAt='second';writeFileSync(b,JSON.stringify(s));
-    const run=mode=>spawnSync(process.execPath,[join(bench,'compare-membrane-modal-audit.mjs'),a,b,...(mode?['--observer-comparison']:[]),'--out',out],{encoding:'utf8'});
+    const run=mode=>{rmSync(out,{force:true});return spawnSync(process.execPath,[join(bench,'compare-membrane-modal-audit.mjs'),a,b,...(mode?['--observer-comparison']:[]),'--out',out],{encoding:'utf8'});};
     assert.equal(run(false).status,0);assert.equal(JSON.parse(readFileSync(out)).allRequiredFieldsExactlyEqual,true);
     s.protocol.instrument=true;s.protocol.perNewtonLinearDiagnostics='measured';s.gates.perNewtonLinearDiagnostics=true;
     s.results[0].trajectories[0].solveObservation={enabled:true,records:[{actual:1}]};s.results[0].trajectories[0].gates.perNewtonLinearDiagnostics=true;

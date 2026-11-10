@@ -5,6 +5,7 @@
  * identical factorisation, so a restored world replays bit-identically).
  */
 import { assembleAndFactor } from './implicit.js';
+import { getIncrementSearchSnapshot, restoreIncrementSearchSnapshot, INCREMENT_SEARCH_IDENTITY } from './increment-search.js';
 
 /** @param {any} w */
 export function snapshotWorld(w) {
@@ -27,7 +28,7 @@ export function snapshotWorld(w) {
     edgeSide: w.edgeContact ? [...w.edgeContact.side] : [],
     factor: w._factorState ? copyFactor(w._factorState) : null,
     factorDir: Float64Array.from(w.factorDir),
-    energySearch: w.energySearch ? { backtracks: w.energySearch.backtracks, rejected: w.energySearch.rejected } : null,
+    energySearch: w.energySearch ? { backtracks: w.energySearch.backtracks, rejected: w.energySearch.rejected, ...getIncrementSearchSnapshot(w.energySearch) } : null,
     motionGuard: w.motionGuard?.snapshot() ?? null,
     coupledContact: w.coupledContact?.snapshot() ?? null,
     ...(w.orthotropicMembrane ? { membrane: { signature: w.orthotropicMembraneSignature, factorCount: w.factorCount, pcgIterations: w.pcgIterations } } : {}),
@@ -37,6 +38,19 @@ export function snapshotWorld(w) {
 /** Restore a state captured by snapshotWorld() (bit-exact, including the factorisation). @param {any} w @param {any} s */
 export function restoreWorld(w, s) {
   if (!!w.orthotropicMembrane !== !!s.membrane || (w.orthotropicMembrane && s.membrane.signature !== w.orthotropicMembraneSignature)) throw new Error('Orthotropic membrane: snapshot model/reference/material convention mismatch');
+  // Historical snapshots without arithmetic metadata mean total-energy. Bind
+  // policy AND diagnostics before touching any World/search/factor state.
+  const increment = w.opts.lineSearchArithmetic === INCREMENT_SEARCH_IDENTITY.name;
+  if (increment !== !!w.energySearch?.increment) throw new Error('Energy search: snapshot arithmetic identity mismatch (current option/search drift)');
+  const identity = s.energySearch?.arithmetic;
+  if (increment ? !identity || typeof identity !== 'object' || Array.isArray(identity) ||
+    Object.keys(identity).length !== Object.keys(INCREMENT_SEARCH_IDENTITY).length ||
+    !Object.entries(INCREMENT_SEARCH_IDENTITY).every(([key, value]) => identity[key] === value) :
+    identity !== undefined || s.energySearch?.increment !== undefined) throw new Error('Energy search: snapshot arithmetic identity mismatch');
+  const preparedSearch = w.energySearch ? Object.create(w.energySearch) : null;
+  if (increment && preparedSearch) preparedSearch.increment = structuredClone(w.energySearch.increment);
+  if (preparedSearch) restoreIncrementSearchSnapshot(preparedSearch, s.energySearch);
+  const preparedIncrement = increment ? getIncrementSearchSnapshot(preparedSearch) : null;
   w.x.set(s.x); w.v.set(s.v); w.theta.set(s.theta); w.restTheta.set(s.restTheta); w.memory.set(s.memory);
   w.hingeK.set(s.hingeK); w.driveK.set(s.driveK); w.torn = s.torn;
   w.fixedTarget.set(s.fixedTarget); w.userForce.set(s.userForce);
@@ -75,6 +89,7 @@ export function restoreWorld(w, s) {
   w._quiet = s.quiet;
   w._pcgFail = s.pcgFail;
   if (w.energySearch) { w.energySearch.backtracks = s.energySearch?.backtracks ?? 0; w.energySearch.rejected = s.energySearch?.rejected ?? 0; }
+  if (increment) restoreIncrementSearchSnapshot(w.energySearch, preparedIncrement);
   if (w.motionGuard && s.motionGuard) w.motionGuard.restore(s.motionGuard);
   if (w.coupledContact && s.coupledContact) w.coupledContact.restore(s.coupledContact);
   if (w.orthotropicMembrane) { w.factorCount = s.membrane.factorCount; w.pcgIterations = s.membrane.pcgIterations; }

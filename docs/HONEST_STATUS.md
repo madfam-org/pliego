@@ -149,10 +149,17 @@ while two refinement checks still fail. The unchanged base16 window retains 20
 local-convergence failures despite valid oracle/measurement/global balance.
 A separately labeled fourfold16 window converges on 216/216 and passes its
 bounded static same-mesh/eta/refinement gates under unchanged materials and
-threshold formulas. All failures remain retained. Stable search is bench-only;
-World timestep Armijo is unchanged. Fixed-pose 80/100-digit checks leave a retained
+threshold formulas. All failures remain retained. At that source stable search is bench-only;
+baseline World timestep Armijo is unchanged. Fixed-pose 80/100-digit checks leave a retained
 base failure above tolerance and prove no impossibility of another equilibrium.
 Physical stock, World time accuracy, new-law booklet, devices and 8 ms remain open.
+
+A subsequent [opt-in World membrane/inertia increment search](research/membrane-increment-search.md)
+now implements actual rounded trials and separate precision-limited/no-op decisions
+under an enforced all-free planar domain. Independent high-precision tests retain
+near-rest computed acceptances that are real potential increases. This arithmetic
+is not certified descent; endpoint force and time accuracy still require their
+unchanged independent gates. It is not enabled in the booklet reader.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

@@ -28,6 +28,7 @@ import { snapshotWorld, restoreWorld } from './state.js';
 import { JoinGates } from './gates.js';
 import { Presentation } from './presentation.js';
 import { EnergySearch } from './energy-search.js';
+import { validateIncrementDomain, getIncrementSearchSnapshot } from './increment-search.js';
 import { MotionGuard } from '../collision/motion-guard.js';
 import { CoupledContact } from './coupled-contact.js';
 import { OrthotropicMembrane } from './orthotropic-membrane.js';
@@ -42,7 +43,7 @@ export class World {
    * @param {{meshEdge?:number, substeps?:number, contact?:boolean, ground?:boolean, gravity?:boolean|number, seed?:number,
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
-   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, continuousContact?:boolean, ccdIterations?:number,
+   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
    *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
    *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none'}} [opts]
@@ -51,6 +52,8 @@ export class World {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
     this.doc = doc;
     const orthotropic = opts.membraneModel === 'orthotropic-stvk';
+    if (!['total-energy', 'membrane-inertia-increment'].includes(opts.lineSearchArithmetic ?? 'total-energy')) throw new RangeError('World: invalid lineSearchArithmetic');
+    if (opts.lineSearchArithmetic === 'membrane-inertia-increment' && (!orthotropic || opts.lineSearch !== true)) throw new Error('World: membrane-inertia-increment requires orthotropic-stvk and lineSearch:true');
     if (!['edge-springs', 'orthotropic-stvk'].includes(opts.membraneModel ?? 'edge-springs')) throw new RangeError('World: invalid membraneModel');
     const membraneKeys = ['membranePoissonConvention', 'membraneNu12', 'membraneCurvature', 'membraneProjection'];
     if (!orthotropic && membraneKeys.some(key => /** @type {any} */(opts)[key] !== undefined)) throw new Error('World: membrane research metadata requires orthotropic-stvk');
@@ -62,6 +65,7 @@ export class World {
       handFactor: opts.handFactor ?? K.HAND_FACTOR, plasticity: opts.plasticity ?? true, meshEdge: opts.meshEdge,
       physicalMembrane: opts.physicalMembrane ?? false,
       lineSearch: opts.lineSearch ?? false,
+      ...(opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchArithmetic: opts.lineSearchArithmetic } : {}),
       continuousContact: opts.continuousContact ?? false,
       barrierContact: opts.barrierContact ?? false,
       previousPoseStart: opts.previousPoseStart ?? false,
@@ -135,7 +139,7 @@ export class World {
     this.fixedTarget = Float64Array.from(this.x);
     this._clampCorrection();
     this.sys = buildSystem(this);
-    this.energySearch = this.opts.lineSearch ? new EnergySearch(3 * nV) : null;
+    this.energySearch = this.opts.lineSearch ? new EnergySearch(3 * nV, this.opts.lineSearchArithmetic) : null;
     this.factorDir = new Float64Array(3 * mesh.nE);
     this.edgeDir = new Float64Array(3 * mesh.nE);
     this.edgeK = new Float64Array(mesh.nE);
@@ -175,6 +179,7 @@ export class World {
     this.coupledContact?.initialise(this);
     this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
+    if (this.opts.lineSearchArithmetic === 'membrane-inertia-increment') validateIncrementDomain(this, this.x);
   }
 
   /** Stiffness, rest angles, yields and limits of membrane edges and hinges. */
@@ -406,7 +411,7 @@ export class World {
       this.energySearch?.begin(this);
       g.fill(0);
       gradient(this, x, g);
-      if (it > 0 || this.opts.previousPoseStart) for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
+      if (it > 0 || this.opts.previousPoseStart || this.opts.lineSearchArithmetic === 'membrane-inertia-increment') for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
       if (!this.dirty && !(this._pcgFail > 0)) {
         const r = pcgStep(this, x, g, K.PCG_MAX_ITER, K.PCG_RTOL);
         this.pcgIterations = r.iterations;
@@ -670,6 +675,7 @@ export class World {
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
       unheldWelds: this.gates.unheld(this),
       lineSearchBacktracks: this.energySearch?.backtracks ?? 0, lineSearchRejected: this.energySearch?.rejected ?? 0,
+      ...(this.opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchIncrement: getIncrementSearchSnapshot(this.energySearch) } : {}),
       continuousContact: this.motionGuard?.snapshot() ?? null,
       coupledContact: this.coupledContact?.snapshot() ?? null,
       ...(membrane ? { membrane: { model: 'orthotropic-stvk', convention: 'nu12', curvature: 'gauss-newton', projectionPolicy: 'none',

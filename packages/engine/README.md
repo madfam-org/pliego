@@ -97,6 +97,17 @@ later contact/strain projections, and does not make a single Newton iteration
 converged. The contact-free axial counterexample remains in
 `node packages/engine/bench/axial-pull.mjs`.
 
+`lineSearchArithmetic: 'membrane-inertia-increment'` selects a separate
+[planar membrane/inertia research search](../../docs/research/membrane-increment-search.md).
+It uses actual rounded trial displacements, a compensated gradient/remainder
+increment and strict computed Armijo, with explicit precision-limited zero-step
+and stationary-no-op decisions. Exact Y=0, all-free, undamped, zero-force and
+zero-omitted-hinge-work restrictions are enforced; contact, bending work and
+drives are unsupported. Its versioned diagnostics replay through snapshots.
+Independent Decimal tests retain near-rest cases where computed acceptance is
+a real potential increase: this is approximate arithmetic, not certified descent
+or force convergence. Omission and explicit `total-energy` preserve the old path.
+
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
 `previousPoseStart` changes the legacy initial guess; `continuousContact` adds a

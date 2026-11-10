@@ -5,6 +5,7 @@
 import { dihedral } from './dihedral.js';
 import { unwrap, termResidual, termProjector, TERM_STRING } from './implicit.js';
 import { hypot3 } from '../fastmath.js';
+import { beginIncrementSearch, finishIncrementSearch, initialiseIncrementSearch } from './increment-search.js';
 
 /** The actual per-substep implicit objective, in nJ. @param {any} w @param {Float64Array} x */
 export function implicitEnergy(w, x) {
@@ -44,12 +45,17 @@ export function implicitEnergy(w, x) {
 }
 
 export class EnergySearch {
-  constructor(n) { this.start = new Float64Array(n); this.delta = new Float64Array(n); this.energy = 0; this.backtracks = 0; this.rejected = 0; }
+  constructor(n, arithmetic = 'total-energy') {
+    this.start = new Float64Array(n); this.delta = new Float64Array(n); this.energy = 0; this.backtracks = 0; this.rejected = 0;
+    if (arithmetic === 'membrane-inertia-increment') { this.increment = /** @type {any} */ (null); initialiseIncrementSearch(this); }
+  }
   begin(w) {
+    if (this.increment || w.opts.lineSearchArithmetic === 'membrane-inertia-increment') return beginIncrementSearch(this, w);
     this.start.set(w.x); this.energy = implicitEnergy(w, w.x);
     if (!Number.isFinite(this.energy)) throw new Error('Implicit objective is non-finite before the Newton step');
   }
   finish(w, gradient) {
+    if (this.increment || w.opts.lineSearchArithmetic === 'membrane-inertia-increment') return finishIncrementSearch(this, w, gradient);
     const x = w.x, old = this.start, d = this.delta;
     let slope = 0;
     for (let i = 0; i < x.length; i++) { d[i] = x[i] - old[i]; if (w.invMass[Math.floor(i / 3)]) slope += gradient[i] * d[i]; }

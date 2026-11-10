@@ -5,6 +5,13 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Optional `lineSearchArithmetic: 'membrane-inertia-increment'` adds an enforced
+planar membrane/inertia experiment with actual rounded trials, strict computed
+Armijo, separate zero-step decisions and versioned snapshot diagnostics. Native
+World GN/PCG stepping remains in use. Independent Decimal tests retain tiny real
+potential-increase counterexamples; this is not certified descent or solved time
+accuracy. Default/explicit total-energy arithmetic and reader defaults remain unchanged.
+
 Optional `membraneModel: 'orthotropic-stvk'` adds objective per-triangle full-Q
 Green-strain membrane energy, exact gradients and an explicitly named PSD
 Gauss–Newton search matrix. It requires explicit uncapped/symmetric-compression,

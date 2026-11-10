@@ -3,6 +3,7 @@ import { EnergySearch } from '../src/xpbd/energy-search.js';
 import { hessianTimes } from '../src/xpbd/pcg.js';
 import { World } from '../src/index.js';
 import * as K from '../src/constants.js';
+import { createHash } from 'node:crypto';
 
 const attached = new WeakSet();
 const demand = (ok, message) => { if (!ok) throw new Error('membrane-modal-solve-observer: ' + message); };
@@ -12,6 +13,21 @@ const zero = a => a && Array.from(a).every(x => x === 0);
 const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
 const norm = a => a.reduce((sum, v) => Math.hypot(sum, v), 0);
 const maximum = a => a.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+const incrementMode = w => w.opts.lineSearchArithmetic === 'membrane-inertia-increment';
+
+function incrementTrial(before, candidate, gradient, last) {
+  demand(last && Number.isSafeInteger(last.trials) && last.trials >= 1 && last.trials <= 21 && finite(last.alpha) && last.alpha > 0, 'last actual increment trial unavailable');
+  demand(last.alpha === 2 ** -(last.trials - 1), 'actual increment alpha/trial count mismatch');
+  const after = last.trials === 1 ? Array.from(candidate) : Array.from(before.start, (x, i) => x + last.alpha * (candidate[i] - x));
+  const fields = { before: Array.from(before.start), after, xt: Array.from(before.xt), mass: Array.from(before.mass), h: [before.h], gradient: Array.from(gradient) };
+  const stateFloat64LE = {}, stateSHA256 = {};
+  for (const [key, values] of Object.entries(fields)) {
+    const bytes = Buffer.alloc(8 * values.length); values.forEach((v, i) => bytes.writeDoubleLE(v, 8 * i));
+    stateFloat64LE[key] = bytes.toString('base64'); stateSHA256[key] = createHash('sha256').update(bytes).digest('hex');
+  }
+  return { ...fields, h: before.h, runtime: { ...structuredClone(last), c1: 1e-4 }, stateFloat64LE, stateSHA256,
+    scope: 'last actual represented trial; after is not the restored final World endpoint when rejected; first trial is actual candidate, later trials use the exact runtime interpolation expression; LE binary64 binds all inputs' };
+}
 
 function domain(w) {
   const errors = [], check = (ok, message) => { if (!ok) errors.push(message); };
@@ -95,6 +111,7 @@ export function attachModalSolveObserver(context, { onIteration, retain = 'all',
         dirty: world.dirty, pcgFail: world._pcgFail, backtracks: this.backtracks, rejected: this.rejected,
         time: world.time, framesRun: world.framesRun, substepsRun: world.substepsRun, h: world.dt,
         errors: world === w && this === search ? domain(world) : ['unexpected World/search association'] };
+      if (incrementMode(world)) Object.assign(pending, { xt: world.xt.slice(), mass: world.mass.slice(), increment: structuredClone(this.increment) });
       if (world.framesRun !== world.substepsRun + 1) pending.errors.push('not inside the supported one-substep public call');
     } catch (cause) { pending = { iteration: counts.begins, errors: ['begin capture unavailable: ' + cause.message] }; }
     return result;
@@ -148,10 +165,31 @@ export function attachModalSolveObserver(context, { onIteration, retain = 'all',
       const backtracks = this.backtracks - before.backtracks, rejected = this.rejected - before.rejected;
       demand(Number.isSafeInteger(backtracks) && backtracks >= 0 && backtracks <= 20 && (rejected === 0 || rejected === 1), 'unrecognized search counter deltas');
       demand(rejected === 0 || backtracks === 0, 'rejected search changed accepted-backtrack count');
-      record.acceptedAlpha = rejected ? 0 : 2 ** -backtracks;
-      record.lineSearch = { accepted: rejected === 0, rejected: rejected === 1, acceptedBacktracks: backtracks,
-        rejectedTrialCount: null, rejectedTrialCountScope: 'not exposed by original EnergySearch; never inferred from accepted-backtrack counter' };
-      if (candidate) demand(w.x.every((x, i) => x === (rejected ? before.start[i] : backtracks ? before.start[i] + record.acceptedAlpha * (candidate[i] - before.start[i]) : candidate[i])), 'actual post-search position differs from counter-derived decision');
+      if (incrementMode(world)) {
+        demand(before.increment && this.increment && candidate, 'increment decision/counters unavailable');
+        const current = this.increment, last = current.last, decision = last?.decision;
+        demand(['accepted', 'stationary-noop', 'precision-limited-zero-step', 'rejected'].includes(decision), 'unknown increment decision');
+        const accepted = decision === 'accepted', stationaryNoop = decision === 'stationary-noop', precisionLimited = decision === 'precision-limited-zero-step';
+        demand(current.accepted - before.increment.accepted === Number(accepted) && current.stationaryNoops - before.increment.stationaryNoops === Number(stationaryNoop) &&
+          current.precisionLimited - before.increment.precisionLimited === Number(precisionLimited), 'increment decision/counter mismatch');
+        demand(rejected === Number(!accepted && !stationaryNoop), 'increment versus legacy rejection mismatch');
+        demand(Number.isSafeInteger(current.invalidTrials - before.increment.invalidTrials) && current.invalidTrials - before.increment.invalidTrials >= 0 && current.invalidTrials - before.increment.invalidTrials <= last.trials, 'invalid trial counter mismatch');
+        if (accepted) demand(last.alpha === 2 ** -backtracks && last.trials === backtracks + 1, 'accepted increment backtrack/alpha mismatch');
+        demand(Object.values(last).every(value => typeof value !== 'number' || finite(value)), 'nonfinite increment diagnostics');
+        record.acceptedAlpha = accepted ? last.alpha : stationaryNoop ? null : 0;
+        record.lineSearch = { accepted, stationaryNoop, precisionLimited, decision, rejected: rejected === 1, acceptedBacktracks: backtracks,
+          trials: last.trials, rejectedTrialCount: last.trials - Number(accepted || stationaryNoop),
+          rejectedTrialCountScope: 'actual new-mode trial count; stationary no-op is distinct from an accepted update' };
+        record.increment = structuredClone(current);
+        record.incrementTrial = incrementTrial(before, candidate, g, last);
+        if (accepted) demand(same(record.incrementTrial.after, w.x), 'accepted increment trial differs from actual final World');
+        if (stationaryNoop) demand(zero(record.acceptedRoundedDirection) && zero(g) && backtracks === 0, 'stationary no-op must have exact zero gradient and actual step');
+      } else {
+        record.acceptedAlpha = rejected ? 0 : 2 ** -backtracks;
+        record.lineSearch = { accepted: rejected === 0, rejected: rejected === 1, acceptedBacktracks: backtracks,
+          rejectedTrialCount: null, rejectedTrialCountScope: 'not exposed by original EnergySearch; never inferred from accepted-backtrack counter' };
+      }
+      if (candidate && !record.lineSearch.stationaryNoop) demand(w.x.every((x, i) => x === (rejected ? before.start[i] : backtracks ? before.start[i] + record.acceptedAlpha * (candidate[i] - before.start[i]) : candidate[i])), 'actual post-search position differs from counter-derived decision');
     } catch (cause) { missing.push(cause.message); }
     record.valid = missing.length === 0; emit(record);
     if (originalError) throw originalError;

@@ -97,8 +97,10 @@ World uses exact selected elastic gradient and a GN PSD search matrix rather tha
 Existing PCG permits direction relative tolerance 1e-3 and at most 12 iterations; direct-factor fallback is separate.
 These linear-search controls are not the strict nonlinear endpoint-force tolerance.
 
-The current World search compares raw total incremental energies with its existing Armijo allowance.
+The retained baseline World search compares raw total incremental energies with its existing Armijo allowance.
 The stable energy-increment method used by the static BVP bench is **not** adopted by World here.
+The subsequent [named planar increment candidate](membrane-increment-search.md)
+is a separate opt-in experiment; this baseline capture and its failures are retained.
 A predictor-start first iteration has zero inertia gradient because x equals xt.
 Previous-pose start includes inertia from iteration zero. It is a named controlled numerical candidate.
 Calling private `_newton` repeatedly from a benchmark would change these semantics and is forbidden.

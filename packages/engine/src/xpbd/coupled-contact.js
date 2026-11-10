@@ -8,14 +8,19 @@ import { implicitEnergy } from './energy-search.js';
 import { gradient, assembleAndFactor } from './implicit.js';
 import { updateTerms } from './joins.js';
 import { pcgStep } from './pcg.js';
+import { LocalContactSolve } from './local-contact-solve.js';
 
 export class CoupledContact {
-  /** @param {any} w @param {{barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,ccdIterations?:number}} [opts] */
+  /** @param {any} w @param {{barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,ccdIterations?:number,barrierLinearSolver?:'pcg'|'direct-local'|'auto'}} [opts] */
   constructor(w, opts = {}) {
     this.potential = new BarrierContact(w, { distance: opts.barrierDistance, stiffness: opts.barrierStiffness });
     this.guard = new MotionGuard(w, opts.ccdIterations);
     this.maxIterations = opts.barrierIterations ?? 8; this.cgIterations = opts.barrierCgIterations ?? 128;
     this.tolerance = opts.barrierTolerance ?? 1e-3;
+    this.linearSolver = opts.barrierLinearSolver ?? 'pcg';
+    if (!['pcg', 'direct-local', 'auto'].includes(this.linearSolver)) throw new RangeError('Coupled contact: invalid linear solver');
+    this.local = this.linearSolver === 'pcg' ? null : new LocalContactSolve(w);
+    this.directSolves = 0; this.nonlocalFallbacks = 0;
     for (const n of [this.maxIterations, this.cgIterations]) if (!(Number.isInteger(n) && n > 0)) throw new RangeError('Coupled contact: iteration budgets must be positive integers');
     if (!(Number.isFinite(this.tolerance) && this.tolerance > 0)) throw new RangeError('Coupled contact: tolerance must be positive finite');
     this.start = new Float64Array(w.x.length); this.delta = new Float64Array(w.x.length);
@@ -66,6 +71,11 @@ export class CoupledContact {
    * observable failure count and the same feasibility/energy search.
    */
   direction(w) {
+    if (this.local) {
+      if (this.local.solve(w, this.potential)) { this.directSolves++; return; }
+      if (this.linearSolver === 'direct-local') throw new Error('Coupled contact: nonlocal contact exceeds the direct-local pattern');
+      this.nonlocalFallbacks++;
+    }
     if (w.dirty || !w._factorState) this.refactor(w);
     let result = pcgStep(w, w.x, w.g, this.cgIterations, 1e-5, this.multiply, false);
     this.cgTotal += result.iterations;
@@ -125,6 +135,6 @@ export class CoupledContact {
     w._contacts = this.last.contacts; w._grounded = this.last.grounded; w._edgeContacts = 0;
   }
 
-  snapshot() { return { configuration: { distance: this.potential.distance, stiffness: this.potential.stiffness, iterations: this.maxIterations, cgIterations: this.cgIterations, tolerance: this.tolerance }, initialAdjustment: this.initialAdjustment, maximumEndResidual: this.maximumEndResidual, steps: this.steps, unconverged: this.unconverged, iterations: this.iterations, cgTotal: this.cgTotal, linearFailures: this.linearFailures, backtracks: this.backtracks, rejected: this.rejected, last: { ...this.last }, guard: this.guard.snapshot() }; }
-  restore(s) { for (const key of ['initialAdjustment', 'maximumEndResidual', 'steps', 'unconverged', 'iterations', 'cgTotal', 'linearFailures', 'backtracks', 'rejected']) this[key] = s[key]; this.last = { ...s.last }; this.guard.restore(s.guard); }
+  snapshot() { return { configuration: { distance: this.potential.distance, stiffness: this.potential.stiffness, iterations: this.maxIterations, cgIterations: this.cgIterations, tolerance: this.tolerance, linearSolver: this.linearSolver }, initialAdjustment: this.initialAdjustment, maximumEndResidual: this.maximumEndResidual, steps: this.steps, unconverged: this.unconverged, iterations: this.iterations, cgTotal: this.cgTotal, directSolves: this.directSolves, nonlocalFallbacks: this.nonlocalFallbacks, linearFailures: this.linearFailures, backtracks: this.backtracks, rejected: this.rejected, last: { ...this.last }, guard: this.guard.snapshot() }; }
+  restore(s) { for (const key of ['initialAdjustment', 'maximumEndResidual', 'steps', 'unconverged', 'iterations', 'cgTotal', 'directSolves', 'nonlocalFallbacks', 'linearFailures', 'backtracks', 'rejected']) this[key] = s[key]; this.last = { ...s.last }; this.guard.restore(s.guard); }
 }

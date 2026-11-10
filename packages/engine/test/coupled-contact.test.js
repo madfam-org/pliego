@@ -26,7 +26,8 @@ function pointMass() {
 }
 
 test('coupled normal force reaches the independently bracketed point-mass equilibrium without tunneling', () => {
-  const w = pointMass(), solver = new CoupledContact(w, { barrierStiffness: 100, barrierIterations: 32, barrierTolerance: 1e-9 });
+  for (const barrierLinearSolver of ['pcg', 'direct-local', 'auto']) {
+  const w = pointMass(), solver = new CoupledContact(w, { barrierStiffness: 100, barrierIterations: 32, barrierTolerance: 1e-9, barrierLinearSolver });
   solver.solve(w);
   const derivatives = new Float64Array(2); let lo = 0.1, hi = 0.15;
   for (let i = 0; i < 80; i++) {
@@ -36,7 +37,8 @@ test('coupled normal force reaches the independently bracketed point-mass equili
   assert.ok(Math.abs(w.x[1] - (lo + hi) / 2) < 1e-10);
   assert.ok(solver.last.converged); assert.ok(w.x[1] > 0.1); assert.ok(solver.guard.limited > 0);
   assert.ok(solver.last.energyAfter <= solver.last.energyBefore + 1e-12);
-  console.log(`coupled-element: y=${w.x[1]} mm, bracketed equilibrium=${(lo + hi) / 2}, residual=${solver.last.residual} µN, iterations=${solver.last.iterations}`);
+  console.log(`coupled-element: solver=${barrierLinearSolver}, y=${w.x[1]} mm, bracketed equilibrium=${(lo + hi) / 2}, residual=${solver.last.residual} µN, iterations=${solver.last.iterations}`);
+  }
 });
 
 test('iteration exhaustion is observable and cannot turn a zero-velocity candidate into sleep', () => {

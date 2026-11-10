@@ -93,8 +93,17 @@ function addOuter(/** @type {BlockCholesky} */ ch, /** @type {number} */ s, /** 
  * @param {any} w World @param {Float64Array} x
  */
 export function assembleAndFactor(w, x) {
+  assembleElastic(w, x, w.sys.ch);
+  if (w.sys.ch) { w.sys.ch.factor(); w.factorCount++; }
+}
+
+/** Assemble into a compatible pattern without changing the saved elastic factor.
+ * currentOperator omits slack strings, matching the matrix-free GN operator.
+ * @param {any} w @param {Float64Array} x @param {BlockCholesky|null} ch
+ * @param {boolean} [currentOperator]
+ */
+export function assembleElastic(w, x, ch, currentOperator = false) {
   const S = w.sys;
-  const ch = /** @type {BlockCholesky} */(S.ch);
   if (!ch) return;
   ch.clear();
   const { nV } = w.mesh;
@@ -117,11 +126,13 @@ export function assembleAndFactor(w, x) {
     // max(MEMBRANE_COMPRESSION, MODEL_COMPRESSION)·k: never below the true stiffness (an
     // underestimate overshoots when an edge re-enters tension), and only 4× below tension so the
     // branch switch of edges near zero strain does not wreck the stale preconditioner
-    const k = w.edgeComp[e] ? w.kCompModel * kM[e] : kM[e];
+    const k = w.opts.consistentMembraneCurvature
+      ? (L < w.mesh.edgeLen[e] ? w.kCompFactor : 1) * kM[e]
+      : w.edgeComp[e] ? w.kCompModel * kM[e] : kM[e];
     addOuter(ch, S.diagSlot[a], k, u, 0, u, 0);
     addOuter(ch, S.diagSlot[b], k, u, 0, u, 0);
     addOuter(ch, S.edgeSlot[e], -k, u, 0, u, 0);
-    w.factorDir[3 * e] = u[0]; w.factorDir[3 * e + 1] = u[1]; w.factorDir[3 * e + 2] = u[2];
+    if (ch === S.ch) { w.factorDir[3 * e] = u[0]; w.factorDir[3 * e + 1] = u[1]; w.factorDir[3 * e + 2] = u[2]; }
     void dx; void dy; void dz;
   }
   const Hg = w.mesh.hinges;
@@ -137,6 +148,7 @@ export function assembleAndFactor(w, x) {
   const P = new Float64Array(9);
   for (let t = 0; t < T.count; t++) {
     if (!T.active[t] || T.k[t] === 0) continue;
+    if (currentOperator && T.mode[t] === TERM_STRING && !w._stringTaut[t]) continue;
     termProjector(T, t, x, P);
     const k = T.k[t];
     const s0 = T.start[t], s1 = T.start[t + 1];
@@ -152,8 +164,6 @@ export function assembleAndFactor(w, x) {
       ch.add(s, BLK);
     }
   }
-  ch.factor();
-  w.factorCount++;
 }
 
 /**
@@ -202,7 +212,9 @@ export function gradient(w, x, g) {
     // leave it as soon as the edge is in tension (the model never underestimates a stretched edge)
     const strain = (L - L0[e]) / L0[e];
     if (w.edgeComp[e]) { if (strain >= 0) w.edgeComp[e] = 0; } else if (strain < -MODEL_COMP_ENTER) w.edgeComp[e] = 1;
-    w.edgeK[e] = w.edgeComp[e] ? w.kCompModel * kM[e] : kM[e];
+    w.edgeK[e] = w.opts.consistentMembraneCurvature
+      ? (L < L0[e] ? w.kCompFactor : 1) * kM[e]
+      : w.edgeComp[e] ? w.kCompModel * kM[e] : kM[e];
     const d = L - L0[e];
     const f = ((d < 0 ? w.kCompFactor * kM[e] : kM[e]) * d) / L;
     g[a] -= f * dx; g[a + 1] -= f * dy; g[a + 2] -= f * dz;

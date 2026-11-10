@@ -38,6 +38,8 @@ function treeHash(directory) {
 const engineTreeSHA256 = treeHash(dirname(fileURLToPath(engineURL)));
 const readerSHA256 = hash(Buffer.concat(['book-layout.js', 'book-world.js'].map(name => readFileSync(new URL(`../../../apps/web/studio/src/${name}`, import.meta.url)))));
 const harnessSHA256 = hash(readFileSync(fileURLToPath(import.meta.url)));
+const sourceStart = { git: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
+  status: execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }) };
 const quantile = (a, q) => a.length ? a.toSorted((x, y) => x - y)[Math.min(a.length - 1, Math.ceil(a.length * q) - 1)] : null;
 
 // Independent vertex-to-flat-resting-block audit. This does not cover moving
@@ -61,6 +63,7 @@ function overlapWithRestingBlocks(w, active, positions) {
 }
 
 function run(model, settings) {
+  const trajectory = createHash('sha256');
   const times = [], activeTimes = [], options = { ...engineOptions(json), ...settings, mechanismRate: 240, plasticity: false };
   const r = { model, options, frames: 0, turns: 0, maxStrain: 0, maxCompression: 0,
     minY: Infinity, finite: true, error: null, completed: false, modelCachePeak: 0,
@@ -68,7 +71,7 @@ function run(model, settings) {
     continuousContact: { steps: 0, limited: 0, iterationLimits: 0, precisionLimits: 0, initialOverlaps: 0, minimumTime: 1 } };
   r.framesEndingWithZeroProgress = 0;
   r.activeFrames = 0; r.asleepFrames = 0;
-  r.coupledContact = { steps: 0, unconverged: 0, iterations: 0, cgTotal: 0, linearFailures: 0, backtracks: 0, rejected: 0, maximumEndResidual: 0, maximumInitialAdjustment: 0 };
+  r.coupledContact = { steps: 0, unconverged: 0, iterations: 0, cgTotal: 0, directSolves: 0, nonlocalFallbacks: 0, linearFailures: 0, backtracks: 0, rejected: 0, maximumEndResidual: 0, maximumInitialAdjustment: 0 };
   let w;
   const start = performance.now();
   try {
@@ -88,6 +91,12 @@ function run(model, settings) {
     }
     if (settings.previousPoseStart && (w.world || w).opts.previousPoseStart !== true) {
       r.supported = false; throw new Error('Engine does not support the previousPoseStart experiment');
+    }
+    if (settings.consistentMembraneCurvature && (w.world || w).opts.consistentMembraneCurvature !== true) {
+      r.supported = false; throw new Error('Engine does not support consistent membrane curvature');
+    }
+    if (settings.barrierLinearSolver && (w.world || w).coupledContact?.linearSolver !== settings.barrierLinearSolver) {
+      r.supported = false; throw new Error('Engine does not support the requested barrier linear solver');
     }
     const seenCCD = new Map(), seenCoupled = new Map();
     for (const { index, goal } of turnPlan) {
@@ -111,7 +120,7 @@ function run(model, settings) {
         }
         if (stats.coupledContact) {
           const c = stats.coupledContact, prev = seenCoupled.get(native) || {};
-          for (const key of ['steps', 'unconverged', 'iterations', 'cgTotal', 'linearFailures', 'backtracks', 'rejected']) r.coupledContact[key] += c[key] - (prev[key] || 0);
+          for (const key of ['steps', 'unconverged', 'iterations', 'cgTotal', 'directSolves', 'nonlocalFallbacks', 'linearFailures', 'backtracks', 'rejected']) r.coupledContact[key] += (c[key] || 0) - (prev[key] || 0);
           r.coupledContact.maximumEndResidual = Math.max(r.coupledContact.maximumEndResidual, c.maximumEndResidual);
           r.coupledContact.maximumInitialAdjustment = Math.max(r.coupledContact.maximumInitialAdjustment, c.initialAdjustment);
           seenCoupled.set(native, c);
@@ -120,6 +129,8 @@ function run(model, settings) {
         r.maxStrain = Math.max(r.maxStrain, stats.maxStrain);
         r.maxCompression = Math.max(r.maxCompression, stats.maxCompression);
         const positions = released?.positions || native.x;
+        trajectory.update(`${index}:${goal}:${f}:${positions.length}\0`);
+        trajectory.update(Buffer.from(positions.buffer, positions.byteOffset, positions.byteLength));
         for (let i = 1; i < positions.length; i += 3) r.minY = Math.min(r.minY, positions[i]);
         if (w.models) r.modelCachePeak = Math.max(r.modelCachePeak, w.models.size);
         if (model === 'active-leaf') r.vertexRestBlockOverlapMm = Math.max(r.vertexRestBlockOverlapMm,
@@ -150,6 +161,7 @@ function run(model, settings) {
   r.stepMeanMs = times.length ? times.reduce((a, b) => a + b, 0) / times.length : null;
   r.stepP95Ms = quantile(times, 0.95); r.stepMaxMs = times.length ? Math.max(...times) : null;
   r.activeStepP95Ms = quantile(activeTimes, 0.95);
+  r.trajectorySHA256 = trajectory.digest('hex');
   r.gates = {
     numerical1Percent: r.completed && r.finite && r.maxStrain <= 0.01 && r.minY >= -0.1,
     numericalPoint1Percent: r.completed && r.finite && r.maxStrain <= 0.001 && r.minY >= -0.1,
@@ -164,7 +176,15 @@ function run(model, settings) {
 }
 
 const results = [];
-const settingsMatrix = process.argv.includes('--barrier-matrix')
+const settingsMatrix = process.argv.includes('--local-matrix')
+  ? [{ substeps: 8, newtonIterations: 1 }, { substeps: 8, barrierContact: true, barrierIterations: 8 },
+    { substeps: 8, barrierContact: true, barrierIterations: 8, barrierLinearSolver: 'direct-local' },
+    { substeps: 8, barrierContact: true, barrierIterations: 8, barrierLinearSolver: 'direct-local', consistentMembraneCurvature: true },
+    { substeps: 8, barrierContact: true, barrierIterations: 8, consistentMembraneCurvature: true },
+    { substeps: 8, barrierContact: true, barrierIterations: 32, barrierLinearSolver: 'direct-local', consistentMembraneCurvature: true },
+    { substeps: 8, physicalMembrane: true, barrierContact: true, barrierIterations: 8, barrierLinearSolver: 'direct-local', consistentMembraneCurvature: true },
+    { substeps: 1, barrierContact: true, barrierIterations: 64, barrierLinearSolver: 'direct-local', consistentMembraneCurvature: true }]
+  : process.argv.includes('--barrier-matrix')
   ? [{ substeps: 8, newtonIterations: 1 }, { substeps: 8, newtonIterations: 8, lineSearch: true },
     { substeps: 8, newtonIterations: 1, lineSearch: true, previousPoseStart: true },
     { substeps: 8, newtonIterations: 1, barrierContact: true, barrierIterations: 8 },
@@ -185,9 +205,9 @@ for (const settings of caseIndex === null ? settingsMatrix : [settingsMatrix[cas
   }
 }
 const report = {
-  schema: 'pliego-paper-campaign/0.2', recordedAt: new Date().toISOString(),
-  source: { git: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
-    dirty: !!execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim(),
+  schema: 'pliego-paper-campaign/0.3', recordedAt: new Date().toISOString(),
+  source: { git: sourceStart.git,
+    dirty: !!sourceStart.status.trim(),
     engine: arg('--engine-label') || (enginePath ? 'external engine (caller must record source)' : 'current checkout'),
     engineTreeSHA256, readerSHA256, harnessSHA256,
     metricsSHA256: hash(readFileSync(new URL('./paper-metrics.mjs', import.meta.url))),
@@ -195,7 +215,8 @@ const report = {
   runtime: { node: process.version, arch: arch(), platform: platform(), cpu: cpus()[0]?.model },
   protocol: { seed: 1, frameSeconds: 1 / 60, framesPerTurn: 84, requestedTurns, stopOnZeroProgress,
     selectedCase: caseIndex ?? 'all', models,
-    fallback: false, repetitions: 1, matrix: process.argv.includes('--barrier-matrix') ? 'coupled-contact' : process.argv.includes('--contact-matrix') ? 'continuous-contact' : 'solver',
+    fallback: false, repetitions: 1, matrix: process.argv.includes('--local-matrix') ? 'local-contact' : process.argv.includes('--barrier-matrix') ? 'coupled-contact' : process.argv.includes('--contact-matrix') ? 'continuous-contact' : 'solver',
+    trajectory: 'SHA256 of turn/frame headers and every sampled pre-promotion Float64 pose, native-endian; includes frames completed before failure',
     endpointGate: 'every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation',
     continuousContact: 'experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; stopOnZeroProgress declares whether zero progress stops the case',
     timingScope: 'World.step only; includes first-frame/JIT cost; active-step p95 excludes frames asleep at start; exploratory local measurement',
@@ -208,6 +229,13 @@ const report = {
   })),
   results,
 };
+if (sourceStart.git !== execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim()
+  || sourceStart.status !== execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' })
+  || engineTreeSHA256 !== treeHash(dirname(fileURLToPath(engineURL)))
+  || harnessSHA256 !== hash(readFileSync(fileURLToPath(import.meta.url)))
+  || readerSHA256 !== hash(Buffer.concat(['book-layout.js', 'book-world.js'].map(name => readFileSync(new URL(`../../../apps/web/studio/src/${name}`, import.meta.url)))))) {
+  throw new Error('Source changed during benchmark; discard these results and rerun');
+}
 const output = JSON.stringify(report, null, 2) + '\n';
 if (arg('--out')) writeFileSync(resolve(arg('--out')), output); else process.stdout.write(output);
 console.error(`paper-campaign: cases=${results.length} completedProtocols=${results.filter(r => r.completed).length} numericalGate=${results.filter(r => r.gates.numerical1Percent).length} endpointGate=${results.filter(r => r.gates.endpointProgress).length} solverConvergenceGate=${results.filter(r => r.gates.allSolverStepsConverged === true).length}`);

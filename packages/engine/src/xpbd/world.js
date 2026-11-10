@@ -42,7 +42,8 @@ export class World {
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, continuousContact?:boolean, ccdIterations?:number,
-   *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean}} [opts]
+   *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
+   *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -58,6 +59,7 @@ export class World {
       continuousContact: opts.continuousContact ?? false,
       barrierContact: opts.barrierContact ?? false,
       previousPoseStart: opts.previousPoseStart ?? false,
+      consistentMembraneCurvature: opts.consistentMembraneCurvature ?? false,
     };
     if (typeof this.opts.physicalMembrane !== 'boolean') throw new TypeError('World: physicalMembrane must be boolean');
     this.membraneCap = this.opts.physicalMembrane ? Infinity : K.MEMBRANE_CAP_LENGTH;
@@ -66,6 +68,7 @@ export class World {
     if (this.opts.continuousContact && !this.opts.contact) throw new Error('World: continuousContact requires contact');
     if (typeof this.opts.barrierContact !== 'boolean') throw new TypeError('World: barrierContact must be boolean');
     if (typeof this.opts.previousPoseStart !== 'boolean') throw new TypeError('World: previousPoseStart must be boolean');
+    if (typeof this.opts.consistentMembraneCurvature !== 'boolean') throw new TypeError('World: consistentMembraneCurvature must be boolean');
     if (this.opts.barrierContact && (!this.opts.contact || this.opts.continuousContact)) throw new Error('World: barrierContact requires contact and replaces continuousContact');
     if (!(this.opts.substeps >= 1 && Number.isInteger(this.opts.substeps))) throw new RangeError('World: substeps must be a positive integer');
     const mesh = buildMesh(doc, { meshEdge: opts.meshEdge });

@@ -16,6 +16,32 @@ check. Contacts contribute to both the force gradient and a matrix-free PSD
 radial Gauss–Newton operator. Elastic block Cholesky remains the preconditioner;
 dynamic contact stencils do not need its fixed sparsity pattern to be enlarged.
 
+Two further opt-in ablations address linear/nonlinear work, without changing the
+energy, force law, CCD bound or force tolerance:
+
+- `consistentMembraneCurvature: true` uses the actual compressed spring's radial
+  coefficient (`membraneCompression`, normally 0.05), including near-zero
+  compression. The default GN approximation instead uses hysteresis and model
+  compression 0.25, or full tensile stiffness near rest. This is radial GN, not
+  the exact spring Hessian; transverse geometric stiffness remains omitted.
+- `barrierLinearSolver: 'direct-local'` freshly assembles elastic, inertial and
+  radial contact blocks in a separate sparse Cholesky matrix. It first checks
+  every nonzero free contact pair against the elastic graph. Static/free contact
+  often fits; general nonlocal free/free contact does not. Strict mode refuses a
+  missing pair before changing positions. `'auto'` instead counts a fallback to
+  the original PCG path; the default remains `'pcg'`. The separate factor does
+  not modify the saved elastic preconditioner or its snapshot state. Slack
+  strings are omitted from this current operator, matching matrix-free PCG.
+
+Tests compare the combined direct direction to the independently applied
+matrix-free operator, verify the scalar contact root, preserve active-contact
+snapshot replay, and exercise strict rejection/automatic fallback. These tests
+do not establish booklet convergence, speed or general self-contact support.
+The `--local-matrix` benchmark isolates direct solving and consistent curvature,
+then varies the nonlinear budget, uncapped modulus and substep count. Its 0.3
+report adds a hash of every sampled pre-promotion pose and rejects source changes
+during a run; a flat promoted endpoint alone is insufficient replay evidence.
+
 The barrier used here is explicitly a function of **distance gap**, not C-IPC's
 squared-distance offset formulation:
 

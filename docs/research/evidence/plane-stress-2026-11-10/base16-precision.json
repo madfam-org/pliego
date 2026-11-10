@@ -1,0 +1,245 @@
+{
+  "schema": "pliego-plane-stress-precision/0.1",
+  "decimalDigits": 80,
+  "selection": {
+    "cells": 16,
+    "pattern": "forward",
+    "grain": 0.0,
+    "boundary": "clamped-left",
+    "eta": 2.5e-05
+  },
+  "provenance": {
+    "inputSHA256": "f92dc92696ddf9424889e069fb8a41a52b6db2a6c8ffefe90f95ed8aea96b68f",
+    "diagnosticSHA256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec",
+    "runtimeSourceGit": "9bbeb9faaacbf1fc48c11ba17c3dca422a3997f6",
+    "storedInputSHA256": "176d36e7ed8d367750bae8eaa2f0f5214c70d29832ea5b812f59010403287013",
+    "storedInputSource": "parent-report-captured",
+    "storedInputHashEncoding": "sorted-key compact UTF-8 JSON; Python numeric encoding",
+    "actualPositionFloat64LESHA256": "f1c773d32cc74da462ba3c178663d0036a41bdb1e3d205a98af2f7a4d3509043"
+  },
+  "runtimeStatus": "iteration-limit",
+  "iterations": 100,
+  "forceToleranceMicroN": 3.4375e-06,
+  "summary": {
+    "independentExactUVMaterial": {
+      "freeResidualInfinityMicroN": 8.32626423182754e-06,
+      "passesUnchangedForceGate": false
+    },
+    "storedCoefficientPolynomial": {
+      "freeResidualInfinityMicroN": 8.32626424251173e-06,
+      "passesUnchangedForceGate": false
+    },
+    "runtime": {
+      "freeResidualInfinityMicroN": 8.12134566530176e-06,
+      "passesUnchangedForceGate": false
+    }
+  },
+  "maximumRuntimeGradientErrorMicroN": {
+    "independentExactUVMaterial": 4.2753290973333157e-07,
+    "storedCoefficientPolynomial": 4.275329566606923e-07
+  },
+  "worstFreeDofs": [
+    {
+      "dof": 334,
+      "node": 167,
+      "component": "u",
+      "uv": [
+        35,
+        22.5
+      ],
+      "worldPosition": [
+        35.00086168913948,
+        0.0,
+        -22.49998230393347
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": -8.32626423182754e-06,
+        "storedCoefficientPolynomial": -8.32626424251173e-06,
+        "runtime": -8.12134566530176e-06
+      }
+    },
+    {
+      "dof": 234,
+      "node": 117,
+      "component": "u",
+      "uv": [
+        37.5,
+        15
+      ],
+      "worldPosition": [
+        37.50092584924115,
+        0.0,
+        -15.00004127902722
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": -7.1773699088864215e-06,
+        "storedCoefficientPolynomial": -7.17736991925538e-06,
+        "runtime": -7.023234083192165e-06
+      }
+    },
+    {
+      "dof": 336,
+      "node": 168,
+      "component": "u",
+      "uv": [
+        37.5,
+        22.5
+      ],
+      "worldPosition": [
+        37.500924406792606,
+        0.0,
+        -22.49998194084499
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": 6.954723760944096e-06,
+        "storedCoefficientPolynomial": 6.954723749320537e-06,
+        "runtime": 6.919830012108719e-06
+      }
+    },
+    {
+      "dof": 302,
+      "node": 151,
+      "component": "u",
+      "uv": [
+        37.5,
+        20
+      ],
+      "worldPosition": [
+        37.50092416246872,
+        0.0,
+        -20.00000174770966
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": -5.05224055995927e-06,
+        "storedCoefficientPolynomial": -5.052240571961118e-06,
+        "runtime": -5.165081557123585e-06
+      }
+    },
+    {
+      "dof": 230,
+      "node": 115,
+      "component": "u",
+      "uv": [
+        32.5,
+        15
+      ],
+      "worldPosition": [
+        32.500800414586436,
+        0.0,
+        -15.00003932868252
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": 4.808367000935939e-06,
+        "storedCoefficientPolynomial": 4.8083669916274665e-06,
+        "runtime": 4.546386236370381e-06
+      }
+    },
+    {
+      "dof": 236,
+      "node": 118,
+      "component": "u",
+      "uv": [
+        40,
+        15
+      ],
+      "worldPosition": [
+        40.000988580092354,
+        0.0,
+        -15.000042571473944
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": 4.449117479902769e-06,
+        "storedCoefficientPolynomial": 4.539131261086025e-06,
+        "runtime": 4.526846169028431e-06
+      }
+    },
+    {
+      "dof": 400,
+      "node": 200,
+      "component": "u",
+      "uv": [
+        32.5,
+        27.5
+      ],
+      "worldPosition": [
+        32.500801622587595,
+        0.0,
+        -27.49994486287726
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": -4.183724675941503e-06,
+        "storedCoefficientPolynomial": -4.183724683789092e-06,
+        "runtime": -4.199286749440034e-06
+      }
+    },
+    {
+      "dof": 332,
+      "node": 166,
+      "component": "u",
+      "uv": [
+        32.5,
+        22.5
+      ],
+      "worldPosition": [
+        32.500798955783395,
+        0.0,
+        -22.49998260140771
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": 4.369782338238927e-06,
+        "storedCoefficientPolynomial": 4.369782327892845e-06,
+        "runtime": 4.169470226855765e-06
+      }
+    },
+    {
+      "dof": 196,
+      "node": 98,
+      "component": "u",
+      "uv": [
+        32.5,
+        12.5
+      ],
+      "worldPosition": [
+        32.50080231083626,
+        0.0,
+        -12.500058190169904
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": -4.018837842435012e-06,
+        "storedCoefficientPolynomial": -4.018837850143541e-06,
+        "runtime": -3.948794883967821e-06
+      }
+    },
+    {
+      "dof": 540,
+      "node": 270,
+      "component": "u",
+      "uv": [
+        37.5,
+        37.5
+      ],
+      "worldPosition": [
+        37.500936622666494,
+        0.0,
+        -37.499866876200876
+      ],
+      "coordinateULPMm": 7.105427357601002e-15,
+      "residualMicroN": {
+        "independentExactUVMaterial": 3.9180300859133186e-06,
+        "storedCoefficientPolynomial": 3.918030088323653e-06,
+        "runtime": 3.8956882644214375e-06
+      }
+    }
+  ],
+  "scope": "fixed actual-f64-pose evaluation only, no solve/time integration/calibration or proof that no representable equilibrium exists; independent exact-UV/Q real StVK and optional stored-coefficient polynomial kept separate; reference-displacement reconstruction verified",
+  "rotationConvention": "high-precision declared-degree material rotation, exact binary64 material/UV/pose inputs; optional rounded runtime coefficient constants interpreted exactly; coherent difference-form alpha0=-(alpha1+alpha2) for polynomial derivative"
+}

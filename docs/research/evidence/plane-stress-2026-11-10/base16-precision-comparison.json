@@ -1,0 +1,68 @@
+{
+  "schema": "pliego-plane-stress-precision-comparison/0.1",
+  "sourceGit": "9bbeb9faaacbf1fc48c11ba17c3dca422a3997f6",
+  "input": {
+    "path": "base16-stable.json",
+    "sha256": "f92dc92696ddf9424889e069fb8a41a52b6db2a6c8ffefe90f95ed8aea96b68f"
+  },
+  "diagnostic": {
+    "path": "packages/engine/bench/plane-stress-precision.py",
+    "sha256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec",
+    "matchesRuntimeSourcePin": true
+  },
+  "reports": [
+    {
+      "path": "base16-precision.json",
+      "sha256": "800d6f71c71d371bf3ec48ece811c6d9317d2005f069a01f8275bfda6b57e5c7",
+      "decimalDigits": 80
+    },
+    {
+      "path": "base16-precision-100.json",
+      "sha256": "be2bea84a9209382e00958beb828c36710955e4baaf3e72460c48d4af21a21df",
+      "decimalDigits": 100
+    }
+  ],
+  "excludedFields": [
+    "decimalDigits"
+  ],
+  "allOtherFieldsExactlyEqual": true,
+  "provenanceExactlyEqual": true,
+  "provenanceChecks": [
+    {
+      "inputBytesHashMatches": true,
+      "helperHashMatchesCurrentAndRuntimePin": true,
+      "parentFixtureCanonicalHashMatches": true,
+      "actualPositionHashMatches": true
+    },
+    {
+      "inputBytesHashMatches": true,
+      "helperHashMatchesCurrentAndRuntimePin": true,
+      "parentFixtureCanonicalHashMatches": true,
+      "actualPositionHashMatches": true
+    }
+  ],
+  "selection": {
+    "cells": 16,
+    "pattern": "forward",
+    "grain": 0.0,
+    "boundary": "clamped-left",
+    "eta": 2.5e-05
+  },
+  "forceToleranceMicroN": 3.4375e-06,
+  "summary": {
+    "independentExactUVMaterial": {
+      "freeResidualInfinityMicroN": 8.32626423182754e-06,
+      "passesUnchangedForceGate": false
+    },
+    "storedCoefficientPolynomial": {
+      "freeResidualInfinityMicroN": 8.32626424251173e-06,
+      "passesUnchangedForceGate": false
+    },
+    "runtime": {
+      "freeResidualInfinityMicroN": 8.12134566530176e-06,
+      "passesUnchangedForceGate": false
+    }
+  },
+  "comparison": "parsed JSON structural equality after removing ONLY the top-level decimalDigits; every provenance field and numeric result retained",
+  "scope": "selected fixed-pose numerical evidence; does not prove absence of a representable equilibrium, stock calibration, time accuracy or booklet readiness"
+}

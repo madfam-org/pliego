@@ -218,20 +218,30 @@ Reviewed control migration preserves the old audit's failed accuracy gates.
 Fresh old-law capped/uncapped booklet regressions also complete eight turns and
 672 frames, preserving all recorded non-time physics with 0/5168 and 0/5200 force
 misses. This does not accept the new law for booklet reading or certify shipping
-UI/devices. No stock or reader default changes. Solved non-affine FE, controlled
+UI/devices. No stock or reader default changes. Broader solved FE coverage, controlled
 time/iteration accuracy, locking/bending, crease/join/hand support, physical
 calibration, the 8 ms target and real-device interaction remain required.
 
-The next [non-affine static BVP](nonaffine-membrane-bvp.md) is implemented and
-acceptance-pending: full left clamp/right dead traction, actual runtime membrane
-GN restricted to planar DOFs, independent linear CST assembly/solve and independent
-acceptance checks. Raw total-potential stagnation remains a numerical control;
-the stable increment candidate changes only bench globalization, leaving World
-timestep searches intact. Base eta=[1e-4,5e-5,2.5e-5] remains unchanged. A separate
-fourfold [4e-4,2e-4,1e-4] window investigates precision versus finite-strain effects
-without changing material or threshold formulas; base failures remain retained,
-and no fourfold outcome is asserted. Clean run/repeat/ablation and refinement
-gates must be resolved before a bounded static acceptance claim.
+The [non-affine static BVP](nonaffine-membrane-bvp.md) now has
+[complete clean 9bb evidence](evidence/plane-stress-2026-11-10/README.md): actual
+runtime planar GN statics versus an independent linear CST solve, with independent
+acceptance validation. Stable base8 converges on 162/162 loads versus 100/162 for
+raw total-potential Armijo, while two refinement checks still fail. Unchanged
+base eta=[1e-4,5e-5,2.5e-5] through cells16 retains 20 failures (13 iteration limits,
+seven rejected searches), all at cells16; valid global balance is separate from
+failed local residuals. The separate fourfold [4e-4,2e-4,1e-4] window passes 216/216
+loads and 36/36 refined/topology comparisons. Maximum finest-load area-L2 error
+is .050020%; maximum 8→16 sampled-field change is .523075% runtime/.523366% reference.
+All eight captures repeat or compare under exact same-source controls; the
+factor-four proof retains every base failure and unchanged material/threshold
+formula. Stable globalization remains bench-only, not a World timestep change.
+
+Selected 80/100-digit fixed-pose evaluation leaves the retained base16 failure
+above force tolerance under both exact-UV/material and stored-coefficient
+polynomials. This is precision evidence, not a proof of unrepresentable
+equilibrium. The fourfold pass closes only the specified synthetic static window;
+physical stock, controlled time accuracy, bending/locking, contact/strain limits,
+crease/join/hand support, new-law booklet, devices and 8 ms remain open.
 
 ## Separate gates
 
@@ -326,8 +336,9 @@ source and disclose their timing/accuracy scope.
    progress, strain and cost. This does not close coupled contact research.
 2. Finish booklet browser/device acceptance, arbitrary-location hand coupling and
    derived companion page mapping with immutable fabrication provenance.
-3. Complete clean-source acceptance of the implemented non-affine static BVP,
-   then add C-IPC comparison and measured stock fixtures;
+3. Resolve retained small-load/refined static failures and extend the bounded
+   BVP evidence toward controlled time/iteration studies, C-IPC comparison and
+   measured stock fixtures;
    keep actual time/iteration convergence separate from constitutive accuracy. Quantify stiffness
    capping, grain response, crease hysteresis and mesh/time convergence.
 4. Implement and compare local XPBD, developable/rod and VBD/AVBD candidates on those

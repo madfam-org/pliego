@@ -138,19 +138,21 @@ error is .003078%; independent finite-Green agreement covers 1944 poses and
 36 scaled finite-rotation cases. Old spring-law booklet controls separately
 preserve all recorded physics over both eight-turn protocols, with 0/5168 capped
 and 0/5200 uncapped force misses. This is not new-law booklet or shipping UI
-acceptance. Stocks and reader defaults remain unchanged; non-affine solved FE,
+acceptance. Stocks and reader defaults remain unchanged; broader static FE coverage,
 time accuracy, locking/bending, joins/drives, measured stock, 8 ms and device
 gates remain open. The synthetic pass is not a stable catalogue release.
 
-The [solved non-affine membrane stage](research/nonaffine-membrane-bvp.md) is now
-implemented but has no accepted clean-source full-matrix result yet. It compares
-actual runtime planar statics with an independently assembled/solved linear CST
-reference, retains the raw-potential Armijo failure control and independently
-validates residuals, reactions and acceptance traces. Stable energy increments
-are bench-only; World timestep searches are unchanged. Base load-window failures
-remain retained while a separate fourfold window studies numerical resolution
-and finite-strain effects under the same material and threshold formulas. No
-fourfold success, mesh-converged model or new booklet/device result is claimed.
+The [solved non-affine membrane stage](research/nonaffine-membrane-bvp.md) now has
+[clean source 9bb captures and exact repeats](research/evidence/plane-stress-2026-11-10/README.md).
+Stable base8 converges on 162/162 loads versus 100/162 with raw total potentials,
+while two refinement checks still fail. The unchanged base16 window retains 20
+local-convergence failures despite valid oracle/measurement/global balance.
+A separately labeled fourfold16 window converges on 216/216 and passes its
+bounded static same-mesh/eta/refinement gates under unchanged materials and
+threshold formulas. All failures remain retained. Stable search is bench-only;
+World timestep Armijo is unchanged. Fixed-pose 80/100-digit checks leave a retained
+base failure above tolerance and prove no impossibility of another equilibrium.
+Physical stock, World time accuracy, new-law booklet, devices and 8 ms remain open.
 
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the

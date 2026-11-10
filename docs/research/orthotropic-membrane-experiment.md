@@ -6,7 +6,7 @@ Status: clean-source synthetic constitutive and finite-objectivity gates pass at
 [strict comparison](evidence/paper-2026-11-10/orthotropic-comparison.json) retain
 36 new-law cases and 108 legacy controls with exact non-recording agreement.
 Old-model eight-turn booklet regression controls also preserve recorded physics.
-New-model booklet acceptance, measured stock, solved non-affine FE, time accuracy
+New-model booklet acceptance, measured stock, broader FE coverage, time accuracy
 and the 8 ms/device gates remain open. This is not a stable catalogue release.
 
 The [accepted scalar-spring audit](membrane-constitutive-audit.md) retains the
@@ -182,12 +182,15 @@ The package contains 614149 unpacked bytes (192625 packed). This validation is
 pinned to `25ca58d`; no deployment or stable catalogue release follows.
 
 An independently assembled/solved [non-affine membrane BVP](nonaffine-membrane-bvp.md)
-is now implemented with actual runtime planar GN statics, an independent linear
-CST oracle, explicit acceptance validation and raw/stable globalization controls.
-Clean-source acceptance remains pending. Base load failures stay retained; a
-separate fourfold load window studies numerical resolution versus finite strain,
-with no fourfold outcome claimed. Stable increments are used only in the bench
-static search; World timestep Armijo remains unchanged. Controlled time/iteration
+now has [clean source 9bb evidence](evidence/plane-stress-2026-11-10/README.md).
+Stable base8 converges on 162/162 loads versus 100/162 for raw total potentials;
+two refinement comparisons still fail. Refinement of the unchanged base window
+retains 20 failures at cells16. A separate fourfold16 window converges on 216/216
+and passes its bounded same-mesh/eta/refinement gates, with exact repeats and
+controlled input-scaling proof. These outcomes remain separate. Selected fixed-
+pose 80/100-digit precision evaluation leaves the retained base failure above its
+force threshold; it proves neither a new equilibrium nor unrepresentability.
+Stable increments remain bench-only; World timestep Armijo is unchanged. Controlled time/iteration
 accuracy, membrane locking/bending, crease/join/hand support, contact/strain limits,
 measured stocks and new-model booklet/device acceptance remain owed.
 This bounded pass does not certify full-shell accuracy, fastest abstraction or

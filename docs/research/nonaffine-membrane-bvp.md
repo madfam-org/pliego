@@ -1,8 +1,11 @@
 # Independently solved non-affine membrane boundary problem
 
-Status: **accepted source/results pending**. This implemented research stage has
-predeclared gates and retained development failures. Clean source-pinned full
-run/repeat/ablation evidence is required before quantitative acceptance.
+Status: accepted source `9bbeb9faaacbf1fc48c11ba17c3dca422a3997f6`.
+The [complete evidence](evidence/plane-stress-2026-11-10/README.md) retains eight
+captures, exact repeats and controlled method/load comparisons. The separate
+fourfold window passes this bounded synthetic static protocol; the unchanged
+base16 window retains 20 convergence failures. World timestep searches, reader
+defaults and stock values remain unchanged.
 
 The question is whether the actual research orthotropic-StVK membrane, minimized
 to a declared exact-gradient static residual, approaches an independently solved
@@ -42,8 +45,9 @@ the unchanged `--load-window base` values above. This measures the numerical-
 resolution/finite-strain window with identical materials, accuracy thresholds
 and residual-threshold formula. The realized absolute residual bound still
 follows its declared nodal-load scale. Base-window failures must remain retained;
-the separate window cannot overwrite or relabel them. No fourfold result is
-claimed at this checkpoint.
+the separate window cannot overwrite or relabel them. The accepted fourfold16
+result passes 216/216 loads and its same-mesh/eta/refinement gates; that bounded
+pass does not repair the retained base-window failures.
 
 Mesh coordinates/connectivity, material, constructor options, force vectors and
 hard constrained DOFs are fingerprinted. Every load starts from zero displacement
@@ -115,12 +119,13 @@ numerical evaluation of the objective increment; it does not change material,
 loads, constraints, starting pose, solver budget or physical accuracy thresholds.
 Both modes run from the same pinned source for the accepted ablation.
 
-Development traces exposed backtracking stagnation near equilibrium: the
-predicted GN decrease can be far smaller than roundoff in separately evaluated
-U-f·u. One dirty smoke witness reached 100 accepted tiny steps and iteration-limit,
-with zero rejected line searches. It must not be described as “100 rejected
-searches.” Final documentation must retain the accepted control's actual counts
-and traces, including failures, rather than promoting this witness to acceptance.
+The accepted raw base8 control exposes backtracking stagnation near equilibrium:
+the predicted GN decrease can be far smaller than roundoff in separately evaluated
+U-f·u. It converges on 100/162 loads, with 58 iteration limits, four rejected
+searches and 80867 backtracks. Iteration-limit traces contain accepted tiny steps;
+they must not be described as 100 rejected searches. The matched stable candidate
+converges on 162/162 loads in three or four iterations without backtracking.
+All force/material/accuracy thresholds remain unchanged, and all failures repeat.
 
 ## Stable increment of the same declared energy
 
@@ -210,14 +215,40 @@ nonconvergence; eta dependence is finite-strain behavior. A same-mesh small-load
 mismatch after convergence points to model/assembly/boundary mapping, while
 refinement sensitivity is discretization. There is no timestep error here.
 
-## Provisional observations and acceptance still pending
+## Accepted outcomes and limits
 
-Development cells2/4/8 runs complete 162 loads with convergence, same-mesh and
-eta-separation gates passing under the stable policy, while two mesh comparisons
-still fail. These are development observations only. They do not justify a
-mesh-converged or accepted full-BVP claim. Further refinement is being evaluated
-and can expose coordinate/force precision limits; no higher-resolution outcome
-is asserted here. Accepted source/results remain pending.
+The [source-pinned reports and comparisons](evidence/plane-stress-2026-11-10/README.md)
+retain each result separately. All independent reference and measurement checks
+pass; faithfully measured nonconvergence is still a failed numerical solve.
+
+| Study | Converged / loads | Remaining limit |
+|---|---:|---|
+| Raw base8 |100/162 |58 iteration limits and 4 rejected searches |
+| Stable base8 |162/162 |2/36 refinement/topology comparisons fail 1% |
+| Stable base16 |196/216 |13 iteration limits and 7 rejected searches |
+| Stable fourfold16 |216/216 |Bounded static gates pass; broader physics unmeasured |
+
+All 20 base16 failures occur at cells16. Sixteen finest-load solves fail; four
+more fail at the middle amplitude. Global balance and genuine non-affine scope
+pass separately from the failed exact free residual. Only three refined
+comparisons are valid passes; 33 are invalid for acceptance because the required
+finest solve did not converge, not 33 measured discretization-limit breaches.
+
+Fourfold16 passes all 72 finest-load 1% field/max-node/energy/reaction gates and
+all 36 refinement/topology comparisons. Maximum finest-load errors are .050020%
+area-L2, .060720% maximum-node, .044001% energy and .021716% reaction-vector error.
+Last-halving normalized displacement/energy changes are .049924%/.043963%, below
+.1%. Maximum 8→16 sampled-field change is .523075% runtime/.523366% reference.
+This is a synthetic result for the specified load window and declared gates;
+it does not establish arbitrary-load or finer-mesh convergence.
+
+A retained base16/forward/grain0 clamp at eta 2.5e-5 still fails its 3.4375e-6
+microN force threshold: runtime residual 8.12135e-6, with independent exact-UV/
+material and stored-coefficient fixed-pose Decimal residuals≈8.32626e-6. The
+80/100-digit reports agree apart from the digit count and name the archived
+input bytes. Better evaluation does not make the pose an equilibrium or prove
+that no representable binary64 equilibrium exists. Original-load failures remain
+open numerical-resolution evidence, not calibration or time-integration findings.
 
 ## Reproduction and clean-source evidence
 
@@ -235,14 +266,18 @@ node packages/engine/bench/compare-plane-stress-audit.mjs --method-comparison /t
 ```
 
 To investigate the separate fourfold window, use fresh outputs and repeat the
-same control/candidate/repeat sequence with `--load-window fourfold`:
+same control/candidate/repeat sequence with the chosen matrix/window. The accepted
+refined candidate uses `--max-cells 16`, and its separate window uses:
 
 ```sh
-node packages/engine/bench/plane-stress-audit.mjs --max-cells 8 --load-window fourfold --line-search energy-difference --out /tmp/pliego-fe-fourfold-run.json
+node packages/engine/bench/plane-stress-audit.mjs --max-cells 16 --load-window fourfold --line-search energy-difference --out /tmp/pliego-fe-fourfold-run.json
 ```
 
-The same-source method comparator keeps loadWindow/loadScales fixed. It must not
-be used to relabel a cross-window change as only a globalization change.
+The method comparator keeps loadWindow/loadScales fixed. A separate
+`--load-comparison` mode checks the prescribed factor-four changes and independent
+linear scaling; it retains both windows' outcomes. The accepted evidence includes
+four strict repeats, one same-window method comparison and one load comparison.
+All six are rerun on the compacted archives with matching input hashes.
 
 The harness fingerprints runtime source, helpers, independent acceptance reducer,
 comparator, oracle/self-tests, every engine JS test and the fixture builder,

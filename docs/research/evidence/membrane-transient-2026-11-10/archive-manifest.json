@@ -1,0 +1,39 @@
+{
+  "schema": "pliego-modal-archive/0.1",
+  "node": "v20.19.5",
+  "sourceGit": "93f6653136bc37c4feff48c86f88259000c7dde8",
+  "toolSHA256": "21969f709847b62a26d099415fb86670a4550c8fe37ce632def7ff12b757bcad",
+  "records": [
+    {
+      "file": "diagnostic.json",
+      "representation": "complete original",
+      "sha256": "db235d86c022470fe58f4bd44b6495ff07b892ab1b35c784fc7553c1982110d8",
+      "originalBytes": 40684804,
+      "storedBytes": 40684804,
+      "allOriginalBytesExact": true
+    },
+    {
+      "file": "diagnostic-repeat.delta.json",
+      "representation": "lossless declared-path delta",
+      "sha256": "54e5b46ea2134334c9759e2f63d5ffe98369c7edbc81f6875a8ac93054f6e36c",
+      "target": "diagnostic-repeat.json",
+      "targetSHA256": "338f122996624b9fd7da905e95811df73771cab73909c34052ff159ef23afe56",
+      "originalBytes": 40684804,
+      "storedBytes": 641,
+      "allOriginalBytesExact": true
+    },
+    {
+      "file": "diagnostic-uninstrumented.delta.json",
+      "representation": "lossless declared-path delta",
+      "sha256": "0d455aebbddac5e485a67ff9df0a719a1ebaa303a728f8fdb69c55cad4be08e9",
+      "target": "diagnostic-uninstrumented.json",
+      "targetSHA256": "3b2b72589a743f3fd8f4ca7c41b9bbe44f2f44c94869285c2776476149d8796c",
+      "originalBytes": 19596375,
+      "storedBytes": 23779,
+      "allOriginalBytesExact": true
+    }
+  ],
+  "originalBytes": 100965983,
+  "storedBytes": 40709224,
+  "method": "complete diagnostic capture plus two independently verified timestamp/observer-only deltas; JSON.stringify reconstructs every original captured byte and original SHA256; no simulation/metric/gate data omitted"
+}

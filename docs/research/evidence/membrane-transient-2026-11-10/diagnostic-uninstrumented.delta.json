@@ -1,0 +1,735 @@
+{
+  "schema": "pliego-modal-capture-delta/0.1",
+  "kind": "observer",
+  "base": "diagnostic.json",
+  "baseSHA256": "db235d86c022470fe58f4bd44b6495ff07b892ab1b35c784fc7553c1982110d8",
+  "target": "diagnostic-uninstrumented.json",
+  "targetSHA256": "3b2b72589a743f3fd8f4ca7c41b9bbe44f2f44c94869285c2776476149d8796c",
+  "targetBytes": 19596375,
+  "replacements": [
+    {
+      "path": [
+        "recordedAt"
+      ],
+      "value": "2026-11-10T13:20:25.747Z"
+    },
+    {
+      "path": [
+        "protocol",
+        "instrument"
+      ],
+      "value": false
+    },
+    {
+      "path": [
+        "protocol",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not exposed by basic public-step observer; explicitly missing"
+    },
+    {
+      "path": [
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        0,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        0,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        1,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        1,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        2,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        2,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        3,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        3,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        4,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        4,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        5,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        5,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        6,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        6,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        7,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        7,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        8,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        8,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        9,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        9,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        10,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        10,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        11,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        11,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        12,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        12,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        13,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        13,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        14,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        14,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        15,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        15,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        16,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        16,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        17,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        17,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        18,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        18,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        19,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        19,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        20,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        20,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        21,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        21,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        22,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        22,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        23,
+        "solveObservation"
+      ],
+      "value": {
+        "enabled": false,
+        "counts": null,
+        "callbackErrors": [],
+        "trace": [],
+        "snapshots": {},
+        "invariantRecordMetadata": "lineSearch rejection trial count is not exposed; source/domain/equation definitions are fixed by the observer and retained in full worst/first event snapshots; all per-event changing quantities above are retained",
+        "scope": "transparent wrappers around actual EnergySearch originals; nominal packed solution and actual rounded direction independently checked with actual pre-search GN operator; no repeated solver or changed physics"
+      }
+    },
+    {
+      "path": [
+        "results",
+        0,
+        "trajectories",
+        23,
+        "gates",
+        "perNewtonLinearDiagnostics"
+      ],
+      "value": "not measured"
+    }
+  ],
+  "scope": "lossless reconstruction of the entire captured JSON byte stream; no field/trace/failure removed; only already verified timestamp or observer-metadata differences stored"
+}

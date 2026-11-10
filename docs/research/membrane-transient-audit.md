@@ -1,6 +1,8 @@
 # Actual-World membrane modal transient experiment
 
-Implementation and protocol checkpoint, 2026-11-10. **Accepted clean-source diagnostics and repeats pending.**
+Clean diagnostic source [`93f6653`](https://github.com/madfam-org/pliego/commit/93f6653136bc37c4feff48c86f88259000c7dde8), 2026-11-10.
+[Complete captures, strict repeat and observation/precision proofs](evidence/membrane-transient-2026-11-10/README.md)
+are retained. **Every trajectory contains strict force failures; time accuracy remains unaccepted.**
 This stage extends the membrane campaign from static equilibrium to actual World time stepping.
 The wider mission remains accuracy and interactive paper reading with separate acceptance gates.
 A diagnostic subset does not exhaust that mission or substitute for complete transient acceptance.
@@ -12,9 +14,8 @@ real `World.step(World.dt)` calls, an independent linear CST modal reference and
 No surrogate 2D integrator, repeated private Newton call, hidden pin, oracle predictor or trajectory injection is used.
 Materials, thickness, areal density and rest geometry retain their physical engine values.
 
-At this checkpoint there is **no accepted full-trajectory evidence** and no time-accuracy acceptance.
-A dirty-source development run completes the 24-trajectory smoke diagnostic, with every trajectory
-containing strict force failures. Its trajectory comparisons guide diagnosis; they do not establish solved time accuracy.
+The clean-source smoke diagnostic completes and repeats24 full trajectories, with every trajectory
+containing strict force failures. The captures establish reproducible diagnostics, not solved time accuracy.
 The current audit hard-codes whole time-accuracy acceptance false until all remaining isolation/trend/full-matrix gates exist and pass.
 
 This experiment does not validate bending, buckling, contact, joining, finite deformation dynamics,
@@ -176,7 +177,7 @@ The implemented diagnostic protocol uses z0 at most .08, integer timestep refine
 A=.004 mm, Newton budgets 1/4/16, and predictor/previous-pose starts.
 The smoke geometry is cells2, forward diagonals, grain0: 24 complete trajectories when actually run.
 The full geometry matrix is cells2/cells4, forward/alternating/perturbed, grains0/45: 12 cases, 288 diagnostic trajectories.
-The earlier one-step probe is retained separately; the current development diagnostic completes all 24 smoke trajectories.
+The retained clean smoke capture completes all 24 full trajectories; the earlier one-step development probe is not counted as another trajectory result.
 
 The separately declared window protocol uses z0 at most .04 and refinements 1/2/4/8/16,
 A=.08/.04/.02/.01 mm, budgets16/32, and both starts: 80 smoke or 960 full-matrix trajectories.
@@ -213,8 +214,12 @@ Use the binary payload for exact state reconstruction, not JSON arrays alone.
 Before/after source guards bind git SHA/status, the engine source tree, modal tools/tests,
 imported independent CST code and fixture builder. Dirty runs are development only.
 Input/output fingerprints bind the initial oracle and response requests, and their unchanged core reference is checked.
-A future strict comparator must cover every nonrecording report value and fingerprint its own implementation.
-Accepted evidence must preserve failed gates and retained failure states, with source/test/replay provenance.
+The strict comparator covers every report field except recordedAt and fingerprints its implementation.
+A separately named observer ablation excludes only observation selector/records/completeness metadata,
+while preserving exact physics/force/state/metric parity. Both comparisons pass at the clean source.
+The [evidence archive](evidence/membrane-transient-2026-11-10/README.md) retains the full first capture
+and declared-path deltas reconstructing every original repeat/control byte and SHA256. Reconstruct
+the complete reports before rerunning official comparisons; no captured failure or field is omitted.
 
 Implemented CLI, from the repository root:
 
@@ -225,12 +230,14 @@ Implemented CLI, from the repository root:
 Development can explicitly add `--allow-dirty`; such a report is never accepted clean-source evidence.
 Outputs must be new paths outside the checkout. Repeated accepted runs require distinct output files.
 
-## Development observation and precision interpretation
+## Clean-source diagnostic outcomes and precision interpretation
 
-The dirty-source development diagnostic completes 24 smoke trajectories and 7110 actual public substeps.
-Independent reference, live measurement and solve-observer coverage checks pass, while all 24 trajectories
-contain strict endpoint-force failures: 6975/7110 substeps miss the unchanged literal threshold.
-These are **development results without an accepted source pin or strict repeat**, not accepted evidence.
+The clean-source diagnostic completes 24 smoke trajectories and 7110 actual public substeps.
+Independent reference, live measurement and 49770-event solve-observer coverage checks pass, while all 24
+trajectories contain strict endpoint-force failures: 6975/7110 substeps miss the unchanged literal threshold.
+The whole report repeats exactly except recordedAt, and observed/unobserved physics remains exactly equal.
+These are accepted-source diagnostic results, not time-accuracy acceptance. All 16 source CI checks pass,
+including 214 engine/123 web tests, 46 typechecked sources and the 96-file package.
 
 Maximum actual-rounded-initial discrete-BE full-state error is .00043004 fraction, or about .0431%.
 Maximum continuous full-state errors decrease from about 22.31% to 11.87%, 6.124% and 3.111%
@@ -239,17 +246,15 @@ individual displacement/velocity and energy gates remain separately reported.
 Small discrete-state errors do not repair failed force solves or establish an isolated first-order time limit.
 The single amplitude does not demonstrate small-strain separation, and only one geometry is measured here.
 
-The earlier 24-case **one-step** probe has a different count and scope: four first steps pass force,
-while twenty fail. Those four local passes must not be presented as four passing full trajectories.
-All corresponding full trajectories contain failures. The full source-pinned matrix, repeats,
-amplitude/all-step budget isolation and time trend remain open.
+A passing first substep is not a passing trajectory. All 24 retained full trajectories contain failures.
+The larger full geometry/window matrix, amplitude/all-step budget isolation and time trend remain open.
 
-A prototype 80-digit fixed-pose check evaluates two retained development failures, separately under
-independent exact-UV/material StVK and the stored-runtime-coefficient polynomial, plus real stored
-M/h^2*(x-xt). Both remain above the unchanged force threshold. The selected search-stalled state is
-about .79948 microN against 8.8140e-5 microN; the finer-step state is about .0108206 microN.
-These are pointwise development diagnostics, not accepted precision captures, a new solve,
-or proof that no other representable equilibrium exists.
+The retained80/100-digit fixed-pose witnesses separately evaluate independent exact-UV/material StVK
+and the stored-runtime-coefficient polynomial, plus real stored M/h^2*(x-xt). Both remain above the
+unchanged force threshold. Independent UV residuals are about .799479 microN at the selected search-stalled
+state and .0108206 microN at the finer-step state, against 8.8140e-5 microN. Each 80/100 pair agrees on
+all 335 parsed leaves except decimalDigits, including source/input/coefficient/LE-state provenance.
+These are pointwise endpoint diagnostics, not a new solve or proof that no other representable equilibrium exists.
 
 Absolute positions introduce a possible precision interaction: M/h^2 magnifies represented x-xt spacing.
 The diagnostic scale m ULP(x)/h^2, or relatively ULP(x)/(A z^2), is not a rigorous bound,
@@ -274,5 +279,5 @@ Its particular Newmark accuracy, stability and energy properties do not apply to
 examines implicit-Euler artificial dissipation. Its PDE examples are not membrane validation.
 The modal recurrence, discrete energy loss and World-specific conclusions here are independent derivations.
 
-Accepted results, clean-source pin, exact repeats and clean-source solve-history evidence remain pending.
+Clean-source diagnostics and exact repeats are retained; strict solves, full isolation/refinement and whole time acceptance remain open.
 No optimality, lowest-abstraction, exhausted-research or production-readiness conclusion follows from this checkpoint.

@@ -154,15 +154,16 @@ World timestep Armijo is unchanged. Fixed-pose 80/100-digit checks leave a retai
 base failure above tolerance and prove no impossibility of another equilibrium.
 Physical stock, World time accuracy, new-law booklet, devices and 8 ms remain open.
 
-The [actual-World transient audit](research/membrane-transient-audit.md) is now
-implemented with an independent free-CST modal oracle, live exact-gradient force
-validation and a transparent bench-only GN/PCG/search observer. A development-only
-24-trajectory smoke run preserves honest force failures in every trajectory,
-despite small differences from exact discrete backward Euler. Continuous-time,
-small-amplitude and solve-isolation acceptance remain open; accepted clean-source
-captures and repeats are pending. Native masses, runtime timestep search, stocks
-and reader defaults are unchanged. This is neither measured-paper nor new-law
-booklet/device/8 ms acceptance.
+The [actual-World transient audit](research/membrane-transient-audit.md) now has
+[clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).
+All 24 smoke trajectories contain strict force failures: 6975/7110 substeps miss
+the unchanged threshold, despite small discrete-BE state errors. Independent
+80/100-digit checks leave two retained endpoints above tolerance. Native mass,
+World timestep search, stocks and reader defaults are unchanged. The lossless
+archive reconstructs every original captured byte, including failures. Time,
+amplitude/solve isolation, broader geometry, material, new-law booklet, devices
+and 8 ms acceptance remain open. All 16 source CI checks pass, including 214 engine
+and 123 web tests; that does not close the physics failures.
 
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the

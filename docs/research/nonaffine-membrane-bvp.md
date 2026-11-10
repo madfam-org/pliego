@@ -15,13 +15,13 @@ unknown field and constrained reactions. It remains a synthetic **2D static BVP*
 not a timestep, buckling, physical-paper, new-law booklet or device certificate.
 
 The next [actual-World transient experiment](membrane-transient-audit.md) now
-implements a free-sheet modal oracle, real public substeps, live force validation
-and transparent solve observation. Its development-only smoke trajectories all
-retain strict force failures; clean-source captures/repeats and time acceptance
-remain pending. It reuses the independently checked linear CST assembler but
-introduces native mass and two distinct continuous/discrete time truths. The
-static fourfold pass above does not transfer to that transient problem, and
-World's raw timestep Armijo remains unchanged.
+retains [clean-source captures, repeats and observation/precision proofs](evidence/membrane-transient-2026-11-10/README.md).
+It reuses the independent linear CST assembler with native mass and separate
+continuous/discrete truths. Every one of 24 full smoke trajectories has strict
+force failures; 6975/7110 substeps miss tolerance. Two 80/100-digit endpoint checks
+remain failures. This is reproducible diagnosis, not time acceptance, and the
+static fourfold pass above does not transfer. Full isolation/geometry/material/
+booklet/device gates remain open; World raw timestep Armijo stays unchanged.
 
 ## Boundary problem and immutable inputs
 

@@ -1,0 +1,18 @@
+{
+  "schema": "pliego-modal-capture-delta/0.1",
+  "kind": "repeat",
+  "base": "diagnostic.json",
+  "baseSHA256": "db235d86c022470fe58f4bd44b6495ff07b892ab1b35c784fc7553c1982110d8",
+  "target": "diagnostic-repeat.json",
+  "targetSHA256": "338f122996624b9fd7da905e95811df73771cab73909c34052ff159ef23afe56",
+  "targetBytes": 40684804,
+  "replacements": [
+    {
+      "path": [
+        "recordedAt"
+      ],
+      "value": "2026-11-10T13:20:53.923Z"
+    }
+  ],
+  "scope": "lossless reconstruction of the entire captured JSON byte stream; no field/trace/failure removed; only already verified timestamp or observer-metadata differences stored"
+}

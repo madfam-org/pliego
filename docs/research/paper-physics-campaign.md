@@ -243,17 +243,19 @@ equilibrium. The fourfold pass closes only the specified synthetic static window
 physical stock, controlled time accuracy, bending/locking, contact/strain limits,
 crease/join/hand support, new-law booklet, devices and 8 ms remain open.
 
-The implemented [actual-World transient stage](membrane-transient-audit.md)
-compares real public substeps with independent continuous and exact discrete-BE
-modal truths, including spectral propagation of the actual rounded initial field.
-It uses native lumped mass and the unchanged strict endpoint-force rule, with
-separate live validation and transparent nominal/rounded GN-direction observation.
-A complete 24-trajectory smoke development run has valid measurement/reference/
-observer coverage and small discrete-state errors, but every trajectory contains
-force misses. Accepted source/repeats are pending. The larger amplitude/time/solve
-window, all-step isolation, first-order trend and full geometry matrix remain
-required; whole time acceptance is explicitly false. No physical modulus/mass,
-World timestep search, stock or reader defaults change in this stage.
+The [actual-World transient stage](membrane-transient-audit.md) now has
+[clean 93f6653 captures and exact repeat/observer proofs](evidence/membrane-transient-2026-11-10/README.md).
+It compares real public substeps with independent continuous/discrete BE truths,
+including the actual rounded initial field, native lumped mass and live force
+validation. All 24 smoke trajectories contain strict residual failures: 6975/7110
+substeps miss the unchanged gate, despite a maximum discrete full-state error
+of .043004%. Two 80/100-digit retained-pose checks also fail force. The lossless
+archive reconstructs the complete original reports; no captured failure is lost.
+Whole time acceptance stays false. Larger amplitude/time/solve windows, all-step
+isolation, first-order trend and the full geometry matrix remain required, as do
+material/contact/booklet/device/8 ms gates. Runtime search, stocks and reader
+defaults remain unchanged. All 16 source CI checks pass (214 engine/123 web),
+separately from the failed force/time gates.
 
 ## Separate gates
 

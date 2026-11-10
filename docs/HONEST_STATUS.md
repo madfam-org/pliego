@@ -108,6 +108,21 @@ permitted research browser page passes capped/uncapped first-turn byte and
 diagnostic parity. It changes no production policy or default reader and closes
 neither material calibration nor real-device/input-to-paint acceptance.
 
+The independent [membrane constitutive audit](research/membrane-constitutive-audit.md)
+now completes and exactly repeats 108 prescribed-pose cases against a separately
+implemented CST reference at clean `f145538`. **All 36 uncapped/symmetric cases
+fail the 1% tensor gates**, with 14.08–29.78% relative engineering-Voigt matrix
+error and up to 60.89% worst signed energy error. Oracle and extraction checks
+pass; the scalar springs constrain C12=C66 where the declared orthotropic target
+requires independent coupling and shear. Forty-two of 48 mesh/topology comparisons
+also fail. Cap and .05-compression controls are separate; the combined shipping
+cap+.05 policy is not another measured case here. The explicit synthetic nu12
+convention does not resolve the stock/bending Poisson ambiguity. This zero-step
+energy/reaction audit is not a solved patch or physical-stock validation. A
+coupled per-triangle research membrane and independent non-affine/time/material
+tests remain necessary; backend parity and force convergence cannot close this
+constitutive gap. Runtime laws, stocks and reader defaults remain unchanged.
+
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the
 declared 0.001 µN force tolerance, identical sampled-position hashes and all

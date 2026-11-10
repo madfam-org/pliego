@@ -1,4 +1,4 @@
-# Surface-guarded contact evidence
+# Paper physics evidence
 
 Status: research checkpoint, not a stable catalogue physics release. The model
 changes EE energy and its gradient; this is not an index-only equivalence claim.
@@ -441,3 +441,69 @@ At `c05de1a`, all 16 CI checks pass, including 154 engine and 123 web tests,
 45-source JSDoc/declaration checks, a 94-file package check and full-history
 secret scanning. This milestone does not close material or interaction gates,
 establish a lowest possible abstraction, or exhaust implementation/research.
+
+
+## Independent membrane tensor audit
+
+Clean implementation/measurement source:
+[`f145538`](https://github.com/madfam-org/pliego/commit/f145538f8200563ff110439f006605882050d2ba).
+The [complete run](membrane-run.json), [repeat](membrane-repeat.json) and
+[strict whole-report comparison](membrane-comparison.json) retain **108 cases**
+with exact agreement in every field except recording time, including failed
+engineering gates. The [method and derivation](../../membrane-constitutive-audit.md)
+explain the independent CST reference, material convention and model restriction.
+Runtime engine code, reader defaults and stock snapshots are unchanged.
+
+The matrix uses three authored triangle layouts, three resolutions, four grain
+angles and three separate cap/compression policies. Native geometry/connectivity
+hashes remain fixed across grain/policy changes. All nodes have prescribed affine
+poses; no time step, contact, inertia or non-membrane energy occurs. This is an
+energy/reaction audit, not a solved boundary-value patch test.
+
+The independent stdlib Python reference evaluates 2,628 cases: 19 mathematical
+affine checks plus 54 actual binary64 applied fields for each of 36 mesh/grain
+combinations. Actual and nominal inputs are distinguished, so coordinate-rounding
+nonaffinity is retained without relaxing the nominal oracle threshold. All 5,832
+nonzero engine observations and 324 zero-strain observations complete.
+
+| Separate policy, 36 cases each | Finest-amplitude tensor error | Per-case worst signed energy error |
+|---|---:|---:|
+| Uncapped, compression = 1 | **14.08–29.78%** | 46.08–60.89% |
+| Uncapped, compression = 0.05 | No unique zero-strain tensor | 95.36–98.02% |
+| Capped control, compression = 1 | 97.88–98.52% | 99.06–99.23% |
+
+Tensor error is the relative Frobenius norm in the declared global engineering-
+Voigt representation, with entry errors separately normalized by sqrt(Qii Qjj).
+Each case's worst energy error spans both signs of all nine tested modes. This
+does not mean every individual observation fails. The three controls separate
+cap and compression effects; the combined shipping cap plus 0.05 policy is not
+claimed as another measured policy here.
+
+All 72 symmetric-policy cases pass strain extraction and exhibit the predicted
+central-force limit C12 = C66. All fail their 1% tensor gates. Every case fails
+its worst-signed-energy gate. Of 48 refinement/topology comparisons, 42 fail
+thresholds of 0.5% for 8→16 cells and 1% between finest layouts.
+
+For the uncapped 16×16 forward/alternating layouts at grain zero, C12 and C66
+both approach 0.568770 GPa. The independent declared target instead requires
+Q12 = 0.762245 GPa and Q66 = 1.435034 GPa. The forward layout also creates
+C16/C26 ≈ 0.568770 GPa against a zero target; alternating diagonals suppress that
+coupling but retain the constitutive mismatch. Scalar spring refinement and
+backend optimization cannot independently tune the constrained tensor entries.
+
+Maximum tensor change across all consecutive strain halvings is 8.46×10⁻¹⁰;
+nominal-reference energy and traction errors are below 9.47×10⁻¹⁶ and
+7.18×10⁻¹⁵, respectively, against the unchanged 10⁻¹⁰ oracle threshold. The
+independent oracle self-tests also pass 144 affine cases and 18 derivative
+checks. Engine stats/implicit-objective differences are explicitly retained:
+maximum scaled discrepancy 5.08×10⁻¹⁵ against a separate 10⁻¹² observation guard.
+No physical 1% gate is weakened. All sources, inputs, tools and reference outputs
+retain SHA256 provenance; the two reports compare whole fields exactly.
+
+The target explicitly declares synthetic nu12 = 0.293, consistent with current
+directional membrane compliance. Stock provenance and bending use a geometric-
+mean Poisson convention; this ambiguity remains unresolved. These failures
+establish limits of the declared model, not measured-stock properties or a
+dynamic solver failure. A coupled per-triangle orthotropic research model and
+an independently solved non-affine reference are next implementation work.
+Material calibration, interaction performance and actual-device gates remain open.

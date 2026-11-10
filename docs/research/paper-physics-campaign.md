@@ -177,6 +177,30 @@ change or actual-touch/input-to-paint certificate follows. Scalar/SIMD/batched
 backends, independent models, time/mesh accuracy and material/device validation
 remain open campaign work.
 
+
+The independent [membrane tensor audit](membrane-constitutive-audit.md) now exposes
+a model limitation beyond backend cost. At clean `f145538`, all 108 prescribed-pose
+cases and 2,628 independent CST evaluations complete and repeat exactly. All
+36 uncapped/symmetric-compression cases fail the declared 1% tensor gates:
+relative engineering-Voigt Frobenius error is 14.08–29.78%, and per-case worst
+signed energy error reaches 60.89%. The ordinary matrix norm is in global axes
+and is not rotation invariant. Oracle and every strain-halving check pass;
+scalar central-force C12=C66 persists. At grain zero, cells16, forward/alternating
+layouts give C12=C66≈.568770 GPa against target Q12=.762245 and Q66=1.435034 GPa.
+Alternating diagonals remove the forward layout's spurious C16/C26 coupling but
+do not remove this constitutive restriction. Forty-two of 48 mesh/topology
+comparisons also fail their declared limits.
+
+Capped/symmetric and uncapped/default-compression controls remain separate; the
+combined shipping cap+.05 policy is not measured in this matrix. The synthetic
+nu12 convention is explicit, while the stock/bending geometric-mean Poisson
+meaning remains unresolved. This is an all-node energy/reaction audit with no
+steps or contact, not a solved boundary-value patch or material calibration.
+A coupled per-triangle orthotropic research law is the next model
+experiment, followed by a solved non-affine reference, controlled time/iteration
+convergence and measured stock gates. No reader/default/runtime law changes
+follow from documenting this failed baseline.
+
 ## Separate gates
 
 **Interaction:** booklet frame/camera fixed throughout dragging; only exposed leaves
@@ -270,7 +294,9 @@ source and disclose their timing/accuracy scope.
    progress, strain and cost. This does not close coupled contact research.
 2. Finish booklet browser/device acceptance, arbitrary-location hand coupling and
    derived companion page mapping with immutable fabrication provenance.
-3. Build an offline C-IPC/FEA reference and measured stock fixtures; quantify stiffness
+3. Implement a research-only coupled orthotropic triangle membrane against the
+   failed scalar-spring tensor baseline; add an independently solved non-affine
+   FE reference, C-IPC comparison and measured stock fixtures. Quantify stiffness
    capping, grain response, crease hysteresis and mesh/time convergence.
 4. Implement and compare local XPBD, developable/rod and VBD/AVBD candidates on those
    same gates, then evaluate backend ports for the strongest candidates.

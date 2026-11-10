@@ -1,0 +1,901 @@
+{
+  "schema": "pliego-axial-pull/0.4",
+  "recordedAt": "2026-11-10T08:48:07.937Z",
+  "source": {
+    "git": "cc74f251b95872a5838d7ff205a2f4aee2dce095",
+    "dirty": false,
+    "fixtureSHA256": "367c855f1f44460e5df816d019f25a3ff010940498b7c083aa6f77dd9449c01c",
+    "files": [
+      {
+        "path": "collision/accd.js",
+        "sha256": "8f7a942c2c42591172720cc13c84eaa813ab9f4f6fe67de3c3084c4ab9ab74ae"
+      },
+      {
+        "path": "collision/barrier.js",
+        "sha256": "e6d4eae996cc0e5e970230c0ab5ae19ae4e5dbb7f72bd60fb170d139111310b4"
+      },
+      {
+        "path": "collision/bounds-tree.js",
+        "sha256": "54a5b13547b6033d258ff247ba8afb228fff9c4b750187dbd96f34897eea116a"
+      },
+      {
+        "path": "collision/distance.js",
+        "sha256": "d0cd28674bc018eb5078dea271a53c7dd2cda7d2d26cc1af562e0a6d009be2ed"
+      },
+      {
+        "path": "collision/edge-mollifier.js",
+        "sha256": "92ecfc693115252d16952ee1b6a9779d4b4c1df03e24f608b4455ac5d4b0c088"
+      },
+      {
+        "path": "collision/motion-guard.js",
+        "sha256": "efaf2861ee434db6cb19fa403ea1ec8660352b5f8ec550597e088b47e2f7d8dc"
+      },
+      {
+        "path": "collision/surface-coverage.js",
+        "sha256": "ff917c18ede134c7c13b4732f4ccb0973fb174dab13e1738a9f96b605b5dbd61"
+      },
+      {
+        "path": "collision/swept.js",
+        "sha256": "8fdae90265ea29351d51f704fe478ba557acb41757d96e9009ffceadd0f0e546"
+      },
+      {
+        "path": "constants.js",
+        "sha256": "ba82c79e86505b83e4ad3586412f6f65be287f853c8e154ccee3525a7f8384cc"
+      },
+      {
+        "path": "digest.js",
+        "sha256": "6324da4ba0fbcaf606e21594a4853531c7e2d5e8c8895da8a805445b9f0559ab"
+      },
+      {
+        "path": "docrules.js",
+        "sha256": "49ea71a917903cdcbcdf790fe59c0fdd88aa8a53bc79f03c97ab4bfa066080d4"
+      },
+      {
+        "path": "document.js",
+        "sha256": "e7ace1a75773c01c2d723a8f1e89fd4d23a139e069c6c18fbe11684064341b3f"
+      },
+      {
+        "path": "drivers.js",
+        "sha256": "386ed1e20465ad00d02ffb7dcd7c73188f3a4baf000bdd2ce85401a13e45a30c"
+      },
+      {
+        "path": "fastmath.js",
+        "sha256": "f16c1dbb9ec70ac3a533b9965ef7e1d5ea579b2f9ee8eb7223fa288e87b1fe7d"
+      },
+      {
+        "path": "gates.js",
+        "sha256": "23b2581a15fc63fed9e7aa95613d806e5d2edba2cb63ac45ca4a9bb7a3a493c5"
+      },
+      {
+        "path": "geom.js",
+        "sha256": "e4573e28b1c086ea8517639e7f510c5ea23bd7e0d3f9d19df02467c8185ef2c3"
+      },
+      {
+        "path": "index.js",
+        "sha256": "649271ca75c134eddf458d839a3d2da80946887c68d0f7029f04f06c503d2844"
+      },
+      {
+        "path": "keyed.js",
+        "sha256": "aa34c6332b3e155384608a51deb438d572ec8457aff248a27c9e3731adc7799f"
+      },
+      {
+        "path": "kinematics/closedform.js",
+        "sha256": "efc6361b6d2a0f7e231e37b64fc897536ddbd4163440286c88c9d34671135400"
+      },
+      {
+        "path": "kinematics/facetree.js",
+        "sha256": "42b1edce8af1456a1e6e5c5998dcfa7c8334aabf9f75eeb40c26ae1f7559d1af"
+      },
+      {
+        "path": "kinematics/index.js",
+        "sha256": "4e42195b27333b1062fcdfa69e76068f765fcb21185d692903e18713cbe82624"
+      },
+      {
+        "path": "kinematics/linalg.js",
+        "sha256": "036fb00907a8e0418e5a1fce5bc10e0ab334d1676b056ab42d4b25c70cd3c011"
+      },
+      {
+        "path": "kinematics/program.js",
+        "sha256": "70dcb91733dd253eebfabee88836b9301e692cd115894494c98f04c5af0508b9"
+      },
+      {
+        "path": "linalg/blockchol.js",
+        "sha256": "2759ae3e4f1d787b7bbc5495210bee19d0a40d579a500e75a823a1d00ad1e46e"
+      },
+      {
+        "path": "material.js",
+        "sha256": "d7967d7c20f1485d299363fc470ca8e12a9f962bae8f2b2f9f23fbd905a13f88"
+      },
+      {
+        "path": "mesh.js",
+        "sha256": "354a9ecbe6276a36cdda5e659021eef263074da91bb6a8f0f1be25990b0ee8a4"
+      },
+      {
+        "path": "triangulate.js",
+        "sha256": "0e29f6c96221b24077e27a5e2674344ad9e3cb9bb7e379d65ff514b08047265f"
+      },
+      {
+        "path": "xpbd/air.js",
+        "sha256": "889b3da6c6c46011750e0b75238177b300d62b34b0005148420d28fa571f40e4"
+      },
+      {
+        "path": "xpbd/contact.js",
+        "sha256": "c42e2f61431c9a7919e9ee74aa4b991b869846dfb75148b0f974c9571e704f92"
+      },
+      {
+        "path": "xpbd/coupled-contact.js",
+        "sha256": "cc96dd7e1d95e60e4180fe3887f1882d0f36f5eb41114135ca8685193d974ba7"
+      },
+      {
+        "path": "xpbd/dihedral.js",
+        "sha256": "ed0142a5a2b450029b96a4c7c0ddd0200dec60d2fb7fea143cb96d896db7377c"
+      },
+      {
+        "path": "xpbd/edgecontact.js",
+        "sha256": "78cd94005c701a0eefb270b89b420b191315d1b72b1fda69628250516cde4dd5"
+      },
+      {
+        "path": "xpbd/energy-search.js",
+        "sha256": "880d3a567a86af5ff62339881d562d42199708b5bd21cfde22b50b99236870e8"
+      },
+      {
+        "path": "xpbd/gates.js",
+        "sha256": "0d6ff3718e71b4574c456b138c9e8576a3476634013f431a27f050f8ce3a8aca"
+      },
+      {
+        "path": "xpbd/implicit.js",
+        "sha256": "e0957aee6a49b363da4bd4261524c6a5dca3f5c32c45a84c2f4daca737d40b32"
+      },
+      {
+        "path": "xpbd/joins.js",
+        "sha256": "621e4d2adcccccabac8b01db9fd2752805b7576582268d8c3b65afad18665910"
+      },
+      {
+        "path": "xpbd/local-contact-solve.js",
+        "sha256": "4f6777b80e61a8564a398bf6f8bb5b472d97e39b9f39994a623e15e28eb992a0"
+      },
+      {
+        "path": "xpbd/pcg.js",
+        "sha256": "fb393e36ab0dc68855d51f0fa52e55dffe5db4d80a68c1d84e514802350f7aaa"
+      },
+      {
+        "path": "xpbd/presentation.js",
+        "sha256": "185ded5508ff841fe99a6dee95c74dd1c49047a2c07eeef60e794ae0f16e5965"
+      },
+      {
+        "path": "xpbd/render.js",
+        "sha256": "5db389f5d41ea35de160d56ab4d36a640ffce694d8224d64c3660187afddbd3c"
+      },
+      {
+        "path": "xpbd/setrest.js",
+        "sha256": "7d759b2c307e4e1bed12c5995ba0b8c70cfd4ab7381834874e6047f2d2387bc4"
+      },
+      {
+        "path": "xpbd/state.js",
+        "sha256": "f936c068037b1e6d6679655b350b45d362b57a7eda5c41fca580ca79e50a3c81"
+      },
+      {
+        "path": "xpbd/world.js",
+        "sha256": "de2b66691dec7dba781edc2f518e2d3e940aa74f559bd918a7a143b954d5ad14"
+      }
+    ],
+    "harnessSHA256": "ce429300b82101280b76f2f8dca3da174ac81016647e22d79faf55804c20f876"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "protocol": {
+    "forceMicroNewtons": 10000,
+    "lengthMm": 100,
+    "widthMm": 10,
+    "frames": 180,
+    "frameSeconds": 0.016666666666666666,
+    "contact": "disabled in legacy; enabled in coupled path but zero active barrier stencils/energy required",
+    "analyticalBarExtensionMm": 0.0001818181818181818,
+    "materialBasis": "DocBuilder copy-80 synthetic estimate; E*t*width axial-bar reference, not a calibrated 2D FE solution",
+    "unloadFrames": 120,
+    "variants": "direct-local, consistent curvature, uncapped membrane; I32/I128 each with smoothing off/on; zero active contact required",
+    "timing": "one local exploratory run; step only; includes warm-up; active-step p95 excludes frames already asleep at step start; max includes all frames"
+  },
+  "results": [
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "barrierContact": true,
+        "barrierIterations": 32,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.0000018219897624405234,
+      "error": null,
+      "extensionMm": 0.00018014591553594528,
+      "extensionAtHalfTimeMm": 0.00018014591553594528,
+      "driftMm": 0,
+      "relativeBarError": 0.00919746455230091,
+      "maxSpeedMmPerSecond": 0,
+      "activeFrames": 30,
+      "asleepFrames": 150,
+      "maximumBarrierStencils": 0,
+      "maximumBarrierEnergy": 0,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "fd5414150c6197fa185330a3852bc07cc154dbf16445e4ee7259dfbf84d25c4a",
+      "vertices": 32,
+      "substepsExecuted": 240,
+      "coupledContact": {
+        "configuration": {
+          "distance": 0.05,
+          "stiffness": 100000,
+          "iterations": 32,
+          "cgIterations": 128,
+          "tolerance": 0.001,
+          "linearSolver": "direct-local"
+        },
+        "initialAdjustment": 0,
+        "maximumEndResidual": 0.00005006555566069437,
+        "steps": 240,
+        "unconverged": 0,
+        "iterations": 7,
+        "cgTotal": 0,
+        "directSolves": 7,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 0,
+        "rejected": 0,
+        "last": {
+          "converged": true,
+          "residual": 0.00003846315939881606,
+          "iterations": 0,
+          "status": "converged",
+          "energyBefore": 0,
+          "energyAfter": 0,
+          "incrementalEnergy": 81381.10906284371,
+          "barrierEnergy": 0,
+          "contacts": 0,
+          "grounded": 0,
+          "minimumGap": 0.05,
+          "alpha": 1
+        },
+        "guard": {
+          "steps": 7,
+          "limited": 0,
+          "iterationLimits": 0,
+          "precisionLimits": 0,
+          "initialOverlaps": 0,
+          "minimumTime": 1,
+          "last": {
+            "time": 1,
+            "queries": 0,
+            "iterations": 0,
+            "vertexTrianglePairs": 0,
+            "edgeEdgePairs": 0,
+            "status": "clear",
+            "pair": []
+          }
+        }
+      },
+      "unload": {
+        "frames": 120,
+        "extensionMm": -1.5574528333672788e-9,
+        "finalMaxSpeedMmPerSecond": 0,
+        "coupledContact": {
+          "configuration": {
+            "distance": 0.05,
+            "stiffness": 100000,
+            "iterations": 32,
+            "cgIterations": 128,
+            "tolerance": 0.001,
+            "linearSolver": "direct-local"
+          },
+          "initialAdjustment": 0,
+          "maximumEndResidual": 0.0006340747199442546,
+          "steps": 248,
+          "unconverged": 0,
+          "iterations": 14,
+          "cgTotal": 0,
+          "directSolves": 14,
+          "nonlocalFallbacks": 0,
+          "linearFailures": 0,
+          "backtracks": 0,
+          "rejected": 0,
+          "last": {
+            "converged": true,
+            "residual": 0.00042770007517676156,
+            "iterations": 0,
+            "status": "converged",
+            "energyBefore": 0,
+            "energyAfter": 0,
+            "incrementalEnergy": 4.9019663643786955e-12,
+            "barrierEnergy": 0,
+            "contacts": 0,
+            "grounded": 0,
+            "minimumGap": 0.05,
+            "alpha": 1
+          },
+          "guard": {
+            "steps": 14,
+            "limited": 0,
+            "iterationLimits": 0,
+            "precisionLimits": 0,
+            "initialOverlaps": 0,
+            "minimumTime": 1,
+            "last": {
+              "time": 1,
+              "queries": 0,
+              "iterations": 0,
+              "vertexTrianglePairs": 0,
+              "edgeEdgePairs": 0,
+              "status": "clear",
+              "pair": []
+            }
+          }
+        },
+        "poseSHA256": "d4f905f7e1048c33088bf55b03a832f1b13b49b6bb6f1a0517cf77bbb6f1e1c1",
+        "timing": "not included in loaded-phase timing statistics",
+        "gates": {
+          "restWithin1PercentBarExtension": true,
+          "finalForceConverged": true,
+          "allUnloadingStepsConverged": true
+        }
+      },
+      "meanStepMs": 0.3224931277777794,
+      "p95StepMs": 1.0072460000000092,
+      "p95ActiveStepMs": 3.8575500000000034,
+      "maxStepMs": 22.983416000000005,
+      "gates": {
+        "tensile": true,
+        "axialBar5Percent": true,
+        "drift1Percent": true,
+        "physics8ms": true,
+        "finalForceConverged": true,
+        "allSolverStepsConverged": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "barrierContact": true,
+        "barrierIterations": 32,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true,
+        "edgeEdgeMollification": "surface-guarded"
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.0000018219897624405234,
+      "error": null,
+      "extensionMm": 0.00018014591553594528,
+      "extensionAtHalfTimeMm": 0.00018014591553594528,
+      "driftMm": 0,
+      "relativeBarError": 0.00919746455230091,
+      "maxSpeedMmPerSecond": 0,
+      "activeFrames": 30,
+      "asleepFrames": 150,
+      "maximumBarrierStencils": 0,
+      "maximumBarrierEnergy": 0,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "fd5414150c6197fa185330a3852bc07cc154dbf16445e4ee7259dfbf84d25c4a",
+      "vertices": 32,
+      "substepsExecuted": 240,
+      "coupledContact": {
+        "configuration": {
+          "distance": 0.05,
+          "stiffness": 100000,
+          "iterations": 32,
+          "cgIterations": 128,
+          "tolerance": 0.001,
+          "linearSolver": "direct-local",
+          "edgeEdgeMollification": "surface-guarded"
+        },
+        "edgeEdgeMollification": {
+          "mode": "surface-guarded",
+          "activeEdges": 0,
+          "smoothedEdges": 0,
+          "uncoveredEdges": 0,
+          "parallelEdges": 0,
+          "curvatureRows": 0,
+          "totals": {
+            "evaluations": 487,
+            "activeEdges": 0,
+            "smoothedEdges": 0,
+            "uncoveredEdges": 0,
+            "parallelEdges": 0,
+            "curvatureRows": 0
+          }
+        },
+        "initialAdjustment": 0,
+        "maximumEndResidual": 0.00005006555566069437,
+        "steps": 240,
+        "unconverged": 0,
+        "iterations": 7,
+        "cgTotal": 0,
+        "directSolves": 7,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 0,
+        "rejected": 0,
+        "last": {
+          "converged": true,
+          "residual": 0.00003846315939881606,
+          "iterations": 0,
+          "status": "converged",
+          "energyBefore": 0,
+          "energyAfter": 0,
+          "incrementalEnergy": 81381.10906284371,
+          "barrierEnergy": 0,
+          "contacts": 0,
+          "grounded": 0,
+          "minimumGap": 0.05,
+          "alpha": 1
+        },
+        "guard": {
+          "steps": 7,
+          "limited": 0,
+          "iterationLimits": 0,
+          "precisionLimits": 0,
+          "initialOverlaps": 0,
+          "minimumTime": 1,
+          "last": {
+            "time": 1,
+            "queries": 0,
+            "iterations": 0,
+            "vertexTrianglePairs": 0,
+            "edgeEdgePairs": 0,
+            "status": "clear",
+            "pair": []
+          }
+        }
+      },
+      "unload": {
+        "frames": 120,
+        "extensionMm": -1.5574528333672788e-9,
+        "finalMaxSpeedMmPerSecond": 0,
+        "coupledContact": {
+          "configuration": {
+            "distance": 0.05,
+            "stiffness": 100000,
+            "iterations": 32,
+            "cgIterations": 128,
+            "tolerance": 0.001,
+            "linearSolver": "direct-local",
+            "edgeEdgeMollification": "surface-guarded"
+          },
+          "edgeEdgeMollification": {
+            "mode": "surface-guarded",
+            "activeEdges": 0,
+            "smoothedEdges": 0,
+            "uncoveredEdges": 0,
+            "parallelEdges": 0,
+            "curvatureRows": 0,
+            "totals": {
+              "evaluations": 510,
+              "activeEdges": 0,
+              "smoothedEdges": 0,
+              "uncoveredEdges": 0,
+              "parallelEdges": 0,
+              "curvatureRows": 0
+            }
+          },
+          "initialAdjustment": 0,
+          "maximumEndResidual": 0.0006340747199442546,
+          "steps": 248,
+          "unconverged": 0,
+          "iterations": 14,
+          "cgTotal": 0,
+          "directSolves": 14,
+          "nonlocalFallbacks": 0,
+          "linearFailures": 0,
+          "backtracks": 0,
+          "rejected": 0,
+          "last": {
+            "converged": true,
+            "residual": 0.00042770007517676156,
+            "iterations": 0,
+            "status": "converged",
+            "energyBefore": 0,
+            "energyAfter": 0,
+            "incrementalEnergy": 4.9019663643786955e-12,
+            "barrierEnergy": 0,
+            "contacts": 0,
+            "grounded": 0,
+            "minimumGap": 0.05,
+            "alpha": 1
+          },
+          "guard": {
+            "steps": 14,
+            "limited": 0,
+            "iterationLimits": 0,
+            "precisionLimits": 0,
+            "initialOverlaps": 0,
+            "minimumTime": 1,
+            "last": {
+              "time": 1,
+              "queries": 0,
+              "iterations": 0,
+              "vertexTrianglePairs": 0,
+              "edgeEdgePairs": 0,
+              "status": "clear",
+              "pair": []
+            }
+          }
+        },
+        "poseSHA256": "d4f905f7e1048c33088bf55b03a832f1b13b49b6bb6f1a0517cf77bbb6f1e1c1",
+        "timing": "not included in loaded-phase timing statistics",
+        "gates": {
+          "restWithin1PercentBarExtension": true,
+          "finalForceConverged": true,
+          "allUnloadingStepsConverged": true
+        }
+      },
+      "meanStepMs": 0.2558192555555539,
+      "p95StepMs": 0.9814589999999725,
+      "p95ActiveStepMs": 4.871151999999995,
+      "maxStepMs": 11.959904999999992,
+      "gates": {
+        "tensile": true,
+        "axialBar5Percent": true,
+        "drift1Percent": true,
+        "physics8ms": true,
+        "finalForceConverged": true,
+        "allSolverStepsConverged": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "barrierContact": true,
+        "barrierIterations": 128,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.0000018219897624405234,
+      "error": null,
+      "extensionMm": 0.00018014591553594528,
+      "extensionAtHalfTimeMm": 0.00018014591553594528,
+      "driftMm": 0,
+      "relativeBarError": 0.00919746455230091,
+      "maxSpeedMmPerSecond": 0,
+      "activeFrames": 30,
+      "asleepFrames": 150,
+      "maximumBarrierStencils": 0,
+      "maximumBarrierEnergy": 0,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "fd5414150c6197fa185330a3852bc07cc154dbf16445e4ee7259dfbf84d25c4a",
+      "vertices": 32,
+      "substepsExecuted": 240,
+      "coupledContact": {
+        "configuration": {
+          "distance": 0.05,
+          "stiffness": 100000,
+          "iterations": 128,
+          "cgIterations": 128,
+          "tolerance": 0.001,
+          "linearSolver": "direct-local"
+        },
+        "initialAdjustment": 0,
+        "maximumEndResidual": 0.00005006555566069437,
+        "steps": 240,
+        "unconverged": 0,
+        "iterations": 7,
+        "cgTotal": 0,
+        "directSolves": 7,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 0,
+        "rejected": 0,
+        "last": {
+          "converged": true,
+          "residual": 0.00003846315939881606,
+          "iterations": 0,
+          "status": "converged",
+          "energyBefore": 0,
+          "energyAfter": 0,
+          "incrementalEnergy": 81381.10906284371,
+          "barrierEnergy": 0,
+          "contacts": 0,
+          "grounded": 0,
+          "minimumGap": 0.05,
+          "alpha": 1
+        },
+        "guard": {
+          "steps": 7,
+          "limited": 0,
+          "iterationLimits": 0,
+          "precisionLimits": 0,
+          "initialOverlaps": 0,
+          "minimumTime": 1,
+          "last": {
+            "time": 1,
+            "queries": 0,
+            "iterations": 0,
+            "vertexTrianglePairs": 0,
+            "edgeEdgePairs": 0,
+            "status": "clear",
+            "pair": []
+          }
+        }
+      },
+      "unload": {
+        "frames": 120,
+        "extensionMm": -1.5574528333672788e-9,
+        "finalMaxSpeedMmPerSecond": 0,
+        "coupledContact": {
+          "configuration": {
+            "distance": 0.05,
+            "stiffness": 100000,
+            "iterations": 128,
+            "cgIterations": 128,
+            "tolerance": 0.001,
+            "linearSolver": "direct-local"
+          },
+          "initialAdjustment": 0,
+          "maximumEndResidual": 0.0006340747199442546,
+          "steps": 248,
+          "unconverged": 0,
+          "iterations": 14,
+          "cgTotal": 0,
+          "directSolves": 14,
+          "nonlocalFallbacks": 0,
+          "linearFailures": 0,
+          "backtracks": 0,
+          "rejected": 0,
+          "last": {
+            "converged": true,
+            "residual": 0.00042770007517676156,
+            "iterations": 0,
+            "status": "converged",
+            "energyBefore": 0,
+            "energyAfter": 0,
+            "incrementalEnergy": 4.9019663643786955e-12,
+            "barrierEnergy": 0,
+            "contacts": 0,
+            "grounded": 0,
+            "minimumGap": 0.05,
+            "alpha": 1
+          },
+          "guard": {
+            "steps": 14,
+            "limited": 0,
+            "iterationLimits": 0,
+            "precisionLimits": 0,
+            "initialOverlaps": 0,
+            "minimumTime": 1,
+            "last": {
+              "time": 1,
+              "queries": 0,
+              "iterations": 0,
+              "vertexTrianglePairs": 0,
+              "edgeEdgePairs": 0,
+              "status": "clear",
+              "pair": []
+            }
+          }
+        },
+        "poseSHA256": "d4f905f7e1048c33088bf55b03a832f1b13b49b6bb6f1a0517cf77bbb6f1e1c1",
+        "timing": "not included in loaded-phase timing statistics",
+        "gates": {
+          "restWithin1PercentBarExtension": true,
+          "finalForceConverged": true,
+          "allUnloadingStepsConverged": true
+        }
+      },
+      "meanStepMs": 0.1486026944444458,
+      "p95StepMs": 0.8385579999999777,
+      "p95ActiveStepMs": 1.194092000000012,
+      "maxStepMs": 2.7648380000000543,
+      "gates": {
+        "tensile": true,
+        "axialBar5Percent": true,
+        "drift1Percent": true,
+        "physics8ms": true,
+        "finalForceConverged": true,
+        "allSolverStepsConverged": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "barrierContact": true,
+        "barrierIterations": 128,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true,
+        "edgeEdgeMollification": "surface-guarded"
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.0000018219897624405234,
+      "error": null,
+      "extensionMm": 0.00018014591553594528,
+      "extensionAtHalfTimeMm": 0.00018014591553594528,
+      "driftMm": 0,
+      "relativeBarError": 0.00919746455230091,
+      "maxSpeedMmPerSecond": 0,
+      "activeFrames": 30,
+      "asleepFrames": 150,
+      "maximumBarrierStencils": 0,
+      "maximumBarrierEnergy": 0,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "fd5414150c6197fa185330a3852bc07cc154dbf16445e4ee7259dfbf84d25c4a",
+      "vertices": 32,
+      "substepsExecuted": 240,
+      "coupledContact": {
+        "configuration": {
+          "distance": 0.05,
+          "stiffness": 100000,
+          "iterations": 128,
+          "cgIterations": 128,
+          "tolerance": 0.001,
+          "linearSolver": "direct-local",
+          "edgeEdgeMollification": "surface-guarded"
+        },
+        "edgeEdgeMollification": {
+          "mode": "surface-guarded",
+          "activeEdges": 0,
+          "smoothedEdges": 0,
+          "uncoveredEdges": 0,
+          "parallelEdges": 0,
+          "curvatureRows": 0,
+          "totals": {
+            "evaluations": 487,
+            "activeEdges": 0,
+            "smoothedEdges": 0,
+            "uncoveredEdges": 0,
+            "parallelEdges": 0,
+            "curvatureRows": 0
+          }
+        },
+        "initialAdjustment": 0,
+        "maximumEndResidual": 0.00005006555566069437,
+        "steps": 240,
+        "unconverged": 0,
+        "iterations": 7,
+        "cgTotal": 0,
+        "directSolves": 7,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 0,
+        "rejected": 0,
+        "last": {
+          "converged": true,
+          "residual": 0.00003846315939881606,
+          "iterations": 0,
+          "status": "converged",
+          "energyBefore": 0,
+          "energyAfter": 0,
+          "incrementalEnergy": 81381.10906284371,
+          "barrierEnergy": 0,
+          "contacts": 0,
+          "grounded": 0,
+          "minimumGap": 0.05,
+          "alpha": 1
+        },
+        "guard": {
+          "steps": 7,
+          "limited": 0,
+          "iterationLimits": 0,
+          "precisionLimits": 0,
+          "initialOverlaps": 0,
+          "minimumTime": 1,
+          "last": {
+            "time": 1,
+            "queries": 0,
+            "iterations": 0,
+            "vertexTrianglePairs": 0,
+            "edgeEdgePairs": 0,
+            "status": "clear",
+            "pair": []
+          }
+        }
+      },
+      "unload": {
+        "frames": 120,
+        "extensionMm": -1.5574528333672788e-9,
+        "finalMaxSpeedMmPerSecond": 0,
+        "coupledContact": {
+          "configuration": {
+            "distance": 0.05,
+            "stiffness": 100000,
+            "iterations": 128,
+            "cgIterations": 128,
+            "tolerance": 0.001,
+            "linearSolver": "direct-local",
+            "edgeEdgeMollification": "surface-guarded"
+          },
+          "edgeEdgeMollification": {
+            "mode": "surface-guarded",
+            "activeEdges": 0,
+            "smoothedEdges": 0,
+            "uncoveredEdges": 0,
+            "parallelEdges": 0,
+            "curvatureRows": 0,
+            "totals": {
+              "evaluations": 510,
+              "activeEdges": 0,
+              "smoothedEdges": 0,
+              "uncoveredEdges": 0,
+              "parallelEdges": 0,
+              "curvatureRows": 0
+            }
+          },
+          "initialAdjustment": 0,
+          "maximumEndResidual": 0.0006340747199442546,
+          "steps": 248,
+          "unconverged": 0,
+          "iterations": 14,
+          "cgTotal": 0,
+          "directSolves": 14,
+          "nonlocalFallbacks": 0,
+          "linearFailures": 0,
+          "backtracks": 0,
+          "rejected": 0,
+          "last": {
+            "converged": true,
+            "residual": 0.00042770007517676156,
+            "iterations": 0,
+            "status": "converged",
+            "energyBefore": 0,
+            "energyAfter": 0,
+            "incrementalEnergy": 4.9019663643786955e-12,
+            "barrierEnergy": 0,
+            "contacts": 0,
+            "grounded": 0,
+            "minimumGap": 0.05,
+            "alpha": 1
+          },
+          "guard": {
+            "steps": 14,
+            "limited": 0,
+            "iterationLimits": 0,
+            "precisionLimits": 0,
+            "initialOverlaps": 0,
+            "minimumTime": 1,
+            "last": {
+              "time": 1,
+              "queries": 0,
+              "iterations": 0,
+              "vertexTrianglePairs": 0,
+              "edgeEdgePairs": 0,
+              "status": "clear",
+              "pair": []
+            }
+          }
+        },
+        "poseSHA256": "d4f905f7e1048c33088bf55b03a832f1b13b49b6bb6f1a0517cf77bbb6f1e1c1",
+        "timing": "not included in loaded-phase timing statistics",
+        "gates": {
+          "restWithin1PercentBarExtension": true,
+          "finalForceConverged": true,
+          "allUnloadingStepsConverged": true
+        }
+      },
+      "meanStepMs": 0.13640664444444578,
+      "p95StepMs": 0.7627650000000017,
+      "p95ActiveStepMs": 1.1320529999999849,
+      "maxStepMs": 2.068492000000049,
+      "gates": {
+        "tensile": true,
+        "axialBar5Percent": true,
+        "drift1Percent": true,
+        "physics8ms": true,
+        "finalForceConverged": true,
+        "allSolverStepsConverged": true
+      }
+    }
+  ]
+}

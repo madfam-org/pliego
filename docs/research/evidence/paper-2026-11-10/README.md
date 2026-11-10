@@ -154,7 +154,9 @@ steps, linear failures or nonlocal fallbacks occur. Repeated gradient totals are
 34777 evaluations, 5766533 active EE observations, 1298506 smoothed observations
 and 9634 uncovered observations; general smooth coverage remains open.
 
-The [contact-free strip matrix](axial-local.json) tests direct/consistent uncapped
+The [contact-free strip matrix](axial-local.json), regenerated at
+[`cc74f251b95872a5838d7ff205a2f4aee2dce095`](https://github.com/madfam-org/pliego/commit/cc74f251b95872a5838d7ff205a2f4aee2dce095),
+tests direct/consistent uncapped
 I32/I128, each with smoothing off/on, for 180 loaded plus 120 unloading frames.
 All four pass the declared 5% axial-reference, 1% half-time drift, every-substep
 force and unloading-return gates. Loaded extension is 0.000180145916 mm versus
@@ -165,8 +167,10 @@ non-timing results, loaded/unloaded pose hashes and force counters match at
 each budget. Active contact stencils and energy remain zero: this validates
 that combined material/solver response in this fixture, **not contact forces or
 a causal improvement from smoothing**. It is not held-out paper data, a 2D FE
-reference, or mesh/time convergence. Loaded active p95 spans about 1.06–5.07 ms
+reference, or mesh/time convergence. Loaded active p95 spans about 1.13–4.87 ms
 across this small, sequential four-case matrix; that is not booklet performance.
+Per-file source digests use explicit path/SHA256 records. The metadata-format
+change preserves every digest and all numerical loading/unloading results.
 
 The [all-flexible uncapped probe](6fb-initial-feasibility.json) still fails initial
 strict geometry/ground feasibility before a completed frame; all physical gates

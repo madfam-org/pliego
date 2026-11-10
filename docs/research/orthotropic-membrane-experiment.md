@@ -181,9 +181,15 @@ At the measurement source, all 16 CI checks pass, including 173 engine and
 The package contains 614149 unpacked bytes (192625 packed). This validation is
 pinned to `25ca58d`; no deployment or stable catalogue release follows.
 
-An independently solved non-affine FE boundary problem, controlled time/iteration
-convergence, membrane locking/bending, crease/join/hand support, contact/strain
-limits, measured stocks and new-model booklet/device acceptance remain owed.
+An independently assembled/solved [non-affine membrane BVP](nonaffine-membrane-bvp.md)
+is now implemented with actual runtime planar GN statics, an independent linear
+CST oracle, explicit acceptance validation and raw/stable globalization controls.
+Clean-source acceptance remains pending. Base load failures stay retained; a
+separate fourfold load window studies numerical resolution versus finite strain,
+with no fourfold outcome claimed. Stable increments are used only in the bench
+static search; World timestep Armijo remains unchanged. Controlled time/iteration
+accuracy, membrane locking/bending, crease/join/hand support, contact/strain limits,
+measured stocks and new-model booklet/device acceptance remain owed.
 This bounded pass does not certify full-shell accuracy, fastest abstraction or
 exhausted research.
 

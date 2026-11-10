@@ -142,6 +142,16 @@ acceptance. Stocks and reader defaults remain unchanged; non-affine solved FE,
 time accuracy, locking/bending, joins/drives, measured stock, 8 ms and device
 gates remain open. The synthetic pass is not a stable catalogue release.
 
+The [solved non-affine membrane stage](research/nonaffine-membrane-bvp.md) is now
+implemented but has no accepted clean-source full-matrix result yet. It compares
+actual runtime planar statics with an independently assembled/solved linear CST
+reference, retains the raw-potential Armijo failure control and independently
+validates residuals, reactions and acceptance traces. Stable energy increments
+are bench-only; World timestep searches are unchanged. Base load-window failures
+remain retained while a separate fourfold window studies numerical resolution
+and finite-strain effects under the same material and threshold formulas. No
+fourfold success, mesh-converged model or new booklet/device result is claimed.
+
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the
 declared 0.001 µN force tolerance, identical sampled-position hashes and all

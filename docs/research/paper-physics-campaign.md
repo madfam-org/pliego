@@ -222,6 +222,17 @@ UI/devices. No stock or reader default changes. Solved non-affine FE, controlled
 time/iteration accuracy, locking/bending, crease/join/hand support, physical
 calibration, the 8 ms target and real-device interaction remain required.
 
+The next [non-affine static BVP](nonaffine-membrane-bvp.md) is implemented and
+acceptance-pending: full left clamp/right dead traction, actual runtime membrane
+GN restricted to planar DOFs, independent linear CST assembly/solve and independent
+acceptance checks. Raw total-potential stagnation remains a numerical control;
+the stable increment candidate changes only bench globalization, leaving World
+timestep searches intact. Base eta=[1e-4,5e-5,2.5e-5] remains unchanged. A separate
+fourfold [4e-4,2e-4,1e-4] window investigates precision versus finite-strain effects
+without changing material or threshold formulas; base failures remain retained,
+and no fourfold outcome is asserted. Clean run/repeat/ablation and refinement
+gates must be resolved before a bounded static acceptance claim.
+
 ## Separate gates
 
 **Interaction:** booklet frame/camera fixed throughout dragging; only exposed leaves
@@ -315,8 +326,8 @@ source and disclose their timing/accuracy scope.
    progress, strain and cost. This does not close coupled contact research.
 2. Finish booklet browser/device acceptance, arbitrary-location hand coupling and
    derived companion page mapping with immutable fabrication provenance.
-3. Extend the accepted synthetic orthotropic triangle audit with an independently
-   solved non-affine FE reference, C-IPC comparison and measured stock fixtures;
+3. Complete clean-source acceptance of the implemented non-affine static BVP,
+   then add C-IPC comparison and measured stock fixtures;
    keep actual time/iteration convergence separate from constitutive accuracy. Quantify stiffness
    capping, grain response, crease hysteresis and mesh/time convergence.
 4. Implement and compare local XPBD, developable/rod and VBD/AVBD candidates on those

@@ -116,6 +116,21 @@ export function evaluateOrthotropicElement(element, x, opts = {}) {
     areaRatio: k.areaRatio, minimumStretch: k.minimumStretch, maximumStretch: k.maximumStretch };
 }
 
+/** Neumaier accumulation; magnitude is diagnostic, not an interval bound.
+ * @param {{sum:number,correction:number,magnitude:number}} accumulator @param {number} value */
+function addIncrement(accumulator, value) {
+  const sum = accumulator.sum, next = sum + value;
+  accumulator.correction += Math.abs(sum) >= Math.abs(value) ? (sum - next) + value : (value - next) + sum;
+  accumulator.sum = next; accumulator.magnitude += Math.abs(value);
+}
+
+/** @param {number[]} values */
+function compensatedIncrement(values) {
+  const accumulator = { sum: 0, correction: 0, magnitude: 0 };
+  for (const value of values) addIncrement(accumulator, value);
+  return accumulator.sum + accumulator.correction;
+}
+
 export class OrthotropicMembrane {
   /** @param {import('../mesh.js').Mesh} mesh @param {import('../material.js').Material[]} materials
    * @param {any} doc loaded document @param {number[]} nu12PerSheet explicit research Poisson convention */
@@ -152,6 +167,59 @@ export class OrthotropicMembrane {
     }
     return Number.isFinite(energy) ? energy : Infinity;
   }
+  /** Stable increment of the declared real StVK polynomial at actual f64 poses.
+   * This is not literal subtraction of two separately rounded energy() values.
+   * Existing energy/gradient/GN arithmetic remains unchanged. Invalid endpoints
+   * return Infinity; absoluteTermSum is a magnitude diagnostic, not an error bound.
+   * @param {ArrayLike<number>} before @param {ArrayLike<number>} after */
+  energyDifferenceDetails(before, after) {
+    const start = scratch(), end = scratch();
+    const total = { sum: 0, correction: 0, magnitude: 0 };
+    const linear = { sum: 0, correction: 0, magnitude: 0 };
+    const remainder = { sum: 0, correction: 0, magnitude: 0 };
+    for (let t = 0; t < this.mesh.nT; t++) {
+      const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3);
+      if (!kinematics(e, before, ids, start) || !kinematics(e, after, ids, end)) return { difference: Infinity, absoluteTermSum: Infinity, linear: Infinity, remainder: Infinity, absoluteRemainderTermSum: Infinity, triangles: this.mesh.nT, valid: false };
+      const da = [0, 0, 0], db = [0, 0, 0];
+      for (let r = 0; r < 3; r++) {
+        // Form actual nodal position increments first. Subtracting two rounded
+        // deformation gradients would lose Newton-scale changes a second time.
+        const d0 = after[3 * ids[0] + r] - before[3 * ids[0] + r];
+        const d1 = after[3 * ids[1] + r] - before[3 * ids[1] + r] - d0;
+        const d2 = after[3 * ids[2] + r] - before[3 * ids[2] + r] - d0;
+        da[r] = e.alpha[1] * d1 + e.alpha[2] * d2;
+        db[r] = e.beta[1] * d1 + e.beta[2] * d2;
+      }
+      const { a, b, stress } = start;
+      const de = [
+        compensatedIncrement([a[0]*da[0], a[1]*da[1], a[2]*da[2], 0.5*da[0]*da[0], 0.5*da[1]*da[1], 0.5*da[2]*da[2]]),
+        compensatedIncrement([b[0]*db[0], b[1]*db[1], b[2]*db[2], 0.5*db[0]*db[0], 0.5*db[1]*db[1], 0.5*db[2]*db[2]]),
+        compensatedIncrement([a[0]*db[0], a[1]*db[1], a[2]*db[2], b[0]*da[0], b[1]*da[1], b[2]*da[2], da[0]*db[0], da[1]*db[1], da[2]*db[2]]),
+      ];
+      const q = e.Q, ds = [q[0]*de[0]+q[2]*de[1], q[2]*de[0]+q[1]*de[1], q[3]*de[2]];
+      for (let i = 0; i < 3; i++) {
+        addIncrement(total, e.volume * de[i] * stress[i]);
+        addIncrement(total, 0.5 * e.volume * de[i] * ds[i]);
+        addIncrement(remainder, 0.5 * e.volume * de[i] * ds[i]);
+        addIncrement(remainder, 0.5 * e.volume * stress[0] * da[i] * da[i]);
+        addIncrement(remainder, 0.5 * e.volume * stress[1] * db[i] * db[i]);
+        addIncrement(remainder, e.volume * stress[2] * da[i] * db[i]);
+        for (let r = 0; r < 3; r++) {
+          const c = 3 * i + r;
+          const g = e.volume * (start.J[c] * stress[0] + start.J[9 + c] * stress[1] + start.J[18 + c] * stress[2]);
+          addIncrement(linear, g * (after[3 * ids[i] + r] - before[3 * ids[i] + r]));
+        }
+      }
+    }
+    const difference = total.sum + total.correction;
+    const linearValue = linear.sum + linear.correction, remainderValue = remainder.sum + remainder.correction;
+    const valid = [difference, total.magnitude, linearValue, remainderValue, remainder.magnitude].every(Number.isFinite);
+    return { difference: valid ? difference : Infinity, absoluteTermSum: total.magnitude,
+      linear: linearValue, remainder: remainderValue, absoluteRemainderTermSum: remainder.magnitude,
+      triangles: this.mesh.nT, valid };
+  }
+  /** @param {ArrayLike<number>} before @param {ArrayLike<number>} after */
+  energyDifference(before, after) { return this.energyDifferenceDetails(before, after).difference; }
   /** Add exact elastic gradient over all vertices. @param {ArrayLike<number>} x @param {Float64Array} g */
   addGradient(x, g) {
     for (let t = 0; t < this.mesh.nT; t++) {

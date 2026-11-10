@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createOrthotropicElement, evaluateOrthotropicElement, OrthotropicMembrane } from '../src/xpbd/orthotropic-membrane.js';
 import { BlockCholesky } from '../src/linalg/blockchol.js';
 
@@ -179,4 +180,125 @@ test('principal metric diagnostics match known stretches and remain finite at ex
   const overflow=stretched.slice();overflow[3]=1.4e154;
   assert.equal(membrane.energy(overflow),Infinity);assert.equal(membrane.diagnostics(overflow).finite,false);
   console.log('orthotropic-element: analytical stretches/area verified under 3D rotation; finite 6.25e303 nJ extreme has finite 1e154/1 principal stretches; unrepresentable state rejected');
+});
+
+function incrementFixture(grain) {
+  const mesh={nV:3,nT:1,tris:Int32Array.of(0,1,2),triSheet:Int32Array.of(0),uv:Float64Array.of(0,0,40,0,0,40)};
+  return new OrthotropicMembrane(mesh,[{Emd:material.E1,Ecd:material.E2,G12:material.G12,t:material.thickness}],{sheets:[{grainDeg:grain}]},[0.293]);
+}
+function compensated(values) {
+  let sum=0,correction=0;
+  for(const value of values) {
+    const next=sum+value;
+    correction+=Math.abs(sum)>=Math.abs(value)?(sum-next)+value:(value-next)+sum;
+    sum=next;
+  }
+  return sum+correction;
+}
+
+test('stable StVK increments agree with independent Decimal subtraction at close poses and resolve Newton-scale potential changes', () => {
+  const cases=[];
+  for(const grain of [0,31,90])for(const h of [1e-8,1e-10,1e-11]) {
+    const membrane=incrementFixture(grain),element=membrane.elements[0];
+    const before=Float64Array.of(0,0,0,40.004,0,-0.0012,0.0008,0,-39.9988);
+    const after=Float64Array.from(before,(v,i)=>v+(i%3===1||i<3?0:h*Math.sin(0.7*i+0.3)));
+    const delta=Float64Array.from(after,(v,i)=>v-before[i]);
+    const value=evaluateOrthotropicElement(element,before),hd=multiply(value.gaussNewton,delta);
+    const force=Float64Array.from(value.gradient,(v,i)=>v+hd[i]);
+    const details=membrane.energyDifferenceDetails(before,after);
+    const work=compensated(Array.from(force,(v,i)=>v*delta[i]));
+    const residualDot=compensated(Array.from(value.gradient,(v,i)=>(v-force[i])*delta[i]));
+    const rawPotential=(membrane.energy(after)-force.reduce((s,v,i)=>s+v*after[i],0))
+      -(membrane.energy(before)-force.reduce((s,v,i)=>s+v*before[i],0));
+    assert.equal(details.valid,true);assert.equal(membrane.energyDifference(before,after),details.difference);
+    assert.ok(Math.abs(details.difference-details.linear-details.remainder)<=1e-10*Math.max(Math.abs(details.difference),Number.MIN_VALUE));
+    const reverse=membrane.energyDifference(after,before);
+    assert.ok(Math.abs(details.difference+reverse)<=1e-9*Math.max(Math.abs(details.difference),Number.MIN_VALUE));
+    cases.push({grain,h,before:Array.from(before),after:Array.from(after),force:Array.from(force),
+      alpha:Array.from(element.alpha),beta:Array.from(element.beta),Q:Array.from(element.Q),volume:element.volume,
+      stable:details.difference,raw:membrane.energy(after)-membrane.energy(before),
+      stablePotential:residualDot+details.remainder,stableDifferenceMinusWork:details.difference-work,
+      rawPotential,absoluteTermSum:details.absoluteTermSum,absoluteRemainderTermSum:details.absoluteRemainderTermSum});
+  }
+  // Independent 100-digit direct U(after)-U(before), not the increment identity.
+  // Stored binary64 coefficients and actual binary64 poses are exact constants
+  // here; this isolates increment arithmetic from coefficient calibration.
+  const python=String.raw`
+import json,sys
+from decimal import Decimal,localcontext
+def D(v): return Decimal.from_float(float(v))
+def energy(case,key):
+    x=list(map(D,case[key])); alpha=list(map(D,case['alpha'])); beta=list(map(D,case['beta']))
+    q=list(map(D,case['Q'])); volume=D(case['volume'])
+    a=[alpha[1]*(x[3+r]-x[r])+alpha[2]*(x[6+r]-x[r]) for r in range(3)]
+    b=[beta[1]*(x[3+r]-x[r])+beta[2]*(x[6+r]-x[r]) for r in range(3)]
+    e=[(sum(v*v for v in a)-1)/2,(sum(v*v for v in b)-1)/2,sum(u*v for u,v in zip(a,b))]
+    return volume/2*(q[0]*e[0]*e[0]+q[1]*e[1]*e[1]+2*q[2]*e[0]*e[1]+q[3]*e[2]*e[2])
+out=[]
+with localcontext() as context:
+    context.prec=100
+    for case in json.load(sys.stdin):
+        difference=energy(case,'after')-energy(case,'before')
+        work=sum(D(f)*(D(a)-D(b)) for f,a,b in zip(case['force'],case['after'],case['before']))
+        out.append({'difference':float(difference),'potentialDifference':float(difference-work)})
+json.dump(out,sys.stdout,allow_nan=False)
+`;
+  const reference=JSON.parse(execFileSync('python3',['-c',python],{input:JSON.stringify(cases),encoding:'utf8'}));
+  let worstInternal=0,worstPotential=0,bestRawImprovement=0,smallestDecisionMargin=Infinity;
+  let maximumAbsolutePotentialError=0,smallestPotentialDecrease=Infinity;
+  for(let i=0;i<cases.length;i++) {
+    const row=cases[i],truth=reference[i];
+    const internalError=Math.abs(row.stable-truth.difference)/Math.abs(truth.difference);
+    worstInternal=Math.max(worstInternal,internalError);assert.ok(internalError<1e-9);
+    if(row.h>=1e-10) {
+      const stableError=Math.abs(row.stablePotential-truth.potentialDifference);
+      const rawError=Math.abs(row.rawPotential-truth.potentialDifference);
+      const relativeError=stableError/Math.abs(truth.potentialDifference);
+      maximumAbsolutePotentialError=Math.max(maximumAbsolutePotentialError,stableError);
+      smallestPotentialDecrease=Math.min(smallestPotentialDecrease,Math.abs(truth.potentialDifference));
+      worstPotential=Math.max(worstPotential,relativeError);
+      bestRawImprovement=Math.max(bestRawImprovement,rawError/Math.max(stableError,Number.MIN_VALUE));
+      smallestDecisionMargin=Math.min(smallestDecisionMargin,Math.abs(truth.potentialDifference)/Math.max(stableError,Number.MIN_VALUE));
+      assert.ok(truth.potentialDifference<0 && row.stablePotential<0,'synthetic GN descent decision must agree with Decimal');
+      assert.ok(relativeError<0.001,`Newton-scale relative error=${relativeError}`);
+    }
+  }
+  assert.ok(bestRawImprovement>1e4,'stable potential must materially improve the rounded-total cancellation witness');
+  console.log(`orthotropic-increment: 100-digit Decimal direct energy subtraction cases=${cases.length}; worst internal relative error=${worstInternal}; worst Newton potential relative error=${worstPotential}; maximum absolute potential error=${maximumAbsolutePotentialError} nJ; smallest true decrease=${smallestPotentialDecrease} nJ; minimum decision/error margin=${smallestDecisionMargin}; best improvement over rounded totals=${bestRawImprovement}; base-FP strain error retained, no interval-bound claim`);
+});
+
+test('stable increments preserve larger-change agreement, finite 3D covariance, directional derivatives and invalid-endpoint handling', () => {
+  const membrane=incrementFixture(31),before=Float64Array.of(0,0,0,40.004,0,-0.0012,0.0008,0,-39.9988);
+  let worst=0;
+  for(let sample=0;sample<12;sample++) {
+    const after=Float64Array.from(before,(v,i)=>v+0.01*Math.sin(i+0.37*sample));
+    const stable=membrane.energyDifference(before,after),raw=membrane.energy(after)-membrane.energy(before);
+    const error=Math.abs(stable-raw)/Math.max(1,Math.abs(raw));worst=Math.max(worst,error);
+    assert.ok(error<1e-8,`larger-change energy increment error=${error}`);
+    const r=rotation(0.73),movedBefore=rotatePose(r,before,[2,-3,4]),movedAfter=rotatePose(r,after,[2,-3,4]);
+    const moved=membrane.energyDifference(movedBefore,movedAfter);
+    assert.ok(Math.abs(moved-stable)/Math.max(1,Math.abs(stable))<1e-9);
+  }
+  const gradient=new Float64Array(9);membrane.addGradient(before,gradient);
+  const after=Float64Array.from(before,(v,i)=>v+1e-11*Math.sin(i+0.3));
+  const details=membrane.energyDifferenceDetails(before,after);
+  const slope=compensated(Array.from(gradient,(v,i)=>v*(after[i]-before[i])));
+  assert.ok(Math.abs(details.difference-slope)/Math.max(Math.abs(slope),Number.MIN_VALUE)<1e-6);
+  assert.equal(membrane.energyDifference(before,before),0);
+  const invalid=new Float64Array(9);
+  assert.equal(membrane.energyDifference(before,invalid),Infinity);assert.equal(membrane.energyDifference(invalid,before),Infinity);
+  assert.equal(membrane.energyDifferenceDetails(before,invalid).valid,false);
+  const mesh={nV:4,nT:2,tris:Int32Array.of(0,1,2,0,2,3),triSheet:Int32Array.of(0,0),uv:Float64Array.of(0,0,40,0,40,40,0,40)};
+  const combined=new OrthotropicMembrane(mesh,[{Emd:material.E1,Ecd:material.E2,G12:material.G12,t:material.thickness}],{sheets:[{grainDeg:31}]},[0.293]);
+  const a=Float64Array.of(0,0,0,40.004,0,-0.0012,40.0048,0,-40,0.0008,0,-39.9988);
+  const b=Float64Array.from(a,(v,i)=>v+0.01*Math.sin(i+0.71));
+  let split=0;
+  for(let t=0;t<2;t++) {
+    const ids=Array.from(mesh.tris.subarray(3*t,3*t+3));
+    const localMesh={nV:3,nT:1,tris:Int32Array.of(0,1,2),triSheet:Int32Array.of(0),uv:Float64Array.from(ids.flatMap(i=>Array.from(mesh.uv.subarray(2*i,2*i+2))))};
+    const local=new OrthotropicMembrane(localMesh,[{Emd:material.E1,Ecd:material.E2,G12:material.G12,t:material.thickness}],{sheets:[{grainDeg:31}]},[0.293]);
+    split+=local.energyDifference(Float64Array.from(ids.flatMap(i=>Array.from(a.subarray(3*i,3*i+3)))),Float64Array.from(ids.flatMap(i=>Array.from(b.subarray(3*i,3*i+3)))));
+  }
+  assert.ok(Math.abs(combined.energyDifference(a,b)-split)<1e-14*Math.max(1,Math.abs(split)));
+  console.log(`orthotropic-increment: larger-change cases=12 worst rounded-total agreement=${worst}; finite-rotation covariance, actual-pose directional derivative, zero/reversal/domain checks; no energy/gradient/GN path changed`);
 });

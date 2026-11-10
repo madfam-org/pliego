@@ -89,7 +89,7 @@ and input latency. GPU Float32 and parallel reduction order also need a declared
 determinism policy; they cannot silently inherit bit-exact CPU replay claims.
 
 The current [WGSL scalar-type specification](https://www.w3.org/TR/WGSL/#scalar-types)
-provides concrete floating types f32/f16. AbstractFloat's binary64 constant rules
+provides concrete floating types f32 and optional f16. AbstractFloat's binary64 constant rules
 do not provide an f64 storage/compute type. A direct Float64-preserving WebGPU
 port is therefore not a baseline-language substitution. Float32/emulation and
 WASM f64/SIMD remain separate experiments, including transfer and dispatch cost.

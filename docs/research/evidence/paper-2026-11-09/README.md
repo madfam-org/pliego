@@ -418,7 +418,8 @@ this is an objective reproducer, not bit-exact `World.step` replay.
 
 `replay-contact-objective.mjs` reconstructs energy `355.1898846773351 nJ` and
 free-force residual `0.6630251270038201 µN`, with zero difference in the captured
-free gradient values. Along its GN proposal, the symmetric energy change
+free gradient values. The [source-clean reconstruction report](late-objective-49ab74d.json)
+pins the replayer, capture and measured engine source separately. Along its GN proposal, the symmetric energy change
 `(E(x+alpha*d)+E(x-alpha*d))/2-E(x)` is concentrated in EE contact:
 
 | alpha | Implicit terms, nJ | VT contact, nJ | EE contact, nJ |

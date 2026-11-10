@@ -144,6 +144,7 @@ function run(model, settings) {
           goal, ...endpointProgress(native, model === 'active-leaf' ? w.book.leaves[w.active].sheet : index, positions, goal) });
       }
       r.turns++;
+      if (settings.barrierContact) console.error(`paper-barrier-progress: ${model} turn=${r.turns}/${requestedTurns} frames=${r.frames} endpointMinimum=${r.endpoints.at(-1).minimum} unconverged=${r.coupledContact.unconverged}/${r.coupledContact.steps} backtracks=${r.coupledContact.backtracks}`);
       if (settings.continuousContact) console.error(`paper-contact-progress: ${model} turn=${r.turns} endpointMinimum=${r.endpoints.at(-1).minimum} limited=${r.continuousContact.limited} iterationLimits=${r.continuousContact.iterationLimits}`);
     }
     r.completed = true;
@@ -201,7 +202,7 @@ if (models.some(m => !['all-leaves', 'active-leaf'].includes(m))) throw new Rang
 for (const settings of caseIndex === null ? settingsMatrix : [settingsMatrix[caseIndex - 1]]) {
   for (const model of models) {
     const r = run(model, settings); results.push(r);
-    console.error(`paper-campaign: ${model} S=${settings.substeps} I=${settings.newtonIterations} physical=${!!settings.physicalMembrane} search=${!!settings.lineSearch} CCD=${!!settings.continuousContact} barrier=${!!settings.barrierContact} turns=${r.turns}/${requestedTurns} strain=${r.maxStrain} p95=${r.stepP95Ms?.toFixed(2)}ms ${r.error || 'completed protocol'}`);
+    console.error(`paper-campaign: ${model} S=${settings.substeps} I=${settings.barrierContact ? settings.barrierIterations : settings.newtonIterations ?? 1} physical=${!!settings.physicalMembrane} search=${!!settings.lineSearch} CCD=${!!settings.continuousContact} barrier=${!!settings.barrierContact} turns=${r.turns}/${requestedTurns} strain=${r.maxStrain} p95=${r.stepP95Ms?.toFixed(2)}ms ${r.error || 'completed protocol'}`);
   }
 }
 const report = {

@@ -5,6 +5,13 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Paper campaign continuation (2026-11-10, unreleased source): optional additive CCD,
+coupled finite-gap normal barriers, previous-pose initialization, consistent radial
+compression curvature and a checked direct-local/automatic contact solve. Native
+eight-turn evidence, force-residual failures, CPU profiles and a parallel-edge
+smoothness counterexample are retained. New physics remains off by default;
+these are not C-IPC/OGC implementations or validated material/release presets.
+
 Paper campaign additions (2026-11-09, unreleased source): fixed-query face contacts
 reject negative barycentric weights near pinned corners; experimental
 `physicalMembrane` and `lineSearch` options with objective/replay tests; native

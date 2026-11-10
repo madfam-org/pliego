@@ -60,13 +60,36 @@ validated quality preset. Defaults retain the existing cap. Compare it with
 `node packages/engine/bench/paper-campaign.mjs`; see the
 [active campaign and separate gates](../../docs/research/paper-physics-campaign.md).
 
-`lineSearch: true` additionally backtracks GN/PCG proposals against the actual
-implicit inertia, membrane, bend/damping, drive and join objective. It exposes
+`lineSearch: true` additionally backtracks GN/PCG proposals against the current
+implicit inertia, membrane, bend/damping, drive and join objective, with join
+coefficients frozen for each proposal. It exposes
 `lineSearchBacktracks` and `lineSearchRejected` diagnostics and preserves them
 through snapshots. It is off by default. It does not safeguard prediction or the
 later contact/strain projections, and does not make a single Newton iteration
 converged. The contact-free axial counterexample remains in
 `node packages/engine/bench/axial-pull.mjs`.
+
+Further opt-in research options are documented in the
+[coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
+`previousPoseStart` changes the legacy initial guess; `continuousContact` adds a
+global endpoint-motion filter; `barrierContact` replaces projections with a
+normal-barrier solve. The filter failed booklet progress. The barrier path needs
+strictly feasible initial contact/ground geometry and static prescribed vertices.
+It cannot be combined with `continuousContact` or `contact: false`.
+
+For the barrier path, `barrierIterations` defaults to 8, `barrierCgIterations` to
+128 and `barrierTolerance` to 0.001 µN. `barrierDistance` is 0.05 mm and
+`barrierStiffness` is 100000 g/s². `barrierLinearSolver` accepts `'pcg'` (default),
+`'direct-local'` (refuses nonlocal free contact pairs outside the elastic graph)
+or `'auto'` (counts a fallback to PCG). `consistentMembraneCurvature: true` matches
+radial compression curvature to the existing force law; it does not change that
+law. Solver/convergence/fallback counters are in `stats().coupledContact`.
+
+These options remain research candidates. Unmollified parallel EE ties are
+nonsmooth; geometry-dependent join Jacobians, friction, general contact weighting,
+material calibration and interactive timing remain open. The coupled eight-turn
+geometry result does not close those gates. Energy-gradient checks apply with
+frozen join coefficients and differentiable closest-feature configurations.
 
 `kinematics` exports `FaceTree`, `LoopClosure`, `KinematicProgram` and the closed forms
 (`degree4`, `degree4Multipliers`, `miuraDims`, `miuraPoisson`, `miuraFoldAngles`, `vfold`,

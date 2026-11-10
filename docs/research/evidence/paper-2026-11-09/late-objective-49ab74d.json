@@ -1,0 +1,137 @@
+{
+  "schema": "pliego-objective-diagnosis/0.2",
+  "recordedAt": "2026-11-10T06:34:33.296Z",
+  "source": {
+    "git": "49ab74dcb843bde8a0e5d513bffe4be1ba48681d",
+    "dirty": false,
+    "harnessSHA256": "cab87c9e37dae1ee865abfb3a69e785ac8c5e734ca48f2f9974df91eedb85989",
+    "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+    "capturedEngine": {
+      "git": "e25b8e53e22d361d24156f878ea602751ddc4004",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "093db3c568896172014213c1aca72a1ef108d1cb48e50a16eed3280994183595",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "76d70a7380b7b606a64b685737f630a87d7a31a7562e861c76f42420b17d5d08",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    }
+  },
+  "scope": "Native accepted-pose frozen-objective reconstruction; JSON values reproduce energy/free gradient/residual. Not bit-exact World.step replay, material validation or a smoothness certificate at feature ties.",
+  "completedFramesAtObservation": 650,
+  "capturedResidual": 0.6630251270038201,
+  "reconstructedResidual": 0.6630251270038201,
+  "gradientDifference": 0,
+  "capturedEnergy": 355.1898846773351,
+  "reconstructedEnergy": 355.1898846773351,
+  "contacts": 1592,
+  "slope": -0.0000016965983983870196,
+  "maxDelta": 0.00000446493841355089,
+  "baseComponents": {
+    "implicit": 353.72086532562776,
+    "vt": 0.3837639021447952,
+    "ee": 1.0852554495625442,
+    "ground": 0
+  },
+  "rows": [
+    {
+      "alpha": 1,
+      "plus": 355.18989049952086,
+      "minus": 355.18989626409683,
+      "centralSlope": -0.00000288228798694945,
+      "slope": -0.0000016965983983870196,
+      "armijo": false,
+      "componentEvenChange": {
+        "implicit": 2.2933397758606588e-7,
+        "vt": 1.6387478046775428e-7,
+        "ee": 0.00000831126499623025,
+        "ground": 0
+      }
+    },
+    {
+      "alpha": 0.1,
+      "plus": 355.1898851802241,
+      "minus": 355.1898857564923,
+      "centralSlope": -0.0000028813408903261006,
+      "slope": -0.0000016965983983870196,
+      "armijo": false,
+      "componentEvenChange": {
+        "implicit": 2.2927224563318305e-9,
+        "vt": 1.6387475265666751e-9,
+        "ee": 7.870916327590294e-7,
+        "ground": 0
+      }
+    },
+    {
+      "alpha": 0.01,
+      "plus": 355.1898847251112,
+      "minus": 355.1898847816323,
+      "centralSlope": -0.0000028260558337933617,
+      "slope": -0.0000016965983983870196,
+      "armijo": false,
+      "componentEvenChange": {
+        "implicit": 2.2680524125462398e-11,
+        "vt": 1.6388335133399323e-11,
+        "ee": 7.599759732634936e-8,
+        "ground": 0
+      }
+    },
+    {
+      "alpha": 0.001,
+      "plus": 355.18988468036815,
+      "minus": 355.1898846849878,
+      "centralSlope": -0.0000023098323254089337,
+      "slope": -0.0000016965983983870196,
+      "armijo": false,
+      "componentEvenChange": {
+        "implicit": -2.2737367544323206e-13,
+        "vt": 1.6303625116620424e-13,
+        "ee": 5.3429820567885145e-9,
+        "ground": 0
+      }
+    },
+    {
+      "alpha": 0.0001,
+      "plus": 355.18988467725694,
+      "minus": 355.1898846775957,
+      "centralSlope": -0.0000016939338820520788,
+      "slope": -0.0000016965983983870196,
+      "armijo": true,
+      "componentEvenChange": {
+        "implicit": 1.1368683772161603e-13,
+        "vt": 3.497202527569243e-15,
+        "ee": 9.114642374186133e-11,
+        "ground": 0
+      }
+    },
+    {
+      "alpha": 0.00001,
+      "plus": 355.1898846773192,
+      "minus": 355.1898846773534,
+      "centralSlope": -0.000001710986907710321,
+      "slope": -0.0000016965983983870196,
+      "armijo": true,
+      "componentEvenChange": {
+        "implicit": 2.8421709430404007e-13,
+        "vt": 3.885780586188048e-16,
+        "ee": 9.15045816896054e-13,
+        "ground": 0
+      }
+    },
+    {
+      "alpha": 0.000001,
+      "plus": 355.18988467733317,
+      "minus": 355.18988467733675,
+      "centralSlope": -0.0000017905676941154525,
+      "slope": -0.0000016965983983870196,
+      "armijo": true,
+      "componentEvenChange": {
+        "implicit": -1.1368683772161603e-13,
+        "vt": -7.216449660063518e-16,
+        "ee": 8.881784197001252e-15,
+        "ground": 0
+      }
+    }
+  ]
+}

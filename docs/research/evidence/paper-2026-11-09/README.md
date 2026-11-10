@@ -1,5 +1,9 @@
 # First paper campaign measurements
 
+This page retains the first solver measurements and the subsequent
+[continuous-contact comparison](#continuous-contact-and-physical-turn-progress).
+Their source checkpoints are separate; later evidence does not replace earlier failures.
+
 Source: [`78ca50699ebfd7700e5fc97ba8cceb499b0ed01c`](https://github.com/madfam-org/pliego/commit/78ca50699ebfd7700e5fc97ba8cceb499b0ed01c),
 clean during these runs. Recorded 2026-11-10 UTC (2026-11-09 local).
 One sequential local run per candidate, Node 20.19.5, Intel Core i7-9750H.
@@ -99,3 +103,57 @@ contact and closest-feature/coupled formulations, analytical/physical material
 validation, developable/rod and local-solver prototypes, backend comparisons,
 full-corpus before/after coverage and the archive companion adapter are open.
 No merge, publication, deployment or engine-wide stability claim follows from this milestone.
+
+## Continuous contact and physical turn progress
+
+Source [`e749ff46beef833a418512526cdbafd2f2139247`](https://github.com/madfam-org/pliego/commit/e749ff46beef833a418512526cdbafd2f2139247),
+clean at both candidate runs and the old-engine comparison. Same runtime/hardware
+as above. Reports include the new metric-helper hash as well as engine, reader,
+harness and fixture hashes. All use the schema 0.2 contact matrix:
+
+- [Previous engine `c3d7747`](contact-baseline-c3d7747.json), with the new harness.
+  Two default cases supported; six CCD cases explicitly unsupported.
+- [Candidate, first run](contact-e749ff4.json).
+- [Candidate, second run](contact-e749ff4-repeat.json).
+- [Machine-readable comparison](contact-comparison.json).
+
+The two default cases are numerically identical to the previous engine. All eight
+candidate cases replay identically between the two runs: every result field except
+build/step timing agrees, including endpoint progress, final position hash,
+strain, failure and CCD diagnostics. This does not compare timing statistically.
+
+| Model | Substeps | Membrane / search | Frames before stop | Completed turns | Peak stretch | Step p95, first / repeat | Result |
+|---|---:|---|---:|---:|---:|---:|---|
+| All flexible, guard off | 8 | capped / off | 107 | 1/8 | 1.260% | 35.70 / 35.65 ms | strain failure |
+| Active leaf, guard off | 8 | capped / off | 672 | 8/8 | 0.582% | 18.23 / 18.71 ms | turn progress passes; thickness and timing fail |
+| All flexible, guard on | 8 | capped / off | 3 | 0/8 | 0.0197% | 218.37 / 223.53 ms | zero progress |
+| Active leaf, guard on | 8 | capped / off | 3 | 0/8 | 0.0913% | 89.30 / 97.55 ms | zero progress |
+| All flexible, guard on | 16 | capped / off | 1 | 0/8 | 0.0088% | 229.06 / 232.37 ms | zero progress |
+| Active leaf, guard on | 16 | capped / off | 6 | 0/8 | 1.513% | 163.04 / 160.00 ms | strain failure |
+| All flexible, guard on | 8 | physical / on | 2 | 0/8 | 0.0086% | 155.51 / 158.32 ms | zero progress |
+| Active leaf, guard on | 8 | physical / on | 18 | 0/8 | 0.0719% | 83.43 / 83.57 ms | zero progress |
+
+Early-stopped timing samples describe only those short prefixes, sometimes one
+frame. They do not establish steady-state performance or an equal-completed-work
+speed ratio. They do show that this implementation misses the 8 ms gate on the
+tested prefixes. The low strains of stalled cases cannot be counted as successful
+reading or material accuracy. Five guard cases reach an explicit precision-limit
+zero interval; the sixth has 359 per-pair iteration-limit events and exceeds 1%
+stretch. No guarded case completes the first turn.
+
+The default active-leaf reader's minimum pre-promotion fore-edge progress is
+0.999313 across all eight endpoints (required ≥0.9), but its thickness deficit
+remains 0.099853 mm. Readability, progress and thickness are independent results.
+An earlier exploratory run without zero-progress termination was interrupted
+before producing a complete report. Its logical turn count is not acceptance
+evidence; the retained protocol stops stalled motion before endpoint promotion.
+
+Reproduce the recorded comparison, failing on numerical drift:
+
+```sh
+node packages/engine/bench/compare-paper-runs.mjs docs/research/evidence/paper-2026-11-09/contact-baseline-c3d7747.json docs/research/evidence/paper-2026-11-09/contact-e749ff4.json docs/research/evidence/paper-2026-11-09/contact-e749ff4-repeat.json
+```
+
+The [component implementation and limits](../../continuous-contact-experiment.md)
+explain why a global CCD endpoint filter cannot replace a coupled contact solve.
+It remains experimental and disabled by default.

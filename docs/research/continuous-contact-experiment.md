@@ -72,6 +72,9 @@ The native booklet comparison confirms this limitation. Guarded candidates eithe
 stop making progress or fail the strain gate before their first complete turn.
 Keeping a nearly motionless sheet below 1% stretch is not success. The guard stays
 off by default; there is no stable-release or optimal-performance claim.
+The [source-pinned reports and repeated comparison](evidence/paper-2026-11-09/README.md#continuous-contact-and-physical-turn-progress)
+retain all failures and verify unchanged default-case numerical results against
+the previous engine.
 
 ## Reproduction and gates
 

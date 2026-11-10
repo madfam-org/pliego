@@ -157,3 +157,67 @@ node packages/engine/bench/compare-paper-runs.mjs docs/research/evidence/paper-2
 The [component implementation and limits](../../continuous-contact-experiment.md)
 explain why a global CCD endpoint filter cannot replace a coupled contact solve.
 It remains experimental and disabled by default.
+
+## Full first-turn recovery probe
+
+The zero-progress gate above stops immediately. To test whether later frames
+recover, [source `51f5278`](https://github.com/madfam-org/pliego/commit/51f527840a39f570101de1a8ffedd57f0503120f)
+adds an explicit `--continue-after-zero` diagnostic protocol and `--turns 1`.
+The [recorded report](contact-recovery-51f5278.json) is source-clean and retains
+the same engine tree as `e749ff4`. It requests all 84 frames of the first forward
+turn, preserving the strain/floor gates and pre-promotion endpoint audit.
+
+| Guarded model | Substeps | Membrane / search | Mean fore-edge progress | Minimum fore-edge progress | Endpoint gate |
+|---|---:|---|---:|---:|---|
+| All flexible | 8 | capped / off | 0.00729% | −0.00055% | fail |
+| Active leaf | 8 | capped / off | 0.25708% | 0.04375% | fail |
+| All flexible | 16 | capped / off | 0.00502% | 0.00057% | fail |
+| Active leaf | 16 | capped / off | unavailable | unavailable | strain failure at frame 6 |
+| All flexible | 8 | physical / on | 0.00052% | −0.00005% | fail |
+| Active leaf | 8 | physical / on | 0.52855% | 0.06132% | fail |
+
+Required progress is ≥90% at **every** sampled fore-edge vertex. The five cases
+that run all 84 frames advance their logical turn count but fail physical turn
+progress by a wide margin. Their p95 step times range from 79.92 to 733.86 ms.
+Some motion resumes between zero intervals, but no guarded case reaches the
+required first-turn endpoint. This separates persistent practical failure from
+the earlier immediate-zero acceptance failure.
+
+Engine sleep is not an equilibrium certificate here: it uses velocities and
+control goals, and a globally clipped proposal can zero velocities while the
+geometry remains far from its target. Some runs therefore execute fewer than
+84×S guarded substeps; raw counts are retained. `framesEndingWithZeroProgress`
+counts frame statistics reporting a zero last interval, including a retained
+diagnostic while asleep, not distinct executed CCD queries. No fallback or
+wall-time-based simulation compression is added by the harness.
+
+Both unguarded first-turn cases pass the endpoint gate. The unguarded active leaf
+also passes this **first-turn** partial thickness check; its separately recorded
+eight-turn thickness failure remains open.
+
+```sh
+node packages/engine/bench/paper-campaign.mjs --contact-matrix --turns 1 --continue-after-zero --out /tmp/contact-recovery.json
+```
+
+## Independent compiled distance reference
+
+[Source `ad6a64c`](https://github.com/madfam-org/pliego/commit/ad6a64c4b8b73b93a91b1a0eb9c3967dbc1b5e4e)
+and the [reference report](distance-reference-ad6a64c.json) pin the component
+generator, native distance implementation, complete generated-input hash,
+adapter, IPC Toolkit 1.4.0 binary and public wheel hashes. Source was clean.
+Running the adapter twice on that same input produces byte-identical reports.
+
+Of 2,216 queries (1,107 VT / 1,109 EE), 2,215 have finite independent reference
+results; all agree within `1e-10 × stencil diameter²`, with maximum normalized
+discrepancy 3.87e-16. The remaining collapsed point-triangle returns non-finite
+in the reference. Native 0.25 mm² agrees with its analytical fixture. This remains
+an explicit reference-unavailable result, so the adapter exits 1; it is not
+counted as a comparison pass or silently removed from the denominator.
+
+The input generator covers seeded random, uniformly scaled, near-parallel,
+sliver, pinned-corner and collapsed stencils. This establishes tested component
+agreement, not exact predicates, full CCD safety, contact-force convergence,
+measured stock calibration or solver/backend optimality. The
+[reference workflow](../../continuous-contact-experiment.md#independent-distance-reference)
+uses an isolated Python environment; the native engine retains zero runtime
+dependencies.

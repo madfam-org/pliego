@@ -75,6 +75,11 @@ off by default; there is no stable-release or optimal-performance claim.
 The [source-pinned reports and repeated comparison](evidence/paper-2026-11-09/README.md#continuous-contact-and-physical-turn-progress)
 retain all failures and verify unchanged default-case numerical results against
 the previous engine.
+An additional [full first-turn recovery probe](evidence/paper-2026-11-09/README.md#full-first-turn-recovery-probe)
+continues after zero intervals: five candidates finish the requested 84 frames
+but retain mean fore-edge progress below 0.53% (required minimum at every sample:
+90%); the sixth fails strain. Logical control completion and velocity-based
+sleep are not evidence of a physically completed turn.
 
 ## Reproduction and gates
 

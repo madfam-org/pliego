@@ -1,10 +1,12 @@
 // @ts-check
-/** Two-word evaluation of the SAME real stored-coefficient difference-form
- * Green polynomial. No rest-gradient/metric subtraction or coefficient change.
+/** Two-word evaluation of the selected represented difference-form Green law.
+ * The historical stored-material polynomial is unchanged when reference is absent.
+ * UV-displacement is a separately named actual-X0 metric-relative polynomial.
  * Flat scratch arrays make cloned observation work independent of solver work.
  */
 import * as D from './double-double.js';
 import { hypot2, hypot3 } from '../fastmath.js';
+import { referenceKinematics, referenceMetrics, referenceCoefficient, referenceRotate } from './uv-reference.js';
 
 export function accurateScratch() {
   return { arithmetic: 'double-double', arithmeticError: '', ddA: new Float64Array(6), ddB: new Float64Array(6),
@@ -32,8 +34,9 @@ function words(a, n) { return Array.from({ length: n }, (_, i) => D.get(a, i)); 
 export function accurateKinematics(e, x, ids, k) {
   k.arithmeticError = '';
   try {
-    const { a, b } = tangents(e, x, ids), aa = dot(a, a), bb = dot(b, b), ab = dot(a, b);
-    const strain = [D.scale(D.sub(aa, [1, 0]), 0.5), D.scale(D.sub(bb, [1, 0]), 0.5), ab];
+    const reference = e.reference ? referenceKinematics(e.reference, x, ids) : null;
+    const { a, b } = reference ?? tangents(e, x, ids), aa = dot(a, a), bb = dot(b, b), ab = dot(a, b);
+    const strain = reference ? reference.strain : [D.scale(D.sub(aa, [1, 0]), 0.5), D.scale(D.sub(bb, [1, 0]), 0.5), ab];
     const q = e.Q, stress = [D.add(D.scale(strain[0], q[0]), D.scale(strain[1], q[2])),
       D.add(D.scale(strain[0], q[2]), D.scale(strain[1], q[1])), D.scale(strain[2], q[3])];
     const energy = D.scale(D.scale(dot(strain, stress), e.volume), 0.5);
@@ -46,11 +49,13 @@ export function accurateKinematics(e, x, ids, k) {
     const aa64 = D.rounded(aa), bb64 = D.rounded(bb), ab64 = D.rounded(ab);
     k.maximumStretch = Math.sqrt(aa64 / 2 + bb64 / 2 + hypot2((aa64 - bb64) / 2, ab64));
     k.minimumStretch = k.areaRatio / k.maximumStretch;
+    if (reference) Object.assign(k, referenceMetrics(reference.base, reference));
     if (!(Number.isFinite(k.areaRatio + k.maximumStretch + k.minimumStretch) && k.areaRatio > 1e-12 && k.minimumStretch > 0)) { k.energy = Infinity; return false; }
     D.put(k.ddEnergy, 0, energy); k.energy = D.rounded(energy);
     for (let i = 0; i < 3; i++) for (let r = 0; r < 3; r++) {
-      const col = 3 * i + r, alpha = coefficient(e.alpha, i), beta = coefficient(e.beta, i);
-      const values = [D.mul(alpha, a[r]), D.mul(beta, b[r]), D.add(D.mul(alpha, b[r]), D.mul(beta, a[r]))];
+      const col = 3 * i + r, alpha = coefficient(e.reference?.u ?? e.alpha, i), beta = coefficient(e.reference?.v ?? e.beta, i);
+      let values = [D.mul(alpha, a[r]), D.mul(beta, b[r]), D.add(D.mul(alpha, b[r]), D.mul(beta, a[r]))];
+      if (e.reference) values = referenceRotate(e.reference, values);
       for (let c = 0; c < 3; c++) {
         D.put(k.ddJ, 9 * c + col, values[c]); k.J[9 * c + col] = D.rounded(values[c]);
       }
@@ -83,9 +88,11 @@ export function accurateGN(e, k, row, col) {
 }
 /** @param {any} e @param {any} k @param {number} i @param {number} j */
 export function accurateGeometric(e, k, i, j) {
-  const a = coefficient(e.alpha, i), b = coefficient(e.beta, i), c = coefficient(e.alpha, j), d = coefficient(e.beta, j);
-  return D.scale(D.sum([D.mul(D.get(k.ddStress, 0), D.mul(a, c)), D.mul(D.get(k.ddStress, 1), D.mul(b, d)),
-    D.mul(D.get(k.ddStress, 2), D.add(D.mul(a, d), D.mul(b, c)))]), e.volume);
+  const u = e.reference?.u ?? e.alpha, v = e.reference?.v ?? e.beta;
+  const a = referenceCoefficient(u, i), b = referenceCoefficient(v, i), c = referenceCoefficient(u, j), d = referenceCoefficient(v, j);
+  const stress = e.reference ? referenceRotate(e.reference, words(k.ddStress, 3), true) : words(k.ddStress, 3);
+  return D.scale(D.sum([D.mul(stress[0], D.mul(a, c)), D.mul(stress[1], D.mul(b, d)),
+    D.mul(stress[2], D.add(D.mul(a, d), D.mul(b, c)))]), e.volume);
 }
 /** Add all element contributions in two words before the binary64 public gradient.
  * @param {any} membrane @param {ArrayLike<number>} x @param {Float64Array} g */
@@ -139,14 +146,16 @@ export function accurateDifference(membrane, before, after) {
       const da = [], db = [];
       for (let r = 0; r < 3; r++) {
         const d1 = D.sub(displacement[1][r], displacement[0][r]), d2 = D.sub(displacement[2][r], displacement[0][r]);
-        da.push(D.add(D.scale(d1, e.alpha[1]), D.scale(d2, e.alpha[2])));
-        db.push(D.add(D.scale(d1, e.beta[1]), D.scale(d2, e.beta[2])));
+        da.push(D.add(D.scale(d1, (e.reference?.u ?? e.alpha)[1]), D.scale(d2, (e.reference?.u ?? e.alpha)[2])));
+        db.push(D.add(D.scale(d1, (e.reference?.v ?? e.beta)[1]), D.scale(d2, (e.reference?.v ?? e.beta)[2])));
       }
-      const de = [D.add(dot(a, da), D.scale(dot(da, da), .5)), D.add(dot(b, db), D.scale(dot(db, db), .5)), D.sum([dot(a, db), dot(b, da), dot(da, db)])];
+      let de = [D.add(dot(a, da), D.scale(dot(da, da), .5)), D.add(dot(b, db), D.scale(dot(db, db), .5)), D.sum([dot(a, db), dot(b, da), dot(da, db)])];
+      if (e.reference) de = referenceRotate(e.reference, de);
+      const geometricStress = e.reference ? referenceRotate(e.reference, stress, true) : stress;
       const q = e.Q, ds = [D.add(D.scale(de[0], q[0]), D.scale(de[1], q[2])), D.add(D.scale(de[0], q[2]), D.scale(de[1], q[1])), D.scale(de[2], q[3])];
       const quadratic = de.map((v, i) => D.scale(D.mul(v, ds[i]), .5));
       const rrTerms = [...quadratic];
-      for (let r = 0; r < 3; r++) rrTerms.push(D.scale(D.mul(stress[0], D.mul(da[r], da[r])), .5), D.scale(D.mul(stress[1], D.mul(db[r], db[r])), .5), D.mul(stress[2], D.mul(da[r], db[r])));
+      for (let r = 0; r < 3; r++) rrTerms.push(D.scale(D.mul(geometricStress[0], D.mul(da[r], da[r])), .5), D.scale(D.mul(geometricStress[1], D.mul(db[r], db[r])), .5), D.mul(geometricStress[2], D.mul(da[r], db[r])));
       const changeTerms = [...de.map((v, i) => D.mul(v, stress[i])), ...quadratic];
       const rr = D.scale(D.sum(rrTerms), e.volume), change = D.scale(D.sum(changeTerms), e.volume);
       total = D.add(total, change); remainder = D.add(remainder, rr);

@@ -4,6 +4,11 @@ Started 2026-11-09. Status: active; research and implementation are **not exhaus
 Scope: Pliego only. Owner selected both interactive reading and engineering accuracy,
 with separate acceptance gates. No merge, deployment or whole-engine GA is implied.
 
+The active next experiment is the [actual-reference membrane candidate](membrane-uv-reference.md):
+a named UV-displacement strain law, with independent accuracy and native-trajectory
+checks. Implementation validation is in progress; no new accepted trajectory results
+are claimed. Earlier failed force, material and booklet gates remain open.
+
 ## What would count as exhausted
 
 An operational stopping rule, not a claim of mathematical optimality: every credible

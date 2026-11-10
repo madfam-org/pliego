@@ -191,6 +191,13 @@ updates, physical rest, a resolved time limit or booklet/device performance.
 The [complete preserved evidence](research/evidence/membrane-double-double-2026-11-10/README.md)
 keeps the earlier failures and the separate diagnostic-only repair.
 
+The next [actual-reference membrane candidate](research/membrane-uv-reference.md)
+introduces an explicit UV-displacement strain law relative to the stored X0,
+with tensor rotation into material axes. Numerical validation is in progress;
+no new accepted trajectory result is claimed. Exact stored-rest zero and passing
+element derivatives cannot close force/time, physical-material or fixed-booklet
+device acceptance. The shipping reader and historical membrane defaults are unchanged.
+
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).
 All 24 smoke trajectories contain strict force failures: 6975/7110 substeps miss

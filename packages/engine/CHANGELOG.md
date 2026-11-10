@@ -5,6 +5,13 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Optional `membraneReference: 'uv-displacement'` introduces a named alternative
+actual-X0 metric-relative strain law, with tensor rotation before material Voigt
+assembly. It requires DD/planar increment-search research selections, binds
+reference identity and quality limits, and preserves historical defaults. Exact
+rest, independent derivatives and operator tests remain separate from full
+material, force/time and fixed-booklet interaction acceptance.
+
 Optional `membraneArithmetic: 'double-double'` carries bounded two-word tangent,
 strain, stress, coherent gradient and GN arithmetic through selected objective
 increments. World selection requires the existing planar increment-search domain.

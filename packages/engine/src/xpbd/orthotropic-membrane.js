@@ -4,10 +4,11 @@
 import { hypot2, hypot3 } from '../fastmath.js';
 import * as DD from './double-double.js';
 import { accurateScratch, accurateKinematics, accurateEnergy, accurateGradient, accurateGN, accurateGeometric, addAccurateGradient, addAccurateTimes, accurateDifference } from './accurate-membrane.js';
+import { createUVReference, describeUVReference, UV_REFERENCE_IDENTITY, REFERENCE_POSE_QUALITY_MIN } from './uv-reference.js';
 
 const REFERENCE_QUALITY_MIN = 1e-12, CURRENT_AREA_RATIO_MIN = 1e-12;
 const SLOT_NONE = -2147483648;
-/** @typedef {{alpha:Float64Array,beta:Float64Array,Q:Float64Array,area:number,volume:number,referenceQuality:number}} OrthotropicElement */
+/** @typedef {{alpha:Float64Array,beta:Float64Array,Q:Float64Array,area:number,volume:number,referenceQuality:number,reference?:import('./uv-reference.js').UVReference}} OrthotropicElement */
 /** @param {boolean} ok @param {string} message */
 function demand(ok, message) { if (!ok) throw new Error(`Orthotropic membrane: ${message}`); }
 
@@ -44,6 +45,17 @@ export function createOrthotropicElement(uv, material, grainRadians, nu12) {
   const Q = planeStress(material, nu12), area = det / 2, volume = area * material.thickness;
   demand(Number.isFinite(volume) && volume > 0, 'invalid reference element volume');
   return { alpha, beta, Q, area, volume, referenceQuality: quality };
+}
+
+/** Named alternative represented law; the original element coefficients stay
+ * available for comparison. Finite 3D X0 above the stated quality floor is supported
+ * here; the World experiment retains its narrower planar search domain.
+ * @param {ArrayLike<number>} uv @param {{E1:number,E2:number,G12:number,thickness:number}} material
+ * @param {number} grainRadians @param {number} nu12 @param {ArrayLike<number>} x0 */
+export function createUVReferenceElement(uv, material, grainRadians, nu12, x0) {
+  const element = createOrthotropicElement(uv, material, grainRadians, nu12);
+  element.reference = createUVReference(uv, x0, grainRadians);
+  return element;
 }
 
 function scratch(arithmetic = 'binary64') {
@@ -103,6 +115,7 @@ function gnEntry(e, k, row, col) {
 export function evaluateOrthotropicElement(element, x, opts = {}) {
   demand(x.length === 9, 'element pose must have nine coordinates');
   demand(['binary64', 'double-double'].includes(opts.arithmetic ?? 'binary64'), 'invalid arithmetic');
+  demand(!element.reference || opts.arithmetic === 'double-double', 'UV reference requires double-double arithmetic');
   const k = scratch(opts.arithmetic), ids = [0, 1, 2];
   demand(kinematics(element, x, ids, k), 'collapsed or non-finite current triangle' + (k.arithmetic === 'double-double' ? '/arithmetic: ' + k.arithmeticError : ''));
   const gradient = new Float64Array(9), gaussNewton = new Float64Array(81);
@@ -119,7 +132,8 @@ export function evaluateOrthotropicElement(element, x, opts = {}) {
     }
   }
   return { energy: k.energy, gradient, hessian, gaussNewton, strain: k.strain.slice(), stress: k.stress.slice(),
-    areaRatio: k.areaRatio, minimumStretch: k.minimumStretch, maximumStretch: k.maximumStretch };
+    areaRatio: k.areaRatio, minimumStretch: k.minimumStretch, maximumStretch: k.maximumStretch,
+    ...(element.reference ? { referenceMetricMismatch: /** @type {any} */ (k).referenceMetricMismatch } : {}) };
 }
 
 /** Neumaier accumulation; magnitude is diagnostic, not an interval bound.
@@ -140,9 +154,11 @@ function compensatedIncrement(values) {
 export class OrthotropicMembrane {
   /** @param {import('../mesh.js').Mesh} mesh @param {import('../material.js').Material[]} materials
    * @param {any} doc loaded document @param {number[]} nu12PerSheet explicit research Poisson convention
-   * @param {'binary64'|'double-double'} [arithmetic] */
-  constructor(mesh, materials, doc, nu12PerSheet, arithmetic = 'binary64') {
+   * @param {'binary64'|'double-double'} [arithmetic] @param {'material-coefficients'|'uv-displacement'} [reference] */
+  constructor(mesh, materials, doc, nu12PerSheet, arithmetic = 'binary64', reference = 'material-coefficients') {
     demand(['binary64', 'double-double'].includes(arithmetic), 'invalid arithmetic');
+    demand(['material-coefficients', 'uv-displacement'].includes(reference), 'invalid reference');
+    demand(reference !== 'uv-displacement' || arithmetic === 'double-double', 'UV reference requires double-double arithmetic');
     demand(Array.isArray(nu12PerSheet) && nu12PerSheet.length === doc.sheets.length && materials.length === doc.sheets.length, 'explicit nu12 array must cover every sheet');
     demand(mesh.nT > 0 && mesh.tris.length === 3 * mesh.nT, 'nonempty triangle mesh required');
     this.mesh = mesh;
@@ -157,15 +173,20 @@ export class OrthotropicMembrane {
         demand(Number.isInteger(v) && v >= 0 && v < mesh.nV, 'triangle vertex index out of range');
         uv[2 * i] = mesh.uv[2 * v]; uv[2 * i + 1] = mesh.uv[2 * v + 1];
       }
-      this.elements.push(createOrthotropicElement(uv, materialData[sheet], grainDegrees[sheet] * Math.PI / 180, nu12PerSheet[sheet]));
+      const grain = grainDegrees[sheet] * Math.PI / 180;
+      const x0 = reference === 'uv-displacement' ? Array.from(mesh.tris.subarray(3 * t, 3 * t + 3)).flatMap(v => Array.from(mesh.X0.subarray(3 * v, 3 * v + 3))) : [];
+      this.elements.push(reference === 'uv-displacement' ? createUVReferenceElement(uv, materialData[sheet], grain, nu12PerSheet[sheet], x0) : createOrthotropicElement(uv, materialData[sheet], grain, nu12PerSheet[sheet]));
     }
     this.configuration = { model: 'orthotropic-stvk', version: 1, curvature: 'gauss-newton', poissonConvention: 'nu12',
       nu12BySheet: nu12PerSheet.slice(), materials: materialData, grainDegrees,
       referenceUV: Array.from(mesh.uv), triangles: Array.from(mesh.tris), triangleSheets: Array.from(mesh.triSheet),
       referenceQualityMin: REFERENCE_QUALITY_MIN, currentAreaRatioMin: CURRENT_AREA_RATIO_MIN,
-      ...(arithmetic === 'double-double' ? { arithmetic: { ...DD.DOUBLE_DOUBLE_IDENTITY } } : {}) };
+      ...(arithmetic === 'double-double' ? { arithmetic: { ...DD.DOUBLE_DOUBLE_IDENTITY } } : {}),
+      ...(reference === 'uv-displacement' ? { reference: { ...UV_REFERENCE_IDENTITY }, referencePoseQualityMin: REFERENCE_POSE_QUALITY_MIN,
+        referenceElements: this.elements.map(e => describeUVReference(/** @type {import('./uv-reference.js').UVReference} */ (e.reference))) } : {}) };
     this.configurationKey = JSON.stringify(this.configuration);
     this.work = scratch(arithmetic); this.block = new Float64Array(9);
+    if (reference === 'uv-displacement') Object.assign(this.work, { reference, referenceMetricMismatch: 0 });
   }
   /** @param {ArrayLike<number>} x */
   energy(x) {
@@ -280,15 +301,17 @@ export class OrthotropicMembrane {
   /** Current metric diagnostics, not an inversion/contact/strain-limit certificate. @param {ArrayLike<number>} x */
   diagnostics(x) {
     let invalidTriangles = 0, minimumStretch = Infinity, maximumStretch = 0, minimumAreaRatio = Infinity, maximumAreaRatio = 0;
-    let arithmeticError = '';
+    let arithmeticError = '', referenceMetricMismatch = 0;
     for (let t = 0; t < this.mesh.nT; t++) {
       if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work)) { invalidTriangles++; arithmeticError ||= this.work.arithmeticError ?? ''; continue; }
       minimumStretch = Math.min(minimumStretch, this.work.minimumStretch); maximumStretch = Math.max(maximumStretch, this.work.maximumStretch);
       minimumAreaRatio = Math.min(minimumAreaRatio, this.work.areaRatio); maximumAreaRatio = Math.max(maximumAreaRatio, this.work.areaRatio);
+      if (this.configuration.reference) referenceMetricMismatch = Math.max(referenceMetricMismatch, /** @type {any} */ (this.work).referenceMetricMismatch);
     }
     if (this.work.arithmetic === 'double-double') this.work.arithmeticError = arithmeticError;
     return { model: 'orthotropic-stvk', curvature: 'gauss-newton', poissonConvention: 'nu12',
       ...(this.work.arithmetic === 'double-double' ? { arithmetic: 'double-double', arithmeticVersion: 1, arithmeticError } : {}),
+      ...(this.configuration.reference ? { reference: 'uv-displacement', referenceVersion: 1, referenceMetricMismatch } : {}),
       finite: invalidTriangles === 0, invalidTriangles, triangles: this.mesh.nT,
       minimumStretch: minimumStretch === Infinity ? 0 : minimumStretch, maximumStretch,
       minimumAreaRatio: minimumAreaRatio === Infinity ? 0 : minimumAreaRatio, maximumAreaRatio,

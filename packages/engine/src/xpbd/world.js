@@ -46,12 +46,14 @@ export class World {
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
    *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
-   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double'}} [opts]
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
     this.doc = doc;
     const orthotropic = opts.membraneModel === 'orthotropic-stvk';
+    if (!['material-coefficients', 'uv-displacement'].includes(opts.membraneReference ?? 'material-coefficients')) throw new RangeError('World: invalid membraneReference');
+    if (opts.membraneReference === 'uv-displacement' && (!orthotropic || opts.membraneArithmetic !== 'double-double' || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: uv-displacement membraneReference requires orthotropic-stvk, double-double and membrane-inertia-increment search');
     if (!['binary64', 'double-double'].includes(opts.membraneArithmetic ?? 'binary64')) throw new RangeError('World: invalid membraneArithmetic');
     if (opts.membraneArithmetic === 'double-double' && (!orthotropic || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: double-double membraneArithmetic requires orthotropic-stvk and membrane-inertia-increment search');
     if (!['total-energy', 'membrane-inertia-increment'].includes(opts.lineSearchArithmetic ?? 'total-energy')) throw new RangeError('World: invalid lineSearchArithmetic');
@@ -68,6 +70,7 @@ export class World {
       physicalMembrane: opts.physicalMembrane ?? false,
       lineSearch: opts.lineSearch ?? false,
       ...(opts.membraneArithmetic === 'double-double' ? { membraneArithmetic: opts.membraneArithmetic } : {}),
+      ...(opts.membraneReference === 'uv-displacement' ? { membraneReference: opts.membraneReference } : {}),
       ...(opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchArithmetic: opts.lineSearchArithmetic } : {}),
       continuousContact: opts.continuousContact ?? false,
       barrierContact: opts.barrierContact ?? false,
@@ -96,7 +99,7 @@ export class World {
     const nV = mesh.nV;
     this.materials = doc.sheets.map((/** @type {any} */ s) => fromDerived(s.derived));
     if (orthotropic) validateMembraneExperiment(doc, opts, mesh);
-    this.orthotropicMembrane = orthotropic ? new OrthotropicMembrane(mesh, this.materials, doc, opts.membraneNu12, opts.membraneArithmetic) : null;
+    this.orthotropicMembrane = orthotropic ? new OrthotropicMembrane(mesh, this.materials, doc, opts.membraneNu12, opts.membraneArithmetic, opts.membraneReference) : null;
     if (this.orthotropicMembrane && !this.orthotropicMembrane.diagnostics(mesh.X0).finite) throw new Error('Orthotropic membrane: invalid initial triangle metric/arithmetic: ' + (this.orthotropicMembrane.work.arithmeticError ?? ''));
     this.orthotropicMembraneSignature = this.orthotropicMembrane ? JSON.stringify(this.orthotropicMembrane.configuration) : null;
     const lift = (opts.ground ?? true) ? liftOntoTable(doc, mesh) : 0; // setrest.js

@@ -5,6 +5,8 @@ import { gradient } from '../src/xpbd/implicit.js';
 import { implicitEnergy } from '../src/xpbd/energy-search.js';
 import * as K from '../src/constants.js';
 
+const UV_REFERENCE = { mode: 'uv-displacement', version: 1, metric: 'actual-X0', strain: 'uv-covariant', rotation: 'tensor-before-voigt' };
+const referenceMatches = identity => identity && Object.keys(identity).length === Object.keys(UV_REFERENCE).length && Object.entries(UV_REFERENCE).every(([key, value]) => identity[key] === value);
 const ATOL = 1e-7, RTOL = 1e-10, MASS_TOLERANCE = 1e-12;
 const demand = (ok, message) => { if (!ok) throw new Error('membrane-modal-runtime: ' + message); };
 const finite = x => typeof x === 'number' && Number.isFinite(x);
@@ -16,7 +18,7 @@ const maximum = a => Math.max(0, ...a.map(Math.abs));
  * phi is supplied by the independent oracle, dimensionless with max nodal norm1.
  * No eigenproblem, mode projection or integrator is substituted for World here.
  */
-export function createModalWorld(patch, { phi, omega, amplitude, substeps, newtonIterations = 1, previousPoseStart = false, lineSearchArithmetic, membraneArithmetic, ...unknown } = {}) {
+export function createModalWorld(patch, { phi, omega, amplitude, substeps, newtonIterations = 1, previousPoseStart = false, lineSearchArithmetic, membraneArithmetic, membraneReference, ...unknown } = {}) {
   demand(Object.keys(unknown).length === 0, 'unknown/unsupported observer options: ' + Object.keys(unknown).join(','));
   const n = patch.vertices.length;
   demand(Array.isArray(phi) && phi.length === n && phi.every(p => Array.isArray(p) && p.length === 2 && p.every(finite)), 'one finite [phi_u,phi_v] per native vertex required');
@@ -28,10 +30,12 @@ export function createModalWorld(patch, { phi, omega, amplitude, substeps, newto
   demand(lineSearchArithmetic === undefined || ['total-energy', 'membrane-inertia-increment'].includes(lineSearchArithmetic), 'unsupported line-search arithmetic');
   demand(membraneArithmetic === undefined || ['binary64', 'double-double'].includes(membraneArithmetic), 'unsupported membrane arithmetic');
   demand(membraneArithmetic !== 'double-double' || lineSearchArithmetic === 'membrane-inertia-increment', 'double-double requires explicit membrane-inertia-increment search');
+  demand(membraneReference === undefined || ['material-coefficients', 'uv-displacement'].includes(membraneReference), 'unsupported membrane reference');
+  demand(membraneReference !== 'uv-displacement' || membraneArithmetic === 'double-double' && lineSearchArithmetic === 'membrane-inertia-increment', 'uv-displacement requires explicit double-double and membrane-inertia-increment');
   demand(patch.options.membraneModel === 'orthotropic-stvk', 'selected-law native patch required');
   const options = { ...patch.options, substeps, newtonIterations, previousPoseStart, damping: 0, bendDamping: 0,
     gravity: false, ground: false, contact: false, plasticity: false, lineSearch: true,
-    ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }), ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }) };
+    ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }), ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }), ...(membraneReference === 'uv-displacement' ? { membraneReference } : {}) };
   const world = new World(patch.doc, options), mesh = world.mesh;
   demand(world.dt === 1 / (60 * substeps) && finite(world.dt) && world.dt > 0, 'actual public timestep differs or is invalid');
   demand(mesh.nV === n && mesh.nT === patch.triangles.length, 'native mesh counts changed');
@@ -41,6 +45,7 @@ export function createModalWorld(patch, { phi, omega, amplitude, substeps, newto
       element[key].every((value, i) => Object.is(value, patch.world.orthotropicMembrane.elements[t][key][i]))) &&
       Object.is(element.volume, patch.world.orthotropicMembrane.elements[t].volume)), 'arithmetic candidate changed captured real polynomial coefficients');
   }
+  if (membraneReference === 'uv-displacement') demand(world.opts.membraneReference === membraneReference && referenceMatches(world.orthotropicMembrane.configuration.reference), 'actual membrane reference identity differs');
   demand(Array.from(mesh.uv).every((v, i) => v === patch.world.mesh.uv[i]) &&
     Array.from(mesh.tris).every((v, i) => v === patch.world.mesh.tris[i]), 'native UV/connectivity changed');
   demand(!world.fixed.some(Boolean) && world.sys.nFree === n, 'free vibration cannot contain runtime or benchmark constraints');
@@ -70,11 +75,39 @@ export function createModalWorld(patch, { phi, omega, amplitude, substeps, newto
   demand(finite(forceScale) && finite(modalMass) && modalMass > 0, 'invalid fixed modal normalization');
   return { patch, world, options, phi: mode, omega, amplitude, masses, modalMass, forceScale,
     parameters: { phi: mode, omega, amplitude, substeps, newtonIterations, previousPoseStart,
-      ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }), ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }) },
+      ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }), ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }), ...(membraneReference === 'uv-displacement' ? { membraneReference } : {}) },
     forceTolerance: Math.max(ATOL, RTOL * forceScale), maximumModeNorm,
     massProof: { native: masses.slice(), independentlyLumpedMass, verticesConsumed: consumed.size,
       totalMass: masses.reduce((a, b) => a + b, 0), maximumMassScaledDifference, massScale, tolerance: MASS_TOLERANCE,
       convention: 'reference UV triangle area times native areal density /3 per node; grams; no extra thickness or consistent-mass substitution' } };
+}
+
+/** Capture the actual selected World definition, never the default patch World.
+ * Historical output shape is unchanged. UV bases are bound to actual mesh.X0.
+ */
+export function captureModalReference(context) {
+  const w = context.world, model = w.orthotropicMembrane, mesh = w.mesh;
+  demand(w instanceof World && model && mesh, 'actual selected World reference required');
+  const uv = w.opts.membraneReference === 'uv-displacement';
+  demand(uv ? referenceMatches(model.configuration.reference) : model.configuration.reference === undefined && model.configuration.referenceElements === undefined, 'actual reference configuration differs');
+  const elements = model.elements.map((e, t) => {
+    const value = { alpha: Array.from(e.alpha), beta: Array.from(e.beta), Q: Array.from(e.Q), volume: e.volume };
+    if (uv) {
+      const r = e.reference;
+      demand(r?.mode === 'uv-displacement' && r.version === 1, 'actual element reference missing');
+      const reference = { mode: r.mode, version: r.version, u: Array.from(r.u), v: Array.from(r.v), x0: Array.from(r.x0), c: r.c, s: r.s };
+      demand(reference.u.length === 3 && reference.v.length === 3 && reference.x0.length === 9 && [...reference.u, ...reference.v, ...reference.x0, r.c, r.s].every(finite), 'actual element reference malformed');
+      demand(reference.x0.every((x, i) => x === mesh.X0[3 * mesh.tris[3 * t + Math.floor(i / 3)] + i % 3]), 'actual element reference base differs from native X0');
+      const configured = model.configuration.referenceElements?.[t];
+      demand(configured && Object.keys(configured).length === Object.keys(reference).length && Object.entries(reference).every(([key, value]) =>
+        Array.isArray(value) ? Array.isArray(configured[key]) && value.length === configured[key].length && value.every((x, i) => x === configured[key][i]) : value === configured[key]), 'actual reference configuration/element differs');
+      value.reference = reference;
+    } else demand(e.reference === undefined, 'unexpected historical element reference');
+    return value;
+  });
+  if (uv) demand(model.configuration.referenceElements.length === mesh.nT, 'actual reference element count differs');
+  return { triangles: Array.from({ length: mesh.nT }, (_, t) => Array.from(mesh.tris.subarray(3 * t, 3 * t + 3))), elements,
+    scope: 'actual immutable runtime coefficients and native cyclic connectivity; independent UV/Q reference remains separate' };
 }
 
 /** Read actual state and recompute the final force equation, never re-run a solve.
@@ -95,6 +128,8 @@ export function observeModalWorld(context, { step = 0, initial = step === 0, exe
   check(w.opts.damping === 0 && w.bendDamp === 0 && !w.opts.gravity && !w.opts.ground && !w.opts.contact && !w.opts.plasticity, 'disabled external/dissipative option changed');
   check(!w.contact && !w.coupledContact && !w.motionGuard && !w.edgeContact, 'unexpected contact path');
   check(masses.every((m, i) => m === w.mass[i]), 'native masses changed');
+  const actualReference = w.opts.membraneReference ?? 'material-coefficients', requestedReference = context.parameters.membraneReference ?? 'material-coefficients';
+  check(actualReference === requestedReference && (actualReference === 'uv-displacement' ? referenceMatches(w.orthotropicMembrane?.configuration.reference) : w.orthotropicMembrane?.configuration.reference === undefined), 'actual membrane reference identity changed');
   if (execution) {
     check(execution.returnedSubsteps === 1 && execution.actualSubstepExecuted && execution.framesAdvancedExactlyOne && execution.accumulatedTimeExact, 'public call did not execute exactly one actual substep/time increment');
     check(execution.xsMatchesPreviousX && execution.xtMatchesActualPredictor && execution.velocityMatchesActualDifference, 'actual predecessor/predictor/velocity identity mismatch');
@@ -172,7 +207,9 @@ export function observeModalWorld(context, { step = 0, initial = step === 0, exe
       ...(w.opts.lineSearchArithmetic === 'membrane-inertia-increment' ? {
         lineSearchArithmetic: w.opts.lineSearchArithmetic, increment: w.energySearch?.increment ? structuredClone(w.energySearch.increment) : null } : {}),
       ...(w.opts.membraneArithmetic === 'double-double' ? { membraneArithmetic: w.opts.membraneArithmetic,
-        membraneArithmeticIdentity: structuredClone(w.orthotropicMembrane.configuration.arithmetic) } : {}) },
+        membraneArithmeticIdentity: structuredClone(w.orthotropicMembrane.configuration.arithmetic) } : {}),
+      ...(w.opts.membraneReference === 'uv-displacement' ? { membraneReference: w.opts.membraneReference,
+        membraneReferenceIdentity: structuredClone(w.orthotropicMembrane.configuration.reference) } : {}) },
     measurementValid: errors.length === 0, errors };
 }
 

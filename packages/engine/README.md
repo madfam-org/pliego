@@ -117,6 +117,16 @@ explicit. World selection requires the planar increment-search domain. Omission
 or explicit `binary64` retains existing arithmetic. This does not supply richer
 authoritative positions, a converged solve or an interaction-performance certificate.
 
+`membraneReference: 'uv-displacement'` selects an explicit alternative
+[actual-reference law](../../docs/research/membrane-uv-reference.md), requiring
+the above DD/increment research selections. It forms metric change from the
+actual stored X0 and displacement, then rotates the strain tensor into grain
+axes. This gives exact zero stored-rest energy/force without measured rest-force
+subtraction or metric whitening. It changes the represented polynomial; ideal
+UV/material accuracy and force/time convergence require separate evidence.
+Reference descriptors and quality limits bind snapshot identity. Omission or
+explicit `material-coefficients` retains the historical law and metadata.
+
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
 `previousPoseStart` changes the legacy initial guess; `continuousContact` adds a

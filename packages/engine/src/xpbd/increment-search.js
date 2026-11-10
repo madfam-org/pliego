@@ -9,6 +9,7 @@ import { implicitEnergy } from './energy-search.js';
 import { HINGE_PANEL } from '../mesh.js';
 import { DOUBLE_DOUBLE_IDENTITY, add as addDD, rounded as roundedDD } from './double-double.js';
 import { accurateTrialTerms } from './accurate-membrane.js';
+import { UV_REFERENCE_IDENTITY, describeUVReference } from './uv-reference.js';
 
 export const INCREMENT_SEARCH_IDENTITY = Object.freeze({ name: 'membrane-inertia-increment', version: 1, armijo: 1e-4, maxBacktracks: 20 });
 
@@ -18,6 +19,12 @@ export function validateMembraneArithmeticIdentity(w) {
   const mode = w.opts.membraneArithmetic, dd = mode === 'double-double', identity = w.orthotropicMembrane?.configuration.arithmetic;
   if (!['binary64', 'double-double'].includes(mode ?? 'binary64') || dd !== (w.orthotropicMembrane?.work.arithmetic === 'double-double') || dd !== !!identity ||
       (dd && (Object.keys(identity).length !== Object.keys(DOUBLE_DOUBLE_IDENTITY).length || Object.entries(DOUBLE_DOUBLE_IDENTITY).some(([key, value]) => identity[key] !== value)))) throw new Error('Membrane arithmetic identity changed');
+  const reference = w.opts.membraneReference ?? 'material-coefficients', model = w.orthotropicMembrane, uv = reference === 'uv-displacement';
+  if (!['material-coefficients', 'uv-displacement'].includes(reference) || uv !== !!model?.configuration.reference || uv !== (model?.work.reference === 'uv-displacement') ||
+      (uv && (!dd || w.opts.lineSearchArithmetic !== 'membrane-inertia-increment' || JSON.stringify(model.configuration) !== model.configurationKey || model.configurationKey !== w.orthotropicMembraneSignature || JSON.stringify(model.configuration.reference) !== JSON.stringify(UV_REFERENCE_IDENTITY) ||
+        !model.elements.every(e => e.reference?.mode === 'uv-displacement' && e.reference.version === 1) ||
+        JSON.stringify(model.elements.map(e => describeUVReference(e.reference))) !== JSON.stringify(model.configuration.referenceElements))) ||
+      (!uv && (model?.configuration.referenceElements !== undefined || model?.elements.some(e => e.reference !== undefined)))) throw new Error('Membrane reference identity changed');
 }
 
 /** @param {any} search */

@@ -5,6 +5,7 @@ import { World } from '../src/index.js';
 import * as K from '../src/constants.js';
 import { createHash } from 'node:crypto';
 
+const REFERENCE_IDENTITY = { mode: 'uv-displacement', version: 1, metric: 'actual-X0', strain: 'uv-covariant', rotation: 'tensor-before-voigt' };
 const attached = new WeakSet();
 const demand = (ok, message) => { if (!ok) throw new Error('membrane-modal-solve-observer: ' + message); };
 const finite = x => typeof x === 'number' && Number.isFinite(x);
@@ -36,6 +37,9 @@ function domain(w) {
   const membraneArithmetic = w.opts.membraneArithmetic ?? 'binary64', identity = w.orthotropicMembrane?.configuration?.arithmetic;
   check(membraneArithmetic === 'binary64' ? identity === undefined : membraneArithmetic === 'double-double' && incrementMode(w) &&
     identity?.name === 'double-double' && identity.version === 1 && identity.productExponentLimit === 450 && identity.derivative === 'coherent-difference', 'actual membrane arithmetic identity changed');
+  const reference = w.opts.membraneReference ?? 'material-coefficients', referenceIdentity = w.orthotropicMembrane?.configuration?.reference;
+  check(reference === 'material-coefficients' ? referenceIdentity === undefined : reference === 'uv-displacement' && membraneArithmetic === 'double-double' && incrementMode(w) &&
+    referenceIdentity && Object.keys(referenceIdentity).length === Object.keys(REFERENCE_IDENTITY).length && Object.entries(REFERENCE_IDENTITY).every(([key, value]) => referenceIdentity[key] === value), 'actual membrane reference identity changed');
   check(w?.opts?.lineSearch === true && w.energySearch instanceof EnergySearch, 'actual EnergySearch required');
   check(!w.fixed.some(Boolean) && w.sys.nFree === w.mesh.nV && w.invMass.every(m => m > 0), 'only all-free native DOFs supported');
   check(!w.contact && !w.coupledContact && !w.motionGuard && !w.edgeContact && !w.opts.contact && !w.opts.ground, 'contact/ground outside observer domain');
@@ -116,6 +120,7 @@ export function attachModalSolveObserver(context, { onIteration, retain = 'all',
         errors: world === w && this === search ? domain(world) : ['unexpected World/search association'] };
       if (incrementMode(world)) Object.assign(pending, { xt: world.xt.slice(), mass: world.mass.slice(), increment: structuredClone(this.increment) });
       if (world.opts.membraneArithmetic === 'double-double') pending.membraneArithmeticIdentity = structuredClone(world.orthotropicMembrane.configuration.arithmetic);
+      if (world.opts.membraneReference === 'uv-displacement') pending.membraneReferenceIdentity = structuredClone(world.orthotropicMembrane.configuration.reference);
       if (world.framesRun !== world.substepsRun + 1) pending.errors.push('not inside the supported one-substep public call');
     } catch (cause) { pending = { iteration: counts.begins, errors: ['begin capture unavailable: ' + cause.message] }; }
     return result;
@@ -166,6 +171,7 @@ export function attachModalSolveObserver(context, { onIteration, retain = 'all',
       demand(before && world === w && this === search, 'missing search association after finish');
       record.after = Array.from(w.x); record.acceptedRoundedDirection = Array.from(w.x, (x, i) => x - before.start[i]);
       if (before.membraneArithmeticIdentity) Object.assign(record, { membraneArithmetic: 'double-double', membraneArithmeticIdentity: before.membraneArithmeticIdentity });
+      if (before.membraneReferenceIdentity) Object.assign(record, { membraneReference: 'uv-displacement', membraneReferenceIdentity: before.membraneReferenceIdentity });
       demand(!originalError, 'original finish did not complete; acceptance decision unavailable');
       const backtracks = this.backtracks - before.backtracks, rejected = this.rejected - before.rejected;
       demand(Number.isSafeInteger(backtracks) && backtracks >= 0 && backtracks <= 20 && (rejected === 0 || rejected === 1), 'unrecognized search counter deltas');

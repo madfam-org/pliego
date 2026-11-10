@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {makePatch} from './membrane-patch.mjs';
-import {createModalWorld,runModalContext} from './membrane-modal-runtime.mjs';
+import {createModalWorld,runModalContext,captureModalReference} from './membrane-modal-runtime.mjs';
 import {validateObservation} from './membrane-modal-validation.mjs';
 import {attachModalSolveObserver} from './membrane-modal-solve-observer.mjs';
 import {modalScales,modalTruth,measureModalFields,spectralInitialReference,compareModalStates,compareAmplitudeNormalizedStates} from './membrane-modal-metrics.mjs';
@@ -24,7 +24,7 @@ function source(){
   const engine=[],visit=(dir,prefix='')=>{for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name,'en'))){
     if(e.isDirectory())visit(join(dir,e.name),prefix+e.name+'/');else if(e.name.endsWith('.js'))engine.push({path:prefix+e.name,sha256:sha(readFileSync(join(dir,e.name)))});
   }};visit(join(root,'packages/engine/src'));
-  const tools=readdirSync(bench).filter(p=>p.startsWith('membrane-modal-')||p.startsWith('test_membrane_modal_')&&p.endsWith('.py')||['compare-membrane-modal-audit.mjs','membrane-increment-precision.py','membrane-increment-probes.mjs','membrane-gradient-precision.py','membrane-gradient-probes.mjs','membrane-patch.mjs','plane-stress-reference.py','test_plane_stress_reference.py','plane-stress-precision.py','test_plane_stress_precision.py'].includes(p)).sort();
+  const tools=readdirSync(bench).filter(p=>p.startsWith('membrane-modal-')||p.startsWith('test_membrane_modal_')&&p.endsWith('.py')||['compare-membrane-modal-audit.mjs','membrane-increment-precision.py','membrane-increment-probes.mjs','membrane-gradient-precision.py','membrane-gradient-probes.mjs','membrane-reference-precision.py','membrane-reference-binding.py','membrane-reference-probes.mjs','membrane-patch.mjs','plane-stress-reference.py','test_plane_stress_reference.py','plane-stress-precision.py','test_plane_stress_precision.py'].includes(p)).sort();
   const tests=join(root,'packages/engine/test');
   return {git:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),status:execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),
     engineFiles:engine,tools:tools.map(path=>({path,sha256:sha(readFileSync(join(bench,path)))})),
@@ -56,8 +56,9 @@ function responseProof(reference){
   }
   return {maximumNormalizedDifference:maximum,valuesChecked:values,threshold:LIMITS.oracleResponse,pass:values>0&&maximum<=LIMITS.oracleResponse};
 }
-function trajectory(patch,reference,{amplitude,substeps,steps,budget,seed,level,instrument=true,lineSearchArithmetic,membraneArithmetic}){
-  const context=createModalWorld(patch,{phi:reference.mode.phi,omega:reference.mode.omega,amplitude,substeps,newtonIterations:budget,previousPoseStart:seed,...(lineSearchArithmetic===undefined?{}:{lineSearchArithmetic}),...(membraneArithmetic===undefined?{}:{membraneArithmetic})});
+function trajectory(patch,reference,{amplitude,substeps,steps,budget,seed,level,instrument=true,lineSearchArithmetic,membraneArithmetic,membraneReference}){
+  const context=createModalWorld(patch,{phi:reference.mode.phi,omega:reference.mode.omega,amplitude,substeps,newtonIterations:budget,previousPoseStart:seed,...(lineSearchArithmetic===undefined?{}:{lineSearchArithmetic}),...(membraneArithmetic===undefined?{}:{membraneArithmetic}),...(membraneReference==='uv-displacement'?{membraneReference}:{})});
+  const actualReferenceCoefficients=captureModalReference(context);
   const config={vertices:patch.vertices,mass:context.masses,phi:context.phi,omega:context.omega,amplitude};
   const scales=modalScales(config),trace=[],snapshots={},poseHistory=createHash('sha256');
   const oracleModalMassRelativeDifference=Math.abs(scales.modalMass-reference.mode.modalMass)/reference.mode.modalMass;
@@ -82,6 +83,7 @@ function trajectory(patch,reference,{amplitude,substeps,steps,budget,seed,level,
       if(record.lineSearch?.precisionLimited&&!linearSnapshots.firstPrecisionLimited)linearSnapshots.firstPrecisionLimited=record;
     }
     if(record.membraneArithmetic)Object.assign(event,{membraneArithmetic:record.membraneArithmetic,membraneArithmeticIdentity:record.membraneArithmeticIdentity});
+    if(record.membraneReference)Object.assign(event,{membraneReference:record.membraneReference,membraneReferenceIdentity:record.membraneReferenceIdentity});
     linearTrace.push(event);
     if(!record.valid&&!linearSnapshots.firstMissing)linearSnapshots.firstMissing=record;
     if(record.nominal?.relativeResidual>worstLinear){worstLinear=record.nominal.relativeResidual;linearSnapshots.worstNominal=record;}
@@ -147,17 +149,19 @@ function trajectory(patch,reference,{amplitude,substeps,steps,budget,seed,level,
       solver:{factorizations:observation.solver.factorizations,lastPublicPcgIterations:observation.solver.lastPublicPcgIterations,
         lineSearchBacktracks:observation.solver.lineSearchBacktracks,lineSearchRejected:observation.solver.lineSearchRejected,
         ...(observation.solver.lineSearchArithmetic?{lineSearchArithmetic:observation.solver.lineSearchArithmetic,increment:observation.solver.increment}:{}),
-        ...(observation.solver.membraneArithmetic?{membraneArithmetic:observation.solver.membraneArithmetic,membraneArithmeticIdentity:observation.solver.membraneArithmeticIdentity}:{})}});
+        ...(observation.solver.membraneArithmetic?{membraneArithmetic:observation.solver.membraneArithmetic,membraneArithmeticIdentity:observation.solver.membraneArithmeticIdentity}:{}),
+        ...(observation.solver.membraneReference?{membraneReference:observation.solver.membraneReference,membraneReferenceIdentity:observation.solver.membraneReferenceIdentity}:{})}});
     previous=observation;last=observation;
   }});}finally{solveObserver?.detach();}
+  assert.deepEqual(captureModalReference(context),actualReferenceCoefficients,'actual selected reference changed during trajectory');
   snapshots.final={observation:last,stateFloat64LE:encodeStateLE(last)};
   const clockPass=maxima.clockRelative<=64*Number.EPSILON*Math.max(1,steps);
   const measurement=allValid&&runtime.gates.measurementValid&&runtime.gates.noSleep&&runtime.gates.completeRequestedSteps&&clockPass;
   const discrete=measurement&&maxima.discreteDisplacement<=LIMITS.discreteField&&maxima.discreteVelocity<=LIMITS.discreteVelocity&&maxima.discreteEnergy<=LIMITS.discreteEnergy;
   const continuous=measurement&&maxima.continuousDisplacement<=LIMITS.continuousField&&maxima.continuousVelocity<=LIMITS.continuousVelocity&&maxima.continuousEnergy<=LIMITS.continuousEnergy&&phaseObservable&&maxima.phaseCycles<=LIMITS.phaseCycles;
   const linearDiagnostics=instrument&&solveObserver.counts.missing===0&&solveObserver.counts.callbackErrors===0&&solveObserver.counts.begins===steps*budget&&solveObserver.counts.finishes===steps*budget&&linearTrace.length===steps*budget;
-  return {level,budget,seed,amplitude,substeps,steps,h:context.world.dt,z:context.omega*context.world.dt,options:context.options,
-    ...(lineSearchArithmetic===undefined?{}:{lineSearchArithmetic}),...(membraneArithmetic===undefined?{}:{membraneArithmetic}),
+  return {actualReferenceCoefficients,level,budget,seed,amplitude,substeps,steps,h:context.world.dt,z:context.omega*context.world.dt,options:context.options,
+    ...(lineSearchArithmetic===undefined?{}:{lineSearchArithmetic}),...(membraneArithmetic===undefined?{}:{membraneArithmetic}),...(membraneReference==='uv-displacement'?{membraneReference}:{}),
     fixedForceScale:context.forceScale,forceTolerance:context.forceTolerance,modalMass:context.modalMass,
     oracleModalMass:reference.mode.modalMass,modalMassRelativeDifference:Math.abs(context.modalMass-reference.mode.modalMass)/reference.mode.modalMass,oracleModalMassRelativeDifference,
     runtime:{...runtime,observations:undefined,initial:undefined,final:undefined},initialReference,scales:{...scales,worldPhi:undefined},
@@ -203,11 +207,13 @@ function pairedControls(rows,patch,reference){
   return {budget,amplitude,scope:'paired checkpoint diagnostics supplement literal force gates; they cannot turn two unconverged trajectories into a solved limit'};
 }
 
-export function runModalAudit({allowDirty=false,stage='diagnostic',matrix='smoke',instrument=true,lineSearchArithmetic,membraneArithmetic}={}){
+export function runModalAudit({allowDirty=false,stage='diagnostic',matrix='smoke',instrument=true,lineSearchArithmetic,membraneArithmetic,membraneReference}={}){
   assert.ok(Object.hasOwn(PROTOCOLS,stage));assert.ok(['smoke','full'].includes(matrix));
   assert.ok(lineSearchArithmetic===undefined||['total-energy','membrane-inertia-increment'].includes(lineSearchArithmetic),'unknown line-search arithmetic');
   assert.ok(membraneArithmetic===undefined||['binary64','double-double'].includes(membraneArithmetic),'unknown membrane arithmetic');
   assert.ok(membraneArithmetic!=='double-double'||lineSearchArithmetic==='membrane-inertia-increment','double-double requires explicit membrane-inertia-increment search');
+  assert.ok(membraneReference===undefined||['material-coefficients','uv-displacement'].includes(membraneReference),'unknown membrane reference');
+  assert.ok(membraneReference!=='uv-displacement'||membraneArithmetic==='double-double'&&lineSearchArithmetic==='membrane-inertia-increment','uv-displacement requires explicit double-double and membrane-inertia-increment');
   const start=source();assert.ok(allowDirty||!start.status,'clean source required; --allow-dirty is development only');
   const selfRaw=oracle(['--self-test']),self=JSON.parse(selfRaw);assert.equal(self.passed,true);assert.ok(self.testsRun>0);
   const p=PROTOCOLS[stage],geometries=matrix==='smoke'?[{cells:2,pattern:'forward',grain:0}]:[2,4].flatMap(cells=>['forward','alternating','perturbed'].flatMap(pattern=>[0,45].map(grain=>({cells,pattern,grain}))));
@@ -224,12 +230,11 @@ export function runModalAudit({allowDirty=false,stage='diagnostic',matrix='smoke
     const proof=responseProof(ref);assert.equal(proof.pass,true,'independent scalar reference vs reducer must agree before observing World');
     const rows=[];
     for(const amplitude of p.amplitudes)for(const level of p.levels)for(const budget of p.budgets)for(const seed of p.seeds){
-      const row=trajectory(patch,ref,{amplitude,level,budget,seed,substeps:plan.S0*level,steps:plan.N0*level,instrument,lineSearchArithmetic,membraneArithmetic});rows.push(row);
+      const row=trajectory(patch,ref,{amplitude,level,budget,seed,substeps:plan.S0*level,steps:plan.N0*level,instrument,lineSearchArithmetic,membraneArithmetic,membraneReference});rows.push(row);
       console.error('membrane-modal-progress: '+patch.info.pattern+' cells='+patch.info.cells+' grain='+patch.info.grain+' A='+amplitude+' level='+level+' I='+budget+' previous='+seed+' '+row.classification+' failedForce='+row.failedSteps+'/'+row.steps);
     }
-    const mesh=patch.world.mesh,referenceCoefficients={triangles:Array.from({length:mesh.nT},(_,i)=>Array.from(mesh.tris.subarray(3*i,3*i+3))),
-      elements:patch.world.orthotropicMembrane.elements.map(e=>({alpha:Array.from(e.alpha),beta:Array.from(e.beta),Q:Array.from(e.Q),volume:e.volume})),
-      scope:'actual immutable runtime coefficients and native cyclic connectivity; independent UV/Q reference remains separate'};
+    const referenceCoefficients=rows[0].actualReferenceCoefficients;
+    for(const row of rows){assert.deepEqual(row.actualReferenceCoefficients,referenceCoefficients,'actual selected reference changed across trajectories');delete row.actualReferenceCoefficients;}
     results.push({geometry:geometries[i],vertices:patch.vertices,triangles:patch.triangles,material:patch.material,mesh:patch.info,fixtureSHA256:patch.fixtureSHA256,meshSHA256:patch.meshSHA256,referenceCoefficients,
       reference:ref,scalarResponseProof:proof,plan,trajectories:rows,pairedControls:pairedControls(rows,patch,ref)});
   }
@@ -238,7 +243,7 @@ export function runModalAudit({allowDirty=false,stage='diagnostic',matrix='smoke
   return {schema:'pliego-membrane-modal-audit/0.1',recordedAt:new Date().toISOString(),source:{...start,status:undefined,dirty:!!start.status},
     runtime:{node:process.version,python:execFileSync(PYTHON,['--version'],{encoding:'utf8'}).trim(),arch:process.arch,platform:process.platform,
       byteOrder:new Uint8Array(new Uint16Array([1]).buffer)[0]===1?'LE':'BE'},
-    protocol:{stage,matrix,instrument,...p,limits:LIMITS,geometries,...(lineSearchArithmetic===undefined?{}:{lineSearchArithmetic}),...(membraneArithmetic===undefined?{}:{membraneArithmetic}),initialization:'one actual A*dimensionless independentphi perturbation of native x; zero velocity; no oracle prediction, pins, sleep override or E/t/mass rescaling',
+    protocol:{stage,matrix,instrument,...p,limits:LIMITS,geometries,...(lineSearchArithmetic===undefined?{}:{lineSearchArithmetic}),...(membraneArithmetic===undefined?{}:{membraneArithmetic}),...(membraneReference==='uv-displacement'?{membraneReference}:{}),initialization:'one actual A*dimensionless independentphi perturbation of native x; zero velocity; no oracle prediction, pins, sleep override or E/t/mass rescaling',
       force:'literal max coordinate abs(gU+M/h²*(x-xt)) <= max(1e-7 microN,1e-10*FIXED initial A*omega²*max_i(nativeMass_i*norm(phi_i))); mass source independently checked, no ULP acceptance allowance',
       truth:'continuous linear mode and exact discrete BE, plus full independent K/M spectral propagation of actual rounded u0; they are distinct truths',
       acceptance:'diagnostic implementation and time/solve/precision separation; no whole time-accuracy acceptance until literal solves, amplitude isolation, all-step budget isolation, first-order trend and full matrix pass',
@@ -253,12 +258,13 @@ export function runModalAudit({allowDirty=false,stage='diagnostic',matrix='smoke
     classification:(start.status?'development-only/':'')+(!measurement?'measurement-invalid':!force?'incremental-force-nonconvergence':'diagnostic-complete-time-acceptance-open')};
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  const args=process.argv.slice(2),oi=args.indexOf('--out'),si=args.indexOf('--stage'),mi=args.indexOf('--matrix'),ai=args.indexOf('--line-search-arithmetic'),bi=args.indexOf('--membrane-arithmetic'),path=oi>=0?resolve(args[oi+1]||''):null;
+  const args=process.argv.slice(2),oi=args.indexOf('--out'),si=args.indexOf('--stage'),mi=args.indexOf('--matrix'),ai=args.indexOf('--line-search-arithmetic'),bi=args.indexOf('--membrane-arithmetic'),ri=args.indexOf('--membrane-reference'),path=oi>=0?resolve(args[oi+1]||''):null;
   assert.ok(ai<0||['total-energy','membrane-inertia-increment'].includes(args[ai+1]),'--line-search-arithmetic needs a supported value');
   assert.ok(bi<0||['binary64','double-double'].includes(args[bi+1]),'--membrane-arithmetic needs a supported value');
-  assert.ok(args.every((a,i)=>['--out','--stage','--matrix','--line-search-arithmetic','--membrane-arithmetic','--allow-dirty','--no-solve-observer'].includes(a)||(oi>=0&&i===oi+1)||(si>=0&&i===si+1)||(mi>=0&&i===mi+1)||(ai>=0&&i===ai+1)||(bi>=0&&i===bi+1)),'unknown argument');
+  assert.ok(ri<0||['material-coefficients','uv-displacement'].includes(args[ri+1]),'--membrane-reference needs a supported value');
+  assert.ok(args.every((a,i)=>['--out','--stage','--matrix','--line-search-arithmetic','--membrane-arithmetic','--membrane-reference','--allow-dirty','--no-solve-observer'].includes(a)||(oi>=0&&i===oi+1)||(si>=0&&i===si+1)||(mi>=0&&i===mi+1)||(ai>=0&&i===ai+1)||(bi>=0&&i===bi+1)||(ri>=0&&i===ri+1)),'unknown argument');
   if(path)assert.ok(!path.startsWith(root),'write observations outside checkout');
-  const report=runModalAudit({allowDirty:args.includes('--allow-dirty'),stage:si>=0?args[si+1]:'diagnostic',matrix:mi>=0?args[mi+1]:'smoke',instrument:!args.includes('--no-solve-observer'),lineSearchArithmetic:ai>=0?args[ai+1]:undefined,membraneArithmetic:bi>=0?args[bi+1]:undefined});
+  const report=runModalAudit({allowDirty:args.includes('--allow-dirty'),stage:si>=0?args[si+1]:'diagnostic',matrix:mi>=0?args[mi+1]:'smoke',instrument:!args.includes('--no-solve-observer'),lineSearchArithmetic:ai>=0?args[ai+1]:undefined,membraneArithmetic:bi>=0?args[bi+1]:undefined,membraneReference:ri>=0?args[ri+1]:undefined});
   const bytes=JSON.stringify(report,(_key,v)=>typeof v==='number'&&!Number.isFinite(v)?{nonFinite:Number.isNaN(v)?'NaN':v>0?'Infinity':'-Infinity'}:v)+'\n';
   if(path)writeFileSync(path,bytes,{flag:'wx',mode:0o600});else process.stdout.write(bytes);
   console.error('membrane-modal-audit: '+report.results.length+' geometries '+report.results.reduce((n,r)=>n+r.trajectories.length,0)+' trajectories '+report.classification);

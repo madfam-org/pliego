@@ -1,0 +1,193 @@
+{
+  "schema": "pliego-paper-campaign/0.3",
+  "recordedAt": "2026-11-10T07:58:28.428Z",
+  "source": {
+    "git": "ba6dd592de4e0ae676e88adb6a4b9e81d917e843",
+    "dirty": false,
+    "engine": "git:b36347cc90244e0deb0a694610cd434f06a03d3c",
+    "engineTreeSHA256": "58ea740b6cba7ba7f12a5867c661612928ce7fc74d3bda3e5c500aaf9f9698d3",
+    "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+    "harnessSHA256": "e90ce6226d2d8c09e776dee64eddb96df293232d22597df8d1fe068c53c40118",
+    "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+    "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+    "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "arch": "x64",
+    "platform": "darwin",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "protocol": {
+    "seed": 1,
+    "frameSeconds": 0.016666666666666666,
+    "framesPerTurn": 84,
+    "requestedTurns": 1,
+    "stopOnZeroProgress": true,
+    "selectedCase": 4,
+    "models": [
+      "active-leaf"
+    ],
+    "broadPhase": "bvh",
+    "edgeMollification": "off",
+    "checkpointEnabled": true,
+    "fallback": false,
+    "repetitions": 1,
+    "matrix": "local-contact",
+    "trajectory": "SHA256 of turn/frame headers and every sampled pre-promotion Float64 pose, native-endian; includes frames completed before failure",
+    "endpointGate": "every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation",
+    "continuousContact": "experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; stopOnZeroProgress declares whether zero progress stops the case",
+    "timingScope": "World.step only; includes first-frame/JIT cost; active-step p95 excludes frames asleep at start; exploratory local measurement",
+    "cpuTimingScope": "process.cpuUsage delta around World.step, all process threads including JIT/GC; not retired instructions or pure solver self time",
+    "coupledContact": "normal finite-gap barrier, h=0.05 mm k=1e5 g/s², force tolerance=0.001 µN, CG cap=128, per-iteration CCD/energy search; no projection constraints or friction",
+    "mollification": "optional surface-guarded IPC multiplier on EE energy; whole-energy gradient, approximate PSD curvature, strict geometric feasibility/CCD retained; uncovered pairs remain unmollified; totals count gradient evaluations, not unique contacts or physics steps"
+  },
+  "reduction": "Active-leaf reader promotes releases to flat resting blocks after 1.4 simulation seconds; pre-promotion release poses are audited. Plasticity disabled for reading. Not an unconstrained stack equilibrium.",
+  "materialAudit": {
+    "copy-80": {
+      "capY": 7848000.000000001,
+      "physicalYmd": 550000000,
+      "physicalYcd": 250000000,
+      "retainedMD": 0.01426909090909091,
+      "retainedCD": 0.031392
+    }
+  },
+  "results": [
+    {
+      "model": "active-leaf",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "barrierContact": true,
+        "barrierIterations": 8,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true,
+        "contactBroadPhase": "bvh",
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.0001911487535984887,
+      "maxCompression": 0.004954765140339673,
+      "minY": 0.041472262303768596,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 1,
+      "vertexRestBlockOverlapMm": 0,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.9998630977140386,
+          "minimum": 0.9998334163874287,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 0,
+        "limited": 0,
+        "iterationLimits": 0,
+        "precisionLimits": 0,
+        "initialOverlaps": 0,
+        "minimumTime": 1
+      },
+      "framesEndingWithZeroProgress": 0,
+      "activeFrames": 84,
+      "asleepFrames": 0,
+      "coupledContact": {
+        "steps": 672,
+        "unconverged": 13,
+        "iterations": 2239,
+        "cgTotal": 0,
+        "directSolves": 2239,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 17,
+        "rejected": 0,
+        "maximumEndResidual": 511.8825033179289,
+        "maximumInitialAdjustment": 3.552713678800501e-14
+      },
+      "buildMs": 58.301692,
+      "poseSHA256": "03add4e67ba6b5c0820e8b8673316c2a1cfa2fffa5d332d66ad3ede44b53800c",
+      "vertices": 492,
+      "freeVertices": 111,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": null,
+      "lastCoupledContact": {
+        "configuration": {
+          "distance": 0.05,
+          "stiffness": 100000,
+          "iterations": 8,
+          "cgIterations": 128,
+          "tolerance": 0.001,
+          "linearSolver": "direct-local"
+        },
+        "initialAdjustment": 3.552713678800501e-14,
+        "maximumEndResidual": 511.8825033179289,
+        "steps": 672,
+        "unconverged": 13,
+        "iterations": 2239,
+        "cgTotal": 0,
+        "directSolves": 2239,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 17,
+        "rejected": 0,
+        "last": {
+          "converged": true,
+          "residual": 0.0005548007584081915,
+          "iterations": 0,
+          "status": "converged",
+          "energyBefore": 0,
+          "energyAfter": 0,
+          "incrementalEnergy": 1724.3405857000669,
+          "barrierEnergy": 7.058658467393634,
+          "contacts": 0,
+          "grounded": 13,
+          "minimumGap": 0.041499092725458916,
+          "alpha": 1
+        },
+        "guard": {
+          "steps": 2239,
+          "limited": 0,
+          "iterationLimits": 0,
+          "precisionLimits": 0,
+          "initialOverlaps": 0,
+          "minimumTime": 1,
+          "last": {
+            "time": 1,
+            "queries": 220,
+            "iterations": 220,
+            "vertexTrianglePairs": 50,
+            "edgeEdgePairs": 170,
+            "status": "clear",
+            "pair": []
+          }
+        }
+      },
+      "stepMeanMs": 128.57061951190482,
+      "stepP95Ms": 300.13492599999995,
+      "stepMaxMs": 447.16894,
+      "activeStepP95Ms": 300.13492599999995,
+      "cpuStepMeanMs": 132.743880952381,
+      "cpuStepMaxMs": 747.722,
+      "activeCpuStepP95Ms": 301.618,
+      "trajectorySHA256": "d2021a2ce117d7841f88afe44a2810ebc089553237c6d330f2ced8f30667042d",
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": true,
+        "physics8ms": false,
+        "restingBlockVertexThickness": true,
+        "endpointProgress": true,
+        "allSolverStepsConverged": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    }
+  ]
+}

@@ -57,7 +57,7 @@ compressed force law reduces first-turn missed force-tolerance substeps from
 436/672 to 13/672 with either PCG or direct solving. Direct solving alone leaves
 436 misses. A direct S8/I32 candidate completes all eight turns above 99.98%
 sampled endpoint progress, with 0.0192% peak tensile strain, 0.4955% compression
-and zero partial resting-block deficit. It still misses tolerance on 680/5264
+and zero partial resting-block deficit. Its unsmoothed variant misses tolerance on 680/5264
 executed substeps and takes about 23 seconds at active-frame p95 in a diagnostic
 run. It is unsuitable for interactive reading. Spatial candidate scanning dominates
 the recorded CPU samples. A reconstructed late-turn objective and a parallel-edge
@@ -77,6 +77,15 @@ An opt-in surface-guarded native experiment now smooths only pairs with sufficie
 retained VT backups; uncovered pairs keep their original barriers. Whole-energy
 derivatives, native operator agreement and replay are tested. This partial
 smoothing does not close general coverage, force/material or device gates.
+
+The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
+now complete and repeat all eight turns with **0/5168** substeps missing the
+declared 0.001 µN force tolerance, identical sampled-position hashes and all
+recorded non-timing fields. Local active-frame p95 is 287–289 ms, still above
+8 ms. This successful force gate uses the capped material model; the uncapped
+S8/I8 first turn still misses tolerance on 103/672 substeps. Physical stock
+calibration, faster reading, general coverage and actual-device acceptance remain
+open. No stable catalogue physics release is implied.
 
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched

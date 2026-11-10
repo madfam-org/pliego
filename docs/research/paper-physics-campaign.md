@@ -115,8 +115,11 @@ published VT-backup coverage argument under our current exclusions.
 The resulting opt-in `edgeEdgeMollification: 'surface-guarded'` experiment admits
 only sufficient retained VT backups, differentiates the entire weighted energy
 and leaves uncovered barriers intact. Native operator/replay and independent
-multiplier-gradient checks are separate from its pending booklet force/material
-comparison; no global smoothness or C-IPC equivalence is implied.
+multiplier-gradient checks are separate from its booklet force/material
+comparison. The [recorded S8/I32 capped candidate and full repeat](evidence/paper-2026-11-10/README.md)
+now pass the all-substep force gate, while the 8 ms target and material-validation
+gate remain open. Uncapped S8/I8 still misses force tolerance on 103/672 substeps.
+No global smoothness or C-IPC equivalence is implied.
 
 ## Separate gates
 

@@ -27,6 +27,8 @@ const broadPhase = arg('--broad-phase');
 if (broadPhase && !['reference', 'bvh'].includes(broadPhase)) throw new RangeError('--broad-phase must be reference or bvh');
 const edgeMollification = arg('--edge-mollification');
 if (edgeMollification && !['off', 'surface-guarded'].includes(edgeMollification)) throw new RangeError('--edge-mollification must be off or surface-guarded');
+const iterations = arg('--iterations') === null ? null : Number(arg('--iterations'));
+if (iterations !== null && !(Number.isSafeInteger(iterations) && iterations > 0)) throw new RangeError('--iterations must be a positive safe integer');
 const checkpointPath = arg('--checkpoint') ? resolve(arg('--checkpoint')) : null;
 if (checkpointPath) {
   const inside = relative(root, checkpointPath);
@@ -230,7 +232,8 @@ const caseIndex = arg('--case') === null ? null : Number(arg('--case'));
 if (caseIndex !== null && (!Number.isInteger(caseIndex) || caseIndex < 1 || caseIndex > settingsMatrix.length)) throw new RangeError('--case is a one-based matrix index');
 const models = arg('--model') ? [arg('--model')] : ['all-leaves', 'active-leaf'];
 if (models.some(m => !['all-leaves', 'active-leaf'].includes(m))) throw new RangeError('--model must be all-leaves or active-leaf');
-for (const settings of caseIndex === null ? settingsMatrix : [settingsMatrix[caseIndex - 1]]) {
+for (const preset of caseIndex === null ? settingsMatrix : [settingsMatrix[caseIndex - 1]]) {
+  const settings = iterations === null ? preset : { ...preset, [preset.barrierContact ? 'barrierIterations' : 'newtonIterations']: iterations };
   for (const model of models) {
     const r = run(model, settings); results.push(r);
     checkpoint('case-finished', r);
@@ -247,7 +250,7 @@ const report = {
     fixture: 'pliego.book.codex(leaves=4,width=90,height=128)', fixtureSHA256: hash(bytes) },
   runtime: { node: process.version, arch: arch(), platform: platform(), cpu: cpus()[0]?.model },
   protocol: { seed: 1, frameSeconds: 1 / 60, framesPerTurn: 84, requestedTurns, stopOnZeroProgress,
-    selectedCase: caseIndex ?? 'all', models,
+    selectedCase: caseIndex ?? 'all', models, iterationOverride: iterations,
     broadPhase: broadPhase ?? 'reference', edgeMollification: edgeMollification ?? 'off', checkpointEnabled: !!checkpointPath,
     fallback: false, repetitions: 1, matrix: process.argv.includes('--local-matrix') ? 'local-contact' : process.argv.includes('--barrier-matrix') ? 'coupled-contact' : process.argv.includes('--contact-matrix') ? 'continuous-contact' : 'solver',
     trajectory: 'SHA256 of turn/frame headers and every sampled pre-promotion Float64 pose, native-endian; includes frames completed before failure',

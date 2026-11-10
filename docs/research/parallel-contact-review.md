@@ -115,6 +115,13 @@ symmetry tests. Neither check substitutes for fresh trajectory force/material an
 device gates. New energy means new physics: index-only trajectory equality is not
 an acceptance criterion for the smoothed variant.
 
+[Source-pinned booklet measurements](evidence/paper-2026-11-10/README.md) now
+complete and repeat all eight capped S8/I32 turns with no force-tolerance misses
+across 5168 executed substeps. Active p95 remains 287–289 ms; uncapped S8/I8
+still fails 103/672 force checks. The global capped-stock ratios and uncovered
+observation counts remain visible. These results do not validate the material or
+close general coverage/performance gates.
+
 ```sh
 python packages/engine/bench/mollifier-prototype.py --native > /tmp/native-mollifier.json
 node --test packages/engine/test/mollified-contact.test.js

@@ -1,7 +1,8 @@
 // Contact-free constitutive/time-integration counterexample. No preview or
 // wall-time-based compression. Engine sleep is counted separately. Compare to an axial bar;
 // this is a synthetic estimate-based stock, not physical material calibration.
-import { writeFileSync, readFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { execFileSync } from 'node:child_process';
@@ -11,6 +12,21 @@ import { World } from '../src/index.js';
 import { DocBuilder } from '../test/helpers/docbuilder.js';
 
 const hash = data => createHash('sha256').update(data).digest('hex');
+const root = fileURLToPath(new URL('../../../', import.meta.url));
+function engineFiles() {
+  const result = {}, base = fileURLToPath(new URL('../src/', import.meta.url));
+  function visit(dir, prefix = '') {
+    for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name, 'en'))) {
+      if (e.isDirectory()) visit(join(dir, e.name), prefix + e.name + '/');
+      else if (e.name.endsWith('.js')) result[prefix + e.name] = hash(readFileSync(join(dir, e.name)));
+    }
+  }
+  visit(base); return result;
+}
+const sourceStart = { git: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
+  status: execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }), files: engineFiles(),
+  harnessSHA256: hash(readFileSync(fileURLToPath(import.meta.url))) };
+const localContact = process.argv.includes('--local-contact');
 const b = new DocBuilder('axial paper strip, 100 by 10 mm');
 b.rect({ id: 'strip', width: 100, height: 10, grain: 0,
   placement: { origin: [0, 100, 0], rotation: [0, 0, 0, 1] } });
@@ -18,7 +34,11 @@ b.joins.push({ id: 'root', type: 'pin', a: { sheet: 'strip', along: [[0, 0], [0,
 const json = b.build(), force = 10000;
 const d = json['pliego:stocks']['copy-80'].derived;
 const reference = force * 100 / (d.E_md * d.thickness * 10);
-const settings = [
+const settings = localContact ? [32, 128].flatMap(barrierIterations => ['off', 'surface-guarded'].map(edgeEdgeMollification => ({
+  substeps: 8, newtonIterations: 1, physicalMembrane: true, barrierContact: true, barrierIterations,
+  barrierLinearSolver: 'direct-local', consistentMembraneCurvature: true,
+  ...(edgeEdgeMollification === 'off' ? {} : { edgeEdgeMollification }),
+}))) : [
   { substeps: 8, newtonIterations: 1, physicalMembrane: false },
   { substeps: 8, newtonIterations: 1, physicalMembrane: true },
   { substeps: 8, newtonIterations: 1, physicalMembrane: true, lineSearch: true },
@@ -62,6 +82,23 @@ for (const options of settings) {
     r.poseSHA256 = hash(Buffer.from(w.positions.buffer));
     r.vertices = w.mesh.nV;
     r.substepsExecuted = w.substepsRun; r.coupledContact = w.stats().coupledContact;
+    if (localContact) {
+      for (const v of tip) w.setForce(v, [0, 0, 0]);
+      r.unload = { frames: 0, extensionMm: null, finalMaxSpeedMmPerSecond: 0, coupledContact: null, poseSHA256: null,
+        timing: 'not included in loaded-phase timing statistics' };
+      for (let frame = 0; frame < 120; frame++) {
+        w.step(1 / 60); r.unload.frames++;
+        const stats = w.stats();
+        if (!stats.finite) throw new Error('Non-finite unloaded strip');
+        if (stats.coupledContact.last.contacts || stats.coupledContact.last.barrierEnergy) throw new Error('Unloaded axial strip acquired contact forces');
+      }
+      r.unload.extensionMm = extension(); r.unload.coupledContact = w.stats().coupledContact;
+      r.unload.poseSHA256 = hash(Buffer.from(w.positions.buffer));
+      for (let v = 0; v < w.mesh.nV; v++) r.unload.finalMaxSpeedMmPerSecond = Math.max(r.unload.finalMaxSpeedMmPerSecond, Math.hypot(...w.v.subarray(3 * v, 3 * v + 3)));
+      r.unload.gates = { restWithin1PercentBarExtension: Math.abs(r.unload.extensionMm) <= 0.01 * reference,
+        finalForceConverged: r.unload.coupledContact.last.converged,
+        allUnloadingStepsConverged: r.unload.coupledContact.unconverged === r.coupledContact.unconverged };
+    }
   } catch (e) { r.error = e.message; }
   r.meanStepMs = times.length ? times.reduce((a, b) => a + b, 0) / times.length : null;
   r.p95StepMs = times.toSorted((a, b) => a - b)[Math.ceil(times.length * 0.95) - 1] ?? null;
@@ -76,16 +113,18 @@ for (const options of settings) {
   results.push(r);
   console.error(`axial-pull: S=${options.substeps} I=${options.newtonIterations} physical=${options.physicalMembrane} search=${!!options.lineSearch} barrier=${!!options.barrierContact} BI=${options.barrierIterations ?? 0} extension=${r.extensionMm} mm referenceError=${r.relativeBarError} drift=${r.driftMm} activeP95=${r.p95ActiveStepMs?.toFixed(3)}ms ${r.error || ''}`);
 }
-const sourceFiles = ['xpbd/world.js', 'xpbd/energy-search.js', 'xpbd/implicit.js', 'xpbd/pcg.js', 'xpbd/coupled-contact.js', 'collision/barrier.js', 'collision/motion-guard.js', 'collision/distance.js', 'collision/accd.js', 'collision/swept.js', 'constants.js'];
-const report = { schema: 'pliego-axial-pull/0.2', recordedAt: new Date().toISOString(),
-  source: { git: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: fileURLToPath(new URL('../../../', import.meta.url)), encoding: 'utf8' }).trim(),
-    dirty: !!execFileSync('git', ['status', '--porcelain'], { cwd: fileURLToPath(new URL('../../../', import.meta.url)), encoding: 'utf8' }).trim(),
-    fixtureSHA256: hash(JSON.stringify(json)), files: Object.fromEntries(sourceFiles.map(name => [name, hash(readFileSync(new URL('../src/' + name, import.meta.url)))])),
-    harnessSHA256: hash(readFileSync(fileURLToPath(import.meta.url))) },
+if (execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim() !== sourceStart.git
+  || execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }) !== sourceStart.status
+  || JSON.stringify(engineFiles()) !== JSON.stringify(sourceStart.files)
+  || hash(readFileSync(fileURLToPath(import.meta.url))) !== sourceStart.harnessSHA256) throw new Error('Source changed during axial benchmark; discard results');
+const report = { schema: localContact ? 'pliego-axial-pull/0.3' : 'pliego-axial-pull/0.2', recordedAt: new Date().toISOString(),
+  source: { git: sourceStart.git, dirty: !!sourceStart.status.trim(), fixtureSHA256: hash(JSON.stringify(json)),
+    files: sourceStart.files, harnessSHA256: sourceStart.harnessSHA256 },
   runtime: { node: process.version, cpu: cpus()[0]?.model },
   protocol: { forceMicroNewtons: force, lengthMm: 100, widthMm: 10, frames: 180, frameSeconds: 1 / 60,
     contact: 'disabled in legacy; enabled in coupled path but zero active barrier stencils/energy required',
     analyticalBarExtensionMm: reference, materialBasis: 'DocBuilder copy-80 synthetic estimate; E*t*width axial-bar reference, not a calibrated 2D FE solution',
+    ...(localContact ? { unloadFrames: 120, variants: 'direct-local, consistent curvature, uncapped membrane; I32/I128 each with smoothing off/on; zero active contact required' } : {}),
     timing: 'one local exploratory run; step only; includes warm-up; active-step p95 excludes frames already asleep at step start; max includes all frames' }, results };
 const output = JSON.stringify(report, null, 2) + '\n';
 const i = process.argv.indexOf('--out');

@@ -104,11 +104,11 @@ test('public output is exclusive0600 outside checkout and refuses existing files
     const out=join(dir,'report.json'),value={schema:'test'};writeReferenceProbeReport(out,value);
     const expected=Buffer.from(JSON.stringify(value)+'\n'),descriptor=openSync(out,constants.O_RDONLY|constants.O_NOFOLLOW);
     try{
-      const originalInfo=fstatSync(descriptor,{bigint:true});assert.equal(originalInfo.mode&0o777n,0o600n);
       const checkContent=fd=>{const content=Buffer.alloc(expected.length+1),n=readSync(fd,content,0,content.length,0);assert.deepEqual(content.subarray(0,n),expected);};
       checkContent(descriptor);assert.throws(()=>writeReferenceProbeReport(out,{changed:true}),/EEXIST/);checkContent(descriptor);
       const reopened=openSync(out,constants.O_RDONLY|constants.O_NOFOLLOW);
       try{
+        const originalInfo=fstatSync(descriptor,{bigint:true});assert.equal(originalInfo.mode&0o777n,0o600n);
         const currentInfo=fstatSync(reopened,{bigint:true});assert.equal(currentInfo.dev,originalInfo.dev);assert.equal(currentInfo.ino,originalInfo.ino);checkContent(reopened);
       }finally{closeSync(reopened);}
     }finally{closeSync(descriptor);}

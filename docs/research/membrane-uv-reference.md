@@ -180,6 +180,15 @@ The capture commit's separate CodeQL finding concerned a test fixture's path
 stat/read sequence. Its later descriptor-based test repair preserves the
 original measurement source bytes and changes no runtime, producer or oracle.
 Passing source checks does not close physical failures.
+The first publication at `00e3c02` still triggered the
+[checker](membrane-reference-test-order-codeql.json) on reopening the
+path after inspecting the original descriptor. The subsequent test-only ordering
+correction opens both descriptors before inspecting either, retaining all mode,
+device/inode and content assertions. The frozen archive's publication-delta
+verifier describes the initial `00e3c02` bytes; use that commit when reproducing
+that stage. The separate [follow-up source review](membrane-reference-test-order-review.json)
+and [frozen verifier](membrane-reference-test-order-review-source.json) record
+the final ordering without changing or relabeling the captured study.
 
 The next bounded hypothesis is a separately named
 [authoritative displacement state](membrane-state-precision.md), retaining both

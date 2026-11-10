@@ -127,6 +127,27 @@ UV/material accuracy and force/time convergence require separate evidence.
 Reference descriptors and quality limits bind snapshot identity. Omission or
 explicit `material-coefficients` retains the historical law and metadata.
 
+`stateCoordinates: 'reference-displacement'` additionally selects an experimental
+binary64 displacement-authoritative state ABI in that same restricted UV/DD
+planar domain. Physical positions are the real sums `X0 + u`; public `x/xs/xt`
+are rounded views. Predictor, velocity, force, GN operator and search increments
+consume `u/us/ut` directly. The stale preconditioner's orientation and the zero
+planar hinge terms use projected geometry. This is a changed numerical state
+contract; absolute-position remains the canonical default.
+
+Use `setInitialReferencePose(actualX, actualV?)` on a pristine World. It refuses
+inexact one-word conversion or changed projection bytes, including zero signs,
+and preserves the original uninitialized zero `xs/xt` buffers. Public position
+writes are refused. `authoritativeState()` returns copies at completed boundaries;
+`authoritativeResiduals(frozenTau)` reports separate latent `converged` and public
+`literalForceGate` values at the same supplied tolerance. Initial targets cannot
+certify convergence. In this mode, `stats().stateCoordinates` explicitly labels
+the existing projected diagnostics and adds separately named latent metrics/energy. Snapshots bind both states, reference, native mass/timestep
+and factor coordinates; mid-Newton/substep snapshots are refused. An interrupted
+substep is not a completed solve. See the
+[state experiment and independent gates](../../docs/research/membrane-state-precision.md).
+No force/time, material, booklet or device acceptance follows from selecting it.
+
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
 `previousPoseStart` changes the legacy initial guess; `continuousContact` adds a

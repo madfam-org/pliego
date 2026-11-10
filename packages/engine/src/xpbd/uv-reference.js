@@ -10,6 +10,12 @@ import { hypot2, hypot3 } from '../fastmath.js';
 export const UV_REFERENCE_IDENTITY = Object.freeze({ mode: 'uv-displacement', version: 1,
   metric: 'actual-X0', strain: 'uv-covariant', rotation: 'tensor-before-voigt' });
 export const REFERENCE_POSE_QUALITY_MIN = 1e-12;
+/** Explicit argument semantics; mutable work/cache state never selects coordinates.
+ * @param {string} coordinates @param {boolean} hasUVReference @param {string} arithmetic */
+export function validateMembraneCoordinates(coordinates, hasUVReference, arithmetic) {
+  if (!['absolute-position', 'reference-displacement'].includes(coordinates)) throw new Error('Membrane coordinates: invalid coordinate selector');
+  if (coordinates === 'reference-displacement' && (!hasUVReference || arithmetic !== 'double-double')) throw new Error('Membrane coordinates: reference-displacement requires UV reference and double-double arithmetic');
+}
 /** @typedef {{mode:'uv-displacement',version:number,u:Float64Array,v:Float64Array,x0:Float64Array,c:number,s:number}} UVReference */
 /** @param {ArrayLike<number>} uv @param {ArrayLike<number>} x0 @param {number} grainRadians @returns {UVReference} */
 export function createUVReference(uv, x0, grainRadians) {
@@ -77,10 +83,11 @@ export function referenceRotate(ref, values, transpose = false) {
 }
 /** Recompute A=KX0; cached rounded A would define a different real polynomial.
  * Euv = sym(A^T H) + H^T H/2, H=K(x-X0), evaluated without subtracting metrics.
- * @param {UVReference} ref @param {ArrayLike<number>} x @param {ArrayLike<number>} ids */
-export function referenceKinematics(ref, x, ids) {
+ * @param {UVReference} ref @param {ArrayLike<number>} x @param {ArrayLike<number>} ids @param {string} [coordinates] */
+export function referenceKinematics(ref, x, ids, coordinates = 'absolute-position') {
+  validateMembraneCoordinates(coordinates, true, 'double-double');
   const base = referenceTangents(ref, ref.x0, [0, 1, 2]);
-  const delta = referenceApply(ref, Array.from(ids, (id, i) => [0, 1, 2].map(r => D.twoSum(x[3 * id + r], -ref.x0[3 * i + r]))));
+  const delta = referenceApply(ref, Array.from(ids, (id, i) => [0, 1, 2].map(r => coordinates === 'reference-displacement' ? /** @type {D.DD} */ ([x[3 * id + r], 0]) : D.twoSum(x[3 * id + r], -ref.x0[3 * i + r]))));
   const uvStrain = [D.add(referenceDot(base.a, delta.a), D.scale(referenceDot(delta.a, delta.a), .5)),
     D.add(referenceDot(base.b, delta.b), D.scale(referenceDot(delta.b, delta.b), .5)),
     D.sum([referenceDot(base.a, delta.b), referenceDot(base.b, delta.a), referenceDot(delta.a, delta.b)])];

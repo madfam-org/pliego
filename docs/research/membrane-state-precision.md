@@ -1,14 +1,46 @@
 # Next state representation candidates
 
 2026-11-10. Research/design prepared during the frozen `d739165` study and published
-after its captures and independent reviews finished. No state-representation
-prototype or simulation has been implemented for this proposal. The
+after its captures and independent reviews finished. The separately named
+reference-displacement prototype is now implemented for a bounded first-witness
+experiment; the full 24-trajectory matrix has not yet been run for this state ABI. The
 [reference-law results](membrane-uv-reference.md) improve frozen-pose component
 accuracy while retaining 6968/7110 force failures. Better force evaluation and a
 finer state/update representation are different hypotheses; those failures do
 not prove that equilibrium is unrepresentable on the existing grid.
 
 ## Recommendation
+
+Implementation: `World({stateCoordinates:'reference-displacement', ...})` requires
+the existing UV/DD/increment prerequisites. The explicit model-coordinate
+argument defaults to absolute-position; no array shape or mutable work flag
+selects its meaning. `setInitialReferencePose(actualX,actualV?)` is restricted to
+a pristine World. Constructor `xs/xt` remain their original zero buffers with
+`targetValid:false`; they are not invented initial predictors. One-word conversion
+requires zero TwoDiff low and byte-identical projection. For desired x=-0 and
+X0=-0, the explicit initial u=-0 preserves that sign; origin +0/desired -0 refuses.
+All other native differences remain unchanged.
+
+`authoritativeState()` returns copies of u/us/ut, public views, v, immutable X0,
+22 native words per element, M/h, initial x/u/v and the versioned state identity.
+`authoritativeResiduals(tau)` reports separate native latent `converged` and public
+`literalForceGate`, with null gates until a completed substep provides a target.
+Both use the supplied fixed original tolerance. Rounded geometry is used only
+for the stale preconditioner orientation and zero planar hinge terms; membrane
+energy/gradient/GN and inertia consume authority directly. Mid-Newton/substep
+observations through these boundary APIs refuse, including after an individual
+search finishes. An exception during a substep does not certify a completed
+target or solve. Restore validates latent/projected pairs, bindings, factor
+coordinates and the incoming omitted-physics domain before writes.
+
+The bounded first evidence is predeclared as one retained near-reference witness,
+an exactly representable rigid-translation control and one actual same-input
+substep replay. It must retain every Newton decision, both native force gates,
+exact old endpoint replay, repeat/transparent-observer parity, and independent
+latent/public truth. The represented elastic error gates remain 1e-12 nJ in
+energy and 1e-9 microN per gradient component. Both physical residual gates keep
+the original tau/F0. A full-proof 80/100-digit comparison may omit only the
+declared precision field. No sampled result certifies unrecorded iterations.
 
 The smallest useful next implementation is a separately named **binary64 reference-displacement-authoritative World**, restricted initially to the existing all-free near-reference planar UV-displacement/DD/increment-search domain. It is a changed state contract/ABI, not continued acceptance of the same absolute-x World. It must retain BOTH the original literal force gate at the actual public rounded x and a separately named latent-state force gate. A latent pass cannot close the public endpoint gate, booklet gate or device gate.
 
@@ -67,4 +99,4 @@ Start with one frozen near-reference failure witness plus an exactly representab
 - [Felippa/Haugen,2005 primary publisher abstract](https://www.sciencedirect.com/science/article/pii/S0045782504005353): the corotational framework assumes small corotated strains with unrestricted base rotations and derives forces/tangents by energy variation. Full paper retrieval was unavailable in this pass; no unread detailed dynamic algorithm is claimed reviewed.
 - [Official WebAssembly numeric/vector types](https://webassembly.github.io/spec/core/syntax/types.html#number-types): f64 is IEEE double; v128 packs numeric lanes. The same-state-grid conclusion above is an inference from these representations, not a backend benchmark.
 
-Full amplitude/time/solve isolation, material calibration, bending/buckling/creases/joins/hands/contact/friction, alternative formulations/backends, independent natural left/right booklet reading with its frame fixed, actual touch/device input-to-paint and the8msphysics gate remain open. No implementation starts during the frozen accepted pipeline, and this memo makes no optimality or exhausted-research claim.
+Full amplitude/time/solve isolation, material calibration, bending/buckling/creases/joins/hands/contact/friction, alternative formulations/backends, independent natural left/right booklet reading with its frame fixed, actual touch/device input-to-paint and the8msphysics gate remain open. Implementation began after the previous frozen accepted pipeline finished. This phase makes no optimality or exhausted-research claim.

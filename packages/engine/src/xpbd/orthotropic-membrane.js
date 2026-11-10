@@ -4,7 +4,7 @@
 import { hypot2, hypot3 } from '../fastmath.js';
 import * as DD from './double-double.js';
 import { accurateScratch, accurateKinematics, accurateEnergy, accurateGradient, accurateGN, accurateGeometric, addAccurateGradient, addAccurateTimes, accurateDifference } from './accurate-membrane.js';
-import { createUVReference, describeUVReference, UV_REFERENCE_IDENTITY, REFERENCE_POSE_QUALITY_MIN } from './uv-reference.js';
+import { createUVReference, describeUVReference, UV_REFERENCE_IDENTITY, REFERENCE_POSE_QUALITY_MIN, validateMembraneCoordinates } from './uv-reference.js';
 
 const REFERENCE_QUALITY_MIN = 1e-12, CURRENT_AREA_RATIO_MIN = 1e-12;
 const SLOT_NONE = -2147483648;
@@ -65,9 +65,10 @@ function scratch(arithmetic = 'binary64') {
     ...(arithmetic === 'double-double' ? accurateScratch() : {}) };
 }
 /** Pose-local kinematics; no dependence on a previous gradient or factor cache.
- * @param {OrthotropicElement} e @param {ArrayLike<number>} x @param {ArrayLike<number>} ids @param {ReturnType<typeof scratch>} k */
-function kinematics(e, x, ids, k) {
-  if (k.arithmetic === 'double-double') return accurateKinematics(e, x, ids, k);
+ * @param {OrthotropicElement} e @param {ArrayLike<number>} x @param {ArrayLike<number>} ids @param {ReturnType<typeof scratch>} k @param {string} [coordinates] */
+function kinematics(e, x, ids, k, coordinates = 'absolute-position') {
+  validateMembraneCoordinates(coordinates, !!e.reference, k.arithmetic ?? 'binary64');
+  if (k.arithmetic === 'double-double') return accurateKinematics(e, x, ids, k, coordinates);
   const { a, b, strain, stress, J } = k;
   for (let r = 0; r < 3; r++) {
     const x0 = x[3 * ids[0] + r], d1 = x[3 * ids[1] + r] - x0, d2 = x[3 * ids[2] + r] - x0;
@@ -111,13 +112,13 @@ function gnEntry(e, k, row, col) {
 /** Exact element energy, force gradient, and exact/GN Hessians for validation.
  * Invalid trial energy is Infinity; derivative requests at invalid poses throw.
  * @param {OrthotropicElement} element @param {ArrayLike<number>} x nine world coordinates
- * @param {{exactHessian?:boolean,arithmetic?:'binary64'|'double-double'}} [opts] */
+ * @param {{exactHessian?:boolean,arithmetic?:'binary64'|'double-double',coordinates?:'absolute-position'|'reference-displacement'}} [opts] */
 export function evaluateOrthotropicElement(element, x, opts = {}) {
   demand(x.length === 9, 'element pose must have nine coordinates');
   demand(['binary64', 'double-double'].includes(opts.arithmetic ?? 'binary64'), 'invalid arithmetic');
   demand(!element.reference || opts.arithmetic === 'double-double', 'UV reference requires double-double arithmetic');
   const k = scratch(opts.arithmetic), ids = [0, 1, 2];
-  demand(kinematics(element, x, ids, k), 'collapsed or non-finite current triangle' + (k.arithmetic === 'double-double' ? '/arithmetic: ' + k.arithmeticError : ''));
+  demand(kinematics(element, x, ids, k, opts.coordinates), 'collapsed or non-finite current triangle' + (k.arithmetic === 'double-double' ? '/arithmetic: ' + k.arithmeticError : ''));
   const gradient = new Float64Array(9), gaussNewton = new Float64Array(81);
   const hessian = opts.exactHessian === false ? null : new Float64Array(81);
   for (let i = 0; i < 9; i++) {
@@ -188,12 +189,13 @@ export class OrthotropicMembrane {
     this.work = scratch(arithmetic); this.block = new Float64Array(9);
     if (reference === 'uv-displacement') Object.assign(this.work, { reference, referenceMetricMismatch: 0 });
   }
-  /** @param {ArrayLike<number>} x */
-  energy(x) {
-    if (this.work.arithmetic === 'double-double') return accurateEnergy(this, x);
+  /** @param {ArrayLike<number>} x @param {string} [coordinates] */
+  energy(x, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
+    if (this.work.arithmetic === 'double-double') return accurateEnergy(this, x, coordinates);
     let energy = 0;
     for (let t = 0; t < this.mesh.nT; t++) {
-      if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work)) return Infinity;
+      if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work, coordinates)) return Infinity;
       energy += this.work.energy;
     }
     return Number.isFinite(energy) ? energy : Infinity;
@@ -202,16 +204,17 @@ export class OrthotropicMembrane {
    * This is not literal subtraction of two separately rounded energy() values.
    * Existing energy/gradient/GN arithmetic remains unchanged. Invalid endpoints
    * return Infinity; absoluteTermSum is a magnitude diagnostic, not an error bound.
-   * @param {ArrayLike<number>} before @param {ArrayLike<number>} after */
-  energyDifferenceDetails(before, after) {
-    if (this.work.arithmetic === 'double-double') return accurateDifference(this, before, after);
+   * @param {ArrayLike<number>} before @param {ArrayLike<number>} after @param {string} [coordinates] */
+  energyDifferenceDetails(before, after, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
+    if (this.work.arithmetic === 'double-double') return accurateDifference(this, before, after, coordinates);
     const start = scratch(), end = scratch();
     const total = { sum: 0, correction: 0, magnitude: 0 };
     const linear = { sum: 0, correction: 0, magnitude: 0 };
     const remainder = { sum: 0, correction: 0, magnitude: 0 };
     for (let t = 0; t < this.mesh.nT; t++) {
       const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3);
-      if (!kinematics(e, before, ids, start) || !kinematics(e, after, ids, end)) return { difference: Infinity, absoluteTermSum: Infinity, linear: Infinity, remainder: Infinity, absoluteRemainderTermSum: Infinity, triangles: this.mesh.nT, valid: false };
+      if (!kinematics(e, before, ids, start, coordinates) || !kinematics(e, after, ids, end, coordinates)) return { difference: Infinity, absoluteTermSum: Infinity, linear: Infinity, remainder: Infinity, absoluteRemainderTermSum: Infinity, triangles: this.mesh.nT, valid: false };
       const da = [0, 0, 0], db = [0, 0, 0];
       for (let r = 0; r < 3; r++) {
         // Form actual nodal position increments first. Subtracting two rounded
@@ -250,14 +253,15 @@ export class OrthotropicMembrane {
       linear: linearValue, remainder: remainderValue, absoluteRemainderTermSum: remainder.magnitude,
       triangles: this.mesh.nT, valid };
   }
-  /** @param {ArrayLike<number>} before @param {ArrayLike<number>} after */
-  energyDifference(before, after) { return this.energyDifferenceDetails(before, after).difference; }
-  /** Add exact elastic gradient over all vertices. @param {ArrayLike<number>} x @param {Float64Array} g */
-  addGradient(x, g) {
-    if (this.work.arithmetic === 'double-double') return addAccurateGradient(this, x, g);
+  /** @param {ArrayLike<number>} before @param {ArrayLike<number>} after @param {string} [coordinates] */
+  energyDifference(before, after, coordinates = 'absolute-position') { return this.energyDifferenceDetails(before, after, coordinates).difference; }
+  /** Add exact elastic gradient over all vertices. @param {ArrayLike<number>} x @param {Float64Array} g @param {string} [coordinates] */
+  addGradient(x, g, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
+    if (this.work.arithmetic === 'double-double') return addAccurateGradient(this, x, g, coordinates);
     for (let t = 0; t < this.mesh.nT; t++) {
       const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3), k = this.work;
-      demand(kinematics(e, x, ids, k), 'collapsed or non-finite current triangle' + (k.arithmetic === 'double-double' ? '/arithmetic: ' + k.arithmeticError : ''));
+      demand(kinematics(e, x, ids, k, coordinates), 'collapsed or non-finite current triangle' + (k.arithmetic === 'double-double' ? '/arithmetic: ' + k.arithmeticError : ''));
       for (let i = 0; i < 3; i++) for (let r = 0; r < 3; r++) {
         const c = 3 * i + r, value = e.volume * (k.J[c] * k.stress[0] + k.J[9 + c] * k.stress[1] + k.J[18 + c] * k.stress[2]);
         demand(Number.isFinite(value), 'non-finite membrane gradient'); g[3 * ids[i] + r] += value;
@@ -265,13 +269,14 @@ export class OrthotropicMembrane {
     }
   }
   /** Add PSD search blocks, not exact stress curvature.
-   * @param {any} w @param {ArrayLike<number>} x @param {import('../linalg/blockchol.js').BlockCholesky} ch */
-  addGaussNewtonBlocks(w, x, ch) {
+   * @param {any} w @param {ArrayLike<number>} x @param {import('../linalg/blockchol.js').BlockCholesky} ch @param {string} [coordinates] */
+  addGaussNewtonBlocks(w, x, ch, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
     const slots = w.sys.membraneSlots;
     demand(slots instanceof Int32Array && slots.length === 3 * this.mesh.nT, 'membrane assembly slots missing');
     for (let t = 0; t < this.mesh.nT; t++) {
       const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3), k = this.work;
-      demand(kinematics(e, x, ids, k), 'collapsed or non-finite current triangle');
+      demand(kinematics(e, x, ids, k, coordinates), 'collapsed or non-finite current triangle');
       let pair = 0;
       for (let i = 0; i < 3; i++) for (let j = i; j < 3; j++) {
         const slot = i === j ? w.sys.diagSlot[ids[i]] : slots[3 * t + pair++];
@@ -282,12 +287,13 @@ export class OrthotropicMembrane {
     }
   }
   /** Add PSD operator, treating fixed input entries as zero and omitting fixed output.
-   * @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] */
-  addGaussNewtonTimes(x, p, out, invMass) {
-    if (this.work.arithmetic === 'double-double') return addAccurateTimes(this, x, p, out, invMass);
+   * @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] @param {string} [coordinates] */
+  addGaussNewtonTimes(x, p, out, invMass, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
+    if (this.work.arithmetic === 'double-double') return addAccurateTimes(this, x, p, out, invMass, coordinates);
     for (let t = 0; t < this.mesh.nT; t++) {
       const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3), k = this.work;
-      demand(kinematics(e, x, ids, k), 'collapsed or non-finite current triangle');
+      demand(kinematics(e, x, ids, k, coordinates), 'collapsed or non-finite current triangle');
       let z0 = 0, z1 = 0, z2 = 0;
       for (let i = 0; i < 3; i++) if (!invMass || invMass[ids[i]]) for (let r = 0; r < 3; r++) {
         const c = 3 * i + r, value = p[3 * ids[i] + r]; z0 += k.J[c] * value; z1 += k.J[9 + c] * value; z2 += k.J[18 + c] * value;
@@ -298,12 +304,13 @@ export class OrthotropicMembrane {
       }
     }
   }
-  /** Current metric diagnostics, not an inversion/contact/strain-limit certificate. @param {ArrayLike<number>} x */
-  diagnostics(x) {
+  /** Current metric diagnostics, not an inversion/contact/strain-limit certificate. @param {ArrayLike<number>} x @param {string} [coordinates] */
+  diagnostics(x, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
     let invalidTriangles = 0, minimumStretch = Infinity, maximumStretch = 0, minimumAreaRatio = Infinity, maximumAreaRatio = 0;
     let arithmeticError = '', referenceMetricMismatch = 0;
     for (let t = 0; t < this.mesh.nT; t++) {
-      if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work)) { invalidTriangles++; arithmeticError ||= this.work.arithmeticError ?? ''; continue; }
+      if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work, coordinates)) { invalidTriangles++; arithmeticError ||= this.work.arithmeticError ?? ''; continue; }
       minimumStretch = Math.min(minimumStretch, this.work.minimumStretch); maximumStretch = Math.max(maximumStretch, this.work.maximumStretch);
       minimumAreaRatio = Math.min(minimumAreaRatio, this.work.areaRatio); maximumAreaRatio = Math.max(maximumAreaRatio, this.work.areaRatio);
       if (this.configuration.reference) referenceMetricMismatch = Math.max(referenceMetricMismatch, /** @type {any} */ (this.work).referenceMetricMismatch);

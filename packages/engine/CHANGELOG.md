@@ -5,6 +5,15 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Optional `stateCoordinates: 'reference-displacement'` introduces a separately
+versioned binary64 displacement-authoritative research state. It carries small
+updates through predictor, elastic/GN evaluation, inertia, search and velocity,
+while retaining rounded public views and their original literal force gate.
+Exact initial conversion, projection-write refusal and boundary snapshot/replay
+checks are explicit. A separate independent rational observer evaluates latent
+and public physical states; this does not establish full trajectory, booklet,
+material or device acceptance.
+
 Optional `membraneReference: 'uv-displacement'` introduces a named alternative
 actual-X0 metric-relative strain law, with tensor rotation before material Voigt
 assembly. It requires DD/planar increment-search research selections, binds

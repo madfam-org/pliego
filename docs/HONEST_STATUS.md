@@ -201,8 +201,11 @@ real Armijo failures are zero; this does not certify all 13354 accepted updates.
 The [complete evidence](research/evidence/membrane-reference-2026-11-10/README.md)
 preserves failures, the comparison-path recovery and a documented prototype-source
 gap. Force/time, material, fixed-booklet/device and 8 ms acceptance remain open.
-The next bounded hypothesis is [authoritative displacement state](research/membrane-state-precision.md),
-with separate latent/public residual gates. Reader and historical defaults remain unchanged.
+The next bounded hypothesis, [authoritative displacement state](research/membrane-state-precision.md),
+now has an opt-in implementation with separate latent/public residual gates,
+exact initial-state conversion and boundary replay/refusal checks. Its first
+frozen-witness experiment remains separate from the still-unrun 24-trajectory
+state matrix. Reader and historical defaults remain unchanged.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

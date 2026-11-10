@@ -15,7 +15,7 @@ import { loadDocument } from '../document.js';
 import { buildMesh, HINGE_PANEL, HINGE_CREASE, HINGE_SCORE, HINGE_PERF } from '../mesh.js';
 import { fromDerived, bendingDeff, membraneE, creaseGrainFactor } from '../material.js';
 import { dihedral } from './dihedral.js';
-import { buildSystem, assembleAndFactor, gradient, unwrap, TERM_STRING, termResidual } from './implicit.js';
+import { buildSystem, unwrap, TERM_STRING, termResidual } from './implicit.js';
 import { liftOntoTable, restBranch } from './setrest.js';
 import { resolveJoins, updateTerms, TK_STRING, TK_PERF } from './joins.js';
 import { Drivers } from '../drivers.js';
@@ -23,7 +23,8 @@ import { Contact } from './contact.js';
 import { EdgeContact } from './edgecontact.js';
 import { Wind, addAirForces } from './air.js';
 import { RenderBuffers } from './render.js';
-import { pcgStep } from './pcg.js';
+import { newtonStep } from './newton.js';
+import { initialiseReferenceState, validateReferenceState, stepReferenceState, setInitialReferencePose, referenceStateSnapshot, referenceResiduals, referenceDiagnostics } from './reference-state.js';
 import { snapshotWorld, restoreWorld } from './state.js';
 import { JoinGates } from './gates.js';
 import { Presentation } from './presentation.js';
@@ -46,12 +47,14 @@ export class World {
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
    *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
-   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement'}} [opts]
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
     this.doc = doc;
     const orthotropic = opts.membraneModel === 'orthotropic-stvk';
+    if (!['absolute-position', 'reference-displacement'].includes(opts.stateCoordinates ?? 'absolute-position')) throw new RangeError('World: invalid stateCoordinates');
+    if (opts.stateCoordinates === 'reference-displacement' && opts.membraneReference !== 'uv-displacement') throw new Error('World: reference-displacement stateCoordinates requires uv-displacement membraneReference');
     if (!['material-coefficients', 'uv-displacement'].includes(opts.membraneReference ?? 'material-coefficients')) throw new RangeError('World: invalid membraneReference');
     if (opts.membraneReference === 'uv-displacement' && (!orthotropic || opts.membraneArithmetic !== 'double-double' || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: uv-displacement membraneReference requires orthotropic-stvk, double-double and membrane-inertia-increment search');
     if (!['binary64', 'double-double'].includes(opts.membraneArithmetic ?? 'binary64')) throw new RangeError('World: invalid membraneArithmetic');
@@ -71,6 +74,7 @@ export class World {
       lineSearch: opts.lineSearch ?? false,
       ...(opts.membraneArithmetic === 'double-double' ? { membraneArithmetic: opts.membraneArithmetic } : {}),
       ...(opts.membraneReference === 'uv-displacement' ? { membraneReference: opts.membraneReference } : {}),
+      ...(opts.stateCoordinates === 'reference-displacement' ? { stateCoordinates: opts.stateCoordinates } : {}),
       ...(opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchArithmetic: opts.lineSearchArithmetic } : {}),
       continuousContact: opts.continuousContact ?? false,
       barrierContact: opts.barrierContact ?? false,
@@ -186,6 +190,7 @@ export class World {
     this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
     if (this.opts.lineSearchArithmetic === 'membrane-inertia-increment') validateIncrementDomain(this, this.x);
+    initialiseReferenceState(this);
   }
 
   /** Stiffness, rest angles, yields and limits of membrane edges and hinges. */
@@ -262,7 +267,7 @@ export class World {
     }
   }
 
-  /** Simulation positions (Float64Array xyz, live view; write through it only before stepping, or render() may serve a stale pose). */
+  /** Simulation positions, xyz live view. Reference-displacement mode refuses writes; use setInitialReferencePose before stepping. */
   get positions() { return this.x; }
 
   /** Whether the world sleeps (steps skip the solver until something wakes it); O(1), unlike stats(). */
@@ -283,6 +288,7 @@ export class World {
    * @param {number} [frameDt]
    */
   step(frameDt = 1 / 60) {
+    validateReferenceState(this);
     this._acc += frameDt / this.dt;
     const n = Math.floor(this._acc + 1e-9);
     this._acc -= n;
@@ -346,6 +352,8 @@ export class World {
   }
 
   _substep() {
+    validateReferenceState(this);
+    if (this.opts.stateCoordinates === 'reference-displacement') return stepReferenceState(this);
     const dt = this.dt, nV = this.mesh.nV;
     const x = this.x, v = this.v, xs = this.xs, w = this.invMass, f = this.fext;
     if (this.motionGuard || this.coupledContact) xs.set(x); // include prescribed/gated movement in the swept path
@@ -408,39 +416,7 @@ export class World {
     this.substepsRun++;
   }
 
-  _newton() {
-    const S = this.sys;
-    if (!S.ch) return;
-    const x = this.x, g = this.g, rhs = S.rhs, fi = S.freeIdx, nV = this.mesh.nV;
-    const idt2 = 1 / (this.dt * this.dt);
-    for (let it = 0; it < this.opts.newtonIterations; it++) {
-      this.energySearch?.begin(this);
-      g.fill(0);
-      gradient(this, x, g);
-      if (it > 0 || this.opts.previousPoseStart || this.opts.lineSearchArithmetic === 'membrane-inertia-increment') for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
-      if (!this.dirty && !(this._pcgFail > 0)) {
-        const r = pcgStep(this, x, g, K.PCG_MAX_ITER, K.PCG_RTOL);
-        this.pcgIterations = r.iterations;
-        if (r.converged) { if (r.iterations > K.PCG_REFACTOR_ITER) this.dirty = true; this.energySearch?.finish(this, g); continue; }
-        this._pcgFail = K.PCG_FAIL_HOLD; // the sheet is moving fast: factor directly for a few substeps
-      } else if (this._pcgFail > 0) this._pcgFail--;
-      assembleAndFactor(this, x);
-      this._saveFactorState(x);
-      this.dirty = false;
-      for (let i = 0; i < nV; i++) {
-        const k = fi[i];
-        if (k < 0) continue;
-        rhs[3 * k] = -g[3 * i]; rhs[3 * k + 1] = -g[3 * i + 1]; rhs[3 * k + 2] = -g[3 * i + 2];
-      }
-      S.ch.solve(rhs);
-      for (let i = 0; i < nV; i++) {
-        const k = fi[i];
-        if (k < 0) continue;
-        x[3 * i] += rhs[3 * k]; x[3 * i + 1] += rhs[3 * k + 1]; x[3 * i + 2] += rhs[3 * k + 2];
-      }
-      this.energySearch?.finish(this, g);
-    }
-  }
+  _newton() { newtonStep(this); }
 
   _projections() {
     const x = this.x, w = this.invMass, E = this.mesh.edges, L0 = this.mesh.edgeLen;
@@ -600,11 +576,11 @@ export class World {
    * Remember what the current factorisation was built from (bit-exact snapshot/restore), in buffers
    * reused from one factorisation to the next (snapshots copy them). @param {Float64Array} x
    */
-  _saveFactorState(x) {
+  _saveFactorState(x, coordinates = 'absolute-position') {
     const T = this.terms, f = this._factorState;
     if (!f) {
       this._factorState = {
-        x: Float64Array.from(x), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
+        x: Float64Array.from(x), ...(coordinates === 'reference-displacement' ? { coordinates } : {}), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
         active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode),
         verts: Int32Array.from(T.verts), c: Float64Array.from(T.c), dir: Float64Array.from(T.dir), len: Float64Array.from(T.len),
       };
@@ -673,9 +649,10 @@ export class World {
     for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i])) { nan = true; break; }
     const membrane = this.orthotropicMembrane?.diagnostics(x);
     if (this.orthotropicMembrane) stretch = this.orthotropicMembrane.energy(x);
-    const legacyEdgeMaxStrain = maxStrain, legacyEdgeMaxCompression = maxCompression;
+    const legacyEdgeMaxStrain = maxStrain, legacyEdgeMaxCompression = maxCompression, coordinates = referenceDiagnostics(this);
     if (membrane) { maxStrain = Math.max(0, membrane.maximumStretch - 1); maxCompression = Math.max(0, 1 - membrane.minimumStretch); }
     return {
+      ...(coordinates ? { stateCoordinates: coordinates } : {}),
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, edgeContacts: this._edgeContacts, grounded: this._grounded,
       substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan && (!membrane || membrane.finite),
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
@@ -688,6 +665,17 @@ export class World {
         nu12BySheet: this.opts.membraneNu12?.slice(), legacyEdgeMaxStrain, legacyEdgeMaxCompression, ...membrane } } : {}),
     };
   }
+
+  /** Exact one-word initial displacement conversion; research mode only, pristine World.
+   * @param {ArrayLike<number>} x @param {ArrayLike<number>} [velocity] */
+  setInitialReferencePose(x, velocity) { setInitialReferencePose(this, x, velocity); }
+
+  /** Copied authority and projected views, or undefined on the original ABI. */
+  authoritativeState() { return referenceStateSnapshot(this); }
+
+  /** Separate native residual gates at one fixed tolerance, research mode only.
+   * @param {number} forceTolerance */
+  authoritativeResiduals(forceTolerance) { return referenceResiduals(this, forceTolerance); }
 
   /** Bit-exact state capture (see state.js). */
   snapshot() { return snapshotWorld(this); }

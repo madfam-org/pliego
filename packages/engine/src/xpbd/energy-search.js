@@ -5,17 +5,20 @@
 import { dihedral } from './dihedral.js';
 import { unwrap, termResidual, termProjector, TERM_STRING } from './implicit.js';
 import { hypot3 } from '../fastmath.js';
+import { projectReference, solverTarget } from './reference-state.js';
 import { beginIncrementSearch, finishIncrementSearch, initialiseIncrementSearch } from './increment-search.js';
 
 /** The actual per-substep implicit objective, in nJ. @param {any} w @param {Float64Array} x */
-export function implicitEnergy(w, x) {
+export function implicitEnergy(w, x, coordinates = 'absolute-position') {
+  const pose = coordinates === 'reference-displacement' ? projectReference(w, x) : x;
+  const target = coordinates === 'reference-displacement' ? solverTarget(w) : w.xt;
   let energy = 0;
   const { mesh, terms: T } = w, idt2 = 1 / (w.dt * w.dt);
   for (let v = 0; v < mesh.nV; v++) if (w.invMass[v]) {
-    for (let c = 0; c < 3; c++) energy += 0.5 * w.mass[v] * idt2 * (x[3 * v + c] - w.xt[3 * v + c]) ** 2;
+    for (let c = 0; c < 3; c++) energy += 0.5 * w.mass[v] * idt2 * (x[3 * v + c] - target[3 * v + c]) ** 2;
   }
   if (w.orthotropicMembrane) {
-    const membrane = w.orthotropicMembrane.energy(x);
+    const membrane = w.orthotropicMembrane.energy(x, coordinates);
     if (!Number.isFinite(membrane)) return Infinity;
     energy += membrane;
   } else for (let e = 0; e < mesh.nE; e++) {
@@ -25,19 +28,19 @@ export function implicitEnergy(w, x) {
   }
   for (let h = 0; h < mesh.nH; h++) {
     const o = 4 * h;
-    const angle = unwrap(w.theta[h], dihedral(x, mesh.hinges[o], mesh.hinges[o + 1], mesh.hinges[o + 2], mesh.hinges[o + 3], null));
+    const angle = unwrap(w.theta[h], dihedral(pose, mesh.hinges[o], mesh.hinges[o + 1], mesh.hinges[o + 2], mesh.hinges[o + 3], null));
     energy += 0.5 * w.hingeK[h] * ((angle - w.restTheta[h]) ** 2 + w.bendDamp * (angle - w.theta[h]) ** 2);
     if (w.driveOn[h]) energy += 0.5 * w.driveK[h] * w.handScale * (angle - w.driveTarget[h]) ** 2;
   }
   const r = [0, 0, 0], P = new Float64Array(9);
   for (let t = 0; t < T.count; t++) {
     if (!T.active[t] || !T.k[t]) continue;
-    termResidual(T, t, x, r);
+    termResidual(T, t, pose, r);
     if (T.mode[t] === TERM_STRING) {
       const d = Math.max(0, hypot3(r[0], r[1], r[2]) - T.len[t]);
       energy += 0.5 * T.k[t] * d * d;
     } else {
-      termProjector(T, t, x, P);
+      termProjector(T, t, pose, P);
       for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) energy += 0.5 * T.k[t] * r[a] * P[3 * a + b] * r[b];
     }
   }

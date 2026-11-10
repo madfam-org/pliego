@@ -10,6 +10,7 @@ import { HINGE_PANEL } from '../mesh.js';
 import { DOUBLE_DOUBLE_IDENTITY, add as addDD, rounded as roundedDD } from './double-double.js';
 import { accurateTrialTerms } from './accurate-membrane.js';
 import { UV_REFERENCE_IDENTITY, describeUVReference } from './uv-reference.js';
+import { stateCoordinates, solverPositions, solverTarget, projectReference, projectCurrentReference, validateReferenceBinding } from './reference-state.js';
 
 export const INCREMENT_SEARCH_IDENTITY = Object.freeze({ name: 'membrane-inertia-increment', version: 1, armijo: 1e-4, maxBacktracks: 20 });
 
@@ -74,11 +75,13 @@ export function validateIncrementDomain(w, x) {
 /** @param {any} search @param {any} w */
 export function beginIncrementSearch(search, w) {
   if (!search.increment) throw new Error('membrane-inertia-increment arithmetic identity changed');
+  const coordinates = stateCoordinates(w), x = solverPositions(w);
+  validateReferenceBinding(w);
   validateIncrementDomain(w, w.x);
-  if (!w.orthotropicMembrane.diagnostics(w.x).finite) throw new Error('membrane-inertia-increment: invalid starting membrane metric/arithmetic: ' + (w.orthotropicMembrane.work.arithmeticError ?? ''));
-  search.start.set(w.x); search.energy = implicitEnergy(w, w.x);
+  if (!w.orthotropicMembrane.diagnostics(x, coordinates).finite) throw new Error('membrane-inertia-increment: invalid starting membrane metric/arithmetic: ' + (w.orthotropicMembrane.work.arithmeticError ?? ''));
+  search.start.set(x); search.energy = implicitEnergy(w, x, coordinates);
   if (!Number.isFinite(search.energy)) throw new Error('membrane-inertia-increment: non-finite starting objective');
-  search._incrementObjective = { h: w.dt, mass: w.mass.slice(), inverse: w.invMass.slice(), target: w.xt.slice() };
+  search._incrementObjective = { h: w.dt, mass: w.mass.slice(), inverse: w.invMass.slice(), target: solverTarget(w).slice(), coordinates };
 }
 
 /** Neumaier accumulation; the scale is diagnostic, never an acceptance bound. */
@@ -89,15 +92,19 @@ function accumulator() {
 
 /** @param {any} search @param {any} w @param {Float64Array} gradient */
 export function finishIncrementSearch(search, w, gradient) {
-  const x = w.x, old = search.start, proposal = search.delta, counts = search.increment, objective = search._incrementObjective;
+  const objective = search._incrementObjective, coordinates = objective?.coordinates ?? stateCoordinates(w);
+  const target = coordinates === 'reference-displacement' ? w._ut : w.xt, x = coordinates === 'reference-displacement' ? w._u : w.x;
+  const old = search.start, proposal = search.delta, counts = search.increment;
   if (!counts || !objective) throw new Error('membrane-inertia-increment: begin is required');
   const reject = () => { x.set(old); search.rejected++; w.dirty = true; };
   try {
+    validateReferenceBinding(w);
+    if (stateCoordinates(w) !== objective.coordinates) throw new Error('membrane-inertia-increment: coordinates changed during search');
     if (w.dt !== objective.h) throw new Error('membrane-inertia-increment: timestep changed during search');
     for (let i = 0; i < w.mass.length; i++) if (!Object.is(w.mass[i], objective.mass[i]) || !Object.is(w.invMass[i], objective.inverse[i])) throw new Error('membrane-inertia-increment: mass changed during search');
-    for (let i = 0; i < w.xt.length; i++) if (!Object.is(w.xt[i], objective.target[i])) throw new Error('membrane-inertia-increment: target changed during search');
+    for (let i = 0; i < target.length; i++) if (!Object.is(target[i], objective.target[i])) throw new Error('membrane-inertia-increment: target changed during search');
     if (gradient.length !== x.length || !gradient.every(Number.isFinite)) throw new Error('membrane-inertia-increment: invalid starting gradient');
-    validateIncrementDomain(w, old);
+    validateIncrementDomain(w, coordinates === 'reference-displacement' ? projectReference(w, old) : old);
     for (let i = 0; i < x.length; i++) proposal[i] = x[i] - old[i];
     let last = null;
     for (let trial = 0; trial <= INCREMENT_SEARCH_IDENTITY.maxBacktracks; trial++) {
@@ -106,13 +113,14 @@ export function finishIncrementSearch(search, w, gradient) {
       // A nonfinite/collapsed membrane proposal is a rejected trial. Unsupported
       // finite nonplanar physics is a visible error, not silently omitted work.
       let valid = x.every(Number.isFinite);
-      validateIncrementDomain(w, old);
+      validateReferenceBinding(w);
+      validateIncrementDomain(w, coordinates === 'reference-displacement' ? projectReference(w, old) : old);
       if (valid) {
         // Check structural physics even for collapsed triangles; dihedral needs
         // a valid metric, so use the start only for this preliminary check.
         for (let i = 1; i < x.length; i += 3) if (x[i] !== 0) throw new Error('membrane-inertia-increment domain: nonplanar trial');
-        valid = w.orthotropicMembrane.diagnostics(x).finite;
-        if (valid) validateIncrementDomain(w, x);
+        valid = w.orthotropicMembrane.diagnostics(x, coordinates).finite;
+        if (valid) validateIncrementDomain(w, coordinates === 'reference-displacement' ? projectReference(w, x) : x);
       }
       const slope = accumulator(), inertiaR = accumulator(), inertiaL = accumulator();
       let zero = true, stationary = true;
@@ -123,14 +131,14 @@ export function finishIncrementSearch(search, w, gradient) {
         if (gradient[i] !== 0) stationary = false;
         slope.add(gradient[i] * d);
         inertiaR.add(0.5 * coefficient * d * d);
-        inertiaL.add(coefficient * (old[i] - w.xt[i]) * d);
+        inertiaL.add(coefficient * (old[i] - target[i]) * d);
       }
-      const details = valid ? w.orthotropicMembrane.energyDifferenceDetails(old, x) : null;
-      const dd = valid && w.opts.membraneArithmetic === 'double-double' ? accurateTrialTerms(w, old, x, gradient) : null;
+      const details = valid ? w.orthotropicMembrane.energyDifferenceDetails(old, x, coordinates) : null;
+      const dd = valid && w.opts.membraneArithmetic === 'double-double' ? accurateTrialTerms(w, old, x, gradient, target) : null;
       const s = dd?.slope ?? slope.value(), mr = details?.remainder ?? NaN, ir = dd?.inertiaRemainder ?? inertiaR.value(), il = dd?.inertiaLinear ?? inertiaL.value();
       const sum = accumulator(); sum.add(s); sum.add(mr); sum.add(ir);
       const deltaWords = dd && details?.valid ? addDD(addDD(dd.slopeWords, details.remainderWords), dd.inertiaWords) : null;
-      const delta = deltaWords ? roundedDD(deltaWords) : sum.value(), raw = valid ? implicitEnergy(w, x) - search.energy : NaN;
+      const delta = deltaWords ? roundedDD(deltaWords) : sum.value(), raw = valid ? implicitEnergy(w, x, coordinates) - search.energy : NaN;
       const finite = value => Number.isFinite(value) ? value : null;
       last = { decision: 'rejected', reason: valid ? 'non-descent' : 'invalid-trial', trials: trial + 1, alpha,
         slope: finite(s), delta: finite(delta), rawDifference: finite(raw), membraneDifference: finite(details?.difference),
@@ -161,6 +169,7 @@ export function finishIncrementSearch(search, w, gradient) {
     x.set(old); w.dirty = true; throw error;
   } finally {
     search._incrementObjective = null;
+    projectCurrentReference(w);
   }
 }
 

@@ -18,6 +18,7 @@
 import { BlockCholesky } from '../linalg/blockchol.js';
 import { dihedral } from './dihedral.js';
 import { hypot3 } from '../fastmath.js';
+import { projectReference } from './reference-state.js';
 
 /** Strain below which an edge switches to the compression model (hysteresis, see gradient()). */
 const MODEL_COMP_ENTER = 1e-4;
@@ -97,8 +98,8 @@ function addOuter(/** @type {BlockCholesky} */ ch, /** @type {number} */ s, /** 
  * Assemble H = M/Δt² + Σ k ∇C∇Cᵀ at positions x and factorise.
  * @param {any} w World @param {Float64Array} x
  */
-export function assembleAndFactor(w, x) {
-  assembleElastic(w, x, w.sys.ch);
+export function assembleAndFactor(w, x, coordinates = 'absolute-position') {
+  assembleElastic(w, x, w.sys.ch, false, coordinates);
   if (w.sys.ch) { w.sys.ch.factor(); w.factorCount++; }
 }
 
@@ -107,7 +108,8 @@ export function assembleAndFactor(w, x) {
  * @param {any} w @param {Float64Array} x @param {BlockCholesky|null} ch
  * @param {boolean} [currentOperator]
  */
-export function assembleElastic(w, x, ch, currentOperator = false) {
+export function assembleElastic(w, x, ch, currentOperator = false, coordinates = 'absolute-position') {
+  const pose = coordinates === 'reference-displacement' ? projectReference(w, x) : x;
   const S = w.sys;
   if (!ch) return;
   ch.clear();
@@ -123,16 +125,16 @@ export function assembleElastic(w, x, ch, currentOperator = false) {
   const E = w.mesh.edges, kM = w.kMem;
   const u = [0, 0, 0];
   if (w.orthotropicMembrane) {
-    w.orthotropicMembrane.addGaussNewtonBlocks(w, x, ch);
+    w.orthotropicMembrane.addGaussNewtonBlocks(w, x, ch, coordinates);
     // Retain geometric factor reuse independently of the discarded spring law.
     if (ch === S.ch) for (let e = 0; e < w.mesh.nE; e++) {
       const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
-      const L = hypot3(x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]) || 1;
-      for (let k = 0; k < 3; k++) w.factorDir[3 * e + k] = (x[b + k] - x[a + k]) / L;
+      const L = hypot3(pose[b] - pose[a], pose[b + 1] - pose[a + 1], pose[b + 2] - pose[a + 2]) || 1;
+      for (let k = 0; k < 3; k++) w.factorDir[3 * e + k] = (pose[b + k] - pose[a + k]) / L;
     }
   } else for (let e = 0; e < w.mesh.nE; e++) {
     const a = E[2 * e], b = E[2 * e + 1];
-    let dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
+    let dx = pose[3 * b] - pose[3 * a], dy = pose[3 * b + 1] - pose[3 * a + 1], dz = pose[3 * b + 2] - pose[3 * a + 2];
     const L = hypot3(dx, dy, dz) || 1;
     u[0] = dx / L; u[1] = dy / L; u[2] = dz / L;
     // model stiffness of the branch the edge is on. Compression is modelled at
@@ -152,7 +154,7 @@ export function assembleElastic(w, x, ch, currentOperator = false) {
   for (let h = 0; h < w.mesh.nH; h++) {
     const k = w.hingeK[h] * (1 + w.bendDamp) + (w.driveOn[h] ? w.driveK[h] * w.handScale : 0);
     if (k === 0) continue;
-    dihedral(x, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
+    dihedral(pose, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
     for (let i = 0; i < 4; i++) addOuter(ch, S.diagSlot[Hg[4 * h + i]], k, G12, 3 * i, G12, 3 * i);
     let q = 0;
     for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) addOuter(ch, S.hingeSlot[6 * h + q++], k, G12, 3 * i, G12, 3 * j);
@@ -162,7 +164,7 @@ export function assembleElastic(w, x, ch, currentOperator = false) {
   for (let t = 0; t < T.count; t++) {
     if (!T.active[t] || T.k[t] === 0) continue;
     if (currentOperator && T.mode[t] === TERM_STRING && !w._stringTaut[t]) continue;
-    termProjector(T, t, x, P);
+    termProjector(T, t, pose, P);
     const k = T.k[t];
     const s0 = T.start[t], s1 = T.start[t + 1];
     for (let i = s0; i < s1; i++) {
@@ -213,12 +215,13 @@ export function termResidual(T, t, x, r) {
  * (`w.thetaPred`), membrane directions (`w.edgeDir`) and hinge gradients (`w.hingeGrad`) for PCG.
  * @param {any} w World @param {Float64Array} x @param {Float64Array} g
  */
-export function gradient(w, x, g) {
+export function gradient(w, x, g, coordinates = 'absolute-position') {
+  const pose = coordinates === 'reference-displacement' ? projectReference(w, x) : x;
   const E = w.mesh.edges, kM = w.kMem, L0 = w.mesh.edgeLen, U = w.edgeDir, HG = w.hingeGrad;
-  if (w.orthotropicMembrane) w.orthotropicMembrane.addGradient(x, g);
+  if (w.orthotropicMembrane) w.orthotropicMembrane.addGradient(x, g, coordinates);
   else for (let e = 0; e < w.mesh.nE; e++) {
     const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
-    const dx = x[b] - x[a], dy = x[b + 1] - x[a + 1], dz = x[b + 2] - x[a + 2];
+    const dx = pose[b] - pose[a], dy = pose[b + 1] - pose[a + 1], dz = pose[b + 2] - pose[a + 2];
     const L = hypot3(dx, dy, dz);
     if (L === 0) continue;
     U[3 * e] = dx / L; U[3 * e + 1] = dy / L; U[3 * e + 2] = dz / L;
@@ -236,7 +239,7 @@ export function gradient(w, x, g) {
   }
   const Hg = w.mesh.hinges;
   for (let h = 0; h < w.mesh.nH; h++) {
-    const raw = dihedral(x, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
+    const raw = dihedral(pose, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
     const th = unwrap(w.theta[h], raw);
     w.thetaPred[h] = th;
     HG.set(G12, 12 * h);
@@ -254,7 +257,7 @@ export function gradient(w, x, g) {
   const P = new Float64Array(9);
   for (let t = 0; t < T.count; t++) {
     if (!T.active[t] || T.k[t] === 0) continue;
-    termResidual(T, t, x, r);
+    termResidual(T, t, pose, r);
     let fx, fy, fz;
     if (T.mode[t] === TERM_STRING) {
       const L = hypot3(r[0], r[1], r[2]);
@@ -263,7 +266,7 @@ export function gradient(w, x, g) {
       const s = (T.k[t] * ex) / L;
       fx = s * r[0]; fy = s * r[1]; fz = s * r[2];
     } else {
-      termProjector(T, t, x, P);
+      termProjector(T, t, pose, P);
       const k = T.k[t];
       fx = k * (P[0] * r[0] + P[1] * r[1] + P[2] * r[2]);
       fy = k * (P[3] * r[0] + P[4] * r[1] + P[5] * r[2]);

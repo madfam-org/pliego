@@ -5,12 +5,14 @@
  * identical factorisation, so a restored world replays bit-identically).
  */
 import { assembleAndFactor } from './implicit.js';
+import { referenceStateSnapshot, prepareReferenceRestore, restoreReferenceState } from './reference-state.js';
 import { getIncrementSearchSnapshot, restoreIncrementSearchSnapshot, INCREMENT_SEARCH_IDENTITY, validateMembraneArithmeticIdentity } from './increment-search.js';
 
 /** @param {any} w */
 export function snapshotWorld(w) {
-  const T = w.terms;
+  const T = w.terms, referenceState = referenceStateSnapshot(w);
   return {
+    ...(referenceState ? { referenceState } : {}),
     x: Float64Array.from(w.x), v: Float64Array.from(w.v), theta: Float64Array.from(w.theta),
     restTheta: Float64Array.from(w.restTheta), memory: Uint8Array.from(w.memory), hingeK: Float64Array.from(w.hingeK), driveK: Float64Array.from(w.driveK), torn: w.torn, edgeComp: Uint8Array.from(w.edgeComp),
     driveOn: Uint8Array.from(w.driveOn), driveTarget: Float64Array.from(w.driveTarget),
@@ -38,6 +40,7 @@ export function snapshotWorld(w) {
 /** Restore a state captured by snapshotWorld() (bit-exact, including the factorisation). @param {any} w @param {any} s */
 export function restoreWorld(w, s) {
   validateMembraneArithmeticIdentity(w);
+  const preparedReference = prepareReferenceRestore(w, s);
   if (!!w.orthotropicMembrane !== !!s.membrane || (w.orthotropicMembrane && s.membrane.signature !== w.orthotropicMembraneSignature)) throw new Error('Orthotropic membrane: snapshot model/reference/material convention mismatch');
   // Historical snapshots without arithmetic metadata mean total-energy. Bind
   // policy AND diagnostics before touching any World/search/factor state.
@@ -52,6 +55,7 @@ export function restoreWorld(w, s) {
   if (increment && preparedSearch) preparedSearch.increment = structuredClone(w.energySearch.increment);
   if (preparedSearch) restoreIncrementSearchSnapshot(preparedSearch, s.energySearch);
   const preparedIncrement = increment ? getIncrementSearchSnapshot(preparedSearch) : null;
+  restoreReferenceState(w, preparedReference);
   w.x.set(s.x); w.v.set(s.v); w.theta.set(s.theta); w.restTheta.set(s.restTheta); w.memory.set(s.memory);
   w.hingeK.set(s.hingeK); w.driveK.set(s.driveK); w.torn = s.torn;
   w.fixedTarget.set(s.fixedTarget); w.userForce.set(s.userForce);
@@ -78,7 +82,7 @@ export function restoreWorld(w, s) {
     w.edgeComp.set(s.factor.edgeComp);
     const f = s.factor;
     w.driveOn.set(f.driveOn); T.active.set(f.active); T.k.set(f.k); T.mode.set(f.mode); T.verts.set(f.verts); T.c.set(f.c); T.dir.set(f.dir); T.len.set(f.len);
-    assembleAndFactor(w, f.x);
+    assembleAndFactor(w, f.x, f.coordinates);
     w._factorState = copyFactor(f); // the World refills its own buffers; the snapshot stays as it was
   }
   w.driveOn.set(s.driveOn); w.driveTarget.set(s.driveTarget);
@@ -99,7 +103,7 @@ export function restoreWorld(w, s) {
 /** A deep copy of a World's factorisation inputs (the World reuses its buffers). @param {any} f */
 function copyFactor(f) {
   return {
-    x: Float64Array.from(f.x), driveOn: Uint8Array.from(f.driveOn), edgeComp: Uint8Array.from(f.edgeComp), active: Uint8Array.from(f.active),
+    x: Float64Array.from(f.x), ...(f.coordinates ? { coordinates: f.coordinates } : {}), driveOn: Uint8Array.from(f.driveOn), edgeComp: Uint8Array.from(f.edgeComp), active: Uint8Array.from(f.active),
     k: Float64Array.from(f.k), mode: Uint8Array.from(f.mode), verts: Int32Array.from(f.verts), c: Float64Array.from(f.c), dir: Float64Array.from(f.dir), len: Float64Array.from(f.len),
   };
 }

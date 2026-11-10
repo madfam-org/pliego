@@ -6,7 +6,7 @@
  */
 import * as D from './double-double.js';
 import { hypot2, hypot3 } from '../fastmath.js';
-import { referenceKinematics, referenceMetrics, referenceCoefficient, referenceRotate } from './uv-reference.js';
+import { referenceKinematics, referenceMetrics, referenceCoefficient, referenceRotate, validateMembraneCoordinates } from './uv-reference.js';
 
 export function accurateScratch() {
   return { arithmetic: 'double-double', arithmeticError: '', ddA: new Float64Array(6), ddB: new Float64Array(6),
@@ -30,11 +30,12 @@ function tangents(e, x, ids) {
 function dot(a, b) { return D.sum(a.map((v, i) => D.mul(v, b[i]))); }
 /** @param {Float64Array} a @param {number} n */
 function words(a, n) { return Array.from({ length: n }, (_, i) => D.get(a, i)); }
-/** @param {any} e @param {ArrayLike<number>} x @param {ArrayLike<number>} ids @param {any} k */
-export function accurateKinematics(e, x, ids, k) {
+/** @param {any} e @param {ArrayLike<number>} x @param {ArrayLike<number>} ids @param {any} k @param {string} [coordinates] */
+export function accurateKinematics(e, x, ids, k, coordinates = 'absolute-position') {
+  validateMembraneCoordinates(coordinates, !!e.reference, 'double-double');
   k.arithmeticError = '';
   try {
-    const reference = e.reference ? referenceKinematics(e.reference, x, ids) : null;
+    const reference = e.reference ? referenceKinematics(e.reference, x, ids, coordinates) : null;
     const { a, b } = reference ?? tangents(e, x, ids), aa = dot(a, a), bb = dot(b, b), ab = dot(a, b);
     const strain = reference ? reference.strain : [D.scale(D.sub(aa, [1, 0]), 0.5), D.scale(D.sub(bb, [1, 0]), 0.5), ab];
     const q = e.Q, stress = [D.add(D.scale(strain[0], q[0]), D.scale(strain[1], q[2])),
@@ -70,11 +71,11 @@ export function accurateKinematics(e, x, ids, k) {
 export function accurateGradient(e, k, col) {
   return D.scale(D.sum([0, 1, 2].map(i => D.mul(D.get(k.ddJ, 9 * i + col), D.get(k.ddStress, i)))), e.volume);
 }
-/** @param {any} membrane @param {ArrayLike<number>} x */
-export function accurateEnergy(membrane, x) {
+/** @param {any} membrane @param {ArrayLike<number>} x @param {string} [coordinates] */
+export function accurateEnergy(membrane, x, coordinates = 'absolute-position') {
   let value = /** @type {D.DD} */ ([0, 0]);
   for (let t = 0; t < membrane.mesh.nT; t++) {
-    if (!accurateKinematics(membrane.elements[t], x, membrane.mesh.tris.subarray(3 * t, 3 * t + 3), membrane.work)) return Infinity;
+    if (!accurateKinematics(membrane.elements[t], x, membrane.mesh.tris.subarray(3 * t, 3 * t + 3), membrane.work, coordinates)) return Infinity;
     value = D.add(value, D.get(membrane.work.ddEnergy, 0));
   }
   return D.rounded(value);
@@ -95,14 +96,14 @@ export function accurateGeometric(e, k, i, j) {
     D.mul(stress[2], D.add(D.mul(a, d), D.mul(b, c)))]), e.volume);
 }
 /** Add all element contributions in two words before the binary64 public gradient.
- * @param {any} membrane @param {ArrayLike<number>} x @param {Float64Array} g */
-export function addAccurateGradient(membrane, x, g) {
+ * @param {any} membrane @param {ArrayLike<number>} x @param {Float64Array} g @param {string} [coordinates] */
+export function addAccurateGradient(membrane, x, g, coordinates = 'absolute-position') {
   const values = new Float64Array(2 * g.length);
   for (let i = 0; i < g.length; i++) values[2 * i] = g[i];
   const k = membrane.work;
   for (let t = 0; t < membrane.mesh.nT; t++) {
     const e = membrane.elements[t], ids = membrane.mesh.tris.subarray(3 * t, 3 * t + 3);
-    if (!accurateKinematics(e, x, ids, k)) throw new Error('Double-double membrane: invalid metric or arithmetic domain: ' + k.arithmeticError);
+    if (!accurateKinematics(e, x, ids, k, coordinates)) throw new Error('Double-double membrane: invalid metric or arithmetic domain: ' + k.arithmeticError);
     for (let i = 0; i < 3; i++) for (let r = 0; r < 3; r++) {
       const index = 3 * ids[i] + r; D.put(values, index, D.add(D.get(values, index), accurateGradient(e, k, 3 * i + r)));
     }
@@ -110,13 +111,13 @@ export function addAccurateGradient(membrane, x, g) {
   for (let i = 0; i < g.length; i++) g[i] = D.rounded(D.get(values, i));
 }
 /** Same J^T Q J operator as sparse assembly; masks follow the native contract.
- * @param {any} membrane @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] */
-export function addAccurateTimes(membrane, x, p, out, invMass) {
+ * @param {any} membrane @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] @param {string} [coordinates] */
+export function addAccurateTimes(membrane, x, p, out, invMass, coordinates = 'absolute-position') {
   const values = new Float64Array(2 * out.length), k = membrane.work;
   for (let i = 0; i < out.length; i++) values[2 * i] = out[i];
   for (let t = 0; t < membrane.mesh.nT; t++) {
     const e = membrane.elements[t], ids = membrane.mesh.tris.subarray(3 * t, 3 * t + 3);
-    if (!accurateKinematics(e, x, ids, k)) throw new Error('Double-double membrane: invalid metric or arithmetic domain: ' + k.arithmeticError);
+    if (!accurateKinematics(e, x, ids, k, coordinates)) throw new Error('Double-double membrane: invalid metric or arithmetic domain: ' + k.arithmeticError);
     const z = [[], [], []];
     for (let i = 0; i < 3; i++) if (!invMass || invMass[ids[i]]) for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) z[c].push(D.scale(D.get(k.ddJ, 9 * c + 3 * i + r), p[3 * ids[i] + r]));
     const j = z.map(D.sum), q = e.Q;
@@ -130,8 +131,9 @@ export function addAccurateTimes(membrane, x, p, out, invMass) {
   for (let i = 0; i < out.length; i++) out[i] = D.rounded(D.get(values, i));
 }
 /** Carry exact endpoint TwoDiff words through the base and remainder.
- * @param {any} membrane @param {ArrayLike<number>} before @param {ArrayLike<number>} after */
-export function accurateDifference(membrane, before, after) {
+ * @param {any} membrane @param {ArrayLike<number>} before @param {ArrayLike<number>} after @param {string} [coordinates] */
+export function accurateDifference(membrane, before, after, coordinates = 'absolute-position') {
+  validateMembraneCoordinates(coordinates, membrane.elements.every(e => !!e.reference), membrane.work.arithmetic);
   const k = { ...membrane.work };
   for (const [key, value] of Object.entries(k)) if (value instanceof Float64Array) k[key] = value.slice();
   let total = /** @type {D.DD} */ ([0, 0]), linear = /** @type {D.DD} */ ([0, 0]), remainder = /** @type {D.DD} */ ([0, 0]);
@@ -140,7 +142,7 @@ export function accurateDifference(membrane, before, after) {
   try {
     for (let t = 0; t < membrane.mesh.nT; t++) {
       const e = membrane.elements[t], ids = membrane.mesh.tris.subarray(3 * t, 3 * t + 3);
-      if (!accurateKinematics(e, after, ids, k) || !accurateKinematics(e, before, ids, k)) return invalid();
+      if (!accurateKinematics(e, after, ids, k, coordinates) || !accurateKinematics(e, before, ids, k, coordinates)) return invalid();
       const a = words(k.ddA, 3), b = words(k.ddB, 3), stress = words(k.ddStress, 3);
       const displacement = Array.from(ids, id => [0, 1, 2].map(r => D.twoSum(after[3 * id + r], -before[3 * id + r])));
       const da = [], db = [];
@@ -172,8 +174,8 @@ export function accurateDifference(membrane, before, after) {
 /** DD selected objective evaluation; World predictor/inertia gradient and the
  * coefficient's native association stay unchanged. TwoDiff endpoint work avoids
  * mixing a rounded step slope with an exact-endpoint membrane remainder.
- * @param {any} w @param {Float64Array} before @param {Float64Array} after @param {Float64Array} gradient */
-export function accurateTrialTerms(w, before, after, gradient) {
+ * @param {any} w @param {Float64Array} before @param {Float64Array} after @param {Float64Array} gradient @param {Float64Array} [target] */
+export function accurateTrialTerms(w, before, after, gradient, target = w.xt) {
   let slope = /** @type {D.DD} */ ([0, 0]), inertia = /** @type {D.DD} */ ([0, 0]), linear = /** @type {D.DD} */ ([0, 0]);
   let slopeMagnitude = 0, inertiaMagnitude = 0;
   const idt2 = 1 / (w.dt * w.dt);
@@ -181,7 +183,7 @@ export function accurateTrialTerms(w, before, after, gradient) {
     const d = D.twoSum(after[i], -before[i]), coefficient = w.mass[Math.floor(i / 3)] * idt2;
     const work = D.scale(d, gradient[i]), quadratic = D.scale(D.scale(D.mul(d, d), coefficient), .5);
     slope = D.add(slope, work); inertia = D.add(inertia, quadratic);
-    linear = D.add(linear, D.scale(D.mul(D.twoSum(before[i], -w.xt[i]), d), coefficient));
+    linear = D.add(linear, D.scale(D.mul(D.twoSum(before[i], -target[i]), d), coefficient));
     slopeMagnitude += Math.abs(D.rounded(work)); inertiaMagnitude += Math.abs(D.rounded(quadratic));
   }
   return { slope: D.rounded(slope), inertiaRemainder: D.rounded(inertia), inertiaLinear: D.rounded(linear), slopeWords: slope, inertiaWords: inertia, slopeMagnitude, inertiaMagnitude };

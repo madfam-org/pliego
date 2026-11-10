@@ -1,0 +1,136 @@
+{
+  "schema": "pliego-contact-variant-comparison/0.1",
+  "recordedAt": "2026-11-10T08:02:21.365Z",
+  "comparisonSHA256": "4efab44c7b1df30bc4d6783963b9741e6a2c9d8f08dbf6fa631079c541b745fa",
+  "sources": {
+    "old": {
+      "git": "ba6dd592de4e0ae676e88adb6a4b9e81d917e843",
+      "dirty": false,
+      "engine": "git:b36347cc90244e0deb0a694610cd434f06a03d3c",
+      "engineTreeSHA256": "58ea740b6cba7ba7f12a5867c661612928ce7fc74d3bda3e5c500aaf9f9698d3",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "e90ce6226d2d8c09e776dee64eddb96df293232d22597df8d1fe068c53c40118",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    },
+    "control": {
+      "git": "ba6dd592de4e0ae676e88adb6a4b9e81d917e843",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "e4f3f6e8a333ca99f6935b749a71f16dc87b1c15529feb300a8145e58be82ab2",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "e90ce6226d2d8c09e776dee64eddb96df293232d22597df8d1fe068c53c40118",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    },
+    "candidate": {
+      "git": "ba6dd592de4e0ae676e88adb6a4b9e81d917e843",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "e4f3f6e8a333ca99f6935b749a71f16dc87b1c15529feb300a8145e58be82ab2",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "e90ce6226d2d8c09e776dee64eddb96df293232d22597df8d1fe068c53c40118",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    },
+    "repeat": {
+      "git": "ba6dd592de4e0ae676e88adb6a4b9e81d917e843",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "e4f3f6e8a333ca99f6935b749a71f16dc87b1c15529feb300a8145e58be82ab2",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "e90ce6226d2d8c09e776dee64eddb96df293232d22597df8d1fe068c53c40118",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    }
+  },
+  "unchangedControlCases": 1,
+  "candidateRepeatCases": 1,
+  "comparison": "all recorded result fields except enumerated wall/CPU timings and their physics8ms gate; controls unchanged, candidate repeat exact; changed contact model judged by separate retained gates",
+  "sourceScope": "same harness and input fingerprints; old engine identity retained in source.engine and engineTreeSHA256; fresh control/candidate/repeat share git and engine bytes",
+  "changes": [
+    {
+      "model": "active-leaf",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "barrierContact": true,
+        "barrierIterations": 8,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true,
+        "contactBroadPhase": "bvh",
+        "edgeEdgeMollification": "surface-guarded",
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "sameTrajectoryAsControl": false,
+      "control": {
+        "trajectorySHA256": "d2021a2ce117d7841f88afe44a2810ebc089553237c6d330f2ced8f30667042d",
+        "coupledContact": {
+          "steps": 672,
+          "unconverged": 13,
+          "iterations": 2239,
+          "cgTotal": 0,
+          "directSolves": 2239,
+          "nonlocalFallbacks": 0,
+          "linearFailures": 0,
+          "backtracks": 17,
+          "rejected": 0,
+          "maximumEndResidual": 511.8825033179289,
+          "maximumInitialAdjustment": 3.552713678800501e-14
+        },
+        "gates": {
+          "numerical1Percent": true,
+          "numericalPoint1Percent": true,
+          "physics8ms": false,
+          "restingBlockVertexThickness": true,
+          "endpointProgress": true,
+          "allSolverStepsConverged": false,
+          "physicalMaterialValidation": "not measured by this booklet benchmark",
+          "browserInteraction": "requires separate browser/device acceptance"
+        },
+        "activeStepP95Ms": 296.33461699999975
+      },
+      "candidate": {
+        "trajectorySHA256": "0d5254f362cdf0ff4501d5e20e09127c8baa88357c4948ddc09fb969c785c9f3",
+        "coupledContact": {
+          "steps": 672,
+          "unconverged": 5,
+          "iterations": 2220,
+          "cgTotal": 0,
+          "directSolves": 2220,
+          "nonlocalFallbacks": 0,
+          "linearFailures": 0,
+          "backtracks": 1,
+          "rejected": 0,
+          "maximumEndResidual": 511.88250331798235,
+          "maximumInitialAdjustment": 3.552713678800501e-14
+        },
+        "mollification": {
+          "evaluations": 3548,
+          "activeEdges": 192147,
+          "smoothedEdges": 26953,
+          "uncoveredEdges": 2273,
+          "parallelEdges": 0,
+          "curvatureRows": 332789
+        },
+        "gates": {
+          "numerical1Percent": true,
+          "numericalPoint1Percent": true,
+          "physics8ms": false,
+          "restingBlockVertexThickness": true,
+          "endpointProgress": true,
+          "allSolverStepsConverged": false,
+          "physicalMaterialValidation": "not measured by this booklet benchmark",
+          "browserInteraction": "requires separate browser/device acceptance"
+        },
+        "activeStepP95Ms": 295.3223290000001
+      }
+    }
+  ]
+}

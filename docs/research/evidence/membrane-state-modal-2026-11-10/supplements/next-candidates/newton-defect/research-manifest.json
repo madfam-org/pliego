@@ -1,0 +1,58 @@
+{
+  "schema": "pliego-first-accepted-defect-freeze/1",
+  "postHocDiagnostic": true,
+  "acceptedCapture": false,
+  "repoGit": "3d778abc179988e1c1a31b43d8048aa6a08d00b1",
+  "checkoutClean": true,
+  "files": [
+    {
+      "file": "diagnose-first-accepted.py",
+      "bytes": 12342,
+      "sha256": "f0414297c920a8d17f3224b5d7d14f5fe3ff691d8d0ccf90219baafd1ac5b5b6"
+    },
+    {
+      "file": "diagnosis-plan.json",
+      "bytes": 1506,
+      "sha256": "6e63032de85a29e4a590fd4c62bfd53d8137e472ae3a382795c01568976a57c2"
+    },
+    {
+      "file": "diagnosis.log",
+      "bytes": 3138,
+      "sha256": "9b303237fce9b70a44fbe81650332dfabba813914b5cbae1f61a810a7eaaa8e8"
+    },
+    {
+      "file": "diagnosis.terminal.json",
+      "bytes": 1147,
+      "sha256": "d952036582f6b0221665fef72888f0dc8d51ee62ee944d821d3c3d7bb8bd1330"
+    },
+    {
+      "file": "first-accepted-defect.json",
+      "bytes": 963867,
+      "sha256": "f95e63c2591a09c65703bb9622d9147db3d5f14c165968232f2672b7733f93f6"
+    },
+    {
+      "file": "interpretation.json",
+      "bytes": 17140,
+      "sha256": "8e6c19406ba86a9732c3ec8f8d9a5ad1735dc2020c19c1597aeea362138fe209"
+    },
+    {
+      "file": "research-memo.md",
+      "bytes": 5763,
+      "sha256": "b9f8f3dacb90784f869e48d0097f9b54581f1ae21bc9e450a52cb61f8480f731"
+    }
+  ],
+  "selection": "first-accepted all24role references\u21924 identical-state/reference/M/h unique events; one shared starting elastic linearization",
+  "calculation": "unchanged exactFraction oracle; nativeC and realM separate; complete g1=L+K+R identity plus nominal/endpoint-rounding split",
+  "interpretation": "omitted geometric curvature dominates these first direct/fullalpha updates; exact-curvature direction credible next investigation, no predicted force pass or counterfactual solve",
+  "scopeLimits": [
+    "no later-PCG or full-trajectory attribution",
+    "I4/16 firstevent endpoints are not completed substep endpoints",
+    "same-state duplicate references are not independent samples",
+    "publicforce gate remains separate",
+    "exact start SPD bound is not all-iterate/factorization guarantee"
+  ],
+  "noWorldOrReplayCalls": true,
+  "noRepositoryEdits": true,
+  "currentCaptureInputsBudgetsUntouched": true,
+  "globalGoalRemainsActive": true
+}

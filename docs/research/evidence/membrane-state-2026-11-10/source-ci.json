@@ -1,0 +1,104 @@
+{
+  "schema": "pliego-state-source-ci-recovery/1",
+  "freshRetrieval": true,
+  "originalTemporaryCiProofAvailable": false,
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "pr": {
+    "headRefOid": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+    "isDraft": true,
+    "state": "OPEN",
+    "url": "https://github.com/madfam-org/pliego/pull/69"
+  },
+  "checks": [
+    {
+      "link": "https://github.com/madfam-org/pliego/runs/129991544348",
+      "name": "CodeQL",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862133215/job/129990932953",
+      "name": "Analyze (python)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862133215/job/129990932886",
+      "name": "Analyze (javascript-typescript)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777355",
+      "name": "Kernel (ruff, pytest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777722",
+      "name": "Org quality gates (byte and file-size)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777758",
+      "name": "Repository guards and their tests",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777804",
+      "name": "Stock cards (derived physics up to date)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777852",
+      "name": "Web (node --test)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777718",
+      "name": "Production manifests (kustomize render, schema validation)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777848",
+      "name": "Secret scan (full history)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862133215/job/129990778412",
+      "name": "Detect languages",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132870/job/129990777598",
+      "name": "Docker image (build, no push) and in-container smoke",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777712",
+      "name": "Doctrine compliance (AST level, commons manifests)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990778046",
+      "name": "Agent docs and boundary markers",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777799",
+      "name": "Engine (node --test, JSDoc type check)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777850",
+      "name": "API (pytest, OpenAPI drift)",
+      "state": "SUCCESS"
+    }
+  ],
+  "all16Successful": true,
+  "engineTests": 303,
+  "webTests": 123,
+  "sourceAndDeclarationModules": 52,
+  "packageFiles": 108,
+  "unpackedBytes": 719059,
+  "packedBytes": 220564,
+  "engineJobLogSHA256": "dc4d8b9e3082c6268b00e850113f852be66d1af558730be198aff44691306857",
+  "engineJob": "https://github.com/madfam-org/pliego/actions/runs/42862132957/job/129990777799",
+  "scope": "same authoritative source-commit CI retrieved afresh; no merge, deployment or publication"
+}

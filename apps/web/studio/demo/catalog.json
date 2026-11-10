@@ -127,6 +127,23 @@
      "unit": "°"
     }
    ]
+  },
+  {
+   "slug": "booklet-reading",
+   "document": "../books/eight-page.fold",
+   "title": {
+    "en": "Eight-page booklet",
+    "es": "Cuadernillo de ocho páginas",
+    "fr": "Livret de huit pages",
+    "pt": "Livreto de oito páginas"
+   },
+   "summary": {
+    "en": "Four native paper leaves. Open in paper mode to read forward and backward.",
+    "es": "Cuatro hojas nativas de papel. Abre el modo papel para leer en ambos sentidos.",
+    "fr": "Quatre feuillets natifs. Ouvrez le mode papier pour lire dans les deux sens.",
+    "pt": "Quatro folhas nativas. Abra o modo papel para ler nos dois sentidos."
+   },
+   "parameters": []
   }
  ]
 }

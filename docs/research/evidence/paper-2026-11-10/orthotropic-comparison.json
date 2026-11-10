@@ -1,0 +1,210 @@
+{
+  "schema": "pliego-orthotropic-audit-comparison/0.1",
+  "recordedAt": "2026-11-10T11:44:30.010Z",
+  "comparisonSHA256": "6a70ed611b1ebc26974a8c6827cc14fb1ca47821628ddcc74a6e4a64b850177f",
+  "inputSHA256": [
+    "4c15d9e2fe899443d970ad287f1f9f0bc84993d788e4541f77ce7a5d727b4feb",
+    "8cab2671caa7b4e438fa98258b4897c4441275845c3d08dd3d8b8627fca0ec9e"
+  ],
+  "source": {
+    "engineFiles": [
+      {
+        "path": "collision/accd.js",
+        "sha256": "8f7a942c2c42591172720cc13c84eaa813ab9f4f6fe67de3c3084c4ab9ab74ae"
+      },
+      {
+        "path": "collision/barrier.js",
+        "sha256": "e6d4eae996cc0e5e970230c0ab5ae19ae4e5dbb7f72bd60fb170d139111310b4"
+      },
+      {
+        "path": "collision/bounds-tree.js",
+        "sha256": "da8895327f9d71990d1f38a0f0dd0e7592e591bd0b743f9c03b1900e77d781e3"
+      },
+      {
+        "path": "collision/distance.js",
+        "sha256": "d0cd28674bc018eb5078dea271a53c7dd2cda7d2d26cc1af562e0a6d009be2ed"
+      },
+      {
+        "path": "collision/edge-mollifier.js",
+        "sha256": "92ecfc693115252d16952ee1b6a9779d4b4c1df03e24f608b4455ac5d4b0c088"
+      },
+      {
+        "path": "collision/motion-guard.js",
+        "sha256": "efaf2861ee434db6cb19fa403ea1ec8660352b5f8ec550597e088b47e2f7d8dc"
+      },
+      {
+        "path": "collision/surface-coverage.js",
+        "sha256": "ff917c18ede134c7c13b4732f4ccb0973fb174dab13e1738a9f96b605b5dbd61"
+      },
+      {
+        "path": "collision/swept.js",
+        "sha256": "3dccfbaf62f97e9ece10edce0833351864d43a78dfae1dd19f4f586836f90718"
+      },
+      {
+        "path": "collision/wasm-bounds-code.js",
+        "sha256": "0254329b8d1304d293340ad382481ce6372489b223a46f11385768a6aeebe713"
+      },
+      {
+        "path": "collision/wasm-bounds-tree.js",
+        "sha256": "56fe95de452169fcdfc5f5a02553f45eebf236092f615b491e3dfb9afcac6fef"
+      },
+      {
+        "path": "constants.js",
+        "sha256": "ba82c79e86505b83e4ad3586412f6f65be287f853c8e154ccee3525a7f8384cc"
+      },
+      {
+        "path": "digest.js",
+        "sha256": "6324da4ba0fbcaf606e21594a4853531c7e2d5e8c8895da8a805445b9f0559ab"
+      },
+      {
+        "path": "docrules.js",
+        "sha256": "49ea71a917903cdcbcdf790fe59c0fdd88aa8a53bc79f03c97ab4bfa066080d4"
+      },
+      {
+        "path": "document.js",
+        "sha256": "e7ace1a75773c01c2d723a8f1e89fd4d23a139e069c6c18fbe11684064341b3f"
+      },
+      {
+        "path": "drivers.js",
+        "sha256": "386ed1e20465ad00d02ffb7dcd7c73188f3a4baf000bdd2ce85401a13e45a30c"
+      },
+      {
+        "path": "fastmath.js",
+        "sha256": "f16c1dbb9ec70ac3a533b9965ef7e1d5ea579b2f9ee8eb7223fa288e87b1fe7d"
+      },
+      {
+        "path": "gates.js",
+        "sha256": "23b2581a15fc63fed9e7aa95613d806e5d2edba2cb63ac45ca4a9bb7a3a493c5"
+      },
+      {
+        "path": "geom.js",
+        "sha256": "e4573e28b1c086ea8517639e7f510c5ea23bd7e0d3f9d19df02467c8185ef2c3"
+      },
+      {
+        "path": "index.js",
+        "sha256": "649271ca75c134eddf458d839a3d2da80946887c68d0f7029f04f06c503d2844"
+      },
+      {
+        "path": "keyed.js",
+        "sha256": "aa34c6332b3e155384608a51deb438d572ec8457aff248a27c9e3731adc7799f"
+      },
+      {
+        "path": "kinematics/closedform.js",
+        "sha256": "efc6361b6d2a0f7e231e37b64fc897536ddbd4163440286c88c9d34671135400"
+      },
+      {
+        "path": "kinematics/facetree.js",
+        "sha256": "42b1edce8af1456a1e6e5c5998dcfa7c8334aabf9f75eeb40c26ae1f7559d1af"
+      },
+      {
+        "path": "kinematics/index.js",
+        "sha256": "4e42195b27333b1062fcdfa69e76068f765fcb21185d692903e18713cbe82624"
+      },
+      {
+        "path": "kinematics/linalg.js",
+        "sha256": "036fb00907a8e0418e5a1fce5bc10e0ab334d1676b056ab42d4b25c70cd3c011"
+      },
+      {
+        "path": "kinematics/program.js",
+        "sha256": "70dcb91733dd253eebfabee88836b9301e692cd115894494c98f04c5af0508b9"
+      },
+      {
+        "path": "linalg/blockchol.js",
+        "sha256": "2759ae3e4f1d787b7bbc5495210bee19d0a40d579a500e75a823a1d00ad1e46e"
+      },
+      {
+        "path": "material.js",
+        "sha256": "d7967d7c20f1485d299363fc470ca8e12a9f962bae8f2b2f9f23fbd905a13f88"
+      },
+      {
+        "path": "mesh.js",
+        "sha256": "354a9ecbe6276a36cdda5e659021eef263074da91bb6a8f0f1be25990b0ee8a4"
+      },
+      {
+        "path": "triangulate.js",
+        "sha256": "0e29f6c96221b24077e27a5e2674344ad9e3cb9bb7e379d65ff514b08047265f"
+      },
+      {
+        "path": "xpbd/air.js",
+        "sha256": "889b3da6c6c46011750e0b75238177b300d62b34b0005148420d28fa571f40e4"
+      },
+      {
+        "path": "xpbd/contact.js",
+        "sha256": "c42e2f61431c9a7919e9ee74aa4b991b869846dfb75148b0f974c9571e704f92"
+      },
+      {
+        "path": "xpbd/coupled-contact.js",
+        "sha256": "cc96dd7e1d95e60e4180fe3887f1882d0f36f5eb41114135ca8685193d974ba7"
+      },
+      {
+        "path": "xpbd/dihedral.js",
+        "sha256": "ed0142a5a2b450029b96a4c7c0ddd0200dec60d2fb7fea143cb96d896db7377c"
+      },
+      {
+        "path": "xpbd/edgecontact.js",
+        "sha256": "78cd94005c701a0eefb270b89b420b191315d1b72b1fda69628250516cde4dd5"
+      },
+      {
+        "path": "xpbd/energy-search.js",
+        "sha256": "6a157b1295e2066602442c43e8ad392ac9405280173303929336500d1100da9a"
+      },
+      {
+        "path": "xpbd/gates.js",
+        "sha256": "0d6ff3718e71b4574c456b138c9e8576a3476634013f431a27f050f8ce3a8aca"
+      },
+      {
+        "path": "xpbd/implicit.js",
+        "sha256": "af4056632972f8b464a5bf71539911e30dea49c4991395a602003dcd06367859"
+      },
+      {
+        "path": "xpbd/joins.js",
+        "sha256": "621e4d2adcccccabac8b01db9fd2752805b7576582268d8c3b65afad18665910"
+      },
+      {
+        "path": "xpbd/local-contact-solve.js",
+        "sha256": "4f6777b80e61a8564a398bf6f8bb5b472d97e39b9f39994a623e15e28eb992a0"
+      },
+      {
+        "path": "xpbd/orthotropic-membrane.js",
+        "sha256": "871ed23fcd1f3b0ff0ee2a8a06cb9739f251dafe49cd23de53fa285355b30a76"
+      },
+      {
+        "path": "xpbd/pcg.js",
+        "sha256": "85712c9829542d8c7ee822145ffb55cb3e1de04a62791ff55ddb27188f31dbe1"
+      },
+      {
+        "path": "xpbd/presentation.js",
+        "sha256": "185ded5508ff841fe99a6dee95c74dd1c49047a2c07eeef60e794ae0f16e5965"
+      },
+      {
+        "path": "xpbd/render.js",
+        "sha256": "5db389f5d41ea35de160d56ab4d36a640ffce694d8224d64c3660187afddbd3c"
+      },
+      {
+        "path": "xpbd/setrest.js",
+        "sha256": "7d759b2c307e4e1bed12c5995ba0b8c70cfd4ab7381834874e6047f2d2387bc4"
+      },
+      {
+        "path": "xpbd/state.js",
+        "sha256": "651484d55205a9b910500780f82246fa91da418b39e9a7ee5be3fb6dda586d1d"
+      },
+      {
+        "path": "xpbd/world.js",
+        "sha256": "34bddad64037bad8d3eb25eb52b7554663b922010f698e54616271a0951feb56"
+      }
+    ],
+    "git": "25ca58d55ba6caad2b8562d03034309cece3d0ac",
+    "harnessSHA256": "43fa53910b4a429590b9718421a796a7b368bee4c301efd244ff970ffc58e79e",
+    "patchHelperSHA256": "c36818ef3b166ccf0299045c8466adda8cd38cc1880c507f3170e141e69afc11",
+    "linearHarnessSHA256": "53acc3eb697974b5ad91c6b6d8d6ec617baae22a2853217cdbe3efd971b92564",
+    "tensorToolsSHA256": "8cf7bb9c71115172d163f9f2386df3de0a8de424c9a9d6965be8389c6ab9110e",
+    "greenReferenceSHA256": "5df43137751d658003915612cd3a2530c23778769e8ac467a589c8ff869b650b",
+    "greenTestsSHA256": "e2377a58bc8b5e8183996444c9b0735eaa68f2da243cb1f54caa253e828ac0d2",
+    "dirty": false
+  },
+  "controlCases": 108,
+  "newCases": 36,
+  "allNonRecordingFieldsEqual": true,
+  "comparison": "whole reports except root recordedAt and controls.recordedAt; includes all source/runtime/protocol/reference/geometry/energy/gradient/tensor/objectivity fields and failed/unmeasured gates",
+  "acceptance": "deterministic same-model replay only; constitutive, solved-reference, stock and interaction gates remain separate"
+}

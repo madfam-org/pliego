@@ -1,0 +1,147 @@
+{
+  "schema": "pliego-profile-summary/0.1",
+  "source": "e25b8e53e22d361d24156f878ea602751ddc4004",
+  "scope": "Two-second V8 inspector sample taken during the long-running S8/I32 eight-turn case; no model/solver inputs changed. Not a full-run timing distribution.",
+  "profileSHA256": "0cbe1e41f7c32d37f4a95c6e4995d8e746dcbf1582786fba8df898e10d7f9f34",
+  "reducerSHA256": "9ba3a8719717bb597e429a384c837b420fd0ffcf04a85b59e75e77b1ad3265d8",
+  "totalMs": 2025.008,
+  "stages": [
+    {
+      "name": "other engine (swept.js)",
+      "ms": 1848.597,
+      "share": 0.9128838009528851
+    },
+    {
+      "name": "BlockCholesky factor",
+      "ms": 34.606,
+      "share": 0.01708931520270537
+    },
+    {
+      "name": "dihedral angles + gradients",
+      "ms": 30.679,
+      "share": 0.015150063604686993
+    },
+    {
+      "name": "other engine (energy-search.js)",
+      "ms": 29.846,
+      "share": 0.014738707205107338
+    },
+    {
+      "name": "other engine (implicit.js)",
+      "ms": 26.917,
+      "share": 0.01329229316624922
+    },
+    {
+      "name": "gradient ∇E",
+      "ms": 20.739,
+      "share": 0.01024144102146757
+    },
+    {
+      "name": "assembly (H = M/dt² + Σ k∇C∇Cᵀ)",
+      "ms": 20.72,
+      "share": 0.010232058342485561
+    },
+    {
+      "name": "substep integration, rotation check, hinges, sleep",
+      "ms": 4.557,
+      "share": 0.002250361480053412
+    },
+    {
+      "name": "other engine (coupled-contact.js)",
+      "ms": 4.248,
+      "share": 0.0020977694902933716
+    },
+    {
+      "name": "BlockCholesky solve (direct + PCG preconditioner)",
+      "ms": 4.099,
+      "share": 0.0020241895340660384
+    }
+  ],
+  "functions": [
+    {
+      "name": "build swept.js:27",
+      "ms": 1809.675,
+      "share": 0.893663136145635
+    },
+    {
+      "name": "factor blockchol.js:167",
+      "ms": 34.606,
+      "share": 0.01708931520270537
+    },
+    {
+      "name": "dihedral dihedral.js:29",
+      "ms": 30.679,
+      "share": 0.015150063604686993
+    },
+    {
+      "name": "implicitEnergy energy-search.js:10",
+      "ms": 29.846,
+      "share": 0.014738707205107338
+    },
+    {
+      "name": "assembleElastic implicit.js:105",
+      "ms": 26.917,
+      "share": 0.01329229316624922
+    },
+    {
+      "name": "boxesOverlap swept.js:86",
+      "ms": 24.175,
+      "share": 0.011938224441582454
+    },
+    {
+      "name": "gradient implicit.js:203",
+      "ms": 20.739,
+      "share": 0.01024144102146757
+    },
+    {
+      "name": "add blockchol.js:156",
+      "ms": 19.215,
+      "share": 0.009488851402068534
+    },
+    {
+      "name": "adjacent swept.js:24",
+      "ms": 9.046,
+      "share": 0.004467142845855423
+    },
+    {
+      "name": "(anonymous) swept.js:41",
+      "ms": 4.191,
+      "share": 0.0020696214533473447
+    },
+    {
+      "name": "solve blockchol.js:252",
+      "ms": 4.099,
+      "share": 0.0020241895340660384
+    },
+    {
+      "name": "_substep world.js:320",
+      "ms": 3.046,
+      "share": 0.00150419158837891
+    },
+    {
+      "name": "search coupled-contact.js:96",
+      "ms": 2.736,
+      "share": 0.0013511057734092902
+    },
+    {
+      "name": "evaluate coupled-contact.js:49",
+      "ms": 1.512,
+      "share": 0.0007466637168840815
+    },
+    {
+      "name": "stats world.js:628",
+      "ms": 1.511,
+      "share": 0.000746169891674502
+    },
+    {
+      "name": "(anonymous) swept.js:40",
+      "ms": 1.51,
+      "share": 0.0007456760664649226
+    },
+    {
+      "name": "clear blockchol.js:149",
+      "ms": 1.505,
+      "share": 0.0007432069404170256
+    }
+  ]
+}

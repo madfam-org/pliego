@@ -1,0 +1,25 @@
+{
+  "schema": "pliego-paper-backend-comparison/0.1",
+  "recordedAt": "2026-11-10T10:21:18.519Z",
+  "comparisonSHA256": "869207e22b3ec89012b74960efdadda73d43b6fe54ff71047380f0fa11a4260d",
+  "inputSHA256": [
+    "e3f7577ed5d7b8bdf4f7e89b677a63bd8ac3d0369356a60fe1558457214603ef",
+    "08f103b698e8714c70040d43c1a68392608255ea05782561a57a2706fa51a0b3"
+  ],
+  "source": {
+    "git": "4b48ec15ab40c5a5cc6c6b9002ecb5e44a82f0a8",
+    "dirty": false,
+    "engine": "current checkout",
+    "engineTreeSHA256": "53afe23e63a3d13d1815b93f79553aaf1aa8f96b4153beb4e16f856aac362e1c",
+    "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+    "harnessSHA256": "4dae29e2922615993736728d6cef16c4b93053e7427703b5565a0c9b0fe386a1",
+    "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+    "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+    "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+  },
+  "cases": 1,
+  "sourceCleanAtRuns": true,
+  "allRecordedPhysicsFieldsEqual": true,
+  "comparison": "whole reports except recordedAt, declared protocol.broadPhase/results.options.contactBroadPhase BVH-to-Wasm execution choice, enumerated result wall/CPU timings and their physics8ms gate; all source/runtime/input metadata, physics options, sampled poses, solver/contact diagnostics and non-time gates exact",
+  "acceptance": "backend parity only; timing, material calibration and actual browser/device gates require separate evidence"
+}

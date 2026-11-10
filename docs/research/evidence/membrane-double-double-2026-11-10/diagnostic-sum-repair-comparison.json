@@ -1,0 +1,333 @@
+{
+  "schema": "pliego-increment-diagnostic-sum-repair-review/1",
+  "diagnosticVersion": "exact-rational-dot-plus-remainders/2",
+  "verifierGitHead": "2d0dee6aaaad747b5b3ccf8318fb6fe3ad74022b",
+  "verifierWorktreeDirty": true,
+  "verifierSHA256": "81c888351c3af60f5ab2b32433bee45e71ceb27a3d690e2e034bca7feb9c9122",
+  "gradientHelperSHA256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec",
+  "focusedTestSHA256": "a46e3af8137964cfaa562a7bdfe387c965d6e591eefb427c11160069d2d11cdf",
+  "originalCapturedPhysicsSourceGit": "6cd67d082129b45f66ba3fc713df2a4d7b514fd6",
+  "studies": [
+    {
+      "name": "probes",
+      "input": {
+        "file": "probes.json",
+        "sha256": "f75bdaa7b65692aa66686cb59bdca731f69d3b0e1d6c74eecda4cec954d6f4da",
+        "bytes": 95356,
+        "cases": 32
+      },
+      "original80vs100EqualityPass": false,
+      "original80vs100DifferingLeaves": [
+        {
+          "path": "cases.0.runtime.realSumOfStoredRuntimeTermsNJ",
+          "value80": 1.9241191281868086e-28,
+          "value100": 1.9241191281868084e-28
+        },
+        {
+          "path": "cases.1.runtime.realSumOfStoredRuntimeTermsNJ",
+          "value80": 1.8349829942577444e-34,
+          "value100": 1.8349829942577442e-34
+        },
+        {
+          "path": "cases.2.runtime.realSumOfStoredRuntimeTermsNJ",
+          "value80": 1.9241191281868086e-28,
+          "value100": 1.9241191281868084e-28
+        },
+        {
+          "path": "cases.3.runtime.realSumOfStoredRuntimeTermsNJ",
+          "value80": 1.8349829942577444e-34,
+          "value100": 1.8349829942577442e-34
+        },
+        {
+          "path": "cases.12.runtime.realSumOfStoredRuntimeTermsNJ",
+          "value80": -1.8896432097691416e-21,
+          "value100": -1.8896432097691413e-21
+        },
+        {
+          "path": "cases.30.runtime.realSumOfStoredRuntimeTermsNJ",
+          "value80": -2.760506638872507e-23,
+          "value100": -2.7605066388725064e-23
+        },
+        {
+          "path": "cases.31.runtime.realSumOfStoredRuntimeTermsNJ",
+          "value80": -2.760506638872507e-23,
+          "value100": -2.7605066388725064e-23
+        }
+      ],
+      "repaired80vs100CompleteEqualityPass": true,
+      "repaired80vs100ExcludedFields": [
+        "cases[].decimalDigits"
+      ],
+      "repairedParsedLeavesCompared": 1986,
+      "originalToRepaired": [
+        {
+          "digits": 80,
+          "original": {
+            "file": "probes-precision-80.json",
+            "sha256": "a60781fc0b05c2d853763cf95f880e15fcdee0988ed658c3d0e5d8958c57ec41",
+            "bytes": 109906
+          },
+          "repaired": {
+            "file": "probes-v2-80.json",
+            "sha256": "b44563d2e8567294229b29b57c57caa5af8fe9d3d6904537c6bfb4e8b9afb3d8",
+            "bytes": 111893
+          },
+          "diagnosticLeafChanges": [
+            {
+              "caseIndex": 4,
+              "path": "cases.4.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.3369699442031026e-28,
+              "repaired": 1.3369699442031028e-28,
+              "originalFloat64Hex": "3a252f64f7df1e0b",
+              "repairedFloat64Hex": "3a252f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.2420775429197073e-44,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 5,
+              "path": "cases.5.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.275033897593596e-34,
+              "repaired": 1.2750338975935963e-34,
+              "originalFloat64Hex": "38e52f64f7df1e0b",
+              "repairedFloat64Hex": "38e52f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.1382117680737565e-50,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 6,
+              "path": "cases.6.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.3369699442031026e-28,
+              "repaired": 1.3369699442031028e-28,
+              "originalFloat64Hex": "3a252f64f7df1e0b",
+              "repairedFloat64Hex": "3a252f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.2420775429197073e-44,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 7,
+              "path": "cases.7.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.275033897593596e-34,
+              "repaired": 1.2750338975935963e-34,
+              "originalFloat64Hex": "38e52f64f7df1e0b",
+              "repairedFloat64Hex": "38e52f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.1382117680737565e-50,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 10,
+              "path": "cases.10.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": -2.5833387582419846e-21,
+              "repaired": -2.583338758241985e-21,
+              "originalFloat64Hex": "bba866213def4e3d",
+              "repairedFloat64Hex": "bba866213def4e3e",
+              "absoluteDifferenceNJ": 3.76158192263132e-37,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 12,
+              "path": "cases.12.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": -1.8896432097691416e-21,
+              "repaired": -1.8896432097691413e-21,
+              "originalFloat64Hex": "bba1d8e07ea297f7",
+              "repairedFloat64Hex": "bba1d8e07ea297f6",
+              "absoluteDifferenceNJ": 3.76158192263132e-37,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 30,
+              "path": "cases.30.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": -2.760506638872507e-23,
+              "repaired": -2.7605066388725064e-23,
+              "originalFloat64Hex": "bb40afad57d0e949",
+              "repairedFloat64Hex": "bb40afad57d0e948",
+              "absoluteDifferenceNJ": 5.877471754111438e-39,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 31,
+              "path": "cases.31.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": -2.760506638872507e-23,
+              "repaired": -2.7605066388725064e-23,
+              "originalFloat64Hex": "bb40afad57d0e949",
+              "repairedFloat64Hex": "bb40afad57d0e948",
+              "absoluteDifferenceNJ": 5.877471754111438e-39,
+              "ulpSteps": 1
+            }
+          ],
+          "diagnosticLeafChangesCount": 8,
+          "newVersionLabels": 32,
+          "updatedVerifierSourceHashes": 32,
+          "allOtherOriginalFieldsBitExactlyPreserved": true,
+          "allObjectiveErrorArmijoObjectsPreserved": 64
+        },
+        {
+          "digits": 100,
+          "original": {
+            "file": "probes-precision-100.json",
+            "sha256": "468bb5532e53192dfe091e0f7d9a8560c68754a91a57553f9e539f85797ff6bd",
+            "bytes": 109940
+          },
+          "repaired": {
+            "file": "probes-v2-100.json",
+            "sha256": "eaf21ca21241bdd08a08b7c0783b489a4d8967cd141c9c805e5f6c90c2050a1a",
+            "bytes": 111925
+          },
+          "diagnosticLeafChanges": [
+            {
+              "caseIndex": 0,
+              "path": "cases.0.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.9241191281868084e-28,
+              "repaired": 1.9241191281868086e-28,
+              "originalFloat64Hex": "3a2e7d278a7b73b3",
+              "repairedFloat64Hex": "3a2e7d278a7b73b4",
+              "absoluteDifferenceNJ": 2.2420775429197073e-44,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 1,
+              "path": "cases.1.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.8349829942577442e-34,
+              "repaired": 1.8349829942577444e-34,
+              "originalFloat64Hex": "38ee7d278a7b73b3",
+              "repairedFloat64Hex": "38ee7d278a7b73b4",
+              "absoluteDifferenceNJ": 2.1382117680737565e-50,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 2,
+              "path": "cases.2.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.9241191281868084e-28,
+              "repaired": 1.9241191281868086e-28,
+              "originalFloat64Hex": "3a2e7d278a7b73b3",
+              "repairedFloat64Hex": "3a2e7d278a7b73b4",
+              "absoluteDifferenceNJ": 2.2420775429197073e-44,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 3,
+              "path": "cases.3.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.8349829942577442e-34,
+              "repaired": 1.8349829942577444e-34,
+              "originalFloat64Hex": "38ee7d278a7b73b3",
+              "repairedFloat64Hex": "38ee7d278a7b73b4",
+              "absoluteDifferenceNJ": 2.1382117680737565e-50,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 4,
+              "path": "cases.4.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.3369699442031026e-28,
+              "repaired": 1.3369699442031028e-28,
+              "originalFloat64Hex": "3a252f64f7df1e0b",
+              "repairedFloat64Hex": "3a252f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.2420775429197073e-44,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 5,
+              "path": "cases.5.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.275033897593596e-34,
+              "repaired": 1.2750338975935963e-34,
+              "originalFloat64Hex": "38e52f64f7df1e0b",
+              "repairedFloat64Hex": "38e52f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.1382117680737565e-50,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 6,
+              "path": "cases.6.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.3369699442031026e-28,
+              "repaired": 1.3369699442031028e-28,
+              "originalFloat64Hex": "3a252f64f7df1e0b",
+              "repairedFloat64Hex": "3a252f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.2420775429197073e-44,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 7,
+              "path": "cases.7.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": 1.275033897593596e-34,
+              "repaired": 1.2750338975935963e-34,
+              "originalFloat64Hex": "38e52f64f7df1e0b",
+              "repairedFloat64Hex": "38e52f64f7df1e0c",
+              "absoluteDifferenceNJ": 2.1382117680737565e-50,
+              "ulpSteps": 1
+            },
+            {
+              "caseIndex": 10,
+              "path": "cases.10.runtime.realSumOfStoredRuntimeTermsNJ",
+              "original": -2.5833387582419846e-21,
+              "repaired": -2.583338758241985e-21,
+              "originalFloat64Hex": "bba866213def4e3d",
+              "repairedFloat64Hex": "bba866213def4e3e",
+              "absoluteDifferenceNJ": 3.76158192263132e-37,
+              "ulpSteps": 1
+            }
+          ],
+          "diagnosticLeafChangesCount": 9,
+          "newVersionLabels": 32,
+          "updatedVerifierSourceHashes": 32,
+          "allOtherOriginalFieldsBitExactlyPreserved": true,
+          "allObjectiveErrorArmijoObjectsPreserved": 64
+        }
+      ]
+    },
+    {
+      "name": "captured",
+      "input": {
+        "file": "captured-trials-input.json",
+        "sha256": "21543a3f681f0cef2fb55d9545d3c39481762beb1c73ffd3106618a2f3ca55ac",
+        "bytes": 492605,
+        "cases": 85
+      },
+      "original80vs100EqualityPass": true,
+      "original80vs100DifferingLeaves": [],
+      "repaired80vs100CompleteEqualityPass": true,
+      "repaired80vs100ExcludedFields": [
+        "cases[].decimalDigits"
+      ],
+      "repairedParsedLeavesCompared": 5272,
+      "originalToRepaired": [
+        {
+          "digits": 80,
+          "original": {
+            "file": "captured-trials-80.json",
+            "sha256": "8f1860dad269b95e7b75eeb7c6ad611e47861f120cd6ed6e9f4f853a138889a4",
+            "bytes": 280067
+          },
+          "repaired": {
+            "file": "captured-v2-80.json",
+            "sha256": "3fa54d6e904ab0543d43e72f998309c5edca049392acefce5dba9747badbc8d5",
+            "bytes": 285337
+          },
+          "diagnosticLeafChanges": [],
+          "diagnosticLeafChangesCount": 0,
+          "newVersionLabels": 85,
+          "updatedVerifierSourceHashes": 85,
+          "allOtherOriginalFieldsBitExactlyPreserved": true,
+          "allObjectiveErrorArmijoObjectsPreserved": 170
+        },
+        {
+          "digits": 100,
+          "original": {
+            "file": "captured-trials-100.json",
+            "sha256": "c2a7084dcca33fb57bcee84e30f96f0e66eaf37f94c13a7c2626846db5466b50",
+            "bytes": 280152
+          },
+          "repaired": {
+            "file": "captured-v2-100.json",
+            "sha256": "bf3cbdd615880a6ad3aae86ca89578410eb40f5c6fc72217644a222a80cf27d8",
+            "bytes": 285422
+          },
+          "diagnosticLeafChanges": [],
+          "diagnosticLeafChangesCount": 0,
+          "newVersionLabels": 85,
+          "updatedVerifierSourceHashes": 85,
+          "allOtherOriginalFieldsBitExactlyPreserved": true,
+          "allObjectiveErrorArmijoObjectsPreserved": 170
+        }
+      ]
+    }
+  ],
+  "scope": "oracle-only re-evaluation of original archived raw inputs; every original objective/error/Armijo field preserved; old failed equality artifacts untouched; no physics simulation, runtime, force gate or acceptance change"
+}

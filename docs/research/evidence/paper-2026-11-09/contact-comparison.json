@@ -1,0 +1,14 @@
+{
+  "schema": "pliego-contact-comparison/0.1",
+  "source": "e749ff46beef833a418512526cdbafd2f2139247",
+  "baseline": "c3d77471b6bdaacb059ad1a94b81d4f507022f98",
+  "comparisonScriptSHA256": "ac71bcd1179c15ac90b2c021ea6cf3255f26001216650807b30aa404e4050e10",
+  "defaultCasesNumericallyIdentical": 2,
+  "candidateCasesReplayedIdentically": 8,
+  "comparison": "all result fields except build/step timings; includes final pose hash, progress, strain, failure and CCD diagnostics",
+  "guardedCases": 6,
+  "guardedCompletedTurns": 0,
+  "guardedZeroProgressFailures": 5,
+  "guardedStrainFailures": 1,
+  "sourceCleanAtRuns": true
+}

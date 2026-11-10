@@ -1,0 +1,21 @@
+{
+  "schema": "pliego-selected-newton-review-wrapper-preflight-correction/1",
+  "originalWrapper": {
+    "file": "run-selected-newton-review.py",
+    "sha256": "bd361be62f01af237c932f766939493afd8eda7b3d9dce0f73394b7adae069a4"
+  },
+  "correctedWrapper": {
+    "file": "run-selected-newton-review-v2.py",
+    "bytes": 6596,
+    "sha256": "1809b7b27ce904031a09b1add22bd2690453fa77b1ab49a22d6b17b0e17e6750"
+  },
+  "firstLaunch": {
+    "returnCode": 1,
+    "reviewerProcessStarted": false,
+    "outputDirectoryCreated": false,
+    "cause": "wrapper required0700 on durable enclosing phase directory; actual fresh full-newton-review child is created0700"
+  },
+  "mathematicalReviewerChanged": false,
+  "candidateChanged": false,
+  "scope": "one wrapper-preflight correction before first actual mathematical reviewer invocation; original wrapper retained"
+}

@@ -1,0 +1,241 @@
+# Refit broad-phase index experiment
+
+Status: opt-in implementation comparison. Default `contactBroadPhase` remains
+`'reference'`. `'bvh'` applies to swept candidates used by `continuousContact`
+and `barrierContact`; it does not replace the legacy projection contact class.
+The contact energy, material model, solver budgets, CCD and feasibility rules
+remain the same. This index cannot repair their known limitations.
+
+## Coverage and order
+
+Both traversals use the same vertex, triangle and edge bounds, covering both
+motion endpoints, maximum primitive caliper and the existing outward roundoff
+margin. The BVH initially separates stationary and active primitives, then uses
+deterministic spatial medians within those groups. Changing stationary state
+does not preserve a stale exclusion: both groups' flags are fully refitted.
+Each full build refits **every** leaf/internal bound, stationary flag and current
+rank. The BVH may reuse an unswept candidate list only when every position, fixed
+flag, weld, caliper, vertex group, vertex sheet and triangle sheet value is exactly
+unchanged. Comparisons distinguish signed zero and snapshot contents independently
+of caller array identity. Connectivity and primitive counts remain immutable, as
+required by the constructor neighbor graph. Swept calls always rebuild and
+invalidate reuse. There is no approximate temporal cache or curvature suppression.
+
+An internal bound is the component-wise union of its children. Consequently a
+primitive whose bound overlaps the query cannot be removed by an ancestor's
+non-overlap test. A fully stationary fixed node is pruned only for a query that
+is itself fully stationary fixed. Prescribed vertices with different endpoints
+remain active. Existing topology/shared-group/weld exclusions are then applied.
+This preserves the reference candidate set, including its existing exclusions;
+it is not an independent certificate that those exclusions model all paper contact.
+
+Query hits are returned in the reference's current min-X/primitive-ID rank order.
+VT queries retain increasing vertex order. EE queries retain increasing outer
+edge rank and strictly greater inner rank. This preserves multiplicity and the
+order of floating-point force sums and sequential CCD bounds. Traversal topology
+and node-visit counts may differ without changing those physics inputs.
+When a query exactly encloses the root bound, every leaf overlaps; current ranks
+are emitted directly with current stationary/rank filtering, avoiding a dense
+walk and sort. This is an exact enclosure test, not a proximity heuristic.
+
+Trees are scratch state. Snapshot restore can change spatial partition history,
+but the complete refit and ordered output must still reproduce the same pairs.
+Tests cover persistent refits, dense ties, empty trees, moving prescribed vertices,
+changing fixed/weld state, independent brute-force bounds, native replay and the
+retained 1592-stencil late-turn objective/search.
+
+## Measurements and fidelity
+
+`broadphase-pairs.mjs` compares cold first builds and alternating warm builds on
+native initial/late poses, a native sweep, a large synthetic prescribed sweep and
+deliberately dense synthetic bounds. It checks exact ordered pair bytes and
+records wall/process CPU time separately. Schema 0.2 separates forced BVH rebuild
+from allowed exact-pose reuse, so repeated identical poses do not masquerade as
+refit timings. `build(..., false)` supplies the force-build control; this is an
+internal candidate-builder argument, not a new World physics option. Dense output can erase an index's
+advantage; no universal speedup is assumed. Synthetic stress cases are not
+physical sheet simulations.
+
+The booklet harness accepts `--broad-phase reference|bvh`. Its optional
+`--checkpoint /tmp/file.json` writes atomic partial turn/case accumulators,
+explicitly marked incomplete until the final source-integrity check succeeds.
+Checkpoint files must be outside the source checkout so their writes do not
+invalidate that check. A completed checkpoint/report can still contain failed
+physics cases. Process CPU timings include JIT/GC threads; they do not measure
+only solver self time.
+
+```sh
+node --test packages/engine/test/swept-bvh.test.js packages/engine/test/swept-contact.test.js
+node packages/engine/bench/broadphase-pairs.mjs --out /tmp/broadphase-pairs.json
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 4 --model active-leaf --turns 1 --broad-phase bvh --checkpoint /tmp/bvh-progress.json --out /tmp/bvh-turn.json
+```
+
+`compare-broadphase-runs.mjs` requires matching recorded input protocol, fixture,
+reader/metric fingerprints and model options. It compares every recorded result
+field except enumerated timing fields/their 8 ms gate and the declared broad-phase
+selection. This includes the hash covering every sampled pre-promotion pose and
+all force/CCD diagnostics. Prior harness bytes can differ and remain recorded;
+fresh reference/repeat runs must share the indexed run's source and harness.
+
+## Recorded checkpoint
+
+Source [`9a62ba9`](https://github.com/madfam-org/pliego/commit/9a62ba9b0a151ab28ef9b0171903a57013078b1f)
+passes exact ordered-pair comparison on all five component scenes. Native warm
+candidate-build medians fall from 4.66–5.24 ms to 0.95–1.61 ms. The deliberately
+large prescribed sweep regresses from 85.05 to 128.25 ms; dense all-free bounds
+improve from 105.84 to 74.96 ms. The initial index and its regressions are retained
+alongside the refinement, rather than discarded.
+
+The complete eight-turn indexed candidate matches **every recorded non-timing
+result**, including the reference hash of all 672 sampled pre-promotion poses.
+The first turn also matches a fresh same-source reference and a repeated indexed
+run. The comparator rejects altered trajectory and force diagnostics. A separately
+retained all-flexible case still fails initial strict-ground feasibility; its
+completed harness/checkpoint does not claim a completed physical turn.
+
+Fresh first-turn active-frame p95 is 1009.72 ms with the reference versus
+318.90/303.52 ms indexed. Full-sequence diagnostic active p95 falls from
+23253.50 to 7861.01 ms, with the same 680/5264 unconverged substeps and 250492
+backtracks. These are exploratory local costs, not isolated device certification:
+the older full run included short profiling/probes; the indexed full run included
+two brief independent algebra checks. There was no competing full physics suite.
+Both miss the 8 ms target by a large margin. Full-sequence indexed repeat, corpus
+and real-device acceptance remain open.
+
+[Raw reports, comparisons and reproduction](evidence/paper-2026-11-09/README.md#ordered-refit-bvh)
+retain source/input fingerprints and all failed gates. This index is an exact
+substitution for the existing candidate policy, not its physical validation.
+The [parallel-contact audit](parallel-contact-review.md) demonstrates that native
+neighbor exclusions can remove the VT backup needed before applying the published
+EE smoothing construction. Contact smoothness, coverage and material calibration
+remain open. Other indices, exact pose reuse and lower-level backends have not
+been exhausted.
+
+[Toolkit 1.6.0](https://github.com/ipc-sim/ipc-toolkit/releases/tag/v1.6.0)
+now defaults to LBVH and reports gains on its own benchmark scenes. That is an
+additional implementation candidate, not a measured comparison against Pliego's
+refit index; its performance claims have not been reproduced here.
+
+## Exact-pose reuse validation
+
+The targeted suite retains ordered reference pairs/bounds through ten live-input
+states, including signed zero, in-place pose/filter/caliper changes, copied input
+arrays, swept bypass and recovery after nonfinite coordinates. Native replay and
+the retained late-turn objective/search remain exact. Candidate scratch arrays
+are internal and must not be mutated by consumers.
+
+`compare-paper-execution.mjs` compares whole campaign reports while allowing only
+the implementation commit/tree fingerprints and enumerated timing fields to
+differ. Unlike a model comparison, every recorded physics option, diagnostic,
+trajectory hash and non-time gate must agree. The older capped control predates nullable iteration-override metadata. An explicit
+`--legacy-iteration-metadata` comparison accepts only the two reviewed harness
+fingerprints, an absent old override and a null new override. Effective solver
+options still compare exactly; unknown harnesses and non-null overrides fail.
+The retained harness diff only adds override parsing/application and metadata.
+
+Source `62fd4565de9215b69724457740d862365ed11cf7` completes both capped and uncapped
+S8/I32 eight-turn sequences with **all** recorded non-time physics unchanged from
+their controls, including every sampled-pose hash and contact/force counter.
+Both repeat every recorded non-time report field on the new source. This retains
+0/5168 capped and 0/5200 uncapped force misses; it does not change material gates.
+
+The clean-source component report separates forced rebuild and reuse: native
+initial/late candidate medians are 1.08/1.63 ms for full BVH builds and 0.023/0.022 ms
+for exact reuse, with zero traversal tests on hits. Swept input medians remain
+0.97 ms native and 134–135 ms for the synthetic large sweep. That stress case is
+still slower than the 81.08 ms reference scan. Dense all-free inputs use separate
+endpoint arrays and intentionally rebuild; their 77.5–77.6 ms costs show no reuse
+benefit. All five scenes retain identical ordered pair bytes.
+
+Full active-frame p95 is 290.21/237.21 ms capped and 364.81/344.81 ms uncapped;
+CPU p95 is 273.27/237.44 and 357.47/343.69 ms respectively. The first capped run
+overlapped the local engine suite and is excluded from performance conclusions.
+Repeats, uncapped runs and the component/profile experiments were sequential,
+with no competing local campaign/suite, but ordinary background activity remains.
+Prior-source timings are retained controls, not a fresh paired device trial.
+Every full run still fails the 8 ms target.
+
+A fresh first-turn whole-process V8 profile preserves the prior profiled run's
+non-time physics and input metadata. Candidate construction/query/refit accounts
+for 55.51% of sampled self time (37.29% tree, 18.22% swept builder), versus 68.23%
+previously; Cholesky is 6.37%. This keeps exact active-traversal/backend work ahead
+of a factor-only port. Samples include startup, construction, JIT and diagnostics;
+shares are not retired instructions or a device certificate. Raw profiles remain
+local; the committed summary removes local paths and records their hashes.
+
+[Raw reports, strict comparisons and reproduction](evidence/paper-2026-11-10/README.md#exact-pose-candidate-reuse)
+retain all limitations. The targeted invalidation/replay checks, full 146-test
+engine suite and 43-source JSDoc check pass at the implementation checkpoint;
+additional comparator negative controls protect the metadata compatibility path.
+
+
+## Active-edge traversal experiment
+
+An internal `SweptCandidates` traversal experiment queries only nonstationary
+edges, canonicalizes each pair by current min-X/ID rank, and buckets outer ranks
+before sorting inner ranks. An edge is inactive only if both vertices are fixed
+and unchanged over the motion endpoints; free vertices remain active even in a
+zero-motion query. At least one edge of each retained pair must be nonstationary; active/active pairs use increasing rank once. Stationary/moving
+classification uses both endpoints, so moving prescribed edges remain eligible.
+The topology/group/weld predicates are symmetric under exchanging edge pairs.
+Consequently filtering before bucketing and restoring lexicographic rank order
+preserves the reference's multiplicity, orientation and floating-point sum order.
+Offsets are Float64 and indices remain separate integers, avoiding packed-index
+precision and uint32 total-count wrap. Scratch arrays allocate only when used.
+
+The first `active` variant queries all ranks then removes duplicate active pairs.
+A refined `active-ranked` query preserves maximum-rank pruning on nodes containing
+no stationary leaves. A node containing a stationary leaf cannot be removed solely
+by its maximum rank, because a lower-rank stationary partner still needs this
+active query. An additional any-stationary flag is fully refitted on every build;
+leaf and enclosing-root queries use the same eligibility rule. The outer/inner
+rank reconstruction is unchanged.
+
+The internal `auto` policy selects `active-ranked` below half edge mobility and
+`rank` otherwise. `rank`, `active` and `active-ranked` can be forced by the component
+experiment. This policy is inside the opt-in BVH and is not a new World option.
+Component schema 0.4 separates all four full-build policies from the prefix
+reference and exact-pose reuse, recording queries and node tests. Reduced query count alone does
+not establish reduced work: loss of rank pruning and ordering can dominate.
+The clean first variant at `f4b33a6c70cb81eb98d890e661fb4a847a684195` reduces
+native EE queries from 1312 to 317 but increases combined VT/EE node tests:
+19850→24430 initial, 38446→40654 late, 19829→24308 sweep. Its late/sweep medians
+are 1.70/1.13 ms versus rank traversal's 1.64/1.03 ms. Forced active traversal
+also regresses on large sweeps and dense output. Query count alone therefore
+fails the work/cost comparison, and this variant is not selected normally.
+
+The rank-pruned refinement at `fe2ae0c215022c90e7d022713994f1576584523f` retains
+317 EE queries and reduces combined node tests to 18680/34906/18619. In the same
+six-policy component run, auto full-build medians are 0.95/1.55/0.95 ms for those
+native scenes versus 0.99/1.59/0.98 ms with forced rank traversal. These small
+local timing differences are exploratory. At full mobility auto retains rank
+traversal: large-sweep median 125.37 ms and dense median 73.08 ms, while forced
+ranked-active traversal costs 136.89/92.34 ms. The large-sweep reference scan is
+still faster (88.16 ms). No universal crossover or speedup is claimed.
+
+Both capped and uncapped S8/I32 eight-turn runs match **every** recorded non-time
+physics result from the prior exact-reuse implementation, including complete
+672-frame sampled-pose hashes, all solver/contact counters and all non-time gates.
+Each repeats every recorded non-time report field on the refined source. Force
+misses remain 0/5168 capped and 0/5200 uncapped. Active-frame p95 is 205.28/201.62 ms
+capped and 319.83/299.78 ms uncapped; CPU p95 is 206.17/202.54 and 320.02/302.32 ms.
+Runs are sequential without competing local physics suites/campaigns. Background
+activity and prior-source timing differences remain; this is not a device trial.
+The 8 ms and measured-material gates remain open.
+
+The new first-turn profile preserves every recorded non-time result and input
+metadata from the preceding profile. Candidate construction/query/refit remains
+53.35% of weighted whole-process sampled self time: 33.97% tree, 19.38% swept,
+versus 55.51% combined before active traversal. Factorization is 6.53%. Loading,
+construction, JIT and diagnostics are included; this is not isolated step CPU or
+retired instructions. This modest reduction still supports candidate/backend
+work, without assuming that a candidate-only port can meet the reading target.
+
+The deterministic tests compare reference, rank, naive active, rank-pruned active
+and auto across 192 persistent refits, plus prescribed crossings and native
+pose/velocity/diagnostic replay. Full source-pinned component data, both full
+sequences/repeats and sanitized profiles are retained in the
+[active-traversal evidence](evidence/paper-2026-11-10/README.md#rank-preserving-active-edge-traversal).
+The component comparator checks identical inputs/ordered pairs and unchanged
+rank/naive structural work across the refinement. Existing physics gates remain
+unchanged; CAD/art/stock/fabrication data are untouched.

@@ -1,0 +1,74 @@
+{
+  "schema": "pliego-reference-oracle-kinematics-repair-development/1",
+  "developmentOnly": true,
+  "originalVerifierGitHead": "d9efde1d2d4304f2054238a0f7213a225f12201d",
+  "originalVerifierWorktreeDirty": true,
+  "originalVerifierSHA256": "45759b0ecebedc324d2e1f3ee6c0d8127bc4f5ca488e3cb2d8b235504e6d9dd5",
+  "correctedVerifierSHA256": "db521a2a473d8038c4f9abec4c0f14a6242e74937e003269a0ebff8e6d98529f",
+  "input": {
+    "file": "input.json",
+    "sha256": "6ef5a5de46f7061655c7d2535d11a984fbc80869337468bc98737a29bd65f325",
+    "bytes": 676
+  },
+  "original80vs100EqualityPass": false,
+  "corrected80vs100EqualityPass": true,
+  "correctedExcludedFields": [
+    "decimalDigits"
+  ],
+  "originalIdealUVGradient80": [
+    3.036871701614476e-72,
+    0.0,
+    -4.675470394353449e-72,
+    -9.927553262661113e-73,
+    0.0,
+    1.0953438293939615e-72,
+    -2.0441163753483646e-72,
+    0.0,
+    3.5801265649594873e-72
+  ],
+  "originalIdealUVGradient100": [
+    -1.3135940038490488e-91,
+    0.0,
+    3.2719814726929023e-91,
+    6.750748703443097e-92,
+    0.0,
+    -6.541131324594131e-93,
+    6.385191335047392e-92,
+    0.0,
+    -3.206570159446961e-91
+  ],
+  "correctedIdealUVGradient": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "outputs": [
+    {
+      "file": "original-80.json",
+      "sha256": "2d8552da57cc4feff3897331c62e7de1cd86a5863b05a084f42787e8c51dc7e9",
+      "bytes": 2612
+    },
+    {
+      "file": "original-100.json",
+      "sha256": "7597b4a9ed981469c6621607cabcace888c71485bf851126fa17c3c806a1d0e1",
+      "bytes": 2613
+    },
+    {
+      "file": "corrected-80.json",
+      "sha256": "72636fdc99bbd3566de3b85c95ccc62fcf0fc322cdb91198c7a470a63a74c6f6",
+      "bytes": 2822
+    },
+    {
+      "file": "corrected-100.json",
+      "sha256": "29edddc2e5a19621a8799fc2aa8bff338aed429a6dcb7919f0292ac778d6a257",
+      "bytes": 2823
+    }
+  ],
+  "method": "exact rational UV inverse/F/Gram before Decimal material rotation and Q; no epsilon-zero filter, no runtime/source simulation or old verifier changes"
+}

@@ -14,9 +14,11 @@ import { WorkerWorld, startEngineWorker, retireEngineWorker } from './world-prox
 import { probeStep } from './engine-worker.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
 import { createRenderer, rendererOverride } from './render/index.js';
-import { attachInput } from './render/input.js';
 import { sheetsFromDocument } from './render/scene.js';
-import { rayPlane } from './render/camera.js';
+import { attachViewerInput } from './viewer-input.js';
+import { readingBook, fitBookCamera } from './book-layout.js';
+import { BookWorld } from './book-world.js';
+import { syncReadingMode } from './reading-mode.js';
 
 const $ = (id) => /** @type {any} */ (document.getElementById(id));
 const i18n = createI18n(STUDIO_STRINGS);
@@ -33,7 +35,7 @@ const state = {
   physicsWanted: false,   // run paper physics when it is available
   physicsForced: false,   // the viewer asked for it (toggle or ?engine=physics): never fall back for speed
   renderer: /** @type {import('./render/index.js').Renderer | null} */ (null),
-  input: /** @type {{destroy(): void} | null} */ (null),
+  input: /** @type {{destroy(): void, cancel?(): void, navigate?(direction: string): void, reset?(): void} | null} */ (null),
   catalog: /** @type {{source: 'api'|'demo', items: any[]} | null} */ (null),
   item: /** @type {any} */ (null),
   mode: /** @type {string|null} */ (null),
@@ -44,6 +46,7 @@ const state = {
   overlayOn: false,
   grabMode: false,
   grabbing: /** @type {{plane: number[], normal: number[]} | null} */ (null),
+  holdingLeaf: false,
   view: /** @type {'3d'|'2d'} */ ('3d'),
   controls: /** @type {ReturnType<typeof renderControls> | null} */ (null),
   updateSteps: /** @type {(v: number) => void} */ (() => {}),
@@ -99,6 +102,7 @@ function renderAll() {
   if (state.json) state.updateSteps = renderSteps($('steps'), $('steps-card'), state.json, i18n, (v) => setPrimary(v, true));
   syncSteps();
   renderStatusStatic();
+  syncReadingMode(state, i18n);
 }
 
 function renderStatusStatic() {
@@ -204,6 +208,7 @@ function advancePlayback(dt) {
 }
 
 function stepButton(dir) {
+  if (state.world instanceof BookWorld) { state.input?.navigate?.(dir > 0 ? 'forward' : 'backward'); return; }
   const c = state.controls;
   if (!c || !c.primaryId) return;
   const [lo, hi] = c.range(c.primaryId);
@@ -297,6 +302,8 @@ function syncPhysicsButton() {
 let docGen = 0;
 async function useDocument(json, opts = {}) {
   const gen = ++docGen;
+  state.input?.destroy(); state.input = null;
+  if (state.grabbing) state.world?.release(); state.grabbing = null; state.holdingLeaf = false;
   state.json = json;
   state.failed = false;
   notice('');
@@ -307,14 +314,15 @@ async function useDocument(json, opts = {}) {
   state.overlay = null;
   speed.n = 0; speed.avg = 0; speed.fired = false;
   const physicsOk = !!(state.physics && state.physics.kind === 'engine');
-  const fits = state.physicsForced || physicsFits(json);
+  const book = state.share.interaction === 'paper' && readingBook(json);
+  const fits = state.physicsForced || !!book || physicsFits(json);
   state.engine = physicsOk && state.physicsWanted && !opts.preview && fits ? state.physics : state.preview;
   const real = state.engine.kind === 'engine';
   const heavyNotice = physicsOk && state.physicsWanted && !opts.preview && !fits
     ? i18n.t('physics.heavy', { n: estimateVertices(json, engineOptions(json).meshEdge) }) : '';
   /** @type {WorkerWorld | null} */
   let remote = null;
-  if (real) {
+  if (real && !book) {
     try {
       remote = await startEngineWorker({ off: state.share.worker === 'off', json, opts: engineOptions(json), probe: !state.physicsForced, onFrame: () => { pumpRemote(); kick(); }, onStep: noteStep });
     } catch (e) {
@@ -323,7 +331,8 @@ async function useDocument(json, opts = {}) {
     if (gen !== docGen) { if (remote) remote.dispose(); return; }   // a newer document took over
   }
   try {
-    if (remote) { state.world = remote; state.where = 'worker'; }
+    if (real && book) { state.world = new BookWorld(state.engine.mod, json, engineOptions(json), () => syncReadingMode(state, i18n)); state.where = 'main'; }
+    else if (remote) { state.world = remote; state.where = 'worker'; }
     else {
       const doc = state.engine.mod.loadDocument(json);
       state.world = new state.engine.mod.World(doc, real ? engineOptions(json) : { seed: 1 });
@@ -340,7 +349,7 @@ async function useDocument(json, opts = {}) {
         if (!needsEngine(c.id)) { try { state.world.setControl(c.id, c.default); } catch (e) { fail('error.engine', e); } }
       }
     }
-    if (real && !state.physicsForced) {
+    if (real && !state.physicsForced && !book) {
       let ms = NaN;
       if (remote) ms = remote.probeMs;
       else try { ms = probeStep(state.world, STEP, () => performance.now()); } catch (e) { fail('error.engine', e); }
@@ -366,6 +375,7 @@ async function useDocument(json, opts = {}) {
   shownOverlay = null;
   quiet = 0; received = 0;
   renderAll();
+  setupInput();
   if (!state.renderer || !state.world) setView('2d', false);
   invalidate();
 }
@@ -415,30 +425,9 @@ function setView(view, share = true) {
 }
 
 function setupInput() {
-  const r = state.renderer;
-  if (!r) return;
-  state.input = attachInput(r.canvas, r.camera, {
-    grabMode: () => state.grabMode,
-    onGrabStart(ndc) {
-      if (!state.world) return false;
-      if (state.world.capabilities && state.world.capabilities.grab === false) { status(i18n.t('status.grabStub')); return false; }
-      const ray = r.camera.ray(ndc[0], ndc[1]);
-      const hit = state.world.pick(ray.origin, ray.dir);
-      if (!hit) return false;
-      state.world.grab(hit.vertex, hit.point);
-      state.grabbing = { plane: hit.point, normal: r.camera.forward() };
-      wake();
-      return true;
-    },
-    onGrabMove(ndc) {
-      if (!state.grabbing || !state.world) return;
-      const ray = r.camera.ray(ndc[0], ndc[1]);
-      const p = rayPlane(ray.origin, ray.dir, state.grabbing.plane, state.grabbing.normal);
-      if (p) state.world.moveGrab(p);
-      wake();
-    },
-    onGrabEnd() { if (state.world) state.world.release(); state.grabbing = null; wake(); },
-    onChange: invalidate,
+  state.input = attachViewerInput(state, {
+    wake, invalidate, onControl, stopPlayback: () => setPlaying(false),
+    onUnavailable: () => status(i18n.t('status.grabStub')),
   });
 }
 
@@ -464,12 +453,12 @@ function invalidate() { redraw = true; kick(); }
 function wake() { quiet = 0; pumpRemote(); kick(); }
 
 /** A settled world (the same pose for a while, nothing driving it) is not stepped until woken. */
-const settled = () => quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing;
+const settled = () => quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing && !state.holdingLeaf && !state.world?.readingBusy;
 
 /** A Worker engine is stepped when its last pose lands (WorkerWorld.pump), not at the next frame. */
 function pumpRemote() {
   const w = state.world;
-  if (w instanceof WorkerWorld && !state.failed && !settled()) try { w.pump(STEP); } catch (e) { fail('error.engine', e); }
+  if (w instanceof WorkerWorld && !document.hidden && !state.failed && !settled()) try { w.pump(STEP); } catch (e) { fail('error.engine', e); }
 }
 
 function frame(now) {
@@ -504,7 +493,7 @@ function frame(now) {
       if (shownOverlay) { ovView.positions = shownOverlay.positions; ovView.colors = shownOverlay.colors; ovView.faint = !state.overlayOn; ov = ovView; }
       const bounds = state.renderer.draw(r, ov, changed);
       redraw = false;
-      if (!state.fitted && bounds) { state.renderer.camera.fit(bounds.center, bounds.radius); state.fitted = true; redraw = true; }
+      if (!state.fitted && bounds) { if (world instanceof BookWorld) fitBookCamera(state.renderer, world.book); else state.renderer.camera.fit(bounds.center, bounds.radius); state.fitted = true; redraw = true; }
     }
   } catch (e) {
     fail('error.engine', e);
@@ -515,7 +504,7 @@ function frame(now) {
   else if (world.received !== received) { received = world.received; quiet = changed ? 0 : quiet + 1; }
   frames++;
   const running = keepRunning({
-    playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing,
+    playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing || state.holdingLeaf || !!world.readingBusy,
     pending: world instanceof WorkerWorld && world.pending, quietFrames: quiet,
     engine: state.engine ? state.engine.kind : 'stub', hidden: document.hidden,
   });
@@ -535,13 +524,13 @@ function wireStatic() {
   const sel = $('lang-select');
   sel.value = i18n.lang;
   sel.addEventListener('change', () => i18n.setLang(sel.value));
-  document.addEventListener(LANG_EVENT, () => { sel.value = i18n.lang; renderAll(); setPlaying(state.playing); });
+  document.addEventListener(LANG_EVENT, () => { sel.value = i18n.lang; renderAll(); setPlaying(state.playing); invalidate(); });
   $('view-3d').addEventListener('click', () => setView('3d'));
   $('view-2d').addEventListener('click', () => setView('2d'));
   $('btn-play').addEventListener('click', () => setPlaying(!state.playing));
   $('btn-back').addEventListener('click', () => stepButton(-1));
   $('btn-forward').addEventListener('click', () => stepButton(1));
-  $('btn-restart').addEventListener('click', () => { const c = state.controls; if (c && c.primaryId) setPrimary(c.range(c.primaryId)[0], true); });
+  $('btn-restart').addEventListener('click', () => { if (state.world instanceof BookWorld) { state.input?.reset?.(); return; } const c = state.controls; if (c && c.primaryId) setPrimary(c.range(c.primaryId)[0], true); });
   $('btn-reset').addEventListener('click', () => { if (state.renderer) { state.renderer.camera.reset(); invalidate(); } });
   $('btn-grab').addEventListener('click', () => { state.grabMode = !state.grabMode; $('btn-grab').setAttribute('aria-pressed', String(state.grabMode)); $('viewer').classList.toggle('grab', state.grabMode); });
   $('btn-overlay').addEventListener('click', () => { state.overlayOn = !state.overlayOn; $('btn-overlay').setAttribute('aria-pressed', String(state.overlayOn)); invalidate(); });
@@ -575,11 +564,10 @@ async function init() {
   const canvas = $('view-canvas');
   state.renderer = createRenderer(canvas, { prefer: rendererOverride(state.share.renderer), onWarn: (m) => console.warn(m), onInvalidate: invalidate });
   const rd = state.renderer;   // the observer hands the size over: drawing never forces a layout
-  if (rd && typeof ResizeObserver === 'function') new ResizeObserver((es) => { rd.resize(es[0].contentRect.width, es[0].contentRect.height); invalidate(); }).observe(rd.canvas);
+  if (rd && typeof ResizeObserver === 'function') new ResizeObserver((es) => { state.input?.cancel?.(); if (state.world instanceof BookWorld) state.fitted = false; rd.resize(es[0].contentRect.width, es[0].contentRect.height); invalidate(); }).observe(rd.canvas);
   if (!state.renderer) notice(i18n.t('viewer.none'));
   else if (state.renderer.kind === 'canvas2d' && rendererOverride(state.share.renderer) !== 'canvas2d') notice(i18n.t('viewer.canvas2d'));
   const noticeText = $('viewer-notice').textContent;
-  setupInput();
   renderStatusStatic();
   state.view = state.share.view;
   try {

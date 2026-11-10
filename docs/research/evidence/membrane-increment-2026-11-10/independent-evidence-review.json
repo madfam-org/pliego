@@ -1,0 +1,451 @@
+{
+  "schema": "pliego-increment-independent-evidence-review/1",
+  "recordedAt": "2026-11-10T14:07:40.069117+00:00",
+  "sourceGit": "6cd67d082129b45f66ba3fc713df2a4d7b514fd6",
+  "readOnly": true,
+  "physicsRunsPerformed": 0,
+  "oracleRunsPerformed": 0,
+  "files": {
+    "probes.json": {
+      "sha256": "f75bdaa7b65692aa66686cb59bdca731f69d3b0e1d6c74eecda4cec954d6f4da",
+      "bytes": 95356
+    },
+    "probes-repeat.json": {
+      "sha256": "f75bdaa7b65692aa66686cb59bdca731f69d3b0e1d6c74eecda4cec954d6f4da",
+      "bytes": 95356
+    },
+    "probes-precision-80.json": {
+      "sha256": "a60781fc0b05c2d853763cf95f880e15fcdee0988ed658c3d0e5d8958c57ec41",
+      "bytes": 109906
+    },
+    "probes-precision-100.json": {
+      "sha256": "468bb5532e53192dfe091e0f7d9a8560c68754a91a57553f9e539f85797ff6bd",
+      "bytes": 109940
+    },
+    "historical-diagnostic.json": {
+      "sha256": "db235d86c022470fe58f4bd44b6495ff07b892ab1b35c784fc7553c1982110d8",
+      "bytes": 40684804
+    },
+    "baseline.json": {
+      "sha256": "879cb76014193f4661b143d0650c8ae6ab41729cc3458b528c97486365ac9044",
+      "bytes": 40685867
+    },
+    "historical-baseline-comparison.json": {
+      "sha256": "467e52160ec5d079a256eb47b63fd7ad8e7c1a84a74675e1b7e286c77aa87092",
+      "bytes": 44270
+    }
+  },
+  "sourceFiles": {
+    "increment-search.js": "00ad97ea195493e514b9c97221ff78ffbec1211d8b99c736d8c8c3d59a1e205d",
+    "membrane-increment-probes.mjs": "8c8c9141605a4ab0c7566581d5f9767b500c08c4d831f8b48e6c492f79ae9247",
+    "membrane-increment-precision.py": "15e14f198e5c273cecdbcfa72a8c740582e39ffb2b8206d0296934534fe3196b",
+    "plane-stress-precision.py": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec"
+  },
+  "gates": {
+    "probeRepeatedBytesExactlyEqual": true,
+    "precisionInputHashesMatchExactCaptureBytes": true,
+    "fullPrecisionEqualityExcludingOnlyDecimalDigits": false,
+    "allTruthErrorAndArmijoMeaningsExactlyEqual": true,
+    "losslessInputAndSourceHashesMatch": true,
+    "historicalBaselineExactExceptOnlyRecordedAtAndSource": true
+  },
+  "probes": {
+    "cases": 32,
+    "captureSHA256": "f75bdaa7b65692aa66686cb59bdca731f69d3b0e1d6c74eecda4cec954d6f4da",
+    "sourceClean": true,
+    "decisions": {
+      "rejected": 20,
+      "accepted": 12
+    },
+    "decisionsByGrain": {
+      "0": {
+        "rejected": 8
+      },
+      "31": {
+        "rejected": 4,
+        "accepted": 4
+      },
+      "45": {
+        "rejected": 4,
+        "accepted": 4
+      },
+      "90": {
+        "accepted": 4,
+        "rejected": 4
+      }
+    },
+    "acceptedStrictComputedArmijo": 12,
+    "acceptedZeroActualSteps": 0,
+    "losslessInputFieldsVerified": 192,
+    "fieldsWithNegativeZeroLEBytes": 0
+  },
+  "precision": {
+    "excludedFieldsOnly": [
+      "cases[].decimalDigits"
+    ],
+    "additionalExclusions": [],
+    "comparedScalarLeaves": 1954,
+    "fullProofDifferences": [
+      {
+        "path": ".cases[0].runtime.realSumOfStoredRuntimeTermsNJ",
+        "left": 1.9241191281868086e-28,
+        "right": 1.9241191281868084e-28,
+        "ulpDistance": 1,
+        "absoluteDifferenceNJ": 2.2420775429197073e-44
+      },
+      {
+        "path": ".cases[1].runtime.realSumOfStoredRuntimeTermsNJ",
+        "left": 1.8349829942577444e-34,
+        "right": 1.8349829942577442e-34,
+        "ulpDistance": 1,
+        "absoluteDifferenceNJ": 2.1382117680737565e-50
+      },
+      {
+        "path": ".cases[2].runtime.realSumOfStoredRuntimeTermsNJ",
+        "left": 1.9241191281868086e-28,
+        "right": 1.9241191281868084e-28,
+        "ulpDistance": 1,
+        "absoluteDifferenceNJ": 2.2420775429197073e-44
+      },
+      {
+        "path": ".cases[3].runtime.realSumOfStoredRuntimeTermsNJ",
+        "left": 1.8349829942577444e-34,
+        "right": 1.8349829942577442e-34,
+        "ulpDistance": 1,
+        "absoluteDifferenceNJ": 2.1382117680737565e-50
+      },
+      {
+        "path": ".cases[12].runtime.realSumOfStoredRuntimeTermsNJ",
+        "left": -1.8896432097691416e-21,
+        "right": -1.8896432097691413e-21,
+        "ulpDistance": 1,
+        "absoluteDifferenceNJ": 3.76158192263132e-37
+      },
+      {
+        "path": ".cases[30].runtime.realSumOfStoredRuntimeTermsNJ",
+        "left": -2.760506638872507e-23,
+        "right": -2.7605066388725064e-23,
+        "ulpDistance": 1,
+        "absoluteDifferenceNJ": 5.877471754111438e-39
+      },
+      {
+        "path": ".cases[31].runtime.realSumOfStoredRuntimeTermsNJ",
+        "left": -2.760506638872507e-23,
+        "right": -2.7605066388725064e-23,
+        "ulpDistance": 1,
+        "absoluteDifferenceNJ": 5.877471754111438e-39
+      }
+    ],
+    "truthErrorAndArmijoMeaningObjectsCompared": 64,
+    "truthErrorAndArmijoScalarLeavesCompared": 1088,
+    "allMeaningFieldsExactlyEqual": true,
+    "strictAcceptanceAllowanceNJ": 0,
+    "heuristicScaleDiagnosticOnly": true,
+    "heuristicAcceptanceAllowanceUsed": false,
+    "byMeaning": {
+      "storedCoefficientPolynomial": {
+        "computedAcceptedRealIncreases": 5,
+        "computedAcceptedRealDecreases": 7,
+        "computedAcceptedRealZeros": 0,
+        "acceptedFailsRecordedRealArmijo": 5,
+        "maximumAcceptedRealIncreaseNJ": 9.703930675670846e-22,
+        "witnesses": [
+          {
+            "case": 20,
+            "probe": {
+              "grain": 45,
+              "index": 2,
+              "direction": -1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -6.472749837974225e-22,
+            "recordedArmijoRhsNJ": -3.382874771933681e-25,
+            "computedRealPotentialDeltaNJ": 2.131138134777538e-22,
+            "recordedIncrementAbsoluteErrorNJ": 8.603887972751762e-22,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 3.552713678800501e-15
+          },
+          {
+            "case": 24,
+            "probe": {
+              "grain": 90,
+              "index": 0,
+              "direction": -1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -1.531729533057508e-22,
+            "recordedArmijoRhsNJ": -7.139387917908359e-26,
+            "computedRealPotentialDeltaNJ": 9.703930675670846e-22,
+            "recordedIncrementAbsoluteErrorNJ": 1.1235660208728352e-21,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 1.7763568394002505e-15
+          },
+          {
+            "case": 25,
+            "probe": {
+              "grain": 90,
+              "index": 0,
+              "direction": -1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -2.167779362741466e-22,
+            "recordedArmijoRhsNJ": -3.5696939589541794e-26,
+            "computedRealPotentialDeltaNJ": 3.4500507416227096e-22,
+            "recordedIncrementAbsoluteErrorNJ": 5.617830104364176e-22,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 8.881784197001252e-16
+          },
+          {
+            "case": 30,
+            "probe": {
+              "grain": 90,
+              "index": 2,
+              "direction": 1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -2.7605066388725064e-23,
+            "recordedArmijoRhsNJ": -7.804469486266535e-27,
+            "computedRealPotentialDeltaNJ": 6.034239298463663e-22,
+            "recordedIncrementAbsoluteErrorNJ": 6.310289962350914e-22,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 4.440892098500626e-16
+          },
+          {
+            "case": 31,
+            "probe": {
+              "grain": 90,
+              "index": 2,
+              "direction": 1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -2.7605066388725064e-23,
+            "recordedArmijoRhsNJ": -7.804469486266535e-27,
+            "computedRealPotentialDeltaNJ": 6.034239298463663e-22,
+            "recordedIncrementAbsoluteErrorNJ": 6.310289962350914e-22,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 4.440892098500626e-16
+          }
+        ]
+      },
+      "independentExactUVMaterial": {
+        "computedAcceptedRealIncreases": 12,
+        "computedAcceptedRealDecreases": 0,
+        "computedAcceptedRealZeros": 0,
+        "acceptedFailsRecordedRealArmijo": 12,
+        "maximumAcceptedRealIncreaseNJ": 2.966831637627207e-21,
+        "witnesses": [
+          {
+            "case": 10,
+            "probe": {
+              "grain": 31,
+              "index": 0,
+              "direction": 1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -2.583338758241985e-21,
+            "recordedArmijoRhsNJ": -5.550170395869193e-25,
+            "computedRealPotentialDeltaNJ": 2.966831637627207e-21,
+            "recordedIncrementAbsoluteErrorNJ": 5.550170395869192e-21,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 3.552713678800501e-15
+          },
+          {
+            "case": 11,
+            "probe": {
+              "grain": 31,
+              "index": 0,
+              "direction": 1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -1.2021156216155977e-21,
+            "recordedArmijoRhsNJ": -1.3875425989672982e-25,
+            "computedRealPotentialDeltaNJ": 1.8542697735170043e-22,
+            "recordedIncrementAbsoluteErrorNJ": 1.3875425989672981e-21,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 8.881784197001252e-16
+          },
+          {
+            "case": 12,
+            "probe": {
+              "grain": 31,
+              "index": 2,
+              "direction": -1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -1.8896432097691413e-21,
+            "recordedArmijoRhsNJ": -4.3940111484144535e-25,
+            "computedRealPotentialDeltaNJ": 2.5043679386453107e-21,
+            "recordedIncrementAbsoluteErrorNJ": 4.394011148414452e-21,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 3.552713678800501e-15
+          },
+          {
+            "case": 13,
+            "probe": {
+              "grain": 31,
+              "index": 2,
+              "direction": -1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -9.419797909382813e-22,
+            "recordedArmijoRhsNJ": -1.0985027871036134e-25,
+            "computedRealPotentialDeltaNJ": 1.5652299616533194e-22,
+            "recordedIncrementAbsoluteErrorNJ": 1.0985027871036133e-21,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 8.881784197001252e-16
+          },
+          {
+            "case": 18,
+            "probe": {
+              "grain": 45,
+              "index": 0,
+              "direction": 1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -1.7531399078531637e-23,
+            "recordedArmijoRhsNJ": -6.027514576816068e-27,
+            "computedRealPotentialDeltaNJ": 4.2743746689629046e-23,
+            "recordedIncrementAbsoluteErrorNJ": 6.027514576816068e-23,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 4.440892098500626e-16
+          },
+          {
+            "case": 19,
+            "probe": {
+              "grain": 45,
+              "index": 0,
+              "direction": 1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -1.7531399078531637e-23,
+            "recordedArmijoRhsNJ": -6.027514576816068e-27,
+            "computedRealPotentialDeltaNJ": 4.2743746689629046e-23,
+            "recordedIncrementAbsoluteErrorNJ": 6.027514576816068e-23,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 4.440892098500626e-16
+          },
+          {
+            "case": 20,
+            "probe": {
+              "grain": 45,
+              "index": 2,
+              "direction": -1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -6.472749837974225e-22,
+            "recordedArmijoRhsNJ": -3.382874771933681e-25,
+            "computedRealPotentialDeltaNJ": 2.7355997881362586e-21,
+            "recordedIncrementAbsoluteErrorNJ": 3.3828747719336812e-21,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 3.552713678800501e-15
+          },
+          {
+            "case": 21,
+            "probe": {
+              "grain": 45,
+              "index": 2,
+              "direction": -1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -6.74743706224904e-22,
+            "recordedArmijoRhsNJ": -8.457186929834202e-26,
+            "computedRealPotentialDeltaNJ": 1.7097498675851619e-22,
+            "recordedIncrementAbsoluteErrorNJ": 8.457186929834202e-22,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 8.881784197001252e-16
+          },
+          {
+            "case": 24,
+            "probe": {
+              "grain": 90,
+              "index": 0,
+              "direction": -1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -1.531729533057508e-22,
+            "recordedArmijoRhsNJ": -7.139387917908359e-26,
+            "computedRealPotentialDeltaNJ": 5.607658384850851e-22,
+            "recordedIncrementAbsoluteErrorNJ": 7.139387917908359e-22,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 1.7763568394002505e-15
+          },
+          {
+            "case": 25,
+            "probe": {
+              "grain": 90,
+              "index": 0,
+              "direction": -1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -2.167779362741466e-22,
+            "recordedArmijoRhsNJ": -3.5696939589541794e-26,
+            "computedRealPotentialDeltaNJ": 1.4019145962127127e-22,
+            "recordedIncrementAbsoluteErrorNJ": 3.569693958954179e-22,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 8.881784197001252e-16
+          },
+          {
+            "case": 30,
+            "probe": {
+              "grain": 90,
+              "index": 2,
+              "direction": 1,
+              "magnitude": 9.094947017729282e-13,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -2.7605066388725064e-23,
+            "recordedArmijoRhsNJ": -7.804469486266535e-27,
+            "computedRealPotentialDeltaNJ": 5.0439628473940275e-23,
+            "recordedIncrementAbsoluteErrorNJ": 7.804469486266534e-23,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 4.440892098500626e-16
+          },
+          {
+            "case": 31,
+            "probe": {
+              "grain": 90,
+              "index": 2,
+              "direction": 1,
+              "magnitude": 8.881784197001252e-16,
+              "decision": "accepted"
+            },
+            "computedDeltaNJ": -2.7605066388725064e-23,
+            "recordedArmijoRhsNJ": -7.804469486266535e-27,
+            "computedRealPotentialDeltaNJ": 5.0439628473940275e-23,
+            "recordedIncrementAbsoluteErrorNJ": 7.804469486266534e-23,
+            "passesRealPotentialRecordedArmijo": false,
+            "maximumActualCoordinateStepMm": 4.440892098500626e-16
+          }
+        ]
+      }
+    },
+    "scope": "Retained direct Decimal 80/100 outputs only. Full-proof equality remains FAILED on seven one-ULP recombined-runtime diagnostic fields; all meaning/truth/error/Armijo objects agree exactly. No extra exclusions, oracle changes, new oracle execution or interval/error-bound certificate."
+  },
+  "historicalBaseline": {
+    "oldSource": "93f6653136bc37c4feff48c86f88259000c7dde8",
+    "newSource": "6cd67d082129b45f66ba3fc713df2a4d7b514fd6",
+    "completeBodyExactlyEqual": true,
+    "excludedFieldsOnly": [
+      "recordedAt",
+      "source"
+    ],
+    "existingProofHashesAndClaimIndependentlyVerified": true,
+    "trajectories": 24
+  },
+  "conclusion": "Byte identity, exact input/source binding and full historical default-body equality pass. The 32-case full 80/100 precision-proof equality gate FAILS on seven retained one-ULP diagnostic differences; it is not waived. Computed strict Armijo acceptance is not a real-potential descent certificate: accepted real increases are quantified separately by stored-coefficient and independent UV/material meaning. This bounded campaign does not close force/time/material/booklet/device accuracy or exhaust paper-physics research."
+}

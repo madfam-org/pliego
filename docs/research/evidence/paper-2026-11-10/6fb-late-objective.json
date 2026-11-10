@@ -1,0 +1,355 @@
+{
+  "schema": "pliego-objective-variants/0.1",
+  "recordedAt": "2026-11-10T08:25:46.875Z",
+  "source": {
+    "git": "6fbc553096d75846870710c18f7cfa47d2d9c1ee",
+    "dirty": false,
+    "harnessSHA256": "ca2eb3e93cc785a7322b581db19530173e689559a94aa7582491b545405d604c",
+    "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+    "capturedEngine": {
+      "git": "e25b8e53e22d361d24156f878ea602751ddc4004",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "093db3c568896172014213c1aca72a1ef108d1cb48e50a16eed3280994183595",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "76d70a7380b7b606a64b685737f630a87d7a31a7562e861c76f42420b17d5d08",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    }
+  },
+  "scope": "Frozen-join objective on the same retained accepted pose and inertial target; off mode must reconstruct captured scalars/free gradient. Changed contact model is a state transplant, not its World.step history or material validation.",
+  "variants": [
+    {
+      "edgeEdgeMollification": "off",
+      "energyBefore": 355.1898846773351,
+      "residualBeforeMicroNewtons": 0.6630251270038201,
+      "contacts": 1592,
+      "curvatureRows": 1592,
+      "smoothing": null,
+      "directionalDifferences": [
+        {
+          "direction": 0,
+          "stepMm": 0.00001,
+          "exactSlope": -0.07710997764764937,
+          "centralSlope": 144.44870356840056,
+          "normalizedError": 144.5258135460482
+        },
+        {
+          "direction": 0,
+          "stepMm": 0.000001,
+          "exactSlope": -0.07710997764764937,
+          "centralSlope": 24.792755226599184,
+          "normalizedError": 24.869865204246832
+        },
+        {
+          "direction": 0,
+          "stepMm": 1e-7,
+          "exactSlope": -0.07710997764764937,
+          "centralSlope": 0.2600538095975935,
+          "normalizedError": 0.3371637872452429
+        },
+        {
+          "direction": 0,
+          "stepMm": 1e-8,
+          "exactSlope": -0.07710997764764937,
+          "centralSlope": -0.42243186726409476,
+          "normalizedError": 0.3453218896164454
+        },
+        {
+          "direction": 0,
+          "stepMm": 1e-9,
+          "exactSlope": -0.07710997764764937,
+          "centralSlope": -0.07722178452240769,
+          "normalizedError": 0.00011180687475831341
+        },
+        {
+          "direction": 1,
+          "stepMm": 0.00001,
+          "exactSlope": -0.0832787195422873,
+          "centralSlope": 50.735679397462256,
+          "normalizedError": 50.81895811700454
+        },
+        {
+          "direction": 1,
+          "stepMm": 0.000001,
+          "exactSlope": -0.0832787195422873,
+          "centralSlope": 11.492422089531829,
+          "normalizedError": 11.575700809074116
+        },
+        {
+          "direction": 1,
+          "stepMm": 1e-7,
+          "exactSlope": -0.0832787195422873,
+          "centralSlope": 0.6231232418940635,
+          "normalizedError": 0.7064019614363508
+        },
+        {
+          "direction": 1,
+          "stepMm": 1e-8,
+          "exactSlope": -0.0832787195422873,
+          "centralSlope": 0.2377532837272156,
+          "normalizedError": 0.3210320032695029
+        },
+        {
+          "direction": 1,
+          "stepMm": 1e-9,
+          "exactSlope": -0.0832787195422873,
+          "centralSlope": -0.05263700586510822,
+          "normalizedError": 0.030641713677179078
+        },
+        {
+          "direction": 2,
+          "stepMm": 0.00001,
+          "exactSlope": -0.07497177790721544,
+          "centralSlope": -45.38454956275472,
+          "normalizedError": 45.309577784847505
+        },
+        {
+          "direction": 2,
+          "stepMm": 0.000001,
+          "exactSlope": -0.07497177790721544,
+          "centralSlope": -2.5015303322106774,
+          "normalizedError": 2.426558554303462
+        },
+        {
+          "direction": 2,
+          "stepMm": 1e-7,
+          "exactSlope": -0.07497177790721544,
+          "centralSlope": 1.153691755462205,
+          "normalizedError": 1.2286635333694205
+        },
+        {
+          "direction": 2,
+          "stepMm": 1e-8,
+          "exactSlope": -0.07497177790721544,
+          "centralSlope": 0.8471118917441345,
+          "normalizedError": 0.9220836696513499
+        },
+        {
+          "direction": 2,
+          "stepMm": 1e-9,
+          "exactSlope": -0.07497177790721544,
+          "centralSlope": 0.06835421118012164,
+          "normalizedError": 0.14332598908733707
+        },
+        {
+          "direction": 3,
+          "stepMm": 0.00001,
+          "exactSlope": -0.0536330829429716,
+          "centralSlope": -59.68166943546293,
+          "normalizedError": 59.628036352519956
+        },
+        {
+          "direction": 3,
+          "stepMm": 0.000001,
+          "exactSlope": -0.0536330829429716,
+          "centralSlope": -3.570719968593039,
+          "normalizedError": 3.5170868856500674
+        },
+        {
+          "direction": 3,
+          "stepMm": 1e-7,
+          "exactSlope": -0.0536330829429716,
+          "centralSlope": 1.6636050759188947,
+          "normalizedError": 1.7172381588618664
+        },
+        {
+          "direction": 3,
+          "stepMm": 1e-8,
+          "exactSlope": -0.0536330829429716,
+          "centralSlope": 1.297320295634563,
+          "normalizedError": 1.3509533785775347
+        },
+        {
+          "direction": 3,
+          "stepMm": 1e-9,
+          "exactSlope": -0.0536330829429716,
+          "centralSlope": 0.17848833522293717,
+          "normalizedError": 0.23212141816590875
+        }
+      ],
+      "slope": -0.0000016965983983870196,
+      "maximumDeltaMm": 0.00000446493841355089,
+      "accepted": true,
+      "alpha": 0.000244140625,
+      "backtracksAdded": 12,
+      "energyAfter": 355.1898846774631,
+      "residualAfterMicroNewtons": 1.448236028334037,
+      "acceptedPoseSHA256": "8f50d8108622bc253a597703a53ef3b0eb176e0cfb13d406f4588ce08b9a22e1"
+    },
+    {
+      "edgeEdgeMollification": "surface-guarded",
+      "energyBefore": 354.9469795012215,
+      "residualBeforeMicroNewtons": 61.08932718215231,
+      "contacts": 1592,
+      "curvatureRows": 2438,
+      "smoothing": {
+        "mode": "surface-guarded",
+        "activeEdges": 1172,
+        "smoothedEdges": 282,
+        "uncoveredEdges": 0,
+        "parallelEdges": 0,
+        "curvatureRows": 2438,
+        "totals": {
+          "evaluations": 1,
+          "activeEdges": 1172,
+          "smoothedEdges": 282,
+          "uncoveredEdges": 0,
+          "parallelEdges": 0,
+          "curvatureRows": 2438
+        }
+      },
+      "directionalDifferences": [
+        {
+          "direction": 0,
+          "stepMm": 0.00001,
+          "exactSlope": -202.76340224477082,
+          "centralSlope": -51.86021301994969,
+          "normalizedError": 0.7442328721760875
+        },
+        {
+          "direction": 0,
+          "stepMm": 0.000001,
+          "exactSlope": -202.76340224477082,
+          "centralSlope": -177.69608274420534,
+          "normalizedError": 0.12362842220562488
+        },
+        {
+          "direction": 0,
+          "stepMm": 1e-7,
+          "exactSlope": -202.76340224477082,
+          "centralSlope": -202.21440337309105,
+          "normalizedError": 0.0027075836447892783
+        },
+        {
+          "direction": 0,
+          "stepMm": 1e-8,
+          "exactSlope": -202.76340224477082,
+          "centralSlope": -202.76356451631727,
+          "normalizedError": 8.002999785033665e-7
+        },
+        {
+          "direction": 0,
+          "stepMm": 1e-9,
+          "exactSlope": -202.76340224477082,
+          "centralSlope": -202.76368672966782,
+          "normalizedError": 0.0000014030386838009052
+        },
+        {
+          "direction": 1,
+          "stepMm": 0.00001,
+          "exactSlope": -220.42763427517983,
+          "centralSlope": -167.08303000143587,
+          "normalizedError": 0.24200506642079658
+        },
+        {
+          "direction": 1,
+          "stepMm": 0.000001,
+          "exactSlope": -220.42763427517983,
+          "centralSlope": -209.34177055664804,
+          "normalizedError": 0.05029253140144984
+        },
+        {
+          "direction": 1,
+          "stepMm": 1e-7,
+          "exactSlope": -220.42763427517983,
+          "centralSlope": -220.19391508365516,
+          "normalizedError": 0.0010602989606688683
+        },
+        {
+          "direction": 1,
+          "stepMm": 1e-8,
+          "exactSlope": -220.42763427517983,
+          "centralSlope": -220.42765124297148,
+          "normalizedError": 7.697669898566612e-8
+        },
+        {
+          "direction": 1,
+          "stepMm": 1e-9,
+          "exactSlope": -220.42763427517983,
+          "centralSlope": -220.4280349360488,
+          "normalizedError": 0.0000018176526290800535
+        },
+        {
+          "direction": 2,
+          "stepMm": 0.00001,
+          "exactSlope": -199.77666774697605,
+          "centralSlope": -245.67993844186728,
+          "normalizedError": 0.22977293200740184
+        },
+        {
+          "direction": 2,
+          "stepMm": 0.000001,
+          "exactSlope": -199.77666774697605,
+          "centralSlope": -203.29383960415726,
+          "normalizedError": 0.017605518686675807
+        },
+        {
+          "direction": 2,
+          "stepMm": 1e-7,
+          "exactSlope": -199.77666774697605,
+          "centralSlope": -199.62001147177943,
+          "normalizedError": 0.0007841570137460737
+        },
+        {
+          "direction": 2,
+          "stepMm": 1e-8,
+          "exactSlope": -199.77666774697605,
+          "centralSlope": -199.77481429123145,
+          "normalizedError": 0.000009277638702744191
+        },
+        {
+          "direction": 2,
+          "stepMm": 1e-9,
+          "exactSlope": -199.77666774697605,
+          "centralSlope": -199.7769629724644,
+          "normalizedError": 0.000001477777618744968
+        },
+        {
+          "direction": 3,
+          "stepMm": 0.00001,
+          "exactSlope": -144.40009742923962,
+          "centralSlope": -208.40767707284155,
+          "normalizedError": 0.4432654879264715
+        },
+        {
+          "direction": 3,
+          "stepMm": 0.000001,
+          "exactSlope": -144.40009742923962,
+          "centralSlope": -149.4168325280043,
+          "normalizedError": 0.03474190937594786
+        },
+        {
+          "direction": 3,
+          "stepMm": 1e-7,
+          "exactSlope": -144.40009742923962,
+          "centralSlope": -144.164741016084,
+          "normalizedError": 0.0016298909581480426
+        },
+        {
+          "direction": 3,
+          "stepMm": 1e-8,
+          "exactSlope": -144.40009742923962,
+          "centralSlope": -144.38698485719215,
+          "normalizedError": 0.00009080722437809419
+        },
+        {
+          "direction": 3,
+          "stepMm": 1e-9,
+          "exactSlope": -144.40009742923962,
+          "centralSlope": -144.40021800510294,
+          "normalizedError": 8.35012340483829e-7
+        }
+      ],
+      "slope": -0.08106527464694482,
+      "maximumDeltaMm": 0.00017262295310327413,
+      "accepted": true,
+      "alpha": 1,
+      "backtracksAdded": 0,
+      "energyAfter": 354.90806016634895,
+      "residualAfterMicroNewtons": 4.3083367795752565,
+      "acceptedPoseSHA256": "fa9ae0758e223c1f648465dc0c95dc0476e13cfbbec58fa8f0361f40ea93d2c7"
+    }
+  ]
+}

@@ -15,7 +15,7 @@ import { loadDocument } from '../document.js';
 import { buildMesh, HINGE_PANEL, HINGE_CREASE, HINGE_SCORE, HINGE_PERF } from '../mesh.js';
 import { fromDerived, bendingDeff, membraneE, creaseGrainFactor } from '../material.js';
 import { dihedral } from './dihedral.js';
-import { buildSystem, assembleAndFactor, gradient, unwrap, TERM_STRING, termResidual } from './implicit.js';
+import { buildSystem, unwrap, TERM_STRING, termResidual } from './implicit.js';
 import { liftOntoTable, restBranch } from './setrest.js';
 import { resolveJoins, updateTerms, TK_STRING, TK_PERF } from './joins.js';
 import { Drivers } from '../drivers.js';
@@ -23,10 +23,16 @@ import { Contact } from './contact.js';
 import { EdgeContact } from './edgecontact.js';
 import { Wind, addAirForces } from './air.js';
 import { RenderBuffers } from './render.js';
-import { pcgStep } from './pcg.js';
+import { newtonStep } from './newton.js';
+import { initialiseReferenceState, validateReferenceState, stepReferenceState, setInitialReferencePose, referenceStateSnapshot, referenceResiduals, referenceDiagnostics } from './reference-state.js';
 import { snapshotWorld, restoreWorld } from './state.js';
 import { JoinGates } from './gates.js';
 import { Presentation } from './presentation.js';
+import { EnergySearch } from './energy-search.js';
+import { validateIncrementDomain, getIncrementSearchSnapshot } from './increment-search.js';
+import { MotionGuard } from '../collision/motion-guard.js';
+import { CoupledContact } from './coupled-contact.js';
+import { OrthotropicMembrane } from './orthotropic-membrane.js';
 import * as K from '../constants.js';
 import { hypot3 } from '../fastmath.js';
 
@@ -38,23 +44,68 @@ export class World {
    * @param {{meshEdge?:number, substeps?:number, contact?:boolean, ground?:boolean, gravity?:boolean|number, seed?:number,
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
-   *   bendDamping?:number}} [opts]
+   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
+   *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
+   *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
     this.doc = doc;
+    const orthotropic = opts.membraneModel === 'orthotropic-stvk';
+    if (!['absolute-position', 'reference-displacement'].includes(opts.stateCoordinates ?? 'absolute-position')) throw new RangeError('World: invalid stateCoordinates');
+    if (opts.stateCoordinates === 'reference-displacement' && opts.membraneReference !== 'uv-displacement') throw new Error('World: reference-displacement stateCoordinates requires uv-displacement membraneReference');
+    if (!['material-coefficients', 'uv-displacement'].includes(opts.membraneReference ?? 'material-coefficients')) throw new RangeError('World: invalid membraneReference');
+    if (opts.membraneReference === 'uv-displacement' && (!orthotropic || opts.membraneArithmetic !== 'double-double' || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: uv-displacement membraneReference requires orthotropic-stvk, double-double and membrane-inertia-increment search');
+    if (!['binary64', 'double-double'].includes(opts.membraneArithmetic ?? 'binary64')) throw new RangeError('World: invalid membraneArithmetic');
+    if (opts.membraneArithmetic === 'double-double' && (!orthotropic || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: double-double membraneArithmetic requires orthotropic-stvk and membrane-inertia-increment search');
+    if (!['total-energy', 'membrane-inertia-increment'].includes(opts.lineSearchArithmetic ?? 'total-energy')) throw new RangeError('World: invalid lineSearchArithmetic');
+    if (opts.lineSearchArithmetic === 'membrane-inertia-increment' && (!orthotropic || opts.lineSearch !== true)) throw new Error('World: membrane-inertia-increment requires orthotropic-stvk and lineSearch:true');
+    if (!['edge-springs', 'orthotropic-stvk'].includes(opts.membraneModel ?? 'edge-springs')) throw new RangeError('World: invalid membraneModel');
+    const membraneKeys = ['membranePoissonConvention', 'membraneNu12', 'membraneCurvature', 'membraneProjection'];
+    if (!orthotropic && membraneKeys.some(key => /** @type {any} */(opts)[key] !== undefined)) throw new Error('World: membrane research metadata requires orthotropic-stvk');
     this.opts = {
       substeps: opts.substeps ?? K.DEFAULT_SUBSTEPS, contact: opts.contact ?? true, ground: opts.ground ?? true,
       gravity: opts.gravity ?? true, seed: opts.seed ?? K.DEFAULT_SEED, damping: opts.damping ?? K.DAMPING,
       windDir: opts.windDir ?? [0, 0, 1], panelStiffness: opts.panelStiffness ?? 1, newtonIterations: opts.newtonIterations ?? 1,
       refactorAngle: opts.refactorAngle ?? K.REFACTOR_ANGLE, grabStiffness: opts.grabStiffness ?? K.GRAB_STIFFNESS,
       handFactor: opts.handFactor ?? K.HAND_FACTOR, plasticity: opts.plasticity ?? true, meshEdge: opts.meshEdge,
+      physicalMembrane: opts.physicalMembrane ?? false,
+      lineSearch: opts.lineSearch ?? false,
+      ...(opts.membraneArithmetic === 'double-double' ? { membraneArithmetic: opts.membraneArithmetic } : {}),
+      ...(opts.membraneReference === 'uv-displacement' ? { membraneReference: opts.membraneReference } : {}),
+      ...(opts.stateCoordinates === 'reference-displacement' ? { stateCoordinates: opts.stateCoordinates } : {}),
+      ...(opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchArithmetic: opts.lineSearchArithmetic } : {}),
+      continuousContact: opts.continuousContact ?? false,
+      barrierContact: opts.barrierContact ?? false,
+      previousPoseStart: opts.previousPoseStart ?? false,
+      consistentMembraneCurvature: opts.consistentMembraneCurvature ?? false,
+      contactBroadPhase: opts.contactBroadPhase ?? 'reference',
+      edgeEdgeMollification: opts.edgeEdgeMollification ?? 'off',
+      ...(orthotropic ? { membraneModel: 'orthotropic-stvk', membranePoissonConvention: opts.membranePoissonConvention,
+        membraneNu12: opts.membraneNu12?.slice(), membraneCurvature: opts.membraneCurvature, membraneProjection: opts.membraneProjection } : {}),
     };
+    if (typeof this.opts.physicalMembrane !== 'boolean') throw new TypeError('World: physicalMembrane must be boolean');
+    this.membraneCap = this.opts.physicalMembrane ? Infinity : K.MEMBRANE_CAP_LENGTH;
+    if (typeof this.opts.lineSearch !== 'boolean') throw new TypeError('World: lineSearch must be boolean');
+    if (typeof this.opts.continuousContact !== 'boolean') throw new TypeError('World: continuousContact must be boolean');
+    if (this.opts.continuousContact && !this.opts.contact) throw new Error('World: continuousContact requires contact');
+    if (typeof this.opts.barrierContact !== 'boolean') throw new TypeError('World: barrierContact must be boolean');
+    if (typeof this.opts.previousPoseStart !== 'boolean') throw new TypeError('World: previousPoseStart must be boolean');
+    if (typeof this.opts.consistentMembraneCurvature !== 'boolean') throw new TypeError('World: consistentMembraneCurvature must be boolean');
+    if (!['reference', 'bvh', 'wasm'].includes(this.opts.contactBroadPhase)) throw new RangeError('World: invalid contactBroadPhase');
+    if (!['off', 'surface-guarded'].includes(this.opts.edgeEdgeMollification)) throw new RangeError('World: invalid edgeEdgeMollification');
+    if (this.opts.edgeEdgeMollification !== 'off' && !this.opts.barrierContact) throw new Error('World: edgeEdgeMollification requires barrierContact');
+    if (this.opts.barrierContact && (!this.opts.contact || this.opts.continuousContact)) throw new Error('World: barrierContact requires contact and replaces continuousContact');
     if (!(this.opts.substeps >= 1 && Number.isInteger(this.opts.substeps))) throw new RangeError('World: substeps must be a positive integer');
     const mesh = buildMesh(doc, { meshEdge: opts.meshEdge });
     this.mesh = mesh;
     const nV = mesh.nV;
     this.materials = doc.sheets.map((/** @type {any} */ s) => fromDerived(s.derived));
+    if (orthotropic) validateMembraneExperiment(doc, opts, mesh);
+    this.orthotropicMembrane = orthotropic ? new OrthotropicMembrane(mesh, this.materials, doc, opts.membraneNu12, opts.membraneArithmetic, opts.membraneReference) : null;
+    if (this.orthotropicMembrane && !this.orthotropicMembrane.diagnostics(mesh.X0).finite) throw new Error('Orthotropic membrane: invalid initial triangle metric/arithmetic: ' + (this.orthotropicMembrane.work.arithmeticError ?? ''));
+    this.orthotropicMembraneSignature = this.orthotropicMembrane ? JSON.stringify(this.orthotropicMembrane.configuration) : null;
     const lift = (opts.ground ?? true) ? liftOntoTable(doc, mesh) : 0; // setrest.js
     this.X0 = mesh.X0;
     this.x = Float64Array.from(mesh.X0);
@@ -81,7 +132,7 @@ export class World {
     for (let i = 0; i < mesh.perfPairs.length / 2; i++) {
       const a = mesh.perfPairs[2 * i], b = mesh.perfPairs[2 * i + 1];
       const m = this.materials[mesh.vSheet[a]];
-      const Y = Math.min(m.Emd * m.t, K.MEMBRANE_CAP_LENGTH * m.rhoA * K.GRAVITY);
+      const Y = Math.min(m.Emd * m.t, this.membraneCap * m.rhoA * K.GRAVITY);
       terms.add(TK_PERF, 0, [a, b], [1, -1], { k: this.kHard, pair: i, fBreak: m.perfFactor * Y * m.tearStrain * mesh.perfPairLen[i] });
     }
     this.drivers = new Drivers(this, terms, pins, opts);
@@ -98,6 +149,7 @@ export class World {
     this.fixedTarget = Float64Array.from(this.x);
     this._clampCorrection();
     this.sys = buildSystem(this);
+    this.energySearch = this.opts.lineSearch ? new EnergySearch(3 * nV, this.opts.lineSearchArithmetic) : null;
     this.factorDir = new Float64Array(3 * mesh.nE);
     this.edgeDir = new Float64Array(3 * mesh.nE);
     this.edgeK = new Float64Array(mesh.nE);
@@ -114,6 +166,8 @@ export class World {
     this.factorCount = 0;
     this.dirty = true;
     this.contact = this.opts.contact || this.opts.ground ? new Contact(this) : null;
+    this.motionGuard = this.opts.continuousContact ? new MotionGuard(this, opts.ccdIterations) : null;
+    this.coupledContact = this.opts.barrierContact ? new CoupledContact(this, opts) : null;
     // edge–face contact for interlocking slits: only documents that name an edge `interlock…`
     this.edgeContact = this.contact && this.opts.contact && opts.edgeContact !== false && EdgeContact.wanted(doc) ? new EdgeContact(this) : null;
     if (this.edgeContact && !this.edgeContact.enabled) this.warnings.push(`edge contact: ${this.edgeContact.pairs} lip × triangle pairs exceed the limit; interlocking slits are not held`);
@@ -132,8 +186,11 @@ export class World {
     this._factorState = null;
     // set later; declared here so a World keeps one hidden class and its hot methods stay optimised
     /** @type {any} */ this._pcg = null; /** @type {number[]|null} */ this._perfTerms = null; /** @type {Map<number, number>|null} */ this._perfOf = null; this._grabSheet = 0;
+    this.coupledContact?.initialise(this);
     this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
+    if (this.opts.lineSearchArithmetic === 'membrane-inertia-increment') validateIncrementDomain(this, this.x);
+    initialiseReferenceState(this);
   }
 
   /** Stiffness, rest angles, yields and limits of membrane edges and hinges. */
@@ -149,7 +206,7 @@ export class World {
       const we = t1 >= 0 ? (mesh.triArea[t0] + mesh.triArea[t1]) / (1.5 * l0) : (2 * mesh.triArea[t0]) / l0;
       const grain = (doc.sheets[s].grainDeg * Math.PI) / 180;
       const cphi = Math.abs(((mesh.uv[2 * b] - mesh.uv[2 * a]) * Math.cos(grain) + (mesh.uv[2 * b + 1] - mesh.uv[2 * a + 1]) * Math.sin(grain)) / l0);
-      const Y = Math.min(membraneE(m, Math.acos(Math.min(1, cphi))) * m.t, K.MEMBRANE_CAP_LENGTH * m.rhoA * K.GRAVITY);
+      const Y = Math.min(membraneE(m, Math.acos(Math.min(1, cphi))) * m.t, this.membraneCap * m.rhoA * K.GRAVITY);
       this.kMem[e] = (Y * we) / l0;
     }
     this.hingeK = new Float64Array(nH);
@@ -210,7 +267,7 @@ export class World {
     }
   }
 
-  /** Simulation positions (Float64Array xyz, live view; write through it only before stepping, or render() may serve a stale pose). */
+  /** Simulation positions, xyz live view. Reference-displacement mode refuses writes; use setInitialReferencePose before stepping. */
   get positions() { return this.x; }
 
   /** Whether the world sleeps (steps skip the solver until something wakes it); O(1), unlike stats(). */
@@ -231,6 +288,7 @@ export class World {
    * @param {number} [frameDt]
    */
   step(frameDt = 1 / 60) {
+    validateReferenceState(this);
     this._acc += frameDt / this.dt;
     const n = Math.floor(this._acc + 1e-9);
     this._acc -= n;
@@ -252,6 +310,7 @@ export class World {
    */
   _sleepCheck() {
     if (!K.SLEEP_SPEED) return;
+    if (this.coupledContact && !this.coupledContact.last.converged) { this._quiet = 0; return; }
     const d = this.drivers;
     if (d.wind !== 0 || this.terms.active[d.grabTerm]) { this._quiet = 0; return; }
     for (const [id, g] of d.goal) if (d.value.get(id) !== g) { this._quiet = 0; return; }
@@ -293,14 +352,19 @@ export class World {
   }
 
   _substep() {
+    validateReferenceState(this);
+    if (this.opts.stateCoordinates === 'reference-displacement') return stepReferenceState(this);
     const dt = this.dt, nV = this.mesh.nV;
     const x = this.x, v = this.v, xs = this.xs, w = this.invMass, f = this.fext;
+    if (this.motionGuard || this.coupledContact) xs.set(x); // include prescribed/gated movement in the swept path
     if (this.drivers.apply(this, dt)) this.dirty = true;
     if (this.gates.count) { if (this.gates.update(this)) this.dirty = true; this.gates.follow(this); }
-    xs.set(x);
+    if (!this.motionGuard && !this.coupledContact) xs.set(x);
     if (this.sys.nFree === 0) {
       // every vertex is driven (kinematic program / boards): follow the drivers, nothing to solve
       x.set(this.fixedTarget);
+      if (this.coupledContact) { this.xt.set(x); this.coupledContact.solve(this); }
+      this.motionGuard?.apply(this, xs, x);
       for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
       this._hingeUpdate();
       this.time += dt;
@@ -325,56 +389,34 @@ export class World {
       }
     }
     this.xt.set(x);
-    updateTerms(this, x);
-    this._checkStrings(x);
-    this._checkRotation();
-    this._newton();
-    this._tear(x);
-    if (this.contact && this.opts.contact) {
-      // broad phase every substep with a tight reach: relative motion over the substep (both sides,
-      // inertia + free fall + the Newton step already taken) plus a margin
-      let vmax = 0;
-      for (let i = 0; i < 3 * nV; i++) { const d = Math.abs(x[i] - xs[i]); if (d > vmax) vmax = d; }
-      this.contact.broadPhase(x, this.fixed, Math.min(50, 2 * vmax + 0.5));
+    if (this.opts.previousPoseStart && !this.coupledContact) for (let vertex = 0; vertex < nV; vertex++) if (w[vertex]) {
+      for (let k = 0; k < 3; k++) x[3 * vertex + k] = xs[3 * vertex + k];
     }
-    this._projections();
+    if (this.coupledContact) {
+      this.coupledContact.solve(this); this._tear(x);
+    } else {
+      updateTerms(this, x);
+      this._checkStrings(x);
+      this._checkRotation();
+      this._newton();
+      this._tear(x);
+      if (this.contact && this.opts.contact) {
+        // broad phase every substep with a tight reach: relative motion over the substep (both sides,
+        // inertia + free fall + the Newton step already taken) plus a margin
+        let vmax = 0;
+        for (let i = 0; i < 3 * nV; i++) { const d = Math.abs(x[i] - xs[i]); if (d > vmax) vmax = d; }
+        this.contact.broadPhase(x, this.fixed, Math.min(50, 2 * vmax + 0.5));
+      }
+      if (!this.orthotropicMembrane) this._projections(); // explicit research membraneProjection:'none'
+      this.motionGuard?.apply(this, xs, x);
+    }
     for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
     this._hingeUpdate();
     this.time += dt;
     this.substepsRun++;
   }
 
-  _newton() {
-    const S = this.sys;
-    if (!S.ch) return;
-    const x = this.x, g = this.g, rhs = S.rhs, fi = S.freeIdx, nV = this.mesh.nV;
-    const idt2 = 1 / (this.dt * this.dt);
-    for (let it = 0; it < this.opts.newtonIterations; it++) {
-      g.fill(0);
-      gradient(this, x, g);
-      if (it > 0) for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
-      if (!this.dirty && !(this._pcgFail > 0)) {
-        const r = pcgStep(this, x, g, K.PCG_MAX_ITER, K.PCG_RTOL);
-        this.pcgIterations = r.iterations;
-        if (r.converged) { if (r.iterations > K.PCG_REFACTOR_ITER) this.dirty = true; continue; }
-        this._pcgFail = K.PCG_FAIL_HOLD; // the sheet is moving fast: factor directly for a few substeps
-      } else if (this._pcgFail > 0) this._pcgFail--;
-      assembleAndFactor(this, x);
-      this._saveFactorState(x);
-      this.dirty = false;
-      for (let i = 0; i < nV; i++) {
-        const k = fi[i];
-        if (k < 0) continue;
-        rhs[3 * k] = -g[3 * i]; rhs[3 * k + 1] = -g[3 * i + 1]; rhs[3 * k + 2] = -g[3 * i + 2];
-      }
-      S.ch.solve(rhs);
-      for (let i = 0; i < nV; i++) {
-        const k = fi[i];
-        if (k < 0) continue;
-        x[3 * i] += rhs[3 * k]; x[3 * i + 1] += rhs[3 * k + 1]; x[3 * i + 2] += rhs[3 * k + 2];
-      }
-    }
-  }
+  _newton() { newtonStep(this); }
 
   _projections() {
     const x = this.x, w = this.invMass, E = this.mesh.edges, L0 = this.mesh.edgeLen;
@@ -534,11 +576,11 @@ export class World {
    * Remember what the current factorisation was built from (bit-exact snapshot/restore), in buffers
    * reused from one factorisation to the next (snapshots copy them). @param {Float64Array} x
    */
-  _saveFactorState(x) {
+  _saveFactorState(x, coordinates = 'absolute-position') {
     const T = this.terms, f = this._factorState;
     if (!f) {
       this._factorState = {
-        x: Float64Array.from(x), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
+        x: Float64Array.from(x), ...(coordinates === 'reference-displacement' ? { coordinates } : {}), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
         active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode),
         verts: Int32Array.from(T.verts), c: Float64Array.from(T.c), dir: Float64Array.from(T.dir), len: Float64Array.from(T.len),
       };
@@ -552,6 +594,7 @@ export class World {
 
   /** Grab a vertex with a soft hand constraint toward `point`. Returns false for fixed vertices. @param {number} vertex @param {number[]} point */
   grab(vertex, point) {
+    if (this.orthotropicMembrane) throw new Error('Orthotropic membrane: research domain does not support hand drives');
     if (!(vertex >= 0 && vertex < this.mesh.nV) || this.invMass[vertex] === 0) return false;
     const T = this.terms, t = this.drivers.grabTerm;
     T.verts[T.start[t]] = vertex;
@@ -596,7 +639,7 @@ export class World {
       const s = (L - L0[e]) / L0[e];
       if (s > maxStrain) maxStrain = s;
       if (-s > maxCompression) maxCompression = -s;
-      stretch += 0.5 * (L < L0[e] ? this.kCompFactor : 1) * this.kMem[e] * (L - L0[e]) ** 2;
+      if (!this.orthotropicMembrane) stretch += 0.5 * (L < L0[e] ? this.kCompFactor : 1) * this.kMem[e] * (L - L0[e]) ** 2;
     }
     for (let h = 0; h < this.mesh.nH; h++) {
       const en = 0.5 * this.hingeK[h] * (this.theta[h] - this.restTheta[h]) ** 2;
@@ -604,17 +647,66 @@ export class World {
     }
     let nan = false;
     for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i])) { nan = true; break; }
+    const membrane = this.orthotropicMembrane?.diagnostics(x);
+    if (this.orthotropicMembrane) stretch = this.orthotropicMembrane.energy(x);
+    const legacyEdgeMaxStrain = maxStrain, legacyEdgeMaxCompression = maxCompression, coordinates = referenceDiagnostics(this);
+    if (membrane) { maxStrain = Math.max(0, membrane.maximumStretch - 1); maxCompression = Math.max(0, 1 - membrane.minimumStretch); }
     return {
+      ...(coordinates ? { stateCoordinates: coordinates } : {}),
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, edgeContacts: this._edgeContacts, grounded: this._grounded,
-      substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
+      substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan && (!membrane || membrane.finite),
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
       unheldWelds: this.gates.unheld(this),
+      lineSearchBacktracks: this.energySearch?.backtracks ?? 0, lineSearchRejected: this.energySearch?.rejected ?? 0,
+      ...(this.opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchIncrement: getIncrementSearchSnapshot(this.energySearch) } : {}),
+      continuousContact: this.motionGuard?.snapshot() ?? null,
+      coupledContact: this.coupledContact?.snapshot() ?? null,
+      ...(membrane ? { membrane: { model: 'orthotropic-stvk', convention: 'nu12', curvature: 'gauss-newton', projectionPolicy: 'none',
+        nu12BySheet: this.opts.membraneNu12?.slice(), legacyEdgeMaxStrain, legacyEdgeMaxCompression, ...membrane } } : {}),
     };
   }
+
+  /** Exact one-word initial displacement conversion; research mode only, pristine World.
+   * @param {ArrayLike<number>} x @param {ArrayLike<number>} [velocity] */
+  setInitialReferencePose(x, velocity) { setInitialReferencePose(this, x, velocity); }
+
+  /** Copied authority and projected views, or undefined on the original ABI. */
+  authoritativeState() { return referenceStateSnapshot(this); }
+
+  /** Separate native residual gates at one fixed tolerance, research mode only.
+   * @param {number} forceTolerance */
+  authoritativeResiduals(forceTolerance) { return referenceResiduals(this, forceTolerance); }
 
   /** Bit-exact state capture (see state.js). */
   snapshot() { return snapshotWorld(this); }
 
   /** Restore a snapshot (bit-exact, including the factorisation). @param {any} s */
   restore(s) { restoreWorld(this, s); this.poseVersion++; }
+}
+
+/** Initial supported research domain; no projection, strain barrier or injectivity claim.
+ * @param {any} doc @param {any} opts @param {any} mesh
+ */
+function validateMembraneExperiment(doc, opts, mesh) {
+  if (opts.physicalMembrane !== true || opts.membraneCompression !== 1 || opts.membranePoissonConvention !== 'nu12' ||
+      opts.membraneCurvature !== 'gauss-newton' || opts.membraneProjection !== 'none' || opts.lineSearch !== true || opts.plasticity !== false) {
+    throw new Error('Orthotropic membrane: explicitly require physicalMembrane:true, membraneCompression:1, nu12 convention, gauss-newton curvature, membraneProjection:none, lineSearch:true and plasticity:false');
+  }
+  if (doc.joins.length || doc.controls.length || doc.mechanisms.length || doc.sheets.some(s => s.kinematic) ||
+      mesh.perfPairs.length || mesh.hingeKind.some(k => k !== HINGE_PANEL) || doc.restAngle.some(a => a !== 0)) throw new Error('Orthotropic membrane: joins, controls, mechanisms, kinematic sheets, creases, perforations and set angles are unsupported');
+  if ((opts.contact !== false || opts.ground !== false) && opts.barrierContact !== true) throw new Error('Orthotropic membrane: positional contact/ground requires the coupled barrier path');
+  if (opts.consistentMembraneCurvature !== undefined) throw new Error('Orthotropic membrane: edge consistentMembraneCurvature is inapplicable; use named gauss-newton membraneCurvature');
+  const x = mesh.X0;
+  for (let s = 0; s < doc.sheets.length; s++) {
+    const t = mesh.triSheet.findIndex(sheet => sheet === s);
+    if (t < 0) throw new Error('Orthotropic membrane: each sheet requires a nondegenerate planar patch');
+    const a = 3 * mesh.tris[3 * t], b = 3 * mesh.tris[3 * t + 1], c = 3 * mesh.tris[3 * t + 2];
+    const u = [x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]], v = [x[c] - x[a], x[c + 1] - x[a + 1], x[c + 2] - x[a + 2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], length = hypot3(n[0], n[1], n[2]);
+    if (!(length > 0) || !Number.isFinite(length)) throw new Error('Orthotropic membrane: invalid initial sheet plane');
+    for (let vertex = 0; vertex < mesh.nV; vertex++) if (mesh.vSheet[vertex] === s) {
+      const dx = x[3 * vertex] - x[a], dy = x[3 * vertex + 1] - x[a + 1], dz = x[3 * vertex + 2] - x[a + 2];
+      if (Math.abs(n[0] * dx + n[1] * dy + n[2] * dz) / length > 1e-10 * Math.max(1, hypot3(dx, dy, dz))) throw new Error('Orthotropic membrane: initial sheets must be individually planar');
+    }
+  }
 }

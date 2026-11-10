@@ -1,0 +1,25 @@
+state-modal-progress: level=1 I=1 previous=false public=79/79 authoritative=79/79
+state-modal-progress: level=1 I=1 previous=true public=79/79 authoritative=79/79
+state-modal-progress: level=1 I=4 previous=false public=71/79 authoritative=0/79
+state-modal-progress: level=1 I=4 previous=true public=70/79 authoritative=0/79
+state-modal-progress: level=1 I=16 previous=false public=71/79 authoritative=0/79
+state-modal-progress: level=1 I=16 previous=true public=70/79 authoritative=0/79
+state-modal-progress: level=2 I=1 previous=false public=158/158 authoritative=158/158
+state-modal-progress: level=2 I=1 previous=true public=158/158 authoritative=158/158
+state-modal-progress: level=2 I=4 previous=false public=158/158 authoritative=0/158
+state-modal-progress: level=2 I=4 previous=true public=158/158 authoritative=0/158
+state-modal-progress: level=2 I=16 previous=false public=158/158 authoritative=0/158
+state-modal-progress: level=2 I=16 previous=true public=158/158 authoritative=0/158
+state-modal-progress: level=4 I=1 previous=false public=316/316 authoritative=316/316
+state-modal-progress: level=4 I=1 previous=true public=316/316 authoritative=316/316
+state-modal-progress: level=4 I=4 previous=false public=316/316 authoritative=0/316
+state-modal-progress: level=4 I=4 previous=true public=316/316 authoritative=0/316
+state-modal-progress: level=4 I=16 previous=false public=316/316 authoritative=0/316
+state-modal-progress: level=4 I=16 previous=true public=316/316 authoritative=0/316
+state-modal-progress: level=8 I=1 previous=false public=632/632 authoritative=631/632
+state-modal-progress: level=8 I=1 previous=true public=632/632 authoritative=632/632
+state-modal-progress: level=8 I=4 previous=false public=632/632 authoritative=0/632
+state-modal-progress: level=8 I=4 previous=true public=632/632 authoritative=0/632
+state-modal-progress: level=8 I=16 previous=false public=632/632 authoritative=0/632
+state-modal-progress: level=8 I=16 previous=true public=632/632 authoritative=0/632
+state-modal-audit: state candidate fixed24; raw failed outcomes retained; untimed research

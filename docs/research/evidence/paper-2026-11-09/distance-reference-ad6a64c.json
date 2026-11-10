@@ -1,0 +1,57 @@
+{
+  "schema": "pliego-contact-distance-reference/0.1",
+  "source": {
+    "git": "ad6a64c4b8b73b93a91b1a0eb9c3967dbc1b5e4e",
+    "dirty": false,
+    "generatorSHA256": "2e97327da70953e4f79ac3f3340b257b6472a95f081459f84b6bce692f3992b8",
+    "distanceSHA256": "d0cd28674bc018eb5078dea271a53c7dd2cda7d2d26cc1af562e0a6d009be2ed",
+    "randomSHA256": "e4573e28b1c086ea8517639e7f510c5ea23bd7e0d3f9d19df02467c8185ef2c3",
+    "node": "v20.19.5"
+  },
+  "inputSHA256": "ea6668fdfd6836ee7c3386d7e08c101ba7567531df4e73618524f1a1f2f0319b",
+  "referenceScriptSHA256": "b2bb7592a709e74b258691b4020963ccab3e947f390fc682f6338d6990803d1d",
+  "reference": {
+    "package": "ipctk",
+    "version": "1.4.0",
+    "numpy": "2.5.4",
+    "python": "3.12.14",
+    "binarySHA256": "2c04039f8dcb05655f8525b86d460f1837959d11e02e8db625db5444b0af4a5e",
+    "upstream": "https://github.com/ipc-sim/ipc-toolkit",
+    "wheels": [
+      {
+        "name": "ipctk",
+        "version": "1.4.0",
+        "url": "https://files.pythonhosted.org/packages/1c/7a/99d6e5b882339a91ff4b45d26559e012145925a094ef55cd7c6834af13ab/ipctk-1.4.0-cp312-cp312-macosx_11_0_x86_64.whl",
+        "sha256": "55b273d31be7fcf986ce448fdd319572c3f0cddf3847a47b79290281eefb1af9"
+      },
+      {
+        "name": "numpy",
+        "version": "2.5.4",
+        "url": "https://files.pythonhosted.org/packages/34/f2/b4fc1bafca03868220b5eaf729d2f21ebd7d7b151c0f9e144fe212bbca35/numpy-2.5.4-cp312-cp312-macosx_14_0_x86_64.whl",
+        "sha256": "aec3fc4b32ff82421274f5d205c559c51c840c8df66a78efd7f3612dd005a26a"
+      },
+      {
+        "name": "scipy",
+        "version": "1.18.1",
+        "url": "https://files.pythonhosted.org/packages/23/22/0858a0bbd6b3e825ceb8cd9baf9eaf3b2f2b1d77727eb6be40500bcdc92f/scipy-1.18.1-cp312-cp312-macosx_14_0_x86_64.whl",
+        "sha256": "78c0665edead396b1abb4897c41a5c1d9bf090c8a637a4c20a61678e0a264e66"
+      }
+    ]
+  },
+  "cases": {
+    "vertex-triangle": 1107,
+    "edge-edge": 1109
+  },
+  "finiteComparisons": 2215,
+  "tolerance": "absolute squared-distance difference / stencil diameter squared <= 1e-10",
+  "maximumNormalizedError": 3.869844222907224e-16,
+  "disagreements": [],
+  "referenceUnavailable": [
+    {
+      "id": "point-triangle",
+      "nativeSquared": 0.25,
+      "error": "non-finite reference result"
+    }
+  ],
+  "scope": "distance components only; not CCD certification, physical calibration, full solver or equal-error performance"
+}

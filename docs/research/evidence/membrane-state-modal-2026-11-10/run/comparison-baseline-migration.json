@@ -1,0 +1,43 @@
+{
+  "schema": "pliego-membrane-state-modal-comparison/1",
+  "recordedAt": "2026-11-10T18:55:37.047Z",
+  "mode": "baseline-migration",
+  "comparison": {
+    "leavesCompared": 3944691,
+    "excludedFields": [
+      "recordedAt",
+      "source"
+    ]
+  },
+  "sourcePolicy": {
+    "historicalRuntimeFiles": 50,
+    "currentRuntimeFiles": 52,
+    "reviewedChangedRuntime": [
+      "xpbd/world.js",
+      "xpbd/implicit.js",
+      "xpbd/pcg.js",
+      "xpbd/energy-search.js",
+      "xpbd/state.js",
+      "xpbd/accurate-membrane.js",
+      "xpbd/increment-search.js",
+      "xpbd/orthotropic-membrane.js",
+      "xpbd/uv-reference.js"
+    ],
+    "reviewedAddedRuntime": [
+      "xpbd/newton.js",
+      "xpbd/reference-state.js"
+    ],
+    "reviewedExistingTestChange": "membrane-reference-probes.test.js",
+    "allOtherDependenciesExact": true
+  },
+  "comparatorSHA256": "08cf2c5590aaff57699f85468c33cf63257a781206e3b990b69bed5b37060130",
+  "scope": "complete24data identity/recorded force comparison only; preserves failed gates and literal tolerance; no independent HP full-trajectory/real-Armijo/time/material/booklet/device acceptance",
+  "inputSHA256": [
+    "8a4a0baa6e8bbfde9b657d0bc41b2a7aaaa4e2522b845debcb9dda6b1cbe497d",
+    "e11befb44aa534250686b66610013856de5f976c506de761960d615413c512c6"
+  ],
+  "inputRawSHA256": [
+    "796a80bbe6b47c784eea03a9f3545b24780743f9180002a8c7172879d98307de",
+    "e11befb44aa534250686b66610013856de5f976c506de761960d615413c512c6"
+  ]
+}

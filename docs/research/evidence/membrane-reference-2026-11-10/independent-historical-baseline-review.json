@@ -1,0 +1,280 @@
+{
+  "checks": 7398,
+  "computedNewtonDecisions": {
+    "accepted": 13332,
+    "precision-limited-zero-step": 36438
+  },
+  "failures": [],
+  "inputs": {
+    "baseline.json": {
+      "bytes": 102051736,
+      "sha256": "0ee1272f3df98dcb2ce2db0f822a1dc982f4c7e617d6e8b9368c692adf807f92"
+    },
+    "historical-candidate.json.gz": {
+      "compressedSHA256": "47e1db4bcb1260d38cb4318fa4e0face8d2b342e333e156c6c78380edee2dd24",
+      "decodedBytes": 102050790,
+      "decodedSHA256": "b947d759ea707810e36fc766c05365234453ff5a88cc6d48ad559a5f68c66b79"
+    }
+  },
+  "literalForceFailures": 6956,
+  "literalForcePasses": 154,
+  "observedSubsteps": 7110,
+  "pass": true,
+  "reviewerScriptSHA256": "44e1e1002ad35401c988b33c3543d32291e5ec05b9beefd257ccd986c76a44ac",
+  "rows": [
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 79,
+      "forceMaximum": 4.782281412393786,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 1,
+      "seed": false,
+      "steps": 79
+    },
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 79,
+      "forceMaximum": 36.76473013876239,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 1,
+      "seed": true,
+      "steps": 79
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 38,
+      "forceMaximum": 0.00010618066880851984,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 1,
+      "seed": false,
+      "steps": 79
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 43,
+      "forceMaximum": 0.00010618066880851984,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 1,
+      "seed": true,
+      "steps": 79
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 38,
+      "forceMaximum": 0.00010618066880851984,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 1,
+      "seed": false,
+      "steps": 79
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 43,
+      "forceMaximum": 0.00010618066880851984,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 1,
+      "seed": true,
+      "steps": 79
+    },
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 158,
+      "forceMaximum": 1.3213987326598726,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 2,
+      "seed": false,
+      "steps": 158
+    },
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 158,
+      "forceMaximum": 19.92625640972983,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 2,
+      "seed": true,
+      "steps": 158
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 158,
+      "forceMaximum": 0.0004133819602429867,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 2,
+      "seed": false,
+      "steps": 158
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 158,
+      "forceMaximum": 0.000413362227845937,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 2,
+      "seed": true,
+      "steps": 158
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 158,
+      "forceMaximum": 0.0004133819602429867,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 2,
+      "seed": false,
+      "steps": 158
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 158,
+      "forceMaximum": 0.0004133704933337867,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 2,
+      "seed": true,
+      "steps": 158
+    },
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 316,
+      "forceMaximum": 0.3488582874997519,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 4,
+      "seed": false,
+      "steps": 316
+    },
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 316,
+      "forceMaximum": 10.375810937752249,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 4,
+      "seed": true,
+      "steps": 316
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 316,
+      "forceMaximum": 0.0016448538517579436,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 4,
+      "seed": false,
+      "steps": 316
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 316,
+      "forceMaximum": 0.0016447808593511581,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 4,
+      "seed": true,
+      "steps": 316
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 316,
+      "forceMaximum": 0.0016448538517579436,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 4,
+      "seed": false,
+      "steps": 316
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 316,
+      "forceMaximum": 0.0016447808593511581,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 4,
+      "seed": true,
+      "steps": 316
+    },
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 632,
+      "forceMaximum": 0.09410146763548255,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 8,
+      "seed": false,
+      "steps": 632
+    },
+    {
+      "budget": 1,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 632,
+      "forceMaximum": 5.295582360675326,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 8,
+      "seed": true,
+      "steps": 632
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 632,
+      "forceMaximum": 0.0065814775953185745,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 8,
+      "seed": false,
+      "steps": 632
+    },
+    {
+      "budget": 4,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 632,
+      "forceMaximum": 0.006581471330719069,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 8,
+      "seed": true,
+      "steps": 632
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 632,
+      "forceMaximum": 0.0065814775953185745,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 8,
+      "seed": false,
+      "steps": 632
+    },
+    {
+      "budget": 16,
+      "classification": "incremental-force-nonconvergence",
+      "forceFailures": 632,
+      "forceMaximum": 0.006581471330719069,
+      "forceTolerance": 8.81400646629321e-05,
+      "level": 8,
+      "seed": true,
+      "steps": 632
+    }
+  ],
+  "schema": "pliego-independent-uv-historical-baseline-review/1",
+  "scope": "unchanged old-DD historical control only; all24 trajectories retain literal force failure; no new-reference or force/time/material/booklet acceptance",
+  "sourceGit": "d739165c2f0d72382e2882715c33275c2967fff5",
+  "trajectories": 24,
+  "wholeReportComparison": {
+    "allOtherFieldsCanonicalByteEqual": true,
+    "canonicalNewSHA256": "d45870def7603801506fa5de75d28468ae69e93834ad1457ed440e9d321546f0",
+    "canonicalOldSHA256": "d45870def7603801506fa5de75d28468ae69e93834ad1457ed440e9d321546f0",
+    "excludedTopLevelFields": [
+      "source",
+      "recordedAt"
+    ],
+    "method": "canonical sorted JSON retains parsed numeric types and signed float zero; no numerical field excluded"
+  }
+}

@@ -1,0 +1,25 @@
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=1 I=1 previous=false incremental-force-nonconvergence failedForce=79/79
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=1 I=1 previous=true incremental-force-nonconvergence failedForce=79/79
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=1 I=4 previous=false incremental-force-nonconvergence failedForce=43/79
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=1 I=4 previous=true incremental-force-nonconvergence failedForce=44/79
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=1 I=16 previous=false incremental-force-nonconvergence failedForce=43/79
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=1 I=16 previous=true incremental-force-nonconvergence failedForce=44/79
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=2 I=1 previous=false incremental-force-nonconvergence failedForce=158/158
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=2 I=1 previous=true incremental-force-nonconvergence failedForce=158/158
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=2 I=4 previous=false incremental-force-nonconvergence failedForce=158/158
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=2 I=4 previous=true incremental-force-nonconvergence failedForce=158/158
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=2 I=16 previous=false incremental-force-nonconvergence failedForce=158/158
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=2 I=16 previous=true incremental-force-nonconvergence failedForce=158/158
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=4 I=1 previous=false incremental-force-nonconvergence failedForce=316/316
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=4 I=1 previous=true incremental-force-nonconvergence failedForce=316/316
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=4 I=4 previous=false incremental-force-nonconvergence failedForce=316/316
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=4 I=4 previous=true incremental-force-nonconvergence failedForce=316/316
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=4 I=16 previous=false incremental-force-nonconvergence failedForce=316/316
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=4 I=16 previous=true incremental-force-nonconvergence failedForce=316/316
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=8 I=1 previous=false incremental-force-nonconvergence failedForce=632/632
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=8 I=1 previous=true incremental-force-nonconvergence failedForce=632/632
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=8 I=4 previous=false incremental-force-nonconvergence failedForce=632/632
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=8 I=4 previous=true incremental-force-nonconvergence failedForce=632/632
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=8 I=16 previous=false incremental-force-nonconvergence failedForce=632/632
+membrane-modal-progress: forward cells=2 grain=0 A=0.004 level=8 I=16 previous=true incremental-force-nonconvergence failedForce=632/632
+state-modal-audit: current absolute baseline fixed24; raw failed outcomes retained; untimed research

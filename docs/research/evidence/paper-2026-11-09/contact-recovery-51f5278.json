@@ -1,0 +1,640 @@
+{
+  "schema": "pliego-paper-campaign/0.2",
+  "recordedAt": "2026-11-10T04:36:26.378Z",
+  "source": {
+    "git": "51f527840a39f570101de1a8ffedd57f0503120f",
+    "dirty": false,
+    "engine": "current checkout",
+    "engineTreeSHA256": "f9aa2b5015bffae6a5dd96b1c8aa1f56650c1d18691a44f186d6bdb97296d28f",
+    "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+    "harnessSHA256": "1f1fd44c4e6ea6409eaed2e664259d2f1ba542a337b5e5885bc4ffc54a433e9a",
+    "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+    "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+    "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "arch": "x64",
+    "platform": "darwin",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "protocol": {
+    "seed": 1,
+    "frameSeconds": 0.016666666666666666,
+    "framesPerTurn": 84,
+    "requestedTurns": 1,
+    "stopOnZeroProgress": false,
+    "fallback": false,
+    "repetitions": 1,
+    "matrix": "continuous-contact",
+    "endpointGate": "every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation",
+    "continuousContact": "experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; stopOnZeroProgress declares whether zero progress stops the case",
+    "timingScope": "World.step only; includes first-frame/JIT cost; exploratory local measurement"
+  },
+  "reduction": "Active-leaf reader promotes releases to flat resting blocks after 1.4 simulation seconds; pre-promotion release poses are audited. Plasticity disabled for reading. Not an unconstrained stack equilibrium.",
+  "materialAudit": {
+    "copy-80": {
+      "capY": 7848000.000000001,
+      "physicalYmd": 550000000,
+      "physicalYcd": 250000000,
+      "retainedMD": 0.01426909090909091,
+      "retainedCD": 0.031392
+    }
+  },
+  "results": [
+    {
+      "model": "all-leaves",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "newtonIterations": 1,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.0028767085678932792,
+      "maxCompression": 0.010669362566007617,
+      "minY": 0,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 0,
+      "vertexRestBlockOverlapMm": null,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.9999263996687873,
+          "minimum": 0.9998909844114728,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 0,
+        "limited": 0,
+        "iterationLimits": 0,
+        "precisionLimits": 0,
+        "initialOverlaps": 0,
+        "minimumTime": 1
+      },
+      "framesEndingWithZeroProgress": 0,
+      "buildMs": 66.426796,
+      "poseSHA256": "ed65c86f9a5d54ece7896ccc952abe720876252453a4fb96e7bd59763b21e58c",
+      "vertices": 492,
+      "freeVertices": 444,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": null,
+      "stepMeanMs": 28.140693083333332,
+      "stepP95Ms": 35.90370900000005,
+      "stepMaxMs": 155.108779,
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": false,
+        "physics8ms": false,
+        "restingBlockVertexThickness": "not evaluated for all-deformable stacks",
+        "endpointProgress": true,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    },
+    {
+      "model": "active-leaf",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "newtonIterations": 1,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.002875109875344787,
+      "maxCompression": 0.010013548156970446,
+      "minY": 0,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 1,
+      "vertexRestBlockOverlapMm": 2.7755575615628914e-17,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.9997583692928828,
+          "minimum": 0.9997263353738677,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 0,
+        "limited": 0,
+        "iterationLimits": 0,
+        "precisionLimits": 0,
+        "initialOverlaps": 0,
+        "minimumTime": 1
+      },
+      "framesEndingWithZeroProgress": 0,
+      "buildMs": 22.66931399999976,
+      "poseSHA256": "03add4e67ba6b5c0820e8b8673316c2a1cfa2fffa5d332d66ad3ede44b53800c",
+      "vertices": 492,
+      "freeVertices": 111,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": null,
+      "stepMeanMs": 13.948133523809517,
+      "stepP95Ms": 18.13305999999966,
+      "stepMaxMs": 63.76727600000004,
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": false,
+        "physics8ms": false,
+        "restingBlockVertexThickness": true,
+        "endpointProgress": true,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    },
+    {
+      "model": "all-leaves",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "newtonIterations": 1,
+        "continuousContact": true,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.00019688789618689534,
+      "maxCompression": 0.0021488729841466496,
+      "minY": 0,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 0,
+      "vertexRestBlockOverlapMm": null,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.00007288672968689773,
+          "minimum": -0.000005487547306448626,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 592,
+        "limited": 592,
+        "iterationLimits": 5,
+        "precisionLimits": 573,
+        "initialOverlaps": 0,
+        "minimumTime": 0
+      },
+      "framesEndingWithZeroProgress": 82,
+      "buildMs": 27.732656000000134,
+      "poseSHA256": "07d8fd4fa59a88d008d03d8595ad0c1804b4058c899ca2aab717d2bc1d1b91fb",
+      "vertices": 492,
+      "freeVertices": 444,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": {
+        "steps": 592,
+        "limited": 592,
+        "iterationLimits": 5,
+        "precisionLimits": 573,
+        "initialOverlaps": 0,
+        "minimumTime": 0,
+        "last": {
+          "time": 0,
+          "queries": 355,
+          "iterations": 1446,
+          "vertexTrianglePairs": 3937,
+          "edgeEdgePairs": 11355,
+          "status": "precision-limit",
+          "pair": [
+            0,
+            105,
+            656
+          ]
+        }
+      },
+      "stepMeanMs": 254.27139166666663,
+      "stepP95Ms": 313.90624299999945,
+      "stepMaxMs": 318.6352530000004,
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": true,
+        "physics8ms": false,
+        "restingBlockVertexThickness": "not evaluated for all-deformable stacks",
+        "endpointProgress": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    },
+    {
+      "model": "active-leaf",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "newtonIterations": 1,
+        "continuousContact": true,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.0009133833969304166,
+      "maxCompression": 0.009535604950159067,
+      "minY": 0.48,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 1,
+      "vertexRestBlockOverlapMm": 0,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.0025708080023232227,
+          "minimum": 0.0004374773191656023,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 592,
+        "limited": 590,
+        "iterationLimits": 73,
+        "precisionLimits": 571,
+        "initialOverlaps": 0,
+        "minimumTime": 0
+      },
+      "framesEndingWithZeroProgress": 27,
+      "buildMs": 16.16107700000066,
+      "poseSHA256": "03add4e67ba6b5c0820e8b8673316c2a1cfa2fffa5d332d66ad3ede44b53800c",
+      "vertices": 492,
+      "freeVertices": 111,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": {
+        "steps": 592,
+        "limited": 590,
+        "iterationLimits": 73,
+        "precisionLimits": 571,
+        "initialOverlaps": 0,
+        "minimumTime": 0,
+        "last": {
+          "time": 3.0118710647845376e-17,
+          "queries": 10476,
+          "iterations": 10516,
+          "vertexTrianglePairs": 2712,
+          "edgeEdgePairs": 7764,
+          "status": "precision-limit",
+          "pair": [
+            0,
+            203,
+            218
+          ]
+        }
+      },
+      "stepMeanMs": 135.45020052380949,
+      "stepP95Ms": 172.41542299999855,
+      "stepMaxMs": 176.00923200000034,
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": true,
+        "physics8ms": false,
+        "restingBlockVertexThickness": true,
+        "endpointProgress": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    },
+    {
+      "model": "all-leaves",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 16,
+        "newtonIterations": 1,
+        "continuousContact": true,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.0000880644510394377,
+      "maxCompression": 0.00028265001643462456,
+      "minY": 0,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 0,
+      "vertexRestBlockOverlapMm": null,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.00005015235811120013,
+          "minimum": 0.000005702017010944527,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 1184,
+        "limited": 1183,
+        "iterationLimits": 296,
+        "precisionLimits": 1174,
+        "initialOverlaps": 0,
+        "minimumTime": 0
+      },
+      "framesEndingWithZeroProgress": 84,
+      "buildMs": 22.260457999997016,
+      "poseSHA256": "a91dfa7ad049bac00e46059096460afe13755f39af81556800b60abb39188553",
+      "vertices": 492,
+      "freeVertices": 444,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": {
+        "steps": 1184,
+        "limited": 1183,
+        "iterationLimits": 296,
+        "precisionLimits": 1174,
+        "initialOverlaps": 0,
+        "minimumTime": 0,
+        "last": {
+          "time": 0,
+          "queries": 11276,
+          "iterations": 12224,
+          "vertexTrianglePairs": 4084,
+          "edgeEdgePairs": 11889,
+          "status": "precision-limit",
+          "pair": [
+            1,
+            1078,
+            749
+          ]
+        }
+      },
+      "stepMeanMs": 492.5614626785705,
+      "stepP95Ms": 733.8605279999974,
+      "stepMaxMs": 884.0497729999988,
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": true,
+        "physics8ms": false,
+        "restingBlockVertexThickness": "not evaluated for all-deformable stacks",
+        "endpointProgress": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    },
+    {
+      "model": "active-leaf",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 16,
+        "newtonIterations": 1,
+        "continuousContact": true,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 6,
+      "turns": 0,
+      "maxStrain": 0.01512602387751508,
+      "maxCompression": 0.043005705567255914,
+      "minY": 0.48,
+      "finite": true,
+      "error": "Numerical gate failed",
+      "completed": false,
+      "modelCachePeak": 1,
+      "vertexRestBlockOverlapMm": 0,
+      "supported": true,
+      "endpoints": [],
+      "continuousContact": {
+        "steps": 96,
+        "limited": 92,
+        "iterationLimits": 359,
+        "precisionLimits": 0,
+        "initialOverlaps": 0,
+        "minimumTime": 0.011114104984197867
+      },
+      "framesEndingWithZeroProgress": 0,
+      "buildMs": 12.759642000004533,
+      "poseSHA256": "23fc907e742bc3f384c3caa2290fbcd208cfd32123d3bf1a6e28ae2b8178fc07",
+      "vertices": 492,
+      "freeVertices": 111,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": {
+        "steps": 96,
+        "limited": 92,
+        "iterationLimits": 359,
+        "precisionLimits": 0,
+        "initialOverlaps": 0,
+        "minimumTime": 0.011114104984197867,
+        "last": {
+          "time": 0.030833725108686153,
+          "queries": 378,
+          "iterations": 3051,
+          "vertexTrianglePairs": 95,
+          "edgeEdgePairs": 283,
+          "status": "iteration-limit",
+          "pair": [
+            1,
+            604,
+            276
+          ]
+        }
+      },
+      "stepMeanMs": 134.55264916666783,
+      "stepP95Ms": 154.6581290000031,
+      "stepMaxMs": 154.6581290000031,
+      "gates": {
+        "numerical1Percent": false,
+        "numericalPoint1Percent": false,
+        "physics8ms": false,
+        "restingBlockVertexThickness": false,
+        "endpointProgress": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    },
+    {
+      "model": "all-leaves",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "lineSearch": true,
+        "continuousContact": true,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.00008576460852901329,
+      "maxCompression": 0.000005697757087262529,
+      "minY": 0,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 0,
+      "vertexRestBlockOverlapMm": null,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.00000517888070837402,
+          "minimum": -4.5443735763317505e-7,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 592,
+        "limited": 592,
+        "iterationLimits": 0,
+        "precisionLimits": 582,
+        "initialOverlaps": 0,
+        "minimumTime": 0
+      },
+      "framesEndingWithZeroProgress": 83,
+      "buildMs": 21.344364999997197,
+      "poseSHA256": "4a203711b5aeca353a521af4985b0176b19d45e4b5d000fee79283cd151abff2",
+      "vertices": 492,
+      "freeVertices": 444,
+      "lineSearchBacktracks": 2514,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": {
+        "steps": 592,
+        "limited": 592,
+        "iterationLimits": 0,
+        "precisionLimits": 582,
+        "initialOverlaps": 0,
+        "minimumTime": 0,
+        "last": {
+          "time": 0,
+          "queries": 182,
+          "iterations": 227,
+          "vertexTrianglePairs": 3528,
+          "edgeEdgePairs": 9842,
+          "status": "precision-limit",
+          "pair": [
+            0,
+            71,
+            449
+          ]
+        }
+      },
+      "stepMeanMs": 84.95932248809584,
+      "stepP95Ms": 108.66127899999265,
+      "stepMaxMs": 146.32527799998934,
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": true,
+        "physics8ms": false,
+        "restingBlockVertexThickness": "not evaluated for all-deformable stacks",
+        "endpointProgress": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    },
+    {
+      "model": "active-leaf",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "lineSearch": true,
+        "continuousContact": true,
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 84,
+      "turns": 1,
+      "maxStrain": 0.0007189920389826519,
+      "maxCompression": 0.006587964928063461,
+      "minY": 0.48,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 1,
+      "vertexRestBlockOverlapMm": 0,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.0052855004133626005,
+          "minimum": 0.000613182219414754,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 592,
+        "limited": 591,
+        "iterationLimits": 814,
+        "precisionLimits": 448,
+        "initialOverlaps": 0,
+        "minimumTime": 0
+      },
+      "framesEndingWithZeroProgress": 66,
+      "buildMs": 14.331093000000692,
+      "poseSHA256": "03add4e67ba6b5c0820e8b8673316c2a1cfa2fffa5d332d66ad3ede44b53800c",
+      "vertices": 492,
+      "freeVertices": 111,
+      "lineSearchBacktracks": 3229,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": {
+        "steps": 592,
+        "limited": 591,
+        "iterationLimits": 814,
+        "precisionLimits": 448,
+        "initialOverlaps": 0,
+        "minimumTime": 0,
+        "last": {
+          "time": 0,
+          "queries": 20,
+          "iterations": 23,
+          "vertexTrianglePairs": 1107,
+          "edgeEdgePairs": 3305,
+          "status": "precision-limit",
+          "pair": [
+            0,
+            30,
+            343
+          ]
+        }
+      },
+      "stepMeanMs": 60.939659630953386,
+      "stepP95Ms": 79.9159900000086,
+      "stepMaxMs": 100.89849099999992,
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": true,
+        "physics8ms": false,
+        "restingBlockVertexThickness": true,
+        "endpointProgress": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schema": "pliego-membrane-modal-precision-exact-comparison/1",
+  "pass": true,
+  "selection": {
+    "cells": 2,
+    "pattern": "forward",
+    "grain": 0,
+    "level": 8,
+    "budget": 16,
+    "seed": false,
+    "amplitude": 0.004,
+    "snapshot": "worst-force"
+  },
+  "comparedLeaves": 335,
+  "excludedFields": [
+    "decimalDigits"
+  ],
+  "decimalDigits": [
+    80,
+    100
+  ],
+  "input": {
+    "file": "diagnostic.json",
+    "sha256": "db235d86c022470fe58f4bd44b6495ff07b892ab1b35c784fc7553c1982110d8",
+    "bytes": 40684804,
+    "git": "93f6653136bc37c4feff48c86f88259000c7dde8"
+  },
+  "outputs": [
+    {
+      "file": "fine-precision.json",
+      "sha256": "cc6ae997aba3b3ccaaad84ae8e988475e1296907883e2a64b6b6265e9d74dfa7",
+      "bytes": 14557
+    },
+    {
+      "file": "fine-precision-100.json",
+      "sha256": "dae05bdad38290544b400abc964afc262d982c0be2d9c3b2ac364cc4a9e7f9ed",
+      "bytes": 14558
+    }
+  ],
+  "hashChecks": {
+    "allCapturedSourceFilesMatchCurrentPinnedSource": {
+      "engineFiles": 46,
+      "tests": 78,
+      "tools": 15
+    },
+    "fixtureBuilder": true,
+    "diagnosticAndGradientHelperMatchCapturedToolHashes": true,
+    "capturedCoefficients": true,
+    "nativeMassFloat64LE": true,
+    "hFloat64LE": true,
+    "stateNumericAndLosslessLEAndNativeHashes": {
+      "x": {
+        "float64LESHA256": "f4eabefcdf399b21fc2c6498c22f9d0d9914e7c086bae42a506520180734b737",
+        "nativeSHA256": "f4eabefcdf399b21fc2c6498c22f9d0d9914e7c086bae42a506520180734b737"
+      },
+      "xs": {
+        "float64LESHA256": "57d94e0b6e824d2cbc49b0fd6a7cf9d0f9da735717c86055ce973675ededf28a",
+        "nativeSHA256": "57d94e0b6e824d2cbc49b0fd6a7cf9d0f9da735717c86055ce973675ededf28a"
+      },
+      "xt": {
+        "float64LESHA256": "2c687e0efb0e72da2e4d3bdcc161fde8d7707812f97481997de82a40a0c9b5a1",
+        "nativeSHA256": "2c687e0efb0e72da2e4d3bdcc161fde8d7707812f97481997de82a40a0c9b5a1"
+      },
+      "v": {
+        "float64LESHA256": "80c8e9c39893303b5a0761cafddb33584b285503feffc431b28ea4e20737b4a2",
+        "nativeSHA256": "80c8e9c39893303b5a0761cafddb33584b285503feffc431b28ea4e20737b4a2"
+      }
+    }
+  },
+  "summary": {
+    "independentExactUVMaterial": {
+      "residualInfinityMicroN": 0.010820604364649168,
+      "maximumNodalResidualMicroN": 0.011167162281751714,
+      "massDualResidualNorm": 0.12664288840816015,
+      "passesUnchangedForceGate": false
+    },
+    "storedCoefficientPolynomial": {
+      "residualInfinityMicroN": 0.010819884387826408,
+      "maximumNodalResidualMicroN": 0.011166464650146457,
+      "massDualResidualNorm": 0.1266359095341553,
+      "passesUnchangedForceGate": false
+    },
+    "runtimeRecorded": {
+      "residualInfinityMicroN": 0.010819816758157685,
+      "maximumNodalResidualMicroN": 0.011166451970996081,
+      "massDualResidualNorm": 0.12663863564797812,
+      "passesUnchangedForceGate": false
+    },
+    "runtimeTermsRealSum": {
+      "residualInfinityMicroN": 0.010819816758157685,
+      "maximumNodalResidualMicroN": 0.011166451970996081,
+      "massDualResidualNorm": 0.12663863564797812,
+      "passesUnchangedForceGate": false
+    }
+  },
+  "forceToleranceMicroN": 8.81400646629321e-05,
+  "scope": "complete parsed equality, including all provenance, after excluding only declared decimalDigits; literal force outcomes unchanged; no trajectory integration or equilibrium-existence claim"
+}

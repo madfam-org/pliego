@@ -1,0 +1,135 @@
+{
+  "schema": "pliego-dd-fixed-pose-independent-review/1",
+  "sourceGit": "e96c592ea6d56c47dfbddaaaa447d2c9655b6223",
+  "sourceClean": true,
+  "sourceFilesMatched": 56,
+  "input": {
+    "file": "gradient-probes.json",
+    "sha256": "8bfff903ed73e708377f712a2346d4d4e3b056b0d6bb970663743402f5c890bb",
+    "bytes": 1220743
+  },
+  "repeat": {
+    "file": "gradient-probes-repeat.json",
+    "sha256": "8bfff903ed73e708377f712a2346d4d4e3b056b0d6bb970663743402f5c890bb",
+    "bytes": 1220743
+  },
+  "rawRepeatByteIdentical": true,
+  "precisionProofs": [
+    {
+      "file": "gradient-80.json",
+      "sha256": "4d488c44c37eaa177b5096d439a565cf11963cf56a295d3644f48622d111224f",
+      "bytes": 1110207
+    },
+    {
+      "file": "gradient-100.json",
+      "sha256": "cef86a3835ae3983a1725af97d164eabbb84b61c2a346943dd2037802dd3d636",
+      "bytes": 1110377
+    }
+  ],
+  "precisionComparison": {
+    "completeParsedEqualityPass": true,
+    "excludedFields": [
+      "cases[].decimalDigits"
+    ],
+    "parsedLeavesCompared": 42502,
+    "differences": []
+  },
+  "cases": 170,
+  "pairedArchivedPoses": 85,
+  "losslessFloat64EntriesVerified": 29240,
+  "allNativeInertiaAndIncrementalAdditionAssociationsVerified": true,
+  "allPhysicalInputsAndTruthFieldsIdenticalWithinPairs": true,
+  "allNativeInertiaTermsIdenticalWithinPairs": true,
+  "metrics": {
+    "storedCoefficientPolynomial": {
+      "energyAbsoluteErrorNJ": {
+        "maximumBinary64": 3.928820232202491e-09,
+        "maximumDoubleDouble": 4.087723671311898e-13,
+        "improvedCases": 85,
+        "equalCases": 0,
+        "worsenedCases": 0
+      },
+      "elasticMaximumComponentMicroN": {
+        "maximumBinary64": 2.1961009043649017e-06,
+        "maximumDoubleDouble": 4.619013004137758e-11,
+        "improvedCases": 85,
+        "equalCases": 0,
+        "worsenedCases": 0
+      },
+      "elasticProjectedSlopeAbsoluteErrorNJ": {
+        "maximumBinary64": 1.0144372823000576e-10,
+        "maximumDoubleDouble": 5.660162579784252e-15,
+        "improvedCases": 69,
+        "equalCases": 16,
+        "worsenedCases": 0
+      },
+      "incrementalMaximumComponentMicroN": {
+        "maximumBinary64": 2.1964362009218267e-06,
+        "maximumDoubleDouble": 9.19009327289724e-09,
+        "improvedCases": 85,
+        "equalCases": 0,
+        "worsenedCases": 0
+      },
+      "incrementalProjectedSlopeAbsoluteErrorNJ": {
+        "maximumBinary64": 1.0124944599258916e-10,
+        "maximumDoubleDouble": 3.707567670292243e-13,
+        "improvedCases": 69,
+        "equalCases": 16,
+        "worsenedCases": 0
+      }
+    },
+    "independentExactUVMaterial": {
+      "energyAbsoluteErrorNJ": {
+        "maximumBinary64": 3.926479268902276e-09,
+        "maximumDoubleDouble": 3.4482433393359033e-12,
+        "improvedCases": 85,
+        "equalCases": 0,
+        "worsenedCases": 0
+      },
+      "elasticMaximumComponentMicroN": {
+        "maximumBinary64": 2.3942504007948716e-06,
+        "maximumDoubleDouble": 7.202014967777545e-07,
+        "improvedCases": 85,
+        "equalCases": 0,
+        "worsenedCases": 0
+      },
+      "elasticProjectedSlopeAbsoluteErrorNJ": {
+        "maximumBinary64": 1.0151842928561409e-10,
+        "maximumDoubleDouble": 3.0094324267294913e-13,
+        "improvedCases": 59,
+        "equalCases": 16,
+        "worsenedCases": 10
+      },
+      "incrementalMaximumComponentMicroN": {
+        "maximumBinary64": 2.3942780246504485e-06,
+        "maximumDoubleDouble": 7.231377136267645e-07,
+        "improvedCases": 85,
+        "equalCases": 0,
+        "worsenedCases": 0
+      },
+      "incrementalProjectedSlopeAbsoluteErrorNJ": {
+        "maximumBinary64": 1.0132414704819748e-10,
+        "maximumDoubleDouble": 3.4255098913572053e-13,
+        "improvedCases": 59,
+        "equalCases": 16,
+        "worsenedCases": 10
+      }
+    }
+  },
+  "maximumNativeInertiaErrorAgainstRealMicroN": 5.5934674693985866e-09,
+  "frozen49": {
+    "binary64": {
+      "caseIndex": 98,
+      "storedCoefficientSlopeErrorNJ": 1.0785003360089267e-24,
+      "UVMaterialSlopeErrorNJ": 2.39577460438063e-24
+    },
+    "double-double": {
+      "caseIndex": 99,
+      "storedCoefficientSlopeErrorNJ": 1.6101272747704148e-29,
+      "UVMaterialSlopeErrorNJ": 1.3172903696444509e-24
+    }
+  },
+  "frozen49PredeclaredSlopeGateNJ": 1e-27,
+  "frozen49GatePass": true,
+  "scope": "85 archived before poses, evaluated once per arithmetic mode without steps/solves; comparisons target both distinct real meanings; DD derivative improvement does not change native binary64 inertia or absolute-coordinate state, certify new trajectories, or waive literal force failures"
+}

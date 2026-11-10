@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "bytes": 20463,
+      "matchesCapturedLength": true,
+      "matchesCapturedSHA": true,
+      "matchesFrozenCheckout": true,
+      "path": "packages/engine/bench/membrane-reference-probes.mjs",
+      "sha256": "df45d57b01c80b933fee2686908d59db96d541d58741491e2f1b8d355f81d0be"
+    },
+    {
+      "bytes": 13902,
+      "matchesCapturedLength": true,
+      "matchesCapturedSHA": true,
+      "matchesFrozenCheckout": true,
+      "path": "packages/engine/test/membrane-reference-probes.test.js",
+      "sha256": "20bb5c518f37e140c739fc323707c141907d56b387f3a35e4a15ad9c05fb78e3"
+    }
+  ],
+  "pass": true,
+  "schema": "pliego-independent-measurement-source-snapshot-review/1",
+  "scope": "d739 original measurement producer and test preserved before any subsequent test-only CI repair; no runtime/oracle/payload change",
+  "snapshotSHA256": "df77141b3a34004393375be90d59d692b111fe6bec2adf845420f8afb4f5aab7",
+  "sourceGit": "d739165c2f0d72382e2882715c33275c2967fff5"
+}

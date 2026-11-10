@@ -8,7 +8,7 @@ The Pliego paper engine. It loads a **sheet document** (FOLD 1.2 + `pliego:`) an
 - **Tier R** (rigid / kinematic): face-tree poses, loop closure with damped least squares and a
   DOF report, closed forms (degree-4 vertex, Miura-ori, V-fold, four-bar) and the kinematic fold
   program.
-- **Tier C** (compliant): real paper stiffness. Membrane, grain-anisotropic bending, creases with
+- **Tier C** (compliant): a declared paper model with explicit accuracy limits. Membrane, grain-anisotropic bending, creases with
   plastic memory, perforations that tear, glue welds, pivots, strings, sliders, pins, mechanisms,
   layer contact with friction (sidedness seeded from `faceOrders`), the ground plane, air drag and
   deterministic wind.
@@ -52,6 +52,145 @@ world.snapshot(); world.restore(s);   // bit-exact, including the factorisation 
 
 `render()` buffers are allocated once and refreshed in place. Render vertices are split along fold
 hinges into smoothing groups, and the UVs span each sheet's local bounding box.
+
+Research option: `physicalMembrane: true` bypasses the default membrane-modulus
+cap for membrane edges and perforation strength. It uses the stock's physical
+in-plane modulus and can expose stiffness/conditioning failures; it is not a
+validated quality preset. Defaults retain the existing cap. Compare it with
+`node packages/engine/bench/paper-campaign.mjs`; see the
+[active campaign and separate gates](../../docs/research/paper-physics-campaign.md).
+
+`physicalMembrane` still uses scalar central-force springs. The independent
+[membrane audit](../../docs/research/membrane-constitutive-audit.md) exposes shear,
+Poisson coupling and mesh errors even without the cap; force convergence alone
+does not establish material accuracy.
+
+A separate research law requires all of these constructor options:
+
+```js
+{
+  membraneModel: 'orthotropic-stvk', physicalMembrane: true,
+  membraneCompression: 1, membranePoissonConvention: 'nu12',
+  membraneNu12: [0.293], // explicit synthetic nu12 for every sheet
+  membraneCurvature: 'gauss-newton', membraneProjection: 'none',
+  lineSearch: true, plasticity: false,
+  contact: false, ground: false,
+}
+```
+
+This objective triangle law has a full orthotropic Green-strain energy and exact
+gradient; its PSD Gauss–Newton search matrix is a distinct approximation. The
+initial domain is individually planar uncreased sheets without authored joins,
+drives, perforations or plasticity. Coupled barrier contact is the supported
+contact path; legacy projections and grabs are unsupported. Read the
+[research contract and validation gates](../../docs/research/orthotropic-membrane-experiment.md)
+before using it. Stock Poisson semantics, measured-paper calibration, non-affine
+FE/time convergence and new-model booklet support remain separate work. The
+existing spring law remains the default.
+
+`lineSearch: true` additionally backtracks GN/PCG proposals against the current
+implicit inertia, membrane, bend/damping, drive and join objective, with join
+coefficients frozen for each proposal. It exposes
+`lineSearchBacktracks` and `lineSearchRejected` diagnostics and preserves them
+through snapshots. It is off by default. It does not safeguard prediction or the
+later contact/strain projections, and does not make a single Newton iteration
+converged. The contact-free axial counterexample remains in
+`node packages/engine/bench/axial-pull.mjs`.
+
+`lineSearchArithmetic: 'membrane-inertia-increment'` selects a separate
+[planar membrane/inertia research search](../../docs/research/membrane-increment-search.md).
+It uses actual rounded trial displacements, a compensated gradient/remainder
+increment and strict computed Armijo, with explicit precision-limited zero-step
+and stationary-no-op decisions. Exact Y=0, all-free, undamped, zero-force and
+zero-omitted-hinge-work restrictions are enforced; contact, bending work and
+drives are unsupported. Its versioned diagnostics replay through snapshots.
+Independent Decimal tests retain near-rest cases where computed acceptance is
+a real potential increase: this is approximate arithmetic, not certified descent
+or force convergence. Omission and explicit `total-energy` preserve the old path.
+
+`membraneArithmetic: 'double-double'` additionally selects a bounded two-word
+[membrane/objective evaluation experiment](../../docs/research/membrane-double-double.md).
+It carries coordinate low words through strain, stress, coherent derivatives and
+the selected increment search, using unchanged stored coefficients and native
+mass/inertia association. Its versioned snapshot identity and numeric range are
+explicit. World selection requires the planar increment-search domain. Omission
+or explicit `binary64` retains existing arithmetic. This does not supply richer
+authoritative positions, a converged solve or an interaction-performance certificate.
+
+`membraneReference: 'uv-displacement'` selects an explicit alternative
+[actual-reference law](../../docs/research/membrane-uv-reference.md), requiring
+the above DD/increment research selections. It forms metric change from the
+actual stored X0 and displacement, then rotates the strain tensor into grain
+axes. This gives exact zero stored-rest energy/force without measured rest-force
+subtraction or metric whitening. It changes the represented polynomial; ideal
+UV/material accuracy and force/time convergence require separate evidence.
+Reference descriptors and quality limits bind snapshot identity. Omission or
+explicit `material-coefficients` retains the historical law and metadata.
+
+`stateCoordinates: 'reference-displacement'` additionally selects an experimental
+binary64 displacement-authoritative state ABI in that same restricted UV/DD
+planar domain. Physical positions are the real sums `X0 + u`; public `x/xs/xt`
+are rounded views. Predictor, velocity, force, GN operator and search increments
+consume `u/us/ut` directly. The stale preconditioner's orientation and the zero
+planar hinge terms use projected geometry. This is a changed numerical state
+contract; absolute-position remains the canonical default.
+
+Use `setInitialReferencePose(actualX, actualV?)` on a pristine World. It refuses
+inexact one-word conversion or changed projection bytes, including zero signs,
+and preserves the original uninitialized zero `xs/xt` buffers. Public position
+writes are refused. `authoritativeState()` returns copies at completed boundaries;
+`authoritativeResiduals(frozenTau)` reports separate latent `converged` and public
+`literalForceGate` values at the same supplied tolerance. Initial targets cannot
+certify convergence. In this mode, `stats().stateCoordinates` explicitly labels
+the existing projected diagnostics and adds separately named latent metrics/energy. Snapshots bind both states, reference, native mass/timestep
+and factor coordinates; mid-Newton/substep snapshots are refused. An interrupted
+substep is not a completed solve. See the
+[state experiment and independent gates](../../docs/research/membrane-state-precision.md).
+No force/time, material, booklet or device acceptance follows from selecting it.
+
+Further opt-in research options are documented in the
+[coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
+`previousPoseStart` changes the legacy initial guess; `continuousContact` adds a
+global endpoint-motion filter; `barrierContact` replaces projections with a
+normal-barrier solve. The filter failed booklet progress. The barrier path needs
+strictly feasible initial contact/ground geometry and static prescribed vertices.
+It cannot be combined with `continuousContact` or `contact: false`.
+
+For the barrier path, `barrierIterations` defaults to 8, `barrierCgIterations` to
+128 and `barrierTolerance` to 0.001 µN. `barrierDistance` is 0.05 mm and
+`barrierStiffness` is 100000 g/s². `barrierLinearSolver` accepts `'pcg'` (default),
+`'direct-local'` (refuses nonlocal free contact pairs outside the elastic graph)
+or `'auto'` (counts a fallback to PCG). `consistentMembraneCurvature: true` matches
+radial compression curvature to the existing force law; it does not change that
+law. Solver/convergence/fallback counters are in `stats().coupledContact`.
+
+`contactBroadPhase: 'bvh'` selects a refit spatial index for those swept contact
+candidates, retaining reference bounds, exclusions and pair order. The default
+is `'reference'`. Experimental `'wasm'` uses scalar binary64 Wasm refit/traversal
+with the same JS bounds, topology, exclusions, ordering and exact-pose reuse.
+Its generated kernel has no runtime package dependency; compilation, instance
+initialization, validation, input copies and call boundaries belong in measured
+cost. It refuses unsupported memory sizes/NaN bounds and has no silent JS
+fallback. Performance and browser/device acceptance require separate evidence.
+This option applies to `continuousContact`/`barrierContact`;
+legacy projection contact is unchanged. See the
+[coverage and benchmark contract](../../docs/research/bvh-broadphase-experiment.md).
+
+`edgeEdgeMollification: 'surface-guarded'` (default `'off'`) requires
+`barrierContact`. It applies the IPC parallel-edge multiplier to EE energy only
+where all four endpoints have an eligible opposite-edge VT backup with at least
+the EE thickness offset. Uncovered pairs keep the original energy/force. The
+whole multiplier derivative is included; curvature is an approximate PSD radial
+plus angular operator. `stats().coupledContact.edgeEdgeMollification` distinguishes
+geometric pairs, curvature rows and repeated gradient-evaluation totals. Strict
+geometric feasibility/CCD remain active, including zero multipliers. See the
+[derivation, sufficient coverage condition and limits](../../docs/research/parallel-contact-review.md).
+
+These options remain research candidates. Unmollified parallel EE ties are
+nonsmooth; geometry-dependent join Jacobians, friction, general contact weighting,
+material calibration and interactive timing remain open. The coupled eight-turn
+geometry result does not close those gates. Energy-gradient checks apply with
+frozen join coefficients and differentiable closest-feature configurations.
 
 `kinematics` exports `FaceTree`, `LoopClosure`, `KinematicProgram` and the closed forms
 (`degree4`, `degree4Multipliers`, `miuraDims`, `miuraPoisson`, `miuraFoldAngles`, `vfold`,

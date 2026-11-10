@@ -1,0 +1,1440 @@
+{
+  "schema": "pliego-selected-newton-exact-review/1",
+  "input": {
+    "file": "selected-newton-small-fixture.json",
+    "bytes": 1137116,
+    "sha256": "4a4a463e19f377182608a307b38c1b3287ccc1ff121abf4b2e139fc02a780a94",
+    "decodedBytes": 1137116,
+    "decodedSHA256": "4a4a463e19f377182608a307b38c1b3287ccc1ff121abf4b2e139fc02a780a94"
+  },
+  "inputScope": "ordinary small test fixture; no accepted full capture",
+  "checks": 1105,
+  "decodedFloat64Words": 4912,
+  "source": [
+    {
+      "path": "packages/engine/bench/contact-reference.py",
+      "bytes": 4486,
+      "sha256": "b2bb7592a709e74b258691b4020963ccab3e947f390fc682f6338d6990803d1d"
+    },
+    {
+      "path": "packages/engine/bench/membrane-gradient-precision.py",
+      "bytes": 17735,
+      "sha256": "fdaa1a27a3983cc2251bdb340774279e8bd8902eb8baba8a47528652ad5878cd"
+    },
+    {
+      "path": "packages/engine/bench/membrane-increment-precision.py",
+      "bytes": 20132,
+      "sha256": "81c888351c3af60f5ab2b32433bee45e71ceb27a3d690e2e034bca7feb9c9122"
+    },
+    {
+      "path": "packages/engine/bench/membrane-modal-precision.py",
+      "bytes": 15432,
+      "sha256": "c892e497547d057236046e18ac0b7037841a8cf21d8b33551a5b1bba368642c0"
+    },
+    {
+      "path": "packages/engine/bench/membrane-modal-reference.py",
+      "bytes": 16400,
+      "sha256": "88420d8eddfa05a14391f4f002fba72d5fdf6b0b406401b4c3882a6e669f0ef2"
+    },
+    {
+      "path": "packages/engine/bench/membrane-reference-binding.py",
+      "bytes": 3477,
+      "sha256": "b3a7fa6260ea4aacdce7dcb9e73c3ff5d5ba5e9f7148425ef52142f6bd76816a"
+    },
+    {
+      "path": "packages/engine/bench/membrane-reference-precision.py",
+      "bytes": 24514,
+      "sha256": "db521a2a473d8038c4f9abec4c0f14a6242e74937e003269a0ebff8e6d98529f"
+    },
+    {
+      "path": "packages/engine/bench/membrane-reference.py",
+      "bytes": 8826,
+      "sha256": "1d4d65f85d1e29dc906a050c285f39d683eeaae1f4a7d797e8932f6af71c41b5"
+    },
+    {
+      "path": "packages/engine/bench/membrane-state-precision.py",
+      "bytes": 23280,
+      "sha256": "ce1dbcd0203a6ab7ad5e06912dda6f198bf8e3a867a0cc286bb51ac26f394198"
+    },
+    {
+      "path": "packages/engine/bench/mollifier-prototype.py",
+      "bytes": 6621,
+      "sha256": "8eb5679cbbd20495b201302881b4667a74d4f47bb54c2973fa6a3002614c22af"
+    },
+    {
+      "path": "packages/engine/bench/orthotropic-reference.py",
+      "bytes": 9956,
+      "sha256": "5df43137751d658003915612cd3a2530c23778769e8ac467a589c8ff869b650b"
+    },
+    {
+      "path": "packages/engine/bench/plane-stress-precision.py",
+      "bytes": 12031,
+      "sha256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec"
+    },
+    {
+      "path": "packages/engine/bench/plane-stress-reference.py",
+      "bytes": 19944,
+      "sha256": "e27d1abfb0fb6f4574729c4cc303a65cc5d0a921de43115af23fefb67e756873"
+    },
+    {
+      "path": "packages/engine/bench/test_membrane_modal_precision.py",
+      "bytes": 12437,
+      "sha256": "92b9c5b40d7addb1560a58681c7e07169903f8d14574415083647e098f176e05"
+    },
+    {
+      "path": "packages/engine/bench/test_membrane_modal_reference.py",
+      "bytes": 15203,
+      "sha256": "31377276f8d8038935f8587dfb8c8f100d680c408bf3c508abf2cdabf176e638"
+    },
+    {
+      "path": "packages/engine/bench/test_membrane_reference.py",
+      "bytes": 14514,
+      "sha256": "326be24ac10a1ba652fc6b203bfc2da5fda3385d8dcaeb81ecf88ca423c943ac"
+    },
+    {
+      "path": "packages/engine/bench/test_orthotropic_reference.py",
+      "bytes": 18018,
+      "sha256": "e2377a58bc8b5e8183996444c9b0735eaa68f2da243cb1f54caa253e828ac0d2"
+    },
+    {
+      "path": "packages/engine/bench/test_plane_stress_precision.py",
+      "bytes": 15032,
+      "sha256": "6f782171f0e2572e44126a5c43ee9e3a57b54916a4b85d126c764876db561023"
+    },
+    {
+      "path": "packages/engine/bench/test_plane_stress_reference.py",
+      "bytes": 14771,
+      "sha256": "753a04e795437a80e6e2d802a2324758fc4ed4db51558ba8561f31672ac7bfa9"
+    }
+  ],
+  "selection": {
+    "roleReferences": 10,
+    "uniqueEvents": 8,
+    "allScalarEventsRetained": 24,
+    "deduplication": "trajectory+substepsRun+iteration; all roles preserved; identical full bytes/values required"
+  },
+  "decisions": {
+    "accepted": 5,
+    "precision-limited-zero-step": 3
+  },
+  "counts": {
+    "nativeCoefficient": {
+      "acceptedEvaluated": 5,
+      "wrongAcceptedExactGradientArmijo": 0,
+      "wrongAcceptedCapturedGradientArmijo": 0,
+      "positiveAcceptedPotential": 0,
+      "selectedTrialsEvaluated": 8
+    },
+    "realMass": {
+      "acceptedEvaluated": 5,
+      "wrongAcceptedExactGradientArmijo": 0,
+      "wrongAcceptedCapturedGradientArmijo": 0,
+      "positiveAcceptedPotential": 0,
+      "selectedTrialsEvaluated": 8
+    }
+  },
+  "events": [
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 0,
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "substepsRun": 0,
+        "iteration": 1,
+        "roles": [
+          "first-accepted"
+        ]
+      },
+      "decision": "accepted",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "candidateU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+        "afterU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+        "lastTrialU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+        "startX": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "candidatePublicBeforeFinish": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "afterX": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+        "lastTrialX": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+        "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "xs": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "xt": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "63f5f28433e0ca35ab8d1e67661c09d53b38b0c14e692b43c83f1b780e68374a",
+        "acceptedRealizedDirection": "9f1c9fd4ac1b7b80e97a14fdcef8373e374dd63741009963b993e90293f07f0b",
+        "packedDirection": "e898a91e10988def46d98f072c2ef132ed086e4069065168ab598c0a8e5cd2e2",
+        "nominalDirection": "e898a91e10988def46d98f072c2ef132ed086e4069065168ab598c0a8e5cd2e2",
+        "realizedDirection": "9f1c9fd4ac1b7b80e97a14fdcef8373e374dd63741009963b993e90293f07f0b"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": -0.5419927849482186,
+            "exact": {
+              "numerator": "-1816733790000099494850273678698795474144358282416854278016730457857657424459228472115527158788239715278460523591337782665938922631540973405220990758980931",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.0839855699292713,
+            "exact": {
+              "numerator": "-55442315370334734788424768037041886443352900201854232251931089533714572977881916111025387212918471367911763532821374743824905181736075692548284056295",
+              "denominator": "51146728248377216718956089012931236753385031969422887335676427626502090568823039920051095192592252455482604439493126109519019633529459266458258243584"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292712,
+            "exact": {
+              "numerator": "-409092080996183320984484374279866411369704930070604888449500577516167986863936082263131731921520856719456343996532178846994480605557905266303286411846822364955703195",
+              "denominator": "3773962424821541352241554580988268890916921220416440428376206300245624162392148852086126725177658767541468375030763844899770584629924792632561434251432696043649395326976"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "2045051312837963070986629971295685168480882553278802832909504607511326772913834231132665449576078605127547712838998979969609475693091815430300091292952584163623078299749",
+              "denominator": "3773962424821541352241554580988268890916921220416440428376206300245624162392148852086126725177658767541468375030763844899770584629924792632561434251432696043649395326976"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292714,
+            "exact": {
+              "numerator": "-81113430287088742177220933833991538134962944933",
+              "denominator": "748288838313422294120286634350736906063837462003712"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "1816370443242088469109840426376208091814611867103630311757122945224125541054898372478202533825962427089148252603247045191827021433418162819887216271854915",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 3.7810871362905346e-11,
+            "exact": {
+              "numerator": "819039508876783108744014369725232464856544988331325941595139889937196364737822351522571774911640535540182031551192869",
+              "denominator": "21661481985318866090456360813617841433097164651373566993519371723551728967231450179999800047688590453885868835635965404913860608"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": -0.5419927849482186,
+            "exact": {
+              "numerator": "-5596280584680610126406255217163071639468822241194647237978648354543986539112406773365031885401443954215897628866158704262857281808825527143962872790794104341619774041825710646338215139",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.0839855699292713,
+            "exact": {
+              "numerator": "-55442315370334734788424768037041886443352900201854232251931089533714572977881916111025387212918471367911763532821374743824905181736075692548284056295",
+              "denominator": "51146728248377216718956089012931236753385031969422887335676427626502090568823039920051095192592252455482604439493126109519019633529459266458258243584"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292712,
+            "exact": {
+              "numerator": "-409092080996183320984484374279866411369704930070604888449500577516167986863936082263131731921520856719456343996532178846994480605557905266303286411846822364955703195",
+              "denominator": "3773962424821541352241554580988268890916921220416440428376206300245624162392148852086126725177658767541468375030763844899770584629924792632561434251432696043649395326976"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "6299591618599254725121518659496025919087340032264466755282786657916536730783017780125170356546065556775473948041668339921366113921309096934062108999673600112782338979878535470153165330763541811184581",
+              "denominator": "11625342557943941447853092408151126285263758278943304850747357194011490272923363440615162726696271191552519136844222826112231852903621789272097300577283659394231404494533712367405488765749020856418304"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292714,
+            "exact": {
+              "numerator": "-81113430287088742177220933833991538134962944933",
+              "denominator": "748288838313422294120286634350736906063837462003712"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "5595161328563640101932988073369097208277318888829646996743864315862763731312835972716081602349725383225903149501380803174667658113007246928496281132713525205507666054031754652222184675",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 3.7810871362905346e-11,
+            "exact": {
+              "numerator": "819039508876783108744014369725232464856544988331325941595139889937196364737822351522571774911640535540182031551192869",
+              "denominator": "21661481985318866090456360813617841433097164651373566993519371723551728967231450179999800047688590453885868835635965404913860608"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": false,
+      "capturedGradientSlopeNJ": {
+        "approximate": -1.0839855699292713,
+        "exact": {
+          "numerator": "-10992919666876640459103573706073",
+          "denominator": "10141204801825835211973625643008"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    },
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 0,
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "substepsRun": 0,
+        "iteration": 2,
+        "roles": [
+          "worst-nominal"
+        ]
+      },
+      "decision": "accepted",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+        "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "lastTrialU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "startX": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+        "candidatePublicBeforeFinish": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+        "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "lastTrialX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "xs": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "xt": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "6546e6879d91ecae5613f8640442042729cdcf2ed97ae114d7933a969f633e42",
+        "acceptedRealizedDirection": "36e2c2b1237e4750955e0f82c4c75cc895958cdf45efff4e5cbcdb5f8f9b0a44",
+        "packedDirection": "6181c7b7d0c80aad6e4a33a6a96af0db4c2bb5ff68cd403f0c4644cfc192d960",
+        "nominalDirection": "6181c7b7d0c80aad6e4a33a6a96af0db4c2bb5ff68cd403f0c4644cfc192d960",
+        "realizedDirection": "36e2c2b1237e4750955e0f82c4c75cc895958cdf45efff4e5cbcdb5f8f9b0a44"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": -6.02585529023275e-16,
+            "exact": {
+              "numerator": "-31559964978542661878805561700851097592935053886281360658182763300601612886895420187141444228825461188461308679370020017646794544034974069",
+              "denominator": "52374249726338269920211035149241586435466272736689036631732661889538140742474792878132321477214466514414186946040961136147476104734166288853256441430016"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.205178825685845e-15,
+            "exact": {
+              "numerator": "-504962694250924300595070811514475297039115688022295002189194911215182793729843445990152835370203305210909988486704514970079051307553348245",
+              "denominator": "418993997810706159361688281193932691483730181893512293053861295116305125939798343025058571817715732115313495568327689089179808837873330310826051531440128"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -1.205178825685845e-19,
+            "exact": {
+              "numerator": "-3725967035047058623554508732047172528539338600155573823086597091056513260035032855913896869576148200369352010309711584172943166962951857169064579606244145",
+              "denominator": "30916300184138066757562815127455898754391418637651479989257882011612153138316483396289550132655380623699708928252017417418920629288343901245943269387736645989575846518587392"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 6.024650111407064e-16,
+            "exact": {
+              "numerator": "18625989134866163960318137993209036540516128719740231094969434604567411428463673124075255951371427567091699820444422328778681016132221912078013080962059211983",
+              "denominator": "30916300184138066757562815127455898754391418637651479989257882011612153138316483396289550132655380623699708928252017417418920629288343901245943269387736645989575846518587392"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -1.2051788254075006e-19,
+            "exact": {
+              "numerator": "-90182186322411345766576626295665",
+              "denominator": "748288838313422294120286634350736906063837462003712"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 6.024650111407342e-16,
+            "exact": {
+              "numerator": "31553652944865983131902835623465938500245308273354273127024839952289710209676197693561339892545144688131330938542756445547503694983039349",
+              "denominator": "52374249726338269920211035149241586435466272736689036631732661889538140742474792878132321477214466514414186946040961136147476104734166288853256441430016"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 8.167509941046632e-11,
+            "exact": {
+              "numerator": "14493316665581107828678651541142537554851503600741748607788710262833562214138768912645468174141682339000061254752933251553",
+              "denominator": "177450860423732151013018507785157357019931972824052260810910693159335763699560039874558361990664932998233037501529828597054346100736"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": -6.025855290221043e-16,
+            "exact": {
+              "numerator": "-13888222308978033066104738438839514615649899515526352635701344453195965917740854649763847093194257388982862361944904269037071439903506897213374340773160079729882830659",
+              "denominator": "23047719601757280056211153161750734217306787384376668356992399029846796146922465981381721483528279820113496550298619178828781617546271786494637662597393349632729110257995846990692352"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.205178825684674e-15,
+            "exact": {
+              "numerator": "-1555490924083907082291880666787790921250601680289541343934767209707290723295457446944591851113260734454994529287535856331247956928382190718361468094904875604674181156853",
+              "denominator": "1290672297698407683147824577058041116169180093525093427991574345671420584227658094957376403077583669926355806816722674014411770582591220043699709105454027579432830174447767431478771712"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -1.2051788256846742e-19,
+            "exact": {
+              "numerator": "-11477497194221523359544607770439551912865476124486242103548306523497994850161678035275984703620317365779335662266661790518288823944588511228446371292382116459894293639516775203026775313",
+              "denominator": "95234806234676768340812533007574026528880707821103553337322350133342128315788193305519413057095853601198236769027873391511403338986469697717021086329107737757543665619220171713785763969015978855778746368"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 6.024650111395358e-16,
+            "exact": {
+              "numerator": "57375638599046073424623735701062808081136986102720289896964525682391798298114243131395053164548971201305027638493980350639851346332759746376288186582540583957833795309457666605348479292143",
+              "denominator": "95234806234676768340812533007574026528880707821103553337322350133342128315788193305519413057095853601198236769027873391511403338986469697717021086329107737757543665619220171713785763969015978855778746368"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -1.2051788254075006e-19,
+            "exact": {
+              "numerator": "-90182186322411345766576626295665",
+              "denominator": "748288838313422294120286634350736906063837462003712"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 6.024650111395635e-16,
+            "exact": {
+              "numerator": "13885444646614236339338404061789250200408787951738783388324730998962950049466165214048659467352648318327507521054474781399951814366888813566780617354545514737206826819",
+              "denominator": "23047719601757280056211153161750734217306787384376668356992399029846796146922465981381721483528279820113496550298619178828781617546271786494637662597393349632729110257995846990692352"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 3.779437808630418e-11,
+            "exact": {
+              "numerator": "2582399999114971130916995121005244311125464694329619513465241579018008875532856711847627767378370330814673015571673498814152327901273723100501339471111",
+              "denominator": "68327622516185123749683752541618252839958267931102448942722267399447570143147625239700431811539719512141627963183642126092571010334907615322213766023465211527168"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": false,
+      "capturedGradientSlopeNJ": {
+        "approximate": -1.2051788254075005e-15,
+        "exact": {
+          "numerator": "-12221965291281365",
+          "denominator": "10141204801825835211973625643008"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    },
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 0,
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "substepsRun": 0,
+        "iteration": 3,
+        "roles": [
+          "first-precision-limited",
+          "first-rejected"
+        ]
+      },
+      "decision": "precision-limited-zero-step",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "lastTrialU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "startX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "lastTrialX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "xs": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "xt": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928",
+        "acceptedRealizedDirection": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70",
+        "packedDirection": "24342bce58b3ea2cc61ddfe3fd20655dfbee990c4ac082eb2241e184982bb961",
+        "nominalDirection": "24342bce58b3ea2cc61ddfe3fd20655dfbee990c4ac082eb2241e184982bb961",
+        "realizedDirection": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientStrictRealArmijo": false,
+          "capturedGradientStrictRealArmijo": false,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 4.747885737475455e-11,
+            "exact": {
+              "numerator": "1053145511635731959521579513014165921208872286288548077434774214648275538286505241413557562969735030523558409578427562943",
+              "denominator": "22181357552966518876627313473144669627491496603006532601363836644916970462445004984319795248833116624779129687691228574631793262592"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientStrictRealArmijo": false,
+          "capturedGradientStrictRealArmijo": false,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 7.179247878726544e-11,
+            "exact": {
+              "numerator": "4905409390077500904411029860878903580689464917692101103368141073961428855467306059385638970293038269331516220257729387288256984605116930453363584277471",
+              "denominator": "68327622516185123749683752541618252839958267931102448942722267399447570143147625239700431811539719512141627963183642126092571010334907615322213766023465211527168"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": true,
+      "capturedGradientSlopeNJ": {
+        "approximate": 0.0,
+        "exact": {
+          "numerator": "0",
+          "denominator": "1"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    },
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 0,
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "substepsRun": 1,
+        "iteration": 7,
+        "roles": [
+          "worst-realized"
+        ]
+      },
+      "decision": "precision-limited-zero-step",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "candidateU": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "afterU": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "lastTrialU": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "startX": "b2aedb00d4c6cc1b73f3385719d7a85a78ca6fafefd90f03e10b16915ad93d38",
+        "candidatePublicBeforeFinish": "b2aedb00d4c6cc1b73f3385719d7a85a78ca6fafefd90f03e10b16915ad93d38",
+        "afterX": "b2aedb00d4c6cc1b73f3385719d7a85a78ca6fafefd90f03e10b16915ad93d38",
+        "lastTrialX": "b2aedb00d4c6cc1b73f3385719d7a85a78ca6fafefd90f03e10b16915ad93d38",
+        "us": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "ut": "ee18cb4fca200318b27843ada56453587490d576734a384402e8df484f1e563f",
+        "xs": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "xt": "31ec130d1e888f05ed9276685fca4653fabd6311ebf0b86f2ba845db26b0d3c7",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "9fad6ca6af27534bdb6b017dd81f17403b0f2de5b694c6a5b6a2f06fb3cdaa48",
+        "acceptedRealizedDirection": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70",
+        "packedDirection": "df61daab5a2233e736c1a9170547ae2d98bb184e3f2295f850efc32568643fbd",
+        "nominalDirection": "df61daab5a2233e736c1a9170547ae2d98bb184e3f2295f850efc32568643fbd",
+        "realizedDirection": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientStrictRealArmijo": false,
+          "capturedGradientStrictRealArmijo": false,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 4.918489002044439e-11,
+            "exact": {
+              "numerator": "1117171334908735302070506904953148617530659463125827232273769365244600109658752839312654219139935509390333676948731749897931",
+              "denominator": "22713710134237715329666368996500141698551292521478689383796568724394977753543685103943470334805111423773828800195818060422956300894208"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientStrictRealArmijo": false,
+          "capturedGradientStrictRealArmijo": false,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 5.5656828967838904e-11,
+            "exact": {
+              "numerator": "9701272449393810556223726915661607495956187591355495582295425150677680250238027694527448913620211219315089265861345260782039736138900593389052507801",
+              "denominator": "174305159480064091198172838116373093979485377375261349343679253570019311589662309284950081151887039571789867253019495219623905638609458202352586137814962274304"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": true,
+      "capturedGradientSlopeNJ": {
+        "approximate": 0.0,
+        "exact": {
+          "numerator": "0",
+          "denominator": "1"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    },
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 1,
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "substepsRun": 0,
+        "iteration": 1,
+        "roles": [
+          "first-accepted"
+        ]
+      },
+      "decision": "accepted",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "candidateU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+        "afterU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+        "lastTrialU": "667c4cc592a751d466c8fa414bedebd96c39598bf8b330d827c2fae6ee27bd8c",
+        "startX": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "candidatePublicBeforeFinish": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "afterX": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+        "lastTrialX": "633e63b4badce6b4752c46c6c58be776ec46fd85aef674ec96de4f0f76205980",
+        "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "xs": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "xt": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "63f5f28433e0ca35ab8d1e67661c09d53b38b0c14e692b43c83f1b780e68374a",
+        "acceptedRealizedDirection": "9f1c9fd4ac1b7b80e97a14fdcef8373e374dd63741009963b993e90293f07f0b",
+        "packedDirection": "e898a91e10988def46d98f072c2ef132ed086e4069065168ab598c0a8e5cd2e2",
+        "nominalDirection": "e898a91e10988def46d98f072c2ef132ed086e4069065168ab598c0a8e5cd2e2",
+        "realizedDirection": "9f1c9fd4ac1b7b80e97a14fdcef8373e374dd63741009963b993e90293f07f0b"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": -0.5419927849482186,
+            "exact": {
+              "numerator": "-1816733790000099494850273678698795474144358282416854278016730457857657424459228472115527158788239715278460523591337782665938922631540973405220990758980931",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.0839855699292713,
+            "exact": {
+              "numerator": "-55442315370334734788424768037041886443352900201854232251931089533714572977881916111025387212918471367911763532821374743824905181736075692548284056295",
+              "denominator": "51146728248377216718956089012931236753385031969422887335676427626502090568823039920051095192592252455482604439493126109519019633529459266458258243584"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292712,
+            "exact": {
+              "numerator": "-409092080996183320984484374279866411369704930070604888449500577516167986863936082263131731921520856719456343996532178846994480605557905266303286411846822364955703195",
+              "denominator": "3773962424821541352241554580988268890916921220416440428376206300245624162392148852086126725177658767541468375030763844899770584629924792632561434251432696043649395326976"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "2045051312837963070986629971295685168480882553278802832909504607511326772913834231132665449576078605127547712838998979969609475693091815430300091292952584163623078299749",
+              "denominator": "3773962424821541352241554580988268890916921220416440428376206300245624162392148852086126725177658767541468375030763844899770584629924792632561434251432696043649395326976"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292714,
+            "exact": {
+              "numerator": "-81113430287088742177220933833991538134962944933",
+              "denominator": "748288838313422294120286634350736906063837462003712"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "1816370443242088469109840426376208091814611867103630311757122945224125541054898372478202533825962427089148252603247045191827021433418162819887216271854915",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 3.7810871362905346e-11,
+            "exact": {
+              "numerator": "819039508876783108744014369725232464856544988331325941595139889937196364737822351522571774911640535540182031551192869",
+              "denominator": "21661481985318866090456360813617841433097164651373566993519371723551728967231450179999800047688590453885868835635965404913860608"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": -0.5419927849482186,
+            "exact": {
+              "numerator": "-5596280584680610126406255217163071639468822241194647237978648354543986539112406773365031885401443954215897628866158704262857281808825527143962872790794104341619774041825710646338215139",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.0839855699292713,
+            "exact": {
+              "numerator": "-55442315370334734788424768037041886443352900201854232251931089533714572977881916111025387212918471367911763532821374743824905181736075692548284056295",
+              "denominator": "51146728248377216718956089012931236753385031969422887335676427626502090568823039920051095192592252455482604439493126109519019633529459266458258243584"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292712,
+            "exact": {
+              "numerator": "-409092080996183320984484374279866411369704930070604888449500577516167986863936082263131731921520856719456343996532178846994480605557905266303286411846822364955703195",
+              "denominator": "3773962424821541352241554580988268890916921220416440428376206300245624162392148852086126725177658767541468375030763844899770584629924792632561434251432696043649395326976"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "6299591618599254725121518659496025919087340032264466755282786657916536730783017780125170356546065556775473948041668339921366113921309096934062108999673600112782338979878535470153165330763541811184581",
+              "denominator": "11625342557943941447853092408151126285263758278943304850747357194011490272923363440615162726696271191552519136844222826112231852903621789272097300577283659394231404494533712367405488765749020856418304"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -0.00010839855699292714,
+            "exact": {
+              "numerator": "-81113430287088742177220933833991538134962944933",
+              "denominator": "748288838313422294120286634350736906063837462003712"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.5418843863912257,
+            "exact": {
+              "numerator": "5595161328563640101932988073369097208277318888829646996743864315862763731312835972716081602349725383225903149501380803174667658113007246928496281132713525205507666054031754652222184675",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 3.7810871362905346e-11,
+            "exact": {
+              "numerator": "819039508876783108744014369725232464856544988331325941595139889937196364737822351522571774911640535540182031551192869",
+              "denominator": "21661481985318866090456360813617841433097164651373566993519371723551728967231450179999800047688590453885868835635965404913860608"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": false,
+      "capturedGradientSlopeNJ": {
+        "approximate": -1.0839855699292713,
+        "exact": {
+          "numerator": "-10992919666876640459103573706073",
+          "denominator": "10141204801825835211973625643008"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    },
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 1,
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "substepsRun": 0,
+        "iteration": 3,
+        "roles": [
+          "first-precision-limited",
+          "first-rejected"
+        ]
+      },
+      "decision": "precision-limited-zero-step",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "candidateU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "afterU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "lastTrialU": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "startX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "candidatePublicBeforeFinish": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "afterX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "lastTrialX": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "us": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "ut": "598cd7601fc03b9783b25b6a11a66a3da2b2e2cc8fe644454e9328516d5edc00",
+        "xs": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "xt": "8d2db0ec56e60a143ac4cb3b7300d1207a799166fbce9b0c13c4102a1e4f1740",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "62198b6b6d4645823d19d33cf45b5a100da045a30b2670fcdc8379f874725928",
+        "acceptedRealizedDirection": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70",
+        "packedDirection": "24342bce58b3ea2cc61ddfe3fd20655dfbee990c4ac082eb2241e184982bb961",
+        "nominalDirection": "24342bce58b3ea2cc61ddfe3fd20655dfbee990c4ac082eb2241e184982bb961",
+        "realizedDirection": "a5645e7a3fa0866cde8842c4dab96567507c3d1a3c028b816bc63f6966367b70"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientStrictRealArmijo": false,
+          "capturedGradientStrictRealArmijo": false,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 4.747885737475455e-11,
+            "exact": {
+              "numerator": "1053145511635731959521579513014165921208872286288548077434774214648275538286505241413557562969735030523558409578427562943",
+              "denominator": "22181357552966518876627313473144669627491496603006532601363836644916970462445004984319795248833116624779129687691228574631793262592"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 0.0,
+            "exact": {
+              "numerator": "0",
+              "denominator": "1"
+            }
+          },
+          "exactGradientStrictRealArmijo": false,
+          "capturedGradientStrictRealArmijo": false,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 7.179247878726544e-11,
+            "exact": {
+              "numerator": "4905409390077500904411029860878903580689464917692101103368141073961428855467306059385638970293038269331516220257729387288256984605116930453363584277471",
+              "denominator": "68327622516185123749683752541618252839958267931102448942722267399447570143147625239700431811539719512141627963183642126092571010334907615322213766023465211527168"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": true,
+      "capturedGradientSlopeNJ": {
+        "approximate": 0.0,
+        "exact": {
+          "numerator": "0",
+          "denominator": "1"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    },
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 1,
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "substepsRun": 1,
+        "iteration": 6,
+        "roles": [
+          "worst-realized"
+        ]
+      },
+      "decision": "accepted",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "08885104f618f544355815f9a3498190734e32c07852606fc6ec30f47a878576",
+        "candidateU": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "afterU": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "lastTrialU": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "startX": "d9276d752a2346e340483fdc0c65fce6fc55b1095120ce7a66b67705c793e6a0",
+        "candidatePublicBeforeFinish": "d9276d752a2346e340483fdc0c65fce6fc55b1095120ce7a66b67705c793e6a0",
+        "afterX": "b2aedb00d4c6cc1b73f3385719d7a85a78ca6fafefd90f03e10b16915ad93d38",
+        "lastTrialX": "b2aedb00d4c6cc1b73f3385719d7a85a78ca6fafefd90f03e10b16915ad93d38",
+        "us": "04a4404f1b32417bcac7adc9cf46a29fe031e8ce1343c59dd1fb37f60430cd09",
+        "ut": "ee18cb4fca200318b27843ada56453587490d576734a384402e8df484f1e563f",
+        "xs": "1f7a4ce2d7cb564307c6c739542589d4500b64e165d805b49bb79cde06dc8fbe",
+        "xt": "31ec130d1e888f05ed9276685fca4653fabd6311ebf0b86f2ba845db26b0d3c7",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "7c0b193d5096af6ead626996f04af5c98a40711d5cbd34ab4c0ebc10847047ae",
+        "acceptedRealizedDirection": "624ee7a3f204fa8beae89d96b5f1b1561ff97c8b2d37093521f0c22d0c83773d",
+        "packedDirection": "51f368e82095c6b0d7a91eff49efd67dccfd39d940b31deb2af8870e15b7df82",
+        "nominalDirection": "51f368e82095c6b0d7a91eff49efd67dccfd39d940b31deb2af8870e15b7df82",
+        "realizedDirection": "624ee7a3f204fa8beae89d96b5f1b1561ff97c8b2d37093521f0c22d0c83773d"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": -2.4089253540655587e-15,
+            "exact": {
+              "numerator": "-8074602116219994527445202730956299437109175175503485766093879979864130679099710513017624918567105203283342022170940856888225531485004613411",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -4.8178500615311585e-15,
+            "exact": {
+              "numerator": "-2018650258133496670325283204275326740582948763031411796034244188659398830940949218961796105854859628940693312798468752117931953298357469583",
+              "denominator": "418993997810706159361688281193932691483730181893512293053861295116305125939798343025058571817715732115313495568327689089179808837873330310826051531440128"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -4.817850061531158e-19,
+            "exact": {
+              "numerator": "-14895009874446535233348968330673324929115394974563943925399129884237218900030732842747487759920000915923317569295931915374641182304378945983286327998116643",
+              "denominator": "30916300184138066757562815127455898754391418637651479989257882011612153138316483396289550132655380623699708928252017417418920629288343901245943269387736645989575846518587392"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 2.4084435690594055e-15,
+            "exact": {
+              "numerator": "74460164357597447561448224150675041781423169061834619286443464279664224029801314900064271927619430178526880426703374909258882588644570070081348946780117044445",
+              "denominator": "30916300184138066757562815127455898754391418637651479989257882011612153138316483396289550132655380623699708928252017417418920629288343901245943269387736645989575846518587392"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -4.817850062468061e-19,
+            "exact": {
+              "numerator": "-22532146415077965900324606496125",
+              "denominator": "46768052394588893382517914646921056628989841375232"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 2.408443569059312e-15,
+            "exact": {
+              "numerator": "8072987196013173684752376971775756962711765774163777047463396318228662834041223111912677701278477265706872677937886884098235142218752837411",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 4.634556487125174e-11,
+            "exact": {
+              "numerator": "16448120726455034118332811817787818385174094819639199616463315127569535679720188781965231997232884166163960154674339579349",
+              "denominator": "354901720847464302026037015570314714039863945648104521621821386318671527399120079749116723981329865996466075003059657194108692201472"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": -2.408925354063197e-15,
+            "exact": {
+              "numerator": "-24873065773701574026614941022559662818747528495086670784194714106644593687989246211558745352231462317671304505833577372272406602134573234011521847603938258932165076605635",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -4.817850061528797e-15,
+            "exact": {
+              "numerator": "-6218265608879786416283910884490484652272802944103735389900710580079878318038074144723895014097033532255359122070992569165654536564802888296152082853971626124827148019631",
+              "denominator": "1290672297698407683147824577058041116169180093525093427991574345671420584227658094957376403077583669926355806816722674014411770582591220043699709105454027579432830174447767431478771712"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -4.817850061528796e-19,
+            "exact": {
+              "numerator": "-45882701707742048861014327377950130024831291319789731644722977062727764469480872431111906070937162510001554237178074545578743332990101020258488721796344587799027941250623300736904890051",
+              "denominator": "95234806234676768340812533007574026528880707821103553337322350133342128315788193305519413057095853601198236769027873391511403338986469697717021086329107737757543665619220171713785763969015978855778746368"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 2.408443569057044e-15,
+            "exact": {
+              "numerator": "229367656626300954931556060529359688771430841588478249193025726942767769827748772442461467772741768075607149870118080318102034897131473723799810583108793064912968749819815656267086649588029",
+              "denominator": "95234806234676768340812533007574026528880707821103553337322350133342128315788193305519413057095853601198236769027873391511403338986469697717021086329107737757543665619220171713785763969015978855778746368"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -4.817850062468061e-19,
+            "exact": {
+              "numerator": "-22532146415077965900324606496125",
+              "denominator": "46768052394588893382517914646921056628989841375232"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 2.4084435690569502e-15,
+            "exact": {
+              "numerator": "24868091161213500370988269710709162447483169969286537123712659773821812122203880621574997883519839197717276685483270466784288979371982814789574078453072688569919039101635",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 4.591616005761854e-11,
+            "exact": {
+              "numerator": "100394945657910289549019714210586800798428738420301209975222094698587975450362326736511070060113110155548797975513336418360023358357624110488341868638149",
+              "denominator": "2186483920517923959989880081331784090878664573795278366167112556782322244580724007670413817969271024388532094821876548034962272330717043690310840512750886768869376"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": false,
+      "capturedGradientSlopeNJ": {
+        "approximate": -4.817850062468061e-15,
+        "exact": {
+          "numerator": "-3053675261748625",
+          "denominator": "633825300114114700748351602688"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    },
+    {
+      "selection": {
+        "groupIndex": 0,
+        "trajectoryIndex": 1,
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "substepsRun": 2,
+        "iteration": 10,
+        "roles": [
+          "worst-nominal"
+        ]
+      },
+      "decision": "accepted",
+      "observerValid": true,
+      "observerMissing": [],
+      "stateSHA256": {
+        "startU": "ba9c329d404378f3e878792c99cf938d3aea0b0b5911ee6cbad564240fb47d31",
+        "candidateU": "66f7483d939447fce50213f1dac6d648cecc391c5428198d170e84f06671741c",
+        "afterU": "66f7483d939447fce50213f1dac6d648cecc391c5428198d170e84f06671741c",
+        "lastTrialU": "66f7483d939447fce50213f1dac6d648cecc391c5428198d170e84f06671741c",
+        "startX": "5981b04952f012678400b5bd4b9f5c5f9ad55c3519dfc2dd912414326d5de5bc",
+        "candidatePublicBeforeFinish": "5981b04952f012678400b5bd4b9f5c5f9ad55c3519dfc2dd912414326d5de5bc",
+        "afterX": "f5378993e3d5935a9217698766c5764b1cf18b12022b1d32ba1fdf80d8263f82",
+        "lastTrialX": "f5378993e3d5935a9217698766c5764b1cf18b12022b1d32ba1fdf80d8263f82",
+        "us": "f3832bbc5956ee3922d56bfb4b3aae131063fae935ca01198957f4274da3af2a",
+        "ut": "635a2aa05ca8d6d5aba7ef487e44ce92ec3f815dc540421f9fcd0766833a6051",
+        "xs": "b2aedb00d4c6cc1b73f3385719d7a85a78ca6fafefd90f03e10b16915ad93d38",
+        "xt": "d7dd91ce985158111765650182a24497118fa99d7dc8b441777f1451b0a734af",
+        "x0": "81c94d1a3b9d2074bcca6cf10ee8ef04999372a580615629a490a310c91bb623",
+        "mass": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+        "h": "564b874c138d2b4980607c87b923cb8f8f7dd94f4d93b2ec128e673af9899b43",
+        "gradient": "28589d2f8eb1784d8159a61d0c1e06f1fd92bd33f49b915483c781889d9e1679",
+        "acceptedRealizedDirection": "bc12db7ef64bf7be57ed977a63b5ea5de2be4f78520303c8d863c8c7f53b7143",
+        "packedDirection": "e6e5973679df0a0bf81fbf1f94792f95a80acdb95e379ab861cd534a0ab8258d",
+        "nominalDirection": "e6e5973679df0a0bf81fbf1f94792f95a80acdb95e379ab861cd534a0ab8258d",
+        "realizedDirection": "bc12db7ef64bf7be57ed977a63b5ea5de2be4f78520303c8d863c8c7f53b7143"
+      },
+      "referenceSHA256": "2861d5ade2060add3a30156a9adb908583d021e95899f7d0ea61170e60268064",
+      "lastTrialEqualsFinalBytes": true,
+      "truth": {
+        "nativeCoefficient": {
+          "deltaPotentialNJ": {
+            "approximate": -5.415520838637617e-15,
+            "exact": {
+              "numerator": "-18152565811263705134378188638606256528917349271687171645909153205709029987726885635217031878019158000553758425282447056004790682218634653037",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.0831055479752372e-14,
+            "exact": {
+              "numerator": "-9076294471942004516629679676436152249044374770100506494520061481951370691916027877637170813840989027735063724264945645773930405663208959097",
+              "denominator": "837987995621412318723376562387865382967460363787024586107722590232610251879596686050117143635431464230626991136655378178359617675746660621652103062880256"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -1.0831055479752372e-18,
+            "exact": {
+              "numerator": "-66971232504615577620072161066789212020639761249212925808459076302493995884000078487352798930142799742287091094785470470423564421562116901818971302812269637",
+              "denominator": "61832600368276133515125630254911797508782837275302959978515764023224306276632966792579100265310761247399417856504034834837841258576687802491886538775473291979151693037174784"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 5.414437733089642e-15,
+            "exact": {
+              "numerator": "334788764569046756155918960628864653297178935330920843249661923205383724139098612909285341934687250507195295296610256296355023577423304891470846911774190388155",
+              "denominator": "61832600368276133515125630254911797508782837275302959978515764023224306276632966792579100265310761247399417856504034834837841258576687802491886538775473291979151693037174784"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -1.0831055481986755e-18,
+            "exact": {
+              "numerator": "-1620951584864818439467451626084737",
+              "denominator": "1496577676626844588240573268701473812127674924007424"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 5.414437733089418e-15,
+            "exact": {
+              "numerator": "18148935293474179378480708044599012867581845808504636156346215468990482599468108993351420268232819267318386080752811007189076664594689142125",
+              "denominator": "3351951982485649274893506249551461531869841455148098344430890360930441007518386744200468574541725856922507964546621512713438470702986642486608412251521024"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 7.234286675344999e-11,
+            "exact": {
+              "numerator": "51349215803676426570611766663321668050325329577398442045379617521163888512325646428852132351861467367557921311771700743573",
+              "denominator": "709803441694928604052074031140629428079727891296209043243642772637343054798240159498233447962659731992932150006119314388217384402944"
+            }
+          }
+        },
+        "realMass": {
+          "deltaPotentialNJ": {
+            "approximate": -5.415520838634085e-15,
+            "exact": {
+              "numerator": "-55917301792267693566959497538334854926535611778986880534377178626510318851734480390501559160575480226488847314596774631956209630428773635497602425206019641626179951986637",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientSlopeNJ": {
+            "approximate": -1.083105547974884e-14,
+            "exact": {
+              "numerator": "-27958686525092728201320751524890017121001352115826361653491472575632874869538774977825406781122957221086261250268513645030166846170103992029834384045658131178941956769113",
+              "denominator": "2581344595396815366295649154116082232338360187050186855983148691342841168455316189914752806155167339852711613633445348028823541165182440087399418210908055158865660348895534862957543424"
+            }
+          },
+          "exactGradientArmijoRhsNJ": {
+            "approximate": -1.083105547974884e-18,
+            "exact": {
+              "numerator": "-206298693986182962257483752796295311140025895936342103290345274387094714727334716404699976240378952538947314977494033250304402281561894410354839750348239581797984353826001469999066020773",
+              "denominator": "190469612469353536681625066015148053057761415642207106674644700266684256631576386611038826114191707202396473538055746783022806677972939395434042172658215475515087331238440343427571527938031957711557492736"
+            }
+          },
+          "exactGradientMarginNJ": {
+            "approximate": 5.41443773308611e-15,
+            "exact": {
+              "numerator": "1031285856760356382422496094368569195779119139373767786958319723226620680884806914378738126930364908537478829970843732411754063821868272399369204209094739153437971496230691506321422627734619",
+              "denominator": "190469612469353536681625066015148053057761415642207106674644700266684256631576386611038826114191707202396473538055746783022806677972939395434042172658215475515087331238440343427571527938031957711557492736"
+            }
+          },
+          "capturedGradientArmijoRhsNJ": {
+            "approximate": -1.0831055481986755e-18,
+            "exact": {
+              "numerator": "-1620951584864818439467451626084737",
+              "denominator": "1496577676626844588240573268701473812127674924007424"
+            }
+          },
+          "capturedGradientMarginNJ": {
+            "approximate": 5.414437733085886e-15,
+            "exact": {
+              "numerator": "55906118317655345744535739112548435778620888558947413481233318297605397479586069499036678262747898994578987752068452931471670420701327498784201521111478296173609929738189",
+              "denominator": "10325378381587261465182596616464328929353440748200747423932594765371364673821264759659011224620669359410846454533781392115294164660729760349597672843632220635462641395582139451830173696"
+            }
+          },
+          "exactGradientStrictRealArmijo": true,
+          "capturedGradientStrictRealArmijo": true,
+          "positivePotentialChange": false,
+          "capturedGradientMaximumComponentErrorMicroN": {
+            "approximate": 6.01212027917808e-11,
+            "exact": {
+              "numerator": "16431755398303255854784055440039981328447248733640416926038484673795986057052358689120657300276250795901420081492332091634628467713779403252648496741305",
+              "denominator": "273310490064740494998735010166473011359833071724409795770889069597790280572590500958801727246158878048566511852734568504370284041339630461288855064093860846108672"
+            }
+          }
+        }
+      },
+      "realTrialStepZero": false,
+      "capturedGradientSlopeNJ": {
+        "approximate": -1.0831055481986753e-14,
+        "exact": {
+          "numerator": "-219679903725532197",
+          "denominator": "20282409603651670423947251286016"
+        }
+      },
+      "classification": "finite exact represented-law trial; stationary/no-op never counted as accepted descent"
+    }
+  ],
+  "integrityPassed": true,
+  "allNewtonEventsRealArmijoCertified": false,
+  "scope": "only selected last actually evaluated trial endpoints; not unretained backtracks, all49770 events, force/time/material/booklet or interaction acceptance",
+  "arithmetic": {
+    "geometry": "exact rational direct FTF-ATA and independent Piola gradient at real X0+u",
+    "nativeCoefficient": "exact interpretation of fl(M*fl(1/fl(h*h)))",
+    "realMass": "exact represented M divided by exact represented h squared",
+    "capturedSlope": "exact rational sum of captured binary64 gradient times exact endpoint difference",
+    "trueSlope": "independent exact full gradient for each inertia law times exact endpoint difference",
+    "c1": {
+      "numerator": "7378697629483821",
+      "denominator": "73786976294838206464"
+    },
+    "zeroStep": "reported separately; never accepted as strict descent"
+  },
+  "reviewer": {
+    "file": "review-selected-newton.py",
+    "bytes": 18999,
+    "sha256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0"
+  }
+}

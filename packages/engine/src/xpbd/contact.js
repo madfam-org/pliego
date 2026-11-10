@@ -284,6 +284,11 @@ export class Contact {
       if (!(den > 1e-12 * d11 * d22)) continue; // degenerate triangle
       const bb = (d22 * p1 - d12 * p2) / den, bc = (d11 * p2 - d12 * p1) / den, ba = 1 - bb - bc;
       if (!(ba >= -1e-3 && bb >= -1e-3 && bc >= -1e-3)) continue;
+      // A fixed query outside the face cannot transfer a reaction through negative
+      // weights at a pinned corner: effective inverse mass tends to zero and a
+      // sub-mm overlap moves free wings hundreds of mm. Keep the existing movable
+      // query tolerance until the general closest-feature model passes slit tests.
+      if (w[v] === 0 && (ba < 0 || bb < 0 || bc < 0)) continue;
       const sp = canon === null ? p : canon[p];
       let s = PS[sp];
       if (s === 0 && this.faceSide.size) {

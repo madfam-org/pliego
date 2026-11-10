@@ -1,0 +1,352 @@
+{
+  "schema": "pliego-broadphase-pairs/0.6",
+  "recordedAt": "2026-11-10T10:15:04.964Z",
+  "source": {
+    "git": "4b48ec15ab40c5a5cc6c6b9002ecb5e44a82f0a8",
+    "dirty": false,
+    "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+    "harnessSHA256": "305f65f0c1984e6891b3bfc067e3db2ee6b859ecf98fd77e9111af6095eba7d7"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "platform": "darwin",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "wasmKernel": {
+    "compiler": "wabt",
+    "version": "1.0.39",
+    "compilerSHA256": "cecf06ab5c65c3b7c05bafe601bbba61a45e4939889c5c51351e8817ac06f48d",
+    "sourceSHA256": "2a12b031c6f4ad0e71766cf1b5304c52ddab9d67aff4da2db6f74e89e18f5f58",
+    "binarySHA256": "c17d1b40fa83285f839e80bee871086f364205bc7b37326018a831f1ebadb246",
+    "binaryBytes": 1268
+  },
+  "mesh": {
+    "vertices": 492,
+    "triangles": 824,
+    "edges": 1312,
+    "topologySHA256": "ada37fc049105b20df0ffc445579ae35879a9cb369003f14f5112d3f9b006834"
+  },
+  "protocol": {
+    "repetitions": 9,
+    "warmupBuilds": 32,
+    "selectedBackend": "wasm",
+    "order": "one backend per process; reference oracle after timed builds; sequential same arrays",
+    "execution": {
+      "reference": "prefix scan, no reuse",
+      "bvh": "forced full refit; auto active-edge traversal below half mobility, otherwise rank traversal",
+      "bvhRanked": "forced full refit; active-only EE queries preserving active-rank pruning",
+      "bvhRank": "forced full refit; original all-rank EE queries",
+      "bvhActive": "forced full refit; active-only EE queries with canonical rank buckets",
+      "bvhReuse": "exact-content reuse allowed only for same-array Float64 unswept poses; swept inputs rebuild",
+      "wasm": "forced full build; JS bounds/topology/filters/order plus scalar binary64 Wasm refit/query; includes validation, input copies and boundary calls",
+      "wasmReuse": "same Wasm backend; exact-pose reuse allowed"
+    },
+    "initializationScope": "constructorMs includes memory/instance initialization; first wasm constructor includes lazy shared module compilation; coldFirstBuildMs separately includes JS topology and initial JS+Wasm refits; warm cost never excludes transfer or calls",
+    "timingScope": "candidate build only, separate wall and process CPU deltas including JIT/GC; exploratory local run",
+    "countScope": "reference primitive AABB overlap tests vs BVH internal/leaf overlap tests plus separately counted root-enclosure tests; excludes rank/stationary pruning and bound generation",
+    "physicsAcceptance": "not evaluated; synthetic dense/large-sweep scenes are culling stress cases, not native physics outcomes"
+  },
+  "results": [
+    {
+      "name": "native-initial-energy",
+      "inputSHA256": "43346e579de933ad90883df1517140f9cccdd5002a328663efb2c0eb365340e1",
+      "vertexTrianglePairs": 0,
+      "edgeEdgePairs": 0,
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 383648,
+      "bvhNodeAABBTests": 18680,
+      "bvhRootEnclosureTests": 809,
+      "coldFirstBuildMs": {
+        "wasm": 18.248725000000007
+      },
+      "reusedLastBuild": false,
+      "constructorMs": {
+        "wasm": 1.4942660000000103
+      },
+      "firstWasmCompilationIncluded": true,
+      "buildWork": {
+        "wasm": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 18680,
+          "rootEnclosureTests": 809,
+          "wasmMemoryBytes": 524288
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "wasm": {
+          "medianMs": 0.7696439999999711,
+          "p95Ms": 0.7743440000000419,
+          "processCpuMedianMs": 0.774,
+          "wallMs": [
+            0.7743440000000419,
+            0.7726959999999963,
+            0.7702689999999848,
+            0.7659610000000043,
+            0.7652719999999817,
+            0.7708690000000047,
+            0.7673130000000015,
+            0.7678089999999997,
+            0.7696439999999711
+          ],
+          "processCpuMs": [
+            0.826,
+            0.779,
+            0.775,
+            0.771,
+            0.771,
+            0.775,
+            0.772,
+            0.772,
+            0.774
+          ]
+        }
+      }
+    },
+    {
+      "name": "native-late-energy",
+      "inputSHA256": "be3888e9febd4d75f00a9e1636810079e8f0006f5907b7dcfa918ce21502aed8",
+      "vertexTrianglePairs": 498,
+      "edgeEdgePairs": 1489,
+      "orderedPairsSHA256": "647178c78cf25d36ea0471395816202baa875a84448fce928946f8a769744a0b",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 383681,
+      "bvhNodeAABBTests": 34906,
+      "bvhRootEnclosureTests": 809,
+      "coldFirstBuildMs": {
+        "wasm": 6.875628000000006
+      },
+      "reusedLastBuild": false,
+      "constructorMs": {
+        "wasm": 0.7884579999999914
+      },
+      "firstWasmCompilationIncluded": false,
+      "buildWork": {
+        "wasm": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 34906,
+          "rootEnclosureTests": 809,
+          "wasmMemoryBytes": 524288
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "wasm": {
+          "medianMs": 1.1973149999999464,
+          "p95Ms": 1.2093319999999608,
+          "processCpuMedianMs": 1.202,
+          "wallMs": [
+            1.2093319999999608,
+            1.2035720000000083,
+            1.1982449999999858,
+            1.1973149999999464,
+            1.1926819999999907,
+            1.1986249999999927,
+            1.1932560000000194,
+            1.1947299999999927,
+            1.1917169999999828
+          ],
+          "processCpuMs": [
+            1.229,
+            1.207,
+            1.202,
+            1.201,
+            1.203,
+            1.205,
+            1.195,
+            1.197,
+            1.195
+          ]
+        }
+      }
+    },
+    {
+      "name": "native-late-sweep",
+      "inputSHA256": "88f9069f1b9a9133680e8f9ecc9ac2973864b4e3f9bcb36a7b72180036d50c56",
+      "vertexTrianglePairs": 0,
+      "edgeEdgePairs": 0,
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 380816,
+      "bvhNodeAABBTests": 18619,
+      "bvhRootEnclosureTests": 809,
+      "coldFirstBuildMs": {
+        "wasm": 6.623634000000038
+      },
+      "reusedLastBuild": false,
+      "constructorMs": {
+        "wasm": 0.6764160000000174
+      },
+      "firstWasmCompilationIncluded": false,
+      "buildWork": {
+        "wasm": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 18619,
+          "rootEnclosureTests": 809,
+          "wasmMemoryBytes": 524288
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "wasm": {
+          "medianMs": 0.7630860000000439,
+          "p95Ms": 0.972422999999992,
+          "processCpuMedianMs": 0.766,
+          "wallMs": [
+            0.8130160000000046,
+            0.972422999999992,
+            0.7630860000000439,
+            0.8393540000000144,
+            0.8473379999999793,
+            0.7604690000000005,
+            0.758088999999984,
+            0.7606450000000109,
+            0.7625239999999849
+          ],
+          "processCpuMs": [
+            1.002,
+            1.849,
+            0.766,
+            0.842,
+            0.85,
+            0.762,
+            0.759,
+            0.763,
+            0.765
+          ]
+        }
+      }
+    },
+    {
+      "name": "synthetic-large-prescribed-sweep",
+      "inputSHA256": "7cd4b6b2b2f3d86a729a9e22f004ff8495b4b9bb5b4b626b3bde94932436fa6d",
+      "vertexTrianglePairs": 300479,
+      "edgeEdgePairs": 656436,
+      "orderedPairsSHA256": "430aaf7baa69fc7248e71f46bd99b46f1f3cb22e8bf02dfd2098787280aa7fb9",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 1154533,
+      "bvhNodeAABBTests": 2440896,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "wasm": 6.526515000000018
+      },
+      "reusedLastBuild": false,
+      "constructorMs": {
+        "wasm": 0.5231239999999957
+      },
+      "firstWasmCompilationIncluded": false,
+      "buildWork": {
+        "wasm": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 2440896,
+          "rootEnclosureTests": 1803,
+          "wasmMemoryBytes": 524288
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "wasm": {
+          "medianMs": 103.0753679999998,
+          "p95Ms": 104.34519499999988,
+          "processCpuMedianMs": 103.07,
+          "wallMs": [
+            104.34519499999988,
+            103.12756799999988,
+            102.51288000000022,
+            102.01461999999992,
+            101.50851899999998,
+            101.7359749999996,
+            103.33219099999951,
+            104.19316400000025,
+            103.0753679999998
+          ],
+          "processCpuMs": [
+            104.263,
+            103.07,
+            102.518,
+            102.02,
+            101.513,
+            101.648,
+            103.33,
+            104.151,
+            103.076
+          ]
+        }
+      }
+    },
+    {
+      "name": "synthetic-dense-all-free",
+      "inputSHA256": "b8cab5c6d74fd9c24d53a2c22cab05c2aeceebf76ecc7804b1f2d9c64a8fc393",
+      "vertexTrianglePairs": 396216,
+      "edgeEdgePairs": 837880,
+      "orderedPairsSHA256": "c03fdfd6440f6271e9eb87e7ef25e067d585cc4720a5274e52c72a9101abde86",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 1265424,
+      "bvhNodeAABBTests": 0,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "wasm": 8.73373300000003
+      },
+      "reusedLastBuild": false,
+      "constructorMs": {
+        "wasm": 0.7069520000004559
+      },
+      "firstWasmCompilationIncluded": false,
+      "buildWork": {
+        "wasm": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1803,
+          "wasmMemoryBytes": 524288
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "wasm": {
+          "medianMs": 85.70404600000074,
+          "p95Ms": 87.62232500000027,
+          "processCpuMedianMs": 85.677,
+          "wallMs": [
+            85.91286200000013,
+            85.41223099999934,
+            85.46015400000033,
+            84.94043299999976,
+            87.43909100000019,
+            87.62232500000027,
+            86.0363040000002,
+            85.70404600000074,
+            85.00684700000056
+          ],
+          "processCpuMs": [
+            85.786,
+            85.418,
+            85.461,
+            84.946,
+            87.391,
+            87.734,
+            85.927,
+            85.677,
+            84.981
+          ]
+        }
+      }
+    }
+  ]
+}

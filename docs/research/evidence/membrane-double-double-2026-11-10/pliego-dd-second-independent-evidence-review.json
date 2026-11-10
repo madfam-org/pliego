@@ -1,0 +1,253 @@
+{
+  "schema": "pliego-dd-second-independent-evidence-review/1",
+  "sourceGit": "e96c592ea6d56c47dfbddaaaa447d2c9655b6223",
+  "scope": "Read-only bytes/parsed-proof/recorded-numeric verification; no physics or oracle reruns, no force/material/time/booklet acceptance.",
+  "fixedPoseGradient": {
+    "input": {
+      "file": "gradient-probes.json",
+      "bytes": 1220743,
+      "sha256": "8bfff903ed73e708377f712a2346d4d4e3b056b0d6bb970663743402f5c890bb"
+    },
+    "proofs": [
+      {
+        "file": "gradient-80.json",
+        "bytes": 1110207,
+        "sha256": "4d488c44c37eaa177b5096d439a565cf11963cf56a295d3644f48622d111224f"
+      },
+      {
+        "file": "gradient-100.json",
+        "bytes": 1110377,
+        "sha256": "cef86a3835ae3983a1725af97d164eabbb84b61c2a346943dd2037802dd3d636"
+      }
+    ],
+    "equalExcludingOnly": [
+      "cases[].decimalDigits"
+    ],
+    "leavesCompared": 42502,
+    "cases": 170,
+    "repeatByteEqual": true,
+    "sourceFilesMatched": 56,
+    "losslessFloat64EntriesVerified": 29240,
+    "metrics": {
+      "storedCoefficientPolynomial": {
+        "energyAbsoluteErrorNJ": {
+          "maximumBinary64": 3.928820232202491e-09,
+          "maximumDoubleDouble": 4.087723671311898e-13,
+          "improvedCases": 85,
+          "equalCases": 0,
+          "worsenedCases": 0
+        },
+        "elasticMaximumComponentMicroN": {
+          "maximumBinary64": 2.1961009043649017e-06,
+          "maximumDoubleDouble": 4.619013004137758e-11,
+          "improvedCases": 85,
+          "equalCases": 0,
+          "worsenedCases": 0
+        },
+        "elasticProjectedSlopeAbsoluteErrorNJ": {
+          "maximumBinary64": 1.0144372823000576e-10,
+          "maximumDoubleDouble": 5.660162579784252e-15,
+          "improvedCases": 69,
+          "equalCases": 16,
+          "worsenedCases": 0
+        },
+        "incrementalMaximumComponentMicroN": {
+          "maximumBinary64": 2.1964362009218267e-06,
+          "maximumDoubleDouble": 9.19009327289724e-09,
+          "improvedCases": 85,
+          "equalCases": 0,
+          "worsenedCases": 0
+        },
+        "incrementalProjectedSlopeAbsoluteErrorNJ": {
+          "maximumBinary64": 1.0124944599258916e-10,
+          "maximumDoubleDouble": 3.707567670292243e-13,
+          "improvedCases": 69,
+          "equalCases": 16,
+          "worsenedCases": 0
+        }
+      },
+      "independentExactUVMaterial": {
+        "energyAbsoluteErrorNJ": {
+          "maximumBinary64": 3.926479268902276e-09,
+          "maximumDoubleDouble": 3.4482433393359033e-12,
+          "improvedCases": 85,
+          "equalCases": 0,
+          "worsenedCases": 0
+        },
+        "elasticMaximumComponentMicroN": {
+          "maximumBinary64": 2.3942504007948716e-06,
+          "maximumDoubleDouble": 7.202014967777545e-07,
+          "improvedCases": 85,
+          "equalCases": 0,
+          "worsenedCases": 0
+        },
+        "elasticProjectedSlopeAbsoluteErrorNJ": {
+          "maximumBinary64": 1.0151842928561409e-10,
+          "maximumDoubleDouble": 3.0094324267294913e-13,
+          "improvedCases": 59,
+          "equalCases": 16,
+          "worsenedCases": 10
+        },
+        "incrementalMaximumComponentMicroN": {
+          "maximumBinary64": 2.3942780246504485e-06,
+          "maximumDoubleDouble": 7.231377136267645e-07,
+          "improvedCases": 85,
+          "equalCases": 0,
+          "worsenedCases": 0
+        },
+        "incrementalProjectedSlopeAbsoluteErrorNJ": {
+          "maximumBinary64": 1.0132414704819748e-10,
+          "maximumDoubleDouble": 3.4255098913572053e-13,
+          "improvedCases": 59,
+          "equalCases": 16,
+          "worsenedCases": 10
+        }
+      }
+    }
+  },
+  "restProbes": {
+    "input": {
+      "file": "probes-dd.json",
+      "bytes": 107058,
+      "sha256": "9177ce617aaa2d433a9ab626e07b20b50a7de9672ea50b63c3e0c142ef34dc36"
+    },
+    "proofs": [
+      {
+        "file": "probes-dd-80.json",
+        "bytes": 112554,
+        "sha256": "cc5066a57c8a2a719fc5445cb0dc89a7ab1d98fbf9ce1eae58bb9afbe6ca923c"
+      },
+      {
+        "file": "probes-dd-100.json",
+        "bytes": 112586,
+        "sha256": "9c2e3f9eb4690490375e96a4f75f769addc3d48c5d2339d7aa0c2ea1a7c3dd33"
+      }
+    ],
+    "equalExcludingOnly": [
+      "cases[].decimalDigits"
+    ],
+    "leavesCompared": 1986,
+    "cases": 32,
+    "decisions": {
+      "rejected": 16,
+      "accepted": 16
+    },
+    "losslessFloat64EntriesVerified": 1696,
+    "wrongRealArmijoAmongAcceptedOnly": {
+      "storedCoefficientPolynomial": 0,
+      "independentExactUVMaterial": 16
+    },
+    "positiveRealPotentialAmongAcceptedOnly": {
+      "storedCoefficientPolynomial": 0,
+      "independentExactUVMaterial": 16
+    }
+  },
+  "capturedTrajectories": {
+    "input": {
+      "file": "captured-trials-input.json",
+      "bytes": 521799,
+      "sha256": "4afcbb2ccc09a757212135cbc926e73e998a3f692fc7edbc9a6b7eaa681085fa"
+    },
+    "proofs": [
+      {
+        "file": "captured-trials-80.json",
+        "bytes": 281771,
+        "sha256": "6a80d63d0816507b8ead128468b0c7fde6abda835dc467f1060f87bbffe27aa2"
+      },
+      {
+        "file": "captured-trials-100.json",
+        "bytes": 281857,
+        "sha256": "bc6b548cc8c0accfda64ce0bc5c6a6e0402a5bef0f6bc53dd8c703b5c45d689a"
+      }
+    ],
+    "equalExcludingOnly": [
+      "cases[].decimalDigits"
+    ],
+    "leavesCompared": 5334,
+    "cases": 86,
+    "decisions": {
+      "accepted": 59,
+      "precision-limited-zero-step": 27
+    },
+    "losslessFloat64EntriesVerified": 10148,
+    "wrongRealArmijoAmongAcceptedOnly": {
+      "storedCoefficientPolynomial": 0,
+      "independentExactUVMaterial": 2
+    },
+    "positiveRealPotentialAmongAcceptedOnly": {
+      "storedCoefficientPolynomial": 0,
+      "independentExactUVMaterial": 2
+    }
+  },
+  "actualWorldRecordedForceOutcomes": {
+    "steps": 7110,
+    "binary64Failures": 6973,
+    "doubleDoubleFailures": 6956,
+    "gains": 49,
+    "losses": 32,
+    "failedTrajectories": 24,
+    "trajectories": 24,
+    "sourceScopeFilesMatched": {
+      "engineFiles": 49,
+      "tools": 19,
+      "tests": 88
+    },
+    "gates": {
+      "sourceClean": true,
+      "completeDeclaredMatrix": true,
+      "oracleValid": true,
+      "measurementValid": true,
+      "literalForceEverySubstep": false,
+      "discreteAgreement": true,
+      "continuousAgreement": false,
+      "finiteStrainIsolation": "not measured by single amplitude",
+      "perNewtonLinearDiagnostics": true,
+      "actualTimeAccuracyAcceptance": false,
+      "physicalStockCalibration": "not measured",
+      "newModelBooklet": "not measured",
+      "interactionPerformance": "not measured"
+    }
+  },
+  "comparisonInputHashesVerified": 3,
+  "completeCandidateRepeatParsedEquality": {
+    "pass": true,
+    "excludedFields": [
+      "recordedAt"
+    ]
+  },
+  "completeHistoricalBaselineParsedEquality": {
+    "pass": true,
+    "excludedFields": [
+      "recordedAt",
+      "source"
+    ]
+  },
+  "files": [
+    {
+      "file": "baseline.json",
+      "bytes": 79328234,
+      "sha256": "8c6a974b5fa21d67084363f1aab6a08fe1ab8f674f874632a329d140e703da56"
+    },
+    {
+      "file": "candidate.json",
+      "bytes": 102050790,
+      "sha256": "b947d759ea707810e36fc766c05365234453ff5a88cc6d48ad559a5f68c66b79"
+    },
+    {
+      "file": "repeat.json",
+      "bytes": 102050790,
+      "sha256": "cae920654436dcb8bf10cd50c62286a975abfbbc0632461eff7b45f5fea0f3f4"
+    },
+    {
+      "file": "control.json",
+      "bytes": 26633810,
+      "sha256": "4a8669f763cfeeb2c24d654d4412828987343a8b7613b484b072106de75b7266"
+    },
+    {
+      "file": "constitutive-controls.json",
+      "bytes": 12427169,
+      "sha256": "2757c17ee0e35675e4662622ef1a6e19c595102ea98cb353d5f4d58c3df4ecea"
+    }
+  ],
+  "pass": true
+}

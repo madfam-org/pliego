@@ -1,0 +1,15 @@
+{
+  "schema": "pliego-first-accepted-defect-predeclared-plan/1",
+  "postHocDiagnostic": true,
+  "acceptedCapture": false,
+  "scriptSHA256": "f0414297c920a8d17f3224b5d7d14f5fe3ff691d8d0ccf90219baafd1ac5b5b6",
+  "candidateSHA256": "09d94972d9f7f815d6fae4033eac6417810242a238911b542573b53ccbfadb78",
+  "selectedReviewSHA256": "891197fd9e7e0147ff50adbb705408561e2f502d6af7ed28fe9503f6e57ed2aa",
+  "selection": "first-accepted role from each of24 trajectories, no pass/magnitude filter; assert current observed first events are iteration1/substepsRun0/direct/alpha1",
+  "deduplication": "all21 native event LE/SHA tuples plus native reference binding/state identity/F0/tau; preserve all24 role references",
+  "exactArithmetic": "unchanged independent oracle configuration and assemble(q,elements,hessian=True); q=X0+u as exact sum of captured words, actuald=exact endpoint difference; retain native rounded difference separately",
+  "decomposition": "g1=[g0+(H_GN+C)d]+[(H_exact-H_GN)d]+[g1-g0-(H_exact+C)d]",
+  "secondary": "nominal linear residual plus actual endpoint addition-rounding contribution; captured gradient and native observer residual discrepancies; realM/h\u00b2 interpretation separate",
+  "output": "fullvectors, exact rational identities,\u221enorms and originaltau ratios, complete bound selected raw events/reference; common startH stored once",
+  "limits": "first accepted events only, posthoc diagnosis, no new solve/replay/acceptance gate or claims about alliterations/fulltrajectory"
+}

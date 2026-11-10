@@ -1,0 +1,75 @@
+{
+  "schema": "pliego-bvh-refinement-comparison/0.1",
+  "sources": {
+    "initial": {
+      "git": "02e82e1442593e973dfd2975e3c48f82d7638834",
+      "dirty": false,
+      "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+      "harnessSHA256": "5a8f97b53941879224626a3bdc4dada2198b6a377c0f0c36f87891f666b6ddb0"
+    },
+    "refined": {
+      "git": "9a62ba9b0a151ab28ef9b0171903a57013078b1f",
+      "dirty": false,
+      "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+      "harnessSHA256": "4cc35d476c1fb3368c03e38bb5a803414ef9975a50d6d0bd19aae65941e36857"
+    }
+  },
+  "scope": "Same five scene inputs and exact ordered pair hashes; exploratory warm component medians, no physics acceptance or universal speedup claim",
+  "results": [
+    {
+      "name": "native-initial-energy",
+      "inputsAndOrderedPairsEqual": true,
+      "initialBVHMedianMs": 2.7567379999999844,
+      "refinedBVHMedianMs": 0.9771970000000465,
+      "pairedReferenceMedianMs": 5.02702800000003,
+      "refinedReferenceRatio": 0.19438861291404,
+      "primitiveTests": 383648,
+      "indexOverlapTests": 19850,
+      "rootEnclosureTests": 1803
+    },
+    {
+      "name": "native-late-energy",
+      "inputsAndOrderedPairsEqual": true,
+      "initialBVHMedianMs": 3.008265999999992,
+      "refinedBVHMedianMs": 1.6142970000000219,
+      "pairedReferenceMedianMs": 5.235908999999992,
+      "refinedReferenceRatio": 0.3083126540205386,
+      "primitiveTests": 383681,
+      "indexOverlapTests": 38446,
+      "rootEnclosureTests": 1803
+    },
+    {
+      "name": "native-late-sweep",
+      "inputsAndOrderedPairsEqual": true,
+      "initialBVHMedianMs": 2.6389310000000705,
+      "refinedBVHMedianMs": 0.9527960000000348,
+      "pairedReferenceMedianMs": 4.66230100000007,
+      "refinedReferenceRatio": 0.20436175184742908,
+      "primitiveTests": 380816,
+      "indexOverlapTests": 19829,
+      "rootEnclosureTests": 1803
+    },
+    {
+      "name": "synthetic-large-prescribed-sweep",
+      "inputsAndOrderedPairsEqual": true,
+      "initialBVHMedianMs": 133.29744200000005,
+      "refinedBVHMedianMs": 128.25043900000014,
+      "pairedReferenceMedianMs": 85.05258499999991,
+      "refinedReferenceRatio": 1.5078958387919694,
+      "primitiveTests": 1154533,
+      "indexOverlapTests": 2440896,
+      "rootEnclosureTests": 1803
+    },
+    {
+      "name": "synthetic-dense-all-free",
+      "inputsAndOrderedPairsEqual": true,
+      "initialBVHMedianMs": 165.95097200000055,
+      "refinedBVHMedianMs": 74.96182399999998,
+      "pairedReferenceMedianMs": 105.8359089999999,
+      "refinedReferenceRatio": 0.7082834617124142,
+      "primitiveTests": 1265424,
+      "indexOverlapTests": 0,
+      "rootEnclosureTests": 1803
+    }
+  ]
+}

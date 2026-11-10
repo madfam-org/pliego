@@ -1,0 +1,343 @@
+{
+  "schema": "pliego-membrane-increment-archive/1",
+  "sourceGit": "e96c592ea6d56c47dfbddaaaa447d2c9655b6223",
+  "toolSHA256": "7c91a126328e2a4ef5396990445eac95a5de6d130f7f9980f90ae3c97c2e599b",
+  "producer": {
+    "node": "v20.19.5",
+    "zlib": "1.3.1-470d3a2",
+    "gzipLevel": 9,
+    "gzipTimestamp": 0
+  },
+  "reports": [
+    "baseline.json",
+    "candidate.json",
+    "repeat.json",
+    "control.json",
+    "constitutive-controls.json"
+  ],
+  "records": [
+    {
+      "kind": "complete-report-gzip",
+      "file": "baseline.json.gz",
+      "target": "baseline.json",
+      "originalSHA256": "8c6a974b5fa21d67084363f1aab6a08fe1ab8f674f874632a329d140e703da56",
+      "storedSHA256": "697518f7b926169bb09ff5072faa1609b9efc6e10b8123ebe2d01711bd28d2a8",
+      "originalBytes": 79328234,
+      "storedBytes": 9176443,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-report-gzip",
+      "file": "candidate.json.gz",
+      "target": "candidate.json",
+      "originalSHA256": "b947d759ea707810e36fc766c05365234453ff5a88cc6d48ad559a5f68c66b79",
+      "storedSHA256": "47e1db4bcb1260d38cb4318fa4e0face8d2b342e333e156c6c78380edee2dd24",
+      "originalBytes": 102050790,
+      "storedBytes": 9645063,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-report-gzip",
+      "file": "repeat.json.gz",
+      "target": "repeat.json",
+      "originalSHA256": "cae920654436dcb8bf10cd50c62286a975abfbbc0632461eff7b45f5fea0f3f4",
+      "storedSHA256": "32cb107047a6806e9acf61add958d681375670e36905b25e38b83381d5ecd653",
+      "originalBytes": 102050790,
+      "storedBytes": 9645064,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-report-gzip",
+      "file": "control.json.gz",
+      "target": "control.json",
+      "originalSHA256": "4a8669f763cfeeb2c24d654d4412828987343a8b7613b484b072106de75b7266",
+      "storedSHA256": "ec18cba3c47221e29f9c443bd208b34f2eaa25a45d5e5d2afa5cf90d561bc077",
+      "originalBytes": 26633810,
+      "storedBytes": 5387924,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-report-gzip",
+      "file": "constitutive-controls.json.gz",
+      "target": "constitutive-controls.json",
+      "originalSHA256": "2757c17ee0e35675e4662622ef1a6e19c595102ea98cb353d5f4d58c3df4ecea",
+      "storedSHA256": "b92cf1bcfa699566f519fa3847b9d0c6862d159edf67484f768baae4e464ffe8",
+      "originalBytes": 12427169,
+      "storedBytes": 1596624,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "arithmetic-comparison.json",
+      "target": "arithmetic-comparison.json",
+      "originalSHA256": "9bf76f52b4f5673b70f77fb7ce3441dcf43253c51b669d0b044703c810365960",
+      "storedSHA256": "9bf76f52b4f5673b70f77fb7ce3441dcf43253c51b669d0b044703c810365960",
+      "originalBytes": 171260,
+      "storedBytes": 171260,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "captured-trials-100.json",
+      "target": "captured-trials-100.json",
+      "originalSHA256": "bc6b548cc8c0accfda64ce0bc5c6a6e0402a5bef0f6bc53dd8c703b5c45d689a",
+      "storedSHA256": "bc6b548cc8c0accfda64ce0bc5c6a6e0402a5bef0f6bc53dd8c703b5c45d689a",
+      "originalBytes": 281857,
+      "storedBytes": 281857,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "captured-trials-80.json",
+      "target": "captured-trials-80.json",
+      "originalSHA256": "6a80d63d0816507b8ead128468b0c7fde6abda835dc467f1060f87bbffe27aa2",
+      "storedSHA256": "6a80d63d0816507b8ead128468b0c7fde6abda835dc467f1060f87bbffe27aa2",
+      "originalBytes": 281771,
+      "storedBytes": 281771,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "captured-trials-input.json",
+      "target": "captured-trials-input.json",
+      "originalSHA256": "4afcbb2ccc09a757212135cbc926e73e998a3f692fc7edbc9a6b7eaa681085fa",
+      "storedSHA256": "4afcbb2ccc09a757212135cbc926e73e998a3f692fc7edbc9a6b7eaa681085fa",
+      "originalBytes": 521799,
+      "storedBytes": 521799,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "captured-v2-100.json",
+      "target": "captured-v2-100.json",
+      "originalSHA256": "bf3cbdd615880a6ad3aae86ca89578410eb40f5c6fc72217644a222a80cf27d8",
+      "storedSHA256": "bf3cbdd615880a6ad3aae86ca89578410eb40f5c6fc72217644a222a80cf27d8",
+      "originalBytes": 285422,
+      "storedBytes": 285422,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "captured-v2-80.json",
+      "target": "captured-v2-80.json",
+      "originalSHA256": "3fa54d6e904ab0543d43e72f998309c5edca049392acefce5dba9747badbc8d5",
+      "storedSHA256": "3fa54d6e904ab0543d43e72f998309c5edca049392acefce5dba9747badbc8d5",
+      "originalBytes": 285337,
+      "storedBytes": 285337,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "constitutive-controls-comparison.json",
+      "target": "constitutive-controls-comparison.json",
+      "originalSHA256": "0f2a7a76551ca4036bbf6a5d67b89df4d60c64ae4855d532e62809f6cd28cfcc",
+      "storedSHA256": "0f2a7a76551ca4036bbf6a5d67b89df4d60c64ae4855d532e62809f6cd28cfcc",
+      "originalBytes": 16125,
+      "storedBytes": 16125,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "diagnostic-sum-repair-comparison.json",
+      "target": "diagnostic-sum-repair-comparison.json",
+      "originalSHA256": "f9eb7e648e14b92ba0712b518c10cc1fbe733892556023ab1bf647949b26d824",
+      "storedSHA256": "f9eb7e648e14b92ba0712b518c10cc1fbe733892556023ab1bf647949b26d824",
+      "originalBytes": 13428,
+      "storedBytes": 13428,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "extract-increment-trials.py",
+      "target": "extract-increment-trials.py",
+      "originalSHA256": "cef887e6a70435cb9334119d2f5ec3c5610880e87fa7fe4dcd34f75b2f3f45ad",
+      "storedSHA256": "cef887e6a70435cb9334119d2f5ec3c5610880e87fa7fe4dcd34f75b2f3f45ad",
+      "originalBytes": 4386,
+      "storedBytes": 4386,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "extraction-manifest.json",
+      "target": "extraction-manifest.json",
+      "originalSHA256": "bce4a6621943fdedab5cd01729485618239ebddbcfeb8632a71ca4af2a8af6c0",
+      "storedSHA256": "bce4a6621943fdedab5cd01729485618239ebddbcfeb8632a71ca4af2a8af6c0",
+      "originalBytes": 17541,
+      "storedBytes": 17541,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "gradient-100.json",
+      "target": "gradient-100.json",
+      "originalSHA256": "cef86a3835ae3983a1725af97d164eabbb84b61c2a346943dd2037802dd3d636",
+      "storedSHA256": "cef86a3835ae3983a1725af97d164eabbb84b61c2a346943dd2037802dd3d636",
+      "originalBytes": 1110377,
+      "storedBytes": 1110377,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "gradient-80.json",
+      "target": "gradient-80.json",
+      "originalSHA256": "4d488c44c37eaa177b5096d439a565cf11963cf56a295d3644f48622d111224f",
+      "storedSHA256": "4d488c44c37eaa177b5096d439a565cf11963cf56a295d3644f48622d111224f",
+      "originalBytes": 1110207,
+      "storedBytes": 1110207,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "gradient-probes-repeat.json",
+      "target": "gradient-probes-repeat.json",
+      "originalSHA256": "8bfff903ed73e708377f712a2346d4d4e3b056b0d6bb970663743402f5c890bb",
+      "storedSHA256": "8bfff903ed73e708377f712a2346d4d4e3b056b0d6bb970663743402f5c890bb",
+      "originalBytes": 1220743,
+      "storedBytes": 1220743,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "gradient-probes.json",
+      "target": "gradient-probes.json",
+      "originalSHA256": "8bfff903ed73e708377f712a2346d4d4e3b056b0d6bb970663743402f5c890bb",
+      "storedSHA256": "8bfff903ed73e708377f712a2346d4d4e3b056b0d6bb970663743402f5c890bb",
+      "originalBytes": 1220743,
+      "storedBytes": 1220743,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "historical-baseline-comparison.json",
+      "target": "historical-baseline-comparison.json",
+      "originalSHA256": "e013ed3fd4c1eed7b36e00a14dc30b565dcd0465a1928dfdad22781a320fd464",
+      "storedSHA256": "e013ed3fd4c1eed7b36e00a14dc30b565dcd0465a1928dfdad22781a320fd464",
+      "originalBytes": 46970,
+      "storedBytes": 46970,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "independent-captured-trial-review.json",
+      "target": "independent-captured-trial-review.json",
+      "originalSHA256": "27c9d543373d4ec9979566c2aef5159a8f3d28c2e30f71670cd44f5d0bd711df",
+      "storedSHA256": "27c9d543373d4ec9979566c2aef5159a8f3d28c2e30f71670cd44f5d0bd711df",
+      "originalBytes": 3176,
+      "storedBytes": 3176,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "independent-gradient-review.json",
+      "target": "independent-gradient-review.json",
+      "originalSHA256": "7b48a97725823b85842ed4d4171843a80942f7bcebaa75bd4e9397e8a1606848",
+      "storedSHA256": "7b48a97725823b85842ed4d4171843a80942f7bcebaa75bd4e9397e8a1606848",
+      "originalBytes": 4621,
+      "storedBytes": 4621,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "independent-rest-review.json",
+      "target": "independent-rest-review.json",
+      "originalSHA256": "1f054dff48b6d1f7ec759272a04ead0cd18426f64350af5d93f9cba429c4669b",
+      "storedSHA256": "1f054dff48b6d1f7ec759272a04ead0cd18426f64350af5d93f9cba429c4669b",
+      "originalBytes": 8432,
+      "storedBytes": 8432,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "observer-comparison.json",
+      "target": "observer-comparison.json",
+      "originalSHA256": "2a78c77a9b20ba5fb6448fdb571c02e40067f75df46bf231bfadc953628b4536",
+      "storedSHA256": "2a78c77a9b20ba5fb6448fdb571c02e40067f75df46bf231bfadc953628b4536",
+      "originalBytes": 23554,
+      "storedBytes": 23554,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "pliego-dd-second-independent-evidence-review.json",
+      "target": "pliego-dd-second-independent-evidence-review.json",
+      "originalSHA256": "c687183bbbb6195edd8e97aac2ef80517e45efd0d492cfe4ff64d2a5c6dd526e",
+      "storedSHA256": "c687183bbbb6195edd8e97aac2ef80517e45efd0d492cfe4ff64d2a5c6dd526e",
+      "originalBytes": 7734,
+      "storedBytes": 7734,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "probes-binary64.json",
+      "target": "probes-binary64.json",
+      "originalSHA256": "05fc2a1f415661a3bbcf9ccacd149606a4ae016721cc72406ec271274ff8be1e",
+      "storedSHA256": "05fc2a1f415661a3bbcf9ccacd149606a4ae016721cc72406ec271274ff8be1e",
+      "originalBytes": 95618,
+      "storedBytes": 95618,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "probes-dd-100.json",
+      "target": "probes-dd-100.json",
+      "originalSHA256": "9c2e3f9eb4690490375e96a4f75f769addc3d48c5d2339d7aa0c2ea1a7c3dd33",
+      "storedSHA256": "9c2e3f9eb4690490375e96a4f75f769addc3d48c5d2339d7aa0c2ea1a7c3dd33",
+      "originalBytes": 112586,
+      "storedBytes": 112586,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "probes-dd-80.json",
+      "target": "probes-dd-80.json",
+      "originalSHA256": "cc5066a57c8a2a719fc5445cb0dc89a7ab1d98fbf9ce1eae58bb9afbe6ca923c",
+      "storedSHA256": "cc5066a57c8a2a719fc5445cb0dc89a7ab1d98fbf9ce1eae58bb9afbe6ca923c",
+      "originalBytes": 112554,
+      "storedBytes": 112554,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "probes-dd.json",
+      "target": "probes-dd.json",
+      "originalSHA256": "9177ce617aaa2d433a9ab626e07b20b50a7de9672ea50b63c3e0c142ef34dc36",
+      "storedSHA256": "9177ce617aaa2d433a9ab626e07b20b50a7de9672ea50b63c3e0c142ef34dc36",
+      "originalBytes": 107058,
+      "storedBytes": 107058,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "probes-v2-100.json",
+      "target": "probes-v2-100.json",
+      "originalSHA256": "eaf21ca21241bdd08a08b7c0783b489a4d8967cd141c9c805e5f6c90c2050a1a",
+      "storedSHA256": "eaf21ca21241bdd08a08b7c0783b489a4d8967cd141c9c805e5f6c90c2050a1a",
+      "originalBytes": 111925,
+      "storedBytes": 111925,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "probes-v2-80.json",
+      "target": "probes-v2-80.json",
+      "originalSHA256": "b44563d2e8567294229b29b57c57caa5af8fe9d3d6904537c6bfb4e8b9afb3d8",
+      "storedSHA256": "b44563d2e8567294229b29b57c57caa5af8fe9d3d6904537c6bfb4e8b9afb3d8",
+      "originalBytes": 111893,
+      "storedBytes": 111893,
+      "allOriginalBytesExact": true
+    },
+    {
+      "kind": "complete-artifact-copy",
+      "file": "repeat-comparison.json",
+      "target": "repeat-comparison.json",
+      "originalSHA256": "b72bdc2541b0161f9186581bbc57ef68e5ae0e56f3a62d60e03927812585f121",
+      "storedSHA256": "b72bdc2541b0161f9186581bbc57ef68e5ae0e56f3a62d60e03927812585f121",
+      "originalBytes": 23317,
+      "storedBytes": 23317,
+      "allOriginalBytesExact": true
+    }
+  ],
+  "originalReportBytes": 322490793,
+  "storedReportBytes": 35451118,
+  "method": "five COMPLETE original report byte streams, deterministic standard gzip; ancillary proofs copied byte-exact; no normalization, delta, abbreviated evidence or omitted field/failure"
+}

@@ -1,0 +1,240 @@
+{
+  "schema": "pliego-paper-campaign/0.3",
+  "recordedAt": "2026-11-10T07:32:36.361Z",
+  "source": {
+    "git": "9a62ba9b0a151ab28ef9b0171903a57013078b1f",
+    "dirty": false,
+    "engine": "current checkout",
+    "engineTreeSHA256": "58ea740b6cba7ba7f12a5867c661612928ce7fc74d3bda3e5c500aaf9f9698d3",
+    "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+    "harnessSHA256": "1c8ce3911651c0d8eed4a39327e05cbbdd1497780a6556e668bb3c99642350df",
+    "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+    "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+    "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "arch": "x64",
+    "platform": "darwin",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "protocol": {
+    "seed": 1,
+    "frameSeconds": 0.016666666666666666,
+    "framesPerTurn": 84,
+    "requestedTurns": 8,
+    "stopOnZeroProgress": true,
+    "selectedCase": 6,
+    "models": [
+      "active-leaf"
+    ],
+    "broadPhase": "bvh",
+    "checkpointEnabled": true,
+    "fallback": false,
+    "repetitions": 1,
+    "matrix": "local-contact",
+    "trajectory": "SHA256 of turn/frame headers and every sampled pre-promotion Float64 pose, native-endian; includes frames completed before failure",
+    "endpointGate": "every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation",
+    "continuousContact": "experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; stopOnZeroProgress declares whether zero progress stops the case",
+    "timingScope": "World.step only; includes first-frame/JIT cost; active-step p95 excludes frames asleep at start; exploratory local measurement",
+    "cpuTimingScope": "process.cpuUsage delta around World.step, all process threads including JIT/GC; not retired instructions or pure solver self time",
+    "coupledContact": "normal finite-gap barrier, h=0.05 mm k=1e5 g/s², force tolerance=0.001 µN, CG cap=128, per-iteration CCD/energy search; no projection constraints or friction"
+  },
+  "reduction": "Active-leaf reader promotes releases to flat resting blocks after 1.4 simulation seconds; pre-promotion release poses are audited. Plasticity disabled for reading. Not an unconstrained stack equilibrium.",
+  "materialAudit": {
+    "copy-80": {
+      "capY": 7848000.000000001,
+      "physicalYmd": 550000000,
+      "physicalYcd": 250000000,
+      "retainedMD": 0.01426909090909091,
+      "retainedCD": 0.031392
+    }
+  },
+  "results": [
+    {
+      "model": "active-leaf",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "barrierContact": true,
+        "barrierIterations": 32,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true,
+        "contactBroadPhase": "bvh",
+        "mechanismRate": 240,
+        "plasticity": false
+      },
+      "frames": 672,
+      "turns": 8,
+      "maxStrain": 0.00019114875661663876,
+      "maxCompression": 0.0049549443306268325,
+      "minY": 0.026697357679884143,
+      "finite": true,
+      "error": null,
+      "completed": true,
+      "modelCachePeak": 2,
+      "vertexRestBlockOverlapMm": 0,
+      "supported": true,
+      "endpoints": [
+        {
+          "sheet": 0,
+          "goal": 180,
+          "mean": 0.9998630977140405,
+          "minimum": 0.9998334163874291,
+          "samples": 39
+        },
+        {
+          "sheet": 1,
+          "goal": 180,
+          "mean": 0.9999716337316565,
+          "minimum": 0.9999634536943629,
+          "samples": 39
+        },
+        {
+          "sheet": 2,
+          "goal": 180,
+          "mean": 0.999983872735724,
+          "minimum": 0.9999787563088349,
+          "samples": 39
+        },
+        {
+          "sheet": 3,
+          "goal": 180,
+          "mean": 0.9999928679233909,
+          "minimum": 0.9999903792531906,
+          "samples": 39
+        },
+        {
+          "sheet": 3,
+          "goal": 0,
+          "mean": 0.9998630977140405,
+          "minimum": 0.9998334163874291,
+          "samples": 39
+        },
+        {
+          "sheet": 2,
+          "goal": 0,
+          "mean": 0.9999716337316565,
+          "minimum": 0.9999634536943631,
+          "samples": 39
+        },
+        {
+          "sheet": 1,
+          "goal": 0,
+          "mean": 0.9999838727357246,
+          "minimum": 0.9999787563088354,
+          "samples": 39
+        },
+        {
+          "sheet": 0,
+          "goal": 0,
+          "mean": 0.9999928679276737,
+          "minimum": 0.9999903792356737,
+          "samples": 39
+        }
+      ],
+      "continuousContact": {
+        "steps": 0,
+        "limited": 0,
+        "iterationLimits": 0,
+        "precisionLimits": 0,
+        "initialOverlaps": 0,
+        "minimumTime": 1
+      },
+      "framesEndingWithZeroProgress": 0,
+      "activeFrames": 658,
+      "asleepFrames": 14,
+      "coupledContact": {
+        "steps": 5264,
+        "unconverged": 680,
+        "iterations": 38503,
+        "cgTotal": 0,
+        "directSolves": 38503,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 250492,
+        "rejected": 0,
+        "maximumEndResidual": 43.54909249058255,
+        "maximumInitialAdjustment": 3.552713678800501e-14
+      },
+      "buildMs": 58.81436599999999,
+      "poseSHA256": "add88ff5a3974cd8a320194deffba08483b7bfda9faf7775561148226e982bd5",
+      "vertices": 492,
+      "freeVertices": 111,
+      "lineSearchBacktracks": 0,
+      "lineSearchRejected": 0,
+      "lastContinuousContact": null,
+      "lastCoupledContact": {
+        "configuration": {
+          "distance": 0.05,
+          "stiffness": 100000,
+          "iterations": 32,
+          "cgIterations": 128,
+          "tolerance": 0.001,
+          "linearSolver": "direct-local"
+        },
+        "initialAdjustment": 3.552713678800501e-14,
+        "maximumEndResidual": 35.75970038831247,
+        "steps": 1344,
+        "unconverged": 317,
+        "iterations": 14345,
+        "cgTotal": 0,
+        "directSolves": 14345,
+        "nonlocalFallbacks": 0,
+        "linearFailures": 0,
+        "backtracks": 121523,
+        "rejected": 0,
+        "last": {
+          "converged": false,
+          "residual": 0.6725271150546632,
+          "iterations": 32,
+          "status": "iteration-limit",
+          "energyBefore": 355.1888457238926,
+          "energyAfter": 355.1888457236526,
+          "incrementalEnergy": 355.1888457236526,
+          "barrierEnergy": 1.4689802005884842,
+          "contacts": 1592,
+          "grounded": 0,
+          "minimumGap": 0.04901081897008483,
+          "alpha": 0.0001220703125
+        },
+        "guard": {
+          "steps": 14345,
+          "limited": 12,
+          "iterationLimits": 0,
+          "precisionLimits": 0,
+          "initialOverlaps": 0,
+          "minimumTime": 0.09304513934615498,
+          "last": {
+            "time": 1,
+            "queries": 0,
+            "iterations": 0,
+            "vertexTrianglePairs": 0,
+            "edgeEdgePairs": 0,
+            "status": "clear",
+            "pair": []
+          }
+        }
+      },
+      "stepMeanMs": 1062.0872329389883,
+      "stepP95Ms": 7856.87917900004,
+      "stepMaxMs": 9324.121849000017,
+      "activeStepP95Ms": 7861.013872999931,
+      "cpuStepMeanMs": 1060.558738095238,
+      "cpuStepMaxMs": 9089.014,
+      "activeCpuStepP95Ms": 7855.494,
+      "trajectorySHA256": "b34618c7cc73f041a18e74547f72c6b9a7316a255a74703317f802a62ffa4ebd",
+      "gates": {
+        "numerical1Percent": true,
+        "numericalPoint1Percent": true,
+        "physics8ms": false,
+        "restingBlockVertexThickness": true,
+        "endpointProgress": true,
+        "allSolverStepsConverged": false,
+        "physicalMaterialValidation": "not measured by this booklet benchmark",
+        "browserInteraction": "requires separate browser/device acceptance"
+      }
+    }
+  ]
+}

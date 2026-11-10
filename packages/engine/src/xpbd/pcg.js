@@ -10,6 +10,7 @@
  */
 import { termProjector, TERM_STRING } from './implicit.js';
 import { hypot4 } from '../fastmath.js';
+import { projectReference } from './reference-state.js';
 
 /**
  * Best-fit rotation R (row-major 3×3) taking positions X0 to X over the free vertices (Horn 1987,
@@ -42,6 +43,9 @@ export function bestRotation(X0, X, fi) {
   N[12] = xy - yx; N[13] = zx + xz; N[14] = yz + zy; N[15] = -xx - yy + zz;
   let shift = 0;
   for (let i = 0; i < 16; i++) shift += Math.abs(N[i]);
+  // With one free point (or zero covariance) orientation is undetermined.
+  // Identity preserves an SPD preconditioner; a zero quaternion would erase it.
+  if (shift === 0) { out.fill(0); out[0] = 1; out[4] = 1; out[8] = 1; return out; }
   // power iteration on two alternating buffers (the same arithmetic as fresh arrays, no garbage)
   let q = QA, r = QB;
   q[0] = 1; q[1] = 0; q[2] = 0; q[3] = 0;
@@ -85,11 +89,14 @@ const P9 = new Float64Array(9);
  * Uses w.edgeDir (unit membrane directions) and w.hingeGrad (∇θ per hinge) cached by gradient().
  * @param {any} w @param {Float64Array} x @param {Float64Array} p @param {Float64Array} out
  */
-export function hessianTimes(w, x, p, out) {
+export function hessianTimes(w, x, p, out, coordinates = 'absolute-position') {
+  const pose = coordinates === 'reference-displacement' ? projectReference(w, x) : x;
   const nV = w.mesh.nV, idt2 = 1 / (w.dt * w.dt);
   for (let i = 0; i < nV; i++) { const m = w.mass[i] * idt2; out[3 * i] = m * p[3 * i]; out[3 * i + 1] = m * p[3 * i + 1]; out[3 * i + 2] = m * p[3 * i + 2]; }
   const E = w.mesh.edges, U = w.edgeDir, kM = w.edgeK;
-  for (let e = 0; e < w.mesh.nE; e++) {
+  // Triangle kinematics are evaluated at x on every product; no gradient-cache dependency.
+  if (w.orthotropicMembrane) w.orthotropicMembrane.addGaussNewtonTimes(x, p, out, w.invMass, coordinates);
+  else for (let e = 0; e < w.mesh.nE; e++) {
     const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
     const ux = U[3 * e], uy = U[3 * e + 1], uz = U[3 * e + 2];
     const s = kM[e] * (ux * (p[b] - p[a]) + uy * (p[b + 1] - p[a + 1]) + uz * (p[b + 2] - p[a + 2]));
@@ -109,7 +116,7 @@ export function hessianTimes(w, x, p, out) {
   for (let t = 0; t < T.count; t++) {
     if (!T.active[t] || T.k[t] === 0) continue;
     if (T.mode[t] === TERM_STRING && !w._stringTaut[t]) continue;
-    termProjector(T, t, x, P9);
+    termProjector(T, t, pose, P9);
     let rx = 0, ry = 0, rz = 0;
     for (let i = T.start[t]; i < T.start[t + 1]; i++) { const v = 3 * T.verts[i], c = T.coef[i]; rx += c * p[v]; ry += c * p[v + 1]; rz += c * p[v + 2]; }
     const k = T.k[t];
@@ -122,9 +129,11 @@ export function hessianTimes(w, x, p, out) {
  * Solve H δ = −g (free vertices) by PCG with the stale factorisation; δ is added to x.
  * @param {any} w @param {Float64Array} x @param {Float64Array} g gradient (3·nV)
  * @param {number} maxIter @param {number} rtol
+ * @param {((p:Float64Array,out:Float64Array)=>void)|null} [extraHessian] additive PSD operator
+ * @param {boolean} [stopOnStagnation] legacy elastic refactor heuristic
  * @returns {{iterations:number, converged:boolean}}
  */
-export function pcgStep(w, x, g, maxIter, rtol) {
+export function pcgStep(w, x, g, maxIter, rtol, extraHessian = null, stopOnStagnation = true, coordinates = 'absolute-position') {
   const S = w.sys, ch = S.ch, fi = S.freeIdx, nV = w.mesh.nV, n3 = 3 * S.nFree;
   const W = w._pcg !== null ? w._pcg : (w._pcg = { r: new Float64Array(n3), z: new Float64Array(n3), p: new Float64Array(n3), d: new Float64Array(n3), pv: new Float64Array(3 * nV), Ap: new Float64Array(3 * nV) });
   const { r, z, p, d, pv, Ap } = W;
@@ -134,7 +143,7 @@ export function pcgStep(w, x, g, maxIter, rtol) {
   for (let i = 0; i < n3; i++) r0 += r[i] * r[i];
   r0 = Math.sqrt(r0);
   if (r0 === 0) return { iterations: 0, converged: true };
-  const R = w._factorState ? bestRotation(w._factorState.x, x, fi) : null;
+  const R = w._factorState ? bestRotation(coordinates === 'reference-displacement' ? projectReference(w, w._factorState.x) : w._factorState.x, coordinates === 'reference-displacement' ? projectReference(w, x) : x, fi) : null;
   z.set(r); precond(ch, z, R);
   p.set(z);
   let rz = 0;
@@ -143,7 +152,8 @@ export function pcgStep(w, x, g, maxIter, rtol) {
   for (; it < maxIter; it++) {
     pv.fill(0);
     for (let i = 0; i < nV; i++) { const k = fi[i]; if (k < 0) continue; pv[3 * i] = p[3 * k]; pv[3 * i + 1] = p[3 * k + 1]; pv[3 * i + 2] = p[3 * k + 2]; }
-    hessianTimes(w, x, pv, Ap);
+    hessianTimes(w, x, pv, Ap, coordinates);
+    extraHessian?.(pv, Ap);
     let pAp = 0;
     for (let i = 0; i < nV; i++) { const k = fi[i]; if (k < 0) continue; pAp += p[3 * k] * Ap[3 * i] + p[3 * k + 1] * Ap[3 * i + 1] + p[3 * k + 2] * Ap[3 * i + 2]; }
     if (!(pAp > 0)) break;
@@ -154,7 +164,7 @@ export function pcgStep(w, x, g, maxIter, rtol) {
       for (let c = 0; c < 3; c++) { d[3 * k + c] += alpha * p[3 * k + c]; r[3 * k + c] -= alpha * Ap[3 * i + c]; rn += r[3 * k + c] ** 2; }
     }
     if (Math.sqrt(rn) <= rtol * r0) { converged = true; it++; break; }
-    if (it === 3 && Math.sqrt(rn) > 0.1 * r0) { it++; break; } // stagnating: refactor instead
+    if (stopOnStagnation && it === 3 && Math.sqrt(rn) > 0.1 * r0) { it++; break; } // stagnating: refactor instead
     z.set(r); precond(ch, z, R);
     let rzn = 0;
     for (let i = 0; i < n3; i++) rzn += r[i] * z[i];

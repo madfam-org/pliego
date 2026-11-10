@@ -1,0 +1,58 @@
+{
+  "schema": "pliego-broadphase-comparison/0.1",
+  "recordedAt": "2026-11-10T07:20:38.493Z",
+  "comparisonSHA256": "cf125ecdce5340e4e593d398af57eb0b7c2dbf34004f20e54fc4f53d88443b4c",
+  "sources": {
+    "previous": {
+      "git": "e25b8e53e22d361d24156f878ea602751ddc4004",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "093db3c568896172014213c1aca72a1ef108d1cb48e50a16eed3280994183595",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "76d70a7380b7b606a64b685737f630a87d7a31a7562e861c76f42420b17d5d08",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    },
+    "indexed": {
+      "git": "9a62ba9b0a151ab28ef9b0171903a57013078b1f",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "58ea740b6cba7ba7f12a5867c661612928ce7fc74d3bda3e5c500aaf9f9698d3",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "1c8ce3911651c0d8eed4a39327e05cbbdd1497780a6556e668bb3c99642350df",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    },
+    "repeat": {
+      "git": "9a62ba9b0a151ab28ef9b0171903a57013078b1f",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "58ea740b6cba7ba7f12a5867c661612928ce7fc74d3bda3e5c500aaf9f9698d3",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "1c8ce3911651c0d8eed4a39327e05cbbdd1497780a6556e668bb3c99642350df",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    },
+    "freshReference": {
+      "git": "9a62ba9b0a151ab28ef9b0171903a57013078b1f",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "58ea740b6cba7ba7f12a5867c661612928ce7fc74d3bda3e5c500aaf9f9698d3",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "1c8ce3911651c0d8eed4a39327e05cbbdd1497780a6556e668bb3c99642350df",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    }
+  },
+  "previousCasesMatched": 1,
+  "indexedRepeatCasesMatched": 1,
+  "freshReferenceCasesMatched": 1,
+  "comparison": "all recorded result fields except enumerated wall/CPU timing fields, their physics8ms gate and the declared contactBroadPhase option; includes trajectory hashes and force/CCD diagnostics",
+  "protocol": "matching seed/frame interval/turn count/zero-progress policy/fallback, reader/metrics/fixture fingerprints and all other model options; prior harness bytes may differ and are retained in sources",
+  "sourceCleanAtRuns": true,
+  "allRecordedNonTimingFieldsEqual": true
+}

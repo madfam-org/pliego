@@ -1,0 +1,922 @@
+{
+  "schema": "pliego-profile-summary/0.1",
+  "source": "e25b8e53e22d361d24156f878ea602751ddc4004",
+  "scope": "Whole-process node --cpu-prof sample of direct consistent S8/I8 first-turn repeat, including loading/JIT/diagnostics. Not an isolated World.step CPU-clock benchmark.",
+  "profileSHA256": "fb8a11d19b7f9f52379d870674493ae1e542eeca7d91f05dbb0b700e256b8084",
+  "reducerSHA256": "9ba3a8719717bb597e429a384c837b420fd0ffcf04a85b59e75e77b1ad3265d8",
+  "totalMs": 40770.758,
+  "stages": [
+    {
+      "name": "other engine (swept.js)",
+      "ms": 37298.053,
+      "share": 0.9148236341350338
+    },
+    {
+      "name": "dihedral angles + gradients",
+      "ms": 594.821,
+      "share": 0.014589402532079488
+    },
+    {
+      "name": "BlockCholesky factor",
+      "ms": 492.122,
+      "share": 0.01207046481696514
+    },
+    {
+      "name": "other engine (implicit.js)",
+      "ms": 427.409,
+      "share": 0.010483224275594777
+    },
+    {
+      "name": "gradient ∇E",
+      "ms": 373.957,
+      "share": 0.00917218659510819
+    },
+    {
+      "name": "other engine (energy-search.js)",
+      "ms": 339.056,
+      "share": 0.008316156398171454
+    },
+    {
+      "name": "assembly (H = M/dt² + Σ k∇C∇Cᵀ)",
+      "ms": 282.98,
+      "share": 0.006940758864478311
+    },
+    {
+      "name": "other engine (barrier.js)",
+      "ms": 147.402,
+      "share": 0.0036153853210185594
+    },
+    {
+      "name": "other engine (local-contact-solve.js)",
+      "ms": 121.247,
+      "share": 0.002973871616514954
+    },
+    {
+      "name": "other engine (distance.js)",
+      "ms": 119.374,
+      "share": 0.002927931828002805
+    },
+    {
+      "name": "other (spawnSync)",
+      "ms": 101.703,
+      "share": 0.002494508441564908
+    },
+    {
+      "name": "other engine (coupled-contact.js)",
+      "ms": 89.606,
+      "share": 0.0021978006884247774
+    },
+    {
+      "name": "BlockCholesky solve (direct + PCG preconditioner)",
+      "ms": 84.118,
+      "share": 0.0020631944100720423
+    },
+    {
+      "name": "substep integration, rotation check, hinges, sleep",
+      "ms": 58.479,
+      "share": 0.0014343368352386287
+    },
+    {
+      "name": "garbage collector",
+      "ms": 42.477,
+      "share": 0.0010418496511641997
+    },
+    {
+      "name": "air and wind",
+      "ms": 20.663,
+      "share": 0.0005068093166185431
+    },
+    {
+      "name": "other engine (triangulate.js)",
+      "ms": 17.078,
+      "share": 0.00041887864827040987
+    },
+    {
+      "name": "other engine (accd.js)",
+      "ms": 15.941,
+      "share": 0.0003909910137064413
+    },
+    {
+      "name": "other (paper-campaign.mjs)",
+      "ms": 14.979,
+      "share": 0.0003673956711817818
+    },
+    {
+      "name": "joins, gates, drivers",
+      "ms": 8.722,
+      "share": 0.00021392783523916823
+    },
+    {
+      "name": "other engine (geom.js)",
+      "ms": 8.593,
+      "share": 0.00021076380282162034
+    },
+    {
+      "name": "other ((idle))",
+      "ms": 6.909,
+      "share": 0.0001694596897119254
+    },
+    {
+      "name": "other engine (motion-guard.js)",
+      "ms": 6.134,
+      "share": 0.0001504509678235563
+    },
+    {
+      "name": "other (compileSourceTextModule)",
+      "ms": 6.049,
+      "share": 0.00014836614026160613
+    },
+    {
+      "name": "other engine (blockchol.js)",
+      "ms": 5.834,
+      "share": 0.00014309275289902632
+    },
+    {
+      "name": "other (compileForInternalLoader)",
+      "ms": 5.766,
+      "share": 0.00014142489084946618
+    },
+    {
+      "name": "other ((program))",
+      "ms": 5.287,
+      "share": 0.0001296762743533
+    },
+    {
+      "name": "other engine (mesh.js)",
+      "ms": 4.53,
+      "share": 0.00011110904536040267
+    },
+    {
+      "name": "other (run)",
+      "ms": 4.507,
+      "share": 0.00011054491554952204
+    },
+    {
+      "name": "other (readFileHandle)",
+      "ms": 4.317,
+      "share": 0.00010588471276398639
+    },
+    {
+      "name": "other engine (document.js)",
+      "ms": 4.122,
+      "share": 0.0001011018730630419
+    },
+    {
+      "name": "other (internalModuleReadJSON)",
+      "ms": 3.061,
+      "share": 0.00007507831961328754
+    },
+    {
+      "name": "other (read)",
+      "ms": 3.03,
+      "share": 0.00007431797073775278
+    },
+    {
+      "name": "other (update)",
+      "ms": 3.005,
+      "share": 0.00007370478616070862
+    },
+    {
+      "name": "other engine (contact.js)",
+      "ms": 2.989,
+      "share": 0.00007331234803140035
+    },
+    {
+      "name": "other (Socket)",
+      "ms": 1.542,
+      "share": 0.00003782122471208409
+    },
+    {
+      "name": "other (Hash)",
+      "ms": 1.537,
+      "share": 0.000037698587796675256
+    },
+    {
+      "name": "other engine (fastmath.js)",
+      "ms": 1.536,
+      "share": 0.000037674060413593486
+    },
+    {
+      "name": "other (openFileHandle)",
+      "ms": 1.533,
+      "share": 0.00003760047826434819
+    },
+    {
+      "name": "other (open)",
+      "ms": 1.529,
+      "share": 0.00003750236873202112
+    },
+    {
+      "name": "other (onwrite)",
+      "ms": 1.525,
+      "share": 0.00003740425919969405
+    },
+    {
+      "name": "other (BookWorld)",
+      "ms": 1.522,
+      "share": 0.000037330677050448756
+    },
+    {
+      "name": "other (getPackageScopeConfig)",
+      "ms": 1.521,
+      "share": 0.000037306149667366985
+    },
+    {
+      "name": "other (#updateContext)",
+      "ms": 1.518,
+      "share": 0.00003723256751812169
+    },
+    {
+      "name": "other (runtime)",
+      "ms": 1.517,
+      "share": 0.000037208040135039925
+    },
+    {
+      "name": "other (overlapWithRestingBlocks)",
+      "ms": 1.515,
+      "share": 0.00003715898536887639
+    },
+    {
+      "name": "other (tryReadSync)",
+      "ms": 1.51,
+      "share": 0.00003703634845346755
+    },
+    {
+      "name": "other (getCLIOptionsFromBinding)",
+      "ms": 1.507,
+      "share": 0.000036962766304222256
+    },
+    {
+      "name": "other engine (docrules.js)",
+      "ms": 1.507,
+      "share": 0.000036962766304222256
+    },
+    {
+      "name": "other (decode)",
+      "ms": 1.505,
+      "share": 0.00003691371153805872
+    },
+    {
+      "name": "other (normalizeSpawnArguments)",
+      "ms": 1.505,
+      "share": 0.00003691371153805872
+    },
+    {
+      "name": "other (fileURLToPath)",
+      "ms": 1.499,
+      "share": 0.00003676654723956812
+    },
+    {
+      "name": "other (#getModuleCachedImports)",
+      "ms": 1.493,
+      "share": 0.000036619382941077526
+    },
+    {
+      "name": "other (parse)",
+      "ms": 1.489,
+      "share": 0.00003652127340875046
+    },
+    {
+      "name": "other (internalBinding)",
+      "ms": 1.485,
+      "share": 0.00003642316387642339
+    },
+    {
+      "name": "other (FastBuffer)",
+      "ms": 1.477,
+      "share": 0.000036226944811769255
+    },
+    {
+      "name": "other (execFileSync)",
+      "ms": 1.476,
+      "share": 0.00003620241742868749
+    },
+    {
+      "name": "other (initializeCJSLoader)",
+      "ms": 1.329,
+      "share": 0.0000325968921156678
+    },
+    {
+      "name": "other (pathToFileURL)",
+      "ms": 1.292,
+      "share": 0.000031689378941642436
+    },
+    {
+      "name": "other (observe)",
+      "ms": 1.283,
+      "share": 0.00003146863249390654
+    },
+    {
+      "name": "other (Module._findPath)",
+      "ms": 1.27,
+      "share": 0.00003114977651384357
+    },
+    {
+      "name": "other (promisify)",
+      "ms": 1.265,
+      "share": 0.00003102713959843474
+    },
+    {
+      "name": "other (prepareMainThreadExecution)",
+      "ms": 1.255,
+      "share": 0.00003078186576761708
+    },
+    {
+      "name": "other (validators)",
+      "ms": 1.167,
+      "share": 0.000028623456056421614
+    },
+    {
+      "name": "other (getNamespace)",
+      "ms": 1.151,
+      "share": 0.00002823101792711335
+    },
+    {
+      "name": "other (getPathFromURLPosix)",
+      "ms": 1.08,
+      "share": 0.00002648957372830792
+    },
+    {
+      "name": "other (fstat)",
+      "ms": 1.054,
+      "share": 0.00002585186176818199
+    },
+    {
+      "name": "other (module_job)",
+      "ms": 1.044,
+      "share": 0.000025606587937364323
+    }
+  ],
+  "functions": [
+    {
+      "name": "build swept.js:27",
+      "ms": 36944.286,
+      "share": 0.9061466554043465
+    },
+    {
+      "name": "dihedral dihedral.js:29",
+      "ms": 594.821,
+      "share": 0.014589402532079488
+    },
+    {
+      "name": "factor blockchol.js:167",
+      "ms": 492.122,
+      "share": 0.01207046481696514
+    },
+    {
+      "name": "assembleElastic implicit.js:105",
+      "ms": 425.876,
+      "share": 0.01044562379733043
+    },
+    {
+      "name": "gradient implicit.js:203",
+      "ms": 370.937,
+      "share": 0.009098113898201254
+    },
+    {
+      "name": "implicitEnergy energy-search.js:10",
+      "ms": 339.056,
+      "share": 0.008316156398171454
+    },
+    {
+      "name": "add blockchol.js:156",
+      "ms": 280.986,
+      "share": 0.006891851262613268
+    },
+    {
+      "name": "adjacent swept.js:24",
+      "ms": 208.151,
+      "share": 0.005105399315852798
+    },
+    {
+      "name": "spawnSync child_process:1108",
+      "ms": 101.703,
+      "share": 0.002494508441564908
+    },
+    {
+      "name": "edgeEdgeDistanceSquared distance.js:66",
+      "ms": 94.294,
+      "share": 0.002312785060312099
+    },
+    {
+      "name": "(anonymous) swept.js:41",
+      "ms": 88.309,
+      "share": 0.002165988672567726
+    },
+    {
+      "name": "solve blockchol.js:252",
+      "ms": 84.118,
+      "share": 0.0020631944100720423
+    },
+    {
+      "name": "evaluate barrier.js:43",
+      "ms": 80.902,
+      "share": 0.001984314346081081
+    },
+    {
+      "name": "solve local-contact-solve.js:55",
+      "ms": 68.919,
+      "share": 0.0016904027146122718
+    },
+    {
+      "name": "stencil barrier.js:76",
+      "ms": 59.126,
+      "share": 0.0014502060520925316
+    },
+    {
+      "name": "(anonymous) swept.js:40",
+      "ms": 49.875,
+      "share": 0.0012233032312031088
+    },
+    {
+      "name": "(garbage collector) :0",
+      "ms": 42.477,
+      "share": 0.0010418496511641997
+    },
+    {
+      "name": "evaluate coupled-contact.js:49",
+      "ms": 41.229,
+      "share": 0.001011239477078155
+    },
+    {
+      "name": "search coupled-contact.js:96",
+      "ms": 39.231,
+      "share": 0.0009622337656807852
+    },
+    {
+      "name": "_substep world.js:320",
+      "ms": 35.966,
+      "share": 0.0008821518599188173
+    },
+    {
+      "name": "stencil local-contact-solve.js:22",
+      "ms": 30.083,
+      "share": 0.0007378572652487844
+    },
+    {
+      "name": "pointTriangleDistanceSquared distance.js:27",
+      "ms": 25.08,
+      "share": 0.0006151467676907062
+    },
+    {
+      "name": "supports local-contact-solve.js:39",
+      "ms": 22.245,
+      "share": 0.0005456116366538979
+    },
+    {
+      "name": "addAirForces air.js:48",
+      "ms": 20.663,
+      "share": 0.0005068093166185431
+    },
+    {
+      "name": "query accd.js:36",
+      "ms": 15.941,
+      "share": 0.0003909910137064413
+    },
+    {
+      "name": "stats world.js:628",
+      "ms": 11.935,
+      "share": 0.0002927343170808843
+    },
+    {
+      "name": "(anonymous) paper-campaign.mjs:30",
+      "ms": 10.58,
+      "share": 0.0002594997130050906
+    },
+    {
+      "name": "gapBarrier barrier.js:12",
+      "ms": 7.374,
+      "share": 0.00018086492284494687
+    },
+    {
+      "name": "(idle) :0",
+      "ms": 6.909,
+      "share": 0.0001694596897119254
+    },
+    {
+      "name": "compileSourceTextModule utils:344",
+      "ms": 6.049,
+      "share": 0.00014836614026160613
+    },
+    {
+      "name": "_initElements world.js:164",
+      "ms": 6.037,
+      "share": 0.00014807181166462491
+    },
+    {
+      "name": "compileForInternalLoader realm:383",
+      "ms": 5.766,
+      "share": 0.00014142489084946618
+    },
+    {
+      "name": "(program) :0",
+      "ms": 5.287,
+      "share": 0.0001296762743533
+    },
+    {
+      "name": "solve coupled-contact.js:118",
+      "ms": 4.639,
+      "share": 0.00011378253011631523
+    },
+    {
+      "name": "smooth triangulate.js:73",
+      "ms": 4.518,
+      "share": 0.00011081471676342147
+    },
+    {
+      "name": "boxesOverlap swept.js:86",
+      "ms": 4.413,
+      "share": 0.00010823934153983598
+    },
+    {
+      "name": "(anonymous) paper-campaign.mjs:1",
+      "ms": 4.399,
+      "share": 0.00010789595817669124
+    },
+    {
+      "name": "readFileHandle promises:510",
+      "ms": 4.317,
+      "share": 0.00010588471276398639
+    },
+    {
+      "name": "limit motion-guard.js:19",
+      "ms": 3.077,
+      "share": 0.00007547075774259581
+    },
+    {
+      "name": "run paper-campaign.mjs:65",
+      "ms": 3.065,
+      "share": 0.0000751764291456146
+    },
+    {
+      "name": "internalModuleReadJSON :0",
+      "ms": 3.061,
+      "share": 0.00007507831961328754
+    },
+    {
+      "name": "orient geom.js:48",
+      "ms": 3.044,
+      "share": 0.00007466135410089751
+    },
+    {
+      "name": "read :0",
+      "ms": 3.03,
+      "share": 0.00007431797073775278
+    },
+    {
+      "name": "World world.js:48",
+      "ms": 3.028,
+      "share": 0.00007426891597158924
+    },
+    {
+      "name": "find mesh.js:339",
+      "ms": 3.028,
+      "share": 0.00007426891597158924
+    },
+    {
+      "name": "pointInPolygon geom.js:27",
+      "ms": 3.026,
+      "share": 0.00007421986120542571
+    },
+    {
+      "name": "updateTerms joins.js:236",
+      "ms": 3.024,
+      "share": 0.00007417080643926217
+    },
+    {
+      "name": "unionBox swept.js:73",
+      "ms": 3.019,
+      "share": 0.00007404816952385335
+    },
+    {
+      "name": "flip triangulate.js:290",
+      "ms": 3.017,
+      "share": 0.00007399911475768981
+    },
+    {
+      "name": "snapshot coupled-contact.js:138",
+      "ms": 3.005,
+      "share": 0.00007370478616070862
+    },
+    {
+      "name": "update hash:132",
+      "ms": 3.005,
+      "share": 0.00007370478616070862
+    },
+    {
+      "name": "BlockCholesky blockchol.js:56",
+      "ms": 2.998,
+      "share": 0.00007353309447913624
+    },
+    {
+      "name": "setWeldExclusion contact.js:80",
+      "ms": 2.989,
+      "share": 0.00007331234803140035
+    },
+    {
+      "name": "minimumDegreeOrder blockchol.js:25",
+      "ms": 2.836,
+      "share": 0.00006955965841989006
+    },
+    {
+      "name": "addOuter implicit.js:85",
+      "ms": 1.994,
+      "share": 0.00004890760186504259
+    },
+    {
+      "name": "MotionGuard motion-guard.js:10",
+      "ms": 1.545,
+      "share": 0.000037894806861329384
+    },
+    {
+      "name": "earClip triangulate.js:98",
+      "ms": 1.543,
+      "share": 0.00003784575209516585
+    },
+    {
+      "name": "Socket node:net:359",
+      "ms": 1.542,
+      "share": 0.00003782122471208409
+    },
+    {
+      "name": "Hash hash:88",
+      "ms": 1.537,
+      "share": 0.000037698587796675256
+    },
+    {
+      "name": "hypot3 fastmath.js:31",
+      "ms": 1.536,
+      "share": 0.000037674060413593486
+    },
+    {
+      "name": "openFileHandle :0",
+      "ms": 1.533,
+      "share": 0.00003760047826434819
+    },
+    {
+      "name": "buildSystem implicit.js:34",
+      "ms": 1.533,
+      "share": 0.00003760047826434819
+    },
+    {
+      "name": "open :0",
+      "ms": 1.529,
+      "share": 0.00003750236873202112
+    },
+    {
+      "name": "onwrite writable:615",
+      "ms": 1.525,
+      "share": 0.00003740425919969405
+    },
+    {
+      "name": "BookWorld book-world.js:7",
+      "ms": 1.522,
+      "share": 0.000037330677050448756
+    },
+    {
+      "name": "getPackageScopeConfig package_config:28",
+      "ms": 1.521,
+      "share": 0.000037306149667366985
+    },
+    {
+      "name": "#updateContext url:874",
+      "ms": 1.518,
+      "share": 0.00003723256751812169
+    },
+    {
+      "name": "(anonymous) :0",
+      "ms": 1.517,
+      "share": 0.000037208040135039925
+    },
+    {
+      "name": "contains triangulate.js:210",
+      "ms": 1.515,
+      "share": 0.00003715898536887639
+    },
+    {
+      "name": "overlapWithRestingBlocks paper-campaign.mjs:47",
+      "ms": 1.515,
+      "share": 0.00003715898536887639
+    },
+    {
+      "name": "checkRefs document.js:326",
+      "ms": 1.514,
+      "share": 0.00003713445798579462
+    },
+    {
+      "name": "ang triangulate.js:148",
+      "ms": 1.513,
+      "share": 0.00003710993060271286
+    },
+    {
+      "name": "(anonymous) drivers.js:53",
+      "ms": 1.513,
+      "share": 0.00003710993060271286
+    },
+    {
+      "name": "_frame world.js:300",
+      "ms": 1.513,
+      "share": 0.00003710993060271286
+    },
+    {
+      "name": "termProjector implicit.js:173",
+      "ms": 1.513,
+      "share": 0.00003710993060271286
+    },
+    {
+      "name": "note motion-guard.js:40",
+      "ms": 1.512,
+      "share": 0.00003708540321963109
+    },
+    {
+      "name": "tryReadSync node:fs:421",
+      "ms": 1.51,
+      "share": 0.00003703634845346755
+    },
+    {
+      "name": "loadDocument document.js:72",
+      "ms": 1.509,
+      "share": 0.00003701182107038579
+    },
+    {
+      "name": "finish joins.js:44",
+      "ms": 1.509,
+      "share": 0.00003701182107038579
+    },
+    {
+      "name": "getCLIOptionsFromBinding options:19",
+      "ms": 1.507,
+      "share": 0.000036962766304222256
+    },
+    {
+      "name": "faceMap3 docrules.js:268",
+      "ms": 1.507,
+      "share": 0.000036962766304222256
+    },
+    {
+      "name": "unwrap implicit.js:266",
+      "ms": 1.507,
+      "share": 0.000036962766304222256
+    },
+    {
+      "name": "decode encoding:440",
+      "ms": 1.505,
+      "share": 0.00003691371153805872
+    },
+    {
+      "name": "near joins.js:144",
+      "ms": 1.505,
+      "share": 0.00003691371153805872
+    },
+    {
+      "name": "normalizeSpawnArguments node:child_process:547",
+      "ms": 1.505,
+      "share": 0.00003691371153805872
+    },
+    {
+      "name": "buildMesh mesh.js:47",
+      "ms": 1.502,
+      "share": 0.000036840129388813425
+    },
+    {
+      "name": "initialise coupled-contact.js:38",
+      "ms": 1.502,
+      "share": 0.000036840129388813425
+    },
+    {
+      "name": "segmentsCross geom.js:53",
+      "ms": 1.501,
+      "share": 0.000036815602005731654
+    },
+    {
+      "name": "fileURLToPath url:1482",
+      "ms": 1.499,
+      "share": 0.00003676654723956812
+    },
+    {
+      "name": "#getModuleCachedImports module_map:54",
+      "ms": 1.493,
+      "share": 0.000036619382941077526
+    },
+    {
+      "name": "parse :0",
+      "ms": 1.489,
+      "share": 0.00003652127340875046
+    },
+    {
+      "name": "internalBinding realm:184",
+      "ms": 1.485,
+      "share": 0.00003642316387642339
+    },
+    {
+      "name": "FastBuffer buffer:960",
+      "ms": 1.477,
+      "share": 0.000036226944811769255
+    },
+    {
+      "name": "execFileSync node:child_process:916",
+      "ms": 1.476,
+      "share": 0.00003620241742868749
+    },
+    {
+      "name": "run module_job:318",
+      "ms": 1.442,
+      "share": 0.00003536848640390743
+    },
+    {
+      "name": "initializeCJSLoader pre_execution:698",
+      "ms": 1.329,
+      "share": 0.0000325968921156678
+    },
+    {
+      "name": "pathToFileURL url:1559",
+      "ms": 1.292,
+      "share": 0.000031689378941642436
+    },
+    {
+      "name": "splitEdge triangulate.js:253",
+      "ms": 1.284,
+      "share": 0.00003149315987698831
+    },
+    {
+      "name": "(anonymous) observe:1",
+      "ms": 1.283,
+      "share": 0.00003146863249390654
+    },
+    {
+      "name": "Module._findPath loader:663",
+      "ms": 1.27,
+      "share": 0.00003114977651384357
+    },
+    {
+      "name": "promisify util:404",
+      "ms": 1.265,
+      "share": 0.00003102713959843474
+    },
+    {
+      "name": "prepareMainThreadExecution pre_execution:53",
+      "ms": 1.255,
+      "share": 0.00003078186576761708
+    },
+    {
+      "name": "rebuild triangulate.js:173",
+      "ms": 1.217,
+      "share": 0.000029849825210509946
+    },
+    {
+      "name": "apply drivers.js:229",
+      "ms": 1.171,
+      "share": 0.000028721565588748682
+    },
+    {
+      "name": "(anonymous) validators:138",
+      "ms": 1.167,
+      "share": 0.000028623456056421614
+    },
+    {
+      "name": "getNamespace :0",
+      "ms": 1.151,
+      "share": 0.00002823101792711335
+    },
+    {
+      "name": "locate triangulate.js:191",
+      "ms": 1.103,
+      "share": 0.000027053703539188553
+    },
+    {
+      "name": "parseCore document.js:137",
+      "ms": 1.099,
+      "share": 0.000026955594006861485
+    },
+    {
+      "name": "getPathFromURLPosix url:1464",
+      "ms": 1.08,
+      "share": 0.00002648957372830792
+    },
+    {
+      "name": "inCircle triangulate.js:320",
+      "ms": 1.08,
+      "share": 0.00002648957372830792
+    },
+    {
+      "name": "fstat :0",
+      "ms": 1.054,
+      "share": 0.00002585186176818199
+    },
+    {
+      "name": "(anonymous) module_job:171",
+      "ms": 1.044,
+      "share": 0.000025606587937364323
+    },
+    {
+      "name": "distPointSeg geom.js:39",
+      "ms": 1.022,
+      "share": 0.000025066985509565458
+    },
+    {
+      "name": "isEar triangulate.js:132",
+      "ms": 0.288,
+      "share": 0.0000070638863275487786
+    }
+  ]
+}

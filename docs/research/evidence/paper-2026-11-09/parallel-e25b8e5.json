@@ -1,0 +1,42 @@
+{
+  "schema": "pliego-parallel-edge-probe/0.1",
+  "source": "e25b8e53e22d361d24156f878ea602751ddc4004",
+  "scope": "Analytical two-segment element, not a native sheet; unmollified EE barrier at an overlapping parallel closest-point tie",
+  "energy": 0.08246616586867407,
+  "chosenGradientSlope": 9.997744391244941,
+  "expectedOneSidedMagnitude": 9.99774439124493,
+  "rows": [
+    {
+      "epsilon": 0.0001,
+      "plus": 0.0834709979002854,
+      "minus": 0.0834709979002854,
+      "centralDerivative": 0,
+      "positiveOneSided": 10.048320316113356,
+      "negativeOneSided": -10.048320316113356
+    },
+    {
+      "epsilon": 0.00001,
+      "plus": 0.08256619374174895,
+      "minus": 0.08256619374174895,
+      "centralDerivative": 0,
+      "positiveOneSided": 10.00278730748788,
+      "negativeOneSided": -10.00278730748788
+    },
+    {
+      "epsilon": 0.000001,
+      "plus": 0.08247616411721066,
+      "minus": 0.08247616411721066,
+      "centralDerivative": 0,
+      "positiveOneSided": 9.998248536591259,
+      "negativeOneSided": -9.998248536591259
+    },
+    {
+      "epsilon": 1e-7,
+      "plus": 0.08246716564815453,
+      "minus": 0.08246716564815453,
+      "centralDerivative": 0,
+      "positiveOneSided": 9.997794804539328,
+      "negativeOneSided": -9.997794804539328
+    }
+  ]
+}

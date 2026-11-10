@@ -1,0 +1,50 @@
+{
+  "schema": "pliego-state-recovery-legacy/1",
+  "sourceGit": "92d15aa1c6fcb9527e36fc85562e8dbb99fe3755",
+  "freshRecoveryCapture": true,
+  "cases": 108,
+  "wholeComparisonEqual": true,
+  "excluded": [
+    "recordedAt",
+    "source.git",
+    "source.engineFiles",
+    "source.helperSHA256"
+  ],
+  "otherSourceDependenciesExact": true,
+  "runtimeFiles": 52,
+  "reviewedIntegrationFiles": [
+    "xpbd/energy-search.js",
+    "xpbd/implicit.js",
+    "xpbd/pcg.js",
+    "xpbd/state.js",
+    "xpbd/world.js"
+  ],
+  "reviewedAdditions": [
+    "xpbd/accurate-membrane.js",
+    "xpbd/double-double.js",
+    "xpbd/increment-search.js",
+    "xpbd/newton.js",
+    "xpbd/orthotropic-membrane.js",
+    "xpbd/reference-state.js",
+    "xpbd/uv-reference.js"
+  ],
+  "historicalBaseline": {
+    "path": "docs/research/evidence/paper-2026-11-10/membrane-run.json",
+    "sha256": "854db764d63a5fdaa5e2c51656e529563f746712230c0229e3477caa4b0a6a46"
+  },
+  "currentReportSHA256": "51c30376cfbbcb91970bc6ab05ee167ab638657e0e0e7d6426d75fcd5c8c1def",
+  "gates": {
+    "oracleValid": true,
+    "sourceClean": true,
+    "completeMatrix": true,
+    "fixedTopologyAcrossGrainAndPolicies": true,
+    "noTimeIntegration": true,
+    "allExtractionValid": true,
+    "centralForceIdentityObserved": true,
+    "symmetricConstitutiveAccuracy": false,
+    "allSignedEnergiesWithin1Percent": false,
+    "meshAndTopology": false,
+    "physicalStockCalibration": "not measured",
+    "interactionPerformance": "not measured"
+  }
+}

@@ -8,7 +8,7 @@
 /**
  * @param {string} search location.search
  * @param {string} hash location.hash
- * @returns {{slug: string|null, mode: string|null, params: URLSearchParams, view: '3d'|'2d', renderer: string|null, engine: string|null}}
+ * @returns {{slug: string|null, mode: string|null, params: URLSearchParams, view: '3d'|'2d', renderer: string|null, engine: string|null, worker: string|null, interaction: 'paper'|'inspect'}}
  */
 export function parseShare(search, hash) {
   const q = new URLSearchParams(search || '');
@@ -23,6 +23,7 @@ export function parseShare(search, hash) {
     renderer: q.get('renderer'),
     engine: q.get('engine'),
     worker: q.get('worker'),
+    interaction: q.get('interaction') === 'paper' ? 'paper' : 'inspect',
   };
 }
 
@@ -35,7 +36,7 @@ export function buildShare(base, { slug, mode = null, params = {}, view = '3d', 
   const q = new URLSearchParams();
   q.set('slug', slug);
   if (mode) q.set('mode', mode);
-  if (keep) for (const k of ['renderer', 'engine', 'worker', 'lang']) { const v = keep.get(k); if (v) q.set(k, v); }
+  if (keep) for (const k of ['renderer', 'engine', 'worker', 'lang', 'interaction']) { const v = keep.get(k); if (v && (k !== 'interaction' || v === 'paper')) q.set(k, v); }
   u.search = q.toString();
   const h = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null) h.set(k, String(v));

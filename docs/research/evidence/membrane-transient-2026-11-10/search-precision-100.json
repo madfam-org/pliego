@@ -1,0 +1,452 @@
+{
+  "schema": "pliego-membrane-modal-precision/1",
+  "decimalDigits": 100,
+  "selection": {
+    "cells": 2,
+    "grain": 0.0,
+    "level": 2,
+    "budget": 16,
+    "amplitude": 0.004,
+    "pattern": "forward",
+    "snapshot": "worst-force",
+    "seed": true
+  },
+  "step": 35,
+  "h": 3.7165878750037167e-07,
+  "forceToleranceMicroN": 8.81400646629321e-05,
+  "summary": {
+    "independentExactUVMaterial": {
+      "residualInfinityMicroN": 0.7994790861266842,
+      "maximumNodalResidualMicroN": 0.8420248237264549,
+      "massDualResidualNorm": 11.096221890535734,
+      "passesUnchangedForceGate": false
+    },
+    "storedCoefficientPolynomial": {
+      "residualInfinityMicroN": 0.7994783661049244,
+      "maximumNodalResidualMicroN": 0.8420241400860323,
+      "massDualResidualNorm": 11.096219172658314,
+      "passesUnchangedForceGate": false
+    },
+    "runtimeRecorded": {
+      "residualInfinityMicroN": 0.7994806757269544,
+      "maximumNodalResidualMicroN": 0.8420263943461436,
+      "massDualResidualNorm": 11.09623522982634,
+      "passesUnchangedForceGate": false
+    },
+    "runtimeTermsRealSum": {
+      "residualInfinityMicroN": 0.7994806757269544,
+      "maximumNodalResidualMicroN": 0.8420263943461436,
+      "massDualResidualNorm": 11.09623522982634,
+      "passesUnchangedForceGate": false
+    }
+  },
+  "maximumRuntimeTermErrorsMicroN": {
+    "elasticAndResidual": {
+      "independentExactUVMaterial": {
+        "elasticMaximumMicroN": 1.5896032938586896e-06,
+        "residualMaximumMicroN": 1.5896002701726062e-06
+      },
+      "storedCoefficientPolynomial": {
+        "elasticMaximumMicroN": 2.30962505360302e-06,
+        "residualMaximumMicroN": 2.3096220299169365e-06
+      }
+    },
+    "inertia": 6.698020043344708e-12
+  },
+  "highPrecisionFields": {
+    "independentExactUVMaterial": {
+      "elasticGradient": [
+        -42921.65819939532,
+        0.0,
+        -70016.85195263485,
+        -63867.59854905342,
+        0.0,
+        18367.380874296676,
+        -24429.803982332483,
+        0.0,
+        27869.281044431424,
+        61044.68203215162,
+        0.0,
+        3692.8039858422358,
+        140861.5836634022,
+        0.0,
+        39681.27435309262,
+        60411.02228966636,
+        0.0,
+        3524.5670584319987,
+        -24319.79930695589,
+        0.0,
+        28080.676865224978,
+        -63713.598239599545,
+        0.0,
+        18558.920447190285,
+        -43064.82970788353,
+        0.0,
+        -69758.05267587535
+      ],
+      "inertiaGradient": [
+        42921.332328130586,
+        0.0,
+        70016.71244518852,
+        63867.70257585314,
+        0.0,
+        -18367.376205681838,
+        24429.955490128956,
+        0.0,
+        -27869.224887206477,
+        -61043.882553065494,
+        0.0,
+        -3692.5397151578654,
+        -140861.58195042203,
+        0.0,
+        -39681.27361599655,
+        -60411.82001794096,
+        0.0,
+        -3524.8315680064998,
+        24319.647230362785,
+        0.0,
+        -28080.732468022576,
+        63713.49312118277,
+        0.0,
+        -18558.924393203877,
+        43065.1549169352,
+        0.0,
+        69758.19090644563
+      ],
+      "residual": [
+        -0.3258712647311256,
+        0.0,
+        -0.13950744633423023,
+        0.10402679971794954,
+        0.0,
+        0.0046686148408225416,
+        0.151507796470558,
+        0.0,
+        0.05615722494540314,
+        0.7994790861266842,
+        0.0,
+        0.2642706843704187,
+        0.0017129801906075714,
+        0.0,
+        0.000737096064732014,
+        -0.7977282746027005,
+        0.0,
+        -0.26450957450129287,
+        -0.15207659310588761,
+        0.0,
+        -0.05560279760039606,
+        -0.10511841677157326,
+        0.0,
+        -0.003946013590983239,
+        0.3252090516658514,
+        0.0,
+        0.13823057026351898
+      ]
+    },
+    "storedCoefficientPolynomial": {
+      "elasticGradient": [
+        -42921.65819975535,
+        0.0,
+        -70016.85195244817,
+        -63867.598549053444,
+        0.0,
+        18367.380874670136,
+        -24429.803981972473,
+        0.0,
+        27869.28104461817,
+        61044.6820314316,
+        0.0,
+        3692.803985842236,
+        140861.58366340227,
+        0.0,
+        39681.27435309263,
+        60411.02229038643,
+        0.0,
+        3524.567058431999,
+        -24319.799307315923,
+        0.0,
+        28080.67686503827,
+        -63713.59823959957,
+        0.0,
+        18558.920446816843,
+        -43064.829707523524,
+        0.0,
+        -69758.05267606211
+      ],
+      "inertiaGradient": [
+        42921.332328130586,
+        0.0,
+        70016.71244518852,
+        63867.70257585314,
+        0.0,
+        -18367.376205681838,
+        24429.955490128956,
+        0.0,
+        -27869.224887206477,
+        -61043.882553065494,
+        0.0,
+        -3692.5397151578654,
+        -140861.58195042203,
+        0.0,
+        -39681.27361599655,
+        -60411.82001794096,
+        0.0,
+        -3524.8315680064998,
+        24319.647230362785,
+        0.0,
+        -28080.732468022576,
+        63713.49312118277,
+        0.0,
+        -18558.924393203877,
+        43065.1549169352,
+        0.0,
+        69758.19090644563
+      ],
+      "residual": [
+        -0.32587162476676884,
+        0.0,
+        -0.13950725964279934,
+        0.10402679969380746,
+        0.0,
+        0.004668988301647365,
+        0.15150815648191304,
+        0.0,
+        0.056157411690920395,
+        0.7994783661049244,
+        0.0,
+        0.2642706843708219,
+        0.0017129802425952829,
+        0.0,
+        0.0007370960784669521,
+        -0.7977275545360923,
+        0.0,
+        -0.26450957450093765,
+        -0.15207695313877764,
+        0.0,
+        -0.055602984307358785,
+        -0.10511841679567512,
+        0.0,
+        -0.003946387035243372,
+        0.3252094116744375,
+        0.0,
+        0.13823038350247543
+      ]
+    }
+  },
+  "worstRuntimeDofs": [
+    {
+      "dof": 9,
+      "node": 3,
+      "component": "X",
+      "coordinateULPMm": 5.421010862427522e-20,
+      "massTimesCoordinateULPOverHSquaredMicroN": 6.279303127465496e-09,
+      "elasticMicroN": {
+        "independentExactUVMaterial": 61044.68203215162,
+        "storedCoefficientPolynomial": 61044.6820314316
+      },
+      "inertiaMicroN": -61043.882553065494,
+      "residualMicroN": {
+        "independentExactUVMaterial": 0.7994790861266842,
+        "storedCoefficientPolynomial": 0.7994783661049244,
+        "runtimeRecorded": 0.7994806757269544,
+        "runtimeTermsRealSum": 0.7994806757269544
+      }
+    },
+    {
+      "dof": 15,
+      "node": 5,
+      "component": "X",
+      "coordinateULPMm": 7.105427357601002e-15,
+      "massTimesCoordinateULPOverHSquaredMicroN": 0.0008230408195231575,
+      "elasticMicroN": {
+        "independentExactUVMaterial": 60411.02228966636,
+        "storedCoefficientPolynomial": 60411.02229038643
+      },
+      "inertiaMicroN": -60411.82001794096,
+      "residualMicroN": {
+        "independentExactUVMaterial": -0.7977282746027005,
+        "storedCoefficientPolynomial": -0.7977275545360923,
+        "runtimeRecorded": -0.7977290339113097,
+        "runtimeTermsRealSum": -0.7977290339113097
+      }
+    },
+    {
+      "dof": 0,
+      "node": 0,
+      "component": "X",
+      "coordinateULPMm": 5.421010862427522e-20,
+      "massTimesCoordinateULPOverHSquaredMicroN": 4.186202084976997e-09,
+      "elasticMicroN": {
+        "independentExactUVMaterial": -42921.65819939532,
+        "storedCoefficientPolynomial": -42921.65819975535
+      },
+      "inertiaMicroN": 42921.332328130586,
+      "residualMicroN": {
+        "independentExactUVMaterial": -0.3258712647311256,
+        "storedCoefficientPolynomial": -0.32587162476676884,
+        "runtimeRecorded": -0.3258710551963304,
+        "runtimeTermsRealSum": -0.3258710551963304
+      }
+    },
+    {
+      "dof": 24,
+      "node": 8,
+      "component": "X",
+      "coordinateULPMm": 7.105427357601002e-15,
+      "massTimesCoordinateULPOverHSquaredMicroN": 0.000548693879682105,
+      "elasticMicroN": {
+        "independentExactUVMaterial": -43064.82970788353,
+        "storedCoefficientPolynomial": -43064.829707523524
+      },
+      "inertiaMicroN": 43065.1549169352,
+      "residualMicroN": {
+        "independentExactUVMaterial": 0.3252090516658514,
+        "storedCoefficientPolynomial": 0.3252094116744375,
+        "runtimeRecorded": 0.3252093497576425,
+        "runtimeTermsRealSum": 0.3252093497576425
+      }
+    },
+    {
+      "dof": 17,
+      "node": 5,
+      "component": "Z",
+      "coordinateULPMm": 3.552713678800501e-15,
+      "massTimesCoordinateULPOverHSquaredMicroN": 0.00041152040976157874,
+      "elasticMicroN": {
+        "independentExactUVMaterial": 3524.5670584319987,
+        "storedCoefficientPolynomial": 3524.567058431999
+      },
+      "inertiaMicroN": -3524.8315680064998,
+      "residualMicroN": {
+        "independentExactUVMaterial": -0.26450957450129287,
+        "storedCoefficientPolynomial": -0.26450957450093765,
+        "runtimeRecorded": -0.26451005431727026,
+        "runtimeTermsRealSum": -0.26451005431727026
+      }
+    },
+    {
+      "dof": 11,
+      "node": 3,
+      "component": "Z",
+      "coordinateULPMm": 3.552713678800501e-15,
+      "massTimesCoordinateULPOverHSquaredMicroN": 0.00041152040976157874,
+      "elasticMicroN": {
+        "independentExactUVMaterial": 3692.8039858422358,
+        "storedCoefficientPolynomial": 3692.803985842236
+      },
+      "inertiaMicroN": -3692.5397151578654,
+      "residualMicroN": {
+        "independentExactUVMaterial": 0.2642706843704187,
+        "storedCoefficientPolynomial": 0.2642706843708219,
+        "runtimeRecorded": 0.2642708798084641,
+        "runtimeTermsRealSum": 0.2642708798084641
+      }
+    },
+    {
+      "dof": 18,
+      "node": 6,
+      "component": "X",
+      "coordinateULPMm": 5.421010862427522e-20,
+      "massTimesCoordinateULPOverHSquaredMicroN": 2.0931010424884987e-09,
+      "elasticMicroN": {
+        "independentExactUVMaterial": -24319.79930695589,
+        "storedCoefficientPolynomial": -24319.799307315923
+      },
+      "inertiaMicroN": 24319.647230362785,
+      "residualMicroN": {
+        "independentExactUVMaterial": -0.15207659310588761,
+        "storedCoefficientPolynomial": -0.15207695313877764,
+        "runtimeRecorded": -0.15207597795597394,
+        "runtimeTermsRealSum": -0.15207597795597394
+      }
+    },
+    {
+      "dof": 6,
+      "node": 2,
+      "component": "X",
+      "coordinateULPMm": 7.105427357601002e-15,
+      "massTimesCoordinateULPOverHSquaredMicroN": 0.0002743469398410525,
+      "elasticMicroN": {
+        "independentExactUVMaterial": -24429.803982332483,
+        "storedCoefficientPolynomial": -24429.803981972473
+      },
+      "inertiaMicroN": 24429.955490128956,
+      "residualMicroN": {
+        "independentExactUVMaterial": 0.151507796470558,
+        "storedCoefficientPolynomial": 0.15150815648191304,
+        "runtimeRecorded": 0.15150849417841528,
+        "runtimeTermsRealSum": 0.15150849417841528
+      }
+    },
+    {
+      "dof": 2,
+      "node": 0,
+      "component": "Z",
+      "coordinateULPMm": 1.0842021724855044e-19,
+      "massTimesCoordinateULPOverHSquaredMicroN": 8.372404169953995e-09,
+      "elasticMicroN": {
+        "independentExactUVMaterial": -70016.85195263485,
+        "storedCoefficientPolynomial": -70016.85195244817
+      },
+      "inertiaMicroN": 70016.71244518852,
+      "residualMicroN": {
+        "independentExactUVMaterial": -0.13950744633423023,
+        "storedCoefficientPolynomial": -0.13950725964279934,
+        "runtimeRecorded": -0.1395074782485608,
+        "runtimeTermsRealSum": -0.1395074782485608
+      }
+    },
+    {
+      "dof": 26,
+      "node": 8,
+      "component": "Z",
+      "coordinateULPMm": 7.105427357601002e-15,
+      "massTimesCoordinateULPOverHSquaredMicroN": 0.000548693879682105,
+      "elasticMicroN": {
+        "independentExactUVMaterial": -69758.05267587535,
+        "storedCoefficientPolynomial": -69758.05267606211
+      },
+      "inertiaMicroN": 69758.19090644563,
+      "residualMicroN": {
+        "independentExactUVMaterial": 0.13823057026351898,
+        "storedCoefficientPolynomial": 0.13823038350247543,
+        "runtimeRecorded": 0.13823106457130052,
+        "runtimeTermsRealSum": 0.13823106457130052
+      }
+    }
+  ],
+  "resolutionDiagnostic": {
+    "maximumMassTimesCoordinateULPOverHSquaredMicroN": 0.0008230408195231575,
+    "scope": "coordinate-resolution warning only; not a bound, impossibility proof or acceptance allowance"
+  },
+  "provenance": {
+    "inputSHA256": "db235d86c022470fe58f4bd44b6495ff07b892ab1b35c784fc7553c1982110d8",
+    "diagnosticSHA256": "c892e497547d057236046e18ac0b7037841a8cf21d8b33551a5b1bba368642c0",
+    "gradientHelperSHA256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec",
+    "runtimeSourceGit": "93f6653136bc37c4feff48c86f88259000c7dde8",
+    "reportNativeByteOrder": "LE",
+    "state": {
+      "x": {
+        "float64LESHA256": "e76bfb5bd525601d4b2a241a9567437790089f783c3aa8dae76b38eb57ce5c31",
+        "nativeSHA256": "e76bfb5bd525601d4b2a241a9567437790089f783c3aa8dae76b38eb57ce5c31"
+      },
+      "xs": {
+        "float64LESHA256": "a1fc41c8a142b5ff09e9051c07673116eb75479c809530bdd9a121b4a43ebd1f",
+        "nativeSHA256": "a1fc41c8a142b5ff09e9051c07673116eb75479c809530bdd9a121b4a43ebd1f"
+      },
+      "xt": {
+        "float64LESHA256": "7beb1eff6ebe64586c4c3f3121958a54174088284022900a6f885e0b690b7a12",
+        "nativeSHA256": "7beb1eff6ebe64586c4c3f3121958a54174088284022900a6f885e0b690b7a12"
+      },
+      "v": {
+        "float64LESHA256": "33fab6ef54d40bfd9f4e013be6679be9385a45eea14daddec167f49422ffc480",
+        "nativeSHA256": "33fab6ef54d40bfd9f4e013be6679be9385a45eea14daddec167f49422ffc480"
+      }
+    },
+    "capturedCoefficientSHA256": "f8509478186d675f1bb2cefe5327ae1b3da1d5d56a6309a097c20cfb53cf288e",
+    "capturedCoefficientHashEncoding": "sorted-key compact UTF-8 JSON; Python numeric encoding",
+    "nativeMassFloat64LESHA256": "f96c3798c4e59cba3b0c908f2225dd754ee2dc4b5ef1c8cd2a28fa3ee039cc15",
+    "hFloat64LESHA256": "dbac7ec6dcf8af28cd1d4057abb6901ff0ac7cebb45a78d47a235c55d25b58b6"
+  },
+  "scope": "fixed actual binary64 pose/predictor evaluation only, no solve/time integration/calibration or proof that no representable equilibrium exists; real stored M/h^2*(x-xt); independent exact-UV/Q StVK and rounded captured-coefficient polynomial kept separate; literal force tolerance unchanged"
+}

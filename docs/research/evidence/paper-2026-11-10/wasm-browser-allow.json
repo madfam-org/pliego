@@ -1,0 +1,75 @@
+{
+  "schema": "pliego-wasm-browser-probe/0.1",
+  "recordedAt": "2026-11-10T10:08:12.367Z",
+  "mode": "allow",
+  "runtime": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+    "nativeEndian": "little"
+  },
+  "wasmKernel": {
+    "compiler": "wabt",
+    "version": "1.0.39",
+    "compilerSHA256": "cecf06ab5c65c3b7c05bafe601bbba61a45e4939889c5c51351e8817ac06f48d",
+    "sourceSHA256": "2a12b031c6f4ad0e71766cf1b5304c52ddab9d67aff4da2db6f74e89e18f5f58",
+    "binarySHA256": "c17d1b40fa83285f839e80bee871086f364205bc7b37326018a831f1ebadb246",
+    "binaryBytes": 1268
+  },
+  "source": {
+    "git": "d969fe0190e16eafac249c6a2ef521df05fa5341",
+    "dirty": false,
+    "files": 55,
+    "aggregateSHA256": "3c6d9ffb60428218da84d0e43b8fe9d98ffc01cc015f61fad271777c85e6fc5f",
+    "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65",
+    "browserHarnessSHA256": "4e535e0fdd353b0dab26d8d02b285f1cd78617ce203e93026f31c2a8d53431be"
+  },
+  "results": [
+    {
+      "model": "capped",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "barrierContact": true,
+        "barrierIterations": 32,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true,
+        "edgeEdgeMollification": "surface-guarded",
+        "physicalMembrane": false,
+        "plasticity": false
+      },
+      "frames": 84,
+      "vertices": 492,
+      "exactPositionVelocityAndDiagnostics": true,
+      "sampledPositionVelocitySHA256": "ea18d3a763ead55a3f6f30895515eca6af23ce2dedfbca0a755ca38a4e8ae655",
+      "releasePoseSHA256": "d65ed9a14ce0190d21b117b90ca56088ed79189491d52955e757c61015467a05",
+      "solverSteps": 672,
+      "unconverged": 0
+    },
+    {
+      "model": "uncapped",
+      "options": {
+        "seed": 1,
+        "meshEdge": 12.5,
+        "substeps": 8,
+        "barrierContact": true,
+        "barrierIterations": 32,
+        "barrierLinearSolver": "direct-local",
+        "consistentMembraneCurvature": true,
+        "edgeEdgeMollification": "surface-guarded",
+        "physicalMembrane": true,
+        "plasticity": false
+      },
+      "frames": 84,
+      "vertices": 492,
+      "exactPositionVelocityAndDiagnostics": true,
+      "sampledPositionVelocitySHA256": "969d318832d26bf212c51a1d0a0ebc23189a65149231bc5b9aa32e505fcd2e34",
+      "releasePoseSHA256": "032602fb4bf8b41b33a925f46e7614f95ea86d5ab0b304163b1ea88ed35ec466",
+      "solverSteps": 672,
+      "unconverged": 0
+    }
+  ],
+  "scope": "Local research browser: compilation-policy check and same-browser JS/Wasm first-turn pose/velocity/diagnostic parity. Positive research policy explicitly permits Wasm; production policy, full input/paint performance, actual touch devices and material accuracy are not certified.",
+  "status": "PASS",
+  "sourceIntegrityVerified": true,
+  "policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; style-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'"
+}

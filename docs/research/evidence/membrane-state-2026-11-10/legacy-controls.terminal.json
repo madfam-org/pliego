@@ -1,0 +1,10 @@
+{
+  "name": "legacy-controls",
+  "command": [
+    "node",
+    "packages/engine/bench/membrane-audit.mjs"
+  ],
+  "input": null,
+  "output": "legacy-controls.json",
+  "exitCode": 0
+}

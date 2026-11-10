@@ -1,0 +1,65 @@
+{
+  "schema": "pliego-midpoint-independent-math-scope-review/1",
+  "reviewer": "state_matrix_design",
+  "status": "No concrete math or scope error found in requested bounded review",
+  "acceptedCapture": false,
+  "reviewedSourceManifestSHA256": "48a3776bcd0888182079f762d94820f79c0671be9d02326cd602f2b4b8dfa0fc",
+  "files": [
+    {
+      "file": "modal-methods.py",
+      "bytes": 2122,
+      "sha256": "dff972d748b9a9ee59e26018e5722500ccbab402bb71e52c8c646f8268797589"
+    },
+    {
+      "file": "modal-methods.json",
+      "bytes": 2466,
+      "sha256": "f673bb064286cf2f3f0e9e1a3a92d86e13bfa8740328e25b55a8bd7a305e44e3"
+    },
+    {
+      "file": "research-memo.md",
+      "bytes": 4405,
+      "sha256": "c493fda71d277a2b5626c0ffe932a9b5fbdd8045adcba1f733157ca3f64147d9"
+    }
+  ],
+  "checks": [
+    {
+      "topic": "BEhalfstage/reflection",
+      "result": "Correct for autonomous first-order system with exact stage solution: ym=y0+(h/2)f(ym), y1=2ym-y0 implies midpoint with ym=(y0+y1)/2. Finite solve/rounding/projection caveat retained."
+    },
+    {
+      "topic": "mechanicalstage elimination",
+      "derivation": "vm=2(qm-q0)/h; vm=v0-(h/2)M^-1 gradU(qm). Eliminating vm gives gradU(qm)+(4M/h\u00b2)[qm-q0-(h/2)v0]=0. Then q1=2qm-q0 and v1=2vm-v0=(4/h)(qm-q0)-v0. Target,4M/h\u00b2 and velocity are correct."
+    },
+    {
+      "topic": "energywork identity",
+      "derivation": "T1-T0=((v1+v0)/2)^T M(v1-v0)=-gradU(qm)^T(q1-q0), hence E1-E0=U(q1)-U(q0)-gradU(qm)\u00b7d. Symmetric Taylor expansion of quartic polynomial aroundqm gives +D\u00b3U(qm)[d,d,d]/24 exactly. Sign and coefficient correct; no quartic energy conservation claimed."
+    },
+    {
+      "topic": "modal amplification",
+      "derivation": "For z=(q,v/omega), A=[[0,omega],[-omega,0]]. BE R=(I-hA)^-1 has modulus(1+s\u00b2)^-1/2 and rotationangleatan(s); midpoint R=(I-hA/2)^-1(I+hA/2) is rotation2atan(s/2). Code BE norm uses equivalent simultaneous velocity-sign reversal; midpoint norm is unit-circle chord2|sin(k(theta-s)/2)|; energy-loss expression1-rho^(2n) correct."
+    },
+    {
+      "topic": "primary conditions and scope",
+      "result": "Pitt \u00a71BEFE equivalence and \u00a72 dissipativity definition/proposition2.1 inspected directly; HairerLecture2 theorem3 and theorem5 inspected directly. Dissipativity-based B-stability is not transferred to arbitrary nonconvex StVK. Symplectic/quadratic-invariant statements remain distinct from nonlinear energy conservation."
+    },
+    {
+      "topic": "nativeimplementation boundary",
+      "result": "Memo correctly requires a named stage/final state contract, declared roundedC4 and multiply/add association, distinct midpointstage/endpoint force interpretation, both representation gates, actual initial state and snapshot recurrence. No private-array halfstep hack is presented as implementation."
+    }
+  ],
+  "primarySources": [
+    {
+      "url": "https://www.mathematics.pitt.edu/sites/default/files/midpoint3_technicalreport.pdf",
+      "reviewed": "\u00a71BEFE equations pp1-2; \u00a72B-stability dissipativity assumption andproposition2.1 p3"
+    },
+    {
+      "url": "https://unige.ch/~hairer/poly_geoint/week2.pdf",
+      "reviewed": "Lecture2 \u00a71theorem3 pp2-3; \u00a72theorem5 p5"
+    }
+  ],
+  "limitations": "Read/derivation review only. Did not rerun modal-methods.py, recompute the numerical table/candidate maxima, inspect full Simo papers, or run tests/World/oracles. No nonlinear stage solution, energy/stability guarantee or force/time acceptance established.",
+  "readiness": "Mathematically ready as a separately named future no-contact candidate contract; numerical/native-stage implementation remains untested. Current accepted campaign unchanged.",
+  "noTestsOrWorldCalls": true,
+  "noRepositoryEdits": true,
+  "rootFrozenFilesUnchanged": true
+}

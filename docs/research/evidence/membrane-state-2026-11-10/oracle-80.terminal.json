@@ -1,0 +1,12 @@
+{
+  "name": "oracle-80",
+  "command": [
+    "python3",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--digits",
+    "80"
+  ],
+  "input": "probe.json",
+  "output": "oracle-80.json",
+  "exitCode": 0
+}

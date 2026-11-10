@@ -273,6 +273,10 @@ const CATALOG = {
       title: L4('V-fold pop-up', 'Pop-up en V', 'Pop-up en V', 'Pop-up em V'),
       summary: L4('A card with a V-fold piece glued across the gutter: it rises as the card opens.', 'Una tarjeta con una pieza en V pegada sobre el pliegue central: se levanta al abrirla.', 'Une carte avec une pièce en V collée sur la pliure : elle se dresse à l’ouverture.', 'Um cartão com uma peça em V colada sobre a dobra central: ela se ergue ao abrir.'),
       parameters: [{ id: 'alpha', type: 'slider', label: L4('Glue angle', 'Ángulo de pegado', 'Angle de collage', 'Ângulo de colagem'), min: 30, max: 60, step: 5, default: 45, unit: '°' }] },
+    { slug: 'booklet-reading', document: '../books/eight-page.fold',
+      title: L4('Eight-page booklet', 'Cuadernillo de ocho páginas', 'Livret de huit pages', 'Livreto de oito páginas'),
+      summary: L4('Four native paper leaves. Open in paper mode to read forward and backward.', 'Cuatro hojas nativas de papel. Abre el modo papel para leer en ambos sentidos.', 'Quatre feuillets natifs. Ouvrez le mode papier pour lire dans les deux sens.', 'Quatro folhas nativas. Abra o modo papel para ler nos dois sentidos.'),
+      parameters: [] },
   ],
 };
 

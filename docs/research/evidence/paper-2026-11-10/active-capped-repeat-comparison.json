@@ -1,0 +1,25 @@
+{
+  "schema": "pliego-paper-repeat-comparison/0.1",
+  "recordedAt": "2026-11-10T09:30:18.192Z",
+  "comparisonSHA256": "19d58cca5aecb57897b8ceae3a335e8773f6528e3fbf9424220667be06456799",
+  "inputSHA256": [
+    "51a083827437a35bde5d1bbdcdb4a62930c05522c76b96b63dc8e26781b7b54b",
+    "720744de8e8b358f1451e1105d5fe58efa5dce12d35154777515d973290934c0"
+  ],
+  "source": {
+    "git": "fe2ae0c215022c90e7d022713994f1576584523f",
+    "dirty": false,
+    "engine": "current checkout",
+    "engineTreeSHA256": "118f4dc2d584cd9c10bd372a0a334f69deac1ec484dd586e2db6078e0ee19017",
+    "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+    "harnessSHA256": "13520a4edfb729765e07613baabf6990322f11eed35362debf92742fbea51f72",
+    "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+    "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+    "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+  },
+  "sourceCleanAtRuns": true,
+  "allRecordedNonTimingFieldsEqual": true,
+  "cases": 1,
+  "comparison": "whole reports except recordedAt, enumerated result wall/CPU timing fields and their physics8ms gate; includes all input/source metadata, sampled pose hashes, every solver/contact diagnostic and non-time gate",
+  "acceptance": "determinism only; failed or unmeasured physics/material/device gates remain unchanged in the raw reports"
+}

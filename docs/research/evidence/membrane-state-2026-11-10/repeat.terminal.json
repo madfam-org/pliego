@@ -1,0 +1,12 @@
+{
+  "name": "repeat",
+  "command": [
+    "node",
+    "packages/engine/bench/membrane-state-probes.mjs",
+    "--out",
+    "{capture}/repeat.json"
+  ],
+  "input": null,
+  "output": null,
+  "exitCode": 0
+}

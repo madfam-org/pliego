@@ -1,0 +1,169 @@
+{
+  "schema": "pliego-state-matrix-archive-build-inputs/1",
+  "runDirectory": "accepted-run-3d778abc",
+  "frozenReviewDirectory": "independent-review",
+  "selectedProof": "full-newton-review/selected-newton-review.json",
+  "reviewTerminal": "full-newton-review/selected-newton-review.terminal.json",
+  "supplements": [
+    {
+      "publicIdentity": "precommit-checks.json",
+      "durableRelativeToPhase": "precommit-checks.json"
+    },
+    {
+      "publicIdentity": "package-precommit.log",
+      "durableRelativeToPhase": "package-precommit.log"
+    },
+    {
+      "publicIdentity": "typecheck-precommit.log",
+      "durableRelativeToPhase": "typecheck-precommit.log"
+    },
+    {
+      "publicIdentity": "root-probe-coverage-closure.log",
+      "durableRelativeToPhase": "root-probe-coverage-closure.log"
+    },
+    {
+      "publicIdentity": "source-ci.json",
+      "durableRelativeToPhase": "source-ci.json"
+    },
+    {
+      "publicIdentity": "integration-review/protocol-probes-committed-closure-review.json",
+      "durableRelativeToPhase": "integration-review/protocol-probes-committed-closure-review.json"
+    },
+    {
+      "publicIdentity": "integration-review/protocol-independent-review.json",
+      "durableRelativeToPhase": "integration-review/protocol-independent-review.json"
+    },
+    {
+      "publicIdentity": "integration-review/probe-independent-code-review.json",
+      "durableRelativeToPhase": "integration-review/probe-independent-code-review.json"
+    },
+    {
+      "publicIdentity": "independent-review/review-captured-boundaries.py",
+      "durableRelativeToPhase": "independent-review/review-captured-boundaries.py"
+    },
+    {
+      "publicIdentity": "native-boundary-review/proof.json",
+      "durableRelativeToPhase": "native-boundary-review/proof.json"
+    },
+    {
+      "publicIdentity": "native-boundary-review/stderr.log",
+      "durableRelativeToPhase": "native-boundary-review/stderr.log"
+    },
+    {
+      "publicIdentity": "native-boundary-review/stdout.log",
+      "durableRelativeToPhase": "native-boundary-review/stdout.log"
+    },
+    {
+      "publicIdentity": "native-boundary-review/terminal.json",
+      "durableRelativeToPhase": "native-boundary-review/terminal.json"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/diagnose-first-accepted.py",
+      "durableRelativeToPhase": "next-candidates/newton-defect/diagnose-first-accepted.py"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/diagnosis-plan.json",
+      "durableRelativeToPhase": "next-candidates/newton-defect/diagnosis-plan.json"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/diagnosis.log",
+      "durableRelativeToPhase": "next-candidates/newton-defect/diagnosis.log"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/diagnosis.public-terminal.json",
+      "durableRelativeToPhase": "next-candidates/newton-defect/diagnosis.public-terminal.json"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/first-accepted-defect.json",
+      "durableRelativeToPhase": "next-candidates/newton-defect/first-accepted-defect.json"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/interpretation.json",
+      "durableRelativeToPhase": "next-candidates/newton-defect/interpretation.json"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/research-manifest.json",
+      "durableRelativeToPhase": "next-candidates/newton-defect/research-manifest.json"
+    },
+    {
+      "publicIdentity": "next-candidates/newton-defect/research-memo.md",
+      "durableRelativeToPhase": "next-candidates/newton-defect/research-memo.md"
+    },
+    {
+      "publicIdentity": "next-candidates/implicit-midpoint/modal-methods.py",
+      "durableRelativeToPhase": "next-candidates/implicit-midpoint/modal-methods.py"
+    },
+    {
+      "publicIdentity": "next-candidates/implicit-midpoint/modal-methods.json",
+      "durableRelativeToPhase": "next-candidates/implicit-midpoint/modal-methods.json"
+    },
+    {
+      "publicIdentity": "next-candidates/implicit-midpoint/research-manifest.json",
+      "durableRelativeToPhase": "next-candidates/implicit-midpoint/research-manifest.json"
+    },
+    {
+      "publicIdentity": "next-candidates/implicit-midpoint/independent-math-scope-review.json",
+      "durableRelativeToPhase": "next-candidates/implicit-midpoint/independent-math-scope-review.json"
+    },
+    {
+      "publicIdentity": "archive-work/publication-exclusions.json",
+      "durableRelativeToPhase": "archive-work/publication-exclusions.json"
+    },
+    {
+      "publicIdentity": "archive-work/publication-exclusions-v2.json",
+      "durableRelativeToPhase": "archive-work/publication-exclusions-v2.json"
+    },
+    {
+      "publicIdentity": "archive-work/publication-exclusions-v3.json",
+      "durableRelativeToPhase": "archive-work/publication-exclusions-v3.json"
+    },
+    {
+      "publicIdentity": "archive-work/publication-exclusions-v4.json",
+      "durableRelativeToPhase": "archive-work/publication-exclusions-v4.json"
+    },
+    {
+      "publicIdentity": "archive-work/review-wrapper-preflight-correction.json",
+      "durableRelativeToPhase": "archive-work/review-wrapper-preflight-correction.json"
+    },
+    {
+      "publicIdentity": "archive-work/wrapper-v1-launch-observation.json",
+      "durableRelativeToPhase": "archive-work/wrapper-v1-launch-observation.json"
+    },
+    {
+      "publicIdentity": "archive-work/run-selected-newton-review.py",
+      "durableRelativeToPhase": "archive-work/run-selected-newton-review.py"
+    },
+    {
+      "publicIdentity": "archive-work/archive-tools-freeze.json",
+      "durableRelativeToPhase": "archive-work/archive-tools-freeze.json"
+    },
+    {
+      "publicIdentity": "archive-work/archive-tools-smoke.json",
+      "durableRelativeToPhase": "archive-work/archive-tools-smoke.json"
+    },
+    {
+      "publicIdentity": "archive-build-inputs.json",
+      "durableRelativeToPhase": "archive-work/archive-build-inputs.json"
+    }
+  ],
+  "output": "archive-work/stage-v2",
+  "sourceMapping": "all paths here relative to CLI phase root; manifest original identity prefixes supplements/ for these selections; run/ maps to runDirectory; frozen independent-review files map to frozenReviewDirectory; selected proof/terminal and execution/* map to full-newton-review; tools/ maps to archive-work",
+  "excludedOriginals": "archive-work/publication-exclusions-v4.json",
+  "scope": "explicit unchanged-byte selections; private original terminal/log files and third-party primary research sources excluded; no source or physics rerun",
+  "supersedes": {
+    "stage": "archive-work/stage-v1",
+    "manifest": {
+      "bytes": 65258,
+      "sha256": "69aaa702a8799e03f1a172b93936b17e9f7b1d5be18eab52e2c80aa6e0bcbfeb"
+    },
+    "independentReviewProof": {
+      "bytes": 68533,
+      "sha256": "976c246e402320bd53d51570289d50fc03977351392b784ce10f9296310ee258"
+    },
+    "mapping": {
+      "bytes": 6560,
+      "sha256": "5b6cc7359d4a0d74a9df9799b1864a3a1322d7a86845d4ebaa7903211c146cc2"
+    },
+    "change": "supplements/engine-precommit.log moved to publication-exclusions-v4.json; every other selection unchanged"
+  }
+}

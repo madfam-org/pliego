@@ -1,0 +1,17 @@
+{
+  "scope": "outside-checkout isolated I/O design only; not full source CI or physics rerun",
+  "checks": {
+    "sameFDOriginalModeAndContents": true,
+    "exclusiveOverwriteRefused": true,
+    "reopenedPathSameDeviceAndInode": true,
+    "reopenedFDContentsExact": true,
+    "sameContentsReplacementDetected": true,
+    "unlinkedPathRefused": true,
+    "symlinkPathRefusedByONOFOLLOW": true,
+    "originalDescriptorRemainsReadable": true
+  },
+  "proposedTestSHA256": "85b2c5c8f457b73ca37968ccc7f2d1077e509cb048409aae2e949bcd1471db6d",
+  "patchSHA256": "d3c74c70dbbcde19f089b863a005329a88be22382fd719ce5c1f2bfb352b3eb2",
+  "measurementSourceSnapshotSHA256": "df77141b3a34004393375be90d59d692b111fe6bec2adf845420f8afb4f5aab7",
+  "repositoryMeasurementTestStillUnchanged": true
+}

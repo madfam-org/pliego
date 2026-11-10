@@ -1,0 +1,542 @@
+{
+  "schema": "pliego-plane-stress-comparison/0.1",
+  "recordedAt": "2026-11-10T12:43:28.478Z",
+  "comparisonSHA256": "bb96a76b6035fe0d80439e3d8f0c1f7f9d3c9a35afc0210660d7fc94c181b041",
+  "inputSHA256": [
+    "1731eb464dce238751bbf09d9e7ccf72fb2bda2ba5993241dffa283015e55e75",
+    "bc6cb7e7c2dc554d85bf46839a78fb0126c477eac990689aa68b5a752fb3d4d3"
+  ],
+  "source": {
+    "git": "9bbeb9faaacbf1fc48c11ba17c3dca422a3997f6",
+    "engineFiles": [
+      {
+        "path": "collision/accd.js",
+        "sha256": "8f7a942c2c42591172720cc13c84eaa813ab9f4f6fe67de3c3084c4ab9ab74ae"
+      },
+      {
+        "path": "collision/barrier.js",
+        "sha256": "e6d4eae996cc0e5e970230c0ab5ae19ae4e5dbb7f72bd60fb170d139111310b4"
+      },
+      {
+        "path": "collision/bounds-tree.js",
+        "sha256": "da8895327f9d71990d1f38a0f0dd0e7592e591bd0b743f9c03b1900e77d781e3"
+      },
+      {
+        "path": "collision/distance.js",
+        "sha256": "d0cd28674bc018eb5078dea271a53c7dd2cda7d2d26cc1af562e0a6d009be2ed"
+      },
+      {
+        "path": "collision/edge-mollifier.js",
+        "sha256": "92ecfc693115252d16952ee1b6a9779d4b4c1df03e24f608b4455ac5d4b0c088"
+      },
+      {
+        "path": "collision/motion-guard.js",
+        "sha256": "efaf2861ee434db6cb19fa403ea1ec8660352b5f8ec550597e088b47e2f7d8dc"
+      },
+      {
+        "path": "collision/surface-coverage.js",
+        "sha256": "ff917c18ede134c7c13b4732f4ccb0973fb174dab13e1738a9f96b605b5dbd61"
+      },
+      {
+        "path": "collision/swept.js",
+        "sha256": "3dccfbaf62f97e9ece10edce0833351864d43a78dfae1dd19f4f586836f90718"
+      },
+      {
+        "path": "collision/wasm-bounds-code.js",
+        "sha256": "0254329b8d1304d293340ad382481ce6372489b223a46f11385768a6aeebe713"
+      },
+      {
+        "path": "collision/wasm-bounds-tree.js",
+        "sha256": "56fe95de452169fcdfc5f5a02553f45eebf236092f615b491e3dfb9afcac6fef"
+      },
+      {
+        "path": "constants.js",
+        "sha256": "ba82c79e86505b83e4ad3586412f6f65be287f853c8e154ccee3525a7f8384cc"
+      },
+      {
+        "path": "digest.js",
+        "sha256": "6324da4ba0fbcaf606e21594a4853531c7e2d5e8c8895da8a805445b9f0559ab"
+      },
+      {
+        "path": "docrules.js",
+        "sha256": "49ea71a917903cdcbcdf790fe59c0fdd88aa8a53bc79f03c97ab4bfa066080d4"
+      },
+      {
+        "path": "document.js",
+        "sha256": "e7ace1a75773c01c2d723a8f1e89fd4d23a139e069c6c18fbe11684064341b3f"
+      },
+      {
+        "path": "drivers.js",
+        "sha256": "386ed1e20465ad00d02ffb7dcd7c73188f3a4baf000bdd2ce85401a13e45a30c"
+      },
+      {
+        "path": "fastmath.js",
+        "sha256": "f16c1dbb9ec70ac3a533b9965ef7e1d5ea579b2f9ee8eb7223fa288e87b1fe7d"
+      },
+      {
+        "path": "gates.js",
+        "sha256": "23b2581a15fc63fed9e7aa95613d806e5d2edba2cb63ac45ca4a9bb7a3a493c5"
+      },
+      {
+        "path": "geom.js",
+        "sha256": "e4573e28b1c086ea8517639e7f510c5ea23bd7e0d3f9d19df02467c8185ef2c3"
+      },
+      {
+        "path": "index.js",
+        "sha256": "649271ca75c134eddf458d839a3d2da80946887c68d0f7029f04f06c503d2844"
+      },
+      {
+        "path": "keyed.js",
+        "sha256": "aa34c6332b3e155384608a51deb438d572ec8457aff248a27c9e3731adc7799f"
+      },
+      {
+        "path": "kinematics/closedform.js",
+        "sha256": "efc6361b6d2a0f7e231e37b64fc897536ddbd4163440286c88c9d34671135400"
+      },
+      {
+        "path": "kinematics/facetree.js",
+        "sha256": "42b1edce8af1456a1e6e5c5998dcfa7c8334aabf9f75eeb40c26ae1f7559d1af"
+      },
+      {
+        "path": "kinematics/index.js",
+        "sha256": "4e42195b27333b1062fcdfa69e76068f765fcb21185d692903e18713cbe82624"
+      },
+      {
+        "path": "kinematics/linalg.js",
+        "sha256": "036fb00907a8e0418e5a1fce5bc10e0ab334d1676b056ab42d4b25c70cd3c011"
+      },
+      {
+        "path": "kinematics/program.js",
+        "sha256": "70dcb91733dd253eebfabee88836b9301e692cd115894494c98f04c5af0508b9"
+      },
+      {
+        "path": "linalg/blockchol.js",
+        "sha256": "2759ae3e4f1d787b7bbc5495210bee19d0a40d579a500e75a823a1d00ad1e46e"
+      },
+      {
+        "path": "material.js",
+        "sha256": "d7967d7c20f1485d299363fc470ca8e12a9f962bae8f2b2f9f23fbd905a13f88"
+      },
+      {
+        "path": "mesh.js",
+        "sha256": "354a9ecbe6276a36cdda5e659021eef263074da91bb6a8f0f1be25990b0ee8a4"
+      },
+      {
+        "path": "triangulate.js",
+        "sha256": "0e29f6c96221b24077e27a5e2674344ad9e3cb9bb7e379d65ff514b08047265f"
+      },
+      {
+        "path": "xpbd/air.js",
+        "sha256": "889b3da6c6c46011750e0b75238177b300d62b34b0005148420d28fa571f40e4"
+      },
+      {
+        "path": "xpbd/contact.js",
+        "sha256": "c42e2f61431c9a7919e9ee74aa4b991b869846dfb75148b0f974c9571e704f92"
+      },
+      {
+        "path": "xpbd/coupled-contact.js",
+        "sha256": "cc96dd7e1d95e60e4180fe3887f1882d0f36f5eb41114135ca8685193d974ba7"
+      },
+      {
+        "path": "xpbd/dihedral.js",
+        "sha256": "ed0142a5a2b450029b96a4c7c0ddd0200dec60d2fb7fea143cb96d896db7377c"
+      },
+      {
+        "path": "xpbd/edgecontact.js",
+        "sha256": "78cd94005c701a0eefb270b89b420b191315d1b72b1fda69628250516cde4dd5"
+      },
+      {
+        "path": "xpbd/energy-search.js",
+        "sha256": "6a157b1295e2066602442c43e8ad392ac9405280173303929336500d1100da9a"
+      },
+      {
+        "path": "xpbd/gates.js",
+        "sha256": "0d6ff3718e71b4574c456b138c9e8576a3476634013f431a27f050f8ce3a8aca"
+      },
+      {
+        "path": "xpbd/implicit.js",
+        "sha256": "af4056632972f8b464a5bf71539911e30dea49c4991395a602003dcd06367859"
+      },
+      {
+        "path": "xpbd/joins.js",
+        "sha256": "621e4d2adcccccabac8b01db9fd2752805b7576582268d8c3b65afad18665910"
+      },
+      {
+        "path": "xpbd/local-contact-solve.js",
+        "sha256": "4f6777b80e61a8564a398bf6f8bb5b472d97e39b9f39994a623e15e28eb992a0"
+      },
+      {
+        "path": "xpbd/orthotropic-membrane.js",
+        "sha256": "cc0f4a12d2a7dfce91885f1eeb4fd50cd8132663de304f19c6ffa66bb38c163b"
+      },
+      {
+        "path": "xpbd/pcg.js",
+        "sha256": "85712c9829542d8c7ee822145ffb55cb3e1de04a62791ff55ddb27188f31dbe1"
+      },
+      {
+        "path": "xpbd/presentation.js",
+        "sha256": "185ded5508ff841fe99a6dee95c74dd1c49047a2c07eeef60e794ae0f16e5965"
+      },
+      {
+        "path": "xpbd/render.js",
+        "sha256": "5db389f5d41ea35de160d56ab4d36a640ffce694d8224d64c3660187afddbd3c"
+      },
+      {
+        "path": "xpbd/setrest.js",
+        "sha256": "7d759b2c307e4e1bed12c5995ba0b8c70cfd4ab7381834874e6047f2d2387bc4"
+      },
+      {
+        "path": "xpbd/state.js",
+        "sha256": "651484d55205a9b910500780f82246fa91da418b39e9a7ee5be3fb6dda586d1d"
+      },
+      {
+        "path": "xpbd/world.js",
+        "sha256": "34bddad64037bad8d3eb25eb52b7554663b922010f698e54616271a0951feb56"
+      }
+    ],
+    "tools": [
+      {
+        "path": "plane-stress-audit.mjs",
+        "sha256": "bdeacd3ed89fd8808ecc646cc80ae0e7d8f73abfb6f9be109e0428c7dd9d7d26"
+      },
+      {
+        "path": "compare-plane-stress-audit.mjs",
+        "sha256": "bb96a76b6035fe0d80439e3d8f0c1f7f9d3c9a35afc0210660d7fc94c181b041"
+      },
+      {
+        "path": "plane-stress-reference.py",
+        "sha256": "e27d1abfb0fb6f4574729c4cc303a65cc5d0a921de43115af23fefb67e756873"
+      },
+      {
+        "path": "test_plane_stress_reference.py",
+        "sha256": "753a04e795437a80e6e2d802a2324758fc4ed4db51558ba8561f31672ac7bfa9"
+      },
+      {
+        "path": "plane-stress-precision.py",
+        "sha256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec"
+      },
+      {
+        "path": "test_plane_stress_precision.py",
+        "sha256": "6f782171f0e2572e44126a5c43ee9e3a57b54916a4b85d126c764876db561023"
+      },
+      {
+        "path": "plane-stress-runtime.mjs",
+        "sha256": "f34eb0bdb749c262193b1f57cd2a53fbd00330578a474facc9b9dd8f5a3a518e"
+      },
+      {
+        "path": "plane-stress-metrics.mjs",
+        "sha256": "c1da83f1cf9d65e403ca86cf7ce9d1a744f236d1b9672b80f7c286a2546ad188"
+      },
+      {
+        "path": "plane-stress-validation.mjs",
+        "sha256": "1e37368801a4a7132642e6a84892c7de22fe23d8d7b95496aa31e492a2bc92d6"
+      },
+      {
+        "path": "membrane-patch.mjs",
+        "sha256": "c36818ef3b166ccf0299045c8466adda8cd38cc1880c507f3170e141e69afc11"
+      }
+    ],
+    "tests": [
+      {
+        "path": "accd.test.js",
+        "sha256": "7ad845ad26c14df3ae2ccfa659a60ad8dc371f0234530d722504f744a4e2c7c6"
+      },
+      {
+        "path": "barrier-contact.test.js",
+        "sha256": "1ee43fbeb39850957d630afd5e87bb29f4045747ceb8d0f1aa32d2ad4cb4645a"
+      },
+      {
+        "path": "bench-tools.test.js",
+        "sha256": "fb8c3070b3691ec252839046f06325d7691193da68e24c8292127acd8efc3df0"
+      },
+      {
+        "path": "board.test.js",
+        "sha256": "741de705e8bd6ee8e9ba3697d83f16b573d5af58ee99b220f7f88149d9f40ed7"
+      },
+      {
+        "path": "broadphase-guard.test.js",
+        "sha256": "9e9061523ccdcbfa23abad96fa269da00c66dcbdf964ed036b65a961b1ce8698"
+      },
+      {
+        "path": "collision-distance.test.js",
+        "sha256": "b111284fde94f4e149d38ca9537843db79a60725dd22012c7d43763295c6a28f"
+      },
+      {
+        "path": "contact-feature.test.js",
+        "sha256": "fd31c5620f2f79645ca01579cc8d07d1c86ec5856ada86460d7f1952ddcde5e1"
+      },
+      {
+        "path": "contact-sides.test.js",
+        "sha256": "23601f63059f30750ef05b6ab7d60db1555063b3b81caf33009825d0db5b3673"
+      },
+      {
+        "path": "contact-stack.test.js",
+        "sha256": "67b3a7622d27fac086657de07bd5a0ae86f4c0e37b13ab4a6c38d7e6f71599e6"
+      },
+      {
+        "path": "coupled-contact.test.js",
+        "sha256": "473f275f5a7f32feb47207318a8241636e67bb88bda8a5e13304cd18fa2b40d2"
+      },
+      {
+        "path": "crease-grain.test.js",
+        "sha256": "1ca20a8750f7101e9471d076caedabe063749b64d73177ed53201e86fc18c74f"
+      },
+      {
+        "path": "creases.test.js",
+        "sha256": "8f6eb719afd07282747fe6e880ed76a5645df3e11b7e9621cfc156694ff561e8"
+      },
+      {
+        "path": "determinism.test.js",
+        "sha256": "3505e1a6ff78a936fa50e7d3a540286da41a587aa122a39681c23d08d1288ed1"
+      },
+      {
+        "path": "digest.test.js",
+        "sha256": "a01281f3159e7ec655986b0e4617814a8dc9d82bc9a84e122bbfe3a67792d6f1"
+      },
+      {
+        "path": "dihedral.test.js",
+        "sha256": "4ec4545f53f4ba76baccb4adebc6fb06c260dc9a4a37403075a653b8069b8a47"
+      },
+      {
+        "path": "document.test.js",
+        "sha256": "7f1b37aa4bd82e01429fef309b2bff04c460c536996572e4820002de53b1e7c8"
+      },
+      {
+        "path": "e1-peirce.test.js",
+        "sha256": "3306a7c9a9de93fbdff4a7d19731b68e86a2f2f725d7d508efb1a0023d1a4662"
+      },
+      {
+        "path": "e10-parallel.test.js",
+        "sha256": "4c712c0b200247871a34cac52cb9766d2f82f4dfb4e1672aff57256c5e945747"
+      },
+      {
+        "path": "e12-substeps.test.js",
+        "sha256": "c3ab0e429ccffdef900d16a937b857d6dafc13dd232e34b79915cc5091afceef"
+      },
+      {
+        "path": "e2-cantilever.test.js",
+        "sha256": "bed34513072df384e94cecb9ef3b64e040f8cffab79ed969a9b9202080521502"
+      },
+      {
+        "path": "e5-degree4.test.js",
+        "sha256": "ab1bffd754c3bbbd0a457e81bf7c35d9c5edd1172ad90f88a1676498a2ea5429"
+      },
+      {
+        "path": "e6-miura.test.js",
+        "sha256": "b9e03ba1a38d99f51468bea27570539ccdaa8aefd5b67b96ef43a59acb6b9ee4"
+      },
+      {
+        "path": "e9-vfold.test.js",
+        "sha256": "36431e03d82c3194e95a585aef3ccf94b7c2b51faa1dee46268d45e8c082ad61"
+      },
+      {
+        "path": "edge-contact.test.js",
+        "sha256": "21f865ee44659fa4cc00eb8051f0a7b32b39b3d90784ee0a0584206ad2fbb8aa"
+      },
+      {
+        "path": "energy-search.test.js",
+        "sha256": "7b5f9459bdb6665f73bb52453ae4afcf12319f479c143978a075efcfe5b41780"
+      },
+      {
+        "path": "fastmath.test.js",
+        "sha256": "51d85c9e3634a3c8d41685a6e173086f2f6d3d21c1b099182952f3d4d65a76a9"
+      },
+      {
+        "path": "fixtures.test.js",
+        "sha256": "dc68bb71f20ce5c13671620c1309dfd2ddbf0c4c2681c83f58ad9fa51e6467ba"
+      },
+      {
+        "path": "flap-settle.test.js",
+        "sha256": "5567a0c5c78eafd40179562c264f379537148167f97956fb2afd49d1eace1243"
+      },
+      {
+        "path": "glue-openings.test.js",
+        "sha256": "4c112e3f9d5a9286be2e59a69d385b9c64c36f3e9dfb4e56e0ad911a56a22f9e"
+      },
+      {
+        "path": "glue-samples.test.js",
+        "sha256": "2be05322f8b0e77729e2a99e80ccfc2e8bbc3e8c0a3af5a3876e5da6e0a26d2a"
+      },
+      {
+        "path": "hand-ease.test.js",
+        "sha256": "bfb9895b6165aba63ce6be1b04c537e7a151550b6671710201e92a182acee6e2"
+      },
+      {
+        "path": "inextensible.test.js",
+        "sha256": "a648e683169d15379e72985dfa3f3072f9182fa854b88accab4fbb86bda3472d"
+      },
+      {
+        "path": "joins.test.js",
+        "sha256": "3ce0dcda006e7f8f4dbb0836e3d612e81106b120d978b123af404b9fd76bd60a"
+      },
+      {
+        "path": "keyed-mechanisms.test.js",
+        "sha256": "f91c92dbad02aa93ec7b1d778a24e161ad958d9adfc742fd822b9074244ed474"
+      },
+      {
+        "path": "laminate.test.js",
+        "sha256": "98701b94187d7b292b941129f748da2a87fc6c70179032c270553956aca5bdb5"
+      },
+      {
+        "path": "local-contact-solve.test.js",
+        "sha256": "5b2b08066636d65fa6cfe0959cafbc53deeb5d6919ef2bb80b45ad617d1a9073"
+      },
+      {
+        "path": "mechanisms.test.js",
+        "sha256": "4dbf9ff5ec1d4c5b0a719fc6cc1b67386b0639e1f8e3e38c46f4aea01e338677"
+      },
+      {
+        "path": "membrane-audit.test.js",
+        "sha256": "d62e8c13d64c5f9aa940fd19eeedf72f49da12a51d3092b68773469215329f09"
+      },
+      {
+        "path": "membrane-patch.test.js",
+        "sha256": "7734e70aead0c4daca7bc6cea90d2425b31c22b8018f0754aa6a86305f3cfc1e"
+      },
+      {
+        "path": "membrane-tensor.test.js",
+        "sha256": "f5bbdcd2089b4c1c9797135d7038a0878a8df110f5e662620188af77bc1ba426"
+      },
+      {
+        "path": "mesh-sweep.test.js",
+        "sha256": "918d10228cb6706792185ef7042052e86b68c582d919f98c978519ae3199e45a"
+      },
+      {
+        "path": "mesh.test.js",
+        "sha256": "ad1a92ee6fe2a47872e82cdc7b1defc92bd8988070eca48491d08fda4695d973"
+      },
+      {
+        "path": "mollified-contact.test.js",
+        "sha256": "5e5a231a247c324c76200a65637a0ab941c5d269b8e4f66a0ffdb8c21cf3e89c"
+      },
+      {
+        "path": "orthotropic-audit.test.js",
+        "sha256": "e8d1062ad0f26e97a59e93db6b4755f1f71638a0576673243546874e049efd9c"
+      },
+      {
+        "path": "orthotropic-element.test.js",
+        "sha256": "1ba5e1fa85c1630abe906b9d38e15b1744493b3c9c3a70cbab89a318face6cbb"
+      },
+      {
+        "path": "orthotropic-world.test.js",
+        "sha256": "8142300bee91269b015290068d057fd451d2e70612d95e1a9a2759e79dea70ae"
+      },
+      {
+        "path": "package.test.js",
+        "sha256": "f62d34ad6a2f9c1918c3d7708b53a95153f2acd3fb149e6c567577c0eb5f2375"
+      },
+      {
+        "path": "paper-backends.test.js",
+        "sha256": "6e0d88e30e933178a3b49e5b3d0d6b1b00a8dbc6a95215a02f6f5c72fcd7003b"
+      },
+      {
+        "path": "paper-execution.test.js",
+        "sha256": "d87a6ab4804f8944c662a0576b9c43d85ec9da4f18d346b9b6df53957170021e"
+      },
+      {
+        "path": "paper-metrics.test.js",
+        "sha256": "d5234dc264c693a11ecab61190966dd139b464f6f8e7d378ab76d4e2e361f59d"
+      },
+      {
+        "path": "parallel-contact-limit.test.js",
+        "sha256": "6d0dc1bc82e4b8f04c5e5fe4b80923113e655d619df713cd6ea69376e2550fba"
+      },
+      {
+        "path": "pass-skip.test.js",
+        "sha256": "a083f42418f976d9c347165eaf4953038e0380bde19bf4cd27456c51fbbe26b4"
+      },
+      {
+        "path": "pcg-rotation.test.js",
+        "sha256": "37ff0ddc6e45ccbef2eff800e9978731b64b9043ee39f32a3218f4d24a6abf1a"
+      },
+      {
+        "path": "perf-budget.test.js",
+        "sha256": "163115abd73e6be6639cbd18a701698d8d94ab6f96aa3a29a2f5ea8d55ebe890"
+      },
+      {
+        "path": "perforation.test.js",
+        "sha256": "1110c93bdd3e326ae88ed4382842b24cd90e819698046af1565f0bacda4511b6"
+      },
+      {
+        "path": "physical-membrane.test.js",
+        "sha256": "333201398a33bae26430edb09b5abbb7d0236befefce547c84df6bd0add96bf8"
+      },
+      {
+        "path": "plane-stress-audit.test.js",
+        "sha256": "39220339d80e0f2be05c4cfd5996f4e7c021b153487ab03d26bd9559a2065c72"
+      },
+      {
+        "path": "plane-stress-metrics.test.js",
+        "sha256": "a177330b40bd5656c4d93913128394947a07487c8e4163af732b280766bbc856"
+      },
+      {
+        "path": "plane-stress-runtime.test.js",
+        "sha256": "ee16e101c21e02705b35e6e5f5377c6a8efdf4619e069d110999990c90820053"
+      },
+      {
+        "path": "plane-stress-validation.test.js",
+        "sha256": "d3c452b4f026c0c350e6d8d90cf68cb2510a41518db5ea8bf57d6ac91650c56d"
+      },
+      {
+        "path": "presentation.test.js",
+        "sha256": "bcb929f67ea789e87092d3a0bb151e01ba8f8402a341114940ff84db22e0f2cd"
+      },
+      {
+        "path": "render-version.test.js",
+        "sha256": "5796b62fc2359c01870be1660b124741194f5babaac78ade073bf394eb3467bb"
+      },
+      {
+        "path": "sequence.test.js",
+        "sha256": "f9a1ac75759c68294d1cdd8b6ce9c639655def05e0ec7448171218723140c425"
+      },
+      {
+        "path": "set-rest.test.js",
+        "sha256": "43e50d38e8ecdad775ac6ee7dc4ddb223a9b20f3db0c1696b0459cb27098bf42"
+      },
+      {
+        "path": "split-cuts.test.js",
+        "sha256": "f5cfb3d80ee1b91e95074d45fac84cd87cb80ce2da9ec95b13872ae10aee521f"
+      },
+      {
+        "path": "start-pose.test.js",
+        "sha256": "eeca963a7b6e907833f06d919294e1bdb212a3f1b51283ea6cb469bbe7aa5b4d"
+      },
+      {
+        "path": "step-joins.test.js",
+        "sha256": "e285d3bd3467820162a1ec3495b42f89c7aa54b1cc877127f0ebcb659a1f6fc4"
+      },
+      {
+        "path": "strain-guard.test.js",
+        "sha256": "7af4809e89cd598a11a4b62b6fef5cc007f0b610b608b99d93c1fa8f88105316"
+      },
+      {
+        "path": "swept-bvh.test.js",
+        "sha256": "2ad82e2c3fe58f368d23f967f1d8420f625d996beada356b2191be92132e7299"
+      },
+      {
+        "path": "swept-contact.test.js",
+        "sha256": "3b7e0439d522ea72e04c127434801d62d04e94cbcc853fe4a47afe180e271a76"
+      },
+      {
+        "path": "untie-joins.test.js",
+        "sha256": "11142d5a18b99670ebc305555df6a0a30be8068b0aa9b61e1a6f4700405ee0a8"
+      },
+      {
+        "path": "wasm-bounds.test.js",
+        "sha256": "0ec745678fa465edf997fd22bb0ea98326cac277c0f78dd250ae705e791c22b7"
+      },
+      {
+        "path": "wind-tissue.test.js",
+        "sha256": "8f43b871c815868e38e23e8adcdf697b927aeb170df336913ad9a9b3327b47d4"
+      }
+    ],
+    "fixtureBuilderSHA256": "49d2b22ec3809245c5f4cd2f90a270ebe69842eb2088c21a6713453ed9206df5",
+    "dirty": false
+  },
+  "geometries": 72,
+  "loadCases": 216,
+  "mode": "strict-repeat",
+  "allRequiredFieldsEqual": true,
+  "comparison": "whole reports except recordedAt; includes all source/runtime/inputs/reference/solutions/reactions/metrics/solver traces and failed or unmeasured gates",
+  "acceptance": "reproducibility or controlled numerical comparison only; failed gates remain failures; no physical-stock/time/device acceptance"
+}

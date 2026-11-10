@@ -1,7 +1,262 @@
 # Honest status
 
-> Last Updated: 2026-10-22
+> Last Updated: 2026-11-10 (paper-physics research checkpoint; other dated evidence retained)
 > Boundary: public. The single truth for what works today. Keep it true when you change behaviour.
+
+Local source addition, 2026-11-09: the studio supports an explicit fixed-camera
+`interaction=paper` mode for one native leaf and an independent 2–32-leaf native
+codex, with physical forward/backward dragging, return/cancel and arrow keys. The
+codex reader uses one flexible leaf and fixed page blocks, promotes released
+leaves to flat blocks and caps the solver cache at two worlds. This is an explicit
+reading model, not a validated unconstrained stack equilibrium. It requires the real engine; the rigid
+preview and unsupported documents show an unavailable message. This is not an
+independent multi-page reader for the archive companion. The
+[paper physics campaign](research/paper-physics-campaign.md) is active, including
+a pinned-contact regression, an experimental uncapped membrane option and a
+reproducible all-flexible/active-leaf benchmark. Research, physical calibration,
+general contact robustness and the 8 ms physics target remain open. See
+[scope and verification](pilots/paper-reading-mode.md). Not deployed by this
+change; a dispatched build and running-version acceptance are still required.
+
+The [first committed campaign results](research/evidence/paper-2026-11-09/README.md)
+show five active-leaf configurations completing eight turns below 1% stretch,
+but none passing the independent partial thickness audit or 8 ms physics gate.
+The contact correction regresses the baseline S=16 reader's thickness result;
+conventional CI passing does not close that failure. The separate axial reference
+shows strong timestep sensitivity and no cure from line search alone. These are
+research/interaction results, not a stable physical catalogue release.
+
+The subsequent [continuous-contact experiment](research/continuous-contact-experiment.md)
+adds opt-in swept vertex–triangle and edge–edge motion bounds and an explicit
+pre-promotion turn-progress gate. Analytical tunneling tests pass. The guarded
+native booklet candidates stall or fail strain before the first complete turn
+and exceed the physics timing target. The default reader does not enable this
+guard. Contact forces coupled to elasticity and prescribed-motion handling remain
+open; this is not a C-IPC solver or a collision-free release claim.
+
+The next opt-in [coupled normal-force candidate](research/coupled-contact-experiment.md)
+adds barriers to the implicit objective, per-iteration feasibility/energy checks
+and force-residual diagnostics. Analytical contact equilibrium, native ground
+support and deterministic replay are tested. A separate previous-pose seed option
+recovers the synthetic S8 axial-bar response even with contact disabled; the
+initialization effect is not a contact-force validation result. Both options
+remain disabled by default. Initial table touching, moving prescribed geometry,
+coupled friction/strain limits and booklet/device performance remain open.
+The [source-pinned comparison](research/evidence/paper-2026-11-09/README.md#coupled-normal-forces-and-previous-pose-initialization)
+records three coupled active-leaf configurations completing the first physical
+turn above 99.98% fore-edge progress, below 0.02% peak tensile strain and with
+zero deficit in the partial resting-block thickness audit. Moving-substep force
+convergence still fails in each, and all-flexible initial table contact is
+rejected. The initialization-only reader completes eight turns but retains a
+0.09846 mm thickness deficit on 0.1 mm paper. Local timing was under verified
+CPU contention; it cannot close the performance gate.
+
+The [local-solve ablation](research/evidence/paper-2026-11-09/README.md#consistent-curvature-and-direct-local-contact)
+separates compression curvature from linear solving. Matching the declared
+compressed force law reduces first-turn missed force-tolerance substeps from
+436/672 to 13/672 with either PCG or direct solving. Direct solving alone leaves
+436 misses. A direct S8/I32 candidate completes all eight turns above 99.98%
+sampled endpoint progress, with 0.0192% peak tensile strain, 0.4955% compression
+and zero partial resting-block deficit. Its unsmoothed variant misses tolerance on 680/5264
+executed substeps and takes about 23 seconds at active-frame p95 in a diagnostic
+run. It is unsuitable for interactive reading. Spatial candidate scanning dominates
+the recorded CPU samples. A reconstructed late-turn objective and a parallel-edge
+element expose contact smoothness/convergence work still owed. All new options
+remain opt-in; this is not a stable catalogue physics release.
+
+An opt-in [ordered refit BVH](research/bvh-broadphase-experiment.md) preserves
+every recorded non-timing result and the complete eight-turn sampled-position
+hash. Local diagnostic active-frame p95 drops from 23.3 to 7.9 seconds; first-turn
+paired p95 drops from 1010 to 304–319 ms. Force convergence and the 8 ms target
+still fail. A large-sweep component stress case is slower, so no universal speedup
+or optimal backend is claimed. Default candidate traversal remains unchanged.
+The [parallel-contact review](research/parallel-contact-review.md) checks smoothing
+algebra against an independent compiled reference and adds a native-filter
+counterexample: an eligible parallel EE pair can lack its VT energy backup.
+An opt-in surface-guarded native experiment now smooths only pairs with sufficient
+retained VT backups; uncovered pairs keep their original barriers. Whole-energy
+derivatives, native operator agreement and replay are tested. This partial
+smoothing does not close general coverage, force/material or device gates.
+
+Exact-pose BVH candidate reuse now preserves both capped/uncapped eight-turn
+trajectories, all recorded force/contact diagnostics and exact repeated reports.
+The [retained measurements](research/evidence/paper-2026-11-10/README.md#exact-pose-candidate-reuse)
+show uncapped active p95 of 345–365 ms and candidate work still about 56% of the
+sampled process. The 8 ms target, material calibration, general contact coverage
+and backend/device acceptance remain open; this is an opt-in optimization.
+
+A rank-preserving active-edge refinement subsequently reduces native query/node
+work while keeping both full trajectories, all recorded diagnostics and exact
+repeated reports. Its [source-pinned evidence](research/evidence/paper-2026-11-10/README.md#rank-preserving-active-edge-traversal)
+measures capped active p95 at 202–205 ms and uncapped at 300–320 ms. The slower
+naive traversal and large-sweep regression are retained. Candidate work still
+accounts for about 53% of sampled process self time; optimality, 8 ms reading and
+measured-paper accuracy remain unproven.
+
+An experimental [binary64 Wasm refit/query backend](research/wasm-contact-experiment.md)
+is available behind `contactBroadPhase: 'wasm'`, with no runtime package dependency
+or hidden JS fallback. Fresh JS/Wasm comparisons and Wasm repeats preserve both
+complete eight-turn sampled trajectories and every recorded non-time physics
+field, with **0/5168** capped and **0/5200** uncapped force misses. Clean `4b48ec1`
+local active-step p95 is 186–189 ms capped and 278–283 ms uncapped, about 9–11%
+below fresh JS controls and still above 8 ms. Dense-output component performance
+regresses; initialization, memory and substantial JS candidate/filter work remain.
+The later runtime change at `c05de1a` only adds a little-endian host guard;
+supported-host first-turn parity passes, while full timings retain the older pin.
+The current studio/API policy demonstrably blocks Wasm compilation. A separately
+permitted research browser page passes capped/uncapped first-turn byte and
+diagnostic parity. It changes no production policy or default reader and closes
+neither material calibration nor real-device/input-to-paint acceptance.
+
+The independent [membrane constitutive audit](research/membrane-constitutive-audit.md)
+now completes and exactly repeats 108 prescribed-pose cases against a separately
+implemented CST reference at clean `f145538`. **All 36 uncapped/symmetric cases
+fail the 1% tensor gates**, with 14.08–29.78% relative engineering-Voigt matrix
+error and up to 60.89% worst signed energy error. Oracle and extraction checks
+pass; the scalar springs constrain C12=C66 where the declared orthotropic target
+requires independent coupling and shear. Forty-two of 48 mesh/topology comparisons
+also fail. Cap and .05-compression controls are separate; the combined shipping
+cap+.05 policy is not another measured case here. The explicit synthetic nu12
+convention does not resolve the stock/bending Poisson ambiguity. This zero-step
+energy/reaction audit is not a solved patch or physical-stock validation. A
+coupled per-triangle law is a separate model experiment; backend parity and
+force convergence cannot close this scalar-spring constitutive gap. That baseline
+audit changed no runtime laws, stocks or reader defaults.
+
+An opt-in [orthotropic triangle membrane](research/orthotropic-membrane-experiment.md)
+now implements a coupled Green-strain energy with an explicit per-sheet nu12
+convention, exact energy/gradient and a named Gauss–Newton search matrix. It
+requires uncapped symmetric membrane behavior, line search, no legacy projections
+and no plasticity. Multiple initially planar sheets and small coupled-contact
+cases are tested; folds, joins, hand drives and new-model booklet reading remain
+outside acceptance. Element/oracle/operator and targeted World replay checks pass.
+At clean `25ca58d`, all 36 new-law cases pass the unchanged 1% tensor/energy
+and mesh/topology gates, with exact repeat of every non-recording field for
+the new cases and 108 retained old controls. Worst finest-amplitude signed
+linear-reference energy
+error is .003078%; independent finite-Green agreement covers 1944 poses and
+36 scaled finite-rotation cases. Old spring-law booklet controls separately
+preserve all recorded physics over both eight-turn protocols, with 0/5168 capped
+and 0/5200 uncapped force misses. This is not new-law booklet or shipping UI
+acceptance. Stocks and reader defaults remain unchanged; broader static FE coverage,
+time accuracy, locking/bending, joins/drives, measured stock, 8 ms and device
+gates remain open. The synthetic pass is not a stable catalogue release.
+
+The [solved non-affine membrane stage](research/nonaffine-membrane-bvp.md) now has
+[clean source 9bb captures and exact repeats](research/evidence/plane-stress-2026-11-10/README.md).
+Stable base8 converges on 162/162 loads versus 100/162 with raw total potentials,
+while two refinement checks still fail. The unchanged base16 window retains 20
+local-convergence failures despite valid oracle/measurement/global balance.
+A separately labeled fourfold16 window converges on 216/216 and passes its
+bounded static same-mesh/eta/refinement gates under unchanged materials and
+threshold formulas. All failures remain retained. At that source stable search is bench-only;
+baseline World timestep Armijo is unchanged. Fixed-pose 80/100-digit checks leave a retained
+base failure above tolerance and prove no impossibility of another equilibrium.
+Physical stock, World time accuracy, new-law booklet, devices and 8 ms remain open.
+
+A subsequent [opt-in World membrane/inertia increment search](research/membrane-increment-search.md)
+now implements actual rounded trials and separate precision-limited/no-op decisions
+under an enforced all-free planar domain. Independent high-precision tests retain
+near-rest computed acceptances that are real potential increases. This arithmetic
+is not certified descent; endpoint force and time accuracy still require their
+unchanged independent gates. It is not enabled in the booklet reader.
+At clean `6cd67d0`, all 24 candidate trajectories still contain force failures:
+6973/7110 failed steps versus 6975/7110 baseline, gaining 58 old failures while
+losing 56 old passes. All 31867 realized-zero Newton events are visibly rejected
+as precision limited. Strict trajectory repeat and transparent-observer parity
+pass. Independent 80/100-digit checks expose one real potential-increase among
+69 retained sampled acceptances; this count does not cover all 17903 accepted
+updates. A separate 32-probe full-proof equality gate fails on seven one-ULP
+diagnostic sums, with every objective/error/Armijo field agreeing. Complete
+[lossless captures and preserved failures](research/evidence/membrane-increment-2026-11-10/README.md)
+remain research evidence; force/time/booklet/device acceptance stays open.
+
+The next [two-word evaluation candidate](research/membrane-double-double.md)
+now carries tangent/strain/gradient and endpoint low words under a bounded
+arithmetic domain, with unchanged stored coefficients and native inertia.
+The retained witness's projected slope error meets its predeclared numerical
+target and its old energy-increasing proposal backtracks. This bounded
+evaluation result does not establish trajectory force/time convergence.
+The separate diagnostic-sum oracle repair changes no objective/Armijo result;
+all original failed proofs remain retained.
+At clean `e96c592`, the same 24 trajectories retain 6956/7110 force failures
+versus 6973/7110 binary64: 49 steps gain and 32 regress; none is solved
+throughout. Strict repeat, observer parity and 108 historical controls pass.
+Independent paired evaluation improves stored-polynomial gradient errors on
+all 85 retained poses, with unchanged native inertia. Among 59 sampled accepted
+trajectory events, stored-polynomial real Armijo failures are zero, while two
+UV/material increases occur at the same physical state. Native-rest DD probes
+also retain that model-meaning difference. This does not certify all accepted
+updates, physical rest, a resolved time limit or booklet/device performance.
+The [complete preserved evidence](research/evidence/membrane-double-double-2026-11-10/README.md)
+keeps the earlier failures and the separate diagnostic-only repair.
+
+The [actual-reference membrane study](research/membrane-uv-reference.md) now
+records exact stored-rest zero and improved ideal-UV component accuracy on all
+85 frozen poses, with retained energy/projected-work regressions. Actual force
+failures worsen from 6956 to 6968 of 7110 steps (16 gains, 28 losses); none of
+24 trajectories is solved throughout. Strict repeat, observer parity and 108
+historical controls pass. Among only 64 retained accepted endpoints, independent
+real Armijo failures are zero; this does not certify all 13354 accepted updates.
+The [complete evidence](research/evidence/membrane-reference-2026-11-10/README.md)
+preserves failures, the comparison-path recovery and a documented prototype-source
+gap. Force/time, material, fixed-booklet/device and 8 ms acceptance remain open.
+The next bounded hypothesis, [authoritative displacement state](research/membrane-state-precision.md),
+now has an opt-in implementation with separate latent/public residual gates,
+exact initial-state conversion and boundary replay/refusal checks. Its first
+frozen-witness experiment [now passes the latent gate while the original public
+gate remains failed](research/membrane-state-results.md). The exact control passes
+both; the accepted-update-with-unchanged-whole-public-pose gate remains false.
+Fresh captures retain all 32 events and new independent proofs. Missing original
+temporary records, exact recovered pre-fix source and new failure reproductions
+are distinguished explicitly in the recovery ledger.
+The [complete 24-trajectory state matrix](research/membrane-state-modal-results.md)
+now retains 2369/7110 native authoritative failures, all at Newton budget1;
+budgets4/16 pass throughout all16 corresponding trajectories. Public failures
+worsen from6968 to7076 (16 gains,124 losses); no trajectory passes that gate
+throughout. Exact repeat, observer parity and full historical numerical replay
+pass. All459 retained endpoint proofs match at80/100 digits and meet the
+sampled arithmetic limits;58 sampled accepted Newton updates satisfy independent
+real Armijo. Continuous-state discrepancy still reaches22.3%, and whole force/time,
+physical stock, new-model booklet/device and8 ms acceptance remain open.
+The [lossless archive](research/evidence/membrane-state-modal-2026-11-10/README.md)
+retains every judged step and explicit private-artifact exclusions. Reader and
+historical defaults remain unchanged; research and implementation are not exhausted.
+
+The [actual-World transient audit](research/membrane-transient-audit.md) now has
+[clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).
+All 24 smoke trajectories contain strict force failures: 6975/7110 substeps miss
+the unchanged threshold, despite small discrete-BE state errors. Independent
+80/100-digit checks leave two retained endpoints above tolerance. Native mass,
+baseline World timestep search, stocks and reader defaults are unchanged. The lossless
+archive reconstructs every original captured byte, including failures. Time,
+amplitude/solve isolation, broader geometry, material, new-law booklet, devices
+and 8 ms acceptance remain open. All 16 source CI checks pass, including 214 engine
+and 123 web tests; that does not close the physics failures.
+
+The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
+now complete and repeat all eight turns with **0/5168** substeps missing the
+declared 0.001 µN force tolerance, identical sampled-position hashes and all
+recorded non-timing fields. Local active-frame p95 is 287–289 ms, still above
+8 ms. This successful force gate uses the capped material model; the uncapped
+S8/I8 first turn still misses tolerance on 103/672 substeps. Raising its budget
+to I32 now completes and repeats the full **uncapped** sequence with **0/5200**
+force misses. Local active p95 varies from 504 to 784 ms. An uncapped axial
+loading/unloading check agrees within 0.92% of its synthetic bar reference and
+isolates zero contact forces. Physical stock calibration, faster reading,
+general coverage and actual-device acceptance remain open. No stable catalogue
+physics release is implied.
+
+Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
+tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched
+over 1%, 10 exploded), zero rejected/world/step errors, and 76 studio preview
+fallbacks. Sixteen runs were truncated by their budget. This is a sampled,
+time-compressed simulation matrix, not a full-corpus or fabrication proof; its
+successful workflow conclusion is informational, not a stability threshold.
+The two sampled `page-turn` variants, `a4-card` and `washi`, were stable and
+interactive: mean steps about 18.9 and 22.5 ms, peak stretch about 0.25% and
+0.45%, with no preview fallback. This supports their tested scope, not every
+stock, parameter combination or bound-book reading mechanism.
 
 **Lifecycle: incubating, first deploy live.** One container serves the three ruled hosts: the
 landing at `https://pliego.madfam.io/`, the studio at `https://pliego-app.madfam.io/studio/` and the

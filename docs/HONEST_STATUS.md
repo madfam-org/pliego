@@ -42,6 +42,14 @@ recovers the synthetic S8 axial-bar response even with contact disabled; the
 initialization effect is not a contact-force validation result. Both options
 remain disabled by default. Initial table touching, moving prescribed geometry,
 coupled friction/strain limits and booklet/device performance remain open.
+The [source-pinned comparison](research/evidence/paper-2026-11-09/README.md#coupled-normal-forces-and-previous-pose-initialization)
+records three coupled active-leaf configurations completing the first physical
+turn above 99.98% fore-edge progress, below 0.02% peak tensile strain and with
+zero deficit in the partial resting-block thickness audit. Moving-substep force
+convergence still fails in each, and all-flexible initial table contact is
+rejected. The initialization-only reader completes eight turns but retains a
+0.09846 mm thickness deficit on 0.1 mm paper. Local timing was under verified
+CPU contention; it cannot close the performance gate.
 
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched

@@ -146,3 +146,11 @@ in both all-flexible and active-leaf models. Equal nominal nonlinear-update
 counts do not imply equal work or equal accuracy. A successful first turn cannot
 close the eight-turn, corpus or actual-device gates. The benchmark preserves
 unsupported and initially infeasible cases instead of removing their denominator.
+
+The [source-pinned results](evidence/paper-2026-11-09/README.md#coupled-normal-forces-and-previous-pose-initialization)
+now retain the axial ablation, first-turn comparison/repeat and eight-turn
+previous-pose failures. Coupled active leaves turn with low strain and zero
+partial thickness deficit, but most moving substeps exhaust their force budget.
+All-flexible initial table contact is rejected. The inexpensive seed change
+does not fix eight-turn thickness failures. Timing was collected under verified
+host contention and cannot close the performance gate.

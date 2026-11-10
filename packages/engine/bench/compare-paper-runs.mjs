@@ -6,7 +6,11 @@ import assert from 'node:assert/strict';
 const paths = process.argv.slice(2);
 assert.equal(paths.length, 3, 'usage: compare-paper-runs.mjs baseline.json candidate.json repeat.json');
 const [base, a, b] = paths.map(path => JSON.parse(readFileSync(path)));
-const numerical = r => Object.fromEntries(Object.entries(r).filter(([key]) => !['buildMs', 'stepMeanMs', 'stepP95Ms', 'stepMaxMs'].includes(key)));
+const numerical = r => {
+  const fields = Object.fromEntries(Object.entries(r).filter(([key]) => !['buildMs', 'stepMeanMs', 'stepP95Ms', 'stepMaxMs', 'activeStepP95Ms'].includes(key)));
+  const { physics8ms, ...gates } = fields.gates; fields.gates = gates;
+  return fields;
+};
 const key = r => JSON.stringify([r.model, r.options]);
 for (const report of [base, a, b]) {
   assert.equal(report.schema, 'pliego-paper-campaign/0.2');
@@ -32,7 +36,7 @@ const result = {
   schema: 'pliego-contact-comparison/0.2', source: a.source.git, baseline: base.source.engine,
   comparisonScriptSHA256: createHash('sha256').update(readFileSync(new URL(import.meta.url))).digest('hex'),
   defaultCasesNumericallyIdentical: defaults.length, candidateCasesReplayedIdentically: b.results.length,
-  comparison: 'all result fields except build/step timings; includes final pose hash, progress, strain, failure and CCD diagnostics',
+  comparison: 'all recorded result fields except build/step timings and their physics8ms gate; includes final pose hash, progress, strain, failure and solver/CCD diagnostics; not a full per-frame trajectory hash',
   guardedCases: guarded.length, guardedCompletedTurns: guarded.reduce((sum, r) => sum + r.turns, 0),
   guardedZeroProgressFailures: guarded.filter(r => r.error?.includes('zero progress')).length,
   guardedStrainFailures: guarded.filter(r => r.error === 'Numerical gate failed' && r.maxStrain > 0.01).length,

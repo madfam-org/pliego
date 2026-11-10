@@ -1,8 +1,8 @@
 # First paper campaign measurements
 
-This page retains the first solver measurements and the subsequent
-[continuous-contact comparison](#continuous-contact-and-physical-turn-progress).
-Their source checkpoints are separate; later evidence does not replace earlier failures.
+This page retains successive solver, [CCD](#continuous-contact-and-physical-turn-progress)
+and [coupled-contact](#coupled-normal-forces-and-previous-pose-initialization)
+measurements. Each section pins its own source; later evidence preserves earlier failures.
 
 Source: [`78ca50699ebfd7700e5fc97ba8cceb499b0ed01c`](https://github.com/madfam-org/pliego/commit/78ca50699ebfd7700e5fc97ba8cceb499b0ed01c),
 clean during these runs. Recorded 2026-11-10 UTC (2026-11-09 local).
@@ -17,9 +17,10 @@ Machine-readable reports:
 
 The booklet reports fingerprint the entire engine source tree, reader modules,
 harness and native fixture. The axial report fingerprints its fixture, harness and
-listed solver files; the commit pins the remaining dependencies. No preview fallback,
-compressed simulation time or dropped physics frames is used. A successful CLI exit
-means the experiment finished recording results, including failures.
+listed solver files; the commit pins the remaining dependencies. The harness adds
+no preview fallback or wall-time-based simulation compression. Deterministic
+engine sleep remains part of `World.step`; later reports count it explicitly.
+A successful CLI exit means recording completed, including failures.
 
 ## Native four-leaf booklet
 
@@ -86,8 +87,9 @@ The prediction moves the loaded boundary about 16 mm in the first S=8 substep;
 reducing the timestep improves the local approximation. S=64/I=1 and S=8/I=8 have
 the same nominal GN-update count, but different solver/projection costs. Their
 comparison favors smaller steps in this fixture; it does not establish a general
-solver optimum. Only S=128 and S=256 pass the 5% bar gate; S=128 also meets the
-strip's 8 ms target. This does not transfer to the booklet workload or phones.
+solver optimum. Only S=128 and S=256 pass the 5% bar gate. The recorded S=128
+whole-run p95 is below 8 ms, but includes sleeping frames; it does not establish
+an active-step budget. This does not transfer to the booklet workload or phones.
 
 ## Verification and remaining work
 
@@ -221,3 +223,118 @@ measured stock calibration or solver/backend optimality. The
 [reference workflow](../../continuous-contact-experiment.md#independent-distance-reference)
 uses an isolated Python environment; the native engine retains zero runtime
 dependencies.
+
+## Coupled normal forces and previous-pose initialization
+
+Source [`f11cc78495976aa3a6baa3dd42945adaf3198780`](https://github.com/madfam-org/pliego/commit/f11cc78495976aa3a6baa3dd42945adaf3198780),
+clean at every recorded run. Same fixture/runtime family as above; no UI or
+reader-source change. The [model and limits](../../coupled-contact-experiment.md)
+describe the gap barrier, radial GN operator, per-iteration CCD/descent and
+residual-aware sleep. It is not a C-IPC solver.
+
+Reports:
+
+- [Eleven axial cases](axial-f11cc78.json), including the previous-pose ablation
+  and three coupled nonlinear budgets.
+- [Twelve-case first-turn booklet matrix](barrier-f11cc78-first-turn.json).
+- [Previous engine `6cc50a2` with the same new harness](barrier-baseline-6cc50a2.json):
+  four supported references, eight explicitly unsupported new-option cases.
+- [Repeated active-leaf S8/I8 coupled case](barrier-f11cc78-repeat.json).
+- [Recorded-field comparison](barrier-comparison.json): all four supported
+  legacy booklet cases agree numerically with the prior engine; the one repeated
+  coupled case agrees in every recorded non-timing result. This is not a
+  full per-frame trajectory hash. Active-contact World snapshot replay is also
+  covered by the unit suite.
+- [Eight-turn previous-pose reader](previous-pose-f11cc78-eight-turn.json).
+
+The seven original axial cases also retain exactly the prior report's fixture
+hash, extensions, drift, peak tensile strain, final speed and final position
+hash. The new options stay off by default.
+
+### Axial response and the initialization ablation
+
+The strip is unchanged: 10 mN, 100×10×0.1 mm, uncapped synthetic copy-80 MD,
+3 simulation seconds. The analytical bar reference is 0.000181818 mm. All four
+new cases reach about **0.000180146 mm**, a **0.920%** bar discrepancy, with zero
+half-time-to-end drift. Contact is disabled for the previous-pose case; coupled
+cases require zero barrier stencils and zero barrier energy in this workload.
+Thus the improvement is not evidence that contact forces fixed the axial model.
+
+| New S8 case | Maximum nonlinear budget per substep | Unconverged executed substeps | Final force residual | Active / asleep frames |
+|---|---:|---:|---:|---:|
+| Previous-pose legacy, line search | 1 | not measured | not measured | 32 / 148 |
+| Coupled normal solver | 8 | 20 | 0.0009515 µN | 32 / 148 |
+| Coupled normal solver | 32 | 5 | 0.0009733 µN | 30 / 150 |
+| Coupled normal solver | 256 | 0 | 0.0009808 µN | 30 / 150 |
+
+Budget 256 is a ceiling: actual work is reported, and many settled substeps use
+zero nonlinear updates. Lower budgets reach the same final axial response but
+do not pass the all-substeps force-convergence gate. The native unit tests also
+check unloading back to rest. Neither bar agreement nor force convergence is
+physical-stock calibration or proof of transient accuracy.
+
+The revised harness explicitly counts deterministic engine sleep and reports
+active-step p95 and maximum latency. For example, the 256-budget case has active
+p95 1.17 ms but maximum step 40.53 ms in this run. Do not use the mostly sleeping
+whole-run distribution to claim hard real-time behavior.
+
+### First physical page turn
+
+Each row below runs all 84 requested frames of the first forward turn. Endpoint
+progress uses the physical release pose before flat promotion. Required minimum
+progress is 90% at every sampled fore-edge vertex.
+
+| Active-leaf model | Peak tensile strain | Minimum endpoint progress | Partial thickness deficit | Unconverged / executed substeps |
+|---|---:|---:|---:|---:|
+| Default S8/I1 | 0.28751% | 99.97263% | <1e-15 mm | not measured |
+| Legacy S8/I8, line search | 0.35592% | 99.97953% | <1e-15 mm | not measured |
+| Previous-pose S8/I1, line search | 0.40428% | 99.97298% | <1e-15 mm | not measured |
+| Coupled capped S8/I8 | 0.01914% | 99.98334% | 0 mm | 436 / 672 |
+| Coupled capped S1/I64 | 0.01911% | 99.98334% | 0 mm | 51 / 84 |
+| Coupled uncapped S8/I8 | 0.00548% | 99.98254% | 0 mm | 443 / 672 |
+
+All three coupled active-leaf cases pass this first-turn progress, 0.1% tensile
+strain and partial thickness audit. This is a concrete improvement over the
+motion-filter-only candidate's stalled physical pages. **None** passes force
+convergence at every moving substep: maximum end residuals are approximately
+877, 26.6 and 25,450 µN respectively, despite their final static residuals below
+0.001 µN. Their numerical work is large: about 169k, 134k and 194k PCG iterations
+over the first turn. More nominal updates are not automatically more efficient.
+
+All three coupled **all-flexible** cases fail before the first completed frame
+because free vertices initially touch the strict ground barrier. These failures
+remain in the 12-case denominator. An initially feasible reduced reader does not
+close the general initial-contact problem. No coupled eight-turn or full-corpus
+claim follows from this first-turn experiment.
+
+### Eight-turn initialization-only reader
+
+The active reader completes 8/8 requested turns, with minimum sampled endpoint
+progress about 99.8931%, peak strain 0.5709% and maximum thickness deficit
+**0.098462 mm**. The all-flexible model completes only 1/8 turns and then fails
+strain at 1.1733%. The previous-pose option fixes the axial counterexample but
+does not solve stack contact or produce a stable physics release.
+
+### Timing context and reproduction
+
+The [live runtime sample](coupled-runtime-context.json) confirms substantial
+scheduler contention during this campaign: the research process received about
+52% of one logical CPU at that observation. Wall-time distributions are retained
+but cannot establish a reliable speedup or close the 8 ms target. First-turn
+coupled active-step p95 was about 2.0–2.8 seconds locally; these are exploratory
+figures on a contended host, not an isolated equal-error benchmark. Fixed-step
+numerical inputs and outcomes do not depend on those wall times.
+
+Reproduce the selected recorded comparison:
+
+```sh
+node packages/engine/bench/compare-paper-runs.mjs docs/research/evidence/paper-2026-11-09/barrier-baseline-6cc50a2.json docs/research/evidence/paper-2026-11-09/barrier-f11cc78-first-turn.json docs/research/evidence/paper-2026-11-09/barrier-f11cc78-repeat.json
+node packages/engine/bench/paper-campaign.mjs --barrier-matrix --turns 1 --case 4 --model active-leaf --out /tmp/repeated-coupled-turn.json
+node packages/engine/bench/paper-campaign.mjs --barrier-matrix --turns 8 --case 3 --out /tmp/previous-pose-eight-turn.json
+```
+
+The source checkpoint's CI passes 127 engine and 123 web tests, types/package
+checks, and all 16 repository checks. The physics campaign remains active:
+initial-contact handling, coupled friction/strain constraints, full sequence and
+corpus coverage, independent material measurements and efficient solver/backend
+comparisons are still required. No merge, deployment or GA claim is made.

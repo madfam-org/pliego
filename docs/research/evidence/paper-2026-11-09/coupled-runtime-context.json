@@ -1,0 +1,13 @@
+{
+  "schema": "pliego-benchmark-context/0.1",
+  "source": "f11cc78495976aa3a6baa3dd42945adaf3198780",
+  "observedAt": "2026-11-10 05:12:23 UTC",
+  "benchmarkCpuPercent": 51.7,
+  "loadAverage": [
+    14.73095703125,
+    33.62841796875,
+    26.896484375
+  ],
+  "logicalCpus": 12,
+  "scope": "One live midpoint sample; substantial scheduler contention. Numerical fixed-step results remain usable; no reliable speedup or final 8ms gate conclusion."
+}

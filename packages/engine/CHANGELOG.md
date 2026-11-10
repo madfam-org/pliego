@@ -5,6 +5,14 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Optional `edgeEdgeMollification: 'surface-guarded'` differentiates the complete
+parallel-edge weighted energy and retains uncovered pairs' original barriers.
+Admission checks current VT topology/weld/fixed filters and sufficient caliper;
+strict geometric feasibility/CCD remain independent of energy weights. Tests
+cover native replay, independent multiplier gradients, PSD operator agreement
+and the refused coverage counterexample. This is not global smooth contact,
+C-IPC equivalence or material/performance acceptance.
+
 Optional `contactBroadPhase: 'bvh'` adds a complete refit hierarchy for swept
 candidates with reference pair ordering, native replay and brute-force coverage
 checks. Reference traversal remains the default. Booklet measurements include

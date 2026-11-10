@@ -4,14 +4,24 @@ Run with a Python environment containing ipctk==1.4.0 and NumPy; stdout is
 machine-readable evidence. No runtime/package dependency is added to Pliego.
 """
 
+import argparse
 import hashlib
 import json
+import subprocess
 import sys
 from importlib.metadata import version
 from pathlib import Path
 
 import ipctk
 import numpy as np
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument(
+    "--native",
+    action="store_true",
+    help="also compare the production JavaScript multiplier and gradient",
+)
+args = parser.parse_args()
 
 
 def own(p, eps):
@@ -138,6 +148,39 @@ r = {
     "prototypeSHA256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     "acceptance": "component algebra only; no native physics, coverage, friction or material validation",
 }
+if args.native:
+    adapter = Path(__file__).with_name("mollifier-native.mjs")
+    module = adapter.parent.parent / "src" / "collision" / "edge-mollifier.js"
+    payload = [{"points": p.tolist(), "threshold": eps} for p, eps in cases]
+    native = json.loads(
+        subprocess.run(
+            ["node", str(adapter)],
+            input=json.dumps(payload),
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout
+    )
+    assert len(native) == len(cases)
+    errors = [0.0, 0.0]
+    for (p, eps), actual in zip(cases, native, strict=True):
+        expected = [
+            ipctk.edge_edge_mollifier(*p, eps),
+            ipctk.edge_edge_mollifier_gradient(*p, eps),
+        ]
+        for i, value in enumerate([actual["multiplier"], actual["gradient"]]):
+            error = float(np.linalg.norm(np.asarray(value) - expected[i])) / max(
+                1.0, float(np.linalg.norm(expected[i]))
+            )
+            errors[i] = max(errors[i], error)
+            assert error < 3e-10, (i, error)
+    r["native"] = {
+        "cases": len(cases),
+        "moduleSHA256": hashlib.sha256(module.read_bytes()).hexdigest(),
+        "adapterSHA256": hashlib.sha256(adapter.read_bytes()).hexdigest(),
+        "maximumNormalizedReferenceErrors": {"value": errors[0], "gradient": errors[1]},
+        "scope": "production multiplier/gradient only; approximate contact curvature, coverage and World convergence tested separately",
+    }
 print(json.dumps(r, indent=2))
 
 print(

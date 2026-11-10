@@ -1,7 +1,7 @@
 # Parallel-edge contact smoothing review
 
-Status: primary derivation reviewed and independent algebra prototype checked;
-not implemented in the native contact energy. This does not close C-IPC,
+Status: primary derivation reviewed, independent algebra checked, and an opt-in
+native surface-guarded energy experiment implemented. This does not close C-IPC,
 contact coverage, force convergence or material-validation gates.
 
 ## Reviewed sources
@@ -26,9 +26,9 @@ include nearly parallel distance/CCD and shape-derivative fixes. The local compi
 reference below is **1.4.0**, not a runtime test of 1.6.0. Rest-shape derivatives
 are distinct from the Cartesian derivative needed for fixed native rest positions.
 
-## Native derivation to test
+## Native derivation and approximation
 
-The following is our candidate algebra, not an implementation or guarantee from
+The following is our candidate algebra, not a guarantee from
 those sources. Let B=b(g), s=u×v, c=s·s, and J=∂s/∂x for the twelve endpoint
 coordinates. With fixed rest geometry, ε is constant. Then
 
@@ -40,7 +40,7 @@ coordinates. With fixed rest geometry, ε is constant. Then
 Ignoring the derivative of m is not the gradient of this energy. Multiplying
 only the existing normal force or deleting parallel pairs is insufficient.
 
-One explicitly approximate PSD operator worth comparing is
+The native experiment uses the explicitly approximate PSD operator
 
     H~=m B'' (∇g)(∇g)ᵀ + 2 B m' JᵀJ
 
@@ -72,6 +72,56 @@ alone would erase the only retained barrier in this fixture. Geometric CCD must
 remain active, and topology/coverage must be resolved with smoothing rather than
 assuming the published surface argument transfers to our stricter exclusions.
 
+## Implemented admission and native experiment
+
+`edgeEdgeMollification: 'surface-guarded'` requires `barrierContact` and is off by
+default. For an EE pair, every one of its four endpoints must have an eligible
+triangle containing the opposite edge. Admission uses the **same** adjacency,
+shared-group, stationary-fixed and weld exclusions as the existing VT traversal.
+It also requires that backup VT's hard thickness offset be **at least** the EE
+offset. The state is rechecked each call; no cached weld/fixed eligibility survives
+a change. Incident triangle lists depend only on immutable mesh topology.
+
+This is a sufficient condition: two parallel finite segments attain their minimum
+distance at an endpoint of at least one segment to the other segment. A triangle
+containing that other edge has point–triangle distance no greater. Requiring all
+four possible endpoint backups avoids making admission depend on a pose's current
+closest feature. With VT offset ≥ EE offset, the retained backup gap is no larger
+at that parallel limit. The existing expanded bounds retain a VT pair within its
+activation distance. Tests audit the actual returned candidates on 96 translated
+and rotated parallel surface pairs. This does not validate every native exclusion
+or certify arbitrary floating-point CCD; that scope remains distinct.
+
+The condition is deliberately stronger than necessary. A missing triangle,
+excluded backup or insufficient caliper leaves the EE barrier **unmollified**,
+and diagnostics count it when it lies in the smoothing interval. The central-fan
+counterexample retains exactly its previous energy and force. This is partial
+smoothing, not a claim that every contact configuration is C1. Triangle collapse,
+degenerate features, and geometry-dependent join derivatives are still open.
+
+The native gradient differentiates both multiplier and gap. The approximate
+operator adds one radial and up to three angular rank-one rows; geometric contact
+pair counts are separate from curvature row counts. Native assembled/matrix-free
+agreement and snapshot replay are tested. At exact covered parallelism the
+two-edge energy cusp is removed, with finite limiting tilt curvature. The same
+fixture without surface backups is refused; no standalone-rod coverage is claimed.
+Strict positive-gap checks occur **before** energy multiplication and geometric
+CCD uses all eligible pairs, even when the multiplier is zero.
+
+The extended independent adapter checks the production JavaScript multiplier and
+Cartesian gradient against the compiled reference. The whole contact gradient is
+also checked against energy finite differences, with force/torque balance and PSD
+symmetry tests. Neither check substitutes for fresh trajectory force/material and
+device gates. New energy means new physics: index-only trajectory equality is not
+an acceptance criterion for the smoothed variant.
+
+```sh
+python packages/engine/bench/mollifier-prototype.py --native > /tmp/native-mollifier.json
+node --test packages/engine/test/mollified-contact.test.js
+node packages/engine/bench/contact-objective-variants.mjs --out /tmp/objective-variants.json
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 4 --model active-leaf --turns 1 --broad-phase bvh --edge-mollification surface-guarded --checkpoint /tmp/mollified-progress.json --out /tmp/mollified-turn.json
+```
+
 ## Prototype evidence and native gates
 
 The standalone Python prototype derives Cartesian cross-product derivatives
@@ -89,7 +139,7 @@ python packages/engine/bench/mollifier-prototype.py > /tmp/mollifier-independent
 node --test packages/engine/test/parallel-contact-limit.test.js
 ```
 
-Before enabling any native option:
+Validation requirements for the experimental option and any future release:
 
 1. Differentiate the whole mB energy, with fixed immutable rest-edge thresholds;
    include exact parallel, clamp, near-feature, duplicate-ID and degenerate cases.

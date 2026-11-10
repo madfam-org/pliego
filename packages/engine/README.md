@@ -91,6 +91,16 @@ is `'reference'`. This option applies to `continuousContact`/`barrierContact`;
 legacy projection contact is unchanged. See the
 [coverage and benchmark contract](../../docs/research/bvh-broadphase-experiment.md).
 
+`edgeEdgeMollification: 'surface-guarded'` (default `'off'`) requires
+`barrierContact`. It applies the IPC parallel-edge multiplier to EE energy only
+where all four endpoints have an eligible opposite-edge VT backup with at least
+the EE thickness offset. Uncovered pairs keep the original energy/force. The
+whole multiplier derivative is included; curvature is an approximate PSD radial
+plus angular operator. `stats().coupledContact.edgeEdgeMollification` distinguishes
+geometric pairs, curvature rows and repeated gradient-evaluation totals. Strict
+geometric feasibility/CCD remain active, including zero multipliers. See the
+[derivation, sufficient coverage condition and limits](../../docs/research/parallel-contact-review.md).
+
 These options remain research candidates. Unmollified parallel EE ties are
 nonsmooth; geometry-dependent join Jacobians, friction, general contact weighting,
 material calibration and interactive timing remain open. The coupled eight-turn

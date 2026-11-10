@@ -25,6 +25,8 @@ const bytes = readFileSync(path), json = JSON.parse(bytes);
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const broadPhase = arg('--broad-phase');
 if (broadPhase && !['reference', 'bvh'].includes(broadPhase)) throw new RangeError('--broad-phase must be reference or bvh');
+const edgeMollification = arg('--edge-mollification');
+if (edgeMollification && !['off', 'surface-guarded'].includes(edgeMollification)) throw new RangeError('--edge-mollification must be off or surface-guarded');
 const checkpointPath = arg('--checkpoint') ? resolve(arg('--checkpoint')) : null;
 if (checkpointPath) {
   const inside = relative(root, checkpointPath);
@@ -80,7 +82,8 @@ function overlapWithRestingBlocks(w, active, positions) {
 function run(model, settings) {
   const trajectory = createHash('sha256');
   const times = [], activeTimes = [], cpuTimes = [], activeCpuTimes = [];
-  const options = { ...engineOptions(json), ...settings, ...(broadPhase ? { contactBroadPhase: broadPhase } : {}), mechanismRate: 240, plasticity: false };
+  const options = { ...engineOptions(json), ...settings, ...(broadPhase ? { contactBroadPhase: broadPhase } : {}),
+    ...(edgeMollification ? { edgeEdgeMollification: edgeMollification } : {}), mechanismRate: 240, plasticity: false };
   const r = { model, options, frames: 0, turns: 0, maxStrain: 0, maxCompression: 0,
     minY: Infinity, finite: true, error: null, completed: false, modelCachePeak: 0,
     vertexRestBlockOverlapMm: model === 'active-leaf' ? 0 : null, supported: true, endpoints: [],
@@ -88,6 +91,7 @@ function run(model, settings) {
   r.framesEndingWithZeroProgress = 0;
   r.activeFrames = 0; r.asleepFrames = 0;
   r.coupledContact = { steps: 0, unconverged: 0, iterations: 0, cgTotal: 0, directSolves: 0, nonlocalFallbacks: 0, linearFailures: 0, backtracks: 0, rejected: 0, maximumEndResidual: 0, maximumInitialAdjustment: 0 };
+  if (edgeMollification === 'surface-guarded') r.mollification = { evaluations: 0, activeEdges: 0, smoothedEdges: 0, uncoveredEdges: 0, parallelEdges: 0, curvatureRows: 0 };
   let w;
   const start = performance.now();
   try {
@@ -95,6 +99,9 @@ function run(model, settings) {
     r.buildMs = performance.now() - start;
     if (broadPhase === 'bvh' && (w.world || w).opts.contactBroadPhase !== 'bvh') {
       r.supported = false; throw new Error('Engine does not support the BVH broad phase');
+    }
+    if (edgeMollification === 'surface-guarded' && !(w.world || w).coupledContact?.potential.surface) {
+      r.supported = false; throw new Error('Engine does not support surface-guarded mollification');
     }
     if (settings.physicalMembrane && (w.world || w).opts.physicalMembrane !== true) {
       r.supported = false; throw new Error('Engine does not support the physicalMembrane experiment');
@@ -143,6 +150,7 @@ function run(model, settings) {
           for (const key of ['steps', 'unconverged', 'iterations', 'cgTotal', 'directSolves', 'nonlocalFallbacks', 'linearFailures', 'backtracks', 'rejected']) r.coupledContact[key] += (c[key] || 0) - (prev[key] || 0);
           r.coupledContact.maximumEndResidual = Math.max(r.coupledContact.maximumEndResidual, c.maximumEndResidual);
           r.coupledContact.maximumInitialAdjustment = Math.max(r.coupledContact.maximumInitialAdjustment, c.initialAdjustment);
+          if (r.mollification) for (const key of Object.keys(r.mollification)) r.mollification[key] += (c.edgeEdgeMollification?.totals[key] || 0) - (prev.edgeEdgeMollification?.totals[key] || 0);
           seenCoupled.set(native, c);
         }
         r.finite &&= stats.finite;
@@ -240,14 +248,15 @@ const report = {
   runtime: { node: process.version, arch: arch(), platform: platform(), cpu: cpus()[0]?.model },
   protocol: { seed: 1, frameSeconds: 1 / 60, framesPerTurn: 84, requestedTurns, stopOnZeroProgress,
     selectedCase: caseIndex ?? 'all', models,
-    broadPhase: broadPhase ?? 'reference', checkpointEnabled: !!checkpointPath,
+    broadPhase: broadPhase ?? 'reference', edgeMollification: edgeMollification ?? 'off', checkpointEnabled: !!checkpointPath,
     fallback: false, repetitions: 1, matrix: process.argv.includes('--local-matrix') ? 'local-contact' : process.argv.includes('--barrier-matrix') ? 'coupled-contact' : process.argv.includes('--contact-matrix') ? 'continuous-contact' : 'solver',
     trajectory: 'SHA256 of turn/frame headers and every sampled pre-promotion Float64 pose, native-endian; includes frames completed before failure',
     endpointGate: 'every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation',
     continuousContact: 'experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; stopOnZeroProgress declares whether zero progress stops the case',
     timingScope: 'World.step only; includes first-frame/JIT cost; active-step p95 excludes frames asleep at start; exploratory local measurement',
     cpuTimingScope: 'process.cpuUsage delta around World.step, all process threads including JIT/GC; not retired instructions or pure solver self time',
-    coupledContact: 'normal finite-gap barrier, h=0.05 mm k=1e5 g/s², force tolerance=0.001 µN, CG cap=128, per-iteration CCD/energy search; no projection constraints or friction' },
+    coupledContact: 'normal finite-gap barrier, h=0.05 mm k=1e5 g/s², force tolerance=0.001 µN, CG cap=128, per-iteration CCD/energy search; no projection constraints or friction',
+    mollification: 'optional surface-guarded IPC multiplier on EE energy; whole-energy gradient, approximate PSD curvature, strict geometric feasibility/CCD retained; uncovered pairs remain unmollified; totals count gradient evaluations, not unique contacts or physics steps' },
   reduction: 'Active-leaf reader promotes releases to flat resting blocks after 1.4 simulation seconds; pre-promotion release poses are audited. Plasticity disabled for reading. Not an unconstrained stack equilibrium.',
   materialAudit: Object.fromEntries(Object.entries(json['pliego:stocks']).map(([id, stock]) => {
     const d = stock.derived, cap = engine.constants.MEMBRANE_CAP_LENGTH * d.areal_density * engine.constants.GRAVITY;

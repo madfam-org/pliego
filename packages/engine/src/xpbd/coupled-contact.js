@@ -27,6 +27,8 @@ export class CoupledContact {
     this.multiply = (p, out) => this.potential.hessianTimes(p, out);
     this.steps = 0; this.unconverged = 0; this.iterations = 0; this.cgTotal = 0; this.linearFailures = 0; this.backtracks = 0; this.rejected = 0;
     this.initialAdjustment = 0;
+    this.edgeMollification = { mode: 'surface-guarded', activeEdges: 0, smoothedEdges: 0, uncoveredEdges: 0, parallelEdges: 0, curvatureRows: 0 };
+    this.edgeTotals = { evaluations: 0, activeEdges: 0, smoothedEdges: 0, uncoveredEdges: 0, parallelEdges: 0, curvatureRows: 0 };
     this.maximumEndResidual = 0;
     this.last = { converged: false, residual: Infinity, iterations: 0, status: 'unstarted', energyBefore: 0, energyAfter: 0, incrementalEnergy: 0, barrierEnergy: 0, contacts: 0, grounded: 0, minimumGap: 0, alpha: 1 };
   }
@@ -61,7 +63,14 @@ export class CoupledContact {
       g[i] += w.mass[v] * idt2 * (x[i] - w.xt[i]); residual = Math.max(residual, Math.abs(g[i]));
     }
     if (!Number.isFinite(residual)) throw new Error('Coupled contact: non-finite force residual');
-    this.last.residual = residual; this.last.contacts = this.potential.count; this.last.grounded = this.potential.groundCount;
+    this.last.residual = residual; this.last.contacts = this.potential.pairCount; this.last.grounded = this.potential.groundCount;
+    if (this.potential.surface) {
+      this.edgeMollification = { mode: 'surface-guarded', activeEdges: this.potential.activeEdges,
+        smoothedEdges: this.potential.smoothedEdges, uncoveredEdges: this.potential.uncoveredEdges,
+        parallelEdges: this.potential.parallelEdges, curvatureRows: this.potential.count };
+      this.edgeTotals.evaluations++;
+      for (const key of ['activeEdges', 'smoothedEdges', 'uncoveredEdges', 'parallelEdges', 'curvatureRows']) this.edgeTotals[key] += this.edgeMollification[key];
+    }
     this.last.minimumGap = this.potential.minimumGap;
     this.last.barrierEnergy = contactEnergy; this.last.incrementalEnergy = implicitEnergy(w, x) + contactEnergy;
     return this.last.incrementalEnergy;
@@ -138,6 +147,12 @@ export class CoupledContact {
     w._contacts = this.last.contacts; w._grounded = this.last.grounded; w._edgeContacts = 0;
   }
 
-  snapshot() { return { configuration: { distance: this.potential.distance, stiffness: this.potential.stiffness, iterations: this.maxIterations, cgIterations: this.cgIterations, tolerance: this.tolerance, linearSolver: this.linearSolver }, initialAdjustment: this.initialAdjustment, maximumEndResidual: this.maximumEndResidual, steps: this.steps, unconverged: this.unconverged, iterations: this.iterations, cgTotal: this.cgTotal, directSolves: this.directSolves, nonlocalFallbacks: this.nonlocalFallbacks, linearFailures: this.linearFailures, backtracks: this.backtracks, rejected: this.rejected, last: { ...this.last }, guard: this.guard.snapshot() }; }
-  restore(s) { for (const key of ['initialAdjustment', 'maximumEndResidual', 'steps', 'unconverged', 'iterations', 'cgTotal', 'directSolves', 'nonlocalFallbacks', 'linearFailures', 'backtracks', 'rejected']) this[key] = s[key]; this.last = { ...s.last }; this.guard.restore(s.guard); }
+  snapshot() { return { configuration: { distance: this.potential.distance, stiffness: this.potential.stiffness, iterations: this.maxIterations, cgIterations: this.cgIterations, tolerance: this.tolerance, linearSolver: this.linearSolver,
+    ...(this.potential.surface ? { edgeEdgeMollification: 'surface-guarded' } : {}) },
+    ...(this.potential.surface ? { edgeEdgeMollification: { ...this.edgeMollification, totals: { ...this.edgeTotals } } } : {}),
+    initialAdjustment: this.initialAdjustment, maximumEndResidual: this.maximumEndResidual, steps: this.steps, unconverged: this.unconverged, iterations: this.iterations, cgTotal: this.cgTotal, directSolves: this.directSolves, nonlocalFallbacks: this.nonlocalFallbacks, linearFailures: this.linearFailures, backtracks: this.backtracks, rejected: this.rejected, last: { ...this.last }, guard: this.guard.snapshot() }; }
+  restore(s) { for (const key of ['initialAdjustment', 'maximumEndResidual', 'steps', 'unconverged', 'iterations', 'cgTotal', 'directSolves', 'nonlocalFallbacks', 'linearFailures', 'backtracks', 'rejected']) this[key] = s[key]; this.last = { ...s.last }; this.guard.restore(s.guard);
+    this.edgeMollification = s.edgeEdgeMollification ? { ...s.edgeEdgeMollification } : { mode: 'surface-guarded', activeEdges: 0, smoothedEdges: 0, uncoveredEdges: 0, parallelEdges: 0, curvatureRows: 0 };
+    this.edgeTotals = s.edgeEdgeMollification?.totals ? { ...s.edgeEdgeMollification.totals } : { evaluations: 0, activeEdges: 0, smoothedEdges: 0, uncoveredEdges: 0, parallelEdges: 0, curvatureRows: 0 };
+  }
 }

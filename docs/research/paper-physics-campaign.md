@@ -112,6 +112,11 @@ selection nor lower-level backends are exhausted. The
 technical-supplement sections, independent multiplier derivatives and a concrete
 native topology-filter counterexample. EE smoothing alone cannot inherit the
 published VT-backup coverage argument under our current exclusions.
+The resulting opt-in `edgeEdgeMollification: 'surface-guarded'` experiment admits
+only sufficient retained VT backups, differentiates the entire weighted energy
+and leaves uncovered barriers intact. Native operator/replay and independent
+multiplier-gradient checks are separate from its pending booklet force/material
+comparison; no global smoothness or C-IPC equivalence is implied.
 
 ## Separate gates
 

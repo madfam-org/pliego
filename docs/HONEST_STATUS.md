@@ -73,7 +73,10 @@ or optimal backend is claimed. Default candidate traversal remains unchanged.
 The [parallel-contact review](research/parallel-contact-review.md) checks smoothing
 algebra against an independent compiled reference and adds a native-filter
 counterexample: an eligible parallel EE pair can lack its VT energy backup.
-Mollification is not yet integrated; coverage must be resolved alongside it.
+An opt-in surface-guarded native experiment now smooths only pairs with sufficient
+retained VT backups; uncovered pairs keep their original barriers. Whole-energy
+derivatives, native operator agreement and replay are tested. This partial
+smoothing does not close general coverage, force/material or device gates.
 
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched

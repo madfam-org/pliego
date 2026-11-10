@@ -243,6 +243,18 @@ equilibrium. The fourfold pass closes only the specified synthetic static window
 physical stock, controlled time accuracy, bending/locking, contact/strain limits,
 crease/join/hand support, new-law booklet, devices and 8 ms remain open.
 
+The implemented [actual-World transient stage](membrane-transient-audit.md)
+compares real public substeps with independent continuous and exact discrete-BE
+modal truths, including spectral propagation of the actual rounded initial field.
+It uses native lumped mass and the unchanged strict endpoint-force rule, with
+separate live validation and transparent nominal/rounded GN-direction observation.
+A complete 24-trajectory smoke development run has valid measurement/reference/
+observer coverage and small discrete-state errors, but every trajectory contains
+force misses. Accepted source/repeats are pending. The larger amplitude/time/solve
+window, all-step isolation, first-order trend and full geometry matrix remain
+required; whole time acceptance is explicitly false. No physical modulus/mass,
+World timestep search, stock or reader defaults change in this stage.
+
 ## Separate gates
 
 **Interaction:** booklet frame/camera fixed throughout dragging; only exposed leaves

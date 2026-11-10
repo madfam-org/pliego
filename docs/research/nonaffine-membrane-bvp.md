@@ -14,6 +14,15 @@ constitutive audit supplies every displacement; this experiment solves for the
 unknown field and constrained reactions. It remains a synthetic **2D static BVP**,
 not a timestep, buckling, physical-paper, new-law booklet or device certificate.
 
+The next [actual-World transient experiment](membrane-transient-audit.md) now
+implements a free-sheet modal oracle, real public substeps, live force validation
+and transparent solve observation. Its development-only smoke trajectories all
+retain strict force failures; clean-source captures/repeats and time acceptance
+remain pending. It reuses the independently checked linear CST assembler but
+introduces native mass and two distinct continuous/discrete time truths. The
+static fourfold pass above does not transfer to that transient problem, and
+World's raw timestep Armijo remains unchanged.
+
 ## Boundary problem and immutable inputs
 
 The reference domain is a 40×40 mm rectangle. Both displacement components are

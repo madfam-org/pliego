@@ -524,7 +524,7 @@ function wireStatic() {
   const sel = $('lang-select');
   sel.value = i18n.lang;
   sel.addEventListener('change', () => i18n.setLang(sel.value));
-  document.addEventListener(LANG_EVENT, () => { sel.value = i18n.lang; renderAll(); setPlaying(state.playing); });
+  document.addEventListener(LANG_EVENT, () => { sel.value = i18n.lang; renderAll(); setPlaying(state.playing); invalidate(); });
   $('view-3d').addEventListener('click', () => setView('3d'));
   $('view-2d').addEventListener('click', () => setView('2d'));
   $('btn-play').addEventListener('click', () => setPlaying(!state.playing));

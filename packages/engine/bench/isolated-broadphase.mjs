@@ -1,14 +1,29 @@
 // Fresh-process, fixed-warmup JS/Wasm component comparison. No physics gate.
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { resolve, join, relative, sep, isAbsolute } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve, join, relative, sep, isAbsolute, basename } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
+
+/** A fresh private directory. Explicit paths retain their exact location but
+ * must not exist; create parent directories before invoking the CLI. */
+export function createIsolatedOutputDirectory(directory) {
+  if (directory === undefined || directory === null) return mkdtempSync(join(tmpdir(), 'pliego-isolated-broadphase-'));
+  const out = resolve(directory); mkdirSync(out, { mode: 0o700 }); return out;
+}
+/** Exclusive creation atomically refuses existing files and symbolic links. */
+export function writeIsolatedOutput(directory, name, bytes) {
+  assert.equal(name, basename(name), 'plain output filename required');
+  const path = join(directory, name); writeFileSync(path, bytes, { flag: 'wx', mode: 0o600 }); return path;
+}
+
+export function runIsolatedBroadphase() {
 const arg = n => { const i = process.argv.indexOf(n); return i < 0 ? null : process.argv[i + 1]; };
 const root = resolve(arg('--root') ?? fileURLToPath(new URL('../../../', import.meta.url)));
-const out = resolve(arg('--out-dir') ?? '/tmp/pliego-isolated-broadphase');
-const rel = relative(root, out); assert.ok(rel && (rel.startsWith('..' + sep) || isAbsolute(rel)), '--out-dir must be outside source');
+const requestedOut = arg('--out-dir'), outputLocation = resolve(requestedOut ?? tmpdir());
+const rel = relative(root, outputLocation); assert.ok(rel && (rel.startsWith('..' + sep) || isAbsolute(rel)), '--out-dir must be outside source');
 const rounds = Number(arg('--rounds') ?? 3), warmup = Number(arg('--warmup') ?? 32), repetitions = Number(arg('--repetitions') ?? 9);
 assert.ok(Number.isInteger(rounds) && rounds >= 1 && rounds <= 9);
 assert.ok(Number.isInteger(warmup) && warmup >= 0 && warmup <= 1024);
@@ -17,14 +32,16 @@ const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8'
 const hash = x => createHash('sha256').update(x).digest('hex');
 const source = { git: git('rev-parse', 'HEAD'), dirty: !!git('status', '--porcelain'), orchestratorSHA256: hash(readFileSync(new URL(import.meta.url))) };
 assert.equal(source.dirty, false, 'clean source required');
-mkdirSync(out, { recursive: true });
+const out = createIsolatedOutputDirectory(requestedOut);
+console.error('isolated-components: output directory=' + out);
 const runs = [];
 for (let round = 1; round <= rounds; round++) for (const backend of round % 2 ? ['bvh', 'wasm'] : ['wasm', 'bvh']) {
-  const name = `component-r${round}-${backend}.json`, path = join(out, name); assert.equal(existsSync(path), false, 'do not overwrite retained experiments');
+  const name = `component-r${round}-${backend}.json`;
   const child = spawnSync(process.execPath, [join(root, 'packages/engine/bench/broadphase-pairs.mjs'), '--only', backend,
-    '--warmup', String(warmup), '--repetitions', String(repetitions), '--out', path], { cwd: root, encoding: 'utf8', maxBuffer: 16e6 });
-  writeFileSync(path + '.log', (child.stdout ?? '') + (child.stderr ?? ''));
+    '--warmup', String(warmup), '--repetitions', String(repetitions)], { cwd: root, encoding: 'utf8', maxBuffer: 16e6 });
+  writeIsolatedOutput(out, name + '.log', (child.status === 0 ? '' : child.stdout ?? '') + (child.stderr ?? ''));
   assert.equal(child.status, 0, `child failed: round=${round} backend=${backend}`);
+  const path = writeIsolatedOutput(out, name, child.stdout ?? '');
   const bytes = readFileSync(path), report = JSON.parse(bytes);
   assert.equal(report.schema, 'pliego-broadphase-pairs/0.6'); assert.equal(report.source.dirty, false); assert.equal(report.source.git, source.git);
   assert.equal(report.protocol.selectedBackend, backend); assert.equal(report.protocol.warmupBuilds, warmup); assert.equal(report.protocol.repetitions, repetitions);
@@ -54,5 +71,7 @@ const result = { schema: 'pliego-isolated-broadphase/0.1', recordedAt: new Date(
   protocol: { rounds, warmupBuilds: warmup, repetitions, order: 'fresh process for every backend/round; BVH/Wasm then reverse on alternating rounds; one backend callsite per process; reference oracle after timing',
     scope: 'candidate full-build wall/process CPU includes input validation/copies/refit/query/boundary calls; cold constructor/first-build and first compilation retained in raw reports; ordinary background activity remains; no World.step, material, browser/device or universal speedup acceptance' },
   exactOrderedPairAndWorkParity: true, runs: runs.map(({ round, backend, name, SHA256 }) => ({ round, backend, name, SHA256 })), results };
-writeFileSync(join(out, 'isolated-comparison.json'), JSON.stringify(result, null, 2) + '\n');
+writeIsolatedOutput(out, 'isolated-comparison.json', JSON.stringify(result, null, 2) + '\n');
 console.error('isolated-components: all five input/pair/work fingerprints exact across fresh processes; initialization and timed arrays retained');
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) runIsolatedBroadphase();

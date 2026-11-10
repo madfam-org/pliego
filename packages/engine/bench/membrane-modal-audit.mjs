@@ -1,6 +1,6 @@
 // Actual World transient diagnosis, independent free-CST modal reference.
 import assert from 'node:assert/strict';
-import {readFileSync,writeFileSync,readdirSync,existsSync,mkdtempSync,openSync,closeSync,rmSync} from 'node:fs';
+import {readFileSync,writeFileSync,readdirSync,mkdtempSync,openSync,closeSync,rmSync} from 'node:fs';
 import {resolve,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
@@ -241,9 +241,9 @@ export function runModalAudit({allowDirty=false,stage='diagnostic',matrix='smoke
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2),oi=args.indexOf('--out'),si=args.indexOf('--stage'),mi=args.indexOf('--matrix'),path=oi>=0?resolve(args[oi+1]||''):null;
   assert.ok(args.every((a,i)=>['--out','--stage','--matrix','--allow-dirty','--no-solve-observer'].includes(a)||(oi>=0&&i===oi+1)||(si>=0&&i===si+1)||(mi>=0&&i===mi+1)),'unknown argument');
-  if(path){assert.ok(!path.startsWith(root),'write observations outside checkout');assert.ok(!existsSync(path),'refuse existing output');}
+  if(path)assert.ok(!path.startsWith(root),'write observations outside checkout');
   const report=runModalAudit({allowDirty:args.includes('--allow-dirty'),stage:si>=0?args[si+1]:'diagnostic',matrix:mi>=0?args[mi+1]:'smoke',instrument:!args.includes('--no-solve-observer')});
   const bytes=JSON.stringify(report,(_key,v)=>typeof v==='number'&&!Number.isFinite(v)?{nonFinite:Number.isNaN(v)?'NaN':v>0?'Infinity':'-Infinity'}:v)+'\n';
-  if(path)writeFileSync(path,bytes);else process.stdout.write(bytes);
+  if(path)writeFileSync(path,bytes,{flag:'wx',mode:0o600});else process.stdout.write(bytes);
   console.error('membrane-modal-audit: '+report.results.length+' geometries '+report.results.reduce((n,r)=>n+r.trajectories.length,0)+' trajectories '+report.classification);
 }

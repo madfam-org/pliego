@@ -82,8 +82,11 @@ No field, force status, diagnostic, trace or failed gate is dropped.
 
 The repeat delta changes only recordedAt. The uninstrumented delta changes only
 the already-reviewed timestamp/observer selector, records and completeness metadata.
-The tool restricts the replacement paths, verifies stored/base/target hashes and
-lengths, and refuses existing output files. These are complete report reconstructions,
+The tool restricts replacement paths and verifies stored/base/target hashes and
+lengths. Every mode requires an output directory that does not already exist;
+it creates that directory with mode `0700`, without recursive parent creation.
+Every file is created atomically with exclusive `wx`, so existing files and
+symlinks are refused. These are complete report reconstructions,
 not abbreviated reports or a new simulation. The official comparison proofs above
 were rerun against the reconstructed original byte streams.
 
@@ -203,7 +206,8 @@ are a separate experiment. No force subtraction or hidden state correction occur
 ## Reproduction and open acceptance
 
 To inspect the archived complete reports, reconstruct into a fresh outside-repository
-directory first. From the repository root:
+directory first. The directory itself must not exist: if using `mktemp -d`,
+pass a new child path inside it. From the repository root:
 
 ```sh
 node docs/research/evidence/membrane-transient-2026-11-10/archive-modal-evidence.mjs --reconstruct docs/research/evidence/membrane-transient-2026-11-10 /tmp/modal-reconstructed

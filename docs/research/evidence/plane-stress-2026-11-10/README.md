@@ -65,10 +65,14 @@ the [precision helper self-test](precision-self-test.json) passes six.
 The [manifest](archive-manifest.json) retains original and archived SHA256/byte
 counts for all eight full reports. The [normalization tool](compact-plane-stress-evidence.mjs)
 uses Node JSON.parse/stringify without indentation, asserts deep equality of
-every value and preserves array/key order. No case, trace or failed gate is
+every value and preserves array/key order. It requires a nonexistent output
+directory, creates it privately with mode `0700` and no recursive parent creation,
+and creates every file atomically with exclusive `wx`. Existing directories,
+files and symlinks are refused; pass a new child path if using `mktemp -d`.
+No case, trace or failed gate is
 removed. Original 202122726 bytes become 81603062 archived bytes; this is a
 representation change, not a reduced dataset. Manifest SHA256 is
-`354b5b581f20cfd920c05877cf15480f3d6c65197932110628d133d802d62dd0`.
+`e716f0f984dd12157536ffe9fe517cfe68b32d0d1fafd6fccf1a56124198bb3d`.
 
 | Published report | Archived SHA256 |
 |---|---|

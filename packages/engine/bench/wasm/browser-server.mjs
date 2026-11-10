@@ -1,14 +1,27 @@
 // Local-only CSP/parity research harness. No production header or app change.
-// node browser-server.mjs [--port 8246] [--out /tmp/pliego-wasm-browser]
+// node browser-server.mjs [--port 8246] [--out /chosen/report-prefix]
+// Default reports live in a fresh private temporary directory printed at start.
 import { createServer } from 'node:http';
-import { createReadStream, readFileSync, writeFileSync, realpathSync, statSync } from 'node:fs';
+import { createReadStream, readFileSync, writeFileSync, realpathSync, statSync, mkdtempSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
-import { resolve, relative, sep, isAbsolute } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { resolve, relative, sep, isAbsolute, join } from 'node:path';
+import { tmpdir } from 'node:os';
+
+export function browserOutputPrefix(prefix) {
+  return prefix === undefined || prefix === null ? join(mkdtempSync(join(tmpdir(), 'pliego-wasm-browser-')), 'probe') : resolve(prefix);
+}
+export function writeBrowserReport(prefix, mode, report) {
+  if (!['strict', 'allow'].includes(mode)) throw new Error('unknown browser report mode');
+  const path = prefix + '-' + mode + '.json';
+  writeFileSync(path, JSON.stringify(report, null, 2) + '\n', { flag: 'wx', mode: 0o600 }); return path;
+}
+
+export function runBrowserServer() {
 const arg = n => { const i = process.argv.indexOf(n); return i < 0 ? null : process.argv[i + 1]; };
 const root = fileURLToPath(new URL('../../../../', import.meta.url)), local = fileURLToPath(new URL('./', import.meta.url));
-const port = Number(arg('--port') ?? 8246), out = resolve(arg('--out') ?? '/tmp/pliego-wasm-browser');
+const port = Number(arg('--port') ?? 8246), out = browserOutputPrefix(arg('--out'));
 const inside = relative(root, out); if (!inside || (!inside.startsWith('..' + sep) && !isAbsolute(inside))) throw new Error('--out must be outside the source checkout');
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 const hash = x => createHash('sha256').update(x).digest('hex');
@@ -32,7 +45,7 @@ const server = createServer(async (req, res) => {
       const report = JSON.parse(body);
       if (!['strict', 'allow'].includes(report.mode) || report.source.git !== source.git || digest() !== source.aggregateSHA256 || git('rev-parse', 'HEAD') !== source.git || git('status', '--porcelain') !== status) throw new Error('source changed');
       report.sourceIntegrityVerified = true; report.policy = policy(report.mode === 'allow');
-      writeFileSync(out + '-' + report.mode + '.json', JSON.stringify(report, null, 2) + '\n');
+      writeBrowserReport(out, report.mode, report);
       console.log(`browser-probe: ${report.mode} ${report.status}; source unchanged; results=${report.results.length}`);
       res.writeHead(200, { 'Content-Type': 'application/json' }).end('{"ok":true}');
     } catch { res.writeHead(409).end('source/report mismatch'); }
@@ -53,4 +66,7 @@ const server = createServer(async (req, res) => {
   res.setHeader('Content-Type', file.endsWith('.html') ? 'text/html; charset=utf-8' : file.endsWith('.fold') ? 'application/json' : 'text/javascript');
   if (req.method === 'HEAD') res.end(); else createReadStream(file).pipe(res);
 });
-server.listen(port, '127.0.0.1', () => console.log(`wasm-browser-server: loopback port=${port}; source=${source.git}; dirty=${source.dirty}; routes=/strict/ /allow/; source files=${files.length}`));
+server.listen(port, '127.0.0.1', () => console.log(`wasm-browser-server: loopback port=${port}; source=${source.git}; dirty=${source.dirty}; routes=/strict/ /allow/; source files=${files.length}; report prefix=${out}`));
+return server;
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) runBrowserServer();

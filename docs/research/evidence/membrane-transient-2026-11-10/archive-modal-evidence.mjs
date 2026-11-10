@@ -1,14 +1,14 @@
 // Lossless storage of source-identical captures; complete original bytes reconstruct.
 import assert from 'node:assert/strict';
-import{readFileSync,writeFileSync,mkdirSync,existsSync}from'node:fs';
+import{readFileSync,writeFileSync,mkdirSync}from'node:fs';
 import{join,basename,resolve}from'node:path';
 import{createHash}from'node:crypto';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const [mode,inputDirectory,outputDirectory]=process.argv.slice(2);
 assert.ok(['--build','--reconstruct'].includes(mode)&&inputDirectory&&outputDirectory,'--build|--reconstruct inputDirectory outputDirectory');
 assert.notEqual(resolve(inputDirectory),resolve(outputDirectory),'separate output directory required');
-mkdirSync(outputDirectory,{recursive:true});
-const write=(name,bytes)=>{assert.equal(name,basename(name));const path=join(outputDirectory,name);assert.ok(!existsSync(path),'refuse existing output '+name);writeFileSync(path,bytes);};
+mkdirSync(outputDirectory,{mode:0o700}); // Exclusive fresh directory; never reuse a file, directory or symlink.
+const write=(name,bytes)=>{assert.equal(name,basename(name));writeFileSync(join(outputDirectory,name),bytes,{flag:'wx'});};
 function pathsFor(report,kind){
  const paths=[['recordedAt']];if(kind==='repeat')return paths;assert.equal(kind,'observer');
  paths.push(['protocol','instrument'],['protocol','perNewtonLinearDiagnostics'],['gates','perNewtonLinearDiagnostics']);

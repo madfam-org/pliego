@@ -1,6 +1,6 @@
 // Solved non-affine 2D membrane BVP; runtime law/operator vs independent linear CST.
 import assert from 'node:assert/strict';
-import {readFileSync,writeFileSync,readdirSync,mkdtempSync,openSync,closeSync,rmSync,existsSync} from 'node:fs';
+import {readFileSync,writeFileSync,readdirSync,mkdtempSync,openSync,closeSync,rmSync} from 'node:fs';
 import {resolve,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
@@ -221,8 +221,8 @@ function encode(value){return JSON.stringify(value,(_key,v)=>typeof v==='number'
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2),oi=args.indexOf('--out'),mi=args.indexOf('--max-cells'),li=args.indexOf('--line-search'),wi=args.indexOf('--load-window'),path=oi>=0?resolve(args[oi+1]||''):null;
   assert.ok(args.every((v,i)=>['--out','--max-cells','--line-search','--load-window','--allow-dirty','--smoke'].includes(v)||(oi>=0&&i===oi+1)||(mi>=0&&i===mi+1)||(li>=0&&i===li+1)||(wi>=0&&i===wi+1)),'unknown argument');
-  if(path){assert.ok(!path.startsWith(root),'write outputs outside checkout');assert.ok(!existsSync(path),'refuse existing output');}
+  if(path)assert.ok(!path.startsWith(root),'write outputs outside checkout');
   const report=runPlaneStressAudit({allowDirty:args.includes('--allow-dirty'),smoke:args.includes('--smoke'),maxCells:mi>=0?Number(args[mi+1]):8,lineSearchMode:li>=0?args[li+1]:'total-potential',loadWindow:wi>=0?args[wi+1]:'base'});
-  if(path)writeFileSync(path,encode(report));else process.stdout.write(encode(report));
+  if(path)writeFileSync(path,encode(report),{flag:'wx',mode:0o600});else process.stdout.write(encode(report));
   console.error('plane-stress-audit: geometries='+report.results.length+' loadCases='+report.results.reduce((n,r)=>n+r.loads.length,0)+' '+report.classification);
 }

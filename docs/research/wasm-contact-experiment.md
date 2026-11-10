@@ -44,6 +44,13 @@ node --test packages/engine/test/wasm-bounds.test.js packages/engine/test/swept-
 node packages/engine/bench/isolated-broadphase.mjs --out-dir /tmp/pliego-isolated
 ```
 
+The isolated runner creates a private temporary output directory by default.
+An explicit `--out-dir` must be a new directory inside an existing parent;
+existing directories, files and symlinks are refused. Reports and logs use
+exclusive creation. The browser probe also uses a private default directory;
+an explicit `--out` retains its report-prefix filenames and refuses duplicates.
+These output protections do not change benchmark kernel arithmetic or timing regions.
+
 Component schema 0.6 records separate constructor/first-build cost, including the
 first lazy module compilation, instance memory and data copies. Mixed-process
 and single-backend modes are distinct. Timed arrays and fixed warmup counts are

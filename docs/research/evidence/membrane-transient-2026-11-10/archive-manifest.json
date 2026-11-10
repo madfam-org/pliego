@@ -2,7 +2,7 @@
   "schema": "pliego-modal-archive/0.1",
   "node": "v20.19.5",
   "sourceGit": "93f6653136bc37c4feff48c86f88259000c7dde8",
-  "toolSHA256": "21969f709847b62a26d099415fb86670a4550c8fe37ce632def7ff12b757bcad",
+  "toolSHA256": "d9130074810f02cd0daf34195801a4f48439862088ca100821cd00e21d4f95cb",
   "records": [
     {
       "file": "diagnostic.json",

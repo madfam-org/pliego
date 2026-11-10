@@ -42,6 +42,9 @@ export function bestRotation(X0, X, fi) {
   N[12] = xy - yx; N[13] = zx + xz; N[14] = yz + zy; N[15] = -xx - yy + zz;
   let shift = 0;
   for (let i = 0; i < 16; i++) shift += Math.abs(N[i]);
+  // With one free point (or zero covariance) orientation is undetermined.
+  // Identity preserves an SPD preconditioner; a zero quaternion would erase it.
+  if (shift === 0) { out.fill(0); out[0] = 1; out[4] = 1; out[8] = 1; return out; }
   // power iteration on two alternating buffers (the same arithmetic as fresh arrays, no garbage)
   let q = QA, r = QB;
   q[0] = 1; q[1] = 0; q[2] = 0; q[3] = 0;
@@ -122,9 +125,11 @@ export function hessianTimes(w, x, p, out) {
  * Solve H δ = −g (free vertices) by PCG with the stale factorisation; δ is added to x.
  * @param {any} w @param {Float64Array} x @param {Float64Array} g gradient (3·nV)
  * @param {number} maxIter @param {number} rtol
+ * @param {((p:Float64Array,out:Float64Array)=>void)|null} [extraHessian] additive PSD operator
+ * @param {boolean} [stopOnStagnation] legacy elastic refactor heuristic
  * @returns {{iterations:number, converged:boolean}}
  */
-export function pcgStep(w, x, g, maxIter, rtol) {
+export function pcgStep(w, x, g, maxIter, rtol, extraHessian = null, stopOnStagnation = true) {
   const S = w.sys, ch = S.ch, fi = S.freeIdx, nV = w.mesh.nV, n3 = 3 * S.nFree;
   const W = w._pcg !== null ? w._pcg : (w._pcg = { r: new Float64Array(n3), z: new Float64Array(n3), p: new Float64Array(n3), d: new Float64Array(n3), pv: new Float64Array(3 * nV), Ap: new Float64Array(3 * nV) });
   const { r, z, p, d, pv, Ap } = W;
@@ -144,6 +149,7 @@ export function pcgStep(w, x, g, maxIter, rtol) {
     pv.fill(0);
     for (let i = 0; i < nV; i++) { const k = fi[i]; if (k < 0) continue; pv[3 * i] = p[3 * k]; pv[3 * i + 1] = p[3 * k + 1]; pv[3 * i + 2] = p[3 * k + 2]; }
     hessianTimes(w, x, pv, Ap);
+    extraHessian?.(pv, Ap);
     let pAp = 0;
     for (let i = 0; i < nV; i++) { const k = fi[i]; if (k < 0) continue; pAp += p[3 * k] * Ap[3 * i] + p[3 * k + 1] * Ap[3 * i + 1] + p[3 * k + 2] * Ap[3 * i + 2]; }
     if (!(pAp > 0)) break;
@@ -154,7 +160,7 @@ export function pcgStep(w, x, g, maxIter, rtol) {
       for (let c = 0; c < 3; c++) { d[3 * k + c] += alpha * p[3 * k + c]; r[3 * k + c] -= alpha * Ap[3 * i + c]; rn += r[3 * k + c] ** 2; }
     }
     if (Math.sqrt(rn) <= rtol * r0) { converged = true; it++; break; }
-    if (it === 3 && Math.sqrt(rn) > 0.1 * r0) { it++; break; } // stagnating: refactor instead
+    if (stopOnStagnation && it === 3 && Math.sqrt(rn) > 0.1 * r0) { it++; break; } // stagnating: refactor instead
     z.set(r); precond(ch, z, R);
     let rzn = 0;
     for (let i = 0; i < n3; i++) rzn += r[i] * z[i];

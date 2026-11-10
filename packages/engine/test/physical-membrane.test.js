@@ -4,12 +4,12 @@ import assert from 'node:assert/strict';
 import { World } from '../src/index.js';
 import { DocBuilder } from './helpers/docbuilder.js';
 
-function pull(grain, physicalMembrane, force = 10, lineSearch = false, substeps = 8) {
+function pull(grain, physicalMembrane, force = 10, lineSearch = false, substeps = 8, previousPoseStart = false) {
   const b = new DocBuilder('small elastic axial pull');
   b.rect({ id: 'strip', width: 100, height: 10, grain,
     placement: { origin: [0, 100, 0], rotation: [0, 0, 0, 1] } });
   b.joins.push({ id: 'root', type: 'pin', a: { sheet: 'strip', along: [[0, 0], [0, 10]] }, world: null });
-  const w = new World(b.build(), { meshEdge: 10, substeps, physicalMembrane, lineSearch,
+  const w = new World(b.build(), { meshEdge: 10, substeps, physicalMembrane, lineSearch, previousPoseStart,
     gravity: false, ground: false, contact: false, plasticity: false });
   const tip = [];
   for (let v = 0; v < w.mesh.nV; v++) if (Math.abs(w.mesh.uv[2 * v] - 100) < 1e-9) tip.push(v);
@@ -29,6 +29,12 @@ test('physical membrane experiment restores stock grain response in a reversible
   assert.ok(capped.extension > 10 * md.extension, 'the experiment must expose the default cap bias');
   for (const r of [capped, md, cd]) assert.ok(Math.abs(r.residual) < 0.05 * r.extension + 1e-7, 'elastic unloading returns to rest');
   console.log(`physical-membrane: 0.01 mN pull; capped=${capped.extension} mm MD=${md.extension} mm CD=${cd.extension} mm; elastic return, finite; not physical stock calibration`);
+});
+test('previous-pose seed isolates the S8 axial improvement from barrier contact forces', () => {
+  const result = pull(0, true, 10000, true, 8, true), expected = 10000 * 100 / (5.5e9 * 0.1 * 10);
+  assert.ok(Math.abs(result.extension - expected) / expected < 0.05);
+  assert.ok(Math.abs(result.residual) < 0.01 * expected);
+  console.log(`axial-start-ablation: S8 I1 previous-pose extension=${result.extension} mm, bar=${expected} mm, unloaded=${result.residual} mm; contact disabled`);
 });
 test('E13-axial: sufficiently small physical-modulus steps approach the axial-bar reference', () => {
   const a = pull(0, true, 10000, true, 128), b = pull(0, true, 10000, true, 256);

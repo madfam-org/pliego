@@ -44,6 +44,16 @@ physics includes contact coupled to elasticity, production general edge–edge c
 orthotropic constitutive convergence, material calibration, in-plane plasticity,
 time-dependent crease relaxation and laminate membrane–bending coupling.
 
+A subsequent [coupled normal-contact candidate](coupled-contact-experiment.md)
+adds feasible nonlinear iterates, normal barrier forces, matrix-free contact
+curvature and per-iteration CCD/energy search. Analytical element equilibrium,
+native force balance and combined-objective derivatives are checked. Its
+previous-pose initialization is separately exposed as a legacy-solver ablation:
+the S8 axial improvement is reproducible with contact disabled, so it must not
+be credited to barrier forces. Friction, strain/fold constraints, initial table
+touching, real prescribed motion, contact weighting and general convergence
+remain open. Both options remain off by default.
+
 The latest sampled nightly at main `77025d0` recorded 154 stable / 95 unstable
 documents of 249 (85 stretched, 10 exploded), with truncated/time-compressed runs.
 See [honest status](../HONEST_STATUS.md) for its exact scope and source. A green
@@ -63,8 +73,8 @@ review is distinguished from a full derivation/implementation review.
 | [Bouaziz et al. 2014: Projective Dynamics](https://www.projectivedynamics.org/) | Local/global optimization with specially chosen potentials and reusable global structure. Primary abstract/paper introduction reviewed. | Not implemented. Benchmark factor reuse, nonlinear residual and crease/contact compatibility against current sparse GN/PCG. Changing the energy model requires material gates. |
 | [Chen et al. 2024: Vertex Block Descent](https://graphics.cs.utah.edu/research/projects/vbd/) | Vertex-local energy descent, graph coloring, convergence to implicit Euler in the studied models. Primary project/paper introduction reviewed. | Not implemented. Candidate for CPU/GPU local 3×3 solves. Test stiffness ratios, bending stencils and pins; published elastic-body results are not a validated paper model. |
 | [Giles, Diaz, Yuksel 2025: Augmented VBD](https://graphics.cs.utah.edu/research/projects/avbd/) | Augmented Lagrangian addresses hard constraints and high stiffness ratios; authors provide demo code. Primary project reviewed. | Not implemented. Compare finite iteration drift, multiplier persistence, deterministic ordering and CPU/browser cost. Browser demo availability does not make it a drop-in native sheet engine. |
-| [Li, Kaufman, Jiang 2021: C-IPC](https://ipc-sim.github.io/C-IPC/) | Coupled strain barriers, finite thickness, friction and additive CCD. Paper §5.1–5.4 / Algorithm 1 reviewed; reference code identified. | Partial component implemented: closest-feature queries, swept VT/EE candidates and opt-in ACCD endpoint filter. Analytical tunneling tests pass, but native booklet progress/strain/timing gates fail; see [experiment](continuous-contact-experiment.md). Coupled barriers, convergence and offline reference adapter remain open. No intersection-free engine claim. |
-| [Chen et al. 2025: Offset Geometric Contact](https://graphics.cs.utah.edu/research/projects/ogc/) | Offset faces and vertex displacement bounds; parallel local contact operations. Primary project reviewed; full PDF exceeds web extraction limit. | Not implemented. Priority comparison for pinned/sliver/stack failures. Its displacement bounds must be derived and tested; an arbitrary correction clamp is not OGC. Published RTX 4090 timings do not establish browser/phone performance. |
+| [Li, Kaufman, Jiang 2021: C-IPC](https://ipc-sim.github.io/C-IPC/) | Coupled strain barriers, finite thickness, friction and additive CCD. Paper §5.1–5.4 / Algorithm 1 reviewed; reference code identified. | Closest-feature/ACCD components and an opt-in [coupled normal-force experiment](coupled-contact-experiment.md) exist. The global endpoint filter fails native turn progress. Normal-force derivative/equilibrium tests pass, but the new gap-based model is not C-IPC: strain barriers, friction, weighting, mollification and a full independent reference remain open. No intersection-free engine claim. |
+| [Chen et al. 2025: Offset Geometric Contact](https://graphics.cs.utah.edu/research/projects/ogc/) | Full PDF acquired; §3.7–3.8, Algorithms 1/3 and limitations reviewed; Algorithm 3 visually checked. Per-vertex bounds are tied to contact detection and forces. Full Gauss-map energy derivation/appendices remain to review. | Not implemented. Priority local-bound comparison after the failed global filter. A clamp without its force model is not OGC. High-velocity sparse-contact and concave-region limitations matter; published RTX 4090 timings do not establish browser/phone performance. |
 | [Wen et al. 2026: dimension-reduced developable dynamics](https://www.sciencedirect.com/science/article/pii/S0022509626000931) | Primary abstract describes reduction to rod dynamics with developable/curve-fold constraints. Abstract only reviewed. | Not implemented; establish applicability to rectangular pages, arbitrary grabs and contact before any speed claim. |
 | [Yamazaki 2026: SOCP–PBD](https://link.springer.com/article/10.1007/s00371-026-04760-z) | Primary abstract identifies anchored-cloth slack/stretch and a cone-programming correction. Abstract only reviewed. | Newly identified, not implemented. Compare feasibility, sparse solve cost and preservation of paper bending/material behavior. |
 

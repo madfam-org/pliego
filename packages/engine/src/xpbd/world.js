@@ -29,6 +29,7 @@ import { JoinGates } from './gates.js';
 import { Presentation } from './presentation.js';
 import { EnergySearch } from './energy-search.js';
 import { MotionGuard } from '../collision/motion-guard.js';
+import { CoupledContact } from './coupled-contact.js';
 import * as K from '../constants.js';
 import { hypot3 } from '../fastmath.js';
 
@@ -40,7 +41,8 @@ export class World {
    * @param {{meshEdge?:number, substeps?:number, contact?:boolean, ground?:boolean, gravity?:boolean|number, seed?:number,
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
-   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, continuousContact?:boolean, ccdIterations?:number}} [opts]
+   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, continuousContact?:boolean, ccdIterations?:number,
+   *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -54,12 +56,17 @@ export class World {
       physicalMembrane: opts.physicalMembrane ?? false,
       lineSearch: opts.lineSearch ?? false,
       continuousContact: opts.continuousContact ?? false,
+      barrierContact: opts.barrierContact ?? false,
+      previousPoseStart: opts.previousPoseStart ?? false,
     };
     if (typeof this.opts.physicalMembrane !== 'boolean') throw new TypeError('World: physicalMembrane must be boolean');
     this.membraneCap = this.opts.physicalMembrane ? Infinity : K.MEMBRANE_CAP_LENGTH;
     if (typeof this.opts.lineSearch !== 'boolean') throw new TypeError('World: lineSearch must be boolean');
     if (typeof this.opts.continuousContact !== 'boolean') throw new TypeError('World: continuousContact must be boolean');
     if (this.opts.continuousContact && !this.opts.contact) throw new Error('World: continuousContact requires contact');
+    if (typeof this.opts.barrierContact !== 'boolean') throw new TypeError('World: barrierContact must be boolean');
+    if (typeof this.opts.previousPoseStart !== 'boolean') throw new TypeError('World: previousPoseStart must be boolean');
+    if (this.opts.barrierContact && (!this.opts.contact || this.opts.continuousContact)) throw new Error('World: barrierContact requires contact and replaces continuousContact');
     if (!(this.opts.substeps >= 1 && Number.isInteger(this.opts.substeps))) throw new RangeError('World: substeps must be a positive integer');
     const mesh = buildMesh(doc, { meshEdge: opts.meshEdge });
     this.mesh = mesh;
@@ -126,6 +133,7 @@ export class World {
     this.dirty = true;
     this.contact = this.opts.contact || this.opts.ground ? new Contact(this) : null;
     this.motionGuard = this.opts.continuousContact ? new MotionGuard(this, opts.ccdIterations) : null;
+    this.coupledContact = this.opts.barrierContact ? new CoupledContact(this, opts) : null;
     // edge–face contact for interlocking slits: only documents that name an edge `interlock…`
     this.edgeContact = this.contact && this.opts.contact && opts.edgeContact !== false && EdgeContact.wanted(doc) ? new EdgeContact(this) : null;
     if (this.edgeContact && !this.edgeContact.enabled) this.warnings.push(`edge contact: ${this.edgeContact.pairs} lip × triangle pairs exceed the limit; interlocking slits are not held`);
@@ -144,6 +152,7 @@ export class World {
     this._factorState = null;
     // set later; declared here so a World keeps one hidden class and its hot methods stay optimised
     /** @type {any} */ this._pcg = null; /** @type {number[]|null} */ this._perfTerms = null; /** @type {Map<number, number>|null} */ this._perfOf = null; this._grabSheet = 0;
+    this.coupledContact?.initialise(this);
     this.presentation = new Presentation(this); // spec §5.16: render-side only
     this.renderBuffers = new RenderBuffers(this);
   }
@@ -264,6 +273,7 @@ export class World {
    */
   _sleepCheck() {
     if (!K.SLEEP_SPEED) return;
+    if (this.coupledContact && !this.coupledContact.last.converged) { this._quiet = 0; return; }
     const d = this.drivers;
     if (d.wind !== 0 || this.terms.active[d.grabTerm]) { this._quiet = 0; return; }
     for (const [id, g] of d.goal) if (d.value.get(id) !== g) { this._quiet = 0; return; }
@@ -307,13 +317,14 @@ export class World {
   _substep() {
     const dt = this.dt, nV = this.mesh.nV;
     const x = this.x, v = this.v, xs = this.xs, w = this.invMass, f = this.fext;
-    if (this.motionGuard) xs.set(x); // include prescribed/gated movement in the swept path
+    if (this.motionGuard || this.coupledContact) xs.set(x); // include prescribed/gated movement in the swept path
     if (this.drivers.apply(this, dt)) this.dirty = true;
     if (this.gates.count) { if (this.gates.update(this)) this.dirty = true; this.gates.follow(this); }
-    if (!this.motionGuard) xs.set(x);
+    if (!this.motionGuard && !this.coupledContact) xs.set(x);
     if (this.sys.nFree === 0) {
       // every vertex is driven (kinematic program / boards): follow the drivers, nothing to solve
       x.set(this.fixedTarget);
+      if (this.coupledContact) { this.xt.set(x); this.coupledContact.solve(this); }
       this.motionGuard?.apply(this, xs, x);
       for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
       this._hingeUpdate();
@@ -339,20 +350,27 @@ export class World {
       }
     }
     this.xt.set(x);
-    updateTerms(this, x);
-    this._checkStrings(x);
-    this._checkRotation();
-    this._newton();
-    this._tear(x);
-    if (this.contact && this.opts.contact) {
-      // broad phase every substep with a tight reach: relative motion over the substep (both sides,
-      // inertia + free fall + the Newton step already taken) plus a margin
-      let vmax = 0;
-      for (let i = 0; i < 3 * nV; i++) { const d = Math.abs(x[i] - xs[i]); if (d > vmax) vmax = d; }
-      this.contact.broadPhase(x, this.fixed, Math.min(50, 2 * vmax + 0.5));
+    if (this.opts.previousPoseStart && !this.coupledContact) for (let vertex = 0; vertex < nV; vertex++) if (w[vertex]) {
+      for (let k = 0; k < 3; k++) x[3 * vertex + k] = xs[3 * vertex + k];
     }
-    this._projections();
-    this.motionGuard?.apply(this, xs, x);
+    if (this.coupledContact) {
+      this.coupledContact.solve(this); this._tear(x);
+    } else {
+      updateTerms(this, x);
+      this._checkStrings(x);
+      this._checkRotation();
+      this._newton();
+      this._tear(x);
+      if (this.contact && this.opts.contact) {
+        // broad phase every substep with a tight reach: relative motion over the substep (both sides,
+        // inertia + free fall + the Newton step already taken) plus a margin
+        let vmax = 0;
+        for (let i = 0; i < 3 * nV; i++) { const d = Math.abs(x[i] - xs[i]); if (d > vmax) vmax = d; }
+        this.contact.broadPhase(x, this.fixed, Math.min(50, 2 * vmax + 0.5));
+      }
+      this._projections();
+      this.motionGuard?.apply(this, xs, x);
+    }
     for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
     this._hingeUpdate();
     this.time += dt;
@@ -368,7 +386,7 @@ export class World {
       this.energySearch?.begin(this);
       g.fill(0);
       gradient(this, x, g);
-      if (it > 0) for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
+      if (it > 0 || this.opts.previousPoseStart) for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
       if (!this.dirty && !(this._pcgFail > 0)) {
         const r = pcgStep(this, x, g, K.PCG_MAX_ITER, K.PCG_RTOL);
         this.pcgIterations = r.iterations;
@@ -628,6 +646,7 @@ export class World {
       unheldWelds: this.gates.unheld(this),
       lineSearchBacktracks: this.energySearch?.backtracks ?? 0, lineSearchRejected: this.energySearch?.rejected ?? 0,
       continuousContact: this.motionGuard?.snapshot() ?? null,
+      coupledContact: this.coupledContact?.snapshot() ?? null,
     };
   }
 

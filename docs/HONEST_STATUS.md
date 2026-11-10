@@ -34,6 +34,15 @@ and exceed the physics timing target. The default reader does not enable this
 guard. Contact forces coupled to elasticity and prescribed-motion handling remain
 open; this is not a C-IPC solver or a collision-free release claim.
 
+The next opt-in [coupled normal-force candidate](research/coupled-contact-experiment.md)
+adds barriers to the implicit objective, per-iteration feasibility/energy checks
+and force-residual diagnostics. Analytical contact equilibrium, native ground
+support and deterministic replay are tested. A separate previous-pose seed option
+recovers the synthetic S8 axial-bar response even with contact disabled; the
+initialization effect is not a contact-force validation result. Both options
+remain disabled by default. Initial table touching, moving prescribed geometry,
+coupled friction/strain limits and booklet/device performance remain open.
+
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched
 over 1%, 10 exploded), zero rejected/world/step errors, and 76 studio preview

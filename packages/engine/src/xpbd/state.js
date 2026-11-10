@@ -5,7 +5,7 @@
  * identical factorisation, so a restored world replays bit-identically).
  */
 import { assembleAndFactor } from './implicit.js';
-import { getIncrementSearchSnapshot, restoreIncrementSearchSnapshot, INCREMENT_SEARCH_IDENTITY } from './increment-search.js';
+import { getIncrementSearchSnapshot, restoreIncrementSearchSnapshot, INCREMENT_SEARCH_IDENTITY, validateMembraneArithmeticIdentity } from './increment-search.js';
 
 /** @param {any} w */
 export function snapshotWorld(w) {
@@ -37,6 +37,7 @@ export function snapshotWorld(w) {
 
 /** Restore a state captured by snapshotWorld() (bit-exact, including the factorisation). @param {any} w @param {any} s */
 export function restoreWorld(w, s) {
+  validateMembraneArithmeticIdentity(w);
   if (!!w.orthotropicMembrane !== !!s.membrane || (w.orthotropicMembrane && s.membrane.signature !== w.orthotropicMembraneSignature)) throw new Error('Orthotropic membrane: snapshot model/reference/material convention mismatch');
   // Historical snapshots without arithmetic metadata mean total-energy. Bind
   // policy AND diagnostics before touching any World/search/factor state.

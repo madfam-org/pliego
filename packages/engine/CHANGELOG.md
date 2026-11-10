@@ -5,6 +5,14 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Optional `membraneArithmetic: 'double-double'` carries bounded two-word tangent,
+strain, stress, coherent gradient and GN arithmetic through selected objective
+increments. World selection requires the existing planar increment-search domain.
+Stored material/reference coefficients, native predictor/inertia gradient and
+absolute positions remain unchanged. Snapshot identity and unsupported ranges
+are enforced. Independent rational/Decimal tests separate evaluation accuracy
+from time/force/material/booklet acceptance; binary64 remains the default.
+
 Optional `lineSearchArithmetic: 'membrane-inertia-increment'` adds an enforced
 planar membrane/inertia experiment with actual rounded trials, strict computed
 Armijo, separate zero-step decisions and versioned snapshot diagnostics. Native

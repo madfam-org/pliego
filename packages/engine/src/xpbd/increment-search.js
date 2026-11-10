@@ -7,8 +7,18 @@ import { dihedral } from './dihedral.js';
 import { unwrap } from './implicit.js';
 import { implicitEnergy } from './energy-search.js';
 import { HINGE_PANEL } from '../mesh.js';
+import { DOUBLE_DOUBLE_IDENTITY, add as addDD, rounded as roundedDD } from './double-double.js';
+import { accurateTrialTerms } from './accurate-membrane.js';
 
 export const INCREMENT_SEARCH_IDENTITY = Object.freeze({ name: 'membrane-inertia-increment', version: 1, armijo: 1e-4, maxBacktracks: 20 });
+
+/** Pure identity preflight, independent of the pose being replaced by restore.
+ * @param {any} w */
+export function validateMembraneArithmeticIdentity(w) {
+  const mode = w.opts.membraneArithmetic, dd = mode === 'double-double', identity = w.orthotropicMembrane?.configuration.arithmetic;
+  if (!['binary64', 'double-double'].includes(mode ?? 'binary64') || dd !== (w.orthotropicMembrane?.work.arithmetic === 'double-double') || dd !== !!identity ||
+      (dd && (Object.keys(identity).length !== Object.keys(DOUBLE_DOUBLE_IDENTITY).length || Object.entries(DOUBLE_DOUBLE_IDENTITY).some(([key, value]) => identity[key] !== value)))) throw new Error('Membrane arithmetic identity changed');
+}
 
 /** @param {any} search */
 export function initialiseIncrementSearch(search) {
@@ -23,6 +33,7 @@ export function initialiseIncrementSearch(search) {
 export function validateIncrementDomain(w, x) {
   const fail = message => { throw new Error(`membrane-inertia-increment domain: ${message}`); };
   const o = w.opts, D = w.drivers;
+  validateMembraneArithmeticIdentity(w);
   if (o.lineSearchArithmetic !== 'membrane-inertia-increment' || !w.orthotropicMembrane || o.membraneModel !== 'orthotropic-stvk' || !o.lineSearch || !o.physicalMembrane ||
       w.kCompFactor !== 1 || o.membranePoissonConvention !== 'nu12' || o.membraneCurvature !== 'gauss-newton' ||
       o.membraneProjection !== 'none' || o.plasticity !== false) fail('selected research membrane prerequisites changed');
@@ -57,7 +68,7 @@ export function validateIncrementDomain(w, x) {
 export function beginIncrementSearch(search, w) {
   if (!search.increment) throw new Error('membrane-inertia-increment arithmetic identity changed');
   validateIncrementDomain(w, w.x);
-  if (!w.orthotropicMembrane.diagnostics(w.x).finite) throw new Error('membrane-inertia-increment: invalid starting membrane metric');
+  if (!w.orthotropicMembrane.diagnostics(w.x).finite) throw new Error('membrane-inertia-increment: invalid starting membrane metric/arithmetic: ' + (w.orthotropicMembrane.work.arithmeticError ?? ''));
   search.start.set(w.x); search.energy = implicitEnergy(w, w.x);
   if (!Number.isFinite(search.energy)) throw new Error('membrane-inertia-increment: non-finite starting objective');
   search._incrementObjective = { h: w.dt, mass: w.mass.slice(), inverse: w.invMass.slice(), target: w.xt.slice() };
@@ -108,16 +119,23 @@ export function finishIncrementSearch(search, w, gradient) {
         inertiaL.add(coefficient * (old[i] - w.xt[i]) * d);
       }
       const details = valid ? w.orthotropicMembrane.energyDifferenceDetails(old, x) : null;
-      const s = slope.value(), mr = details?.remainder ?? NaN, ir = inertiaR.value();
+      const dd = valid && w.opts.membraneArithmetic === 'double-double' ? accurateTrialTerms(w, old, x, gradient) : null;
+      const s = dd?.slope ?? slope.value(), mr = details?.remainder ?? NaN, ir = dd?.inertiaRemainder ?? inertiaR.value(), il = dd?.inertiaLinear ?? inertiaL.value();
       const sum = accumulator(); sum.add(s); sum.add(mr); sum.add(ir);
-      const delta = sum.value(), raw = valid ? implicitEnergy(w, x) - search.energy : NaN;
+      const deltaWords = dd && details?.valid ? addDD(addDD(dd.slopeWords, details.remainderWords), dd.inertiaWords) : null;
+      const delta = deltaWords ? roundedDD(deltaWords) : sum.value(), raw = valid ? implicitEnergy(w, x) - search.energy : NaN;
       const finite = value => Number.isFinite(value) ? value : null;
       last = { decision: 'rejected', reason: valid ? 'non-descent' : 'invalid-trial', trials: trial + 1, alpha,
         slope: finite(s), delta: finite(delta), rawDifference: finite(raw), membraneDifference: finite(details?.difference),
-        membraneRemainder: finite(mr), inertiaRemainder: finite(ir), membraneLinear: finite(details?.linear), inertiaLinear: finite(inertiaL.value()),
+        membraneRemainder: finite(mr), inertiaRemainder: finite(ir), membraneLinear: finite(details?.linear), inertiaLinear: finite(il),
         armijoRhs: finite(INCREMENT_SEARCH_IDENTITY.armijo * s),
-        gradientDiscrepancy: finite((details?.linear ?? NaN) + inertiaL.value() - s),
-        heuristicScale: finite(64 * Number.EPSILON * (slope.magnitude() + (details?.absoluteRemainderTermSum ?? 0) + inertiaR.magnitude())) };
+        gradientDiscrepancy: finite((details?.linear ?? NaN) + il - s),
+        heuristicScale: finite(64 * Number.EPSILON * ((dd?.slopeMagnitude ?? slope.magnitude()) + (details?.absoluteRemainderTermSum ?? 0) + (dd?.inertiaMagnitude ?? inertiaR.magnitude()))),
+        ...(w.opts.membraneArithmetic === 'double-double' ? { displacementArithmetic: 'two-diff',
+          slopeHi: dd?.slopeWords[0] ?? null, slopeLo: dd?.slopeWords[1] ?? null,
+          membraneRemainderHi: details?.remainderWords?.[0] ?? null, membraneRemainderLo: details?.remainderWords?.[1] ?? null,
+          inertiaRemainderHi: dd?.inertiaWords[0] ?? null, inertiaRemainderLo: dd?.inertiaWords[1] ?? null,
+          deltaHi: deltaWords?.[0] ?? null, deltaLo: deltaWords?.[1] ?? null } : {}) };
       if (zero) {
         last.decision = stationary ? 'stationary-noop' : 'precision-limited-zero-step';
         last.reason = 'zero-realized-step'; counts.last = last;

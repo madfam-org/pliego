@@ -27,11 +27,11 @@ assert.deepEqual(fresh.source.engineFiles,files,'current runtime fingerprint req
 assert.equal(fresh.source.helperSHA256,sha(readFileSync(new URL('membrane-patch.mjs',import.meta.url))));
 assert.equal(composite.source.patchHelperSHA256,fresh.source.helperSHA256);
 const mutable=new Set(['xpbd/world.js','xpbd/implicit.js','xpbd/pcg.js','xpbd/energy-search.js','xpbd/state.js']);
-const additions=new Set(['xpbd/orthotropic-membrane.js','xpbd/increment-search.js']);
+const additions=new Set(['xpbd/orthotropic-membrane.js','xpbd/increment-search.js','xpbd/double-double.js','xpbd/accurate-membrane.js']);
 const previous=new Map(old.source.engineFiles.map(f=>[f.path,f.sha256]));
 for(const f of files)if(!mutable.has(f.path)&&!additions.has(f.path))assert.equal(f.sha256,previous.get(f.path),'unreviewed runtime change: '+f.path);
 assert.equal(files.length,old.source.engineFiles.length+additions.size);
-for(const path of additions)assert.ok(files.some(f=>f.path===path)&&!previous.has(path),'only the two named reviewed modules may be added');
+for(const path of additions)assert.ok(files.some(f=>f.path===path)&&!previous.has(path),'only the four named reviewed modules may be added');
 for(const f of old.source.engineFiles)assert.ok(files.some(g=>g.path===f.path),'old runtime path removed');
 const comparable=r=>{
   const c=structuredClone(r);delete c.recordedAt;
@@ -41,7 +41,7 @@ const comparable=r=>{
 assert.deepEqual(comparable(old),comparable(fresh),'whole old-law audit except reviewed git/runtime/helper fingerprints must remain exact');
 const result={schema:'pliego-membrane-model-controls/0.1',recordedAt:new Date().toISOString(),comparisonSHA256:sha(readFileSync(new URL(import.meta.url))),
   inputSHA256:bytes.map(sha),sources:[old.source,composite.source],cases:fresh.results.length,allRecordedControlFieldsEqual:true,
-  migration:'only f145 historical source/helper to current pinned runtime; five named integration files plus the orthotropic-membrane and opt-in increment-search modules may change, baseline harness unchanged; all other source/runtime/input/geometry/reference/energy/gradient/tensor/diagnostic/gates exact',
+  migration:'only f145 historical source/helper to current pinned runtime; five named integration files plus the orthotropic-membrane, increment-search, double-double and accurate-membrane modules may change, baseline harness unchanged; all other source/runtime/input/geometry/reference/energy/gradient/tensor/diagnostic/gates exact',
   acceptance:'unchanged legacy controls only; new-law acceptance requires its separate independent reference and remaining integration/material/device gates'};
 const output=JSON.stringify(result,null,2)+'\n';if(oi>=0)writeFileSync(args[oi+1],output);else process.stdout.write(output);
 console.error('membrane-model-controls: '+result.cases+' cases; every recorded old-law non-recording field preserved');

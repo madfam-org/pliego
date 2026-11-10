@@ -33,6 +33,9 @@ function domain(w) {
   const errors = [], check = (ok, message) => { if (!ok) errors.push(message); };
   check(w?.orthotropicMembrane?.configuration?.model === 'orthotropic-stvk', 'selected research law missing');
   check(w.opts.membraneModel === 'orthotropic-stvk' && w.opts.membraneCurvature === 'gauss-newton' && w.opts.membraneProjection === 'none', 'research law/operator/projection configuration changed');
+  const membraneArithmetic = w.opts.membraneArithmetic ?? 'binary64', identity = w.orthotropicMembrane?.configuration?.arithmetic;
+  check(membraneArithmetic === 'binary64' ? identity === undefined : membraneArithmetic === 'double-double' && incrementMode(w) &&
+    identity?.name === 'double-double' && identity.version === 1 && identity.productExponentLimit === 450 && identity.derivative === 'coherent-difference', 'actual membrane arithmetic identity changed');
   check(w?.opts?.lineSearch === true && w.energySearch instanceof EnergySearch, 'actual EnergySearch required');
   check(!w.fixed.some(Boolean) && w.sys.nFree === w.mesh.nV && w.invMass.every(m => m > 0), 'only all-free native DOFs supported');
   check(!w.contact && !w.coupledContact && !w.motionGuard && !w.edgeContact && !w.opts.contact && !w.opts.ground, 'contact/ground outside observer domain');
@@ -112,6 +115,7 @@ export function attachModalSolveObserver(context, { onIteration, retain = 'all',
         time: world.time, framesRun: world.framesRun, substepsRun: world.substepsRun, h: world.dt,
         errors: world === w && this === search ? domain(world) : ['unexpected World/search association'] };
       if (incrementMode(world)) Object.assign(pending, { xt: world.xt.slice(), mass: world.mass.slice(), increment: structuredClone(this.increment) });
+      if (world.opts.membraneArithmetic === 'double-double') pending.membraneArithmeticIdentity = structuredClone(world.orthotropicMembrane.configuration.arithmetic);
       if (world.framesRun !== world.substepsRun + 1) pending.errors.push('not inside the supported one-substep public call');
     } catch (cause) { pending = { iteration: counts.begins, errors: ['begin capture unavailable: ' + cause.message] }; }
     return result;
@@ -161,6 +165,7 @@ export function attachModalSolveObserver(context, { onIteration, retain = 'all',
     try {
       demand(before && world === w && this === search, 'missing search association after finish');
       record.after = Array.from(w.x); record.acceptedRoundedDirection = Array.from(w.x, (x, i) => x - before.start[i]);
+      if (before.membraneArithmeticIdentity) Object.assign(record, { membraneArithmetic: 'double-double', membraneArithmeticIdentity: before.membraneArithmeticIdentity });
       demand(!originalError, 'original finish did not complete; acceptance decision unavailable');
       const backtracks = this.backtracks - before.backtracks, rejected = this.rejected - before.rejected;
       demand(Number.isSafeInteger(backtracks) && backtracks >= 0 && backtracks <= 20 && (rejected === 0 || rejected === 1), 'unrecognized search counter deltas');

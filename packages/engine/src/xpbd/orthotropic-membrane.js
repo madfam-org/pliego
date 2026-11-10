@@ -2,6 +2,8 @@
 // Research-only objective StVK membrane. Exact energy/gradient; the runtime
 // search matrix is explicitly Gauss–Newton PSD, not the exact Hessian.
 import { hypot2, hypot3 } from '../fastmath.js';
+import * as DD from './double-double.js';
+import { accurateScratch, accurateKinematics, accurateEnergy, accurateGradient, accurateGN, accurateGeometric, addAccurateGradient, addAccurateTimes, accurateDifference } from './accurate-membrane.js';
 
 const REFERENCE_QUALITY_MIN = 1e-12, CURRENT_AREA_RATIO_MIN = 1e-12;
 const SLOT_NONE = -2147483648;
@@ -44,14 +46,16 @@ export function createOrthotropicElement(uv, material, grainRadians, nu12) {
   return { alpha, beta, Q, area, volume, referenceQuality: quality };
 }
 
-function scratch() {
+function scratch(arithmetic = 'binary64') {
   return { a: new Float64Array(3), b: new Float64Array(3), strain: new Float64Array(3),
     stress: new Float64Array(3), J: new Float64Array(27), energy: Infinity,
-    areaRatio: 0, minimumStretch: 0, maximumStretch: 0 };
+    areaRatio: 0, minimumStretch: 0, maximumStretch: 0,
+    ...(arithmetic === 'double-double' ? accurateScratch() : {}) };
 }
 /** Pose-local kinematics; no dependence on a previous gradient or factor cache.
  * @param {OrthotropicElement} e @param {ArrayLike<number>} x @param {ArrayLike<number>} ids @param {ReturnType<typeof scratch>} k */
 function kinematics(e, x, ids, k) {
+  if (k.arithmetic === 'double-double') return accurateKinematics(e, x, ids, k);
   const { a, b, strain, stress, J } = k;
   for (let r = 0; r < 3; r++) {
     const x0 = x[3 * ids[0] + r], d1 = x[3 * ids[1] + r] - x0, d2 = x[3 * ids[2] + r] - x0;
@@ -85,6 +89,7 @@ function kinematics(e, x, ids, k) {
 }
 /** @param {OrthotropicElement} e @param {ReturnType<typeof scratch>} k @param {number} row @param {number} col */
 function gnEntry(e, k, row, col) {
+  if (k.arithmetic === 'double-double') return DD.rounded(accurateGN(e, k, row, col));
   // Canonical evaluation makes diagonal 3x3 assembly blocks bit-symmetric.
   if (row > col) { const swap = row; row = col; col = swap; }
   const j = k.J, q = e.Q;
@@ -94,21 +99,22 @@ function gnEntry(e, k, row, col) {
 /** Exact element energy, force gradient, and exact/GN Hessians for validation.
  * Invalid trial energy is Infinity; derivative requests at invalid poses throw.
  * @param {OrthotropicElement} element @param {ArrayLike<number>} x nine world coordinates
- * @param {{exactHessian?:boolean}} [opts] */
+ * @param {{exactHessian?:boolean,arithmetic?:'binary64'|'double-double'}} [opts] */
 export function evaluateOrthotropicElement(element, x, opts = {}) {
   demand(x.length === 9, 'element pose must have nine coordinates');
-  const k = scratch(), ids = [0, 1, 2];
-  demand(kinematics(element, x, ids, k), 'collapsed or non-finite current triangle');
+  demand(['binary64', 'double-double'].includes(opts.arithmetic ?? 'binary64'), 'invalid arithmetic');
+  const k = scratch(opts.arithmetic), ids = [0, 1, 2];
+  demand(kinematics(element, x, ids, k), 'collapsed or non-finite current triangle' + (k.arithmetic === 'double-double' ? '/arithmetic: ' + k.arithmeticError : ''));
   const gradient = new Float64Array(9), gaussNewton = new Float64Array(81);
   const hessian = opts.exactHessian === false ? null : new Float64Array(81);
   for (let i = 0; i < 9; i++) {
-    gradient[i] = element.volume * (k.J[i] * k.stress[0] + k.J[9 + i] * k.stress[1] + k.J[18 + i] * k.stress[2]);
+    gradient[i] = k.arithmetic === 'double-double' ? DD.rounded(accurateGradient(element, k, i)) : element.volume * (k.J[i] * k.stress[0] + k.J[9 + i] * k.stress[1] + k.J[18 + i] * k.stress[2]);
     for (let j = 0; j < 9; j++) {
       const gn = gnEntry(element, k, i, j); gaussNewton[9 * i + j] = gn;
       if (hessian) {
         const ni = Math.floor(i / 3), nj = Math.floor(j / 3), a = element.alpha, b = element.beta, s = k.stress;
         const geometric = i % 3 === j % 3 ? s[0] * a[ni] * a[nj] + s[1] * b[ni] * b[nj] + s[2] * (a[ni] * b[nj] + b[ni] * a[nj]) : 0;
-        hessian[9 * i + j] = gn + element.volume * geometric;
+        hessian[9 * i + j] = k.arithmetic === 'double-double' ? DD.rounded(DD.add(accurateGN(element, k, i, j), i % 3 === j % 3 ? accurateGeometric(element, k, ni, nj) : [0, 0])) : gn + element.volume * geometric;
       }
     }
   }
@@ -133,8 +139,10 @@ function compensatedIncrement(values) {
 
 export class OrthotropicMembrane {
   /** @param {import('../mesh.js').Mesh} mesh @param {import('../material.js').Material[]} materials
-   * @param {any} doc loaded document @param {number[]} nu12PerSheet explicit research Poisson convention */
-  constructor(mesh, materials, doc, nu12PerSheet) {
+   * @param {any} doc loaded document @param {number[]} nu12PerSheet explicit research Poisson convention
+   * @param {'binary64'|'double-double'} [arithmetic] */
+  constructor(mesh, materials, doc, nu12PerSheet, arithmetic = 'binary64') {
+    demand(['binary64', 'double-double'].includes(arithmetic), 'invalid arithmetic');
     demand(Array.isArray(nu12PerSheet) && nu12PerSheet.length === doc.sheets.length && materials.length === doc.sheets.length, 'explicit nu12 array must cover every sheet');
     demand(mesh.nT > 0 && mesh.tris.length === 3 * mesh.nT, 'nonempty triangle mesh required');
     this.mesh = mesh;
@@ -154,12 +162,14 @@ export class OrthotropicMembrane {
     this.configuration = { model: 'orthotropic-stvk', version: 1, curvature: 'gauss-newton', poissonConvention: 'nu12',
       nu12BySheet: nu12PerSheet.slice(), materials: materialData, grainDegrees,
       referenceUV: Array.from(mesh.uv), triangles: Array.from(mesh.tris), triangleSheets: Array.from(mesh.triSheet),
-      referenceQualityMin: REFERENCE_QUALITY_MIN, currentAreaRatioMin: CURRENT_AREA_RATIO_MIN };
+      referenceQualityMin: REFERENCE_QUALITY_MIN, currentAreaRatioMin: CURRENT_AREA_RATIO_MIN,
+      ...(arithmetic === 'double-double' ? { arithmetic: { ...DD.DOUBLE_DOUBLE_IDENTITY } } : {}) };
     this.configurationKey = JSON.stringify(this.configuration);
-    this.work = scratch(); this.block = new Float64Array(9);
+    this.work = scratch(arithmetic); this.block = new Float64Array(9);
   }
   /** @param {ArrayLike<number>} x */
   energy(x) {
+    if (this.work.arithmetic === 'double-double') return accurateEnergy(this, x);
     let energy = 0;
     for (let t = 0; t < this.mesh.nT; t++) {
       if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work)) return Infinity;
@@ -173,6 +183,7 @@ export class OrthotropicMembrane {
    * return Infinity; absoluteTermSum is a magnitude diagnostic, not an error bound.
    * @param {ArrayLike<number>} before @param {ArrayLike<number>} after */
   energyDifferenceDetails(before, after) {
+    if (this.work.arithmetic === 'double-double') return accurateDifference(this, before, after);
     const start = scratch(), end = scratch();
     const total = { sum: 0, correction: 0, magnitude: 0 };
     const linear = { sum: 0, correction: 0, magnitude: 0 };
@@ -222,9 +233,10 @@ export class OrthotropicMembrane {
   energyDifference(before, after) { return this.energyDifferenceDetails(before, after).difference; }
   /** Add exact elastic gradient over all vertices. @param {ArrayLike<number>} x @param {Float64Array} g */
   addGradient(x, g) {
+    if (this.work.arithmetic === 'double-double') return addAccurateGradient(this, x, g);
     for (let t = 0; t < this.mesh.nT; t++) {
       const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3), k = this.work;
-      demand(kinematics(e, x, ids, k), 'collapsed or non-finite current triangle');
+      demand(kinematics(e, x, ids, k), 'collapsed or non-finite current triangle' + (k.arithmetic === 'double-double' ? '/arithmetic: ' + k.arithmeticError : ''));
       for (let i = 0; i < 3; i++) for (let r = 0; r < 3; r++) {
         const c = 3 * i + r, value = e.volume * (k.J[c] * k.stress[0] + k.J[9 + c] * k.stress[1] + k.J[18 + c] * k.stress[2]);
         demand(Number.isFinite(value), 'non-finite membrane gradient'); g[3 * ids[i] + r] += value;
@@ -251,6 +263,7 @@ export class OrthotropicMembrane {
   /** Add PSD operator, treating fixed input entries as zero and omitting fixed output.
    * @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] */
   addGaussNewtonTimes(x, p, out, invMass) {
+    if (this.work.arithmetic === 'double-double') return addAccurateTimes(this, x, p, out, invMass);
     for (let t = 0; t < this.mesh.nT; t++) {
       const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3), k = this.work;
       demand(kinematics(e, x, ids, k), 'collapsed or non-finite current triangle');
@@ -267,12 +280,15 @@ export class OrthotropicMembrane {
   /** Current metric diagnostics, not an inversion/contact/strain-limit certificate. @param {ArrayLike<number>} x */
   diagnostics(x) {
     let invalidTriangles = 0, minimumStretch = Infinity, maximumStretch = 0, minimumAreaRatio = Infinity, maximumAreaRatio = 0;
+    let arithmeticError = '';
     for (let t = 0; t < this.mesh.nT; t++) {
-      if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work)) { invalidTriangles++; continue; }
+      if (!kinematics(this.elements[t], x, this.mesh.tris.subarray(3 * t, 3 * t + 3), this.work)) { invalidTriangles++; arithmeticError ||= this.work.arithmeticError ?? ''; continue; }
       minimumStretch = Math.min(minimumStretch, this.work.minimumStretch); maximumStretch = Math.max(maximumStretch, this.work.maximumStretch);
       minimumAreaRatio = Math.min(minimumAreaRatio, this.work.areaRatio); maximumAreaRatio = Math.max(maximumAreaRatio, this.work.areaRatio);
     }
+    if (this.work.arithmetic === 'double-double') this.work.arithmeticError = arithmeticError;
     return { model: 'orthotropic-stvk', curvature: 'gauss-newton', poissonConvention: 'nu12',
+      ...(this.work.arithmetic === 'double-double' ? { arithmetic: 'double-double', arithmeticVersion: 1, arithmeticError } : {}),
       finite: invalidTriangles === 0, invalidTriangles, triangles: this.mesh.nT,
       minimumStretch: minimumStretch === Infinity ? 0 : minimumStretch, maximumStretch,
       minimumAreaRatio: minimumAreaRatio === Infinity ? 0 : minimumAreaRatio, maximumAreaRatio,

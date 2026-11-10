@@ -16,7 +16,7 @@ const maximum = a => Math.max(0, ...a.map(Math.abs));
  * phi is supplied by the independent oracle, dimensionless with max nodal norm1.
  * No eigenproblem, mode projection or integrator is substituted for World here.
  */
-export function createModalWorld(patch, { phi, omega, amplitude, substeps, newtonIterations = 1, previousPoseStart = false, lineSearchArithmetic, ...unknown } = {}) {
+export function createModalWorld(patch, { phi, omega, amplitude, substeps, newtonIterations = 1, previousPoseStart = false, lineSearchArithmetic, membraneArithmetic, ...unknown } = {}) {
   demand(Object.keys(unknown).length === 0, 'unknown/unsupported observer options: ' + Object.keys(unknown).join(','));
   const n = patch.vertices.length;
   demand(Array.isArray(phi) && phi.length === n && phi.every(p => Array.isArray(p) && p.length === 2 && p.every(finite)), 'one finite [phi_u,phi_v] per native vertex required');
@@ -26,13 +26,21 @@ export function createModalWorld(patch, { phi, omega, amplitude, substeps, newto
   demand(Number.isSafeInteger(substeps) && substeps > 0 && Number.isSafeInteger(newtonIterations) && newtonIterations > 0, 'positive integer public substep/Newton budgets required');
   demand(typeof previousPoseStart === 'boolean', 'previousPoseStart must be boolean');
   demand(lineSearchArithmetic === undefined || ['total-energy', 'membrane-inertia-increment'].includes(lineSearchArithmetic), 'unsupported line-search arithmetic');
+  demand(membraneArithmetic === undefined || ['binary64', 'double-double'].includes(membraneArithmetic), 'unsupported membrane arithmetic');
+  demand(membraneArithmetic !== 'double-double' || lineSearchArithmetic === 'membrane-inertia-increment', 'double-double requires explicit membrane-inertia-increment search');
   demand(patch.options.membraneModel === 'orthotropic-stvk', 'selected-law native patch required');
   const options = { ...patch.options, substeps, newtonIterations, previousPoseStart, damping: 0, bendDamping: 0,
     gravity: false, ground: false, contact: false, plasticity: false, lineSearch: true,
-    ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }) };
+    ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }), ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }) };
   const world = new World(patch.doc, options), mesh = world.mesh;
   demand(world.dt === 1 / (60 * substeps) && finite(world.dt) && world.dt > 0, 'actual public timestep differs or is invalid');
   demand(mesh.nV === n && mesh.nT === patch.triangles.length, 'native mesh counts changed');
+  if (membraneArithmetic === 'double-double') {
+    demand(world.opts.membraneArithmetic === membraneArithmetic && world.orthotropicMembrane.configuration.arithmetic?.name === membraneArithmetic, 'actual membrane arithmetic identity differs');
+    demand(world.orthotropicMembrane.elements.every((element, t) => ['alpha', 'beta', 'Q'].every(key =>
+      element[key].every((value, i) => Object.is(value, patch.world.orthotropicMembrane.elements[t][key][i]))) &&
+      Object.is(element.volume, patch.world.orthotropicMembrane.elements[t].volume)), 'arithmetic candidate changed captured real polynomial coefficients');
+  }
   demand(Array.from(mesh.uv).every((v, i) => v === patch.world.mesh.uv[i]) &&
     Array.from(mesh.tris).every((v, i) => v === patch.world.mesh.tris[i]), 'native UV/connectivity changed');
   demand(!world.fixed.some(Boolean) && world.sys.nFree === n, 'free vibration cannot contain runtime or benchmark constraints');
@@ -62,7 +70,7 @@ export function createModalWorld(patch, { phi, omega, amplitude, substeps, newto
   demand(finite(forceScale) && finite(modalMass) && modalMass > 0, 'invalid fixed modal normalization');
   return { patch, world, options, phi: mode, omega, amplitude, masses, modalMass, forceScale,
     parameters: { phi: mode, omega, amplitude, substeps, newtonIterations, previousPoseStart,
-      ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }) },
+      ...(lineSearchArithmetic === undefined ? {} : { lineSearchArithmetic }), ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }) },
     forceTolerance: Math.max(ATOL, RTOL * forceScale), maximumModeNorm,
     massProof: { native: masses.slice(), independentlyLumpedMass, verticesConsumed: consumed.size,
       totalMass: masses.reduce((a, b) => a + b, 0), maximumMassScaledDifference, massScale, tolerance: MASS_TOLERANCE,
@@ -162,7 +170,9 @@ export function observeModalWorld(context, { step = 0, initial = step === 0, exe
       missingDiagnostics: 'World exposes final PCG iteration count and cumulative factor/search counters only; no per-Newton direction residual, alpha or linear history observed',
       pcgMaxIterations: K.PCG_MAX_ITER, pcgRelativeTolerance: K.PCG_RTOL,
       ...(w.opts.lineSearchArithmetic === 'membrane-inertia-increment' ? {
-        lineSearchArithmetic: w.opts.lineSearchArithmetic, increment: w.energySearch?.increment ? structuredClone(w.energySearch.increment) : null } : {}) },
+        lineSearchArithmetic: w.opts.lineSearchArithmetic, increment: w.energySearch?.increment ? structuredClone(w.energySearch.increment) : null } : {}),
+      ...(w.opts.membraneArithmetic === 'double-double' ? { membraneArithmetic: w.opts.membraneArithmetic,
+        membraneArithmeticIdentity: structuredClone(w.orthotropicMembrane.configuration.arithmetic) } : {}) },
     measurementValid: errors.length === 0, errors };
 }
 

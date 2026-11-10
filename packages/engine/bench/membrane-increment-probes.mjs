@@ -29,14 +29,15 @@ function source() {
     files: names.sort().map(path => ({ path, sha256: hash(readFileSync(join(root, path))) })) };
 }
 
-export function runIncrementProbes({ allowDirty = false } = {}) {
+export function runIncrementProbes({ allowDirty = false, membraneArithmetic } = {}) {
+  assert.ok(membraneArithmetic === undefined || ['binary64', 'double-double'].includes(membraneArithmetic), 'invalid membrane arithmetic');
   const beforeSource = source();
   assert.ok(allowDirty || !beforeSource.status, 'clean source required; --allow-dirty is development only');
   const cases = [];
   for (const grain of [0, 31, 45, 90]) {
     const patch = makePatch({ cells: 1, grain, membraneModel: 'orthotropic-stvk', membraneNu12: .293 });
     const w = new World(patch.doc, { ...patch.options, damping: 0, bendDamping: 0, substeps: 1000,
-      lineSearchArithmetic: 'membrane-inertia-increment' });
+      lineSearchArithmetic: 'membrane-inertia-increment', ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }) });
     const before = w.X0.slice(), g = new Float64Array(w.x.length); gradient(w, before, g);
     for (const index of [0, 2]) for (const direction of [-1, 1]) for (const magnitude of [2**-40, 2**-50]) {
       w.x.set(before); w.xt.set(before); w.xs.set(before); w.v.fill(0);
@@ -69,21 +70,22 @@ export function runIncrementProbes({ allowDirty = false } = {}) {
   assert.deepEqual(source(), beforeSource, 'source changed during fixed-pose probes; discard output');
   return { schema: 'pliego-membrane-increment-probes/1', source: { ...beforeSource, dirty: !!beforeSource.status, status: undefined },
     runtime: { node: process.version, arch: process.arch, platform: process.platform },
-    protocol: { grains: [0, 31, 45, 90], indices: [0, 2], directions: [-1, 1], magnitudesMm: [2**-40, 2**-50],
+    protocol: { grains: [0, 31, 45, 90], indices: [0, 2], directions: [-1, 1], magnitudesMm: [2**-40, 2**-50], ...(membraneArithmetic === undefined ? {} : { membraneArithmetic }),
       substeps: 1000, poses: 'native rest; xt=before; actual candidate then actual EnergySearch.finish; last evaluated endpoint reconstructed using exact source interpolation',
       scope: 'bounded fixed-pose arithmetic witnesses only; no World timestep, physical force convergence, calibration or general real-descent guarantee' }, cases };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2), index = args.indexOf('--out');
-  assert.ok(args.every((value, i) => value === '--allow-dirty' || value === '--out' || i === index + 1 && index >= 0), 'unknown option');
+  const args = process.argv.slice(2), index = args.indexOf('--out'), ai = args.indexOf('--membrane-arithmetic');
+  assert.ok(args.every((value, i) => ['--allow-dirty', '--out', '--membrane-arithmetic'].includes(value) || i === index + 1 && index >= 0 || i === ai + 1 && ai >= 0), 'unknown option');
+  assert.ok(ai < 0 || ['binary64', 'double-double'].includes(args[ai + 1]), 'supported membrane arithmetic required');
   assert.ok(index < 0 || args[index+1] && !args[index+1].startsWith('--'), '--out requires a path');
   const output = index < 0 ? null : resolve(args[index+1]);
   if (output) {
     const location = relative(root, output);
     assert.ok(location && (location.startsWith('..' + sep) || isAbsolute(location)), '--out must be outside the checkout');
   }
-  const report = runIncrementProbes({ allowDirty: args.includes('--allow-dirty') });
+  const report = runIncrementProbes({ allowDirty: args.includes('--allow-dirty'), membraneArithmetic: ai < 0 ? undefined : args[ai + 1] });
   const bytes = JSON.stringify(report) + '\n';
   if (output) writeFileSync(output, bytes, { flag: 'wx', mode: 0o600 }); else process.stdout.write(bytes);
   console.error('increment-probes: 32 actual fixed-pose searches; source guard exact; ' + (report.source.dirty ? 'development dirty source' : 'clean source') + '; no timestep or force convergence claim');

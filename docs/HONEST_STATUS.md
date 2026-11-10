@@ -171,6 +171,15 @@ diagnostic sums, with every objective/error/Armijo field agreeing. Complete
 [lossless captures and preserved failures](research/evidence/membrane-increment-2026-11-10/README.md)
 remain research evidence; force/time/booklet/device acceptance stays open.
 
+The next [two-word evaluation candidate](research/membrane-double-double.md)
+now carries tangent/strain/gradient and endpoint low words under a bounded
+arithmetic domain, with unchanged stored coefficients and native inertia.
+The retained witness's projected slope error meets its predeclared numerical
+target and its old energy-increasing proposal backtracks. This bounded
+evaluation result does not establish trajectory force/time convergence.
+The separate diagnostic-sum oracle repair changes no objective/Armijo result;
+all original failed proofs remain retained.
+
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).
 All 24 smoke trajectories contain strict force failures: 6975/7110 substeps miss

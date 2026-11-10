@@ -108,6 +108,15 @@ Independent Decimal tests retain near-rest cases where computed acceptance is
 a real potential increase: this is approximate arithmetic, not certified descent
 or force convergence. Omission and explicit `total-energy` preserve the old path.
 
+`membraneArithmetic: 'double-double'` additionally selects a bounded two-word
+[membrane/objective evaluation experiment](../../docs/research/membrane-double-double.md).
+It carries coordinate low words through strain, stress, coherent derivatives and
+the selected increment search, using unchanged stored coefficients and native
+mass/inertia association. Its versioned snapshot identity and numeric range are
+explicit. World selection requires the planar increment-search domain. Omission
+or explicit `binary64` retains existing arithmetic. This does not supply richer
+authoritative positions, a converged solve or an interaction-performance certificate.
+
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
 `previousPoseStart` changes the legacy initial guess; `continuousContact` adds a

@@ -16,6 +16,13 @@ check. Contacts contribute to both the force gradient and a matrix-free PSD
 radial Gauss–Newton operator. Elastic block Cholesky remains the preconditioner;
 dynamic contact stencils do not need its fixed sparsity pattern to be enlarged.
 
+Derivative checks below cover frozen point/driver coefficients and differentiable
+closest-feature configurations. Overlapping parallel EE ties are nonsmooth in
+the current unmollified model. General glue/pivot offsets and slider geometry
+also need their full geometric Jacobians: updating join coefficients from the
+current pose does not by itself differentiate those updates. These are open
+engineering gates, not a global smooth-objective guarantee for arbitrary joins.
+
 Two further opt-in ablations address linear/nonlinear work, without changing the
 energy, force law, CCD bound or force tolerance:
 
@@ -180,3 +187,14 @@ partial thickness deficit, but most moving substeps exhaust their force budget.
 All-flexible initial table contact is rejected. The inexpensive seed change
 does not fix eight-turn thickness failures. Timing was collected under verified
 host contention and cannot close the performance gate.
+
+The subsequent [local-solve evidence](evidence/paper-2026-11-09/README.md#consistent-curvature-and-direct-local-contact)
+isolates the two new options: consistent compression curvature improves nonlinear
+convergence; direct solving removes PCG work without fixing that convergence by
+itself. A full eight-turn direct S8/I32 run passes sampled endpoint/tensile/partial
+thickness gates, but fails force convergence and timing. CPU profiles identify
+the swept candidate scan as the main sampled cost. The retained native late-turn
+objective reproduces its force residual and energy, with excess directional
+curvature concentrated in EE contact. An analytical parallel-edge fixture proves
+that this unmollified contact potential has no smooth gradient at that tie.
+Regularization, contact weighting and efficient conservative indexing remain open.

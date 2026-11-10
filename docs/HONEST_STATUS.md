@@ -1,6 +1,6 @@
 # Honest status
 
-> Last Updated: 2026-11-09 (local paper reading input; other dated evidence retained)
+> Last Updated: 2026-11-10 (paper-physics research checkpoint; other dated evidence retained)
 > Boundary: public. The single truth for what works today. Keep it true when you change behaviour.
 
 Local source addition, 2026-11-09: the studio supports an explicit fixed-camera
@@ -50,6 +50,19 @@ convergence still fails in each, and all-flexible initial table contact is
 rejected. The initialization-only reader completes eight turns but retains a
 0.09846 mm thickness deficit on 0.1 mm paper. Local timing was under verified
 CPU contention; it cannot close the performance gate.
+
+The [local-solve ablation](research/evidence/paper-2026-11-09/README.md#consistent-curvature-and-direct-local-contact)
+separates compression curvature from linear solving. Matching the declared
+compressed force law reduces first-turn missed force-tolerance substeps from
+436/672 to 13/672 with either PCG or direct solving. Direct solving alone leaves
+436 misses. A direct S8/I32 candidate completes all eight turns above 99.98%
+sampled endpoint progress, with 0.0192% peak tensile strain, 0.4955% compression
+and zero partial resting-block deficit. It still misses tolerance on 680/5264
+executed substeps and takes about 23 seconds at active-frame p95 in a diagnostic
+run. It is unsuitable for interactive reading. Spatial candidate scanning dominates
+the recorded CPU samples. A reconstructed late-turn objective and a parallel-edge
+element expose contact smoothness/convergence work still owed. All new options
+remain opt-in; this is not a stable catalogue physics release.
 
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched

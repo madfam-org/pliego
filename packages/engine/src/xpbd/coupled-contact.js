@@ -45,7 +45,10 @@ export class CoupledContact {
     }
   }
 
-  /** Exact first derivative of our declared potential; cache its radial GN operator. */
+  /** Branch derivative with frozen join coefficients; cache radial GN curvature.
+   * Closest-point ties (notably parallel EE) can be nonsmooth. General joins
+   * with geometry-dependent offsets also need their full geometric Jacobian.
+   */
   evaluate(w) {
     const x = w.x, g = w.g, idt2 = 1 / w.dt ** 2;
     updateTerms(w, x); w._checkStrings(x);

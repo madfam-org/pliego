@@ -338,3 +338,117 @@ checks, and all 16 repository checks. The physics campaign remains active:
 initial-contact handling, coupled friction/strain constraints, full sequence and
 corpus coverage, independent material measurements and efficient solver/backend
 comparisons are still required. No merge, deployment or GA claim is made.
+
+## Consistent curvature and direct local contact
+
+Measured engine/harness checkpoint:
+[`e25b8e53e22d361d24156f878ea602751ddc4004`](https://github.com/madfam-org/pliego/commit/e25b8e53e22d361d24156f878ea602751ddc4004).
+The [16-case first-turn matrix](local-e25b8e5-first-turn.json),
+[eight-turn direct candidate](local-e25b8e5-eight-turn.json),
+[prior-engine default controls](local-baseline-5257bf8.json) and
+[profiled first-turn repeat](local-e25b8e5-repeat.json) retain source-clean
+start/end checks, engine/reader/harness/fixture fingerprints and failures.
+Reports use schema 0.3: every sampled pose before flat promotion contributes to
+a trajectory hash. The [comparison](local-comparison.json) verifies both default
+controls against the prior engine and one selected candidate repeat, including
+the whole sampled first-turn trajectory and every recorded non-timing field.
+This is not an eight-turn repeat claim.
+
+The declared compressed spring force normally uses 0.05 of tensile stiffness.
+The legacy radial GN approximation uses 0.25 after entering compression, or full
+stiffness near rest under hysteresis. The optional consistent curvature follows
+the actual radial branch, retaining the same energy and gradient. The independent
+direct option assembles contact only when every nonzero free pair fits the
+elastic graph, in a separate fresh factor. General nonlocal contact is explicitly
+refused or counted as a PCG fallback in auto mode.
+
+| Active-leaf first turn | Missed tolerance / executed substeps | Nonlinear updates | CG iterations | Direct solves |
+|---|---:|---:|---:|---:|
+| PCG, legacy curvature, S8/I8 | 436 / 672 | 3520 | 169021 | 0 |
+| Direct, legacy curvature, S8/I8 | 436 / 672 | 3520 | 0 | 3520 |
+| PCG, consistent curvature, S8/I8 | 13 / 672 | 2239 | 126193 | 0 |
+| Direct, consistent curvature, S8/I8 | 13 / 672 | 2239 | 0 | 2239 |
+| Direct, consistent curvature, S8/I32 | 5 / 672 | 2379 | 0 | 2379 |
+| Direct, consistent curvature, uncapped S8/I8 | 103 / 672 | 3001 | 0 | 3001 |
+| Direct, consistent curvature, S1/I64 | 1 / 84 | 612 | 0 | 612 |
+
+Compression curvature explains the nonlinear-budget improvement in this ablation.
+Changing the linear solver alone leaves the miss count unchanged. Direct solves
+and CG iterations are different work units; their counts are not a speedup ratio.
+All seven coupled active-leaf cases exceed 99.98% endpoint progress, stay below
+0.02% peak tensile strain and have zero partial resting-block deficit. All seven
+coupled all-flexible cases fail initial strict ground feasibility before a complete
+frame. No case passes every moving-substep force tolerance or the 8 ms gate.
+
+### Full sequence and cost
+
+The direct consistent S8/I32 candidate completes **8/8 turns and 672 frames**.
+Its minimum endpoint progress is 99.98334%, peak tensile strain 0.019115%, maximum
+compression 0.495494%, and partial vertex-to-resting-block thickness deficit zero.
+The cache stays at two worlds. Fourteen frames begin asleep; 658 begin active,
+corresponding to 5264 executed substeps. Of those, **680 miss the 0.001 µN force
+tolerance**, with a peak end residual of 43.5491 µN. The final pre-promotion
+residual is 0.672527 µN. Actual work includes 38503 direct solves and **250492
+backtracks**, with no nonlocal fallback or rejected search recorded.
+
+Active-frame p95 is about **23.25 seconds**, maximum step 26.85 seconds, and
+whole-run mean step 3.18 seconds. This diagnostic run included a short inspector
+profile, read-only state captures and a small objective diagnosis; it is not an
+isolated device performance certificate. It clearly does not satisfy interaction
+latency. The [runtime observation](local-runtime-context.json) records about 98%
+of one CPU during the run, without node/network identity. The retained geometry
+passes are partial tests on a capped material model, not physical calibration,
+full primitive-contact certification or browser acceptance.
+
+The [whole-process first-turn profile](local-first-profile.json) attributes 91.48%
+of sampled time to `swept.js`; its Cholesky factor sample share is 1.21%.
+The [two-second late-turn sample](local-late-profile.json) attributes 91.29% to
+`swept.js` and 1.71% to factorization. Loading/JIT/diagnostics are included in the
+first profile. These are sample attributions, not retired-instruction counts or
+a proof about every workload. They prioritize conservative spatial indexing over
+assuming a faster factorization backend will fix the reader.
+
+### Late-turn convergence diagnosis
+
+The [native objective capture](late-turn-objective.json) records the accepted
+pre-direction pose during frame 650 of the final reverse turn, its previous pose,
+inertial target and solver/driver inputs. It normalizes the in-flight snapshot's
+trial `x` to that accepted pose. JSON numeric arrays do not preserve signed zero;
+this is an objective reproducer, not bit-exact `World.step` replay.
+
+`replay-contact-objective.mjs` reconstructs energy `355.1898846773351 nJ` and
+free-force residual `0.6630251270038201 µN`, with zero difference in the captured
+free gradient values. Along its GN proposal, the symmetric energy change
+`(E(x+alpha*d)+E(x-alpha*d))/2-E(x)` is concentrated in EE contact:
+
+| alpha | Implicit terms, nJ | VT contact, nJ | EE contact, nJ |
+|---|---:|---:|---:|
+| 0.1 | 2.29e-9 | 1.64e-9 | 7.87e-7 |
+| 0.01 | 2.27e-11 | 1.64e-11 | 7.60e-8 |
+
+That behavior motivates regularization and contact multiplicity work; it does
+not attribute every backtrack to one mechanism. The separate
+[analytical parallel-edge probe](parallel-e25b8e5.json) proves a concrete
+smoothness limit: for two overlapping parallel segments, tilting gives distance
+`0.12-|epsilon| mm`. Both signs increase the unmollified barrier energy. One-sided
+slopes approach ±9.997744 µN while the central slope is zero. A selected closest
+branch cannot be a smooth gradient at that tie. The new limitation test records
+this as an **open gate**, not a successful smooth-contact validation.
+
+Reproduction at the measured checkpoint (the capture replayer is added in the
+following evidence checkpoint):
+
+```sh
+node packages/engine/bench/paper-campaign.mjs --local-matrix --turns 1 --out /tmp/local-first.json
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 6 --model active-leaf --turns 8 --out /tmp/local-eight.json
+node packages/engine/bench/compare-paper-runs.mjs docs/research/evidence/paper-2026-11-09/local-baseline-5257bf8.json docs/research/evidence/paper-2026-11-09/local-e25b8e5-first-turn.json docs/research/evidence/paper-2026-11-09/local-e25b8e5-repeat.json
+node packages/engine/bench/replay-contact-objective.mjs --out /tmp/late-objective.json
+node --test packages/engine/test/local-contact-solve.test.js packages/engine/test/parallel-contact-limit.test.js
+```
+
+The engine checkpoint passes 132 engine / 123 web tests and all 16 CI checks.
+The later evidence checkpoint adds the parallel-contact limitation test and
+clarifies derivative scope. General geometry-dependent join Jacobians, contact
+weighting/mollification, material measurements, full corpus/device acceptance,
+local solver/model candidates and lower-level backend comparisons remain open.
+Research and implementation are **not exhausted**. No merge or deployment.

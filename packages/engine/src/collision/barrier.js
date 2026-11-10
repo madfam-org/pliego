@@ -38,6 +38,8 @@ export class BarrierContact {
 
   /** Rebuild all active candidates for the supplied pose, including trial energies.
    * A gradient call caches a PSD radial GN curvature, not the exact Hessian.
+   * At overlapping parallel EE closest-point ties this is a selected branch
+   * derivative; the unmollified distance potential is not differentiable there.
    * @param {any} w @param {Float64Array} x @param {Float64Array} [gradient]
    */
   evaluate(w, x, gradient) {

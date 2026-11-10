@@ -72,11 +72,14 @@ review is distinguished from a full derivation/implementation review.
 | [Macklin et al. 2016: XPBD](https://doi.org/10.1145/2994258.2994272) and [2019: Small Steps](https://matthias-research.github.io/pages/publications/smallsteps.pdf) | Compliance scaling; many small steps can improve error/damping at similar work. Small Steps equations and collision-amortization section reviewed. | Compare S=8/I=1, S=4/I=2, S=16/I=1 in the **existing hybrid solver**. This does not substitute for a pure local XPBD implementation or establish equal-error performance. Broad phase per frame requires conservative motion coverage; simply skipping detection is inadmissible. |
 | [Bouaziz et al. 2014: Projective Dynamics](https://www.projectivedynamics.org/) | Local/global optimization with specially chosen potentials and reusable global structure. Primary abstract/paper introduction reviewed. | Not implemented. Benchmark factor reuse, nonlinear residual and crease/contact compatibility against current sparse GN/PCG. Changing the energy model requires material gates. |
 | [Chen et al. 2024: Vertex Block Descent](https://graphics.cs.utah.edu/research/projects/vbd/) | Vertex-local energy descent, graph coloring, convergence to implicit Euler in the studied models. Primary project/paper introduction reviewed. | Not implemented. Candidate for CPU/GPU local 3×3 solves. Test stiffness ratios, bending stencils and pins; published elastic-body results are not a validated paper model. |
-| [Giles, Diaz, Yuksel 2025: Augmented VBD](https://graphics.cs.utah.edu/research/projects/avbd/) | Augmented Lagrangian addresses hard constraints and high stiffness ratios; authors provide demo code. Primary project reviewed. | Not implemented. Compare finite iteration drift, multiplier persistence, deterministic ordering and CPU/browser cost. Browser demo availability does not make it a drop-in native sheet engine. |
+| [Giles, Diaz, Yuksel 2025: Augmented VBD](https://graphics.cs.utah.edu/research/projects/avbd/) | Main §3.1–3.7, §4/Algorithm 1 and closing limitations reviewed; p6 visually checked. | [Native experiment contract](avbd-review.md); not implemented. Target-material residuals must remain independent of temporary ramped stiffness, regularized hard constraints and finite iteration drift. |
 | [Li, Kaufman, Jiang 2021: C-IPC](https://ipc-sim.github.io/C-IPC/) | Coupled strain barriers, finite thickness, friction and additive CCD. Paper §5.1–5.4 / Algorithm 1 reviewed; reference code identified. | Closest-feature/ACCD components and an opt-in [coupled normal-force experiment](coupled-contact-experiment.md) exist. The global endpoint filter fails native turn progress. Normal-force derivative/equilibrium tests pass, but the new gap-based model is not C-IPC: strain barriers, friction, weighting, mollification and a full independent reference remain open. No intersection-free engine claim. |
-| [Chen et al. 2025: Offset Geometric Contact](https://graphics.cs.utah.edu/research/projects/ogc/) | Full PDF acquired; §3.7–3.8, Algorithms 1/3 and limitations reviewed; Algorithm 3 visually checked. Per-vertex bounds are tied to contact detection and forces. Full Gauss-map energy derivation/appendices remain to review. | Not implemented. Priority local-bound comparison after the failed global filter. A clamp without its force model is not OGC. High-velocity sparse-contact and concave-region limitations matter; published RTX 4090 timings do not establish browser/phone performance. |
+| [Chen et al. 2025: Offset Geometric Contact](https://graphics.cs.utah.edu/research/projects/ogc/) | Main §3.1–3.8, Algorithms 1/3 and limitations reviewed; pages9/12 visually checked. Block membership and force construction accompany the bounds. | [Derivation/code review](offset-contact-review.md) records an apparent activation-coefficient discrepancy and the reference-code distinction. No OGC port, cited-proof reproduction or finite-caliper guarantee. |
 | [Wen et al. 2026: dimension-reduced developable dynamics](https://www.sciencedirect.com/science/article/pii/S0022509626000931) | Primary abstract describes reduction to rod dynamics with developable/curve-fold constraints. Abstract only reviewed. | Not implemented; establish applicability to rectangular pages, arbitrary grabs and contact before any speed claim. |
 | [Yamazaki 2026: SOCP–PBD](https://link.springer.com/article/10.1007/s00371-026-04760-z) | Primary abstract identifies anchored-cloth slack/stretch and a cone-programming correction. Abstract only reviewed. | Newly identified, not implemented. Compare feasibility, sparse solve cost and preservation of paper bending/material behavior. |
+| [Wen et al. 2026: variational r-adaptive cloth](https://arxiv.org/html/2608.17833v1) | Main formulation/quality/solver §3–5 reviewed; supplemental derivatives and reproduction open. | Not implemented. Preserve native UV/art, cut/crease anchors and mass. Measure fixed-budget error; approximate cached derivatives need fresh target-force checks before declaring convergence. |
+| [Sung et al. 2026: curvature-driven collision culling](https://www.mdpi.com/2227-7390/14/9/1504) | Curvature criterion and boundary/mesh limitations reviewed; reported GPU experiments not reproduced. | A curvature threshold alone is rejected as our safety certificate: flat leaves can collide at zero curvature. A conservative spatial index must retain all eligible swept pairs. This does not evaluate every stage of their implementation. |
+| [Liesegang et al. 2026: paperboard forming](https://link.springer.com/article/10.1007/s00170-026-17694-6) | Abstract and selected FE/calibration passages reviewed; full model/validation not reproduced. | Calibration reference to investigate, not stock data for our reader. Process-specific model fitting cannot substitute for held-out booklet-paper measurements. |
 
 Backend experiments are a separate axis: baseline optimized JavaScript; WASM scalar
 and SIMD; WebGPU compute with measured transfers/dispatch cost. A backend port must
@@ -84,6 +87,20 @@ use an equivalent model, resolution, tolerance and workload. Record availability
 target browsers, initialization, memory, power where measurable, frame p50/p95/p99,
 and input latency. GPU Float32 and parallel reduction order also need a declared
 determinism policy; they cannot silently inherit bit-exact CPU replay claims.
+
+The current [WGSL scalar-type specification](https://www.w3.org/TR/WGSL/#scalar-types)
+provides concrete floating types f32/f16. AbstractFloat's binary64 constant rules
+do not provide an f64 storage/compute type. A direct Float64-preserving WebGPU
+port is therefore not a baseline-language substitution. Float32/emulation and
+WASM f64/SIMD remain separate experiments, including transfer and dispatch cost.
+
+The [local contact ablation](evidence/paper-2026-11-09/README.md#consistent-curvature-and-direct-local-contact)
+now completes a coupled eight-turn protocol with low tensile strain and zero
+partial resting-block deficit. Force convergence and timing still fail. The
+linear solver alone does not explain nonlinear convergence; compression curvature
+and near-parallel contact behavior matter. Recorded profiles put over 91% of
+sampled time in swept candidate scanning. Next work must address conservative
+indexing and contact smoothness, alongside independent material/model gates.
 
 ## Separate gates
 

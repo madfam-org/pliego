@@ -23,7 +23,8 @@ boundary as six binary64 scalars. Visit counters remain binary64 and retain the
 same increment order. A cold tree includes JS topology/initial refit followed by
 the Wasm refit; subsequent refits run in Wasm. These costs are not hidden.
 
-Addresses/sizes and ranks are checked before unsafe access, fixed memory cannot
+Native views currently require a little-endian host and reject other byte orders
+before allocation. Addresses/sizes and ranks are checked before unsafe access; memory cannot
 grow, and NaN boxes are refused. Infinite outward bounds remain supported.
 Topology/counts are immutable as in the JS tree. This supported input domain is
 not a general certificate for arbitrary degenerate geometry or floating-point CCD.

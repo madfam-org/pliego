@@ -36,6 +36,9 @@ import { engineOptions } from '../../../apps/web/studio/src/physics.js';
 
 /** Engine stage of a profiled function: [stage, file basename, function names (empty = any)]. */
 const STAGES = /** @type {[string, string, string[]][]} */ ([
+  ['BVH refit (Wasm)', 'pliego-bounds.wasm', ['refit']],
+  ['BVH query (Wasm)', 'pliego-bounds.wasm', ['query']],
+  ['JS/Wasm call boundary', 'pliego-bounds.wasm', ['boundary']],
   ['contact broad phase', 'contact.js', ['broadPhase', 'key']],
   ['contact projection (vertex–triangle, ground)', 'contact.js', ['project', 'ground']],
   ['edge–face contact', 'edgecontact.js', []],

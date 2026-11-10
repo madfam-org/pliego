@@ -3,6 +3,7 @@
 // topology construction and integer hit sorting; all transfers remain measured.
 import { BoundsTree } from './bounds-tree.js';
 import { createBoundsKernel } from './wasm-bounds-code.js';
+const LITTLE_ENDIAN = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 
 export class WasmBoundsTree extends BoundsTree {
   /** @param {number} count */
@@ -62,6 +63,7 @@ export class WasmBoundsTree extends BoundsTree {
  * @param {number} count
  */
 function allocate(count) {
+  if (!LITTLE_ENDIAN) throw new Error('Wasm contact: little-endian native views required');
   if (!Number.isSafeInteger(count) || count < 0 || count > 0x3fffffff) throw new RangeError('Wasm contact: invalid primitive count');
   if (typeof WebAssembly === 'undefined') throw new Error('Wasm contact: WebAssembly unavailable');
   const capacity = Math.max(1, 2 * count - 1);

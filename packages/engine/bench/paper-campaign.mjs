@@ -13,6 +13,10 @@ import { engineOptions } from '../../../apps/web/studio/src/physics.js';
 import { endpointProgress } from './paper-metrics.mjs';
 
 const arg = name => { const i = process.argv.indexOf(name); return i < 0 ? null : process.argv[i + 1]; };
+const requestedTurns = Number(arg('--turns') ?? 8);
+if (!Number.isInteger(requestedTurns) || requestedTurns < 1 || requestedTurns > 8) throw new RangeError('--turns must be an integer from 1 to 8');
+const stopOnZeroProgress = !process.argv.includes('--continue-after-zero');
+const turnPlan = [...[0, 1, 2, 3].map(index => ({ index, goal: 180 })), ...[3, 2, 1, 0].map(index => ({ index, goal: 0 }))].slice(0, requestedTurns);
 const enginePath = arg('--engine');
 const engineURL = enginePath ? pathToFileURL(resolve(enginePath)) : new URL('../src/index.js', import.meta.url);
 const engine = await import(engineURL.href);
@@ -62,6 +66,7 @@ function run(model, settings) {
     minY: Infinity, finite: true, error: null, completed: false, modelCachePeak: 0,
     vertexRestBlockOverlapMm: model === 'active-leaf' ? 0 : null, supported: true, endpoints: [],
     continuousContact: { steps: 0, limited: 0, iterationLimits: 0, precisionLimits: 0, initialOverlaps: 0, minimumTime: 1 } };
+  r.framesEndingWithZeroProgress = 0;
   let w;
   const start = performance.now();
   try {
@@ -77,7 +82,7 @@ function run(model, settings) {
       r.supported = false; throw new Error('Engine does not support the continuousContact experiment');
     }
     const seenCCD = new Map();
-    for (const goal of [180, 0]) for (const index of goal ? [0, 1, 2, 3] : [3, 2, 1, 0]) {
+    for (const { index, goal } of turnPlan) {
       if (model === 'active-leaf') {
         if (!w.navigate(goal ? 'forward' : 'backward')) throw new Error('Reader refused an exposed turn');
       } else w.setControl(`turn-${index + 1}`, goal);
@@ -102,7 +107,10 @@ function run(model, settings) {
         if (model === 'active-leaf') r.vertexRestBlockOverlapMm = Math.max(r.vertexRestBlockOverlapMm,
           overlapWithRestingBlocks(native, w.book.leaves[w.active].sheet, released?.positions || native.x));
         if (!r.finite || r.maxStrain > 0.01 || r.minY < -0.1) throw new Error('Numerical gate failed');
-        if (stats.continuousContact?.last.time === 0) throw new Error('Continuous contact made zero progress; no flat promotion accepted');
+        if (stats.continuousContact?.last.time === 0) {
+          r.framesEndingWithZeroProgress++;
+          if (stopOnZeroProgress) throw new Error('Continuous contact made zero progress; no flat promotion accepted');
+        }
         if (f === 83) r.endpoints.push({ sheet: model === 'active-leaf' ? w.book.leaves[w.active].sheet : index,
           goal, ...endpointProgress(native, model === 'active-leaf' ? w.book.leaves[w.active].sheet : index, positions, goal) });
       }
@@ -127,7 +135,7 @@ function run(model, settings) {
     numericalPoint1Percent: r.completed && r.finite && r.maxStrain <= 0.001 && r.minY >= -0.1,
     physics8ms: r.completed && r.stepP95Ms <= 8,
     restingBlockVertexThickness: model === 'active-leaf' ? r.completed && r.vertexRestBlockOverlapMm <= 0.001 : 'not evaluated for all-deformable stacks',
-    endpointProgress: r.completed && r.endpoints.length === 8 && r.endpoints.every(e => e.samples > 0 && e.minimum >= 0.9),
+    endpointProgress: r.completed && r.endpoints.length === requestedTurns && r.endpoints.every(e => e.samples > 0 && e.minimum >= 0.9),
     physicalMaterialValidation: 'not measured by this booklet benchmark',
     browserInteraction: 'requires separate browser/device acceptance',
   };
@@ -142,7 +150,7 @@ const settingsMatrix = process.argv.includes('--contact-matrix')
 for (const settings of settingsMatrix) {
   for (const model of ['all-leaves', 'active-leaf']) {
     const r = run(model, settings); results.push(r);
-    console.error(`paper-campaign: ${model} S=${settings.substeps} I=${settings.newtonIterations} physical=${!!settings.physicalMembrane} search=${!!settings.lineSearch} CCD=${!!settings.continuousContact} turns=${r.turns}/8 strain=${r.maxStrain} p95=${r.stepP95Ms?.toFixed(2)}ms ${r.error || 'completed'}`);
+    console.error(`paper-campaign: ${model} S=${settings.substeps} I=${settings.newtonIterations} physical=${!!settings.physicalMembrane} search=${!!settings.lineSearch} CCD=${!!settings.continuousContact} turns=${r.turns}/${requestedTurns} strain=${r.maxStrain} p95=${r.stepP95Ms?.toFixed(2)}ms ${r.error || 'completed'}`);
   }
 }
 const report = {
@@ -154,10 +162,10 @@ const report = {
     metricsSHA256: hash(readFileSync(new URL('./paper-metrics.mjs', import.meta.url))),
     fixture: 'pliego.book.codex(leaves=4,width=90,height=128)', fixtureSHA256: hash(bytes) },
   runtime: { node: process.version, arch: arch(), platform: platform(), cpu: cpus()[0]?.model },
-  protocol: { seed: 1, frameSeconds: 1 / 60, framesPerTurn: 84, requestedTurns: 8,
+  protocol: { seed: 1, frameSeconds: 1 / 60, framesPerTurn: 84, requestedTurns, stopOnZeroProgress,
     fallback: false, repetitions: 1, matrix: process.argv.includes('--contact-matrix') ? 'continuous-contact' : 'solver',
     endpointGate: 'every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation',
-    continuousContact: 'experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; zero-progress stops the case as failure, not completion',
+    continuousContact: 'experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; stopOnZeroProgress declares whether zero progress stops the case',
     timingScope: 'World.step only; includes first-frame/JIT cost; exploratory local measurement' },
   reduction: 'Active-leaf reader promotes releases to flat resting blocks after 1.4 simulation seconds; pre-promotion release poses are audited. Plasticity disabled for reading. Not an unconstrained stack equilibrium.',
   materialAudit: Object.fromEntries(Object.entries(json['pliego:stocks']).map(([id, stock]) => {

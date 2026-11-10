@@ -101,3 +101,34 @@ Next: integrate feasible contact forces into the nonlinear solve, handle
 prescribed motion and initially touching binding regions explicitly, and compare
 cost at equal progress/strain/thickness tolerances. A faster broad phase alone
 cannot fix the zero-progress failure.
+
+## Independent distance reference
+
+`bench/contact-distances.mjs` emits 2,216 deterministic component queries: 2,000
+seeded random VT/EE stencils, 200 scaled variants and 16 adversarial/degenerate
+features. `bench/contact-reference.py` compares them with the separately installed
+[IPC Toolkit Python bindings](https://ipctk.xyz/build/python.html), using their
+compiled C++ squared-distance queries. It does not copy or bundle toolkit code.
+
+The first comparison with `ipctk==1.4.0` agrees within the stated scale-normalized
+tolerance for all 2,215 finite reference results. Maximum normalized discrepancy
+is about 3.87e-16. The remaining collapsed point-triangle query returns non-finite
+in the reference and stays explicitly unavailable; native 0.25 mm² is checked by
+the separate analytical distance test. The adapter exits nonzero for unavailable
+reference results, so this run is not relabelled as an all-pass certificate.
+
+Use an isolated Python environment (the recorded run uses Python 3.12), not the
+engine or API runtime:
+
+```sh
+python3.12 -m venv /tmp/pliego-contact-reference
+/tmp/pliego-contact-reference/bin/python -m pip install --only-binary=:all: --report /tmp/contact-install.json -r packages/engine/bench/contact-reference-requirements.txt
+node packages/engine/bench/contact-distances.mjs --out /tmp/contact-input.json
+/tmp/pliego-contact-reference/bin/python packages/engine/bench/contact-reference.py /tmp/contact-input.json --install-report /tmp/contact-install.json --out /tmp/contact-reference.json
+```
+
+The report fingerprints source, generator, random source, native distance module,
+complete input, reference adapter, installed binary and public wheel artifacts.
+This is component-level cross-checking of two floating-point implementations,
+not CCD certification, measured-stock validation, a full offline C-IPC reference
+or a comparison of equally accurate solver/backend performance.

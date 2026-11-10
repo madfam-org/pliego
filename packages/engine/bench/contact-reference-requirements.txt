@@ -1,0 +1,4 @@
+# Optional isolated reference environment, not an engine runtime dependency.
+ipctk==1.4.0
+numpy==2.5.4
+scipy==1.18.1

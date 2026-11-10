@@ -12,12 +12,26 @@ export class BoundsTree {
     this.primitive = new Int32Array(capacity).fill(-1);
     this.inactive = new Uint8Array(capacity); this.maximumRank = new Int32Array(capacity);
     this.rank = new Int32Array(count); this.stack = new Int32Array(capacity); this.hits = new Int32Array(count);
-    this.nodeTests = 0;
+    this.nodeTests = 0; this.rootContainmentTests = 0;
+    this.order = /** @type {number[]} */([]);
+    /** @type {Uint8Array} */
+    this.primitiveInactive = new Uint8Array(0);
   }
 
   /** @param {Float64Array} boxes @param {number[]} order @param {Uint8Array} inactive */
   refit(boxes, order, inactive) {
-    if (!this.nodes && this.count) this.partition(Array.from({ length: this.count }, (_, i) => i), boxes);
+    this.order = order; this.primitiveInactive = inactive;
+    if (!this.nodes && this.count) {
+      const ids = Array.from({ length: this.count }, (_, i) => i);
+      const active = ids.filter(id => !inactive[id]), stationary = ids.filter(id => inactive[id]);
+      // Layered sheets overlap in X/Z. Group initial stationary primitives so
+      // fixed queries can prune them at one node, rather than near every leaf.
+      // This affects topology only: ALL flags are still recomputed below.
+      if (active.length && stationary.length) {
+        this.nodes = 1;
+        this.left[0] = this.partition(active, boxes); this.right[0] = this.partition(stationary, boxes);
+      } else this.partition(ids, boxes);
+    }
     for (let rank = 0; rank < order.length; rank++) this.rank[order[rank]] = rank;
     for (let n = this.nodes - 1; n >= 0; n--) {
       const id = this.primitive[n], target = 6 * n;
@@ -34,7 +48,7 @@ export class BoundsTree {
         this.maximumRank[n] = Math.max(this.maximumRank[a], this.maximumRank[b]);
       }
     }
-    this.nodeTests = 0;
+    this.nodeTests = 0; this.rootContainmentTests = 0;
   }
 
   /** Initial median partition; stable primitive-ID tie break on each axis.
@@ -63,6 +77,16 @@ export class BoundsTree {
    */
   query(boxes, index, inactive, after = -1) {
     let size = 0, count = 0;
+    if (!this.nodes || this.maximumRank[0] <= after || (inactive && this.inactive[0])) return 0;
+    // An enclosing query overlaps every leaf. Emit current ranks directly,
+    // avoiding a full dense traversal and sort; still apply current inactivity.
+    this.rootContainmentTests++;
+    let encloses = true;
+    for (let k = 0; k < 3; k++) if (boxes[6 * index + k] > this.boxes[k] || boxes[6 * index + 3 + k] < this.boxes[3 + k]) { encloses = false; break; }
+    if (encloses) {
+      for (let rank = Math.max(0, Math.floor(after) + 1); rank < this.count; rank++) if (!(inactive && this.primitiveInactive[this.order[rank]])) this.hits[count++] = rank;
+      return count;
+    }
     if (this.nodes) this.stack[size++] = 0;
     while (size) {
       const n = this.stack[--size];

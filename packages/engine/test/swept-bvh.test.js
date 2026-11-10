@@ -27,7 +27,7 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
       const from = Float64Array.from({ length: 3 * size }, () => sample % 8 ? 400 * random() - 200 : -0);
       const to = from.map(x => sample % 8 ? x + 1000 * random() - 500 : 0);
       for (let v = 0; v < size; v++) {
-        fixed[v] = sample % 3 ? random() > 0.4 ? 1 : 0 : 1;
+        fixed[v] = sample === 0 ? v % 6 < 3 ? 1 : 0 : sample % 3 ? random() > 0.4 ? 1 : 0 : 1;
         weld[v] = sample % 5 ? random() > 0.8 ? Math.floor(3 * random()) : -1 : -1;
         // Some prescribed vertices are moving, some exactly stationary.
         if (sample % 4 === 0 || (fixed[v] && random() > 0.5)) for (let k = 0; k < 3; k++) to[3 * v + k] = from[3 * v + k];

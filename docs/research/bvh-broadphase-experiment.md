@@ -10,7 +10,9 @@ remain the same. This index cannot repair their known limitations.
 
 Both traversals use the same vertex, triangle and edge bounds, covering both
 motion endpoints, maximum primitive caliper and the existing outward roundoff
-margin. The BVH is initially partitioned by deterministic spatial medians.
+margin. The BVH initially separates stationary and active primitives, then uses
+deterministic spatial medians within those groups. Changing stationary state
+does not preserve a stale exclusion: both groups' flags are fully refitted.
 Each call refits **every** leaf/internal bound, stationary flag and current rank;
 there is no approximate temporal cache or curvature-based contact suppression.
 
@@ -27,6 +29,9 @@ VT queries retain increasing vertex order. EE queries retain increasing outer
 edge rank and strictly greater inner rank. This preserves multiplicity and the
 order of floating-point force sums and sequential CCD bounds. Traversal topology
 and node-visit counts may differ without changing those physics inputs.
+When a query exactly encloses the root bound, every leaf overlaps; current ranks
+are emitted directly with current stationary/rank filtering, avoiding a dense
+walk and sort. This is an exact enclosure test, not a proximity heuristic.
 
 Trees are scratch state. Snapshot restore can change spatial partition history,
 but the complete refit and ordered output must still reproduce the same pairs.

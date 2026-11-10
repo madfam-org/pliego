@@ -63,7 +63,8 @@ for (const scene of scenes) {
   }
   const row = { name: scene.name, inputSHA256: digest([scene.from, scene.to, scene.thickness, scene.fixed, w.contact.weldSheet]),
     vertexTrianglePairs: bvh.vertexTriangleCount, edgeEdgePairs: bvh.edgeEdgeCount, orderedPairsSHA256: pairHash(bvh), exactOrderedPairMatch: true,
-    prefixPrimitiveAABBTests: prefixAABBTests, bvhNodeAABBTests: bvh.triangleTree.nodeTests + bvh.edgeTree.nodeTests, coldFirstBuildMs,
+    prefixPrimitiveAABBTests: prefixAABBTests, bvhNodeAABBTests: bvh.triangleTree.nodeTests + bvh.edgeTree.nodeTests,
+    bvhRootEnclosureTests: bvh.triangleTree.rootContainmentTests + bvh.edgeTree.rootContainmentTests, coldFirstBuildMs,
     timings: Object.fromEntries(['reference', 'bvh'].map(mode => [mode, { medianMs: percentile(times[mode], 0.5), p95Ms: percentile(times[mode], 0.95),
       processCpuMedianMs: percentile(cpu[mode], 0.5), wallMs: times[mode], processCpuMs: cpu[mode] }])) };
   results.push(row);
@@ -75,7 +76,7 @@ const report = { schema: 'pliego-broadphase-pairs/0.1', recordedAt: new Date().t
   mesh: { vertices: m.nV, triangles: m.nT, edges: m.nE, topologySHA256: digest([m.tris, m.edges, m.vGroup, m.vSheet, m.triSheet]) },
   protocol: { repetitions, warmupBuilds: 2, order: 'alternated reference/BVH; sequential, same arrays',
     timingScope: 'candidate build only, separate wall and process CPU deltas including JIT/GC; exploratory local run',
-    countScope: 'reference primitive AABB overlap tests vs BVH internal/leaf AABB tests; excludes rank/stationary pruning and bound generation',
+    countScope: 'reference primitive AABB overlap tests vs BVH internal/leaf overlap tests plus separately counted root-enclosure tests; excludes rank/stationary pruning and bound generation',
     physicsAcceptance: 'not evaluated; synthetic dense/large-sweep scenes are culling stress cases, not native physics outcomes' }, results };
 const output = JSON.stringify(report, null, 2) + '\n';
 if (arg('--out')) writeFileSync(arg('--out'), output); else process.stdout.write(output);

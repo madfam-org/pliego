@@ -1,0 +1,273 @@
+{
+  "schema": "pliego-edge-traversal-comparison/0.1",
+  "recordedAt": "2026-11-10T09:33:18.562Z",
+  "comparisonSHA256": "853ebe855e584ed728d4a0ab2aed81683a7fc84964af4a61bdabc4feb6e1318e",
+  "inputSHA256": [
+    "cae0419e968a7eae7bb0d867bf6c8f0eae8c5bd826464e8bf8872b1af75148b1",
+    "47a9f99500514be80ebad432fe4610e204b94605e660145140116715206d0103"
+  ],
+  "sources": [
+    {
+      "git": "f4b33a6c70cb81eb98d890e661fb4a847a684195",
+      "dirty": false,
+      "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+      "harnessSHA256": "49fe225e96c3dbf396f4d9a93790ab95bb34ccc3437e1f719bbfba11e80d96eb"
+    },
+    {
+      "git": "fe2ae0c215022c90e7d022713994f1576584523f",
+      "dirty": false,
+      "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+      "harnessSHA256": "0112dde6583932d6f72a6d0502bc3acdc343e8d662a4c8a7f0e4b900fc2874ee"
+    }
+  ],
+  "sameMeshRuntimeInputsAndOrderedPairs": true,
+  "originalRankAndNaiveTraversalWorkUnchanged": true,
+  "scope": "Five identical component scenes; source-pinned sequential experiments, not a fresh paired device trial. Within refined source all policies use identical inputs and alternating order. Both forced active variants retain dense/large-sweep regressions; auto uses original rank traversal at higher mobility. No World.step, material or device gate is inferred.",
+  "comparisons": [
+    {
+      "name": "native-initial-energy",
+      "inputSHA256": "43346e579de933ad90883df1517140f9cccdd5002a328663efb2c0eb365340e1",
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "rank": {
+        "work": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 19850,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 0.986391000000026
+      },
+      "naiveActive": {
+        "work": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 24430,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 1.0746849999999881
+      },
+      "rankedActive": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 18680,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 0.9544119999999907
+      },
+      "auto": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 18680,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 0.9519039999999563
+      }
+    },
+    {
+      "name": "native-late-energy",
+      "inputSHA256": "be3888e9febd4d75f00a9e1636810079e8f0006f5907b7dcfa918ce21502aed8",
+      "orderedPairsSHA256": "647178c78cf25d36ea0471395816202baa875a84448fce928946f8a769744a0b",
+      "rank": {
+        "work": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 38446,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 1.5881339999999682
+      },
+      "naiveActive": {
+        "work": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 40654,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 1.6449759999999287
+      },
+      "rankedActive": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 34906,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 1.5821449999999686
+      },
+      "auto": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 34906,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 1.5478319999999712
+      }
+    },
+    {
+      "name": "native-late-sweep",
+      "inputSHA256": "88f9069f1b9a9133680e8f9ecc9ac2973864b4e3f9bcb36a7b72180036d50c56",
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "rank": {
+        "work": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 19829,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 0.980370999999991
+      },
+      "naiveActive": {
+        "work": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 24308,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 1.0634109999999737
+      },
+      "rankedActive": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 18619,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 0.9887529999999742
+      },
+      "auto": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 18619,
+          "rootEnclosureTests": 809
+        },
+        "medianMs": 0.9519299999999475
+      }
+    },
+    {
+      "name": "synthetic-large-prescribed-sweep",
+      "inputSHA256": "7cd4b6b2b2f3d86a729a9e22f004ff8495b4b9bb5b4b626b3bde94932436fa6d",
+      "orderedPairsSHA256": "430aaf7baa69fc7248e71f46bd99b46f1f3cb22e8bf02dfd2098787280aa7fb9",
+      "rank": {
+        "work": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 2440896,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 127.02338999999938
+      },
+      "naiveActive": {
+        "work": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 3760240,
+          "rootEnclosureTests": 1804
+        },
+        "medianMs": 179.00622999999996
+      },
+      "rankedActive": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 2440896,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 136.8941730000006
+      },
+      "auto": {
+        "work": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 2440896,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 125.36906099999942
+      }
+    },
+    {
+      "name": "synthetic-dense-all-free",
+      "inputSHA256": "b8cab5c6d74fd9c24d53a2c22cab05c2aeceebf76ecc7804b1f2d9c64a8fc393",
+      "orderedPairsSHA256": "c03fdfd6440f6271e9eb87e7ef25e067d585cc4720a5274e52c72a9101abde86",
+      "rank": {
+        "work": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 74.66702600000099
+      },
+      "naiveActive": {
+        "work": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1804
+        },
+        "medianMs": 96.1557789999988
+      },
+      "rankedActive": {
+        "work": {
+          "edgeTraversal": "active-ranked",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 92.33686600000146
+      },
+      "auto": {
+        "work": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1803
+        },
+        "medianMs": 73.0840360000002
+      }
+    }
+  ]
+}

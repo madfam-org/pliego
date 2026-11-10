@@ -173,8 +173,9 @@ additional comparator negative controls protect the metadata compatibility path.
 
 An internal `SweptCandidates` traversal experiment queries only nonstationary
 edges, canonicalizes each pair by current min-X/ID rank, and buckets outer ranks
-before sorting inner ranks. At least one edge of each retained pair must be
-nonstationary; active/active pairs use increasing rank once. Stationary/moving
+before sorting inner ranks. An edge is inactive only if both vertices are fixed
+and unchanged over the motion endpoints; free vertices remain active even in a
+zero-motion query. At least one edge of each retained pair must be nonstationary; active/active pairs use increasing rank once. Stationary/moving
 classification uses both endpoints, so moving prescribed edges remain eligible.
 The topology/group/weld predicates are symmetric under exchanging edge pairs.
 Consequently filtering before bucketing and restoring lexicographic rank order
@@ -192,8 +193,49 @@ rank reconstruction is unchanged.
 
 The internal `auto` policy selects `active-ranked` below half edge mobility and
 `rank` otherwise. `rank`, `active` and `active-ranked` can be forced by the component
-experiment. This policy is inside the opt-in BVH and is not a new World option. Component schema 0.3 separates those three full-build policies from
-exact-pose reuse and records queries/node tests. Reduced query count alone does
+experiment. This policy is inside the opt-in BVH and is not a new World option.
+Component schema 0.4 separates all four full-build policies from the prefix
+reference and exact-pose reuse, recording queries and node tests. Reduced query count alone does
 not establish reduced work: loss of rank pruning and ordering can dominate.
-Clean-source measurements and any refinement will be recorded before changing
-normal engine selection. Existing physics gates remain unchanged.
+The clean first variant at `f4b33a6c70cb81eb98d890e661fb4a847a684195` reduces
+native EE queries from 1312 to 317 but increases combined VT/EE node tests:
+19850→24430 initial, 38446→40654 late, 19829→24308 sweep. Its late/sweep medians
+are 1.70/1.13 ms versus rank traversal's 1.64/1.03 ms. Forced active traversal
+also regresses on large sweeps and dense output. Query count alone therefore
+fails the work/cost comparison, and this variant is not selected normally.
+
+The rank-pruned refinement at `fe2ae0c215022c90e7d022713994f1576584523f` retains
+317 EE queries and reduces combined node tests to 18680/34906/18619. In the same
+six-policy component run, auto full-build medians are 0.95/1.55/0.95 ms for those
+native scenes versus 0.99/1.59/0.98 ms with forced rank traversal. These small
+local timing differences are exploratory. At full mobility auto retains rank
+traversal: large-sweep median 125.37 ms and dense median 73.08 ms, while forced
+ranked-active traversal costs 136.89/92.34 ms. The large-sweep reference scan is
+still faster (88.16 ms). No universal crossover or speedup is claimed.
+
+Both capped and uncapped S8/I32 eight-turn runs match **every** recorded non-time
+physics result from the prior exact-reuse implementation, including complete
+672-frame sampled-pose hashes, all solver/contact counters and all non-time gates.
+Each repeats every recorded non-time report field on the refined source. Force
+misses remain 0/5168 capped and 0/5200 uncapped. Active-frame p95 is 205.28/201.62 ms
+capped and 319.83/299.78 ms uncapped; CPU p95 is 206.17/202.54 and 320.02/302.32 ms.
+Runs are sequential without competing local physics suites/campaigns. Background
+activity and prior-source timing differences remain; this is not a device trial.
+The 8 ms and measured-material gates remain open.
+
+The new first-turn profile preserves every recorded non-time result and input
+metadata from the preceding profile. Candidate construction/query/refit remains
+53.35% of weighted whole-process sampled self time: 33.97% tree, 19.38% swept,
+versus 55.51% combined before active traversal. Factorization is 6.53%. Loading,
+construction, JIT and diagnostics are included; this is not isolated step CPU or
+retired instructions. This modest reduction still supports candidate/backend
+work, without assuming that a candidate-only port can meet the reading target.
+
+The deterministic tests compare reference, rank, naive active, rank-pruned active
+and auto across 192 persistent refits, plus prescribed crossings and native
+pose/velocity/diagnostic replay. Full source-pinned component data, both full
+sequences/repeats and sanitized profiles are retained in the
+[active-traversal evidence](evidence/paper-2026-11-10/README.md#rank-preserving-active-edge-traversal).
+The component comparator checks identical inputs/ordered pairs and unchanged
+rank/naive structural work across the refinement. Existing physics gates remain
+unchanged; CAD/art/stock/fabrication data are untouched.

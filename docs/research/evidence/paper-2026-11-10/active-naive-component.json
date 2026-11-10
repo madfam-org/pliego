@@ -1,0 +1,994 @@
+{
+  "schema": "pliego-broadphase-pairs/0.3",
+  "recordedAt": "2026-11-10T09:22:44.236Z",
+  "source": {
+    "git": "f4b33a6c70cb81eb98d890e661fb4a847a684195",
+    "dirty": false,
+    "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+    "harnessSHA256": "49fe225e96c3dbf396f4d9a93790ab95bb34ccc3437e1f719bbfba11e80d96eb"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "platform": "darwin",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "mesh": {
+    "vertices": 492,
+    "triangles": 824,
+    "edges": 1312,
+    "topologySHA256": "ada37fc049105b20df0ffc445579ae35879a9cb369003f14f5112d3f9b006834"
+  },
+  "protocol": {
+    "repetitions": 9,
+    "warmupBuilds": 2,
+    "order": "alternated reference/BVH-auto/BVH-rank/BVH-active/BVH-reuse and reverse; sequential, same arrays",
+    "execution": {
+      "reference": "prefix scan, no reuse",
+      "bvh": "forced full refit; auto active-edge traversal below half mobility, otherwise rank traversal",
+      "bvhRank": "forced full refit; original all-rank EE queries",
+      "bvhActive": "forced full refit; active-only EE queries with canonical rank buckets",
+      "bvhReuse": "exact-content reuse allowed only for same-array Float64 unswept poses; swept inputs rebuild"
+    },
+    "timingScope": "candidate build only, separate wall and process CPU deltas including JIT/GC; exploratory local run",
+    "countScope": "reference primitive AABB overlap tests vs BVH internal/leaf overlap tests plus separately counted root-enclosure tests; excludes rank/stationary pruning and bound generation",
+    "physicsAcceptance": "not evaluated; synthetic dense/large-sweep scenes are culling stress cases, not native physics outcomes"
+  },
+  "results": [
+    {
+      "name": "native-initial-energy",
+      "inputSHA256": "43346e579de933ad90883df1517140f9cccdd5002a328663efb2c0eb365340e1",
+      "vertexTrianglePairs": 0,
+      "edgeEdgePairs": 0,
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 383648,
+      "bvhNodeAABBTests": 24430,
+      "bvhRootEnclosureTests": 809,
+      "coldFirstBuildMs": {
+        "reference": 22.213268,
+        "bvh": 15.973173000000031,
+        "bvhRank": 6.275232999999957,
+        "bvhActive": 6.5725759999999696,
+        "bvhReuse": 6.220213999999999
+      },
+      "reusedLastBuild": true,
+      "buildWork": {
+        "bvh": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 24430,
+          "rootEnclosureTests": 809
+        },
+        "bvhRank": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 19850,
+          "rootEnclosureTests": 1803
+        },
+        "bvhActive": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 24430,
+          "rootEnclosureTests": 809
+        },
+        "bvhReuse": {
+          "edgeTraversal": "active",
+          "reused": true,
+          "triangleQueries": 0,
+          "edgeQueries": 0,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 0
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "reference": {
+          "medianMs": 5.308329000000015,
+          "p95Ms": 5.88294499999995,
+          "processCpuMedianMs": 10.508,
+          "wallMs": [
+            5.834704999999985,
+            5.749198000000035,
+            5.88294499999995,
+            5.871306000000004,
+            5.2382709999999975,
+            5.185712000000024,
+            5.183595999999966,
+            5.2631640000000175,
+            5.308329000000015
+          ],
+          "processCpuMs": [
+            16.839,
+            11.391,
+            11.945,
+            11.97,
+            10.508,
+            5.189,
+            5.187,
+            5.27,
+            5.314
+          ]
+        },
+        "bvh": {
+          "medianMs": 1.1041920000000118,
+          "p95Ms": 1.5622189999999705,
+          "processCpuMedianMs": 1.542,
+          "wallMs": [
+            1.5622189999999705,
+            1.5381150000000048,
+            1.559582999999975,
+            1.537600999999995,
+            1.1041920000000118,
+            1.0766840000000002,
+            1.0952310000000125,
+            1.0823570000000018,
+            1.1010049999999865
+          ],
+          "processCpuMs": [
+            3.133,
+            1.542,
+            3.015,
+            2.615,
+            2.221,
+            1.079,
+            1.099,
+            1.084,
+            1.104
+          ]
+        },
+        "bvhRank": {
+          "medianMs": 1.2318860000000313,
+          "p95Ms": 1.5921769999999924,
+          "processCpuMedianMs": 1.444,
+          "wallMs": [
+            1.5921769999999924,
+            1.4387550000000147,
+            1.4435330000000022,
+            1.4434200000000033,
+            0.9881299999999555,
+            1.0727959999999825,
+            1.000633999999991,
+            0.9852480000000128,
+            1.2318860000000313
+          ],
+          "processCpuMs": [
+            2.633,
+            1.444,
+            3.046,
+            3.084,
+            1.357,
+            1.955,
+            1.004,
+            0.988,
+            1.328
+          ]
+        },
+        "bvhActive": {
+          "medianMs": 1.0932259999999587,
+          "p95Ms": 1.6234269999999924,
+          "processCpuMedianMs": 1.098,
+          "wallMs": [
+            1.089636999999982,
+            1.5251749999999902,
+            1.6234269999999924,
+            1.5457040000000006,
+            1.0813959999999838,
+            1.077967000000001,
+            1.0939649999999688,
+            1.0804999999999723,
+            1.0932259999999587
+          ],
+          "processCpuMs": [
+            1.098,
+            1.529,
+            3.238,
+            2.896,
+            1.085,
+            3.133,
+            1.098,
+            1.084,
+            1.097
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 0.023291000000028816,
+          "p95Ms": 0.052320000000008804,
+          "processCpuMedianMs": 0.027,
+          "wallMs": [
+            0.052320000000008804,
+            0.024327000000027965,
+            0.030251000000021122,
+            0.022790999999983796,
+            0.023060999999984233,
+            0.0211840000000052,
+            0.024072999999987132,
+            0.021065000000021428,
+            0.023291000000028816
+          ],
+          "processCpuMs": [
+            0.057,
+            0.028,
+            0.073,
+            0.054,
+            0.025,
+            0.023,
+            0.027,
+            0.024,
+            0.027
+          ]
+        }
+      }
+    },
+    {
+      "name": "native-late-energy",
+      "inputSHA256": "be3888e9febd4d75f00a9e1636810079e8f0006f5907b7dcfa918ce21502aed8",
+      "vertexTrianglePairs": 498,
+      "edgeEdgePairs": 1489,
+      "orderedPairsSHA256": "647178c78cf25d36ea0471395816202baa875a84448fce928946f8a769744a0b",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 383681,
+      "bvhNodeAABBTests": 40654,
+      "bvhRootEnclosureTests": 809,
+      "coldFirstBuildMs": {
+        "reference": 6.300062000000025,
+        "bvh": 6.004912999999988,
+        "bvhRank": 5.775357999999983,
+        "bvhActive": 6.170494000000019,
+        "bvhReuse": 5.599874999999997
+      },
+      "reusedLastBuild": true,
+      "buildWork": {
+        "bvh": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 40654,
+          "rootEnclosureTests": 809
+        },
+        "bvhRank": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 38446,
+          "rootEnclosureTests": 1803
+        },
+        "bvhActive": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 40654,
+          "rootEnclosureTests": 809
+        },
+        "bvhReuse": {
+          "edgeTraversal": "active",
+          "reused": true,
+          "triangleQueries": 0,
+          "edgeQueries": 0,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 0
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "reference": {
+          "medianMs": 5.657926999999972,
+          "p95Ms": 5.6851190000001,
+          "processCpuMedianMs": 5.665,
+          "wallMs": [
+            5.657926999999972,
+            5.661134000000004,
+            5.650416000000007,
+            5.6828629999999976,
+            5.654104000000075,
+            5.644632999999999,
+            5.675989000000072,
+            5.654496999999992,
+            5.6851190000001
+          ],
+          "processCpuMs": [
+            5.67,
+            5.665,
+            5.654,
+            5.686,
+            5.657,
+            5.648,
+            5.681,
+            5.658,
+            5.685
+          ]
+        },
+        "bvh": {
+          "medianMs": 1.7095620000000054,
+          "p95Ms": 1.7190759999999727,
+          "processCpuMedianMs": 1.713,
+          "wallMs": [
+            1.717614000000026,
+            1.698521000000028,
+            1.7190230000001065,
+            1.6978920000000244,
+            1.7070760000000291,
+            1.704362999999944,
+            1.717444999999998,
+            1.7095620000000054,
+            1.7190759999999727
+          ],
+          "processCpuMs": [
+            1.721,
+            1.702,
+            1.722,
+            1.701,
+            1.709,
+            1.705,
+            1.72,
+            1.713,
+            1.723
+          ]
+        },
+        "bvhRank": {
+          "medianMs": 1.6426349999999275,
+          "p95Ms": 1.711396000000036,
+          "processCpuMedianMs": 1.647,
+          "wallMs": [
+            1.6541480000000206,
+            1.6327689999999961,
+            1.6412909999999101,
+            1.636400999999978,
+            1.711396000000036,
+            1.6426349999999275,
+            1.6466230000000905,
+            1.6406039999999393,
+            1.6437650000000303
+          ],
+          "processCpuMs": [
+            1.657,
+            1.634,
+            1.644,
+            1.639,
+            1.699,
+            1.649,
+            1.648,
+            1.644,
+            1.647
+          ]
+        },
+        "bvhActive": {
+          "medianMs": 1.7001209999999674,
+          "p95Ms": 1.7090449999999464,
+          "processCpuMedianMs": 1.703,
+          "wallMs": [
+            1.7070170000000076,
+            1.6882469999999898,
+            1.7012469999999666,
+            1.6918900000000576,
+            1.7090449999999464,
+            1.6899670000000242,
+            1.7001209999999674,
+            1.6872319999999945,
+            1.701129999999921
+          ],
+          "processCpuMs": [
+            1.709,
+            1.691,
+            1.703,
+            1.693,
+            1.713,
+            1.692,
+            1.703,
+            1.689,
+            1.703
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 0.0225350000000617,
+          "p95Ms": 0.024953999999979715,
+          "processCpuMedianMs": 0.024,
+          "wallMs": [
+            0.022530999999958112,
+            0.024953999999979715,
+            0.02274800000009236,
+            0.020602000000053522,
+            0.023572000000058324,
+            0.020713000000000648,
+            0.023099999999999454,
+            0.020575000000008004,
+            0.0225350000000617
+          ],
+          "processCpuMs": [
+            0.03,
+            0.027,
+            0.024,
+            0.022,
+            0.026,
+            0.022,
+            0.025,
+            0.023,
+            0.024
+          ]
+        }
+      }
+    },
+    {
+      "name": "native-late-sweep",
+      "inputSHA256": "88f9069f1b9a9133680e8f9ecc9ac2973864b4e3f9bcb36a7b72180036d50c56",
+      "vertexTrianglePairs": 0,
+      "edgeEdgePairs": 0,
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 380816,
+      "bvhNodeAABBTests": 24308,
+      "bvhRootEnclosureTests": 809,
+      "coldFirstBuildMs": {
+        "reference": 5.510384000000045,
+        "bvh": 5.5301580000000286,
+        "bvhRank": 5.724943000000053,
+        "bvhActive": 6.337401,
+        "bvhReuse": 5.900796000000014
+      },
+      "reusedLastBuild": false,
+      "buildWork": {
+        "bvh": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 24308,
+          "rootEnclosureTests": 809
+        },
+        "bvhRank": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 19829,
+          "rootEnclosureTests": 1803
+        },
+        "bvhActive": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 24308,
+          "rootEnclosureTests": 809
+        },
+        "bvhReuse": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 317,
+          "nodeAABBTests": 24308,
+          "rootEnclosureTests": 809
+        }
+      },
+      "reuseNodeAABBTests": 24308,
+      "timings": {
+        "reference": {
+          "medianMs": 5.041444999999953,
+          "p95Ms": 5.0618480000000545,
+          "processCpuMedianMs": 5.045,
+          "wallMs": [
+            5.035956000000056,
+            4.992663999999991,
+            5.031361000000061,
+            5.041444999999953,
+            5.027707000000078,
+            5.049523999999906,
+            5.046714000000065,
+            5.0618480000000545,
+            5.041663000000085
+          ],
+          "processCpuMs": [
+            5.046,
+            4.995,
+            5.035,
+            5.045,
+            5.03,
+            5.052,
+            5.05,
+            5.065,
+            5.045
+          ]
+        },
+        "bvh": {
+          "medianMs": 1.1274809999999889,
+          "p95Ms": 1.1305759999999054,
+          "processCpuMedianMs": 1.13,
+          "wallMs": [
+            1.0997299999999086,
+            1.090235000000007,
+            1.1064000000000078,
+            1.1305759999999054,
+            1.1274809999999889,
+            1.1236330000000407,
+            1.1304030000000012,
+            1.1278180000000475,
+            1.1302329999999756
+          ],
+          "processCpuMs": [
+            1.103,
+            1.092,
+            1.109,
+            1.133,
+            1.13,
+            1.125,
+            1.133,
+            1.13,
+            1.132
+          ]
+        },
+        "bvhRank": {
+          "medianMs": 1.034481000000028,
+          "p95Ms": 1.0579699999999548,
+          "processCpuMedianMs": 1.037,
+          "wallMs": [
+            1.0094550000000027,
+            0.9923770000000331,
+            1.0069330000000036,
+            1.0229770000000826,
+            1.0448710000000574,
+            1.0579699999999548,
+            1.0391539999999395,
+            1.034481000000028,
+            1.0401749999999765
+          ],
+          "processCpuMs": [
+            1.011,
+            0.995,
+            1.009,
+            1.025,
+            1.048,
+            1.061,
+            1.042,
+            1.037,
+            1.042
+          ]
+        },
+        "bvhActive": {
+          "medianMs": 1.1245099999999866,
+          "p95Ms": 1.1406390000000783,
+          "processCpuMedianMs": 1.127,
+          "wallMs": [
+            1.0933919999999944,
+            1.0859669999999824,
+            1.099770000000035,
+            1.0949640000000045,
+            1.1320329999999785,
+            1.1259450000000015,
+            1.1332859999999982,
+            1.1245099999999866,
+            1.1406390000000783
+          ],
+          "processCpuMs": [
+            1.095,
+            1.089,
+            1.101,
+            1.096,
+            1.135,
+            1.127,
+            1.135,
+            1.127,
+            1.142
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 1.1166429999999536,
+          "p95Ms": 1.1406150000000252,
+          "processCpuMedianMs": 1.119,
+          "wallMs": [
+            1.0884320000000116,
+            1.0837599999999838,
+            1.0971989999999323,
+            1.0861609999999473,
+            1.1228719999999157,
+            1.1251350000000002,
+            1.1406150000000252,
+            1.1166429999999536,
+            1.1263440000000173
+          ],
+          "processCpuMs": [
+            1.091,
+            1.085,
+            1.1,
+            1.089,
+            1.125,
+            1.128,
+            1.144,
+            1.119,
+            1.129
+          ]
+        }
+      }
+    },
+    {
+      "name": "synthetic-large-prescribed-sweep",
+      "inputSHA256": "7cd4b6b2b2f3d86a729a9e22f004ff8495b4b9bb5b4b626b3bde94932436fa6d",
+      "vertexTrianglePairs": 300479,
+      "edgeEdgePairs": 656436,
+      "orderedPairsSHA256": "430aaf7baa69fc7248e71f46bd99b46f1f3cb22e8bf02dfd2098787280aa7fb9",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 1154533,
+      "bvhNodeAABBTests": 2440896,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "reference": 5.519296999999938,
+        "bvh": 8.147840999999971,
+        "bvhRank": 5.476468999999952,
+        "bvhActive": 5.361873999999943,
+        "bvhReuse": 5.101595999999972
+      },
+      "reusedLastBuild": false,
+      "buildWork": {
+        "bvh": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 2440896,
+          "rootEnclosureTests": 1803
+        },
+        "bvhRank": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 2440896,
+          "rootEnclosureTests": 1803
+        },
+        "bvhActive": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 3760240,
+          "rootEnclosureTests": 1804
+        },
+        "bvhReuse": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 2440896,
+          "rootEnclosureTests": 1803
+        }
+      },
+      "reuseNodeAABBTests": 2440896,
+      "timings": {
+        "reference": {
+          "medianMs": 80.85019700000066,
+          "p95Ms": 83.39721400000008,
+          "processCpuMedianMs": 80.851,
+          "wallMs": [
+            81.97425000000021,
+            83.39721400000008,
+            82.16419600000017,
+            80.85019700000066,
+            80.45717200000036,
+            80.34442799999943,
+            83.38774399999966,
+            80.63280699999996,
+            80.28157199999987
+          ],
+          "processCpuMs": [
+            81.959,
+            83.395,
+            82.115,
+            80.851,
+            80.452,
+            80.322,
+            83.324,
+            80.638,
+            80.282
+          ]
+        },
+        "bvh": {
+          "medianMs": 131.47520200000054,
+          "p95Ms": 132.90265399999998,
+          "processCpuMedianMs": 131.443,
+          "wallMs": [
+            131.66863300000023,
+            132.65991600000007,
+            132.90265399999998,
+            132.47470900000008,
+            130.91972200000055,
+            131.18678399999953,
+            131.47520200000054,
+            130.92316699999992,
+            129.86380700000063
+          ],
+          "processCpuMs": [
+            131.645,
+            132.628,
+            132.753,
+            132.424,
+            130.922,
+            131.141,
+            131.443,
+            130.925,
+            129.831
+          ]
+        },
+        "bvhRank": {
+          "medianMs": 131.75544499999978,
+          "p95Ms": 133.96916800000008,
+          "processCpuMedianMs": 131.756,
+          "wallMs": [
+            132.62674500000003,
+            133.96916800000008,
+            132.04891300000008,
+            131.51873700000033,
+            130.2345780000005,
+            131.38554100000056,
+            131.75544499999978,
+            132.8151939999998,
+            130.39418000000023
+          ],
+          "processCpuMs": [
+            132.629,
+            133.934,
+            131.978,
+            131.495,
+            130.231,
+            131.39,
+            131.756,
+            132.711,
+            130.389
+          ]
+        },
+        "bvhActive": {
+          "medianMs": 186.51127899999983,
+          "p95Ms": 193.85804099999996,
+          "processCpuMedianMs": 186.4,
+          "wallMs": [
+            187.17747700000018,
+            193.85804099999996,
+            186.51127899999983,
+            187.36901699999999,
+            189.12070799999947,
+            184.45877799999926,
+            184.14327200000025,
+            184.73482599999988,
+            186.19500999999946
+          ],
+          "processCpuMs": [
+            187.18,
+            193.148,
+            186.4,
+            187.272,
+            189.118,
+            184.464,
+            184.146,
+            184.713,
+            186.173
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 131.02707800000007,
+          "p95Ms": 138.1001799999999,
+          "processCpuMedianMs": 131.031,
+          "wallMs": [
+            132.24806199999966,
+            138.1001799999999,
+            131.62108700000044,
+            134.63551600000028,
+            130.99143800000002,
+            131.02707800000007,
+            129.7861759999996,
+            129.8125169999994,
+            129.21226699999988
+          ],
+          "processCpuMs": [
+            132.229,
+            137.764,
+            131.548,
+            134.562,
+            131.012,
+            131.031,
+            129.791,
+            129.816,
+            129.173
+          ]
+        }
+      }
+    },
+    {
+      "name": "synthetic-dense-all-free",
+      "inputSHA256": "b8cab5c6d74fd9c24d53a2c22cab05c2aeceebf76ecc7804b1f2d9c64a8fc393",
+      "vertexTrianglePairs": 396216,
+      "edgeEdgePairs": 837880,
+      "orderedPairsSHA256": "c03fdfd6440f6271e9eb87e7ef25e067d585cc4720a5274e52c72a9101abde86",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 1265424,
+      "bvhNodeAABBTests": 0,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "reference": 5.297426999999516,
+        "bvh": 6.366840000000593,
+        "bvhRank": 5.797389999999723,
+        "bvhActive": 7.467087999999421,
+        "bvhReuse": 5.258691000000908
+      },
+      "reusedLastBuild": false,
+      "buildWork": {
+        "bvh": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1803
+        },
+        "bvhRank": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1803
+        },
+        "bvhActive": {
+          "edgeTraversal": "active",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1804
+        },
+        "bvhReuse": {
+          "edgeTraversal": "rank",
+          "reused": false,
+          "triangleQueries": 492,
+          "edgeQueries": 1312,
+          "nodeAABBTests": 0,
+          "rootEnclosureTests": 1803
+        }
+      },
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "reference": {
+          "medianMs": 98.41499199999998,
+          "p95Ms": 99.92103300000053,
+          "processCpuMedianMs": 98.357,
+          "wallMs": [
+            98.20690500000092,
+            96.74140799999986,
+            98.41499199999998,
+            97.8994590000002,
+            99.75067500000114,
+            97.8355419999989,
+            99.49003699999957,
+            99.76064899999983,
+            99.92103300000053
+          ],
+          "processCpuMs": [
+            98.187,
+            96.743,
+            98.357,
+            97.895,
+            99.742,
+            97.84,
+            99.492,
+            99.747,
+            99.926
+          ]
+        },
+        "bvh": {
+          "medianMs": 74.53685399999995,
+          "p95Ms": 76.53592000000026,
+          "processCpuMedianMs": 74.521,
+          "wallMs": [
+            74.44161400000121,
+            74.17906099999891,
+            74.98680000000058,
+            74.53685399999995,
+            76.53592000000026,
+            74.42835299999933,
+            74.51772100000017,
+            75.86744199999885,
+            75.92426100000012
+          ],
+          "processCpuMs": [
+            74.446,
+            74.183,
+            74.867,
+            74.51,
+            76.541,
+            74.431,
+            74.521,
+            75.869,
+            75.926
+          ]
+        },
+        "bvhRank": {
+          "medianMs": 74.95326299999942,
+          "p95Ms": 76.02560799999992,
+          "processCpuMedianMs": 74.958,
+          "wallMs": [
+            74.14658800000143,
+            74.33811700000115,
+            75.47819999999956,
+            74.75667099999919,
+            75.73191299999962,
+            74.95326299999942,
+            74.54971099999966,
+            75.96192999999948,
+            76.02560799999992
+          ],
+          "processCpuMs": [
+            74.091,
+            74.343,
+            75.426,
+            74.755,
+            75.717,
+            74.958,
+            74.554,
+            75.963,
+            75.993
+          ]
+        },
+        "bvhActive": {
+          "medianMs": 96.87084400000094,
+          "p95Ms": 101.46145600000091,
+          "processCpuMedianMs": 96.766,
+          "wallMs": [
+            95.85517399999844,
+            96.87084400000094,
+            96.2174329999998,
+            95.51532999999836,
+            97.53814600000078,
+            96.01425599999857,
+            101.46145600000091,
+            98.04868499999975,
+            98.13566899999933
+          ],
+          "processCpuMs": [
+            95.817,
+            96.766,
+            96.218,
+            95.52,
+            97.532,
+            96.032,
+            101.466,
+            98.038,
+            98.083
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 74.89141299999937,
+          "p95Ms": 79.7677449999992,
+          "processCpuMedianMs": 74.892,
+          "wallMs": [
+            73.8802080000005,
+            73.84300699999949,
+            74.89141299999937,
+            74.59858300000087,
+            76.18095100000028,
+            74.84180500000002,
+            77.89975699999923,
+            79.7677449999992,
+            76.18087100000048
+          ],
+          "processCpuMs": [
+            73.832,
+            73.819,
+            74.892,
+            74.571,
+            76.186,
+            74.846,
+            77.825,
+            79.756,
+            76.185
+          ]
+        }
+      }
+    }
+  ]
+}

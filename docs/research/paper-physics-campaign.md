@@ -125,11 +125,31 @@ declared reference/drift/force gates. No held-out stock, global smoothness or
 C-IPC equivalence is implied. Exact-pose candidate reuse subsequently preserves
 both complete trajectories, every recorded force/contact diagnostic and exact
 new-source repeats. A fresh whole-process profile reduces the candidate share
-from about 68% to 56%; it remains the largest sampled cost. Uncapped active p95
-is still 345–365 ms, above the 8 ms gate. The component benchmark explicitly
+from about 68% to 56%; it remains the largest sampled cost. At that checkpoint,
+uncapped active p95 was 345–365 ms, above the 8 ms gate. The component benchmark explicitly
 separates full refits from cache hits and retains the large-sweep regression.
 [Source-pinned reuse evidence](evidence/paper-2026-11-10/README.md#exact-pose-candidate-reuse)
-keeps active traversal and equivalent backend comparisons as performance priorities.
+retains that checkpoint. A subsequent rank-preserving active-edge traversal
+reduces native EE queries from 1312 to 317 and lowers node visits. Its naive
+predecessor is retained as a negative result: fewer queries increased node work.
+Both full trajectories and all recorded force/contact diagnostics remain exact,
+with exact new-source repeats. Capped active p95 is now 202–205 ms and uncapped
+300–320 ms; candidate work remains about 53% of sampled process self time.
+[Active-traversal evidence](evidence/paper-2026-11-10/README.md#rank-preserving-active-edge-traversal)
+keeps equivalent backend and broader model/time-accuracy comparisons open.
+
+The next CPU backend experiment can retain binary64: the
+[WebAssembly value specification](https://webassembly.github.io/spec/core/syntax/values.html#floating-point)
+defines 32/64-bit IEEE formats, including signed zero. The
+[official nondeterminism register](https://github.com/WebAssembly/design/blob/main/Nondeterminism.md)
+identifies NaN payloads, shared memory and relaxed SIMD as cases requiring care;
+binary64 support alone does not prove our replay contract. An initial finite-input
+port must preserve operation/pair order, rejection behavior and whole-run hashes.
+[LLVM's linker documentation](https://lld.llvm.org/WebAssembly.html) describes the
+Wasm target/linker, and [WABT](https://github.com/WebAssembly/wabt) is an alternative
+text/binary toolchain. Compilation/instantiation, memory copies and end-to-end
+World.step belong in measured cost. A per-pair call benchmark cannot establish
+a useful reader backend. No such port or speedup is yet established here.
 
 ## Separate gates
 

@@ -268,3 +268,60 @@ Use the recorded Node/runtime for strict cross-source comparisons. Repeat each
 full run on the same clean source and use `compare-paper-repeat.mjs` to check all
 recorded non-time fields. Source changes during a campaign invalidate its report.
 Interaction, measured-paper accuracy and device gates remain separate and open.
+
+
+## Rank-preserving active-edge traversal
+
+The [first experiment](active-naive-component.json), source
+[`f4b33a6`](https://github.com/madfam-org/pliego/commit/f4b33a6c70cb81eb98d890e661fb4a847a684195),
+reduces query count but increases node visits and has no consistent native cost
+win. The [refined six-policy comparison](active-refined-component.json), source
+[`fe2ae0c`](https://github.com/madfam-org/pliego/commit/fe2ae0c215022c90e7d022713994f1576584523f),
+preserves active-rank pruning while retaining earlier stationary partners. It
+compares reference, original rank, naive active, ranked active, auto and cache-hit
+policies on identical inputs. The [strict component comparison](active-component-comparison.json)
+checks five input/pair fingerprints and unchanged original/naive structural work.
+All ordered pair bytes agree within each component report.
+
+Native edge queries fall 1312→317. Combined VT/EE node tests fall from
+19850/38446/19829 to 18680/34906/18619 for the retained initial/late/sweep scenes.
+These retained native poses include the older unsmoothed late-state capture;
+they are component inputs, not full refined-model histories. Auto full builds
+measure roughly 0.95/1.55/0.95 ms; rank traversal roughly 0.99/1.59/0.98 ms.
+The differences are small exploratory local measurements. Fully mobile scenes
+use rank traversal; forced active variants retain their dense/large-sweep costs.
+The synthetic large-sweep BVH remains slower than the reference scan.
+
+| Model | Full run / repeat | Prior parity / same-source repeat check | Force misses | Active p95, ms |
+|---|---|---|---:|---:|
+| Capped S8/I32 | [run](active-capped-eight.json), [repeat](active-capped-repeat.json) | [prior](active-capped-comparison.json), [repeat](active-capped-repeat-comparison.json) | 0/5168 | 205.28 / 201.62 |
+| Uncapped S8/I32 | [run](active-uncapped-eight.json), [repeat](active-uncapped-repeat.json) | [prior](active-uncapped-comparison.json), [repeat](active-uncapped-repeat-comparison.json) | 0/5200 | 319.83 / 299.78 |
+
+Every recorded non-time result and the complete 672-frame sampled-pose hashes
+match the exact-reuse controls. Every recorded non-time report field repeats on
+the new source. Effective physics options, force tolerance and all non-time gates
+remain unchanged. All new full/component/profile runs were sequential, without
+competing local campaigns/suites; ordinary background activity is not excluded.
+Prior-source timing comparisons are not a fresh paired device trial.
+
+The [profiled first turn](active-first-profile-run.json), [sanitized sample summary](active-first-profile-summary.json)
+and [strict prior-profile parity check](active-first-profile-comparison.json)
+preserve the preceding profiled run's non-time results and input metadata.
+Candidate work remains 53.35% of sampled whole-process self time versus 55.51%
+before active traversal; factorization is 6.53%. The profile includes startup,
+construction, JIT and diagnostics. Raw local profiles are not committed.
+
+```sh
+node --test packages/engine/test/swept-bvh.test.js packages/engine/test/swept-contact.test.js
+node packages/engine/bench/broadphase-pairs.mjs --out /tmp/active-component.json
+node packages/engine/bench/compare-edge-traversals.mjs docs/research/evidence/paper-2026-11-10/active-naive-component.json docs/research/evidence/paper-2026-11-10/active-refined-component.json --out /tmp/active-component-comparison.json
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 6 --model active-leaf --turns 8 --broad-phase bvh --edge-mollification surface-guarded --checkpoint /tmp/active-capped-progress.json --out /tmp/active-capped.json
+node packages/engine/bench/compare-paper-execution.mjs docs/research/evidence/paper-2026-11-10/reuse-capped-eight.json /tmp/active-capped.json --out /tmp/active-capped-comparison.json
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 7 --iterations 32 --model active-leaf --turns 8 --broad-phase bvh --edge-mollification surface-guarded --checkpoint /tmp/active-uncapped-progress.json --out /tmp/active-uncapped.json
+```
+
+Repeat on the same clean source and use `compare-paper-repeat.mjs`. The
+[algorithm audit](../../bvh-broadphase-experiment.md#active-edge-traversal-experiment)
+details ordering, coverage and the mobility heuristic. Native reading still
+misses 8 ms, and measured-paper, general-contact and actual-device gates remain
+open. Equivalent backend ports and broader solver/model comparisons remain work.

@@ -85,6 +85,14 @@ show uncapped active p95 of 345–365 ms and candidate work still about 56% of t
 sampled process. The 8 ms target, material calibration, general contact coverage
 and backend/device acceptance remain open; this is an opt-in optimization.
 
+A rank-preserving active-edge refinement subsequently reduces native query/node
+work while keeping both full trajectories, all recorded diagnostics and exact
+repeated reports. Its [source-pinned evidence](research/evidence/paper-2026-11-10/README.md#rank-preserving-active-edge-traversal)
+measures capped active p95 at 202–205 ms and uncapped at 300–320 ms. The slower
+naive traversal and large-sweep regression are retained. Candidate work still
+accounts for about 53% of sampled process self time; optimality, 8 ms reading and
+measured-paper accuracy remain unproven.
+
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the
 declared 0.001 µN force tolerance, identical sampled-position hashes and all

@@ -13,7 +13,11 @@ export function implicitEnergy(w, x) {
   for (let v = 0; v < mesh.nV; v++) if (w.invMass[v]) {
     for (let c = 0; c < 3; c++) energy += 0.5 * w.mass[v] * idt2 * (x[3 * v + c] - w.xt[3 * v + c]) ** 2;
   }
-  for (let e = 0; e < mesh.nE; e++) {
+  if (w.orthotropicMembrane) {
+    const membrane = w.orthotropicMembrane.energy(x);
+    if (!Number.isFinite(membrane)) return Infinity;
+    energy += membrane;
+  } else for (let e = 0; e < mesh.nE; e++) {
     const a = 3 * mesh.edges[2 * e], b = 3 * mesh.edges[2 * e + 1];
     const d = hypot3(x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]) - mesh.edgeLen[e];
     energy += 0.5 * (d < 0 ? w.kCompFactor : 1) * w.kMem[e] * d * d;

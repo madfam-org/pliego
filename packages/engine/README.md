@@ -8,7 +8,7 @@ The Pliego paper engine. It loads a **sheet document** (FOLD 1.2 + `pliego:`) an
 - **Tier R** (rigid / kinematic): face-tree poses, loop closure with damped least squares and a
   DOF report, closed forms (degree-4 vertex, Miura-ori, V-fold, four-bar) and the kinematic fold
   program.
-- **Tier C** (compliant): real paper stiffness. Membrane, grain-anisotropic bending, creases with
+- **Tier C** (compliant): a declared paper model with explicit accuracy limits. Membrane, grain-anisotropic bending, creases with
   plastic memory, perforations that tear, glue welds, pivots, strings, sliders, pins, mechanisms,
   layer contact with friction (sidedness seeded from `faceOrders`), the ground plane, air drag and
   deterministic wind.
@@ -59,6 +59,34 @@ in-plane modulus and can expose stiffness/conditioning failures; it is not a
 validated quality preset. Defaults retain the existing cap. Compare it with
 `node packages/engine/bench/paper-campaign.mjs`; see the
 [active campaign and separate gates](../../docs/research/paper-physics-campaign.md).
+
+`physicalMembrane` still uses scalar central-force springs. The independent
+[membrane audit](../../docs/research/membrane-constitutive-audit.md) exposes shear,
+Poisson coupling and mesh errors even without the cap; force convergence alone
+does not establish material accuracy.
+
+A separate research law requires all of these constructor options:
+
+```js
+{
+  membraneModel: 'orthotropic-stvk', physicalMembrane: true,
+  membraneCompression: 1, membranePoissonConvention: 'nu12',
+  membraneNu12: [0.293], // explicit synthetic nu12 for every sheet
+  membraneCurvature: 'gauss-newton', membraneProjection: 'none',
+  lineSearch: true, plasticity: false,
+  contact: false, ground: false,
+}
+```
+
+This objective triangle law has a full orthotropic Green-strain energy and exact
+gradient; its PSD Gauss–Newton search matrix is a distinct approximation. The
+initial domain is individually planar uncreased sheets without authored joins,
+drives, perforations or plasticity. Coupled barrier contact is the supported
+contact path; legacy projections and grabs are unsupported. Read the
+[research contract and validation gates](../../docs/research/orthotropic-membrane-experiment.md)
+before using it. Stock Poisson semantics, measured-paper calibration, non-affine
+FE/time convergence and new-model booklet support remain separate work. The
+existing spring law remains the default.
 
 `lineSearch: true` additionally backtracks GN/PCG proposals against the current
 implicit inertia, membrane, bend/damping, drive and join objective, with join

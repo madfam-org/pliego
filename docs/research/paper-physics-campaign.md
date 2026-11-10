@@ -196,10 +196,18 @@ combined shipping cap+.05 policy is not measured in this matrix. The synthetic
 nu12 convention is explicit, while the stock/bending geometric-mean Poisson
 meaning remains unresolved. This is an all-node energy/reaction audit with no
 steps or contact, not a solved boundary-value patch or material calibration.
-A coupled per-triangle orthotropic research law is the next model
-experiment, followed by a solved non-affine reference, controlled time/iteration
-convergence and measured stock gates. No reader/default/runtime law changes
-follow from documenting this failed baseline.
+A coupled per-triangle orthotropic research law is now implemented as a separate
+[opt-in StVK experiment](orthotropic-membrane-experiment.md), with explicit per-sheet
+nu12, exact energy/gradient, a validated exact element Hessian and a named PSD
+Gauss–Newton runtime operator. Independent finite-Green reference, element/operator
+and targeted World replay checks pass. Multiple initially planar sheets are
+supported; creases, joins, hand drives and new-model booklet acceptance remain
+open. The constructor requires uncapped symmetric behavior, line search, disabled
+plasticity and no legacy projections. Clean-source full matrix/repeat evidence
+and default booklet parity remain pending at this implementation checkpoint.
+The failed scalar baseline remains retained; no stock or reader default changes.
+Solved non-affine FE, time/iteration accuracy, locking/bending, physical calibration
+and real-device interaction are still separate required experiments.
 
 ## Separate gates
 
@@ -294,9 +302,9 @@ source and disclose their timing/accuracy scope.
    progress, strain and cost. This does not close coupled contact research.
 2. Finish booklet browser/device acceptance, arbitrary-location hand coupling and
    derived companion page mapping with immutable fabrication provenance.
-3. Implement a research-only coupled orthotropic triangle membrane against the
-   failed scalar-spring tensor baseline; add an independently solved non-affine
-   FE reference, C-IPC comparison and measured stock fixtures. Quantify stiffness
+3. Complete clean-source acceptance for the research-only orthotropic triangle
+   membrane against the retained scalar baseline; add an independently solved
+   non-affine FE reference, C-IPC comparison and measured stock fixtures. Quantify stiffness
    capping, grain response, crease hysteresis and mesh/time convergence.
 4. Implement and compare local XPBD, developable/rod and VBD/AVBD candidates on those
    same gates, then evaluate backend ports for the strongest candidates.

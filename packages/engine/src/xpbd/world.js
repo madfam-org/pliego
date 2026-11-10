@@ -30,6 +30,7 @@ import { Presentation } from './presentation.js';
 import { EnergySearch } from './energy-search.js';
 import { MotionGuard } from '../collision/motion-guard.js';
 import { CoupledContact } from './coupled-contact.js';
+import { OrthotropicMembrane } from './orthotropic-membrane.js';
 import * as K from '../constants.js';
 import { hypot3 } from '../fastmath.js';
 
@@ -43,11 +44,16 @@ export class World {
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
-   *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded'}} [opts]
+   *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton',membraneProjection?:'none'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
     this.doc = doc;
+    const orthotropic = opts.membraneModel === 'orthotropic-stvk';
+    if (!['edge-springs', 'orthotropic-stvk'].includes(opts.membraneModel ?? 'edge-springs')) throw new RangeError('World: invalid membraneModel');
+    const membraneKeys = ['membranePoissonConvention', 'membraneNu12', 'membraneCurvature', 'membraneProjection'];
+    if (!orthotropic && membraneKeys.some(key => /** @type {any} */(opts)[key] !== undefined)) throw new Error('World: membrane research metadata requires orthotropic-stvk');
     this.opts = {
       substeps: opts.substeps ?? K.DEFAULT_SUBSTEPS, contact: opts.contact ?? true, ground: opts.ground ?? true,
       gravity: opts.gravity ?? true, seed: opts.seed ?? K.DEFAULT_SEED, damping: opts.damping ?? K.DAMPING,
@@ -62,6 +68,8 @@ export class World {
       consistentMembraneCurvature: opts.consistentMembraneCurvature ?? false,
       contactBroadPhase: opts.contactBroadPhase ?? 'reference',
       edgeEdgeMollification: opts.edgeEdgeMollification ?? 'off',
+      ...(orthotropic ? { membraneModel: 'orthotropic-stvk', membranePoissonConvention: opts.membranePoissonConvention,
+        membraneNu12: opts.membraneNu12?.slice(), membraneCurvature: opts.membraneCurvature, membraneProjection: opts.membraneProjection } : {}),
     };
     if (typeof this.opts.physicalMembrane !== 'boolean') throw new TypeError('World: physicalMembrane must be boolean');
     this.membraneCap = this.opts.physicalMembrane ? Infinity : K.MEMBRANE_CAP_LENGTH;
@@ -80,6 +88,10 @@ export class World {
     this.mesh = mesh;
     const nV = mesh.nV;
     this.materials = doc.sheets.map((/** @type {any} */ s) => fromDerived(s.derived));
+    if (orthotropic) validateMembraneExperiment(doc, opts, mesh);
+    this.orthotropicMembrane = orthotropic ? new OrthotropicMembrane(mesh, this.materials, doc, opts.membraneNu12) : null;
+    if (this.orthotropicMembrane && !this.orthotropicMembrane.diagnostics(mesh.X0).finite) throw new Error('Orthotropic membrane: invalid initial triangle metric');
+    this.orthotropicMembraneSignature = this.orthotropicMembrane ? JSON.stringify(this.orthotropicMembrane.configuration) : null;
     const lift = (opts.ground ?? true) ? liftOntoTable(doc, mesh) : 0; // setrest.js
     this.X0 = mesh.X0;
     this.x = Float64Array.from(mesh.X0);
@@ -376,7 +388,7 @@ export class World {
         for (let i = 0; i < 3 * nV; i++) { const d = Math.abs(x[i] - xs[i]); if (d > vmax) vmax = d; }
         this.contact.broadPhase(x, this.fixed, Math.min(50, 2 * vmax + 0.5));
       }
-      this._projections();
+      if (!this.orthotropicMembrane) this._projections(); // explicit research membraneProjection:'none'
       this.motionGuard?.apply(this, xs, x);
     }
     for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
@@ -595,6 +607,7 @@ export class World {
 
   /** Grab a vertex with a soft hand constraint toward `point`. Returns false for fixed vertices. @param {number} vertex @param {number[]} point */
   grab(vertex, point) {
+    if (this.orthotropicMembrane) throw new Error('Orthotropic membrane: research domain does not support hand drives');
     if (!(vertex >= 0 && vertex < this.mesh.nV) || this.invMass[vertex] === 0) return false;
     const T = this.terms, t = this.drivers.grabTerm;
     T.verts[T.start[t]] = vertex;
@@ -639,7 +652,7 @@ export class World {
       const s = (L - L0[e]) / L0[e];
       if (s > maxStrain) maxStrain = s;
       if (-s > maxCompression) maxCompression = -s;
-      stretch += 0.5 * (L < L0[e] ? this.kCompFactor : 1) * this.kMem[e] * (L - L0[e]) ** 2;
+      if (!this.orthotropicMembrane) stretch += 0.5 * (L < L0[e] ? this.kCompFactor : 1) * this.kMem[e] * (L - L0[e]) ** 2;
     }
     for (let h = 0; h < this.mesh.nH; h++) {
       const en = 0.5 * this.hingeK[h] * (this.theta[h] - this.restTheta[h]) ** 2;
@@ -647,14 +660,20 @@ export class World {
     }
     let nan = false;
     for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i])) { nan = true; break; }
+    const membrane = this.orthotropicMembrane?.diagnostics(x);
+    if (this.orthotropicMembrane) stretch = this.orthotropicMembrane.energy(x);
+    const legacyEdgeMaxStrain = maxStrain, legacyEdgeMaxCompression = maxCompression;
+    if (membrane) { maxStrain = Math.max(0, membrane.maximumStretch - 1); maxCompression = Math.max(0, 1 - membrane.minimumStretch); }
     return {
       maxStrain, maxCompression, energy: { stretch, bend, crease }, contacts: this._contacts, edgeContacts: this._edgeContacts, grounded: this._grounded,
-      substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
+      substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan && (!membrane || membrane.finite),
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
       unheldWelds: this.gates.unheld(this),
       lineSearchBacktracks: this.energySearch?.backtracks ?? 0, lineSearchRejected: this.energySearch?.rejected ?? 0,
       continuousContact: this.motionGuard?.snapshot() ?? null,
       coupledContact: this.coupledContact?.snapshot() ?? null,
+      ...(membrane ? { membrane: { model: 'orthotropic-stvk', convention: 'nu12', curvature: 'gauss-newton', projectionPolicy: 'none',
+        nu12BySheet: this.opts.membraneNu12?.slice(), legacyEdgeMaxStrain, legacyEdgeMaxCompression, ...membrane } } : {}),
     };
   }
 
@@ -663,4 +682,31 @@ export class World {
 
   /** Restore a snapshot (bit-exact, including the factorisation). @param {any} s */
   restore(s) { restoreWorld(this, s); this.poseVersion++; }
+}
+
+/** Initial supported research domain; no projection, strain barrier or injectivity claim.
+ * @param {any} doc @param {any} opts @param {any} mesh
+ */
+function validateMembraneExperiment(doc, opts, mesh) {
+  if (opts.physicalMembrane !== true || opts.membraneCompression !== 1 || opts.membranePoissonConvention !== 'nu12' ||
+      opts.membraneCurvature !== 'gauss-newton' || opts.membraneProjection !== 'none' || opts.lineSearch !== true || opts.plasticity !== false) {
+    throw new Error('Orthotropic membrane: explicitly require physicalMembrane:true, membraneCompression:1, nu12 convention, gauss-newton curvature, membraneProjection:none, lineSearch:true and plasticity:false');
+  }
+  if (doc.joins.length || doc.controls.length || doc.mechanisms.length || doc.sheets.some(s => s.kinematic) ||
+      mesh.perfPairs.length || mesh.hingeKind.some(k => k !== HINGE_PANEL) || doc.restAngle.some(a => a !== 0)) throw new Error('Orthotropic membrane: joins, controls, mechanisms, kinematic sheets, creases, perforations and set angles are unsupported');
+  if ((opts.contact !== false || opts.ground !== false) && opts.barrierContact !== true) throw new Error('Orthotropic membrane: positional contact/ground requires the coupled barrier path');
+  if (opts.consistentMembraneCurvature !== undefined) throw new Error('Orthotropic membrane: edge consistentMembraneCurvature is inapplicable; use named gauss-newton membraneCurvature');
+  const x = mesh.X0;
+  for (let s = 0; s < doc.sheets.length; s++) {
+    const t = mesh.triSheet.findIndex(sheet => sheet === s);
+    if (t < 0) throw new Error('Orthotropic membrane: each sheet requires a nondegenerate planar patch');
+    const a = 3 * mesh.tris[3 * t], b = 3 * mesh.tris[3 * t + 1], c = 3 * mesh.tris[3 * t + 2];
+    const u = [x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]], v = [x[c] - x[a], x[c + 1] - x[a + 1], x[c + 2] - x[a + 2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], length = hypot3(n[0], n[1], n[2]);
+    if (!(length > 0) || !Number.isFinite(length)) throw new Error('Orthotropic membrane: invalid initial sheet plane');
+    for (let vertex = 0; vertex < mesh.nV; vertex++) if (mesh.vSheet[vertex] === s) {
+      const dx = x[3 * vertex] - x[a], dy = x[3 * vertex + 1] - x[a + 1], dz = x[3 * vertex + 2] - x[a + 2];
+      if (Math.abs(n[0] * dx + n[1] * dy + n[2] * dz) / length > 1e-10 * Math.max(1, hypot3(dx, dy, dz))) throw new Error('Orthotropic membrane: initial sheets must be individually planar');
+    }
+  }
 }

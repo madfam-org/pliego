@@ -62,6 +62,11 @@ export function buildSystem(w) {
   for (let v = 0; v < nV; v++) diagSlot[v] = slot(v, v);
   const edgeSlot = new Int32Array(w.mesh.nE);
   for (let e = 0; e < w.mesh.nE; e++) edgeSlot[e] = slot(E[2 * e], E[2 * e + 1]);
+  const membraneSlots = w.orthotropicMembrane ? new Int32Array(3 * w.mesh.nT) : null;
+  if (membraneSlots) for (let t = 0; t < w.mesh.nT; t++) {
+    let q = 0;
+    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) membraneSlots[3 * t + q++] = slot(w.mesh.tris[3 * t + i], w.mesh.tris[3 * t + j]);
+  }
   const hingeSlot = new Int32Array(6 * w.mesh.nH);
   for (let h = 0; h < w.mesh.nH; h++) {
     let q = 0;
@@ -75,7 +80,7 @@ export function buildSystem(w) {
     for (let i = T.start[t]; i < T.start[t + 1]; i++) for (let j = i + 1; j < T.start[t + 1]; j++) ts.push(T.verts[i] === T.verts[j] ? SLOT_NONE : slot(T.verts[i], T.verts[j]));
   }
   termSlotStart[T.count] = ts.length;
-  return { freeIdx, nFree, ch, diagSlot, edgeSlot, hingeSlot, termSlot: Int32Array.from(ts), termSlotStart, rhs: new Float64Array(3 * nFree) };
+  return { freeIdx, nFree, ch, diagSlot, edgeSlot, hingeSlot, ...(membraneSlots ? { membraneSlots } : {}), termSlot: Int32Array.from(ts), termSlotStart, rhs: new Float64Array(3 * nFree) };
 }
 
 const BLK = new Float64Array(9);
@@ -117,7 +122,15 @@ export function assembleElastic(w, x, ch, currentOperator = false) {
   }
   const E = w.mesh.edges, kM = w.kMem;
   const u = [0, 0, 0];
-  for (let e = 0; e < w.mesh.nE; e++) {
+  if (w.orthotropicMembrane) {
+    w.orthotropicMembrane.addGaussNewtonBlocks(w, x, ch);
+    // Retain geometric factor reuse independently of the discarded spring law.
+    if (ch === S.ch) for (let e = 0; e < w.mesh.nE; e++) {
+      const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
+      const L = hypot3(x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]) || 1;
+      for (let k = 0; k < 3; k++) w.factorDir[3 * e + k] = (x[b + k] - x[a + k]) / L;
+    }
+  } else for (let e = 0; e < w.mesh.nE; e++) {
     const a = E[2 * e], b = E[2 * e + 1];
     let dx = x[3 * b] - x[3 * a], dy = x[3 * b + 1] - x[3 * a + 1], dz = x[3 * b + 2] - x[3 * a + 2];
     const L = hypot3(dx, dy, dz) || 1;
@@ -202,7 +215,8 @@ export function termResidual(T, t, x, r) {
  */
 export function gradient(w, x, g) {
   const E = w.mesh.edges, kM = w.kMem, L0 = w.mesh.edgeLen, U = w.edgeDir, HG = w.hingeGrad;
-  for (let e = 0; e < w.mesh.nE; e++) {
+  if (w.orthotropicMembrane) w.orthotropicMembrane.addGradient(x, g);
+  else for (let e = 0; e < w.mesh.nE; e++) {
     const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
     const dx = x[b] - x[a], dy = x[b + 1] - x[a + 1], dz = x[b + 2] - x[a + 2];
     const L = hypot3(dx, dy, dz);

@@ -5,6 +5,15 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Optional `membraneModel: 'orthotropic-stvk'` adds objective per-triangle full-Q
+Green-strain membrane energy, exact gradients and an explicitly named PSD
+Gauss–Newton search matrix. It requires explicit uncapped/symmetric-compression,
+nu12, curvature, no-projection and line-search research options. Initial planar
+uncreased/no-join scope, finite geometry, snapshot identity and supported coupled
+contact are checked. Independent linear/finite-strain references and unchanged
+spring controls separate constitutive validation from material/device acceptance.
+The spring law, stock snapshots and reader defaults are unchanged.
+
 Optional `edgeEdgeMollification: 'surface-guarded'` differentiates the complete
 parallel-edge weighted energy and retains uncovered pairs' original barriers.
 Admission checks current VT topology/weld/fixed filters and sufficient caliper;

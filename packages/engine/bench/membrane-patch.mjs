@@ -18,12 +18,15 @@ const requireThat = (ok, message) => { if (!ok) throw new Error(`membrane-patch:
  * at most 0.06 cell widths in either direction; the rectangular boundary stays fixed.
  */
 export function makePatch({ cells = 4, pattern = 'forward', grain = 0,
-  physicalMembrane = true, membraneCompression = 1 } = {}) {
+  physicalMembrane = true, membraneCompression = 1, membraneModel, membraneNu12 } = {}) {
   if (!Number.isInteger(cells) || cells < 1 || cells > 64) throw new RangeError('membrane-patch: cells must be an integer in [1,64]');
   if (!['forward', 'alternating', 'perturbed'].includes(pattern)) throw new RangeError('membrane-patch: unknown pattern');
   if (!Number.isFinite(grain)) throw new RangeError('membrane-patch: grain must be finite');
   if (typeof physicalMembrane !== 'boolean') throw new TypeError('membrane-patch: physicalMembrane must be boolean');
   if (!(Number.isFinite(membraneCompression) && membraneCompression > 0 && membraneCompression <= 1)) throw new RangeError('membrane-patch: compression must be in (0,1]');
+  if (membraneModel !== undefined && membraneModel !== 'orthotropic-stvk') throw new RangeError('membrane-patch: unsupported selected model');
+  if (membraneModel && !Number.isFinite(membraneNu12)) throw new TypeError('membrane-patch: explicit research nu12 required');
+  if (!membraneModel && membraneNu12 !== undefined) throw new TypeError('membrane-patch: unused research nu12');
   const builder = new DocBuilder('synthetic prescribed affine membrane patch', { exact: true });
   const sheet = builder.sheet({ id: 'patch', width: WIDTH, height: HEIGHT, grain });
   const vertices = [], triangles = [], interiorIndices = [];
@@ -52,7 +55,9 @@ export function makePatch({ cells = 4, pattern = 'forward', grain = 0,
   for (const edge of builder.E) if (incidences.get(`${Math.min(edge.a, edge.b)},${Math.max(edge.a, edge.b)}`) === 2) builder.assign(edge.a, edge.b, 'F');
   const doc = builder.build();
   const options = { meshEdge: MESH_EDGE, physicalMembrane, membraneCompression,
-    gravity: false, ground: false, contact: false, plasticity: false };
+    gravity: false, ground: false, contact: false, plasticity: false,
+    ...(membraneModel ? { membraneModel, membraneNu12: [membraneNu12], membranePoissonConvention: 'nu12',
+      membraneCurvature: 'gauss-newton', membraneProjection: 'none', lineSearch: true } : {}) };
   const world = new World(doc, options), m = world.mesh;
   requireThat(m.nV === vertices.length && m.nT === triangles.length, 'authored vertex/triangle counts changed');
   requireThat(Array.from(m.docVertex).every((v, i) => v === i), 'document vertex mapping changed');
@@ -73,7 +78,7 @@ export function makePatch({ cells = 4, pattern = 'forward', grain = 0,
   requireThat(Math.abs(area - WIDTH * HEIGHT) <= 1e-10 * WIDTH * HEIGHT, 'area changed');
   const derived = doc['pliego:stocks']['copy-80'].derived;
   const actualMaterial = world.materials[0];
-  const material = { E1: actualMaterial.Emd, E2: actualMaterial.Ecd, nu12: actualMaterial.nu,
+  const material = { E1: actualMaterial.Emd, E2: actualMaterial.Ecd, nu12: membraneModel ? membraneNu12 : actualMaterial.nu,
     G12: actualMaterial.G12, thickness: actualMaterial.t };
   const nativeByteFingerprints = { uv: nativeSha(m.uv), triangles: nativeSha(m.tris), worldPositions: nativeSha(world.x) };
   const meshSHA256 = sha({ vertices, triangles });
@@ -85,7 +90,8 @@ export function makePatch({ cells = 4, pattern = 'forward', grain = 0,
       materialReference: material, affineOriginMm: [0, 0],
       nativeByteOrder: new Uint8Array(new Uint16Array([1]).buffer)[0] === 1 ? 'little' : 'big',
       coordinateConvention: 'sheet (u,v) maps to world (x,y,z)=(u,0,-v); engineering gamma=2*epsilon_uv',
-      materialBasis: 'synthetic DocBuilder copy-80 estimate; nu12 declared for membrane audit, not measured stock calibration' } };
+      materialBasis: 'synthetic DocBuilder copy-80 estimate; nu12 declared for membrane audit, not measured stock calibration',
+      ...(membraneModel ? { selectedMembraneModel: membraneModel, explicitResearchNu12: membraneNu12 } : {}) } };
 }
 
 /** Actual applied sheet displacement after binary64 pose addition/subtraction. */
@@ -121,10 +127,16 @@ export function measureAffine(patch, strain) {
   w.xt.set(w.x);
   const stats = w.stats(), statsEnergy = stats.energy.stretch;
   const energy = implicitEnergy(w, w.x);
-  const stiffness = w.kMem.slice();
+  const stiffness = w.kMem.slice(), selectedMembrane = w.orthotropicMembrane;
   let nonMembraneEnergy;
-  try { w.kMem.fill(0); nonMembraneEnergy = implicitEnergy(w, w.x); }
-  finally { w.kMem.set(stiffness); }
+  try {
+    w.kMem.fill(0);
+    if (selectedMembrane) w.orthotropicMembrane = null;
+    nonMembraneEnergy = implicitEnergy(w, w.x);
+  } finally {
+    w.kMem.set(stiffness);
+    if (selectedMembrane) w.orthotropicMembrane = selectedMembrane;
+  }
   requireThat(nonMembraneEnergy === 0 && stats.energy.bend === 0 && stats.energy.crease === 0, `non-membrane energy=${nonMembraneEnergy}`);
   // stats sums (0.5*k)*(d*d), while implicitEnergy sums ((0.5*k)*d)*d.
   // Their positive edge sums can accumulate more than a few ulps of difference

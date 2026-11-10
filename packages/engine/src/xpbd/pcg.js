@@ -92,7 +92,9 @@ export function hessianTimes(w, x, p, out) {
   const nV = w.mesh.nV, idt2 = 1 / (w.dt * w.dt);
   for (let i = 0; i < nV; i++) { const m = w.mass[i] * idt2; out[3 * i] = m * p[3 * i]; out[3 * i + 1] = m * p[3 * i + 1]; out[3 * i + 2] = m * p[3 * i + 2]; }
   const E = w.mesh.edges, U = w.edgeDir, kM = w.edgeK;
-  for (let e = 0; e < w.mesh.nE; e++) {
+  // Triangle kinematics are evaluated at x on every product; no gradient-cache dependency.
+  if (w.orthotropicMembrane) w.orthotropicMembrane.addGaussNewtonTimes(x, p, out, w.invMass);
+  else for (let e = 0; e < w.mesh.nE; e++) {
     const a = 3 * E[2 * e], b = 3 * E[2 * e + 1];
     const ux = U[3 * e], uy = U[3 * e + 1], uz = U[3 * e + 2];
     const s = kM[e] * (ux * (p[b] - p[a]) + uy * (p[b + 1] - p[a + 1]) + uz * (p[b + 2] - p[a + 2]));

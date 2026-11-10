@@ -30,11 +30,13 @@ export function snapshotWorld(w) {
     energySearch: w.energySearch ? { backtracks: w.energySearch.backtracks, rejected: w.energySearch.rejected } : null,
     motionGuard: w.motionGuard?.snapshot() ?? null,
     coupledContact: w.coupledContact?.snapshot() ?? null,
+    ...(w.orthotropicMembrane ? { membrane: { signature: w.orthotropicMembraneSignature, factorCount: w.factorCount, pcgIterations: w.pcgIterations } } : {}),
   };
 }
 
 /** Restore a state captured by snapshotWorld() (bit-exact, including the factorisation). @param {any} w @param {any} s */
 export function restoreWorld(w, s) {
+  if (!!w.orthotropicMembrane !== !!s.membrane || (w.orthotropicMembrane && s.membrane.signature !== w.orthotropicMembraneSignature)) throw new Error('Orthotropic membrane: snapshot model/reference/material convention mismatch');
   w.x.set(s.x); w.v.set(s.v); w.theta.set(s.theta); w.restTheta.set(s.restTheta); w.memory.set(s.memory);
   w.hingeK.set(s.hingeK); w.driveK.set(s.driveK); w.torn = s.torn;
   w.fixedTarget.set(s.fixedTarget); w.userForce.set(s.userForce);
@@ -75,6 +77,7 @@ export function restoreWorld(w, s) {
   if (w.energySearch) { w.energySearch.backtracks = s.energySearch?.backtracks ?? 0; w.energySearch.rejected = s.energySearch?.rejected ?? 0; }
   if (w.motionGuard && s.motionGuard) w.motionGuard.restore(s.motionGuard);
   if (w.coupledContact && s.coupledContact) w.coupledContact.restore(s.coupledContact);
+  if (w.orthotropicMembrane) { w.factorCount = s.membrane.factorCount; w.pcgIterations = s.membrane.pcgIterations; }
 }
 
 /** A deep copy of a World's factorisation inputs (the World reuses its buffers). @param {any} f */

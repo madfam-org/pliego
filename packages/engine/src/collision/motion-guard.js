@@ -10,7 +10,7 @@ export class MotionGuard {
   constructor(w, maxIterations = 256) {
     this.mesh = w.mesh;
     this.thickness = Float64Array.from(w.mesh.vSheet, s => Math.max(0.05, w.doc.sheets[s].derived.collision_thickness));
-    this.candidates = new SweptCandidates(w.mesh, this.thickness);
+    this.candidates = new SweptCandidates(w.mesh, this.thickness, w.opts?.contactBroadPhase);
     this.ccd = new AdditiveCCD({ maxIterations });
     this.steps = 0; this.limited = 0; this.iterationLimits = 0; this.precisionLimits = 0; this.initialOverlaps = 0; this.minimumTime = 1;
     this.last = { time: 1, queries: 0, iterations: 0, vertexTrianglePairs: 0, edgeEdgePairs: 0, status: 'clear', pair: [] };

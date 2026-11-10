@@ -27,7 +27,7 @@ const overlaps = (a, b) => a[0].every((v, k) => v <= b[1][k] && b[0][k] <= a[1][
 test('swept candidates match brute-force bounds with no duplicates across moving/deforming meshes', () => {
   const m = mesh(24, Array.from({ length: 24 }, (_, i) => i), Array.from({ length: 24 }, (_, i) => i));
   const random = mulberry32(24), tc = Float64Array.from({ length: 24 }, () => 0.05 + random());
-  const C = new SweptCandidates(m, tc), fixed = new Uint8Array(24), weld = new Int32Array(24).fill(-1);
+  const C = new SweptCandidates(m, tc), indexed = new SweptCandidates(m, tc, 'bvh'), fixed = new Uint8Array(24), weld = new Int32Array(24).fill(-1);
   let checks = 0;
   for (let trial = 0; trial < 24; trial++) {
     const from = Float64Array.from({ length: 72 }, () => 10 * random() - 5), to = from.map(v => v + 200 * random() - 100);
@@ -43,11 +43,14 @@ test('swept candidates match brute-force bounds with no duplicates across moving
     }
     const actualVT = pairs(C.vt, C.vertexTriangleCount), actualEE = pairs(C.ee, C.edgeEdgeCount, true);
     assert.deepEqual(actualVT, vt.sort()); assert.deepEqual(actualEE, ee.sort());
+    indexed.build(from, to, fixed, weld);
+    assert.deepEqual(pairs(indexed.vt, indexed.vertexTriangleCount), vt.sort());
+    assert.deepEqual(pairs(indexed.ee, indexed.edgeEdgeCount, true), ee.sort());
     assert.equal(new Set(actualVT).size, actualVT.length); assert.equal(new Set(actualEE).size, actualEE.length);
     C.build(from, to, fixed, weld); assert.deepEqual(pairs(C.vt, C.vertexTriangleCount), actualVT);
     assert.deepEqual(pairs(C.ee, C.edgeEdgeCount, true), actualEE);
   }
-  console.log(`swept-bounds: random meshes=24 brute-force pair checks=${checks}; >50 mm motion, deterministic and duplicate-free`);
+  console.log(`swept-bounds: random meshes=24 brute-force pair checks=${checks} per implementation; reference/BVH, >50 mm motion, deterministic and duplicate-free`);
 });
 
 test('swept filters retain moving prescribed crossings and exclude stationary/topological/welded pairs', () => {
@@ -84,8 +87,10 @@ function toy(kind) {
 }
 
 test('whole-mesh bound prevents free vertex–triangle and edge–edge tunneling, with replayable diagnostics', () => {
+  for (const contactBroadPhase of ['reference', 'bvh']) {
   for (const kind of ['vertex-triangle', 'edge-edge']) {
-    const w = toy(kind), guard = new MotionGuard(w);
+    const w = toy(kind); w.opts = { contactBroadPhase }; const guard = new MotionGuard(w);
+    assert.equal(guard.candidates.mode, contactBroadPhase);
     const x = kind === 'vertex-triangle'
       ? new Float64Array([0.25, 0.3, 0.25, 0, 0, 0, 1, 0, 0, 0, 0, 1])
       : new Float64Array([-1, 0, 0, 1, 0, 0, 0, 0.3, -1, 0, 0.3, 1]);
@@ -96,7 +101,8 @@ test('whole-mesh bound prevents free vertex–triangle and edge–edge tunneling
     if (kind === 'vertex-triangle') replay[1] = -0.3; else { replay[7] = -0.3; replay[10] = -0.3; }
     guard.restore(s); guard.apply(w, x, replay); assert.deepEqual(replay, y); assert.deepEqual(guard.snapshot(), result);
   }
-  console.log('motion-guard: eligible VT and EE crossings bounded; positions and diagnostics replay exactly');
+  }
+  console.log('motion-guard: reference/BVH eligible VT and EE crossings bounded; positions and diagnostics replay exactly');
 });
 
 test('whole-mesh bound refuses initially infeasible inputs and unsupported prescribed collision', () => {

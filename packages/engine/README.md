@@ -85,6 +85,12 @@ or `'auto'` (counts a fallback to PCG). `consistentMembraneCurvature: true` matc
 radial compression curvature to the existing force law; it does not change that
 law. Solver/convergence/fallback counters are in `stats().coupledContact`.
 
+`contactBroadPhase: 'bvh'` selects a refit spatial index for those swept contact
+candidates, retaining reference bounds, exclusions and pair order. The default
+is `'reference'`. This option applies to `continuousContact`/`barrierContact`;
+legacy projection contact is unchanged. See the
+[coverage and benchmark contract](../../docs/research/bvh-broadphase-experiment.md).
+
 These options remain research candidates. Unmollified parallel EE ties are
 nonsmooth; geometry-dependent join Jacobians, friction, general contact weighting,
 material calibration and interactive timing remain open. The coupled eight-turn

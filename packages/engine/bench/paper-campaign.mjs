@@ -1,12 +1,12 @@
 // Native multi-leaf benchmark. Run on an idle machine; no preview fallback, skipped
 // physics time, or wall-time-dependent inputs. A failed numerical gate stops that
 // case and remains a failure in the report (exit 0 means the harness completed).
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, renameSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
 import { cpus, arch, platform } from 'node:os';
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname, join, relative, isAbsolute, sep } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { BookWorld } from '../../../apps/web/studio/src/book-world.js';
 import { engineOptions } from '../../../apps/web/studio/src/physics.js';
@@ -23,6 +23,13 @@ const engine = await import(engineURL.href);
 const path = new URL('../test/fixtures/kernel/codex-four-leaf.fold', import.meta.url);
 const bytes = readFileSync(path), json = JSON.parse(bytes);
 const root = fileURLToPath(new URL('../../../', import.meta.url));
+const broadPhase = arg('--broad-phase');
+if (broadPhase && !['reference', 'bvh'].includes(broadPhase)) throw new RangeError('--broad-phase must be reference or bvh');
+const checkpointPath = arg('--checkpoint') ? resolve(arg('--checkpoint')) : null;
+if (checkpointPath) {
+  const inside = relative(root, checkpointPath);
+  if (!inside || (inside !== '..' && !inside.startsWith('..' + sep) && !isAbsolute(inside))) throw new RangeError('--checkpoint must be outside the source checkout so its writes cannot invalidate the source-integrity check');
+}
 const hash = data => createHash('sha256').update(data).digest('hex');
 function treeHash(directory) {
   const h = createHash('sha256');
@@ -41,6 +48,14 @@ const harnessSHA256 = hash(readFileSync(fileURLToPath(import.meta.url)));
 const sourceStart = { git: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
   status: execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }) };
 const quantile = (a, q) => a.length ? a.toSorted((x, y) => x - y)[Math.min(a.length - 1, Math.ceil(a.length * q) - 1)] : null;
+function checkpoint(phase, result, trajectorySHA256 = null) {
+  if (!checkpointPath) return;
+  const data = { schema: 'pliego-paper-checkpoint/0.1', partial: true, phase, recordedAt: new Date().toISOString(),
+    source: { git: sourceStart.git, dirty: !!sourceStart.status.trim(), engineTreeSHA256, readerSHA256, harnessSHA256, fixtureSHA256: hash(bytes) },
+    scope: 'Completed frame/turn accumulators; source-end verification and final acceptance remain pending',
+    completedCases: results, current: { ...result, ...(trajectorySHA256 ? { trajectorySHA256 } : {}) } };
+  writeFileSync(checkpointPath + '.tmp', JSON.stringify(data, null, 2) + '\n'); renameSync(checkpointPath + '.tmp', checkpointPath);
+}
 
 // Independent vertex-to-flat-resting-block audit. This does not cover moving
 // edge–edge or triangle crossings; a passing result is not a CCD certificate.
@@ -64,7 +79,8 @@ function overlapWithRestingBlocks(w, active, positions) {
 
 function run(model, settings) {
   const trajectory = createHash('sha256');
-  const times = [], activeTimes = [], options = { ...engineOptions(json), ...settings, mechanismRate: 240, plasticity: false };
+  const times = [], activeTimes = [], cpuTimes = [], activeCpuTimes = [];
+  const options = { ...engineOptions(json), ...settings, ...(broadPhase ? { contactBroadPhase: broadPhase } : {}), mechanismRate: 240, plasticity: false };
   const r = { model, options, frames: 0, turns: 0, maxStrain: 0, maxCompression: 0,
     minY: Infinity, finite: true, error: null, completed: false, modelCachePeak: 0,
     vertexRestBlockOverlapMm: model === 'active-leaf' ? 0 : null, supported: true, endpoints: [],
@@ -77,6 +93,9 @@ function run(model, settings) {
   try {
     w = model === 'active-leaf' ? new BookWorld(engine, json, options) : new engine.World(engine.loadDocument(json), options);
     r.buildMs = performance.now() - start;
+    if (broadPhase === 'bvh' && (w.world || w).opts.contactBroadPhase !== 'bvh') {
+      r.supported = false; throw new Error('Engine does not support the BVH broad phase');
+    }
     if (settings.physicalMembrane && (w.world || w).opts.physicalMembrane !== true) {
       r.supported = false; throw new Error('Engine does not support the physicalMembrane experiment');
     }
@@ -108,7 +127,8 @@ function run(model, settings) {
       const initialCoupled = (w.world || w).stats().coupledContact;
       if (initialCoupled) seenCoupled.set(w.world || w, initialCoupled);
       for (let f = 0; f < 84; f++) {
-        const asleep = (w.world || w).stats().asleep, t = performance.now(); w.step(1 / 60); const elapsed = performance.now() - t;
+        const asleep = (w.world || w).stats().asleep, cpu = process.cpuUsage(), t = performance.now(); w.step(1 / 60); const elapsed = performance.now() - t;
+        const used = process.cpuUsage(cpu), cpuMs = (used.user + used.system) / 1000; cpuTimes.push(cpuMs); if (!asleep) activeCpuTimes.push(cpuMs);
         times.push(elapsed); r.frames++; if (asleep) r.asleepFrames++; else { r.activeFrames++; activeTimes.push(elapsed); }
         const released = model === 'active-leaf' && f === 83 ? w.lastRelease : null;
         const stats = released?.stats || w.stats(), native = model === 'active-leaf' ? w.world : w;
@@ -144,6 +164,7 @@ function run(model, settings) {
           goal, ...endpointProgress(native, model === 'active-leaf' ? w.book.leaves[w.active].sheet : index, positions, goal) });
       }
       r.turns++;
+      checkpoint('turn-finished', r, trajectory.copy().digest('hex'));
       if (settings.barrierContact) console.error(`paper-barrier-progress: ${model} turn=${r.turns}/${requestedTurns} frames=${r.frames} endpointMinimum=${r.endpoints.at(-1).minimum} unconverged=${r.coupledContact.unconverged}/${r.coupledContact.steps} backtracks=${r.coupledContact.backtracks}`);
       if (settings.continuousContact) console.error(`paper-contact-progress: ${model} turn=${r.turns} endpointMinimum=${r.endpoints.at(-1).minimum} limited=${r.continuousContact.limited} iterationLimits=${r.continuousContact.iterationLimits}`);
     }
@@ -162,6 +183,8 @@ function run(model, settings) {
   r.stepMeanMs = times.length ? times.reduce((a, b) => a + b, 0) / times.length : null;
   r.stepP95Ms = quantile(times, 0.95); r.stepMaxMs = times.length ? Math.max(...times) : null;
   r.activeStepP95Ms = quantile(activeTimes, 0.95);
+  r.cpuStepMeanMs = cpuTimes.length ? cpuTimes.reduce((a, b) => a + b, 0) / cpuTimes.length : null;
+  r.cpuStepMaxMs = cpuTimes.length ? Math.max(...cpuTimes) : null; r.activeCpuStepP95Ms = quantile(activeCpuTimes, 0.95);
   r.trajectorySHA256 = trajectory.digest('hex');
   r.gates = {
     numerical1Percent: r.completed && r.finite && r.maxStrain <= 0.01 && r.minY >= -0.1,
@@ -202,6 +225,7 @@ if (models.some(m => !['all-leaves', 'active-leaf'].includes(m))) throw new Rang
 for (const settings of caseIndex === null ? settingsMatrix : [settingsMatrix[caseIndex - 1]]) {
   for (const model of models) {
     const r = run(model, settings); results.push(r);
+    checkpoint('case-finished', r);
     console.error(`paper-campaign: ${model} S=${settings.substeps} I=${settings.barrierContact ? settings.barrierIterations : settings.newtonIterations ?? 1} physical=${!!settings.physicalMembrane} search=${!!settings.lineSearch} CCD=${!!settings.continuousContact} barrier=${!!settings.barrierContact} turns=${r.turns}/${requestedTurns} strain=${r.maxStrain} p95=${r.stepP95Ms?.toFixed(2)}ms ${r.error || 'completed protocol'}`);
   }
 }
@@ -216,11 +240,13 @@ const report = {
   runtime: { node: process.version, arch: arch(), platform: platform(), cpu: cpus()[0]?.model },
   protocol: { seed: 1, frameSeconds: 1 / 60, framesPerTurn: 84, requestedTurns, stopOnZeroProgress,
     selectedCase: caseIndex ?? 'all', models,
+    broadPhase: broadPhase ?? 'reference', checkpointEnabled: !!checkpointPath,
     fallback: false, repetitions: 1, matrix: process.argv.includes('--local-matrix') ? 'local-contact' : process.argv.includes('--barrier-matrix') ? 'coupled-contact' : process.argv.includes('--contact-matrix') ? 'continuous-contact' : 'solver',
     trajectory: 'SHA256 of turn/frame headers and every sampled pre-promotion Float64 pose, native-endian; includes frames completed before failure',
     endpointGate: 'every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation',
     continuousContact: 'experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; stopOnZeroProgress declares whether zero progress stops the case',
     timingScope: 'World.step only; includes first-frame/JIT cost; active-step p95 excludes frames asleep at start; exploratory local measurement',
+    cpuTimingScope: 'process.cpuUsage delta around World.step, all process threads including JIT/GC; not retired instructions or pure solver self time',
     coupledContact: 'normal finite-gap barrier, h=0.05 mm k=1e5 g/s², force tolerance=0.001 µN, CG cap=128, per-iteration CCD/energy search; no projection constraints or friction' },
   reduction: 'Active-leaf reader promotes releases to flat resting blocks after 1.4 simulation seconds; pre-promotion release poses are audited. Plasticity disabled for reading. Not an unconstrained stack equilibrium.',
   materialAudit: Object.fromEntries(Object.entries(json['pliego:stocks']).map(([id, stock]) => {
@@ -239,4 +265,8 @@ if (sourceStart.git !== execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, 
 }
 const output = JSON.stringify(report, null, 2) + '\n';
 if (arg('--out')) writeFileSync(resolve(arg('--out')), output); else process.stdout.write(output);
+if (checkpointPath) {
+  writeFileSync(checkpointPath + '.tmp', JSON.stringify({ schema: 'pliego-paper-checkpoint/0.1', partial: false, phase: 'complete', report }, null, 2) + '\n');
+  renameSync(checkpointPath + '.tmp', checkpointPath);
+}
 console.error(`paper-campaign: cases=${results.length} completedProtocols=${results.filter(r => r.completed).length} numericalGate=${results.filter(r => r.gates.numerical1Percent).length} endpointGate=${results.filter(r => r.gates.endpointProgress).length} solverConvergenceGate=${results.filter(r => r.gates.allSolverStepsConverged === true).length}`);

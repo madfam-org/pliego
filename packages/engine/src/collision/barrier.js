@@ -29,7 +29,7 @@ export class BarrierContact {
     this.mesh = w.mesh; this.distance = opts.distance ?? 0.05; this.stiffness = opts.stiffness ?? 1e5;
     for (const value of [this.distance, this.stiffness]) if (!(Number.isFinite(value) && value > 0)) throw new RangeError('Barrier: distance/stiffness must be positive finite');
     this.thickness = Float64Array.from(w.mesh.vSheet, s => Math.max(0.05, w.doc.sheets[s].derived.collision_thickness));
-    this.candidates = new SweptCandidates(w.mesh, this.thickness.map(t => t + this.distance));
+    this.candidates = new SweptCandidates(w.mesh, this.thickness.map(t => t + this.distance), w.opts?.contactBroadPhase);
     this.ids = new Int32Array(4); this.weights = new Float64Array(4); this.derivatives = new Float64Array(2);
     this.stencilIds = new Int32Array(4 * 1024); this.stencilGrad = new Float64Array(12 * 1024); this.curvature = new Float64Array(1024);
     this.groundCurvature = new Float64Array(w.mesh.nV);

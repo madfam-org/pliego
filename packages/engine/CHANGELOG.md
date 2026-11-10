@@ -5,6 +5,12 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Optional `contactBroadPhase: 'bvh'` adds a complete refit hierarchy for swept
+candidates with reference pair ordering, native replay and brute-force coverage
+checks. Reference traversal remains the default. Booklet measurements include
+process CPU deltas and optional atomic checkpoints; no new physics acceptance
+or backend optimality is implied by an index substitution.
+
 Paper campaign continuation (2026-11-10, unreleased source): optional additive CCD,
 coupled finite-gap normal barriers, previous-pose initialization, consistent radial
 compression curvature and a checked direct-local/automatic contact solve. Native

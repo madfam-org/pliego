@@ -7,7 +7,7 @@ const paths = process.argv.slice(2);
 assert.equal(paths.length, 3, 'usage: compare-paper-runs.mjs baseline.json candidate.json repeat.json');
 const [base, a, b] = paths.map(path => JSON.parse(readFileSync(path)));
 const numerical = r => {
-  const fields = Object.fromEntries(Object.entries(r).filter(([key]) => !['buildMs', 'stepMeanMs', 'stepP95Ms', 'stepMaxMs', 'activeStepP95Ms'].includes(key)));
+  const fields = Object.fromEntries(Object.entries(r).filter(([key]) => !['buildMs', 'stepMeanMs', 'stepP95Ms', 'stepMaxMs', 'activeStepP95Ms', 'cpuStepMeanMs', 'cpuStepMaxMs', 'activeCpuStepP95Ms'].includes(key)));
   const { physics8ms, ...gates } = fields.gates; fields.gates = gates;
   return fields;
 };

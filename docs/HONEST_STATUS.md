@@ -95,9 +95,18 @@ measured-paper accuracy remain unproven.
 
 An experimental [binary64 Wasm refit/query backend](research/wasm-contact-experiment.md)
 is available behind `contactBroadPhase: 'wasm'`, with no runtime package dependency
-or hidden JS fallback. Kernel/candidate bytes and the retained solver probe match
-JS; complete source-pinned performance/replay and browser-policy results remain
-pending. The studio's current script policy does not yet permit this compilation.
+or hidden JS fallback. Fresh JS/Wasm comparisons and Wasm repeats preserve both
+complete eight-turn sampled trajectories and every recorded non-time physics
+field, with **0/5168** capped and **0/5200** uncapped force misses. Clean `4b48ec1`
+local active-step p95 is 186–189 ms capped and 278–283 ms uncapped, about 9–11%
+below fresh JS controls and still above 8 ms. Dense-output component performance
+regresses; initialization, memory and substantial JS candidate/filter work remain.
+The later runtime change at `c05de1a` only adds a little-endian host guard;
+supported-host first-turn parity passes, while full timings retain the older pin.
+The current studio/API policy demonstrably blocks Wasm compilation. A separately
+permitted research browser page passes capped/uncapped first-turn byte and
+diagnostic parity. It changes no production policy or default reader and closes
+neither material calibration nor real-device/input-to-paint acceptance.
 
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the

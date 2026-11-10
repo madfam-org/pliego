@@ -325,3 +325,119 @@ Repeat on the same clean source and use `compare-paper-repeat.mjs`. The
 details ordering, coverage and the mobility heuristic. Native reading still
 misses 8 ms, and measured-paper, general-contact and actual-device gates remain
 open. Equivalent backend ports and broader solver/model comparisons remain work.
+
+
+## Scalar binary64 WebAssembly refit/query
+
+This is an opt-in exact backend experiment, with an unchanged JavaScript default.
+[Implementation and reproduction](../../wasm-contact-experiment.md) describe its
+1,268-byte kernel, interface, memory costs and compiler provenance. Full/native
+component measurements and the profile pair use clean source
+[`4b48ec1`](https://github.com/madfam-org/pliego/commit/4b48ec15ab40c5a5cc6c6b9002ecb5e44a82f0a8).
+Fresh JS controls and Wasm candidates use the same source, harness, runtime,
+inputs and effective physics options except the declared backend selector.
+The implementation does not change tolerances, time steps, solver work or energy.
+
+| Model | Fresh JS control | Wasm run / repeat | Fresh backend / same-source repeat comparisons | Force misses | Active wall p95, JS → Wasm / repeat |
+|---|---|---|---|---:|---:|
+| Capped S8/I32 | [control](wasm-control-capped-eight.json) | [run](wasm-capped-eight.json), [repeat](wasm-capped-repeat.json) | [backend](wasm-capped-backend-comparison.json), [repeat](wasm-capped-repeat-comparison.json) | 0/5168 | 207.25 → 185.73 / 189.18 ms |
+| Uncapped S8/I32 | [control](wasm-control-uncapped-eight.json) | [run](wasm-uncapped-eight.json), [repeat](wasm-uncapped-repeat.json) | [backend](wasm-uncapped-backend-comparison.json), [repeat](wasm-uncapped-repeat-comparison.json) | 0/5200 | 311.92 → 283.46 / 278.00 ms |
+
+Every recorded non-time physics result, including all 672 sampled poses and all
+force/contact diagnostics, matches each fresh control. Wasm repeats match whole
+non-time reports on the same source. The fresh controls also match the prior
+active traversal runs ([capped](wasm-control-capped-comparison.json),
+[uncapped](wasm-control-uncapped-comparison.json)); that cross-source checker
+explicitly allows only the reviewed harness metadata migration, source pins and
+enumerated clocks. Full physics options remain exact.
+
+These six full runs were sequential without a competing local campaign, suite
+or browser. Ordinary background activity remains. The roughly 9–11% observed
+p95 reduction is exploratory local evidence, not a universal speed ratio or a
+sustained target-device certificate. Both models still fail 8 ms. Their recorded
+pose hashes remain `666347fe93c97daa9db829fc80921db043477ede3c7041eb6d72283ef2124636`
+and `01aef1cb7236da259a6e16a461721a89bdcd8a28a61a327b10c3cdfb8f219dbf`.
+Force convergence remains a numerical gate for the declared model, with the
+material, geometry, stock and reader-model limits above still applying.
+
+### Component costs and negative control
+
+The [three-round isolated comparison](wasm-isolated/isolated-comparison.json)
+retains six raw reports with their original names and SHA256 digests in the same
+directory. Each backend/round starts a fresh process, alternates process order,
+runs 32 warmups and measures nine full builds. The reference oracle runs after
+timing. Inputs, ordered pair bytes and structural traversal work agree exactly.
+
+| Scene | JS median of medians | Wasm median of medians |
+|---|---:|---:|
+| Native initial energy | 0.918 ms | 0.754 ms |
+| Retained native late energy | 1.486 ms | 1.162 ms |
+| Retained native late sweep | 0.931 ms | 0.763 ms |
+| Synthetic large prescribed sweep | 126.518 ms | 101.786 ms |
+| Synthetic dense all-free | 76.884 ms | **85.704 ms** |
+
+Dense contact regresses in all three rounds. These are candidate-build costs,
+including validation, copies, refits, queries, JS sorting/filtering and boundary
+calls; they are not World.step or a new trial corpus. Retained late poses include
+the older unsmoothed capture. Two warmups produced misleading apparent gains;
+only the clean fresh-process 32-warmup reports above support these comparisons.
+
+The first JS constructor/build costs 0.463/20.820 ms; the first Wasm constructor/build
+costs 1.442/17.511 ms. Wasm compilation, instance and memory setup are included,
+and the first build includes initial JS topology/refit plus Wasm refit. These
+are candidate-builder cold costs, not full World initialization. Wasm linear
+memory occupies 524,288 bytes per two-tree candidate builder, approximately
+1 MiB for potential plus guard per World and 2 MiB for two cached Worlds, in
+addition to host allocations. JS memory reporting zero means no Wasm memory;
+it does not mean no JS allocation. Hit views still borrow Wasm memory; a
+host-owned copy or batched filtering is an unmeasured next experiment.
+
+### Verified samples and browser policy
+
+The profiled [JS first turn](wasm-profile-control-run.json) and
+[Wasm first turn](wasm-profile-candidate-run.json) retain
+[exact backend parity](wasm-profile-backend-comparison.json).
+Their sanitized [JS](wasm-profile-control-summary.json) and
+[Wasm](wasm-profile-candidate-summary.json) summaries retain raw-profile/run and
+reducer/sanitizer/classifier digests. Raw profiles contain local paths and are
+not committed. Current reducer tooling verifies the archived runtime source,
+unchanged kernel bytes and its actual exported function indices before
+attributing the sole observed Wasm module and known call-boundary signatures.
+Unknown modules/functions fail attribution; sample IDs and weights are unchanged.
+The supplied profile/run association follows the capture protocol; separate hashes
+do not prove that an arbitrary supplied trace belongs to its supplied run.
+
+Candidate work accounts for 54.28% of JS whole-process sampled self time and
+49.00% with Wasm. The latter includes 26.07% in `swept.js`, 9.96% Wasm query,
+5.74% Wasm refit, 6.34% wrapper, 0.67% call boundary and small JS setup costs.
+Factorization accounts for 6.76% / 7.33%. These profiles include startup,
+construction, JIT and diagnostics; they are not isolated step or retired-instruction
+measurements. Wasm samples are counted rather than scrubbed into generic runtime.
+
+The [strict-policy browser probe](wasm-browser-strict.json) confirms expected
+compilation rejection under `script-src 'self'`. The
+[research-policy probe](wasm-browser-allow.json) explicitly permits Wasm and
+passes both capped and uncapped 84-frame first turns: 492 vertices, 672 executed
+substeps and zero force misses each, exact position/velocity bytes, release poses
+and recorded contact diagnostics against JS. Source is clean
+[`d969fe0`](https://github.com/madfam-org/pliego/commit/d969fe0190e16eafac249c6a2ef521df05fa5341),
+whose engine equals the full-run source. This is same-browser backend parity;
+production policy, pointer/paint timing and actual touch/stylus devices remain
+uncertified. Production headers and the default studio backend are unchanged.
+
+### Post-measurement platform guard
+
+[`c05de1a`](https://github.com/madfam-org/pliego/commit/c05de1a63872e4d850827f69d6a786de0e9189af)
+adds an explicit little-endian host check, plus verified profile tooling. The
+runtime diff from the full-run source is only that two-line platform guard;
+the kernel and numerical algorithms are unchanged. Fresh clean-source
+[JS](wasm-guard-control-run.json) and [Wasm](wasm-guard-candidate-run.json)
+first turns pass [same-source backend parity](wasm-guard-backend-comparison.json)
+and match the preceding profiled first turns in every recorded non-time field
+([JS](wasm-guard-control-comparison.json), [Wasm](wasm-guard-candidate-comparison.json)).
+The six complete runs remain attributed to their actual source `4b48ec1`.
+
+At `c05de1a`, all 16 CI checks pass, including 154 engine and 123 web tests,
+45-source JSDoc/declaration checks, a 94-file package check and full-history
+secret scanning. This milestone does not close material or interaction gates,
+establish a lowest possible abstraction, or exhaust implementation/research.

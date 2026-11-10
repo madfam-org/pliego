@@ -138,7 +138,7 @@ with exact new-source repeats. Capped active p95 is now 202–205 ms and uncappe
 [Active-traversal evidence](evidence/paper-2026-11-10/README.md#rank-preserving-active-edge-traversal)
 keeps equivalent backend and broader model/time-accuracy comparisons open.
 
-The next CPU backend experiment can retain binary64: the
+The CPU backend experiment retains binary64: the
 [WebAssembly value specification](https://webassembly.github.io/spec/core/syntax/values.html#floating-point)
 defines 32/64-bit IEEE formats, including signed zero. The
 [official nondeterminism register](https://github.com/WebAssembly/design/blob/main/Nondeterminism.md)
@@ -149,9 +149,33 @@ port must preserve operation/pair order, rejection behavior and whole-run hashes
 Wasm target/linker, and [WABT](https://github.com/WebAssembly/wabt) is an alternative
 text/binary toolchain. Compilation/instantiation, memory copies and end-to-end
 World.step belong in measured cost. A per-pair call benchmark cannot establish
-a useful reader backend. A scalar binary64 refit/query [prototype](wasm-contact-experiment.md) now exists.
-Exact kernel/candidate tests pass; end-to-end speed, full replay and browser-policy
-evidence must be measured before any acceptance claim.
+a useful reader backend. The scalar binary64 refit/query
+[prototype and source-pinned results](wasm-contact-experiment.md) now preserve both
+complete eight-turn trajectories, every recorded non-time physics field and exact
+new-source Wasm repeats. At clean `4b48ec1`, fresh JS controls measure capped /
+uncapped active-step p95 at 207.253 / 311.924 ms; Wasm runs/repeats measure
+185.730–189.179 / 278.003–283.464 ms, with zero force misses on 5168 / 5200
+executed substeps. This modest local gain does not meet 8 ms or validate paper
+material. Three fresh-process component pairs retain a dense-output regression
+and initialization/memory costs rather than claiming a universal faster backend.
+
+Verified first-turn profiles attribute Wasm refit/query and boundary samples to
+the recorded kernel, reducing candidate-related whole-process sample share from
+54.28% to 49.00%; JS candidate construction/filtering alone remains 26.07% in the
+Wasm run. This supports investigating buffers/batching and remaining candidate
+work, not assuming that lowering the abstraction of one kernel is sufficient.
+At subsequent `c05de1a`, the only runtime-engine change is an explicit little-endian
+host guard; supported-host first-turn parity against both earlier controls passes.
+Full timing evidence remains pinned to `4b48ec1`.
+
+The strict browser research probe confirms that current studio/API policy blocks
+compilation. An explicitly permitted research page passes byte-exact JS/Wasm
+positions/velocities, release poses and recorded force/contact diagnostics for
+both capped/uncapped 84-frame first turns, with zero force misses. Its clean
+`d969fe0` engine equals the full-run engine. No production policy/default reader
+change or actual-touch/input-to-paint certificate follows. Scalar/SIMD/batched
+backends, independent models, time/mesh accuracy and material/device validation
+remain open campaign work.
 
 ## Separate gates
 

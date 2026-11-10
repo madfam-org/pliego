@@ -1,9 +1,11 @@
 // @ts-check
-// Research-only objective StVK membrane. Exact energy/gradient; the runtime
-// search matrix is explicitly Gauss–Newton PSD, not the exact Hessian.
+// Research-only objective StVK membrane. Exact energy/gradient; the default
+// runtime search matrix is explicitly Gauss–Newton PSD. The opt-in exact membrane
+// curvature adds the geometric stress term and may be indefinite.
 import { hypot2, hypot3 } from '../fastmath.js';
 import * as DD from './double-double.js';
-import { accurateScratch, accurateKinematics, accurateEnergy, accurateGradient, accurateGN, accurateGeometric, addAccurateGradient, addAccurateTimes, accurateDifference } from './accurate-membrane.js';
+import { accurateScratch, accurateKinematics, accurateEnergy, accurateGradient, accurateGN, accurateGeometric, addAccurateGradient, addAccurateTimes, addAccurateExactTimes, accurateDifference } from './accurate-membrane.js';
+import { curvatureConfiguration } from './membrane-curvature.js';
 import { createUVReference, describeUVReference, UV_REFERENCE_IDENTITY, REFERENCE_POSE_QUALITY_MIN, validateMembraneCoordinates } from './uv-reference.js';
 
 const REFERENCE_QUALITY_MIN = 1e-12, CURRENT_AREA_RATIO_MIN = 1e-12;
@@ -109,6 +111,19 @@ function gnEntry(e, k, row, col) {
   return e.volume * (j[row] * (q[0] * j[col] + q[2] * j[9 + col])
     + j[9 + row] * (q[2] * j[col] + q[1] * j[9 + col]) + j[18 + row] * q[3] * j[18 + col]);
 }
+/** Exact membrane curvature entry: GN plus geometric stress, canonical (row<=col)
+ * so diagonal 3x3 blocks are bit-symmetric. On that upper triangle it is the same
+ * arithmetic as evaluateOrthotropicElement's exact Hessian; double-double sums
+ * both pieces before the single binary64 rounding.
+ * @param {OrthotropicElement} e @param {ReturnType<typeof scratch>} k @param {number} row @param {number} col */
+function exactEntry(e, k, row, col) {
+  if (row > col) { const swap = row; row = col; col = swap; }
+  const ni = Math.floor(row / 3), nj = Math.floor(col / 3), same = row % 3 === col % 3;
+  if (k.arithmetic === 'double-double') return DD.rounded(DD.add(accurateGN(e, k, row, col), same ? accurateGeometric(e, k, ni, nj) : [0, 0]));
+  const a = e.alpha, b = e.beta, s = k.stress;
+  const geometric = same ? s[0] * a[ni] * a[nj] + s[1] * b[ni] * b[nj] + s[2] * (a[ni] * b[nj] + b[ni] * a[nj]) : 0;
+  return gnEntry(e, k, row, col) + e.volume * geometric;
+}
 /** Exact element energy, force gradient, and exact/GN Hessians for validation.
  * Invalid trial energy is Infinity; derivative requests at invalid poses throw.
  * @param {OrthotropicElement} element @param {ArrayLike<number>} x nine world coordinates
@@ -155,8 +170,9 @@ function compensatedIncrement(values) {
 export class OrthotropicMembrane {
   /** @param {import('../mesh.js').Mesh} mesh @param {import('../material.js').Material[]} materials
    * @param {any} doc loaded document @param {number[]} nu12PerSheet explicit research Poisson convention
-   * @param {'binary64'|'double-double'} [arithmetic] @param {'material-coefficients'|'uv-displacement'} [reference] */
-  constructor(mesh, materials, doc, nu12PerSheet, arithmetic = 'binary64', reference = 'material-coefficients') {
+   * @param {'binary64'|'double-double'} [arithmetic] @param {'material-coefficients'|'uv-displacement'} [reference]
+   * @param {'gauss-newton'|'exact-hessian'} [curvature] requested search curvature identity */
+  constructor(mesh, materials, doc, nu12PerSheet, arithmetic = 'binary64', reference = 'material-coefficients', curvature = 'gauss-newton') {
     demand(['binary64', 'double-double'].includes(arithmetic), 'invalid arithmetic');
     demand(['material-coefficients', 'uv-displacement'].includes(reference), 'invalid reference');
     demand(reference !== 'uv-displacement' || arithmetic === 'double-double', 'UV reference requires double-double arithmetic');
@@ -178,13 +194,15 @@ export class OrthotropicMembrane {
       const x0 = reference === 'uv-displacement' ? Array.from(mesh.tris.subarray(3 * t, 3 * t + 3)).flatMap(v => Array.from(mesh.X0.subarray(3 * v, 3 * v + 3))) : [];
       this.elements.push(reference === 'uv-displacement' ? createUVReferenceElement(uv, materialData[sheet], grain, nu12PerSheet[sheet], x0) : createOrthotropicElement(uv, materialData[sheet], grain, nu12PerSheet[sheet]));
     }
-    this.configuration = { model: 'orthotropic-stvk', version: 1, curvature: 'gauss-newton', poissonConvention: 'nu12',
+    const { curvaturePolicy, ...curvatureFields } = curvatureConfiguration(curvature);
+    this.configuration = { model: 'orthotropic-stvk', version: 1, ...curvatureFields, poissonConvention: 'nu12',
       nu12BySheet: nu12PerSheet.slice(), materials: materialData, grainDegrees,
       referenceUV: Array.from(mesh.uv), triangles: Array.from(mesh.tris), triangleSheets: Array.from(mesh.triSheet),
       referenceQualityMin: REFERENCE_QUALITY_MIN, currentAreaRatioMin: CURRENT_AREA_RATIO_MIN,
       ...(arithmetic === 'double-double' ? { arithmetic: { ...DD.DOUBLE_DOUBLE_IDENTITY } } : {}),
       ...(reference === 'uv-displacement' ? { reference: { ...UV_REFERENCE_IDENTITY }, referencePoseQualityMin: REFERENCE_POSE_QUALITY_MIN,
-        referenceElements: this.elements.map(e => describeUVReference(/** @type {import('./uv-reference.js').UVReference} */ (e.reference))) } : {}) };
+        referenceElements: this.elements.map(e => describeUVReference(/** @type {import('./uv-reference.js').UVReference} */ (e.reference))) } : {}),
+      ...(curvaturePolicy ? { curvaturePolicy } : {}) };
     this.configurationKey = JSON.stringify(this.configuration);
     this.work = scratch(arithmetic); this.block = new Float64Array(9);
     if (reference === 'uv-displacement') Object.assign(this.work, { reference, referenceMetricMismatch: 0 });
@@ -304,6 +322,50 @@ export class OrthotropicMembrane {
       }
     }
   }
+  /** Add exact membrane curvature blocks (may be indefinite; no shift or clipping).
+   * Same slots, masks and transpose contract as addGaussNewtonBlocks.
+   * @param {any} w @param {ArrayLike<number>} x @param {import('../linalg/blockchol.js').BlockCholesky} ch @param {string} [coordinates] */
+  addExactHessianBlocks(w, x, ch, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
+    const slots = w.sys.membraneSlots;
+    demand(slots instanceof Int32Array && slots.length === 3 * this.mesh.nT, 'membrane assembly slots missing');
+    for (let t = 0; t < this.mesh.nT; t++) {
+      const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3), k = this.work;
+      demand(kinematics(e, x, ids, k, coordinates), 'collapsed or non-finite current triangle');
+      let pair = 0;
+      for (let i = 0; i < 3; i++) for (let j = i; j < 3; j++) {
+        const slot = i === j ? w.sys.diagSlot[ids[i]] : slots[3 * t + pair++];
+        if (slot === SLOT_NONE) continue;
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) this.block[3 * r + c] = exactEntry(e, k, 3 * i + r, 3 * j + c);
+        ch.add(slot, this.block);
+      }
+    }
+  }
+  /** Exact membrane curvature product; fixed input entries are zero and fixed
+   * output is omitted, exactly as for addGaussNewtonTimes.
+   * @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] @param {string} [coordinates] */
+  addExactHessianTimes(x, p, out, invMass, coordinates = 'absolute-position') {
+    validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
+    if (this.work.arithmetic === 'double-double') return addAccurateExactTimes(this, x, p, out, invMass, coordinates);
+    for (let t = 0; t < this.mesh.nT; t++) {
+      const e = this.elements[t], ids = this.mesh.tris.subarray(3 * t, 3 * t + 3), k = this.work;
+      demand(kinematics(e, x, ids, k, coordinates), 'collapsed or non-finite current triangle');
+      const free = [0, 1, 2].map(i => !invMass || !!invMass[ids[i]]);
+      let z0 = 0, z1 = 0, z2 = 0;
+      for (let i = 0; i < 3; i++) if (free[i]) for (let r = 0; r < 3; r++) {
+        const c = 3 * i + r, value = p[3 * ids[i] + r]; z0 += k.J[c] * value; z1 += k.J[9 + c] * value; z2 += k.J[18 + c] * value;
+      }
+      const q = e.Q, s0 = q[0] * z0 + q[2] * z1, s1 = q[2] * z0 + q[1] * z1, s2 = q[3] * z2, a = e.alpha, b = e.beta, s = k.stress;
+      for (let i = 0; i < 3; i++) if (free[i]) for (let r = 0; r < 3; r++) {
+        let geometric = 0;
+        for (let j = 0; j < 3; j++) if (free[j]) {
+          const m = Math.min(i, j), n = Math.max(i, j);
+          geometric += (s[0] * a[m] * a[n] + s[1] * b[m] * b[n] + s[2] * (a[m] * b[n] + b[m] * a[n])) * p[3 * ids[j] + r];
+        }
+        const c = 3 * i + r; out[3 * ids[i] + r] += e.volume * (k.J[c] * s0 + k.J[9 + c] * s1 + k.J[18 + c] * s2 + geometric);
+      }
+    }
+  }
   /** Current metric diagnostics, not an inversion/contact/strain-limit certificate. @param {ArrayLike<number>} x @param {string} [coordinates] */
   diagnostics(x, coordinates = 'absolute-position') {
     validateMembraneCoordinates(coordinates, !!this.configuration.reference, this.work.arithmetic ?? 'binary64');
@@ -316,7 +378,7 @@ export class OrthotropicMembrane {
       if (this.configuration.reference) referenceMetricMismatch = Math.max(referenceMetricMismatch, /** @type {any} */ (this.work).referenceMetricMismatch);
     }
     if (this.work.arithmetic === 'double-double') this.work.arithmeticError = arithmeticError;
-    return { model: 'orthotropic-stvk', curvature: 'gauss-newton', poissonConvention: 'nu12',
+    return { model: 'orthotropic-stvk', curvature: this.configuration.curvature, poissonConvention: 'nu12',
       ...(this.work.arithmetic === 'double-double' ? { arithmetic: 'double-double', arithmeticVersion: 1, arithmeticError } : {}),
       ...(this.configuration.reference ? { reference: 'uv-displacement', referenceVersion: 1, referenceMetricMismatch } : {}),
       finite: invalidTriangles === 0, invalidTriangles, triangles: this.mesh.nT,

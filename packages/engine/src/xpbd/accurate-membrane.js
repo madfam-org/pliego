@@ -113,6 +113,17 @@ export function addAccurateGradient(membrane, x, g, coordinates = 'absolute-posi
 /** Same J^T Q J operator as sparse assembly; masks follow the native contract.
  * @param {any} membrane @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] @param {string} [coordinates] */
 export function addAccurateTimes(membrane, x, p, out, invMass, coordinates = 'absolute-position') {
+  accurateTimes(membrane, x, p, out, invMass, coordinates, false);
+}
+/** Exact membrane curvature product: the GN value plus the geometric stress
+ * term, both accumulated in two words before the single binary64 rounding.
+ * @param {any} membrane @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out @param {ArrayLike<number>} [invMass] @param {string} [coordinates] */
+export function addAccurateExactTimes(membrane, x, p, out, invMass, coordinates = 'absolute-position') {
+  accurateTimes(membrane, x, p, out, invMass, coordinates, true);
+}
+/** @param {any} membrane @param {ArrayLike<number>} x @param {ArrayLike<number>} p @param {Float64Array} out
+ * @param {ArrayLike<number>|undefined} invMass @param {string} coordinates @param {boolean} exact */
+function accurateTimes(membrane, x, p, out, invMass, coordinates, exact) {
   const values = new Float64Array(2 * out.length), k = membrane.work;
   for (let i = 0; i < out.length; i++) values[2 * i] = out[i];
   for (let t = 0; t < membrane.mesh.nT; t++) {
@@ -122,9 +133,12 @@ export function addAccurateTimes(membrane, x, p, out, invMass, coordinates = 'ab
     for (let i = 0; i < 3; i++) if (!invMass || invMass[ids[i]]) for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) z[c].push(D.scale(D.get(k.ddJ, 9 * c + 3 * i + r), p[3 * ids[i] + r]));
     const j = z.map(D.sum), q = e.Q;
     const stress = [D.add(D.scale(j[0], q[0]), D.scale(j[1], q[2])), D.add(D.scale(j[0], q[2]), D.scale(j[1], q[1])), D.scale(j[2], q[3])];
+    // Canonical (min, max) node pair: the same stress curvature as the blocks.
+    const geometric = exact ? [0, 1, 2].map(a => [0, 1, 2].map(b => accurateGeometric(e, k, Math.min(a, b), Math.max(a, b)))) : null;
     for (let i = 0; i < 3; i++) if (!invMass || invMass[ids[i]]) for (let r = 0; r < 3; r++) {
       const col = 3 * i + r, index = 3 * ids[i] + r;
-      const value = D.scale(D.sum(stress.map((s, c) => D.mul(D.get(k.ddJ, 9 * c + col), s))), e.volume);
+      let value = D.scale(D.sum(stress.map((s, c) => D.mul(D.get(k.ddJ, 9 * c + col), s))), e.volume);
+      if (geometric) for (let n = 0; n < 3; n++) if (!invMass || invMass[ids[n]]) value = D.add(value, D.scale(geometric[i][n], p[3 * ids[n] + r]));
       D.put(values, index, D.add(D.get(values, index), value));
     }
   }

@@ -14,9 +14,9 @@ import { WorkerWorld, startEngineWorker, retireEngineWorker } from './world-prox
 import { probeStep } from './engine-worker.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
 import { createRenderer, rendererOverride } from './render/index.js';
-import { attachInput } from './render/input.js';
 import { sheetsFromDocument } from './render/scene.js';
-import { rayPlane } from './render/camera.js';
+import { readingLeaf } from './leaf-reader.js';
+import { attachViewerInput } from './viewer-input.js';
 
 const $ = (id) => /** @type {any} */ (document.getElementById(id));
 const i18n = createI18n(STUDIO_STRINGS);
@@ -44,6 +44,7 @@ const state = {
   overlayOn: false,
   grabMode: false,
   grabbing: /** @type {{plane: number[], normal: number[]} | null} */ (null),
+  holdingLeaf: false,
   view: /** @type {'3d'|'2d'} */ ('3d'),
   controls: /** @type {ReturnType<typeof renderControls> | null} */ (null),
   updateSteps: /** @type {(v: number) => void} */ (() => {}),
@@ -99,6 +100,20 @@ function renderAll() {
   if (state.json) state.updateSteps = renderSteps($('steps'), $('steps-card'), state.json, i18n, (v) => setPrimary(v, true));
   syncSteps();
   renderStatusStatic();
+  syncReadingMode();
+}
+
+function syncReadingMode() {
+  const paper = state.share.interaction === 'paper';
+  const available = paper && state.engine?.kind === 'engine' && readingLeaf(state.json);
+  const hint = paper ? (available ? 'paper.hint' : 'paper.unavailable') : 'tool.hint';
+  const label = paper ? (available ? 'paper.label' : 'paper.unavailable') : 'viewer.label';
+  $('input-hint').dataset.i18n = hint; $('input-hint').textContent = i18n.t(hint);
+  if (state.renderer) {
+    state.renderer.canvas.setAttribute('data-i18n-attr', `aria-label:${label}`);
+    state.renderer.canvas.setAttribute('aria-label', i18n.t(label));
+  }
+  $('btn-grab').disabled = paper;
 }
 
 function renderStatusStatic() {
@@ -297,6 +312,8 @@ function syncPhysicsButton() {
 let docGen = 0;
 async function useDocument(json, opts = {}) {
   const gen = ++docGen;
+  state.input?.destroy(); state.input = null;
+  if (state.grabbing) state.world?.release(); state.grabbing = null; state.holdingLeaf = false;
   state.json = json;
   state.failed = false;
   notice('');
@@ -366,6 +383,7 @@ async function useDocument(json, opts = {}) {
   shownOverlay = null;
   quiet = 0; received = 0;
   renderAll();
+  setupInput();
   if (!state.renderer || !state.world) setView('2d', false);
   invalidate();
 }
@@ -415,30 +433,9 @@ function setView(view, share = true) {
 }
 
 function setupInput() {
-  const r = state.renderer;
-  if (!r) return;
-  state.input = attachInput(r.canvas, r.camera, {
-    grabMode: () => state.grabMode,
-    onGrabStart(ndc) {
-      if (!state.world) return false;
-      if (state.world.capabilities && state.world.capabilities.grab === false) { status(i18n.t('status.grabStub')); return false; }
-      const ray = r.camera.ray(ndc[0], ndc[1]);
-      const hit = state.world.pick(ray.origin, ray.dir);
-      if (!hit) return false;
-      state.world.grab(hit.vertex, hit.point);
-      state.grabbing = { plane: hit.point, normal: r.camera.forward() };
-      wake();
-      return true;
-    },
-    onGrabMove(ndc) {
-      if (!state.grabbing || !state.world) return;
-      const ray = r.camera.ray(ndc[0], ndc[1]);
-      const p = rayPlane(ray.origin, ray.dir, state.grabbing.plane, state.grabbing.normal);
-      if (p) state.world.moveGrab(p);
-      wake();
-    },
-    onGrabEnd() { if (state.world) state.world.release(); state.grabbing = null; wake(); },
-    onChange: invalidate,
+  state.input = attachViewerInput(state, {
+    wake, invalidate, onControl, stopPlayback: () => setPlaying(false),
+    onUnavailable: () => status(i18n.t('status.grabStub')),
   });
 }
 
@@ -464,12 +461,12 @@ function invalidate() { redraw = true; kick(); }
 function wake() { quiet = 0; pumpRemote(); kick(); }
 
 /** A settled world (the same pose for a while, nothing driving it) is not stepped until woken. */
-const settled = () => quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing;
+const settled = () => quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing && !state.holdingLeaf;
 
 /** A Worker engine is stepped when its last pose lands (WorkerWorld.pump), not at the next frame. */
 function pumpRemote() {
   const w = state.world;
-  if (w instanceof WorkerWorld && !state.failed && !settled()) try { w.pump(STEP); } catch (e) { fail('error.engine', e); }
+  if (w instanceof WorkerWorld && !document.hidden && !state.failed && !settled()) try { w.pump(STEP); } catch (e) { fail('error.engine', e); }
 }
 
 function frame(now) {
@@ -515,7 +512,7 @@ function frame(now) {
   else if (world.received !== received) { received = world.received; quiet = changed ? 0 : quiet + 1; }
   frames++;
   const running = keepRunning({
-    playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing,
+    playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing || state.holdingLeaf,
     pending: world instanceof WorkerWorld && world.pending, quietFrames: quiet,
     engine: state.engine ? state.engine.kind : 'stub', hidden: document.hidden,
   });
@@ -579,7 +576,6 @@ async function init() {
   if (!state.renderer) notice(i18n.t('viewer.none'));
   else if (state.renderer.kind === 'canvas2d' && rendererOverride(state.share.renderer) !== 'canvas2d') notice(i18n.t('viewer.canvas2d'));
   const noticeText = $('viewer-notice').textContent;
-  setupInput();
   renderStatusStatic();
   state.view = state.share.view;
   try {

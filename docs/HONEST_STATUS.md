@@ -1,7 +1,15 @@
 # Honest status
 
-> Last Updated: 2026-10-22
+> Last Updated: 2026-11-09 (local paper reading input; other dated evidence retained)
 > Boundary: public. The single truth for what works today. Keep it true when you change behaviour.
+
+Local source addition, 2026-11-09: the studio supports an explicit fixed-camera
+`interaction=paper` mode for one native leaf, with physical forward/backward
+dragging, return/cancel and arrow keys. It requires the real engine; the rigid
+preview and unsupported documents show an unavailable message. This is not an
+independent multi-page reader for the archive companion. See
+[scope and verification](pilots/paper-reading-mode.md). Not deployed by this
+change; a dispatched build and running-version acceptance are still required.
 
 **Lifecycle: incubating, first deploy live.** One container serves the three ruled hosts: the
 landing at `https://pliego.madfam.io/`, the studio at `https://pliego-app.madfam.io/studio/` and the

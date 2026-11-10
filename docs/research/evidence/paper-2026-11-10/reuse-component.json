@@ -1,0 +1,542 @@
+{
+  "schema": "pliego-broadphase-pairs/0.2",
+  "recordedAt": "2026-11-10T09:08:20.213Z",
+  "source": {
+    "git": "62fd4565de9215b69724457740d862365ed11cf7",
+    "dirty": false,
+    "captureSHA256": "8311e247233fcf57a03630f3313080eaa9e0fde2e86f12676f22df0b2303f229",
+    "harnessSHA256": "e202f5df4d6619d81929b86f016252d9d8b819b5cba268fd95c8844d0747daff"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "platform": "darwin",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "mesh": {
+    "vertices": 492,
+    "triangles": 824,
+    "edges": 1312,
+    "topologySHA256": "ada37fc049105b20df0ffc445579ae35879a9cb369003f14f5112d3f9b006834"
+  },
+  "protocol": {
+    "repetitions": 9,
+    "warmupBuilds": 2,
+    "order": "alternated reference/BVH-rebuild/BVH-reuse and reverse; sequential, same arrays",
+    "execution": {
+      "reference": "prefix scan, no reuse",
+      "bvh": "forced full refit and candidate enumeration",
+      "bvhReuse": "exact-content reuse allowed only for same-array Float64 unswept poses; swept inputs rebuild"
+    },
+    "timingScope": "candidate build only, separate wall and process CPU deltas including JIT/GC; exploratory local run",
+    "countScope": "reference primitive AABB overlap tests vs BVH internal/leaf overlap tests plus separately counted root-enclosure tests; excludes rank/stationary pruning and bound generation",
+    "physicsAcceptance": "not evaluated; synthetic dense/large-sweep scenes are culling stress cases, not native physics outcomes"
+  },
+  "results": [
+    {
+      "name": "native-initial-energy",
+      "inputSHA256": "43346e579de933ad90883df1517140f9cccdd5002a328663efb2c0eb365340e1",
+      "vertexTrianglePairs": 0,
+      "edgeEdgePairs": 0,
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 383648,
+      "bvhNodeAABBTests": 19850,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "reference": 19.03189900000001,
+        "bvh": 14.852653000000032,
+        "bvhReuse": 6.262368999999978
+      },
+      "reusedLastBuild": true,
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "reference": {
+          "medianMs": 5.696084999999982,
+          "p95Ms": 5.901382000000012,
+          "processCpuMedianMs": 11.407,
+          "wallMs": [
+            5.696084999999982,
+            5.735132000000021,
+            5.756692000000044,
+            5.901382000000012,
+            5.829710999999975,
+            5.400851999999986,
+            5.312156000000016,
+            5.2504129999999805,
+            5.339138999999989
+          ],
+          "processCpuMs": [
+            6.757,
+            11.407,
+            11.52,
+            11.837,
+            11.983,
+            11.514,
+            7.742,
+            10.75,
+            7.572
+          ]
+        },
+        "bvh": {
+          "medianMs": 1.0813760000000343,
+          "p95Ms": 1.5291180000000395,
+          "processCpuMedianMs": 1.618,
+          "wallMs": [
+            1.5151250000000118,
+            1.5167900000000145,
+            1.5291180000000395,
+            1.4864000000000033,
+            1.061505000000011,
+            1.0473989999999844,
+            1.0813760000000343,
+            1.0351019999999949,
+            1.0082330000000184
+          ],
+          "processCpuMs": [
+            1.522,
+            1.523,
+            1.942,
+            2.564,
+            2.035,
+            1.618,
+            1.088,
+            2.686,
+            1.014
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 0.02287100000000919,
+          "p95Ms": 0.028886999999997443,
+          "processCpuMedianMs": 0.026,
+          "wallMs": [
+            0.025189000000011674,
+            0.02287100000000919,
+            0.028886999999997443,
+            0.02232600000002094,
+            0.022847999999953572,
+            0.021181000000012773,
+            0.023079999999993106,
+            0.021157000000016524,
+            0.02339599999999109
+          ],
+          "processCpuMs": [
+            0.029,
+            0.028,
+            0.032,
+            0.026,
+            0.028,
+            0.023,
+            0.025,
+            0.024,
+            0.025
+          ]
+        }
+      }
+    },
+    {
+      "name": "native-late-energy",
+      "inputSHA256": "be3888e9febd4d75f00a9e1636810079e8f0006f5907b7dcfa918ce21502aed8",
+      "vertexTrianglePairs": 498,
+      "edgeEdgePairs": 1489,
+      "orderedPairsSHA256": "647178c78cf25d36ea0471395816202baa875a84448fce928946f8a769744a0b",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 383681,
+      "bvhNodeAABBTests": 38446,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "reference": 5.683003999999983,
+        "bvh": 5.331301999999994,
+        "bvhReuse": 5.605471999999963
+      },
+      "reusedLastBuild": true,
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "reference": {
+          "medianMs": 5.621171000000004,
+          "p95Ms": 6.090125999999998,
+          "processCpuMedianMs": 5.624,
+          "wallMs": [
+            6.090125999999998,
+            5.618322999999975,
+            5.592619000000013,
+            5.601234999999974,
+            5.6036359999999945,
+            5.621171000000004,
+            5.659898999999996,
+            5.746999000000017,
+            5.802354000000037
+          ],
+          "processCpuMs": [
+            8.701,
+            5.62,
+            5.595,
+            5.603,
+            5.605,
+            5.624,
+            5.662,
+            5.749,
+            5.804
+          ]
+        },
+        "bvh": {
+          "medianMs": 1.6246399999999994,
+          "p95Ms": 1.7049149999999713,
+          "processCpuMedianMs": 1.627,
+          "wallMs": [
+            1.6491739999999595,
+            1.6153879999999958,
+            1.6161159999999768,
+            1.6226389999999924,
+            1.6246399999999994,
+            1.6131480000000238,
+            1.6629419999999868,
+            1.6700969999999984,
+            1.7049149999999713
+          ],
+          "processCpuMs": [
+            1.652,
+            1.618,
+            1.618,
+            1.625,
+            1.627,
+            1.614,
+            1.665,
+            1.672,
+            1.707
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 0.021500000000003183,
+          "p95Ms": 0.023884000000009564,
+          "processCpuMedianMs": 0.023,
+          "wallMs": [
+            0.02207200000003695,
+            0.023884000000009564,
+            0.02141399999999294,
+            0.020584999999982756,
+            0.021500000000003183,
+            0.020546000000024378,
+            0.022125000000016826,
+            0.021097999999994954,
+            0.0217349999999783
+          ],
+          "processCpuMs": [
+            0.024,
+            0.026,
+            0.022,
+            0.021,
+            0.023,
+            0.022,
+            0.025,
+            0.023,
+            0.023
+          ]
+        }
+      }
+    },
+    {
+      "name": "native-late-sweep",
+      "inputSHA256": "88f9069f1b9a9133680e8f9ecc9ac2973864b4e3f9bcb36a7b72180036d50c56",
+      "vertexTrianglePairs": 0,
+      "edgeEdgePairs": 0,
+      "orderedPairsSHA256": "b72f53758d812fbcaef2f5bf9906f627ee6d5d5775ebf1dd62a9a10f7edd8359",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 380816,
+      "bvhNodeAABBTests": 19829,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "reference": 5.408699000000013,
+        "bvh": 5.109627000000046,
+        "bvhReuse": 6.911374999999907
+      },
+      "reusedLastBuild": false,
+      "reuseNodeAABBTests": 19829,
+      "timings": {
+        "reference": {
+          "medianMs": 4.92144200000007,
+          "p95Ms": 5.096842999999922,
+          "processCpuMedianMs": 4.923,
+          "wallMs": [
+            4.951723999999899,
+            4.8558080000000245,
+            4.852806999999984,
+            4.929240999999934,
+            4.92144200000007,
+            5.096842999999922,
+            4.851944000000003,
+            4.85460599999999,
+            4.928075000000035
+          ],
+          "processCpuMs": [
+            4.961,
+            4.857,
+            4.855,
+            4.932,
+            4.923,
+            5.099,
+            4.853,
+            4.857,
+            4.929
+          ]
+        },
+        "bvh": {
+          "medianMs": 0.9706410000000005,
+          "p95Ms": 1.149573999999916,
+          "processCpuMedianMs": 0.972,
+          "wallMs": [
+            0.9706410000000005,
+            1.149573999999916,
+            0.9667329999999765,
+            0.9622060000000374,
+            0.9755000000000109,
+            1.0452139999999872,
+            0.965960999999993,
+            0.9646099999999933,
+            1.0068069999999807
+          ],
+          "processCpuMs": [
+            0.972,
+            1.134,
+            0.969,
+            0.964,
+            0.978,
+            1.047,
+            0.968,
+            0.966,
+            1.009
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 0.9668369999999413,
+          "p95Ms": 1.0083579999999301,
+          "processCpuMedianMs": 0.969,
+          "wallMs": [
+            0.9677930000000288,
+            0.9656380000000127,
+            0.9668369999999413,
+            0.9628169999999727,
+            1.0083579999999301,
+            0.9650269999999637,
+            0.9693040000000792,
+            0.9647240000000465,
+            0.9676190000000133
+          ],
+          "processCpuMs": [
+            0.97,
+            0.968,
+            0.969,
+            0.964,
+            1.011,
+            0.967,
+            0.971,
+            0.966,
+            0.971
+          ]
+        }
+      }
+    },
+    {
+      "name": "synthetic-large-prescribed-sweep",
+      "inputSHA256": "7cd4b6b2b2f3d86a729a9e22f004ff8495b4b9bb5b4b626b3bde94932436fa6d",
+      "vertexTrianglePairs": 300479,
+      "edgeEdgePairs": 656436,
+      "orderedPairsSHA256": "430aaf7baa69fc7248e71f46bd99b46f1f3cb22e8bf02dfd2098787280aa7fb9",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 1154533,
+      "bvhNodeAABBTests": 2440896,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "reference": 5.925772999999936,
+        "bvh": 6.059146000000055,
+        "bvhReuse": 6.7699230000000625
+      },
+      "reusedLastBuild": false,
+      "reuseNodeAABBTests": 2440896,
+      "timings": {
+        "reference": {
+          "medianMs": 81.08403599999974,
+          "p95Ms": 84.33376900000007,
+          "processCpuMedianMs": 81.088,
+          "wallMs": [
+            83.95221300000003,
+            84.33376900000007,
+            84.20457899999974,
+            81.08403599999974,
+            80.85978999999998,
+            82.32509200000004,
+            80.90202599999975,
+            80.76922999999988,
+            81.08229100000062
+          ],
+          "processCpuMs": [
+            83.972,
+            84.338,
+            84.209,
+            81.088,
+            80.865,
+            82.322,
+            80.891,
+            80.773,
+            81.087
+          ]
+        },
+        "bvh": {
+          "medianMs": 135.13235900000018,
+          "p95Ms": 154.12172099999998,
+          "processCpuMedianMs": 135.083,
+          "wallMs": [
+            137.0751429999998,
+            137.13500999999997,
+            135.5998840000002,
+            134.4316060000001,
+            131.93176600000015,
+            154.12172099999998,
+            131.8777799999998,
+            131.70802299999968,
+            135.13235900000018
+          ],
+          "processCpuMs": [
+            137.079,
+            137.14,
+            135.574,
+            134.392,
+            131.937,
+            153.513,
+            131.876,
+            131.713,
+            135.083
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 134.39081899999928,
+          "p95Ms": 137.37159999999994,
+          "processCpuMedianMs": 134.396,
+          "wallMs": [
+            136.630218,
+            137.37159999999994,
+            133.82598400000006,
+            131.50646199999983,
+            131.76109600000018,
+            136.950241,
+            137.306689,
+            132.06084299999975,
+            134.39081899999928
+          ],
+          "processCpuMs": [
+            136.639,
+            137.377,
+            133.786,
+            131.506,
+            131.766,
+            136.896,
+            137.31,
+            132.035,
+            134.396
+          ]
+        }
+      }
+    },
+    {
+      "name": "synthetic-dense-all-free",
+      "inputSHA256": "b8cab5c6d74fd9c24d53a2c22cab05c2aeceebf76ecc7804b1f2d9c64a8fc393",
+      "vertexTrianglePairs": 396216,
+      "edgeEdgePairs": 837880,
+      "orderedPairsSHA256": "c03fdfd6440f6271e9eb87e7ef25e067d585cc4720a5274e52c72a9101abde86",
+      "exactOrderedPairMatch": true,
+      "prefixPrimitiveAABBTests": 1265424,
+      "bvhNodeAABBTests": 0,
+      "bvhRootEnclosureTests": 1803,
+      "coldFirstBuildMs": {
+        "reference": 5.166348000000653,
+        "bvh": 5.286621000000196,
+        "bvhReuse": 5.6793900000002395
+      },
+      "reusedLastBuild": false,
+      "reuseNodeAABBTests": 0,
+      "timings": {
+        "reference": {
+          "medianMs": 101.55113900000015,
+          "p95Ms": 106.32214099999965,
+          "processCpuMedianMs": 101.557,
+          "wallMs": [
+            104.93879000000015,
+            101.55113900000015,
+            106.32214099999965,
+            100.17581400000017,
+            100.60914099999991,
+            104.38042000000041,
+            99.91550800000005,
+            98.45062400000006,
+            104.81344499999977
+          ],
+          "processCpuMs": [
+            104.957,
+            101.557,
+            101.812,
+            100.177,
+            100.485,
+            104.384,
+            99.85,
+            98.429,
+            104.774
+          ]
+        },
+        "bvh": {
+          "medianMs": 77.50731300000007,
+          "p95Ms": 79.27530400000069,
+          "processCpuMedianMs": 77.513,
+          "wallMs": [
+            78.22897499999999,
+            76.44627200000014,
+            77.50731300000007,
+            78.52662599999985,
+            77.67887000000064,
+            79.27530400000069,
+            76.08806499999992,
+            76.16204600000037,
+            77.26666800000021
+          ],
+          "processCpuMs": [
+            78.227,
+            76.429,
+            77.513,
+            78.386,
+            77.684,
+            79.28,
+            76.095,
+            76.167,
+            77.245
+          ]
+        },
+        "bvhReuse": {
+          "medianMs": 77.58445399999982,
+          "p95Ms": 80.46120299999984,
+          "processCpuMedianMs": 77.589,
+          "wallMs": [
+            75.94235500000013,
+            76.30544000000009,
+            77.58445399999982,
+            80.46120299999984,
+            76.56076899999971,
+            78.97606499999983,
+            77.04308200000014,
+            78.32487399999991,
+            77.85359599999992
+          ],
+          "processCpuMs": [
+            75.934,
+            76.312,
+            77.589,
+            80.466,
+            76.553,
+            78.982,
+            77.048,
+            78.328,
+            77.856
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "pliego-paper-execution-comparison/0.1",
+  "recordedAt": "2026-11-10T09:12:40.816Z",
+  "comparisonSHA256": "32982659e3b9d9a5b0d5a46c705d5a83f845b014966f74066626a5aefb0a5e88",
+  "inputSHA256": [
+    "d05cd6d4ed1d4a522543205d447ee155deacd98a510781a7488bfe30d0d82629",
+    "4b3fd37b7ce7c7695812e5bb08c61eed58b59c1a663dc55a1f1f645c006678b3"
+  ],
+  "sources": [
+    {
+      "git": "6fbc553096d75846870710c18f7cfa47d2d9c1ee",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "e4f3f6e8a333ca99f6935b749a71f16dc87b1c15529feb300a8145e58be82ab2",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "13520a4edfb729765e07613baabf6990322f11eed35362debf92742fbea51f72",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    },
+    {
+      "git": "62fd4565de9215b69724457740d862365ed11cf7",
+      "dirty": false,
+      "engine": "current checkout",
+      "engineTreeSHA256": "73619a2e3c3e438fa16a25b9b9b3868bab82cef829ed6eca37cdc737c2db90c2",
+      "readerSHA256": "a3e5337d429445a739e0972459283a3f6a1e68afe4b12453e0c7d068836b4b5d",
+      "harnessSHA256": "13520a4edfb729765e07613baabf6990322f11eed35362debf92742fbea51f72",
+      "metricsSHA256": "d0eeb81dffe8e1049409fe151db5a251dcd55d9ba3eaafb3baedf28001de7b74",
+      "fixture": "pliego.book.codex(leaves=4,width=90,height=128)",
+      "fixtureSHA256": "d7ae018c0bc4c19f2d54d1fb01e50ecfef743bbe2cca33387a3c7eb5c25c3c65"
+    }
+  ],
+  "sourceCleanAtRuns": true,
+  "allRecordedNonTimingFieldsEqual": true,
+  "compatibility": "none",
+  "cases": 1,
+  "comparison": "whole reports except recordedAt, source.git/source.engineTreeSHA256, enumerated result wall/CPU timing fields and their physics8ms gate; subject to explicitly recorded legacy compatibility, all other source/runtime/input metadata, physics options, sampled pose hashes, solver/contact diagnostics and non-time gates equal",
+  "acceptance": "exact recorded implementation parity only; failed or unmeasured material/device gates remain unchanged"
+}

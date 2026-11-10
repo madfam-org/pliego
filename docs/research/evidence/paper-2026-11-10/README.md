@@ -219,3 +219,52 @@ paper, physical stack height, contact pressure or the imposed resting blocks.
 Force convergence is a numerical gate for the declared model. Measured stock,
 general friction/strain/contact, corpus, live hand coupling, real devices and
 alternative solver/backend gates still require work. Research remains active.
+
+
+## Exact-pose candidate reuse
+
+Implementation source: [`62fd456`](https://github.com/madfam-org/pliego/commit/62fd4565de9215b69724457740d862365ed11cf7).
+The [implementation and cost scope](../../bvh-broadphase-experiment.md#exact-pose-reuse-validation)
+explain exact invalidation, immutable connectivity, swept bypass and the retained
+large-sweep regression. Physics defaults and force tolerances are unchanged.
+
+| Model | New full run / repeat | Prior parity / new repeat comparison | Force misses | Active-frame p95, ms |
+|---|---|---|---:|---:|
+| Capped S8/I32 | [run](reuse-capped-eight.json), [repeat](reuse-capped-repeat.json) | [prior](reuse-capped-comparison.json), [repeat](reuse-capped-repeat-comparison.json) | 0/5168 | 290.21 / 237.21 |
+| Uncapped S8/I32 | [run](reuse-uncapped-eight.json), [repeat](reuse-uncapped-repeat.json) | [prior](reuse-uncapped-comparison.json), [repeat](reuse-uncapped-repeat-comparison.json) | 0/5200 | 364.81 / 344.81 |
+
+The first capped run overlaps the engine suite; exclude its timing from performance
+conclusions. Other runs are sequential with no competing local campaign/suite;
+ordinary background activity still applies. Physics results match independently
+of wall cost. All 672 sampled poses and all recorded force/contact counters match
+their controls. The capped comparator's explicit compatibility path accepts only
+the reviewed old/new harness fingerprints and absent-to-null iteration metadata;
+effective options and every other non-time field remain strict. Unknown harnesses,
+non-null overrides, altered poses, solver options, protocols or force gates are rejected.
+
+[Five-scene component data](reuse-component.json) distinguishes reference scans,
+forced BVH refits and allowed exact reuse. Native identical-pose reuse is about
+0.02 ms; native sweeps rebuild at about 0.97 ms. Large-sweep BVH cost still exceeds
+the reference; dense separate-array inputs deliberately rebuild. Ordered pair
+bytes agree in all scenes. These candidate timings are not World.step timings.
+
+The [new profiled run](reuse-first-profile-run.json), [sanitized summary](reuse-first-profile-summary.json)
+and [strict prior-run comparison](reuse-first-profile-comparison.json) retain the
+same physical trajectory. Candidate construction/query/refit remains 55.51% of
+sampled whole-process self time, versus 68.23% before reuse. The sample includes
+loading, construction, JIT and diagnostics; local raw profiles are not committed.
+An exact active-only traversal and equivalent backend comparisons remain open.
+
+```sh
+node --test packages/engine/test/swept-bvh.test.js packages/engine/test/paper-execution.test.js
+node packages/engine/bench/broadphase-pairs.mjs --out /tmp/reuse-component.json
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 6 --model active-leaf --turns 8 --broad-phase bvh --edge-mollification surface-guarded --checkpoint /tmp/reuse-capped-progress.json --out /tmp/reuse-capped.json
+node packages/engine/bench/compare-paper-execution.mjs docs/research/evidence/paper-2026-11-10/ba6-eight-turn.json /tmp/reuse-capped.json --legacy-iteration-metadata --out /tmp/reuse-capped-comparison.json
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 7 --iterations 32 --model active-leaf --turns 8 --broad-phase bvh --edge-mollification surface-guarded --checkpoint /tmp/reuse-uncapped-progress.json --out /tmp/reuse-uncapped.json
+node packages/engine/bench/compare-paper-execution.mjs docs/research/evidence/paper-2026-11-10/6fb-uncapped-eight-turn.json /tmp/reuse-uncapped.json --out /tmp/reuse-uncapped-comparison.json
+```
+
+Use the recorded Node/runtime for strict cross-source comparisons. Repeat each
+full run on the same clean source and use `compare-paper-repeat.mjs` to check all
+recorded non-time fields. Source changes during a campaign invalidate its report.
+Interaction, measured-paper accuracy and device gates remain separate and open.

@@ -122,9 +122,14 @@ gate remain open. Uncapped S8/I8 still misses force tolerance on 103/672 substep
 An uncapped I32 full sequence and repeat subsequently pass 0/5200 force checks,
 while an independent contact-free axial loading/unloading ablation passes its
 declared reference/drift/force gates. No held-out stock, global smoothness or
-C-IPC equivalence is implied. A fresh profile still assigns about 68% of sampled
-whole-process self time to swept construction and BVH query/refit. Exact candidate
-work/reuse and backend comparisons remain the performance priorities.
+C-IPC equivalence is implied. Exact-pose candidate reuse subsequently preserves
+both complete trajectories, every recorded force/contact diagnostic and exact
+new-source repeats. A fresh whole-process profile reduces the candidate share
+from about 68% to 56%; it remains the largest sampled cost. Uncapped active p95
+is still 345–365 ms, above the 8 ms gate. The component benchmark explicitly
+separates full refits from cache hits and retains the large-sweep regression.
+[Source-pinned reuse evidence](evidence/paper-2026-11-10/README.md#exact-pose-candidate-reuse)
+keeps active traversal and equivalent backend comparisons as performance priorities.
 
 ## Separate gates
 

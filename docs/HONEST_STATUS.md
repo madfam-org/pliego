@@ -78,6 +78,13 @@ retained VT backups; uncovered pairs keep their original barriers. Whole-energy
 derivatives, native operator agreement and replay are tested. This partial
 smoothing does not close general coverage, force/material or device gates.
 
+Exact-pose BVH candidate reuse now preserves both capped/uncapped eight-turn
+trajectories, all recorded force/contact diagnostics and exact repeated reports.
+The [retained measurements](research/evidence/paper-2026-11-10/README.md#exact-pose-candidate-reuse)
+show uncapped active p95 of 345–365 ms and candidate work still about 56% of the
+sampled process. The 8 ms target, material calibration, general contact coverage
+and backend/device acceptance remain open; this is an opt-in optimization.
+
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the
 declared 0.001 µN force tolerance, identical sampled-position hashes and all

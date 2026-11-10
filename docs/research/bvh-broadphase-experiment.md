@@ -116,7 +116,7 @@ now defaults to LBVH and reports gains on its own benchmark scenes. That is an
 additional implementation candidate, not a measured comparison against Pliego's
 refit index; its performance claims have not been reproduced here.
 
-## Exact-pose reuse validation (in progress)
+## Exact-pose reuse validation
 
 The targeted suite retains ordered reference pairs/bounds through ten live-input
 states, including signed zero, in-place pose/filter/caliper changes, copied input
@@ -127,5 +127,43 @@ are internal and must not be mutated by consumers.
 `compare-paper-execution.mjs` compares whole campaign reports while allowing only
 the implementation commit/tree fingerprints and enumerated timing fields to
 differ. Unlike a model comparison, every recorded physics option, diagnostic,
-trajectory hash and non-time gate must agree. Full capped/uncapped runs and a
-clean source-pinned component report are required before reporting a speedup.
+trajectory hash and non-time gate must agree. The older capped control predates nullable iteration-override metadata. An explicit
+`--legacy-iteration-metadata` comparison accepts only the two reviewed harness
+fingerprints, an absent old override and a null new override. Effective solver
+options still compare exactly; unknown harnesses and non-null overrides fail.
+The retained harness diff only adds override parsing/application and metadata.
+
+Source `62fd4565de9215b69724457740d862365ed11cf7` completes both capped and uncapped
+S8/I32 eight-turn sequences with **all** recorded non-time physics unchanged from
+their controls, including every sampled-pose hash and contact/force counter.
+Both repeat every recorded non-time report field on the new source. This retains
+0/5168 capped and 0/5200 uncapped force misses; it does not change material gates.
+
+The clean-source component report separates forced rebuild and reuse: native
+initial/late candidate medians are 1.08/1.63 ms for full BVH builds and 0.023/0.022 ms
+for exact reuse, with zero traversal tests on hits. Swept input medians remain
+0.97 ms native and 134–135 ms for the synthetic large sweep. That stress case is
+still slower than the 81.08 ms reference scan. Dense all-free inputs use separate
+endpoint arrays and intentionally rebuild; their 77.5–77.6 ms costs show no reuse
+benefit. All five scenes retain identical ordered pair bytes.
+
+Full active-frame p95 is 290.21/237.21 ms capped and 364.81/344.81 ms uncapped;
+CPU p95 is 273.27/237.44 and 357.47/343.69 ms respectively. The first capped run
+overlapped the local engine suite and is excluded from performance conclusions.
+Repeats, uncapped runs and the component/profile experiments were sequential,
+with no competing local campaign/suite, but ordinary background activity remains.
+Prior-source timings are retained controls, not a fresh paired device trial.
+Every full run still fails the 8 ms target.
+
+A fresh first-turn whole-process V8 profile preserves the prior profiled run's
+non-time physics and input metadata. Candidate construction/query/refit accounts
+for 55.51% of sampled self time (37.29% tree, 18.22% swept builder), versus 68.23%
+previously; Cholesky is 6.37%. This keeps exact active-traversal/backend work ahead
+of a factor-only port. Samples include startup, construction, JIT and diagnostics;
+shares are not retired instructions or a device certificate. Raw profiles remain
+local; the committed summary removes local paths and records their hashes.
+
+[Raw reports, strict comparisons and reproduction](evidence/paper-2026-11-10/README.md#exact-pose-candidate-reuse)
+retain all limitations. The targeted invalidation/replay checks, full 146-test
+engine suite and 43-source JSDoc check pass at the implementation checkpoint;
+additional comparator negative controls protect the metadata compatibility path.

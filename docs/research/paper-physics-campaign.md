@@ -102,6 +102,17 @@ and near-parallel contact behavior matter. Recorded profiles put over 91% of
 sampled time in swept candidate scanning. Next work must address conservative
 indexing and contact smoothness, alongside independent material/model gates.
 
+The opt-in [ordered refit BVH](bvh-broadphase-experiment.md) now preserves all
+recorded non-timing fields and the full eight-turn sampled trajectory hash.
+Native candidate-build medians improve, while one large-sweep stress case
+regresses. Full-sequence diagnostic active p95 is still 7.9 seconds and force
+convergence still fails. Default traversal remains the reference; neither index
+selection nor lower-level backends are exhausted. The
+[parallel-contact review](parallel-contact-review.md) covers IPC §6, relevant
+technical-supplement sections, independent multiplier derivatives and a concrete
+native topology-filter counterexample. EE smoothing alone cannot inherit the
+published VT-backup coverage argument under our current exclusions.
+
 ## Separate gates
 
 **Interaction:** booklet frame/camera fixed throughout dragging; only exposed leaves

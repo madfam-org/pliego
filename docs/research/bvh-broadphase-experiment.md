@@ -69,7 +69,41 @@ selection. This includes the hash covering every sampled pre-promotion pose and
 all force/CCD diagnostics. Prior harness bytes can differ and remain recorded;
 fresh reference/repeat runs must share the indexed run's source and harness.
 
-Initial component checks pass; full-sequence equivalence, measured cost and
-device/corpus acceptance are evaluated separately. Neither a matching pair hash
-nor a faster index closes the force-convergence, contact-smoothness or material
-calibration gates.
+## Recorded checkpoint
+
+Source [`9a62ba9`](https://github.com/madfam-org/pliego/commit/9a62ba9b0a151ab28ef9b0171903a57013078b1f)
+passes exact ordered-pair comparison on all five component scenes. Native warm
+candidate-build medians fall from 4.66–5.24 ms to 0.95–1.61 ms. The deliberately
+large prescribed sweep regresses from 85.05 to 128.25 ms; dense all-free bounds
+improve from 105.84 to 74.96 ms. The initial index and its regressions are retained
+alongside the refinement, rather than discarded.
+
+The complete eight-turn indexed candidate matches **every recorded non-timing
+result**, including the reference hash of all 672 sampled pre-promotion poses.
+The first turn also matches a fresh same-source reference and a repeated indexed
+run. The comparator rejects altered trajectory and force diagnostics. A separately
+retained all-flexible case still fails initial strict-ground feasibility; its
+completed harness/checkpoint does not claim a completed physical turn.
+
+Fresh first-turn active-frame p95 is 1009.72 ms with the reference versus
+318.90/303.52 ms indexed. Full-sequence diagnostic active p95 falls from
+23253.50 to 7861.01 ms, with the same 680/5264 unconverged substeps and 250492
+backtracks. These are exploratory local costs, not isolated device certification:
+the older full run included short profiling/probes; the indexed full run included
+two brief independent algebra checks. There was no competing full physics suite.
+Both miss the 8 ms target by a large margin. Full-sequence indexed repeat, corpus
+and real-device acceptance remain open.
+
+[Raw reports, comparisons and reproduction](evidence/paper-2026-11-09/README.md#ordered-refit-bvh)
+retain source/input fingerprints and all failed gates. This index is an exact
+substitution for the existing candidate policy, not its physical validation.
+The [parallel-contact audit](parallel-contact-review.md) demonstrates that native
+neighbor exclusions can remove the VT backup needed before applying the published
+EE smoothing construction. Contact smoothness, coverage and material calibration
+remain open. Other indices, exact pose reuse and lower-level backends have not
+been exhausted.
+
+[Toolkit 1.6.0](https://github.com/ipc-sim/ipc-toolkit/releases/tag/v1.6.0)
+now defaults to LBVH and reports gains on its own benchmark scenes. That is an
+additional implementation candidate, not a measured comparison against Pliego's
+refit index; its performance claims have not been reproduced here.

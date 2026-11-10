@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BarrierContact, gapBarrier } from '../src/collision/barrier.js';
+import { SweptCandidates } from '../src/collision/swept.js';
+import { pointTriangleDistanceSquared, edgeEdgeDistanceSquared } from '../src/collision/distance.js';
 
 test('unmollified parallel EE contact has a cusp, so a selected branch is not a smooth-gradient certificate', () => {
   // Analytical segment element: a longer fixed edge below a shorter free edge.
@@ -24,4 +26,29 @@ test('unmollified parallel EE contact has a cusp, so a selected branch is not a 
     assert.ok(Math.abs((plus - energy) / epsilon / slope - 1) < 0.001);
   }
   console.log(`parallel-EE-limit: central slope=0; one-sided slopes approach ±${slope} µN; unmollified potential is nonsmooth, regularization gate OPEN`);
+});
+
+test('native neighbor exclusions can remove the VT backup for an eligible parallel EE pair', () => {
+  // Analytical six-triangle disk, all faces incident on its central vertex.
+  // This audits candidate policy, not an admissible complete World trajectory.
+  const x = new Float64Array([-1, 0, 0, 1, 0, 0, 2, 0.2, 1,
+    -0.5, 0.12, 0, 0.5, 0.12, 0, -2, 0.2, 1, 0, 0, 2]);
+  const edges = [], tris = [];
+  for (let i = 0; i < 6; i++) { edges.push(i, (i + 1) % 6, 6, i); tris.push(6, i, (i + 1) % 6); }
+  const mesh = { nV: 7, nT: 6, nE: 12, edges: Int32Array.from(edges), tris: Int32Array.from(tris),
+    vGroup: Int32Array.from({ length: 7 }, (_, i) => i), vSheet: new Int32Array(7), triSheet: new Int32Array(6) };
+  const distance = Math.sqrt(edgeEdgeDistanceSquared(x, 0, 1, 3, 4));
+  assert.equal(distance, 0.12);
+  assert.equal(Math.sqrt(pointTriangleDistanceSquared(x, 3, 6, 0, 1)), distance);
+  for (const mode of ['reference', 'bvh']) {
+    const C = new SweptCandidates(mesh, new Float64Array(7).fill(0.15), mode);
+    C.build(x, x, new Uint8Array(7), new Int32Array(7).fill(-1));
+    assert.equal(C.vertexTriangleCount, 0);
+    assert.equal(C.edgeEdgeCount, 1);
+    assert.deepEqual(Array.from(C.ee.subarray(0, 2)), [0, 6]);
+  }
+  // Parallel directions make the published EE multiplier zero. With this
+  // stricter native filter, its accompanying VT energy is absent as well.
+  assert.ok(gapBarrier(distance - 0.1, 0.05, 100) > 0);
+  console.log('parallel-coverage-limit: eligible parallel EE=1, geometric VT backup distance=0.12 mm, retained VT=0; mollification coverage gate OPEN');
 });

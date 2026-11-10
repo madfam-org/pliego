@@ -64,6 +64,17 @@ the recorded CPU samples. A reconstructed late-turn objective and a parallel-edg
 element expose contact smoothness/convergence work still owed. All new options
 remain opt-in; this is not a stable catalogue physics release.
 
+An opt-in [ordered refit BVH](research/bvh-broadphase-experiment.md) preserves
+every recorded non-timing result and the complete eight-turn sampled-position
+hash. Local diagnostic active-frame p95 drops from 23.3 to 7.9 seconds; first-turn
+paired p95 drops from 1010 to 304–319 ms. Force convergence and the 8 ms target
+still fail. A large-sweep component stress case is slower, so no universal speedup
+or optimal backend is claimed. Default candidate traversal remains unchanged.
+The [parallel-contact review](research/parallel-contact-review.md) checks smoothing
+algebra against an independent compiled reference and adds a native-filter
+counterexample: an eligible parallel EE pair can lack its VT energy backup.
+Mollification is not yet integrated; coverage must be resolved alongside it.
+
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched
 over 1%, 10 exploded), zero rejected/world/step errors, and 76 studio preview

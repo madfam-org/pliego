@@ -453,3 +453,74 @@ clarifies derivative scope. General geometry-dependent join Jacobians, contact
 weighting/mollification, material measurements, full corpus/device acceptance,
 local solver/model candidates and lower-level backend comparisons remain open.
 Research and implementation are **not exhausted**. No merge or deployment.
+
+## Ordered refit BVH
+
+The opt-in index is measured at source
+[`9a62ba9b0a151ab28ef9b0171903a57013078b1f`](https://github.com/madfam-org/pliego/commit/9a62ba9b0a151ab28ef9b0171903a57013078b1f).
+Default traversal stays `reference`. The [coverage/order explanation](../../bvh-broadphase-experiment.md)
+distinguishes exact substitution of the current policy from physical validation.
+All measured runs start/end with clean, unchanged source and recorded fingerprints.
+
+- [Initial component index](bvh-02e82e1-pairs.json),
+  [refined component index](bvh-9a62ba9-pairs.json) and
+  [same-input/pair comparison](bvh-refinement-comparison.json) retain all five scenes.
+- [Fresh first-turn reference](bvh-9a62ba9-reference.json),
+  [indexed first turn](bvh-9a62ba9-first-turn.json),
+  [indexed repeat](bvh-9a62ba9-repeat.json) and
+  [strict comparison](bvh-first-comparison.json) match every recorded non-timing
+  result against the prior first-turn matrix and each other.
+- [Indexed eight turns](bvh-9a62ba9-eight-turn.json) and
+  [strict comparison](bvh-eight-comparison.json) match every recorded non-timing
+  result against the earlier complete direct S8/I32 sequence. The hash covering
+  all 672 sampled pre-promotion poses is still
+  `b34618c7cc73f041a18e74547f72c6b9a7316a255a74703317f802a62ffa4ebd`.
+  This is one indexed full sequence, not an indexed full-sequence repeat.
+- [All-flexible initial-feasibility failure](bvh-9a62ba9-infeasible.json) remains a
+  failed physical case: zero completed frames/turns. Its terminal checkpoint was
+  marked complete only for the harness, retaining the failed case and false gates.
+  Comparator negative controls reject altered pose hashes and force diagnostics.
+
+Warm component medians (ms), nine alternating sequential samples per traversal:
+
+| Scene | Paired reference | Refined BVH | Exact ordered pairs |
+|---|---:|---:|---|
+| Native initial energy | 5.027 | 0.977 | yes |
+| Native late energy | 5.236 | 1.614 | yes |
+| Native late sweep | 4.662 | 0.953 | yes |
+| Synthetic large prescribed sweep | 85.053 | 128.250 | yes; slower |
+| Synthetic dense all-free | 105.836 | 74.962 | yes |
+
+The initial index was about 1.5× slower on both synthetic scenes; those negative
+measurements remain. Initial stationary/active grouping and exact enclosing-root
+queries improve the refinement but do not eliminate the large-sweep regression.
+Candidate coverage/order and component timing are separate claims. Counts distinguish
+primitive overlap tests from internal/leaf tests and separate root-enclosure tests.
+
+Fresh first-turn active-frame p95 is 1009.72 ms reference versus 318.90/303.52 ms
+indexed. Full-sequence diagnostic active p95 is 7861.01 ms indexed versus the older
+23253.50 ms reference; indexed mean is 1062.09 ms and maximum 9324.12 ms. Process
+CPU mean is 1060.56 ms and active p95 7855.49 ms, including JIT/GC threads. The older
+full run included short profiles/probes; the indexed full run included two brief
+independent Python algebra checks. These are exploratory local timings, not an
+isolated device certificate or a universal speed ratio. No competing full physics
+suite ran. Strictly identical physics still has **680/5264 unconverged substeps,
+250492 backtracks and 43.5491 µN peak end residual**. Both accuracy and 8 ms fail.
+
+Reproduce component/first-turn comparisons with the commands in the index memo;
+for the full sequence (known slow; use the incremental checkpoint):
+
+```sh
+node packages/engine/bench/paper-campaign.mjs --local-matrix --case 6 --model active-leaf --turns 8 --broad-phase bvh --checkpoint /tmp/bvh-eight-progress.json --out /tmp/bvh-eight.json
+node packages/engine/bench/compare-broadphase-runs.mjs docs/research/evidence/paper-2026-11-09/local-e25b8e5-eight-turn.json /tmp/bvh-eight.json
+```
+
+[Parallel-contact research](../../parallel-contact-review.md) now adds a
+[60-case independent multiplier prototype](mollifier-independent.json): maximum
+normalized scalar/gradient/Hessian reference errors ≤3.1×10⁻¹⁶, finite-difference
+errors ≤6.3×10⁻¹⁰. It uses compiled Toolkit **1.4.0** with the recorded binary hash;
+source review of 1.6.0 is not a runtime test of that release. Native neighbor-filter
+regression shows a parallel EE pair without its geometric VT backup retained.
+No smoothing, friction, new material validation or native contact-force fix is
+claimed by this checkpoint. Corpus, devices, model alternatives and backend
+comparisons remain open. Research and implementation are **not exhausted**.

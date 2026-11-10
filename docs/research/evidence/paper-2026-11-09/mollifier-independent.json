@@ -1,0 +1,28 @@
+{
+  "schema": "pliego-mollifier-independent-prototype/0.1",
+  "reference": {
+    "package": "ipctk",
+    "version": "1.4.0",
+    "numpy": "2.5.4",
+    "python": "3.12.14",
+    "binarySHA256": "2c04039f8dcb05655f8525b86d460f1837959d11e02e8db625db5444b0af4a5e",
+    "sourceTagCommit": "dac3b97b1a4a8247f5d55ccba352659976d276e5"
+  },
+  "seed": 195,
+  "cases": 60,
+  "inputsSHA256": "b2b88b1c3ab367aa081097635f600ec50c7066036bfe1cc8f42bf145434525ca",
+  "scaleRange": [
+    0.001,
+    1000
+  ],
+  "quantity": "scalar energy multiplier, Cartesian gradient and exact multiplier Hessian; not full contact or World implementation",
+  "maximumNormalizedReferenceErrors": {
+    "value": 5.551115123125783e-17,
+    "gradient": 3.031546250145503e-16,
+    "hessian": 2.095613480485259e-16
+  },
+  "maximumGradientFiniteDifferenceError": 2.52650844689839e-10,
+  "maximumHessianFiniteDifferenceError": 6.273876555436154e-10,
+  "prototypeSHA256": "909670b69c1966951a9b7e91c8260b3ad82e8f666bfa5bdd5b28890ff17ee393",
+  "acceptance": "component algebra only; no native physics, coverage, friction or material validation"
+}

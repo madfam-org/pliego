@@ -3,10 +3,15 @@
 import { attachInput } from './render/input.js';
 import { rayPlane } from './render/camera.js';
 import { attachLeafReader, readingLeaf } from './leaf-reader.js';
+import { BookWorld } from './book-world.js';
+import { attachBookReader } from './book-reader.js';
 
 export function attachViewerInput(state, { wake, invalidate, onControl, stopPlayback, onUnavailable }) {
   const r = state.renderer;
   if (!r) return null;
+  if (state.share.interaction === 'paper' && state.world instanceof BookWorld) return attachBookReader(r, {
+    getWorld: () => state.world, onStart: stopPlayback, onHolding: held => { state.holdingLeaf = held; wake(); }, onChange: wake,
+  });
   if (state.share.interaction === 'paper') return attachLeafReader(r, {
     leaf: state.engine?.kind === 'engine' ? readingLeaf(state.json) : null,
     getWorld: () => state.world, getControl: (id) => state.controls?.get(id),

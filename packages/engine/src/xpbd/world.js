@@ -27,6 +27,7 @@ import { pcgStep } from './pcg.js';
 import { snapshotWorld, restoreWorld } from './state.js';
 import { JoinGates } from './gates.js';
 import { Presentation } from './presentation.js';
+import { EnergySearch } from './energy-search.js';
 import * as K from '../constants.js';
 import { hypot3 } from '../fastmath.js';
 
@@ -38,7 +39,7 @@ export class World {
    * @param {{meshEdge?:number, substeps?:number, contact?:boolean, ground?:boolean, gravity?:boolean|number, seed?:number,
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
-   *   bendDamping?:number}} [opts]
+   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -49,7 +50,12 @@ export class World {
       windDir: opts.windDir ?? [0, 0, 1], panelStiffness: opts.panelStiffness ?? 1, newtonIterations: opts.newtonIterations ?? 1,
       refactorAngle: opts.refactorAngle ?? K.REFACTOR_ANGLE, grabStiffness: opts.grabStiffness ?? K.GRAB_STIFFNESS,
       handFactor: opts.handFactor ?? K.HAND_FACTOR, plasticity: opts.plasticity ?? true, meshEdge: opts.meshEdge,
+      physicalMembrane: opts.physicalMembrane ?? false,
+      lineSearch: opts.lineSearch ?? false,
     };
+    if (typeof this.opts.physicalMembrane !== 'boolean') throw new TypeError('World: physicalMembrane must be boolean');
+    this.membraneCap = this.opts.physicalMembrane ? Infinity : K.MEMBRANE_CAP_LENGTH;
+    if (typeof this.opts.lineSearch !== 'boolean') throw new TypeError('World: lineSearch must be boolean');
     if (!(this.opts.substeps >= 1 && Number.isInteger(this.opts.substeps))) throw new RangeError('World: substeps must be a positive integer');
     const mesh = buildMesh(doc, { meshEdge: opts.meshEdge });
     this.mesh = mesh;
@@ -81,7 +87,7 @@ export class World {
     for (let i = 0; i < mesh.perfPairs.length / 2; i++) {
       const a = mesh.perfPairs[2 * i], b = mesh.perfPairs[2 * i + 1];
       const m = this.materials[mesh.vSheet[a]];
-      const Y = Math.min(m.Emd * m.t, K.MEMBRANE_CAP_LENGTH * m.rhoA * K.GRAVITY);
+      const Y = Math.min(m.Emd * m.t, this.membraneCap * m.rhoA * K.GRAVITY);
       terms.add(TK_PERF, 0, [a, b], [1, -1], { k: this.kHard, pair: i, fBreak: m.perfFactor * Y * m.tearStrain * mesh.perfPairLen[i] });
     }
     this.drivers = new Drivers(this, terms, pins, opts);
@@ -98,6 +104,7 @@ export class World {
     this.fixedTarget = Float64Array.from(this.x);
     this._clampCorrection();
     this.sys = buildSystem(this);
+    this.energySearch = this.opts.lineSearch ? new EnergySearch(3 * nV) : null;
     this.factorDir = new Float64Array(3 * mesh.nE);
     this.edgeDir = new Float64Array(3 * mesh.nE);
     this.edgeK = new Float64Array(mesh.nE);
@@ -149,7 +156,7 @@ export class World {
       const we = t1 >= 0 ? (mesh.triArea[t0] + mesh.triArea[t1]) / (1.5 * l0) : (2 * mesh.triArea[t0]) / l0;
       const grain = (doc.sheets[s].grainDeg * Math.PI) / 180;
       const cphi = Math.abs(((mesh.uv[2 * b] - mesh.uv[2 * a]) * Math.cos(grain) + (mesh.uv[2 * b + 1] - mesh.uv[2 * a + 1]) * Math.sin(grain)) / l0);
-      const Y = Math.min(membraneE(m, Math.acos(Math.min(1, cphi))) * m.t, K.MEMBRANE_CAP_LENGTH * m.rhoA * K.GRAVITY);
+      const Y = Math.min(membraneE(m, Math.acos(Math.min(1, cphi))) * m.t, this.membraneCap * m.rhoA * K.GRAVITY);
       this.kMem[e] = (Y * we) / l0;
     }
     this.hingeK = new Float64Array(nH);
@@ -350,13 +357,14 @@ export class World {
     const x = this.x, g = this.g, rhs = S.rhs, fi = S.freeIdx, nV = this.mesh.nV;
     const idt2 = 1 / (this.dt * this.dt);
     for (let it = 0; it < this.opts.newtonIterations; it++) {
+      this.energySearch?.begin(this);
       g.fill(0);
       gradient(this, x, g);
       if (it > 0) for (let i = 0; i < nV; i++) { const m = this.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - this.xt[3 * i + c]); }
       if (!this.dirty && !(this._pcgFail > 0)) {
         const r = pcgStep(this, x, g, K.PCG_MAX_ITER, K.PCG_RTOL);
         this.pcgIterations = r.iterations;
-        if (r.converged) { if (r.iterations > K.PCG_REFACTOR_ITER) this.dirty = true; continue; }
+        if (r.converged) { if (r.iterations > K.PCG_REFACTOR_ITER) this.dirty = true; this.energySearch?.finish(this, g); continue; }
         this._pcgFail = K.PCG_FAIL_HOLD; // the sheet is moving fast: factor directly for a few substeps
       } else if (this._pcgFail > 0) this._pcgFail--;
       assembleAndFactor(this, x);
@@ -373,6 +381,7 @@ export class World {
         if (k < 0) continue;
         x[3 * i] += rhs[3 * k]; x[3 * i + 1] += rhs[3 * k + 1]; x[3 * i + 2] += rhs[3 * k + 2];
       }
+      this.energySearch?.finish(this, g);
     }
   }
 
@@ -609,6 +618,7 @@ export class World {
       substepsRun: this.substepsRun, factorizations: this.factorCount, pcgIterations: this.pcgIterations, asleep: !!this._asleep, time: this.time, finite: !nan,
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
       unheldWelds: this.gates.unheld(this),
+      lineSearchBacktracks: this.energySearch?.backtracks ?? 0, lineSearchRejected: this.energySearch?.rejected ?? 0,
     };
   }
 

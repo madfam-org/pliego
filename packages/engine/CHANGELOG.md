@@ -5,6 +5,14 @@
 
 ## 0.1.0 — unreleased (first published version)
 
+Paper campaign additions (2026-11-09, unreleased source): fixed-query face contacts
+reject negative barycentric weights near pinned corners; experimental
+`physicalMembrane` and `lineSearch` options with objective/replay tests; native
+booklet and contact-free axial comparison harnesses. Defaults retain capped
+membranes and no energy line search. These additions do not close general contact,
+material calibration or performance targets. See the research campaign for
+measured failures and rejected alternatives. No package publish is implied.
+
 First version published to MADFAM's registry (`npm.madfam.io`, scope `@pliego`), after the owner ruled on
 2026-10-22 that the engine is a package other platforms consume rather than copy. The code is the engine as it
 runs in the studio at this commit; nothing in `src/` changed for publishing.

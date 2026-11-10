@@ -27,6 +27,7 @@ export function snapshotWorld(w) {
     edgeSide: w.edgeContact ? [...w.edgeContact.side] : [],
     factor: w._factorState ? copyFactor(w._factorState) : null,
     factorDir: Float64Array.from(w.factorDir),
+    energySearch: w.energySearch ? { backtracks: w.energySearch.backtracks, rejected: w.energySearch.rejected } : null,
   };
 }
 
@@ -69,6 +70,7 @@ export function restoreWorld(w, s) {
   w._asleep = s.asleep;
   w._quiet = s.quiet;
   w._pcgFail = s.pcgFail;
+  if (w.energySearch) { w.energySearch.backtracks = s.energySearch?.backtracks ?? 0; w.energySearch.rejected = s.energySearch?.rejected ?? 0; }
 }
 
 /** A deep copy of a World's factorisation inputs (the World reuses its buffers). @param {any} f */

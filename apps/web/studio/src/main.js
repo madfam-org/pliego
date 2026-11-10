@@ -15,8 +15,10 @@ import { probeStep } from './engine-worker.js';
 import { renderCatalog, renderModes, renderParams, renderControls, renderSteps, renderExports, stepIndex } from './panels.js';
 import { createRenderer, rendererOverride } from './render/index.js';
 import { sheetsFromDocument } from './render/scene.js';
-import { readingLeaf } from './leaf-reader.js';
 import { attachViewerInput } from './viewer-input.js';
+import { readingBook, fitBookCamera } from './book-layout.js';
+import { BookWorld } from './book-world.js';
+import { syncReadingMode } from './reading-mode.js';
 
 const $ = (id) => /** @type {any} */ (document.getElementById(id));
 const i18n = createI18n(STUDIO_STRINGS);
@@ -33,7 +35,7 @@ const state = {
   physicsWanted: false,   // run paper physics when it is available
   physicsForced: false,   // the viewer asked for it (toggle or ?engine=physics): never fall back for speed
   renderer: /** @type {import('./render/index.js').Renderer | null} */ (null),
-  input: /** @type {{destroy(): void} | null} */ (null),
+  input: /** @type {{destroy(): void, cancel?(): void, navigate?(direction: string): void, reset?(): void} | null} */ (null),
   catalog: /** @type {{source: 'api'|'demo', items: any[]} | null} */ (null),
   item: /** @type {any} */ (null),
   mode: /** @type {string|null} */ (null),
@@ -100,20 +102,7 @@ function renderAll() {
   if (state.json) state.updateSteps = renderSteps($('steps'), $('steps-card'), state.json, i18n, (v) => setPrimary(v, true));
   syncSteps();
   renderStatusStatic();
-  syncReadingMode();
-}
-
-function syncReadingMode() {
-  const paper = state.share.interaction === 'paper';
-  const available = paper && state.engine?.kind === 'engine' && readingLeaf(state.json);
-  const hint = paper ? (available ? 'paper.hint' : 'paper.unavailable') : 'tool.hint';
-  const label = paper ? (available ? 'paper.label' : 'paper.unavailable') : 'viewer.label';
-  $('input-hint').dataset.i18n = hint; $('input-hint').textContent = i18n.t(hint);
-  if (state.renderer) {
-    state.renderer.canvas.setAttribute('data-i18n-attr', `aria-label:${label}`);
-    state.renderer.canvas.setAttribute('aria-label', i18n.t(label));
-  }
-  $('btn-grab').disabled = paper;
+  syncReadingMode(state, i18n);
 }
 
 function renderStatusStatic() {
@@ -219,6 +208,7 @@ function advancePlayback(dt) {
 }
 
 function stepButton(dir) {
+  if (state.world instanceof BookWorld) { state.input?.navigate?.(dir > 0 ? 'forward' : 'backward'); return; }
   const c = state.controls;
   if (!c || !c.primaryId) return;
   const [lo, hi] = c.range(c.primaryId);
@@ -324,14 +314,15 @@ async function useDocument(json, opts = {}) {
   state.overlay = null;
   speed.n = 0; speed.avg = 0; speed.fired = false;
   const physicsOk = !!(state.physics && state.physics.kind === 'engine');
-  const fits = state.physicsForced || physicsFits(json);
+  const book = state.share.interaction === 'paper' && readingBook(json);
+  const fits = state.physicsForced || !!book || physicsFits(json);
   state.engine = physicsOk && state.physicsWanted && !opts.preview && fits ? state.physics : state.preview;
   const real = state.engine.kind === 'engine';
   const heavyNotice = physicsOk && state.physicsWanted && !opts.preview && !fits
     ? i18n.t('physics.heavy', { n: estimateVertices(json, engineOptions(json).meshEdge) }) : '';
   /** @type {WorkerWorld | null} */
   let remote = null;
-  if (real) {
+  if (real && !book) {
     try {
       remote = await startEngineWorker({ off: state.share.worker === 'off', json, opts: engineOptions(json), probe: !state.physicsForced, onFrame: () => { pumpRemote(); kick(); }, onStep: noteStep });
     } catch (e) {
@@ -340,7 +331,8 @@ async function useDocument(json, opts = {}) {
     if (gen !== docGen) { if (remote) remote.dispose(); return; }   // a newer document took over
   }
   try {
-    if (remote) { state.world = remote; state.where = 'worker'; }
+    if (real && book) { state.world = new BookWorld(state.engine.mod, json, engineOptions(json), () => syncReadingMode(state, i18n)); state.where = 'main'; }
+    else if (remote) { state.world = remote; state.where = 'worker'; }
     else {
       const doc = state.engine.mod.loadDocument(json);
       state.world = new state.engine.mod.World(doc, real ? engineOptions(json) : { seed: 1 });
@@ -357,7 +349,7 @@ async function useDocument(json, opts = {}) {
         if (!needsEngine(c.id)) { try { state.world.setControl(c.id, c.default); } catch (e) { fail('error.engine', e); } }
       }
     }
-    if (real && !state.physicsForced) {
+    if (real && !state.physicsForced && !book) {
       let ms = NaN;
       if (remote) ms = remote.probeMs;
       else try { ms = probeStep(state.world, STEP, () => performance.now()); } catch (e) { fail('error.engine', e); }
@@ -461,7 +453,7 @@ function invalidate() { redraw = true; kick(); }
 function wake() { quiet = 0; pumpRemote(); kick(); }
 
 /** A settled world (the same pose for a while, nothing driving it) is not stepped until woken. */
-const settled = () => quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing && !state.holdingLeaf;
+const settled = () => quiet >= quietLimit(state.engine ? state.engine.kind : 'stub') && !state.playing && !state.grabbing && !state.holdingLeaf && !state.world?.readingBusy;
 
 /** A Worker engine is stepped when its last pose lands (WorkerWorld.pump), not at the next frame. */
 function pumpRemote() {
@@ -501,7 +493,7 @@ function frame(now) {
       if (shownOverlay) { ovView.positions = shownOverlay.positions; ovView.colors = shownOverlay.colors; ovView.faint = !state.overlayOn; ov = ovView; }
       const bounds = state.renderer.draw(r, ov, changed);
       redraw = false;
-      if (!state.fitted && bounds) { state.renderer.camera.fit(bounds.center, bounds.radius); state.fitted = true; redraw = true; }
+      if (!state.fitted && bounds) { if (world instanceof BookWorld) fitBookCamera(state.renderer, world.book); else state.renderer.camera.fit(bounds.center, bounds.radius); state.fitted = true; redraw = true; }
     }
   } catch (e) {
     fail('error.engine', e);
@@ -512,7 +504,7 @@ function frame(now) {
   else if (world.received !== received) { received = world.received; quiet = changed ? 0 : quiet + 1; }
   frames++;
   const running = keepRunning({
-    playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing || state.holdingLeaf,
+    playing: state.playing, redraw: redraw && state.view === '3d', grabbing: !!state.grabbing || state.holdingLeaf || !!world.readingBusy,
     pending: world instanceof WorkerWorld && world.pending, quietFrames: quiet,
     engine: state.engine ? state.engine.kind : 'stub', hidden: document.hidden,
   });
@@ -538,7 +530,7 @@ function wireStatic() {
   $('btn-play').addEventListener('click', () => setPlaying(!state.playing));
   $('btn-back').addEventListener('click', () => stepButton(-1));
   $('btn-forward').addEventListener('click', () => stepButton(1));
-  $('btn-restart').addEventListener('click', () => { const c = state.controls; if (c && c.primaryId) setPrimary(c.range(c.primaryId)[0], true); });
+  $('btn-restart').addEventListener('click', () => { if (state.world instanceof BookWorld) { state.input?.reset?.(); return; } const c = state.controls; if (c && c.primaryId) setPrimary(c.range(c.primaryId)[0], true); });
   $('btn-reset').addEventListener('click', () => { if (state.renderer) { state.renderer.camera.reset(); invalidate(); } });
   $('btn-grab').addEventListener('click', () => { state.grabMode = !state.grabMode; $('btn-grab').setAttribute('aria-pressed', String(state.grabMode)); $('viewer').classList.toggle('grab', state.grabMode); });
   $('btn-overlay').addEventListener('click', () => { state.overlayOn = !state.overlayOn; $('btn-overlay').setAttribute('aria-pressed', String(state.overlayOn)); invalidate(); });
@@ -572,7 +564,7 @@ async function init() {
   const canvas = $('view-canvas');
   state.renderer = createRenderer(canvas, { prefer: rendererOverride(state.share.renderer), onWarn: (m) => console.warn(m), onInvalidate: invalidate });
   const rd = state.renderer;   // the observer hands the size over: drawing never forces a layout
-  if (rd && typeof ResizeObserver === 'function') new ResizeObserver((es) => { rd.resize(es[0].contentRect.width, es[0].contentRect.height); invalidate(); }).observe(rd.canvas);
+  if (rd && typeof ResizeObserver === 'function') new ResizeObserver((es) => { state.input?.cancel?.(); if (state.world instanceof BookWorld) state.fitted = false; rd.resize(es[0].contentRect.width, es[0].contentRect.height); invalidate(); }).observe(rd.canvas);
   if (!state.renderer) notice(i18n.t('viewer.none'));
   else if (state.renderer.kind === 'canvas2d' && rendererOverride(state.share.renderer) !== 'canvas2d') notice(i18n.t('viewer.canvas2d'));
   const noticeText = $('viewer-notice').textContent;

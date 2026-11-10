@@ -53,6 +53,21 @@ world.snapshot(); world.restore(s);   // bit-exact, including the factorisation 
 `render()` buffers are allocated once and refreshed in place. Render vertices are split along fold
 hinges into smoothing groups, and the UVs span each sheet's local bounding box.
 
+Research option: `physicalMembrane: true` bypasses the default membrane-modulus
+cap for membrane edges and perforation strength. It uses the stock's physical
+in-plane modulus and can expose stiffness/conditioning failures; it is not a
+validated quality preset. Defaults retain the existing cap. Compare it with
+`node packages/engine/bench/paper-campaign.mjs`; see the
+[active campaign and separate gates](../../docs/research/paper-physics-campaign.md).
+
+`lineSearch: true` additionally backtracks GN/PCG proposals against the actual
+implicit inertia, membrane, bend/damping, drive and join objective. It exposes
+`lineSearchBacktracks` and `lineSearchRejected` diagnostics and preserves them
+through snapshots. It is off by default. It does not safeguard prediction or the
+later contact/strain projections, and does not make a single Newton iteration
+converged. The contact-free axial counterexample remains in
+`node packages/engine/bench/axial-pull.mjs`.
+
 `kinematics` exports `FaceTree`, `LoopClosure`, `KinematicProgram` and the closed forms
 (`degree4`, `degree4Multipliers`, `miuraDims`, `miuraPoisson`, `miuraFoldAngles`, `vfold`,
 `fourBar`).

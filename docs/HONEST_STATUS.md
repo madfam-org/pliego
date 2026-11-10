@@ -4,10 +4,17 @@
 > Boundary: public. The single truth for what works today. Keep it true when you change behaviour.
 
 Local source addition, 2026-11-09: the studio supports an explicit fixed-camera
-`interaction=paper` mode for one native leaf, with physical forward/backward
-dragging, return/cancel and arrow keys. It requires the real engine; the rigid
+`interaction=paper` mode for one native leaf and an independent 2–32-leaf native
+codex, with physical forward/backward dragging, return/cancel and arrow keys. The
+codex reader uses one flexible leaf and fixed page blocks, promotes released
+leaves to flat blocks and caps the solver cache at two worlds. This is an explicit
+reading model, not a validated unconstrained stack equilibrium. It requires the real engine; the rigid
 preview and unsupported documents show an unavailable message. This is not an
-independent multi-page reader for the archive companion. See
+independent multi-page reader for the archive companion. The
+[paper physics campaign](research/paper-physics-campaign.md) is active, including
+a pinned-contact regression, an experimental uncapped membrane option and a
+reproducible all-flexible/active-leaf benchmark. Research, physical calibration,
+general contact robustness and the 8 ms physics target remain open. See
 [scope and verification](pilots/paper-reading-mode.md). Not deployed by this
 change; a dispatched build and running-version acceptance are still required.
 

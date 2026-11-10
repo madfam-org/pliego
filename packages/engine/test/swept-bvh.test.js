@@ -21,6 +21,7 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
     const reference = new SweptCandidates(m, tc), indexed = new SweptCandidates(m, tc, 'bvh', 'auto');
     const active = new SweptCandidates(m, tc, 'bvh', 'active'), rank = new SweptCandidates(m, tc, 'bvh', 'rank');
     const rankedActive = new SweptCandidates(m, tc, 'bvh', 'active-ranked');
+    const wasm = new SweptCandidates(m, tc, 'wasm');
     const fixed = new Uint8Array(size), weld = new Int32Array(size).fill(-1);
     let topology;
     for (let sample = 0; sample < 48; sample++) {
@@ -35,7 +36,7 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
         if (sample % 4 === 0 || (fixed[v] && random() > 0.5)) for (let k = 0; k < 3; k++) to[3 * v + k] = from[3 * v + k];
       }
       reference.build(from, to, fixed, weld); indexed.build(from, to, fixed, weld);
-      for (const c of [active, rank, rankedActive]) {
+      for (const c of [active, rank, rankedActive, wasm]) {
         c.build(from, to, fixed, weld); assert.deepEqual(result(c), result(reference), `forced ${c.edgeTraversal}, size=${size} sample=${sample}`);
       }
       assert.deepEqual(result(indexed), result(reference), `ordered pairs, size=${size} sample=${sample}`);
@@ -96,15 +97,17 @@ test('BVH native leaf matches reference pose/forces/CCD diagnostics and restores
     consistentMembraneCurvature: true, gravity: false, ground: false, plasticity: false };
   const a = new World(pageLeaf({ width: 30, height: 40 }), options), b = new World(pageLeaf({ width: 30, height: 40 }), { ...options, contactBroadPhase: 'bvh' });
   const active = new World(pageLeaf({ width: 30, height: 40 }), { ...options, contactBroadPhase: 'bvh' });
+  const wasmWorld = new World(pageLeaf({ width: 30, height: 40 }), { ...options, contactBroadPhase: 'wasm' });
   active.coupledContact.potential.candidates.edgeTraversal = 'active-ranked';
   active.coupledContact.guard.candidates.edgeTraversal = 'active-ranked';
   assert.equal(b.coupledContact.potential.candidates.mode, 'bvh'); assert.equal(b.coupledContact.guard.candidates.mode, 'bvh');
-  for (const w of [a, b, active]) w.setControl('turn', 45);
+  for (const w of [a, b, active, wasmWorld]) w.setControl('turn', 45);
   for (let f = 0; f < 12; f++) {
-    a.step(); b.step(); active.step(); assert.deepEqual(a.x, active.x); assert.deepEqual(a.v, active.v);
+    a.step(); b.step(); active.step(); wasmWorld.step(); assert.deepEqual(a.x, wasmWorld.x); assert.deepEqual(a.v, wasmWorld.v);
+    assert.deepEqual(a.stats().coupledContact, wasmWorld.stats().coupledContact); assert.deepEqual(a.x, active.x); assert.deepEqual(a.v, active.v);
     assert.deepEqual(a.stats().coupledContact, active.stats().coupledContact); assert.deepEqual(a.x, b.x); assert.deepEqual(a.v, b.v); assert.deepEqual(a.stats().coupledContact, b.stats().coupledContact);
   }
-  for (const w of [b, active]) {
+  for (const w of [b, active, wasmWorld]) {
     const snapshot = w.snapshot(); for (let f = 0; f < 4; f++) w.step();
     const x = w.x.slice(), diagnostics = w.stats().coupledContact;
     w.restore(snapshot); for (let f = 0; f < 4; f++) w.step();
@@ -118,7 +121,7 @@ test('BVH matches the retained late-turn gradient, local direction and backtrack
   const capture = JSON.parse(readFileSync(new URL('../../../docs/research/evidence/paper-2026-11-09/late-turn-objective.json', import.meta.url)),
     (_key, value) => value?.typed && types[value.typed] ? new types[value.typed](value.data) : value);
   const s = capture.state, states = [];
-  for (const contactBroadPhase of ['reference', 'bvh']) {
+  for (const contactBroadPhase of ['reference', 'bvh', 'wasm']) {
     const w = new World(readingPose(s.json, readingBook(s.json), s.active), { ...s.options, contactBroadPhase });
     w.restore(s.snapshot); w.dt = s.dt; w.xs.set(s.xs); w.xt.set(s.xt);
     const c = w.coupledContact, before = c.evaluate(w), g = w.g.slice();
@@ -127,7 +130,7 @@ test('BVH matches the retained late-turn gradient, local direction and backtrack
     assert.ok(c.search(w, before)); assert.ok(c.backtracks > 0);
     states.push({ g, direction, accepted: w.x.slice(), diagnostics: c.snapshot() });
   }
-  assert.deepEqual(states[0], states[1]);
+  assert.deepEqual(states[0], states[1]); assert.deepEqual(states[0], states[2]);
   console.log('swept-BVH-late-contact: 1592-stencil native objective, direction, accepted pose and full diagnostic state equal reference');
 });
 

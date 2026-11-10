@@ -2,17 +2,20 @@
 // Balanced hierarchy over existing outward primitive AABBs. Topology is built
 // once; every call refits ALL bounds, stationary flags and current sort ranks.
 // Queries return ranks sorted numerically, retaining reference candidate order.
+/** @typedef {{boxes:Float64Array,left:Int32Array,right:Int32Array,primitive:Int32Array,
+ * inactive:Uint8Array,maximumRank:Int32Array,anyInactive:Uint8Array,rank:Int32Array,
+ * stack:Int32Array,hits:Int32Array}} BoundsStorage */
 export class BoundsTree {
-  /** @param {number} count */
-  constructor(count) {
+  /** @param {number} count @param {BoundsStorage} [storage] */
+  constructor(count, storage) {
     this.count = count; this.nodes = 0;
     const capacity = Math.max(1, 2 * count - 1);
-    this.boxes = new Float64Array(6 * capacity);
-    this.left = new Int32Array(capacity); this.right = new Int32Array(capacity);
-    this.primitive = new Int32Array(capacity).fill(-1);
-    this.inactive = new Uint8Array(capacity); this.maximumRank = new Int32Array(capacity);
-    this.anyInactive = new Uint8Array(capacity);
-    this.rank = new Int32Array(count); this.stack = new Int32Array(capacity); this.hits = new Int32Array(count);
+    this.boxes = storage?.boxes ?? new Float64Array(6 * capacity);
+    this.left = storage?.left ?? new Int32Array(capacity); this.right = storage?.right ?? new Int32Array(capacity);
+    this.primitive = (storage?.primitive ?? new Int32Array(capacity)).fill(-1);
+    this.inactive = storage?.inactive ?? new Uint8Array(capacity); this.maximumRank = storage?.maximumRank ?? new Int32Array(capacity);
+    this.anyInactive = storage?.anyInactive ?? new Uint8Array(capacity);
+    this.rank = storage?.rank ?? new Int32Array(count); this.stack = storage?.stack ?? new Int32Array(capacity); this.hits = storage?.hits ?? new Int32Array(count);
     this.nodeTests = 0; this.rootContainmentTests = 0; this.queries = 0;
     this.order = /** @type {number[]} */([]);
     /** @type {Uint8Array} */

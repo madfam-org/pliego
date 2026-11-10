@@ -149,7 +149,9 @@ port must preserve operation/pair order, rejection behavior and whole-run hashes
 Wasm target/linker, and [WABT](https://github.com/WebAssembly/wabt) is an alternative
 text/binary toolchain. Compilation/instantiation, memory copies and end-to-end
 World.step belong in measured cost. A per-pair call benchmark cannot establish
-a useful reader backend. No such port or speedup is yet established here.
+a useful reader backend. A scalar binary64 refit/query [prototype](wasm-contact-experiment.md) now exists.
+Exact kernel/candidate tests pass; end-to-end speed, full replay and browser-policy
+evidence must be measured before any acceptance claim.
 
 ## Separate gates
 

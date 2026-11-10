@@ -24,7 +24,7 @@ const path = new URL('../test/fixtures/kernel/codex-four-leaf.fold', import.meta
 const bytes = readFileSync(path), json = JSON.parse(bytes);
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const broadPhase = arg('--broad-phase');
-if (broadPhase && !['reference', 'bvh'].includes(broadPhase)) throw new RangeError('--broad-phase must be reference or bvh');
+if (broadPhase && !['reference', 'bvh', 'wasm'].includes(broadPhase)) throw new RangeError('--broad-phase must be reference, bvh or wasm');
 const edgeMollification = arg('--edge-mollification');
 if (edgeMollification && !['off', 'surface-guarded'].includes(edgeMollification)) throw new RangeError('--edge-mollification must be off or surface-guarded');
 const iterations = arg('--iterations') === null ? null : Number(arg('--iterations'));
@@ -99,8 +99,16 @@ function run(model, settings) {
   try {
     w = model === 'active-leaf' ? new BookWorld(engine, json, options) : new engine.World(engine.loadDocument(json), options);
     r.buildMs = performance.now() - start;
-    if (broadPhase === 'bvh' && (w.world || w).opts.contactBroadPhase !== 'bvh') {
-      r.supported = false; throw new Error('Engine does not support the BVH broad phase');
+    if (broadPhase && (w.world || w).opts.contactBroadPhase !== broadPhase) {
+      r.supported = false; throw new Error(`Engine does not support the ${broadPhase} broad phase`);
+    }
+    if (broadPhase === 'wasm') {
+      const actual = w.world || w, sets = actual.coupledContact
+        ? [actual.coupledContact.potential.candidates, actual.coupledContact.guard.candidates]
+        : actual.motionGuard ? [actual.motionGuard.candidates] : [];
+      if (!sets.length || sets.some(c => c.mode !== 'wasm' || !(c.triangleTree?.memory instanceof WebAssembly.Memory) || !(c.edgeTree?.memory instanceof WebAssembly.Memory))) {
+        r.supported = false; throw new Error('Wasm refit/query backend is not selected or exercised');
+      }
     }
     if (edgeMollification === 'surface-guarded' && !(w.world || w).coupledContact?.potential.surface) {
       r.supported = false; throw new Error('Engine does not support surface-guarded mollification');

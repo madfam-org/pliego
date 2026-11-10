@@ -4,12 +4,13 @@
 // cap or endpoint-only sphere rejection. Optional refit BVH keeps the same bounds,
 // exclusions and pair order; the prefix scan remains the reference implementation.
 import { BoundsTree } from './bounds-tree.js';
+import { WasmBoundsTree } from './wasm-bounds-tree.js';
 
 export class SweptCandidates {
-  /** @param {any} mesh @param {Float64Array} thickness @param {'reference'|'bvh'} [mode] @param {'auto'|'rank'|'active'|'active-ranked'} [edgeTraversal] */
+  /** @param {any} mesh @param {Float64Array} thickness @param {'reference'|'bvh'|'wasm'} [mode] @param {'auto'|'rank'|'active'|'active-ranked'} [edgeTraversal] */
   constructor(mesh, thickness, mode = 'reference', edgeTraversal = 'auto') {
     this.mesh = mesh; this.thickness = thickness;
-    if (!['reference', 'bvh'].includes(mode)) throw new RangeError('Swept contact: invalid broad phase');
+    if (!['reference', 'bvh', 'wasm'].includes(mode)) throw new RangeError('Swept contact: invalid broad phase');
     this.mode = mode;
     if (!['auto', 'rank', 'active', 'active-ranked'].includes(edgeTraversal)) throw new RangeError('Swept contact: invalid edge traversal');
     this.edgeTraversal = edgeTraversal; this.edgeTraversalUsed = 'rank';
@@ -21,8 +22,9 @@ export class SweptCandidates {
     this.triangleOrder = Array.from({ length: mesh.nT }, (_, i) => i);
     this.edgeOrder = Array.from({ length: mesh.nE }, (_, i) => i);
     this.triangleInactive = new Uint8Array(mesh.nT); this.edgeInactive = new Uint8Array(mesh.nE);
-    this.triangleTree = mode === 'bvh' ? new BoundsTree(mesh.nT) : null;
-    this.edgeTree = mode === 'bvh' ? new BoundsTree(mesh.nE) : null;
+    const Tree = mode === 'wasm' ? WasmBoundsTree : BoundsTree;
+    this.triangleTree = mode !== 'reference' ? new Tree(mesh.nT) : null;
+    this.edgeTree = mode !== 'reference' ? new Tree(mesh.nE) : null;
     this.neighbors = Array.from({ length: mesh.nV }, () => new Set());
     for (let e = 0; e < mesh.nE; e++) {
       const a = mesh.edges[2 * e], b = mesh.edges[2 * e + 1]; this.neighbors[a].add(b); this.neighbors[b].add(a);
@@ -44,7 +46,7 @@ export class SweptCandidates {
     const m = this.mesh, V = this.vertexBoxes, T = this.triangleBoxes, E = this.edgeBoxes, tc = this.thickness;
     const inactive = this.stationaryFixed;
     if (from.length !== 3 * m.nV || to.length !== from.length || fixed.length !== m.nV || weld.length !== m.nV) throw new RangeError('Swept contact: invalid buffer size');
-    const cacheable = this.mode === 'bvh' && from === to && from instanceof Float64Array;
+    const cacheable = this.mode !== 'reference' && from === to && from instanceof Float64Array;
     const inputs = cacheable ? [from, fixed, weld, tc, m.vGroup, m.vSheet, m.triSheet] : [];
     this.reusedLastBuild = false;
     if (reuse && cacheable && this.cacheValid && inputs.every((a, i) => exactContents(a, this.cachedInputs[i]))) {

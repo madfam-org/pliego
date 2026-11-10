@@ -43,7 +43,7 @@ export class World {
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
-   *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh',edgeEdgeMollification?:'off'|'surface-guarded'}} [opts]
+   *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -71,7 +71,7 @@ export class World {
     if (typeof this.opts.barrierContact !== 'boolean') throw new TypeError('World: barrierContact must be boolean');
     if (typeof this.opts.previousPoseStart !== 'boolean') throw new TypeError('World: previousPoseStart must be boolean');
     if (typeof this.opts.consistentMembraneCurvature !== 'boolean') throw new TypeError('World: consistentMembraneCurvature must be boolean');
-    if (!['reference', 'bvh'].includes(this.opts.contactBroadPhase)) throw new RangeError('World: invalid contactBroadPhase');
+    if (!['reference', 'bvh', 'wasm'].includes(this.opts.contactBroadPhase)) throw new RangeError('World: invalid contactBroadPhase');
     if (!['off', 'surface-guarded'].includes(this.opts.edgeEdgeMollification)) throw new RangeError('World: invalid edgeEdgeMollification');
     if (this.opts.edgeEdgeMollification !== 'off' && !this.opts.barrierContact) throw new Error('World: edgeEdgeMollification requires barrierContact');
     if (this.opts.barrierContact && (!this.opts.contact || this.opts.continuousContact)) throw new Error('World: barrierContact requires contact and replaces continuousContact');

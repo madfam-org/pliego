@@ -87,7 +87,13 @@ law. Solver/convergence/fallback counters are in `stats().coupledContact`.
 
 `contactBroadPhase: 'bvh'` selects a refit spatial index for those swept contact
 candidates, retaining reference bounds, exclusions and pair order. The default
-is `'reference'`. This option applies to `continuousContact`/`barrierContact`;
+is `'reference'`. Experimental `'wasm'` uses scalar binary64 Wasm refit/traversal
+with the same JS bounds, topology, exclusions, ordering and exact-pose reuse.
+Its generated kernel has no runtime package dependency; compilation, instance
+initialization, validation, input copies and call boundaries belong in measured
+cost. It refuses unsupported memory sizes/NaN bounds and has no silent JS
+fallback. Performance and browser/device acceptance require separate evidence.
+This option applies to `continuousContact`/`barrierContact`;
 legacy projection contact is unchanged. See the
 [coverage and benchmark contract](../../docs/research/bvh-broadphase-experiment.md).
 

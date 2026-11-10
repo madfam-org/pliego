@@ -93,6 +93,12 @@ naive traversal and large-sweep regression are retained. Candidate work still
 accounts for about 53% of sampled process self time; optimality, 8 ms reading and
 measured-paper accuracy remain unproven.
 
+An experimental [binary64 Wasm refit/query backend](research/wasm-contact-experiment.md)
+is available behind `contactBroadPhase: 'wasm'`, with no runtime package dependency
+or hidden JS fallback. Kernel/candidate bytes and the retained solver probe match
+JS; complete source-pinned performance/replay and browser-policy results remain
+pending. The studio's current script policy does not yet permit this compilation.
+
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the
 declared 0.001 µN force tolerance, identical sampled-position hashes and all

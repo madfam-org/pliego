@@ -11,6 +11,17 @@ independent multi-page reader for the archive companion. See
 [scope and verification](pilots/paper-reading-mode.md). Not deployed by this
 change; a dispatched build and running-version acceptance are still required.
 
+Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
+tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched
+over 1%, 10 exploded), zero rejected/world/step errors, and 76 studio preview
+fallbacks. Sixteen runs were truncated by their budget. This is a sampled,
+time-compressed simulation matrix, not a full-corpus or fabrication proof; its
+successful workflow conclusion is informational, not a stability threshold.
+The two sampled `page-turn` variants, `a4-card` and `washi`, were stable and
+interactive: mean steps about 18.9 and 22.5 ms, peak stretch about 0.25% and
+0.45%, with no preview fallback. This supports their tested scope, not every
+stock, parameter combination or bound-book reading mechanism.
+
 **Lifecycle: incubating, first deploy live.** One container serves the three ruled hosts: the
 landing at `https://pliego.madfam.io/`, the studio at `https://pliego-app.madfam.io/studio/` and the
 API at `https://pliego-api.madfam.io/` (its JSON index; the routes are under `/api/v1/`, and

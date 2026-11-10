@@ -1,0 +1,234 @@
+{
+  "schema": "pliego-axial-pull/0.1",
+  "recordedAt": "2026-11-10T03:59:05.371Z",
+  "source": {
+    "git": "78ca50699ebfd7700e5fc97ba8cceb499b0ed01c",
+    "fixtureSHA256": "367c855f1f44460e5df816d019f25a3ff010940498b7c083aa6f77dd9449c01c",
+    "files": {
+      "xpbd/world.js": "fb9d5cdd1fd92d706346e971cd37fbf91c8fa3a459398cb78f3fd7f28789893c",
+      "xpbd/energy-search.js": "880d3a567a86af5ff62339881d562d42199708b5bd21cfde22b50b99236870e8",
+      "xpbd/implicit.js": "443d22d918522c639b19d9e220a0c93590b61438e9c8d690a21b5325df9f7c0a",
+      "xpbd/pcg.js": "8ea365cae8ea0e416940aabbe3b38882b712449a9b86f1726b54ae0f786f604f",
+      "constants.js": "ba82c79e86505b83e4ad3586412f6f65be287f853c8e154ccee3525a7f8384cc"
+    },
+    "harnessSHA256": "325336a7ced119911a66567dae179142994a98f76a789967286a502f08a6faab"
+  },
+  "runtime": {
+    "node": "v20.19.5",
+    "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+  },
+  "protocol": {
+    "forceMicroNewtons": 10000,
+    "lengthMm": 100,
+    "widthMm": 10,
+    "frames": 180,
+    "frameSeconds": 0.016666666666666666,
+    "contact": false,
+    "analyticalBarExtensionMm": 0.0001818181818181818,
+    "materialBasis": "DocBuilder copy-80 synthetic estimate; E*t*width axial-bar reference, not a calibrated 2D FE solution",
+    "timing": "one local exploratory run; step only; includes warm-up"
+  },
+  "results": [
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": false
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.022687528219423544,
+      "error": null,
+      "extensionMm": -0.4589150519266667,
+      "extensionAtHalfTimeMm": -0.49038141239343247,
+      "driftMm": 0.031466360466765764,
+      "relativeBarError": 2525.032785596667,
+      "maxSpeedMmPerSecond": 232.0200112980065,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "57b3dee7c953b8f7a167ac528727d3ef6b237bd42aac1fc1d5efabbd797aa195",
+      "vertices": 32,
+      "meanStepMs": 1.071132255555556,
+      "p95StepMs": 1.2356180000000023,
+      "gates": {
+        "tensile": false,
+        "axialBar5Percent": false,
+        "drift1Percent": false,
+        "physics8ms": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.005708623398612264,
+      "error": null,
+      "extensionMm": -0.6251384138762361,
+      "extensionAtHalfTimeMm": -0.6319993852787675,
+      "driftMm": 0.006860971402531391,
+      "relativeBarError": 3439.2612763192988,
+      "maxSpeedMmPerSecond": 189.46753908986736,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "037179b1b006ca4de976d717493ea8af1cf58846129dced2f2083ea0b83a217c",
+      "vertices": 32,
+      "meanStepMs": 1.116995188888891,
+      "p95StepMs": 1.7747959999999807,
+      "gates": {
+        "tensile": false,
+        "axialBar5Percent": false,
+        "drift1Percent": false,
+        "physics8ms": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "lineSearch": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.005708623398612264,
+      "error": null,
+      "extensionMm": -0.6251384138762361,
+      "extensionAtHalfTimeMm": -0.6319993852787675,
+      "driftMm": 0.006860971402531391,
+      "relativeBarError": 3439.2612763192988,
+      "maxSpeedMmPerSecond": 189.46753908986736,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "037179b1b006ca4de976d717493ea8af1cf58846129dced2f2083ea0b83a217c",
+      "vertices": 32,
+      "meanStepMs": 0.9969237888888937,
+      "p95StepMs": 1.3062029999999822,
+      "gates": {
+        "tensile": false,
+        "axialBar5Percent": false,
+        "drift1Percent": false,
+        "physics8ms": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 8,
+        "newtonIterations": 8,
+        "physicalMembrane": true,
+        "lineSearch": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.0000020816977929882794,
+      "error": null,
+      "extensionMm": -0.008003602196907877,
+      "extensionAtHalfTimeMm": -0.008003602196907877,
+      "driftMm": 0,
+      "relativeBarError": 45.01981208299333,
+      "maxSpeedMmPerSecond": 0.12354018877745068,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "21098eb4b0d74e053053bb8b39163d7226bc08df27462548babede3dcd071903",
+      "vertices": 32,
+      "meanStepMs": 4.055277294444444,
+      "p95StepMs": 4.504943000000139,
+      "gates": {
+        "tensile": false,
+        "axialBar5Percent": false,
+        "drift1Percent": true,
+        "physics8ms": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 64,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "lineSearch": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.0002950642821832115,
+      "error": null,
+      "extensionMm": 0.00007101601727299567,
+      "extensionAtHalfTimeMm": 0.00007101601725167939,
+      "driftMm": 2.1316282072803006e-14,
+      "relativeBarError": 0.6094119049985238,
+      "maxSpeedMmPerSecond": 10.270152023486023,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "02b5098c3ad7cfceeacd18430e08713c6c0a52af7fdc1d9addfe095533641a8e",
+      "vertices": 32,
+      "meanStepMs": 2.5614375555555573,
+      "p95StepMs": 2.8492650000000594,
+      "gates": {
+        "tensile": true,
+        "axialBar5Percent": false,
+        "drift1Percent": true,
+        "physics8ms": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 128,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "lineSearch": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.000019005961206905274,
+      "error": null,
+      "extensionMm": 0.00018392084691498667,
+      "extensionAtHalfTimeMm": 0.00018392084691498667,
+      "driftMm": 0,
+      "relativeBarError": 0.011564658032426739,
+      "maxSpeedMmPerSecond": 8.185452315956354e-11,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "10bd237db3b643ea619eb1197a8640685df3ab2d79a87d0499b0bd4f836ad6ef",
+      "vertices": 32,
+      "meanStepMs": 0.8106197333333335,
+      "p95StepMs": 4.756556000000046,
+      "gates": {
+        "tensile": true,
+        "axialBar5Percent": true,
+        "drift1Percent": true,
+        "physics8ms": true
+      }
+    },
+    {
+      "options": {
+        "substeps": 256,
+        "newtonIterations": 1,
+        "physicalMembrane": true,
+        "lineSearch": true
+      },
+      "frames": 180,
+      "finite": true,
+      "maxStrain": 0.0000018222667639733458,
+      "error": null,
+      "extensionMm": 0.0001803318405180221,
+      "extensionAtHalfTimeMm": 0.0001803318405180221,
+      "driftMm": 0,
+      "relativeBarError": 0.00817487715087844,
+      "maxSpeedMmPerSecond": 3.89594148466428e-10,
+      "backtracks": 0,
+      "rejected": 0,
+      "poseSHA256": "d905f66d2aaf33a87276fb2c047710f2d867f3c4df0ff8e741a368564fe0d2b0",
+      "vertices": 32,
+      "meanStepMs": 1.5984834666666807,
+      "p95StepMs": 9.560145999999804,
+      "gates": {
+        "tensile": true,
+        "axialBar5Percent": true,
+        "drift1Percent": true,
+        "physics8ms": false
+      }
+    }
+  ]
+}

@@ -18,6 +18,14 @@ general contact robustness and the 8 ms physics target remain open. See
 [scope and verification](pilots/paper-reading-mode.md). Not deployed by this
 change; a dispatched build and running-version acceptance are still required.
 
+The [first committed campaign results](research/evidence/paper-2026-11-09/README.md)
+show five active-leaf configurations completing eight turns below 1% stretch,
+but none passing the independent partial thickness audit or 8 ms physics gate.
+The contact correction regresses the baseline S=16 reader's thickness result;
+conventional CI passing does not close that failure. The separate axial reference
+shows strong timestep sensitivity and no cure from line search alone. These are
+research/interaction results, not a stable physical catalogue release.
+
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched
 over 1%, 10 exploded), zero rejected/world/step errors, and 76 studio preview

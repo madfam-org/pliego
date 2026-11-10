@@ -108,3 +108,7 @@ partial turns, queued navigation, resting-page immobility, endpoint blocks,
 bounded cache eviction/restore, native source/art preservation, zero idle stepping
 and elapsed simulation time. Numerical and browser evidence are recorded separately
 in the campaign; a passing interaction test cannot close material/contact validation.
+Browser codex acceptance also verified spread order through a readable back cover,
+page-relative forward/reverse drags at 390 px, fixed framing, inert background,
+idle pause and EN/ES state. The viewport check used pointer input, not a real touch
+device. See the [source-pinned results](../research/evidence/paper-2026-11-09/README.md).

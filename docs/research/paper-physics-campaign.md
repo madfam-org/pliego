@@ -152,6 +152,15 @@ is invoked. This changes the interaction mapping, not the fore-edge hand model.
 
 ## Next unresolved experiments
 
+The [first committed measurements](evidence/paper-2026-11-09/README.md) retain
+both supported baseline failures and current candidate failures. Five active-leaf
+configurations complete reading below 1% stretch, but none passes the independent
+thickness or 8 ms physics gate. The contact correction also regresses the baseline
+S=16 reader's partial thickness result. In the separate axial test, sufficiently
+small uncapped steps approach the analytical bar reference; line search alone
+does not fix the under-converged update. The machine-readable reports pin the
+source and disclose their timing/accuracy scope.
+
 1. Finish the contact-feature correction without regressing slits; rerun the corpus
    with exact before/after coverage and preserved failures.
 2. Finish booklet browser/device acceptance, arbitrary-location hand coupling and

@@ -12,7 +12,7 @@ export class BoundsTree {
     this.primitive = new Int32Array(capacity).fill(-1);
     this.inactive = new Uint8Array(capacity); this.maximumRank = new Int32Array(capacity);
     this.rank = new Int32Array(count); this.stack = new Int32Array(capacity); this.hits = new Int32Array(count);
-    this.nodeTests = 0; this.rootContainmentTests = 0;
+    this.nodeTests = 0; this.rootContainmentTests = 0; this.queries = 0;
     this.order = /** @type {number[]} */([]);
     /** @type {Uint8Array} */
     this.primitiveInactive = new Uint8Array(0);
@@ -48,7 +48,7 @@ export class BoundsTree {
         this.maximumRank[n] = Math.max(this.maximumRank[a], this.maximumRank[b]);
       }
     }
-    this.nodeTests = 0; this.rootContainmentTests = 0;
+    this.nodeTests = 0; this.rootContainmentTests = 0; this.queries = 0;
   }
 
   /** Initial median partition; stable primitive-ID tie break on each axis.
@@ -76,6 +76,7 @@ export class BoundsTree {
    * @returns {number} number of sorted ranks in this.hits, valid until next query
    */
   query(boxes, index, inactive, after = -1) {
+    this.queries++;
     let size = 0, count = 0;
     if (!this.nodes || this.maximumRank[0] <= after || (inactive && this.inactive[0])) return 0;
     // An enclosing query overlaps every leaf. Emit current ranks directly,

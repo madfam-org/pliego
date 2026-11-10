@@ -167,3 +167,25 @@ local; the committed summary removes local paths and records their hashes.
 retain all limitations. The targeted invalidation/replay checks, full 146-test
 engine suite and 43-source JSDoc check pass at the implementation checkpoint;
 additional comparator negative controls protect the metadata compatibility path.
+
+
+## Active-edge traversal experiment
+
+An internal `SweptCandidates` traversal experiment queries only nonstationary
+edges, canonicalizes each pair by current min-X/ID rank, and buckets outer ranks
+before sorting inner ranks. At least one edge of each retained pair must be
+nonstationary; active/active pairs use increasing rank once. Stationary/moving
+classification uses both endpoints, so moving prescribed edges remain eligible.
+The topology/group/weld predicates are symmetric under exchanging edge pairs.
+Consequently filtering before bucketing and restoring lexicographic rank order
+preserves the reference's multiplicity, orientation and floating-point sum order.
+Offsets are Float64 and indices remain separate integers, avoiding packed-index
+precision and uint32 total-count wrap. Scratch arrays allocate only when used.
+
+`rank` remains the internal default. `active` forces the experiment, while `auto`
+selects it below half edge mobility; this heuristic is experimental and not a new
+World option. Component schema 0.3 separates those three full-build policies from
+exact-pose reuse and records queries/node tests. Reduced query count alone does
+not establish reduced work: loss of rank pruning and ordering can dominate.
+Clean-source measurements and any refinement will be recorded before changing
+normal engine selection. Existing physics gates remain unchanged.

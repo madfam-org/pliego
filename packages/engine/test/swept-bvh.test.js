@@ -18,7 +18,8 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
   let pairs = 0, builds = 0;
   for (const size of [0, 6, 24, 120]) {
     const m = mesh(size), random = mulberry32(734 + size), tc = Float64Array.from({ length: size }, () => random() * 2);
-    const reference = new SweptCandidates(m, tc), indexed = new SweptCandidates(m, tc, 'bvh');
+    const reference = new SweptCandidates(m, tc), indexed = new SweptCandidates(m, tc, 'bvh', 'auto');
+    const active = new SweptCandidates(m, tc, 'bvh', 'active'), rank = new SweptCandidates(m, tc, 'bvh', 'rank');
     const fixed = new Uint8Array(size), weld = new Int32Array(size).fill(-1);
     let topology;
     for (let sample = 0; sample < 48; sample++) {
@@ -33,6 +34,9 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
         if (sample % 4 === 0 || (fixed[v] && random() > 0.5)) for (let k = 0; k < 3; k++) to[3 * v + k] = from[3 * v + k];
       }
       reference.build(from, to, fixed, weld); indexed.build(from, to, fixed, weld);
+      for (const c of [active, rank]) {
+        c.build(from, to, fixed, weld); assert.deepEqual(result(c), result(reference), `forced ${c.edgeTraversal}, size=${size} sample=${sample}`);
+      }
       assert.deepEqual(result(indexed), result(reference), `ordered pairs, size=${size} sample=${sample}`);
       assert.deepEqual(indexed.vertexBoxes, reference.vertexBoxes); assert.deepEqual(indexed.triangleBoxes, reference.triangleBoxes); assert.deepEqual(indexed.edgeBoxes, reference.edgeBoxes);
       const current = [indexed.triangleTree.primitive.slice(), indexed.edgeTree.primitive.slice()];
@@ -42,7 +46,8 @@ test('BVH retains ordered reference pairs through dense ties, large refits and c
   }
   assert.ok(pairs > 10000);
   assert.throws(() => new SweptCandidates(mesh(0), new Float64Array(), 'invalid'), /broad phase/);
-  console.log(`swept-BVH-order: builds=${builds}, emitted pairs compared=${pairs}; reference order/bounds exact across refits and exclusions`);
+  assert.throws(() => new SweptCandidates(mesh(0), new Float64Array(), 'bvh', 'invalid'), /edge traversal/);
+  console.log(`swept-BVH-order: builds=${builds}, emitted pairs compared=${pairs}; reference/auto/rank/active ordered bytes exact across refits and exclusions`);
 });
 
 test('BVH keeps moving prescribed crossings and prunes only exact stationary/stationary nodes', () => {
@@ -117,4 +122,20 @@ test('BVH matches the retained late-turn gradient, local direction and backtrack
   }
   assert.deepEqual(states[0], states[1]);
   console.log('swept-BVH-late-contact: 1592-stencil native objective, direction, accepted pose and full diagnostic state equal reference');
+});
+
+
+test('active edge traversal retains prescribed crossings and excludes only stationary pairs', () => {
+  const m = { nV: 6, nT: 0, nE: 3, tris: new Int32Array(), edges: new Int32Array([0, 1, 2, 3, 4, 5]),
+    vGroup: Int32Array.from([0, 1, 2, 3, 4, 5]), vSheet: Int32Array.from([0, 0, 1, 1, 2, 2]), triSheet: new Int32Array() };
+  const x = Float64Array.from([-1, 1, 0, 1, 1, 0, 0, 0, -1, 0, 0, 1, 10, 0, 0, 11, 0, 0]), y = x.slice();
+  y[1] = -1; y[4] = -1;
+  const fixed = new Uint8Array(6).fill(1), weld = new Int32Array(6).fill(-1);
+  const c = new SweptCandidates(m, new Float64Array(6).fill(0.1), 'bvh', 'auto');
+  c.build(x, y, fixed, weld);
+  assert.equal(c.edgeTraversalUsed, 'active'); assert.equal(c.edgeTree.queries, 1);
+  assert.deepEqual(result(c).ee, new Int32Array([0, 1]));
+  c.build(x, x, fixed, weld); assert.equal(c.edgeEdgeCount, 0); assert.equal(c.edgeTree.queries, 0);
+  c.build(x, x, fixed, weld); assert.equal(c.reusedLastBuild, true); assert.equal(c.edgeTree.queries, 0);
+  console.log('active-edge-prescribed: one moving fixed edge queried; crossing retained; stationary pairs excluded; cache visits zero');
 });

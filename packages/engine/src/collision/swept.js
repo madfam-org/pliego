@@ -6,11 +6,13 @@
 import { BoundsTree } from './bounds-tree.js';
 
 export class SweptCandidates {
-  /** @param {any} mesh @param {Float64Array} thickness @param {'reference'|'bvh'} [mode] */
-  constructor(mesh, thickness, mode = 'reference') {
+  /** @param {any} mesh @param {Float64Array} thickness @param {'reference'|'bvh'} [mode] @param {'auto'|'rank'|'active'} [edgeTraversal] */
+  constructor(mesh, thickness, mode = 'reference', edgeTraversal = 'rank') {
     this.mesh = mesh; this.thickness = thickness;
     if (!['reference', 'bvh'].includes(mode)) throw new RangeError('Swept contact: invalid broad phase');
     this.mode = mode;
+    if (!['auto', 'rank', 'active'].includes(edgeTraversal)) throw new RangeError('Swept contact: invalid edge traversal');
+    this.edgeTraversal = edgeTraversal; this.edgeTraversalUsed = 'rank';
     if (thickness.length !== mesh.nV || thickness.some(t => !Number.isFinite(t) || t < 0)) throw new RangeError('Swept contact: invalid thickness');
     this.stationaryFixed = new Uint8Array(mesh.nV);
     this.vertexBoxes = new Float64Array(6 * mesh.nV);
@@ -31,6 +33,9 @@ export class SweptCandidates {
     // Cache only unswept Float64 poses; compare contents, never input identity.
     this.cacheValid = false; this.reusedLastBuild = false;
     this.cachedInputs = /** @type {Array<Float64Array>} */([]);
+    this.edgeCounts = new Uint32Array();
+    this.edgeOffsets = new Float64Array();
+    this.edgeInner = new Int32Array();
   }
   adjacent(a, b) { return a === b || this.mesh.vGroup[a] === this.mesh.vGroup[b] || this.neighbors[a].has(b); }
 
@@ -44,7 +49,7 @@ export class SweptCandidates {
     this.reusedLastBuild = false;
     if (reuse && cacheable && this.cacheValid && inputs.every((a, i) => exactContents(a, this.cachedInputs[i]))) {
       this.reusedLastBuild = true;
-      for (const tree of [this.triangleTree, this.edgeTree]) if (tree) { tree.nodeTests = 0; tree.rootContainmentTests = 0; }
+      for (const tree of [this.triangleTree, this.edgeTree]) if (tree) { tree.nodeTests = 0; tree.rootContainmentTests = 0; tree.queries = 0; }
       return;
     }
     this.cacheValid = false;
@@ -105,7 +110,11 @@ export class SweptCandidates {
     const m = this.mesh, V = this.vertexBoxes, inactive = this.stationaryFixed;
     const TT = /** @type {BoundsTree} */(this.triangleTree), ET = /** @type {BoundsTree} */(this.edgeTree);
     for (let t = 0; t < m.nT; t++) this.triangleInactive[t] = inactive[m.tris[3 * t]] && inactive[m.tris[3 * t + 1]] && inactive[m.tris[3 * t + 2]] ? 1 : 0;
-    for (let e = 0; e < m.nE; e++) this.edgeInactive[e] = inactive[m.edges[2 * e]] && inactive[m.edges[2 * e + 1]] ? 1 : 0;
+    let activeEdges = 0;
+    for (let e = 0; e < m.nE; e++) {
+      this.edgeInactive[e] = inactive[m.edges[2 * e]] && inactive[m.edges[2 * e + 1]] ? 1 : 0;
+      if (!this.edgeInactive[e]) activeEdges++;
+    }
     TT.refit(this.triangleBoxes, this.triangleOrder, this.triangleInactive);
     ET.refit(this.edgeBoxes, this.edgeOrder, this.edgeInactive);
     let nv = 0, ne = 0;
@@ -120,6 +129,13 @@ export class SweptCandidates {
         this.vt[2 * nv] = v; this.vt[2 * nv + 1] = t; nv++;
       }
     }
+    // Low-mobility scenes can avoid querying each stationary edge. This is a
+    // traversal policy only: canonical rank buckets restore reference order.
+    const activeTraversal = this.edgeTraversal === 'active' || (this.edgeTraversal === 'auto' && activeEdges * 2 < m.nE);
+    this.edgeTraversalUsed = activeTraversal ? 'active' : 'rank';
+    if (activeTraversal) {
+      this.vertexTriangleCount = nv; this.edgeEdgeCount = this.activeEdges(weld); return;
+    }
     for (let i = 0; i < this.edgeOrder.length; i++) {
       const e = this.edgeOrder[i], a = m.edges[2 * e], b = m.edges[2 * e + 1];
       const count = ET.query(this.edgeBoxes, e, this.edgeInactive[e], i);
@@ -133,6 +149,50 @@ export class SweptCandidates {
       }
     }
     this.vertexTriangleCount = nv; this.edgeEdgeCount = ne;
+  }
+
+  /** Query each nonstationary edge once against all ranks. At least one edge of
+   * every eligible pair is nonstationary; active/active pairs use increasing rank.
+   * Stable outer-rank buckets and sorted inner ranks reproduce reference bytes.
+   */
+  activeEdges(weld) {
+    const m = this.mesh, ET = /** @type {BoundsTree} */(this.edgeTree), order = this.edgeOrder;
+    if (this.edgeOffsets.length !== m.nE + 1) {
+      this.edgeCounts = new Uint32Array(m.nE); this.edgeOffsets = new Float64Array(m.nE + 1);
+    }
+    const counts = this.edgeCounts, offsets = this.edgeOffsets;
+    counts.fill(0);
+    let ne = 0;
+    for (let i = 0; i < order.length; i++) {
+      const e = order[i]; if (this.edgeInactive[e]) continue;
+      const a = m.edges[2 * e], b = m.edges[2 * e + 1];
+      const count = ET.query(this.edgeBoxes, e, false);
+      for (let q = 0; q < count; q++) {
+        const rank = ET.hits[q], f = order[rank];
+        if (!this.edgeInactive[f] && rank <= i) continue;
+        const c = m.edges[2 * f], d = m.edges[2 * f + 1];
+        if (this.adjacent(a, c) || this.adjacent(a, d) || this.adjacent(b, c) || this.adjacent(b, d)) continue;
+        if ((weld[a] === m.vSheet[c] && weld[b] === m.vSheet[c]) || (weld[c] === m.vSheet[a] && weld[d] === m.vSheet[a])) continue;
+        if (2 * ne + 2 > this.ee.length) { const next = new Int32Array(this.ee.length * 2); next.set(this.ee); this.ee = next; }
+        const lo = Math.min(i, rank), hi = Math.max(i, rank);
+        this.ee[2 * ne] = lo; this.ee[2 * ne + 1] = hi; counts[lo]++; ne++;
+      }
+    }
+    // Offsets use Float64 to avoid wrapping a total pair count into uint32.
+    offsets[0] = 0;
+    for (let i = 0; i < order.length; i++) offsets[i + 1] = offsets[i] + counts[i];
+    if (this.edgeInner.length < ne) this.edgeInner = new Int32Array(this.ee.length / 2);
+    for (let p = 0; p < ne; p++) {
+      const outer = this.ee[2 * p]; this.edgeInner[offsets[outer] + --counts[outer]] = this.ee[2 * p + 1];
+    }
+    let p = 0;
+    for (let i = 0; i < order.length; i++) {
+      if (offsets[i + 1] - offsets[i] > 1) this.edgeInner.subarray(offsets[i], offsets[i + 1]).sort();
+      for (let q = offsets[i]; q < offsets[i + 1]; q++) {
+        this.ee[2 * p] = order[i]; this.ee[2 * p + 1] = order[this.edgeInner[q]]; p++;
+      }
+    }
+    return ne;
   }
 }
 

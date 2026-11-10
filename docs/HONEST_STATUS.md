@@ -26,6 +26,14 @@ conventional CI passing does not close that failure. The separate axial referenc
 shows strong timestep sensitivity and no cure from line search alone. These are
 research/interaction results, not a stable physical catalogue release.
 
+The subsequent [continuous-contact experiment](research/continuous-contact-experiment.md)
+adds opt-in swept vertex–triangle and edge–edge motion bounds and an explicit
+pre-promotion turn-progress gate. Analytical tunneling tests pass. The guarded
+native booklet candidates stall or fail strain before the first complete turn
+and exceed the physics timing target. The default reader does not enable this
+guard. Contact forces coupled to elasticity and prescribed-motion handling remain
+open; this is not a C-IPC solver or a collision-free release claim.
+
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched
 over 1%, 10 exploded), zero rejected/world/step errors, and 76 studio preview

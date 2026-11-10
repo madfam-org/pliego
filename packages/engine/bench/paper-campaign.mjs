@@ -10,6 +10,7 @@ import { resolve, dirname, join } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { BookWorld } from '../../../apps/web/studio/src/book-world.js';
 import { engineOptions } from '../../../apps/web/studio/src/physics.js';
+import { endpointProgress } from './paper-metrics.mjs';
 
 const arg = name => { const i = process.argv.indexOf(name); return i < 0 ? null : process.argv[i + 1]; };
 const enginePath = arg('--engine');
@@ -59,7 +60,8 @@ function run(model, settings) {
   const times = [], options = { ...engineOptions(json), ...settings, mechanismRate: 240, plasticity: false };
   const r = { model, options, frames: 0, turns: 0, maxStrain: 0, maxCompression: 0,
     minY: Infinity, finite: true, error: null, completed: false, modelCachePeak: 0,
-    vertexRestBlockOverlapMm: model === 'active-leaf' ? 0 : null, supported: true };
+    vertexRestBlockOverlapMm: model === 'active-leaf' ? 0 : null, supported: true, endpoints: [],
+    continuousContact: { steps: 0, limited: 0, iterationLimits: 0, precisionLimits: 0, initialOverlaps: 0, minimumTime: 1 } };
   let w;
   const start = performance.now();
   try {
@@ -71,14 +73,26 @@ function run(model, settings) {
     if (settings.lineSearch && (w.world || w).opts.lineSearch !== true) {
       r.supported = false; throw new Error('Engine does not support the lineSearch experiment');
     }
+    if (settings.continuousContact && (w.world || w).opts.continuousContact !== true) {
+      r.supported = false; throw new Error('Engine does not support the continuousContact experiment');
+    }
+    const seenCCD = new Map();
     for (const goal of [180, 0]) for (const index of goal ? [0, 1, 2, 3] : [3, 2, 1, 0]) {
       if (model === 'active-leaf') {
         if (!w.navigate(goal ? 'forward' : 'backward')) throw new Error('Reader refused an exposed turn');
       } else w.setControl(`turn-${index + 1}`, goal);
+      const initialCCD = (w.world || w).stats().continuousContact;
+      if (initialCCD) seenCCD.set(w.world || w, initialCCD);
       for (let f = 0; f < 84; f++) {
         const t = performance.now(); w.step(1 / 60); times.push(performance.now() - t); r.frames++;
         const released = model === 'active-leaf' && f === 83 ? w.lastRelease : null;
         const stats = released?.stats || w.stats(), native = model === 'active-leaf' ? w.world : w;
+        if (stats.continuousContact) {
+          const c = stats.continuousContact, prev = seenCCD.get(native) || {};
+          for (const key of ['steps', 'limited', 'iterationLimits', 'precisionLimits', 'initialOverlaps']) r.continuousContact[key] += c[key] - (prev[key] || 0);
+          r.continuousContact.minimumTime = Math.min(r.continuousContact.minimumTime, c.minimumTime);
+          seenCCD.set(native, c);
+        }
         r.finite &&= stats.finite;
         r.maxStrain = Math.max(r.maxStrain, stats.maxStrain);
         r.maxCompression = Math.max(r.maxCompression, stats.maxCompression);
@@ -88,8 +102,12 @@ function run(model, settings) {
         if (model === 'active-leaf') r.vertexRestBlockOverlapMm = Math.max(r.vertexRestBlockOverlapMm,
           overlapWithRestingBlocks(native, w.book.leaves[w.active].sheet, released?.positions || native.x));
         if (!r.finite || r.maxStrain > 0.01 || r.minY < -0.1) throw new Error('Numerical gate failed');
+        if (stats.continuousContact?.last.time === 0) throw new Error('Continuous contact made zero progress; no flat promotion accepted');
+        if (f === 83) r.endpoints.push({ sheet: model === 'active-leaf' ? w.book.leaves[w.active].sheet : index,
+          goal, ...endpointProgress(native, model === 'active-leaf' ? w.book.leaves[w.active].sheet : index, positions, goal) });
       }
       r.turns++;
+      if (settings.continuousContact) console.error(`paper-contact-progress: ${model} turn=${r.turns} endpointMinimum=${r.endpoints.at(-1).minimum} limited=${r.continuousContact.limited} iterationLimits=${r.continuousContact.iterationLimits}`);
     }
     r.completed = true;
   } catch (e) { r.error = e.message; }
@@ -99,6 +117,7 @@ function run(model, settings) {
     r.vertices = native.mesh.nV; r.freeVertices = native.sys.nFree;
     r.lineSearchBacktracks = native.stats().lineSearchBacktracks ?? null;
     r.lineSearchRejected = native.stats().lineSearchRejected ?? null;
+    r.lastContinuousContact = native.stats().continuousContact ?? null;
     w.dispose?.();
   }
   r.stepMeanMs = times.length ? times.reduce((a, b) => a + b, 0) / times.length : null;
@@ -108,6 +127,7 @@ function run(model, settings) {
     numericalPoint1Percent: r.completed && r.finite && r.maxStrain <= 0.001 && r.minY >= -0.1,
     physics8ms: r.completed && r.stepP95Ms <= 8,
     restingBlockVertexThickness: model === 'active-leaf' ? r.completed && r.vertexRestBlockOverlapMm <= 0.001 : 'not evaluated for all-deformable stacks',
+    endpointProgress: r.completed && r.endpoints.length === 8 && r.endpoints.every(e => e.samples > 0 && e.minimum >= 0.9),
     physicalMaterialValidation: 'not measured by this booklet benchmark',
     browserInteraction: 'requires separate browser/device acceptance',
   };
@@ -115,22 +135,30 @@ function run(model, settings) {
 }
 
 const results = [];
-for (const settings of [{ substeps: 8, newtonIterations: 1 }, { substeps: 4, newtonIterations: 2 }, { substeps: 16, newtonIterations: 1 }, { substeps: 8, newtonIterations: 1, physicalMembrane: true }, { substeps: 8, newtonIterations: 1, physicalMembrane: true, lineSearch: true }]) {
+const settingsMatrix = process.argv.includes('--contact-matrix')
+  ? [{ substeps: 8, newtonIterations: 1 }, { substeps: 8, newtonIterations: 1, continuousContact: true },
+    { substeps: 16, newtonIterations: 1, continuousContact: true }, { substeps: 8, newtonIterations: 1, physicalMembrane: true, lineSearch: true, continuousContact: true }]
+  : [{ substeps: 8, newtonIterations: 1 }, { substeps: 4, newtonIterations: 2 }, { substeps: 16, newtonIterations: 1 }, { substeps: 8, newtonIterations: 1, physicalMembrane: true }, { substeps: 8, newtonIterations: 1, physicalMembrane: true, lineSearch: true }];
+for (const settings of settingsMatrix) {
   for (const model of ['all-leaves', 'active-leaf']) {
     const r = run(model, settings); results.push(r);
-    console.error(`paper-campaign: ${model} S=${settings.substeps} I=${settings.newtonIterations} physical=${!!settings.physicalMembrane} search=${!!settings.lineSearch} turns=${r.turns}/8 strain=${r.maxStrain} p95=${r.stepP95Ms?.toFixed(2)}ms ${r.error || 'completed'}`);
+    console.error(`paper-campaign: ${model} S=${settings.substeps} I=${settings.newtonIterations} physical=${!!settings.physicalMembrane} search=${!!settings.lineSearch} CCD=${!!settings.continuousContact} turns=${r.turns}/8 strain=${r.maxStrain} p95=${r.stepP95Ms?.toFixed(2)}ms ${r.error || 'completed'}`);
   }
 }
 const report = {
-  schema: 'pliego-paper-campaign/0.1', recordedAt: new Date().toISOString(),
+  schema: 'pliego-paper-campaign/0.2', recordedAt: new Date().toISOString(),
   source: { git: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
     dirty: !!execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim(),
     engine: arg('--engine-label') || (enginePath ? 'external engine (caller must record source)' : 'current checkout'),
     engineTreeSHA256, readerSHA256, harnessSHA256,
+    metricsSHA256: hash(readFileSync(new URL('./paper-metrics.mjs', import.meta.url))),
     fixture: 'pliego.book.codex(leaves=4,width=90,height=128)', fixtureSHA256: hash(bytes) },
   runtime: { node: process.version, arch: arch(), platform: platform(), cpu: cpus()[0]?.model },
   protocol: { seed: 1, frameSeconds: 1 / 60, framesPerTurn: 84, requestedTurns: 8,
-    fallback: false, repetitions: 1, timingScope: 'World.step only; includes first-frame/JIT cost; exploratory local measurement' },
+    fallback: false, repetitions: 1, matrix: process.argv.includes('--contact-matrix') ? 'continuous-contact' : 'solver',
+    endpointGate: 'every sampled fore-edge vertex reaches >=90% of its destination X displacement before flat promotion; not an equilibrium or material validation',
+    continuousContact: 'experimental global endpoint-motion filter; safety=0.1, maxIterations=256 per pair; zero-progress stops the case as failure, not completion',
+    timingScope: 'World.step only; includes first-frame/JIT cost; exploratory local measurement' },
   reduction: 'Active-leaf reader promotes releases to flat resting blocks after 1.4 simulation seconds; pre-promotion release poses are audited. Plasticity disabled for reading. Not an unconstrained stack equilibrium.',
   materialAudit: Object.fromEntries(Object.entries(json['pliego:stocks']).map(([id, stock]) => {
     const d = stock.derived, cap = engine.constants.MEMBRANE_CAP_LENGTH * d.areal_density * engine.constants.GRAVITY;

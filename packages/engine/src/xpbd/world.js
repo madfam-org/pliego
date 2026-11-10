@@ -28,6 +28,7 @@ import { snapshotWorld, restoreWorld } from './state.js';
 import { JoinGates } from './gates.js';
 import { Presentation } from './presentation.js';
 import { EnergySearch } from './energy-search.js';
+import { MotionGuard } from '../collision/motion-guard.js';
 import * as K from '../constants.js';
 import { hypot3 } from '../fastmath.js';
 
@@ -39,7 +40,7 @@ export class World {
    * @param {{meshEdge?:number, substeps?:number, contact?:boolean, ground?:boolean, gravity?:boolean|number, seed?:number,
    *   damping?:number, windDir?:number[], panelStiffness?:number, mechanismRate?:number, newtonIterations?:number,
    *   refactorAngle?:number, grabStiffness?:number, handFactor?:number, plasticity?:boolean, membraneCompression?:number, glueSamples?:boolean, edgeContact?:boolean,
-   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean}} [opts]
+   *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, continuousContact?:boolean, ccdIterations?:number}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -52,10 +53,13 @@ export class World {
       handFactor: opts.handFactor ?? K.HAND_FACTOR, plasticity: opts.plasticity ?? true, meshEdge: opts.meshEdge,
       physicalMembrane: opts.physicalMembrane ?? false,
       lineSearch: opts.lineSearch ?? false,
+      continuousContact: opts.continuousContact ?? false,
     };
     if (typeof this.opts.physicalMembrane !== 'boolean') throw new TypeError('World: physicalMembrane must be boolean');
     this.membraneCap = this.opts.physicalMembrane ? Infinity : K.MEMBRANE_CAP_LENGTH;
     if (typeof this.opts.lineSearch !== 'boolean') throw new TypeError('World: lineSearch must be boolean');
+    if (typeof this.opts.continuousContact !== 'boolean') throw new TypeError('World: continuousContact must be boolean');
+    if (this.opts.continuousContact && !this.opts.contact) throw new Error('World: continuousContact requires contact');
     if (!(this.opts.substeps >= 1 && Number.isInteger(this.opts.substeps))) throw new RangeError('World: substeps must be a positive integer');
     const mesh = buildMesh(doc, { meshEdge: opts.meshEdge });
     this.mesh = mesh;
@@ -121,6 +125,7 @@ export class World {
     this.factorCount = 0;
     this.dirty = true;
     this.contact = this.opts.contact || this.opts.ground ? new Contact(this) : null;
+    this.motionGuard = this.opts.continuousContact ? new MotionGuard(this, opts.ccdIterations) : null;
     // edge–face contact for interlocking slits: only documents that name an edge `interlock…`
     this.edgeContact = this.contact && this.opts.contact && opts.edgeContact !== false && EdgeContact.wanted(doc) ? new EdgeContact(this) : null;
     if (this.edgeContact && !this.edgeContact.enabled) this.warnings.push(`edge contact: ${this.edgeContact.pairs} lip × triangle pairs exceed the limit; interlocking slits are not held`);
@@ -302,12 +307,14 @@ export class World {
   _substep() {
     const dt = this.dt, nV = this.mesh.nV;
     const x = this.x, v = this.v, xs = this.xs, w = this.invMass, f = this.fext;
+    if (this.motionGuard) xs.set(x); // include prescribed/gated movement in the swept path
     if (this.drivers.apply(this, dt)) this.dirty = true;
     if (this.gates.count) { if (this.gates.update(this)) this.dirty = true; this.gates.follow(this); }
-    xs.set(x);
+    if (!this.motionGuard) xs.set(x);
     if (this.sys.nFree === 0) {
       // every vertex is driven (kinematic program / boards): follow the drivers, nothing to solve
       x.set(this.fixedTarget);
+      this.motionGuard?.apply(this, xs, x);
       for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
       this._hingeUpdate();
       this.time += dt;
@@ -345,6 +352,7 @@ export class World {
       this.contact.broadPhase(x, this.fixed, Math.min(50, 2 * vmax + 0.5));
     }
     this._projections();
+    this.motionGuard?.apply(this, xs, x);
     for (let i = 0; i < 3 * nV; i++) v[i] = (x[i] - xs[i]) / dt;
     this._hingeUpdate();
     this.time += dt;
@@ -619,6 +627,7 @@ export class World {
       kinematicResidual: this.drivers.program ? this.drivers.program.residual : 0, tornWelds: this.torn,
       unheldWelds: this.gates.unheld(this),
       lineSearchBacktracks: this.energySearch?.backtracks ?? 0, lineSearchRejected: this.energySearch?.rejected ?? 0,
+      continuousContact: this.motionGuard?.snapshot() ?? null,
     };
   }
 

@@ -1,0 +1,33 @@
+{
+  "schema": "pliego-increment-captured-trials-precision-comparison/1",
+  "pass": true,
+  "decimalDigits": [
+    80,
+    100
+  ],
+  "exclusions": [
+    "cases[].decimalDigits"
+  ],
+  "completeParsedLeavesCompared": 5187,
+  "cases": 85,
+  "input": {
+    "file": "captured-trials-input.json",
+    "sha256": "21543a3f681f0cef2fb55d9545d3c39481762beb1c73ffd3106618a2f3ca55ac",
+    "bytes": 492605
+  },
+  "outputs": [
+    {
+      "file": "captured-trials-80.json",
+      "sha256": "8f1860dad269b95e7b75eeb7c6ad611e47861f120cd6ed6e9f4f853a138889a4",
+      "bytes": 280067
+    },
+    {
+      "file": "captured-trials-100.json",
+      "sha256": "c2a7084dcca33fb57bcee84e30f96f0e66eaf37f94c13a7c2626846db5466b50",
+      "bytes": 280152
+    }
+  ],
+  "losslessNumericStateAndLEAndAllClaimedHashesMatch": true,
+  "stateFloat64EntriesChecked": 10030,
+  "scope": "all retained sampled captured events only; full parsed equality excluding solely declared per-case decimalDigits, no simulation or unsaved-event truth inference"
+}

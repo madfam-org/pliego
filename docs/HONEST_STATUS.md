@@ -160,13 +160,23 @@ under an enforced all-free planar domain. Independent high-precision tests retai
 near-rest computed acceptances that are real potential increases. This arithmetic
 is not certified descent; endpoint force and time accuracy still require their
 unchanged independent gates. It is not enabled in the booklet reader.
+At clean `6cd67d0`, all 24 candidate trajectories still contain force failures:
+6973/7110 failed steps versus 6975/7110 baseline, gaining 58 old failures while
+losing 56 old passes. All 31867 realized-zero Newton events are visibly rejected
+as precision limited. Strict trajectory repeat and transparent-observer parity
+pass. Independent 80/100-digit checks expose one real potential-increase among
+69 retained sampled acceptances; this count does not cover all 17903 accepted
+updates. A separate 32-probe full-proof equality gate fails on seven one-ULP
+diagnostic sums, with every objective/error/Armijo field agreeing. Complete
+[lossless captures and preserved failures](research/evidence/membrane-increment-2026-11-10/README.md)
+remain research evidence; force/time/booklet/device acceptance stays open.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).
 All 24 smoke trajectories contain strict force failures: 6975/7110 substeps miss
 the unchanged threshold, despite small discrete-BE state errors. Independent
 80/100-digit checks leave two retained endpoints above tolerance. Native mass,
-World timestep search, stocks and reader defaults are unchanged. The lossless
+baseline World timestep search, stocks and reader defaults are unchanged. The lossless
 archive reconstructs every original captured byte, including failures. Time,
 amplitude/solve isolation, broader geometry, material, new-law booklet, devices
 and 8 ms acceptance remain open. All 16 source CI checks pass, including 214 engine

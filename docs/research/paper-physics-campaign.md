@@ -257,6 +257,25 @@ material/contact/booklet/device/8 ms gates. Runtime search, stocks and reader
 defaults remain unchanged. All 16 source CI checks pass (214 engine/123 web),
 separately from the failed force/time gates.
 
+The subsequent [World increment-search experiment](membrane-increment-search.md)
+at clean `6cd67d0` retains the same physical protocol and all strict tolerances.
+It changes force failures from 6975 to 6973 of 7110 steps: 58 steps improve and
+56 regress, with no trajectory converged throughout. All 31867 zero-realized-step
+events are explicitly precision limited; 17903 other updates satisfy computed
+Armijo. Strict repeat and observer ablation pass, and every historical baseline
+field except reviewed source/recording metadata remains exact. A separate actual
+108-case spring control remains exact. Among 69 retained sampled acceptances,
+one is a real potential increase in both 80/100-digit polynomial meanings; a
+rounded base-gradient slope error dominates its measured discrepancy. The
+separate 32-probe full-proof comparison retains seven one-ULP diagnostic-sum
+differences instead of adding an exclusion. All raw captures and failures remain
+in the [lossless evidence archive](evidence/membrane-increment-2026-11-10/README.md).
+This candidate does not close force/time convergence, new-law booklet integration,
+stock calibration, contact/friction, alternative formulations/backends or devices.
+The next precision implementation must distinguish stable objective subtraction
+from accurate base gradients and actual coordinate resolution; no ULP force
+allowance or claim of exhausted research is adopted.
+
 ## Separate gates
 
 **Interaction:** booklet frame/camera fixed throughout dragging; only exposed leaves

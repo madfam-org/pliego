@@ -107,3 +107,84 @@ nonlinear/time/spatial convergence, calibration, bending/buckling/crease,
 contact/friction, alternative formulations/backends and fixed-booklet integration
 open under the larger campaign. No optimal abstraction or exhausted research
 claim is justified by a planar line-search experiment.
+
+## Clean-source result: the force failure remains
+
+Source [`6cd67d0`](https://github.com/madfam-org/pliego/commit/6cd67d082129b45f66ba3fc713df2a4d7b514fd6)
+completes the declared 24 trajectories and 7110 poststeps for both arithmetic
+modes. [Complete lossless captures and independent proofs](evidence/membrane-increment-2026-11-10/README.md)
+retain all failures. Strict candidate repeat and observer/no-observer parity pass.
+The fresh total-energy baseline matches the retained 93f6653 report exactly after
+excluding only source metadata and recording time. A separate complete
+constitutive run preserves all 108 historical spring-control results.
+
+| Refinement | Poststeps | Total-energy force failures | Increment force failures |
+|---|---:|---:|---:|
+| 1 | 474 | 339 | 337 |
+| 2 | 948 | 948 | 948 |
+| 4 | 1896 | 1896 | 1896 |
+| 8 | 3792 | 3792 | 3792 |
+| All | 7110 | 6975 | 6973 |
+
+Every trajectory still fails the unchanged all-step literal force gate. The
+increment mode gains 58 previously failed steps and loses 56 previous passes:
+the net two extra passes are mixed outcomes, not a consistent solve improvement.
+All 49770 observed Newton events have complete records: 17903 computed accepted
+updates and 31867 precision-limited zero steps. No event is silently accepted as
+a nonzero update after its realized displacement becomes zero.
+
+The maximum normalized full-state error against discrete BE remains
+0.00043003962282980315 (0.043004%). Continuous error remains unaccepted, and
+small discrete-state agreement does not rescue force failure. These are untimed
+experiments; no new browser/device or 8 ms certificate is implied.
+
+Two independent precision controls expose remaining arithmetic error:
+
+* The 32 native-rest fixed-pose captures reproduce exactly. One regression at
+  grain 45 accepts computed DeltaPi=-6.472749837974225e-22 nJ while the real
+  captured-coefficient polynomial increases by 2.131138134777538e-22 nJ.
+  Across those probes, 12 computed acceptances include five real increases in
+  the stored-coefficient meaning and 12 in the UV/material meaning at native rest.
+* All 104 retained full trajectory-event roles deduplicate to 85 actual events,
+  including 69 computed acceptances and 16 precision-limited decisions. Of those
+  **69 sampled acceptances**, one violates real Armijo in both independently
+  evaluated meanings. At level 4/I4/predictor start, iteration 963, actual maximum
+  coordinate change 1.7618285302889447e-18 mm, computed DeltaPi is
+  -1.0109285332781935e-24 nJ versus real stored-polynomial
+  +6.757180273073309e-26 nJ. The UV/material increase is 1.3848460711024363e-24 nJ.
+
+The trajectory witness's membrane-remainder error is about 1.65e-43 nJ;
+runtime-gradient slope error about 1.0785e-24 nJ dominates this sign reversal.
+The internal gradient-discrepancy diagnostic and heuristic EPS scale do not
+bound that independent error. Both 80/100-digit trajectory proofs agree over
+all 5187 parsed leaves after excluding only the declared decimal precision field.
+The 69-event acceptance sample is not a count over all 17903 accepted updates.
+
+The separate 32-probe precision comparison retains a failed full-output equality
+gate: seven `runtime.realSumOfStoredRuntimeTermsNJ` values differ by one final
+binary64 ULP between 80 and 100 decimal digits. Every real objective/error/Armijo
+field agrees; the discrepant sums remain explicitly retained, without another
+comparison exclusion. This does not become a passing whole-proof repeat.
+
+This version is retained as a measured, opt-in arithmetic experiment. It does
+not establish certified real descent or resolve the actual nonlinear force
+failure. Rounded base-gradient/coordinate resolution now needs its own source-
+pinned implementation comparison; all larger campaign gates remain open.
+
+## Primary-source follow-up
+
+[Ogita, Rump and Oishi, Accurate Sum and Dot Product (2005)](https://www.tuhh.de/ti3/paper/rump/OgRuOi05.pdf),
+sections 3–5, provides error-free sum/product transformations and more accurate
+dot products using ordinary working-precision arithmetic. The paper states
+overflow/underflow and rounding assumptions; its historical timings do not
+measure Pliego. This is a concrete next candidate for base tangent/strain/gradient
+evaluation, beyond compensating the final already-rounded gradient dot product.
+Whether it fixes the retained witness or native-coordinate force resolution is
+an inference to test, not a transferred guarantee.
+
+[Gao and Baidoo's February 2026 preprint](https://arxiv.org/abs/2602.19452)
+reexamines compensated-summation error behavior. Its abstract and scope have
+been checked; full algorithm/proof review remains open. It is not implementation
+or paper-material evidence. The failed seven-sum diagnostic repeat also calls
+for an independently exact stored-input sum/rounding control before changing
+the oracle; the original failing proof must remain retained.

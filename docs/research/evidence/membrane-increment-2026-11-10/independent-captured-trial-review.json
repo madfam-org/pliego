@@ -1,0 +1,1767 @@
+{
+  "schema": "pliego-captured-increment-trial-independent-review/1",
+  "pass": true,
+  "inputReport": {
+    "file": "candidate.json",
+    "bytes": 79327299,
+    "sha256": "a3f8e1f041560ee0da31f1edc4d894c1ddcc36544049c71e25309b8aa53a2790",
+    "sourceGit": "6cd67d082129b45f66ba3fc713df2a4d7b514fd6",
+    "sourceDirty": false
+  },
+  "captureInput": {
+    "file": "captured-trials-input.json",
+    "sha256": "21543a3f681f0cef2fb55d9545d3c39481762beb1c73ffd3106618a2f3ca55ac",
+    "bytes": 492605
+  },
+  "selectionPolicy": "ALL retained full incrementTrial event snapshots, deduplicated by trajectory+iteration; first accepted, worst nominal/rounded and first precision-limited/rejected roles; no unsaved endpoint or nearest inference",
+  "capturedRoleOccurrences": 104,
+  "distinctCapturedEvents": 85,
+  "sampledDecisions": {
+    "accepted": 69,
+    "precision-limited-zero-step": 16
+  },
+  "actualWholeTraceDecisionCountsForContextOnly": {
+    "accepted": 17903,
+    "precision-limited-zero-step": 31867
+  },
+  "realArmijoWrongAcceptancesAmongSampledCapturedAcceptedOnly": {
+    "storedCoefficientPolynomial": 1,
+    "independentExactUVMaterial": 1
+  },
+  "realPositivePotentialAmongSampledCapturedAcceptedOnly": {
+    "storedCoefficientPolynomial": 1,
+    "independentExactUVMaterial": 1
+  },
+  "sampledWrongAcceptanceDetails": {
+    "storedCoefficientPolynomial": [
+      {
+        "caseIndex": 49,
+        "selection": {
+          "cells": 2,
+          "pattern": "forward",
+          "grain": 0,
+          "level": 4,
+          "budget": 4,
+          "seed": false,
+          "amplitude": 0.004,
+          "iteration": 963,
+          "substepsRun": 240,
+          "roles": [
+            "worstNominal"
+          ],
+          "runtimeDecision": "accepted",
+          "forceTolerance": 8.81400646629321e-05,
+          "trajectoryFailedSteps": 316,
+          "trajectorySteps": 316,
+          "trajectoryClassification": "incremental-force-nonconvergence"
+        },
+        "computedDeltaNJ": -1.0109285332781935e-24,
+        "realDeltaNJ": 6.757180273073309e-26,
+        "recordedArmijoMarginNJ": -6.775409797928849e-26,
+        "absoluteErrorNJ": 1.0785003360089265e-24
+      }
+    ],
+    "independentExactUVMaterial": [
+      {
+        "caseIndex": 49,
+        "selection": {
+          "cells": 2,
+          "pattern": "forward",
+          "grain": 0,
+          "level": 4,
+          "budget": 4,
+          "seed": false,
+          "amplitude": 0.004,
+          "iteration": 963,
+          "substepsRun": 240,
+          "roles": [
+            "worstNominal"
+          ],
+          "runtimeDecision": "accepted",
+          "forceTolerance": 8.81400646629321e-05,
+          "trajectoryFailedSteps": 316,
+          "trajectorySteps": 316,
+          "trajectoryClassification": "incremental-force-nonconvergence"
+        },
+        "computedDeltaNJ": -1.0109285332781935e-24,
+        "realDeltaNJ": 1.3848460711024363e-24,
+        "recordedArmijoMarginNJ": -1.3850283663509917e-24,
+        "absoluteErrorNJ": 2.3957746043806297e-24
+      }
+    ]
+  },
+  "allSelectedEvents": [
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 79,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 39,
+      "substepsRun": 38,
+      "roles": [
+        "worstNominal",
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 79,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 79,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 40,
+      "substepsRun": 39,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 79,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 26,
+      "substepsRun": 25,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 79,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 39,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 66,
+      "substepsRun": 16,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 39,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 29,
+      "substepsRun": 7,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 39,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 44,
+      "substepsRun": 10,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 39,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 49,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 78,
+      "substepsRun": 19,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 49,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 77,
+      "substepsRun": 19,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 49,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 64,
+      "substepsRun": 15,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 49,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 47,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 290,
+      "substepsRun": 18,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 47,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 97,
+      "substepsRun": 6,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 47,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 5,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 47,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 44,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 290,
+      "substepsRun": 18,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 44,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 289,
+      "substepsRun": 18,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 44,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 1,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 5,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 44,
+      "trajectorySteps": 79,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 78,
+      "substepsRun": 77,
+      "roles": [
+        "worstNominal",
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 79,
+      "substepsRun": 78,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 52,
+      "substepsRun": 51,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 482,
+      "substepsRun": 120,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 425,
+      "substepsRun": 106,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 182,
+      "substepsRun": 45,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 181,
+      "substepsRun": 45,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1858,
+      "substepsRun": 116,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1857,
+      "substepsRun": 116,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 594,
+      "substepsRun": 37,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 593,
+      "substepsRun": 37,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 2,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 158,
+      "trajectorySteps": 158,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 157,
+      "substepsRun": 156,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 156,
+      "substepsRun": 155,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 158,
+      "substepsRun": 157,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 105,
+      "substepsRun": 104,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 963,
+      "substepsRun": 240,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 477,
+      "substepsRun": 119,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 310,
+      "substepsRun": 77,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 309,
+      "substepsRun": 77,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 4081,
+      "substepsRun": 255,
+      "roles": [
+        "worstNominal",
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1250,
+      "substepsRun": 78,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 706,
+      "substepsRun": 44,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 4,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 316,
+      "trajectorySteps": 316,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 314,
+      "substepsRun": 313,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 1,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 326,
+      "substepsRun": 325,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 317,
+      "substepsRun": 316,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 1,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 207,
+      "substepsRun": 206,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 449,
+      "substepsRun": 112,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 2526,
+      "substepsRun": 631,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 634,
+      "substepsRun": 158,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 633,
+      "substepsRun": 158,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 4,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 6577,
+      "substepsRun": 411,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 10098,
+      "substepsRun": 631,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": false,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 1,
+      "substepsRun": 0,
+      "roles": [
+        "firstIncrementAccepted"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 2498,
+      "substepsRun": 156,
+      "roles": [
+        "worstNominal"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 4212,
+      "substepsRun": 263,
+      "roles": [
+        "worstRounded"
+      ],
+      "runtimeDecision": "accepted",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    },
+    {
+      "cells": 2,
+      "pattern": "forward",
+      "grain": 0,
+      "level": 8,
+      "budget": 16,
+      "seed": true,
+      "amplitude": 0.004,
+      "iteration": 4,
+      "substepsRun": 0,
+      "roles": [
+        "firstPrecisionLimited",
+        "firstRejected"
+      ],
+      "runtimeDecision": "precision-limited-zero-step",
+      "forceTolerance": 8.81400646629321e-05,
+      "trajectoryFailedSteps": 632,
+      "trajectorySteps": 632,
+      "trajectoryClassification": "incremental-force-nonconvergence"
+    }
+  ],
+  "decimalPrecision": [
+    80,
+    100
+  ],
+  "completeParsedEqualityExcludingOnlyPerCaseDecimalDigits": true,
+  "forceOutcomesUnchanged": {
+    "postSteps": 7110,
+    "failedPostSteps": 6973,
+    "passedPostSteps": 137,
+    "allStepConvergedTrajectories": 0
+  },
+  "reportedGates": {
+    "sourceClean": true,
+    "completeDeclaredMatrix": true,
+    "oracleValid": true,
+    "measurementValid": true,
+    "literalForceEverySubstep": false,
+    "discreteAgreement": true,
+    "continuousAgreement": false,
+    "finiteStrainIsolation": "not measured by single amplitude",
+    "perNewtonLinearDiagnostics": true,
+    "actualTimeAccuracyAcceptance": false,
+    "physicalStockCalibration": "not measured",
+    "newModelBooklet": "not measured",
+    "interactionPerformance": "not measured"
+  },
+  "reportedClassification": "incremental-force-nonconvergence",
+  "scope": "fixed captured-state oracle evaluation only, no physics rerun or solve; wrong-acceptance counts apply ONLY to retained sampled events, never all search trace events; force failures and lack of time-accuracy acceptance unchanged",
+  "portability": {
+    "originalReviewSHA256": "bfa1a888a98c9f96d30e9165e4c1ee6a291f27c235694a94cb4910c021a67a1b",
+    "localMetadataExcluded": [
+      "outputDirectory"
+    ],
+    "localMetadataReplacedWithBasename": [
+      "inputReport.file"
+    ],
+    "scope": "only local path metadata changed; all numerical outcomes, selections, capture hashes and precision proofs preserved"
+  }
+}

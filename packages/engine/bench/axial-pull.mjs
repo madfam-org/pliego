@@ -117,9 +117,9 @@ if (execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).
   || execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }) !== sourceStart.status
   || JSON.stringify(engineFiles()) !== JSON.stringify(sourceStart.files)
   || hash(readFileSync(fileURLToPath(import.meta.url))) !== sourceStart.harnessSHA256) throw new Error('Source changed during axial benchmark; discard results');
-const report = { schema: localContact ? 'pliego-axial-pull/0.3' : 'pliego-axial-pull/0.2', recordedAt: new Date().toISOString(),
+const report = { schema: localContact ? 'pliego-axial-pull/0.4' : 'pliego-axial-pull/0.3', recordedAt: new Date().toISOString(),
   source: { git: sourceStart.git, dirty: !!sourceStart.status.trim(), fixtureSHA256: hash(JSON.stringify(json)),
-    files: sourceStart.files, harnessSHA256: sourceStart.harnessSHA256 },
+    files: Object.entries(sourceStart.files).map(([path, sha256]) => ({ path, sha256 })), harnessSHA256: sourceStart.harnessSHA256 },
   runtime: { node: process.version, cpu: cpus()[0]?.model },
   protocol: { forceMicroNewtons: force, lengthMm: 100, widthMm: 10, frames: 180, frameSeconds: 1 / 60,
     contact: 'disabled in legacy; enabled in coupled path but zero active barrier stencils/energy required',

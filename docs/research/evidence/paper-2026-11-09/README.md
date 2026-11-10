@@ -524,3 +524,8 @@ regression shows a parallel EE pair without its geometric VT backup retained.
 No smoothing, friction, new material validation or native contact-force fix is
 claimed by this checkpoint. Corpus, devices, model alternatives and backend
 comparisons remain open. Research and implementation are **not exhausted**.
+
+The [following guarded-contact checkpoint](../paper-2026-11-10/README.md) now
+records repeated force-converged capped and uncapped eight-turn readers. These
+historical failures remain; later force-gate progress does not erase timing,
+calibration, general coverage or device work still owed.

@@ -121,6 +121,10 @@ across 5168 executed substeps. Active p95 remains 287–289 ms; uncapped S8/I8
 still fails 103/672 force checks. The global capped-stock ratios and uncovered
 observation counts remain visible. These results do not validate the material or
 close general coverage/performance gates.
+With I32, the uncapped full sequence also completes and repeats with 0/5200
+misses. Its wall-time variation and contact-free loading/unloading evidence are
+recorded separately; using input moduli still does not establish measured-paper
+accuracy.
 
 ```sh
 python packages/engine/bench/mollifier-prototype.py --native > /tmp/native-mollifier.json

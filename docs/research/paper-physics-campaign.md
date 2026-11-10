@@ -119,7 +119,12 @@ multiplier-gradient checks are separate from its booklet force/material
 comparison. The [recorded S8/I32 capped candidate and full repeat](evidence/paper-2026-11-10/README.md)
 now pass the all-substep force gate, while the 8 ms target and material-validation
 gate remain open. Uncapped S8/I8 still misses force tolerance on 103/672 substeps.
-No global smoothness or C-IPC equivalence is implied.
+An uncapped I32 full sequence and repeat subsequently pass 0/5200 force checks,
+while an independent contact-free axial loading/unloading ablation passes its
+declared reference/drift/force gates. No held-out stock, global smoothness or
+C-IPC equivalence is implied. A fresh profile still assigns about 68% of sampled
+whole-process self time to swept construction and BVH query/refit. Exact candidate
+work/reuse and backend comparisons remain the performance priorities.
 
 ## Separate gates
 

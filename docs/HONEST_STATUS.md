@@ -83,9 +83,13 @@ now complete and repeat all eight turns with **0/5168** substeps missing the
 declared 0.001 µN force tolerance, identical sampled-position hashes and all
 recorded non-timing fields. Local active-frame p95 is 287–289 ms, still above
 8 ms. This successful force gate uses the capped material model; the uncapped
-S8/I8 first turn still misses tolerance on 103/672 substeps. Physical stock
-calibration, faster reading, general coverage and actual-device acceptance remain
-open. No stable catalogue physics release is implied.
+S8/I8 first turn still misses tolerance on 103/672 substeps. Raising its budget
+to I32 now completes and repeats the full **uncapped** sequence with **0/5200**
+force misses. Local active p95 varies from 504 to 784 ms. An uncapped axial
+loading/unloading check agrees within 0.92% of its synthetic bar reference and
+isolates zero contact forces. Physical stock calibration, faster reading,
+general coverage and actual-device acceptance remain open. No stable catalogue
+physics release is implied.
 
 Latest sampled physics evidence: the [2026-11-09 nightly at `77025d0`](https://github.com/madfam-org/pliego/actions/runs/42696487948)
 tested 249 documents from 136 cartridges: 154 stable, 95 unstable (85 stretched

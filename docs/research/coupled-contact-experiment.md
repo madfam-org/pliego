@@ -66,8 +66,12 @@ feasible-iterate strategy are informed by
 [IPC / C-IPC](https://ipc-sim.github.io/C-IPC/file/paper_small.pdf); their published
 guarantees do not transfer to this implementation. In particular, its contact
 curvature omits the distance Hessian rather than reproducing projected IPC
-Hessians. It lacks parallel-edge mollification, contact area weighting and feature
-deduplication. Mesh/contact multiplicity can therefore change the response.
+Hessians. The default remains unmollified. Optional
+[`edgeEdgeMollification: 'surface-guarded'`](parallel-contact-review.md) changes
+covered EE energy/gradient and adds approximate angular PSD rows; uncovered
+pairs retain their original barriers. Contact area weighting and
+multiplicity-aware stencil aggregation remain open. Simply deleting duplicate
+features would change the energy; mesh/contact multiplicity can change response.
 
 Configuration:
 
@@ -113,6 +117,11 @@ threshold is not a material accuracy or temporal convergence certificate.
 - It uses the existing membrane/hinge energy model and its stiffness cap unless
   `physicalMembrane: true` is selected. An accurate solve of a capped material
   remains a different model from the stock's uncapped modulus.
+- Collision thickness still has a 0.05 mm floor in the barrier and motion guard.
+  The booklet probes use 0.1 mm stock and do not validate thinner material.
+  Activation distance/stiffness are numerical parameters, and reading poses
+  impose at least 0.12 mm page spacing. Force convergence alone cannot calibrate
+  physical stack thickness, contact pressure or this reading approximation.
 - Topology, stationary prescribed-pair and welded-sheet exclusions remain those
   of the swept candidate reference. Ordinary Float64 distance/CCD queries are
   not exact predicates or interval arithmetic. No unconditional whole-engine
@@ -198,3 +207,11 @@ objective reproduces its force residual and energy, with excess directional
 curvature concentrated in EE contact. An analytical parallel-edge fixture proves
 that this unmollified contact potential has no smooth gradient at that tie.
 Regularization, contact weighting and efficient conservative indexing remain open.
+
+The later [surface-guarded measurements](evidence/paper-2026-11-10/README.md)
+now complete and repeat eight turns with every executed substep satisfying the
+same 0.001 µN force tolerance: 5168 capped-model substeps and 5200 uncapped-model
+substeps. Both remain above the 8 ms target. The uncapped strip loading/unloading
+ablation agrees with its analytical reference with no contact energy active;
+that result must not be credited to smoothing. Held-out stock data, full temporal/
+mesh convergence, friction and general contact/device acceptance remain open.

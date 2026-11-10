@@ -1,0 +1,46 @@
+{
+  "schema": "pliego-codeql-descriptor-fixture-flow-review/1",
+  "pass": true,
+  "publicationGit": "8b9e47c8996f469d3012f02deae35953126327d5",
+  "analysis": 2136840995,
+  "aggregateCheck": 129968193207,
+  "alert": 20,
+  "mergeGit": "a4af42bde9389b550b6bfd38cf24a9104c0b705c",
+  "sarifSHA256": "192eb58a3f0b2894695ec3f3c5d2ad73419b47d55ae7ed064478736f38d276c9",
+  "ruleId": "js/file-system-race",
+  "message": {
+    "text": "The file may have changed since it [was checked](1)."
+  },
+  "source": {
+    "artifactLocation": {
+      "index": 0,
+      "uri": "packages/engine/test/membrane-reference-probes.test.js"
+    },
+    "region": {
+      "endColumn": 124,
+      "endLine": 105,
+      "startColumn": 71,
+      "startLine": 105
+    }
+  },
+  "sink": {
+    "artifactLocation": {
+      "index": 0,
+      "uri": "packages/engine/test/membrane-reference-probes.test.js"
+    },
+    "region": {
+      "endColumn": 75,
+      "endLine": 109,
+      "startColumn": 22,
+      "startLine": 109
+    }
+  },
+  "queryLastChangedGit": "7500a31814369bc5d72dc8d64f7831114e8c1a4f",
+  "querySHA256": "6bd3beed90bf9ab935edf9d7cc37e78c4ba78aaea3545cdc7bdc5a90cba6512e",
+  "sourceCall": "first pathname openSync, not fstat",
+  "sinkCall": "second pathname openSync",
+  "memoSHA256": "27237fdd4f26704745b9aa64822b926154c6676e6aa6ad18b0d236120b8f2ef3",
+  "repositoryEdits": false,
+  "physicsOrOracleRuns": 0,
+  "securityClosureClaimed": false
+}

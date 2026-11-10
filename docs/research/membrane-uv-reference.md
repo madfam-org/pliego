@@ -182,13 +182,29 @@ original measurement source bytes and changes no runtime, producer or oracle.
 Passing source checks does not close physical failures.
 The first publication at `00e3c02` still triggered the
 [checker](membrane-reference-test-order-codeql.json) on reopening the
-path after inspecting the original descriptor. The subsequent test-only ordering
-correction opens both descriptors before inspecting either, retaining all mode,
-device/inode and content assertions. The frozen archive's publication-delta
+path after inspecting the original descriptor. An intermediate ordering-only
+attempt at `8b9e47c` also failed: the [actual SARIF relation](membrane-reference-test-open-flow-review.json)
+and [annotation](membrane-reference-test-open-flow-codeql.json) identify the first
+pathname open itself as the check and the second open as the use. CodeQL's
+[query](https://github.com/github/codeql/blob/7500a31814369bc5d72dc8d64f7831114e8c1a4f/javascript/ql/src/Security/CWE-367/FileSystemRace.ql)
+explicitly classifies `openSync` in both roles, so moving `fstat` cannot remove
+that relation.
+
+The fixture now uses a reusable descriptor-bound snapshot helper: one
+`O_NOFOLLOW` open binds metadata and content to its descriptor, and `finally`
+closes it after the observation callback. Nested observations keep the original
+inode alive while comparing independent before/after snapshots across a refused
+overwrite. Mode, device/inode and content checks remain; same-content inode
+replacement, unlink and symlink-substitution controls verify their effect.
+No rule suppression or workflow exemption is used. The frozen archive's publication-delta
 verifier describes the initial `00e3c02` bytes; use that commit when reproducing
 that stage. The separate [follow-up source review](membrane-reference-test-order-review.json)
 and [frozen verifier](membrane-reference-test-order-review-source.json) record
-the final ordering without changing or relabeling the captured study.
+the intermediate ordering without changing or relabeling the captured study.
+The final [descriptor-snapshot review](membrane-reference-test-snapshot-review.json)
+and [versioned verifier](membrane-reference-test-snapshot-review-source.json)
+preserve all earlier stages and verify that only the test changes; all 50 runtime
+files, producers/oracles and the original 58 archive files remain byte-exact.
 
 The next bounded hypothesis is a separately named
 [authoritative displacement state](membrane-state-precision.md), retaining both

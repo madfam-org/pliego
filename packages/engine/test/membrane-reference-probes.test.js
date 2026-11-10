@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, mkdtempSync, rmSync, symlinkSync, openSync, closeSync, fstatSync, readSync, constants } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync, symlinkSync, unlinkSync, openSync, closeSync, fstatSync, constants } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,15 @@ import { runReferenceProbes, evaluateFrozenReferencePose, referenceProbeSource, 
 const root=fileURLToPath(new URL('../../../',import.meta.url)),producer=fileURLToPath(new URL('../bench/membrane-reference-probes.mjs',import.meta.url));
 let restFixture;
 const hash=v=>createHash('sha256').update(v).digest('hex');
+// Metadata and content belong to one descriptor. Nested observations keep the
+// original inode alive while independently checking the pathname again.
+function withBoundReport(path, inspect){
+  const descriptor=openSync(path,constants.O_RDONLY|constants.O_NOFOLLOW);
+  try{
+    const info=fstatSync(descriptor,{bigint:true});
+    return inspect({mode:info.mode&0o777n,dev:info.dev,ino:info.ino,content:readFileSync(descriptor)});
+  }finally{closeSync(descriptor);}
+}
 function bound(c){
   const fields={x:c.x,gradient:c.runtime.gradient,direction:c.direction,inertiaGradient:c.inertiaGradient,xt:c.xt,mass:c.mass,h:[c.h],incrementalGradient:c.runtime.incrementalGradient,...(c.after?{after:c.after}:{})};
   assert.deepEqual(Object.keys(c.stateFloat64LE).sort(),Object.keys(fields).sort());assert.deepEqual(Object.keys(c.stateSHA256).sort(),Object.keys(fields).sort());
@@ -102,17 +111,21 @@ test('public output is exclusive0600 outside checkout and refuses existing files
   const dir=mkdtempSync(join(tmpdir(),'pliego-reference-probes-test-'));
   try{
     const out=join(dir,'report.json'),value={schema:'test'};writeReferenceProbeReport(out,value);
-    const expected=Buffer.from(JSON.stringify(value)+'\n'),descriptor=openSync(out,constants.O_RDONLY|constants.O_NOFOLLOW);
-    try{
-      const checkContent=fd=>{const content=Buffer.alloc(expected.length+1),n=readSync(fd,content,0,content.length,0);assert.deepEqual(content.subarray(0,n),expected);};
-      checkContent(descriptor);assert.throws(()=>writeReferenceProbeReport(out,{changed:true}),/EEXIST/);checkContent(descriptor);
-      const reopened=openSync(out,constants.O_RDONLY|constants.O_NOFOLLOW);
-      try{
-        const originalInfo=fstatSync(descriptor,{bigint:true});assert.equal(originalInfo.mode&0o777n,0o600n);
-        const currentInfo=fstatSync(reopened,{bigint:true});assert.equal(currentInfo.dev,originalInfo.dev);assert.equal(currentInfo.ino,originalInfo.ino);checkContent(reopened);
-      }finally{closeSync(reopened);}
-    }finally{closeSync(descriptor);}
+    const expected=Buffer.from(JSON.stringify(value)+'\n');
+    withBoundReport(out,before=>{
+      assert.equal(before.mode,0o600n);assert.deepEqual(before.content,expected);
+      assert.throws(()=>writeReferenceProbeReport(out,{changed:true}),/EEXIST/);
+      withBoundReport(out,after=>assert.deepEqual(after,before));
+    });
     const target=join(dir,'target'),link=join(dir,'link');writeFileSync(target,'retained');symlinkSync(target,link);assert.throws(()=>writeReferenceProbeReport(link,value),/EEXIST/);assert.equal(readFileSync(target,'utf8'),'retained');
+    assert.throws(()=>withBoundReport(link,()=>{}),/ELOOP/);
+    const replaced=join(dir,'replaced');writeFileSync(replaced,'same-content',{mode:0o600});
+    withBoundReport(replaced,before=>{
+      unlinkSync(replaced);writeFileSync(replaced,'same-content',{mode:0o600});
+      withBoundReport(replaced,after=>{assert.deepEqual(after.content,before.content);assert.notEqual(after.ino,before.ino);});
+      unlinkSync(replaced);assert.throws(()=>withBoundReport(replaced,()=>{}),/ENOENT/);
+      symlinkSync(target,replaced);assert.throws(()=>withBoundReport(replaced,()=>{}),/ELOOP/);
+    });
     const inside=join(dir,'inside');symlinkSync(root,inside);assert.throws(()=>writeReferenceProbeReport(join(inside,'unused-probe-test.json'),value),/outside checkout/);
     for(const args of [['--kind'],['--kind','bad'],['--unknown'],['--out'],['--kind','rest','--kind','rest']]){
       const run=spawnSync(process.execPath,[producer,...args],{encoding:'utf8'});assert.notEqual(run.status,0);assert.match(run.stderr,/requires a value|supported kind|unknown option|duplicate option/);

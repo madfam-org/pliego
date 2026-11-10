@@ -119,9 +119,9 @@ also fail. Cap and .05-compression controls are separate; the combined shipping
 cap+.05 policy is not another measured case here. The explicit synthetic nu12
 convention does not resolve the stock/bending Poisson ambiguity. This zero-step
 energy/reaction audit is not a solved patch or physical-stock validation. A
-coupled per-triangle research membrane and independent non-affine/time/material
-tests remain necessary; backend parity and force convergence cannot close this
-constitutive gap. That baseline audit changed no runtime laws, stocks or reader defaults.
+coupled per-triangle law is a separate model experiment; backend parity and
+force convergence cannot close this scalar-spring constitutive gap. That baseline
+audit changed no runtime laws, stocks or reader defaults.
 
 An opt-in [orthotropic triangle membrane](research/orthotropic-membrane-experiment.md)
 now implements a coupled Green-strain energy with an explicit per-sheet nu12
@@ -130,10 +130,17 @@ requires uncapped symmetric membrane behavior, line search, no legacy projection
 and no plasticity. Multiple initially planar sheets and small coupled-contact
 cases are tested; folds, joins, hand drives and new-model booklet reading remain
 outside acceptance. Element/oracle/operator and targeted World replay checks pass.
-Clean-source full matrix/repeat evidence and default booklet parity are pending
-at this implementation checkpoint. Stocks and reader defaults are unchanged;
-non-affine solved FE, time accuracy, locking/bending, measured stock and device
-validation remain open. Development results are not a stable catalogue release.
+At clean `25ca58d`, all 36 new-law cases pass the unchanged 1% tensor/energy
+and mesh/topology gates, with exact repeat of every non-recording field for
+the new cases and 108 retained old controls. Worst finest-amplitude signed
+linear-reference energy
+error is .003078%; independent finite-Green agreement covers 1944 poses and
+36 scaled finite-rotation cases. Old spring-law booklet controls separately
+preserve all recorded physics over both eight-turn protocols, with 0/5168 capped
+and 0/5200 uncapped force misses. This is not new-law booklet or shipping UI
+acceptance. Stocks and reader defaults remain unchanged; non-affine solved FE,
+time accuracy, locking/bending, joins/drives, measured stock, 8 ms and device
+gates remain open. The synthetic pass is not a stable catalogue release.
 
 The [source-pinned guarded-contact measurements](research/evidence/paper-2026-11-10/README.md)
 now complete and repeat all eight turns with **0/5168** substeps missing the

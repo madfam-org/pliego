@@ -203,11 +203,24 @@ Gauss–Newton runtime operator. Independent finite-Green reference, element/ope
 and targeted World replay checks pass. Multiple initially planar sheets are
 supported; creases, joins, hand drives and new-model booklet acceptance remain
 open. The constructor requires uncapped symmetric behavior, line search, disabled
-plasticity and no legacy projections. Clean-source full matrix/repeat evidence
-and default booklet parity remain pending at this implementation checkpoint.
-The failed scalar baseline remains retained; no stock or reader default changes.
-Solved non-affine FE, time/iteration accuracy, locking/bending, physical calibration
-and real-device interaction are still separate required experiments.
+plasticity and no legacy projections. At clean `25ca58d`, all 36 new-law cases
+pass the unchanged 1% tensor/energy gates; all 24 refinement/topology comparisons
+pass and every non-recording field of the new/108-old-control report repeats
+exactly. Maximum relative
+engineering-Voigt tensor error is 1.493e-10; worst finest-amplitude signed
+linear-reference energy error is .003078% (.012314% over all amplitudes).
+Independent finite-Green agreement covers all 1944 poses, with separately
+normalized finite-rotation checks on 36 cases. The reference-metric error is at
+most 8.882e-16; objectivity gradient checks retain their declared material-scale
+floor and are not uniformly relative to actual loaded force.
+
+Reviewed control migration preserves the old audit's failed accuracy gates.
+Fresh old-law capped/uncapped booklet regressions also complete eight turns and
+672 frames, preserving all recorded non-time physics with 0/5168 and 0/5200 force
+misses. This does not accept the new law for booklet reading or certify shipping
+UI/devices. No stock or reader default changes. Solved non-affine FE, controlled
+time/iteration accuracy, locking/bending, crease/join/hand support, physical
+calibration, the 8 ms target and real-device interaction remain required.
 
 ## Separate gates
 
@@ -302,9 +315,9 @@ source and disclose their timing/accuracy scope.
    progress, strain and cost. This does not close coupled contact research.
 2. Finish booklet browser/device acceptance, arbitrary-location hand coupling and
    derived companion page mapping with immutable fabrication provenance.
-3. Complete clean-source acceptance for the research-only orthotropic triangle
-   membrane against the retained scalar baseline; add an independently solved
-   non-affine FE reference, C-IPC comparison and measured stock fixtures. Quantify stiffness
+3. Extend the accepted synthetic orthotropic triangle audit with an independently
+   solved non-affine FE reference, C-IPC comparison and measured stock fixtures;
+   keep actual time/iteration convergence separate from constitutive accuracy. Quantify stiffness
    capping, grain response, crease hysteresis and mesh/time convergence.
 4. Implement and compare local XPBD, developable/rod and VBD/AVBD candidates on those
    same gates, then evaluate backend ports for the strongest candidates.

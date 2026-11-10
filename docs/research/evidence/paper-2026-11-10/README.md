@@ -507,3 +507,62 @@ establish limits of the declared model, not measured-stock properties or a
 dynamic solver failure. A coupled per-triangle orthotropic research model and
 an independently solved non-affine reference are next implementation work.
 Material calibration, interaction performance and actual-device gates remain open.
+
+
+## Objective orthotropic triangle model
+
+Implementation and measurement source:
+[`25ca58d`](https://github.com/madfam-org/pliego/commit/25ca58d55ba6caad2b8562d03034309cece3d0ac).
+The [clean full report](orthotropic-run.json), [repeat](orthotropic-repeat.json)
+and [strict comparison](orthotropic-comparison.json) retain 36 new-model cases
+plus all 108 spring controls. Every non-recording field agrees, including source,
+reference outputs, geometry, energy/gradient/tensor/metric/objectivity results and
+failed or unmeasured gates. The [reviewed legacy-control comparison](orthotropic-controls-comparison.json)
+checks the full historical audit against the fresh controls; only the explicit
+runtime/helper/git migration is allowed. Its old-law physics fields remain exact.
+Read the [law, research domain and remaining gates](../../orthotropic-membrane-experiment.md).
+
+| Same synthetic matrix, uncapped symmetric model | Tensor Frobenius error (fraction) | Finest-amplitude worst signed linear-reference energy error (fraction) |
+|---|---:|---:|
+| Scalar springs, 36 controls | 0.1408–0.2978 | 0.4608–0.6089 |
+| Objective orthotropic triangles, 36 cases | ≤1.493e-10 | ≤3.079e-5 |
+
+All new cases pass the unchanged 1% tensor/entry/signed-energy gates, every
+strain-halving check and all 24 mesh/topology comparisons. The maximum finest-
+amplitude signed energy error is 0.003079%; over all amplitudes it is 0.012314%.
+This expected finite-Green versus infinitesimal-strain difference is retained.
+At grain zero the new tensor independently represents C12≈0.762245 GPa and
+C66≈1.435034 GPa; the old spring C12=C66 restriction is removed.
+
+The independent matrix F/S/P oracle directly evaluates all 1,944 new-model
+nonzero applied poses. Maximum energy/gradient relative discrepancies are
+1.55e-11 / 5.54e-11 against a separately declared near-rest 1e-7 computational
+agreement gate. Runtime stretches and area ratios agree within 8.89e-16 against
+1e-10. These numerical checks do not replace the 1% constitutive gates.
+An additional 36 finite-rotation cases reuse the original UV/material reference,
+with 0/90/180-degree rotations and translations. All pass the declared energy
+and **stress-scaled** gradient checks; the force-scale floor dominates here,
+so this is not a uniform relative-to-actual-gradient accuracy claim.
+
+Fresh [capped](orthotropic-legacy-capped.json) and
+[uncapped](orthotropic-legacy-uncapped.json) retained spring-model S8/I32 booklet
+runs preserve every recorded non-time result from their preceding controls
+([capped comparison](orthotropic-legacy-capped-comparison.json),
+[uncapped comparison](orthotropic-legacy-uncapped-comparison.json)). Both complete
+all eight turns and 672 sampled poses, with 0/5168 and 0/5200 force misses.
+Their local active p95 values are 211.53 and 306.32 ms; these sequential controls
+remain exploratory timing, not a new-law performance or real-device certificate.
+No other local physics suite/campaign/profile/browser competes during those runs.
+
+At source `25ca58d`, all 16 CI checks pass: 173 engine / 123 web tests, 46-source
+typechecking, 96-file package verification and image smoke. Exact element/Hessian,
+GN PSD/operator agreement, active panel bending, supported contact solvers and
+snapshot replay have separate tests. No new-model time-step cost is claimed.
+
+This is a synthetic constitutive/objectivity pass for an explicitly selected
+research model, not measured-paper or full-shell calibration. Initially planar,
+uncreased sheets are supported; joins, creases, hand drives and new-model booklet
+reading remain outside acceptance. A solved non-affine FE reference, time/iteration
+accuracy, locking/bending, strain/contact limits, stock conventions and actual
+input/device performance remain work. Stock snapshots and reader defaults stay
+unchanged. Sharing StVK with a published framework transfers no contact guarantees.

@@ -1,0 +1,47 @@
+{
+  "schema": "pliego-state-protocol-probes-committed-closure-review/1",
+  "reviewer": "state_matrix_design",
+  "acceptedCapture": false,
+  "status": "PASS within prior reviewed protocol/projection scope",
+  "git": "3d778abc179988e1c1a31b43d8048aa6a08d00b1",
+  "checkoutClean": true,
+  "protocolReview": {
+    "path": "protocol-independent-review.json",
+    "sha256": "a535325832521d832af864bfa3c5009ad93ef5842c5c71c18dcdd45f865cd4c0"
+  },
+  "probeReview": {
+    "path": "probe-independent-code-review.json",
+    "sha256": "f21b8f2b9f9b503e675c95df1b41353ef24d3f9a09d0ece818813330e5bf2588"
+  },
+  "coverageOnlyDiff": {
+    "path": "packages/engine/bench/membrane-state-modal-probes.mjs",
+    "currentSHA256": "e9df15a1d48824d12383c8e8a4b390d722a9ea425ac60af2b4478b3ca6ada8b6",
+    "priorReviewedSHA256": "e7717705543ab0b853f7c912b7b370a68f84a2312389e717bdb4a996877f7734",
+    "wholePriorSourceRecoveredBySingleReplacement": true,
+    "changes": [
+      "allJudgedPoststeps renamed to declaredRequestedPoststeps:7110",
+      "capturedCompletedPoststeps sums row.runtime.completedSteps"
+    ],
+    "meaning": "Requested scope and actual completed coverage separately named. Endpoint selection, raw bindings, force semantics and Python oracle projection unchanged."
+  },
+  "probeTest": {
+    "path": "packages/engine/test/membrane-state-modal-probes.test.js",
+    "bytes": 3992,
+    "sha256": "06b8f6ae07f9162d48265c73c61597146923e815d2da4ea9de66bb804d0d7dca",
+    "unchanged": true
+  },
+  "allProtocolReviewedFilesUnchanged": true,
+  "verification": {
+    "independentPriorProbeUnitTests": "2/2 pass with whole source inventory unchanged; source JSON guard, all19 bytes, constructor/uncertified skips, three development endpoints and one Python80 native point association",
+    "parentReportedFinalChecks": "focused probe2tests after coverage edit; full340engine/123web,52types/108pack pass; not independently rerun by this narrow diff review"
+  },
+  "beforeAcceptedCaptureRequired": {
+    "selectedNewtonReviewer": "Freeze external selected-Newton exactFraction realized-descent/real-Armijo reviewer and bind exact executable SHA256 to capture manifest before first accepted matrix process.",
+    "runner": "Freeze external orchestration and bind exact executable SHA256 plus reviewed reviewer SHA before first accepted process.",
+    "status": "Parent confirms reviewers preparing both. Hash values were not supplied to this reviewer; this closure certifies repository protocol/projection only, not satisfaction of external freeze prerequisite."
+  },
+  "noSourceEdits": true,
+  "noAdditionalWorldOrOracleCalls": true,
+  "noAcceptedCapture": true,
+  "limitations": "Final clean-checkout end-to-end CLI/matrices, full80/100 proof equality and independent selected-Newton results remain future capture work; no material/time/booklet/device acceptance follows."
+}

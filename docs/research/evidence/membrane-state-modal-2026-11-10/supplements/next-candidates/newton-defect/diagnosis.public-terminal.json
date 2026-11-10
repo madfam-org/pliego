@@ -1,0 +1,63 @@
+{
+  "schema": "pliego-first-accepted-defect-public-terminal-derivative/1",
+  "derivative": true,
+  "originalFile": "diagnosis.terminal.json",
+  "originalSHA256": "d952036582f6b0221665fef72888f0dc8d51ee62ee944d821d3c3d7bb8bd1330",
+  "originalByteIdentityClaimed": false,
+  "normalization": "Only command path values at listed array indices replaced by REPO/INPUT/OUT placeholders; executable,flags,timestamps,exitCode,logSHA256 and all other terminal fields preserved unchanged. Original private terminal unchanged.",
+  "exactNormalizations": [
+    {
+      "commandArrayIndex": 1,
+      "originalValueSHA256": "85a593bd53fda411e868f7cb9a2d3e8f6f5fe1856a017dbb71ff0a3e0bfe5e19",
+      "normalizedValue": "OUT/diagnose-first-accepted.py"
+    },
+    {
+      "commandArrayIndex": 3,
+      "originalValueSHA256": "003d8a5e5d05d3713e22f37d2d121d91de604058dea2daa4d3d27a9ae96f84db",
+      "normalizedValue": "REPO"
+    },
+    {
+      "commandArrayIndex": 5,
+      "originalValueSHA256": "22c39bcfdcb64ae693bb9672d74c7c288341eede34e9ec041b3286ee13ea51d5",
+      "normalizedValue": "INPUT/candidate.json"
+    },
+    {
+      "commandArrayIndex": 7,
+      "originalValueSHA256": "e54b0e8492fa49041569da2b4eb03dacfbb3b19632871f3f4dbd79dfca409a24",
+      "normalizedValue": "INPUT/selected-newton-review.json"
+    },
+    {
+      "commandArrayIndex": 9,
+      "originalValueSHA256": "5b329f2e025af844f4194f37a550484b20b7e8b6c9a3492e37d940f555c327b9",
+      "normalizedValue": "INPUT/review-selected-newton.py"
+    },
+    {
+      "commandArrayIndex": 11,
+      "originalValueSHA256": "030c0752ca27c231eb41527380221ecddf31ba160abcbe14bbcb1c9fc6ea3c89",
+      "normalizedValue": "OUT/first-accepted-defect.json"
+    }
+  ],
+  "terminal": {
+    "schema": "pliego-first-accepted-defect-terminal/1",
+    "startedAt": "2026-11-10T18:48:48.225049+00:00",
+    "endedAt": "2026-11-10T18:48:54.248117+00:00",
+    "command": [
+      "python3",
+      "OUT/diagnose-first-accepted.py",
+      "--repo",
+      "REPO",
+      "--capture",
+      "INPUT/candidate.json",
+      "--selected-review",
+      "INPUT/selected-newton-review.json",
+      "--reviewer",
+      "INPUT/review-selected-newton.py",
+      "--out",
+      "OUT/first-accepted-defect.json"
+    ],
+    "exitCode": 0,
+    "logSHA256": "9b303237fce9b70a44fbe81650332dfabba813914b5cbae1f61a810a7eaaa8e8",
+    "postHocDiagnostic": true,
+    "acceptedCapture": false
+  }
+}

@@ -1,0 +1,519 @@
+{
+  "schema": "pliego-membrane-state-modal-comparison/1",
+  "recordedAt": "2026-11-10T18:55:53.126Z",
+  "mode": "strict-repeat",
+  "comparison": {
+    "leavesCompared": 8542863,
+    "excludedFields": [
+      "recordedAt"
+    ]
+  },
+  "forceOutcomes": [
+    {
+      "poststeps": 7110,
+      "declaredNewtonEvents": 49770,
+      "trajectories": [
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 79,
+          "publicFailed": 79,
+          "authoritativeFailed": 79,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 79,
+          "publicFailed": 79,
+          "authoritativeFailed": 79,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 79,
+          "publicFailed": 71,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 79,
+          "publicFailed": 70,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 79,
+          "publicFailed": 71,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 79,
+          "publicFailed": 70,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 158,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 158,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 316,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 316,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 631,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 632,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        }
+      ],
+      "publicFailed": 7076,
+      "authoritativeFailed": 2369
+    },
+    {
+      "poststeps": 7110,
+      "declaredNewtonEvents": 49770,
+      "trajectories": [
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 79,
+          "publicFailed": 79,
+          "authoritativeFailed": 79,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 79,
+          "publicFailed": 79,
+          "authoritativeFailed": 79,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 79,
+          "publicFailed": 71,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 79,
+          "publicFailed": 70,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 79,
+          "publicFailed": 71,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 79,
+          "publicFailed": 70,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 2,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 158,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 158,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 158,
+          "publicFailed": 158,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 316,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 316,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 316,
+          "publicFailed": 316,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": false,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 631,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": true,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 632,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": 1
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": false,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": true,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": false,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": true,
+          "poststeps": 632,
+          "publicFailed": 632,
+          "authoritativeFailed": 0,
+          "firstPublicFailure": 1,
+          "firstAuthoritativeFailure": null
+        }
+      ],
+      "publicFailed": 7076,
+      "authoritativeFailed": 2369
+    }
+  ],
+  "comparatorSHA256": "08cf2c5590aaff57699f85468c33cf63257a781206e3b990b69bed5b37060130",
+  "scope": "complete24data identity/recorded force comparison only; preserves failed gates and literal tolerance; no independent HP full-trajectory/real-Armijo/time/material/booklet/device acceptance",
+  "inputSHA256": [
+    "09d94972d9f7f815d6fae4033eac6417810242a238911b542573b53ccbfadb78",
+    "5c3a588a00f993c13c8aa24edb3b836fd5bf6d11807645aa8bad7beebfa031b4"
+  ],
+  "inputRawSHA256": [
+    "09d94972d9f7f815d6fae4033eac6417810242a238911b542573b53ccbfadb78",
+    "5c3a588a00f993c13c8aa24edb3b836fd5bf6d11807645aa8bad7beebfa031b4"
+  ]
+}

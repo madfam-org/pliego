@@ -1,0 +1,50 @@
+{
+  "schema": "pliego-state-probe-independent-code-review/1",
+  "reviewer": "state_matrix_design",
+  "acceptedCapture": false,
+  "status": "PASS within examined projection scope",
+  "files": [
+    {
+      "path": "packages/engine/bench/membrane-state-modal-probes.mjs",
+      "bytes": 6696,
+      "sha256": "e7717705543ab0b853f7c912b7b370a68f84a2312389e717bdb4a996877f7734"
+    },
+    {
+      "path": "packages/engine/test/membrane-state-modal-probes.test.js",
+      "bytes": 3992,
+      "sha256": "06b8f6ae07f9162d48265c73c61597146923e815d2da4ea9de66bb804d0d7dca"
+    }
+  ],
+  "sourceGuardedUnitProof": {
+    "path": "probe-independent-unit-proof.json",
+    "sha256": "0bbd64f966d6b9db89c18ea1af92f5d1db0c350d9da8c119e3cfdee1db55f596",
+    "tests": 2,
+    "pass": 2,
+    "fail": 0
+  },
+  "closedFinding": {
+    "finding": "Original CLI exact-source equality included an owned status:undefined property, while serialized audit capture omitted that property.",
+    "reproduction": {
+      "path": "probe-source-json-proof.json",
+      "sha256": "946713f76577ca9d4f20ee2a80923c1d7920f6410d61a842753bccc98d8e8011",
+      "scope": "pure assertion behavior proof; original full source snapshot was not preserved before owner immediate fix"
+    },
+    "resolution": "Exported pure helper destructures status out, compares remaining exact inventory plus dirty:false; CLI still requires clean current status before calling helper; JSON roundtrip and changed git/hash/dirty cases covered."
+  },
+  "conclusions": [
+    "Case projection copies exact original base64 LE strings and SHA256 for13 state fields and6 force fields, plus separate reference LE/SHA. Decode verifies canonical base64, hash and finite native words; numeric convenience views originate from those bytes. Full19 unchanged-binding regression passes.",
+    "Unchanged Python state oracle input assembler expects exactly those19 supplied optional/required fields and separate reference. Initial state identity, actual initialization, native M/h, public and latent targets/gradients/residuals and frozen F0/tau are compatible. Independent Python80 evaluation verifies both native associations and both reported gates for one development endpoint.",
+    "Every retained completed endpoint role is included independent of either gate. Deduplication only within trajectory by step requires identical observation objects and retains all role names. Initial and uncertified targets remain explicitly skipped with original state hashes; regression includes constructor and synthetic invalid-target control.",
+    "Producer imports no solver and performs no World step. Unit fixture construction and three actual development steps occur solely in the test/audit helper. No ideal trajectory or solver target is injected by projection.",
+    "CLI guards clean source before output, requires serialized capture source exact match, hashes original input bytes, rechecks complete inventory after projection before one output write, and uses existing exclusive durable private-output reservation.",
+    "Coverage explicitly states retained endpoint samples, allPoststepsEvaluated:false and allNewtonArmijoEvaluated:false. Point-oracle samples cannot certify all7110 steps,49770 Newton events or time/material/booklet/device gates."
+  ],
+  "unchangedEngineAndOracleTrackedSources": true,
+  "noRepositoryEditsByReviewer": true,
+  "noCommits": true,
+  "discardedAttempt": {
+    "reason": "first ordinary unit rerun lost source freeze when owner expanded test and added protocol doc during run; not accepted as frozen evidence; successful guarded rerun used latest source",
+    "numericalConclusionsAccepted": false
+  },
+  "limitations": "No end-to-end clean-checkout probes CLI invoked before commit, no accepted matrix capture or complete oracle batch produced; source guard helper and unit projection/one oracle sample exercised only."
+}

@@ -1,0 +1,76 @@
+{
+  "outputSHA256": "f95e63c2591a09c65703bb9622d9147db3d5f14c165968232f2672b7733f93f6",
+  "selectedReferences": 24,
+  "uniqueEvents": 4,
+  "uniqueStartLinearizations": 1,
+  "summary": [
+    {
+      "level": 1,
+      "native": {
+        "fullGradient0": 848380.7811917505,
+        "fullGradient1": 1.799042411473004,
+        "realizedLinearError": 4.7487404777359326e-09,
+        "omittedGeometricCurvature": 1.8111818594989484,
+        "nonlinearTaylorRemainder": 0.01213944435026221,
+        "nominalDirectionLinearError": 1.4028341128549786e-10,
+        "endpointAdditionRoundingContribution": 4.749278824609465e-09,
+        "nativeRoundedDifferenceLinearError": 4.7487404777359326e-09,
+        "capturedGradient0Error": 3.7810871362905346e-11,
+        "recordedNominalResidualError": 1.1587697495340255e-10,
+        "recordedRealizedResidualError": 9.212760465854014e-11
+      },
+      "nativeFinalPass": false
+    },
+    {
+      "level": 2,
+      "native": {
+        "fullGradient0": 848380.7811917505,
+        "fullGradient1": 0.4542009339762186,
+        "realizedLinearError": 4.622912845614171e-08,
+        "omittedGeometricCurvature": 0.45496694351468997,
+        "nonlinearTaylorRemainder": 0.0007660115312028616,
+        "nominalDirectionLinearError": 1.310352436958827e-10,
+        "endpointAdditionRoundingContribution": 4.618860743387407e-08,
+        "nativeRoundedDifferenceLinearError": 4.622912845614171e-08,
+        "capturedGradient0Error": 3.7810871362905346e-11,
+        "recordedNominalResidualError": 7.156591309542362e-11,
+        "recordedRealizedResidualError": 6.229949845521546e-11
+      },
+      "nativeFinalPass": false
+    },
+    {
+      "level": 4,
+      "native": {
+        "fullGradient0": 848380.7811917505,
+        "fullGradient1": 0.11383032788490144,
+        "realizedLinearError": 8.052988031366993e-08,
+        "omittedGeometricCurvature": 0.1138782698127697,
+        "nonlinearTaylorRemainder": 4.79907544344479e-05,
+        "nominalDirectionLinearError": 2.3619668320141124e-10,
+        "endpointAdditionRoundingContribution": 8.038882920760163e-08,
+        "nativeRoundedDifferenceLinearError": 8.052988031366993e-08,
+        "capturedGradient0Error": 3.7810871362905346e-11,
+        "recordedNominalResidualError": 3.575214725911368e-11,
+        "recordedRealizedResidualError": 8.689293125796521e-11
+      },
+      "nativeFinalPass": false
+    },
+    {
+      "level": 8,
+      "native": {
+        "fullGradient0": 848380.7811917505,
+        "fullGradient1": 0.028474875374280825,
+        "realizedLinearError": 3.6911037598841655e-07,
+        "omittedGeometricCurvature": 0.028478113663637457,
+        "nonlinearTaylorRemainder": 3.001223610593037e-06,
+        "nominalDirectionLinearError": 1.8117962895792479e-10,
+        "endpointAdditionRoundingContribution": 3.6914046126537925e-07,
+        "nativeRoundedDifferenceLinearError": 3.6911037598841655e-07,
+        "capturedGradient0Error": 3.7810871362905346e-11,
+        "recordedNominalResidualError": 6.476430713098999e-11,
+        "recordedRealizedResidualError": 1.301492431667704e-10
+      },
+      "nativeFinalPass": false
+    }
+  ]
+}

@@ -123,8 +123,11 @@ The separate [archive review](membrane-state-archive-review.json) and
 stored files, 40 selected inputs, gzip reconstruction and decoded privacy checks;
 its independent restore-to-rebuild comparison reproduces every archived byte.
 
-The next bounded accuracy experiment is the same 24-trajectory matrix with
-independent latent/public state identities and both original force gates. Full
+The same24-trajectory matrix now has
+[complete separate latent/public evidence](membrane-state-modal-results.md):
+16 trajectories pass the authoritative gate throughout, while public misses
+worsen to7076/7110 and continuous-state discrepancy reaches22.3%. Both original
+force gates and all failures remain visible. Full
 amplitude/time/solve isolation, finite rotations, material calibration, bending,
 buckling, creases, joins, friction/contact, natural left/right fixed-booklet
 reading under the new model, actual touch/stylus input-to-paint and the 8 ms gate

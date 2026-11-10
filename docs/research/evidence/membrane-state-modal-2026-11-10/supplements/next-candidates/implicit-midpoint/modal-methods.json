@@ -1,0 +1,56 @@
+{
+  "schema": "pliego-analytic-modal-time-methods/1",
+  "inputSHA256": "e8f006ab770da4ed3790cd8fb8e2a2108be725ec9e4525d227c18b185452d620",
+  "programSHA256": "dff972d748b9a9ee59e26018e5722500ccbab402bb71e52c8c646f8268797589",
+  "omega": 107622.14139533653,
+  "initialModalCoordinate": 1,
+  "initialModalVelocity": 0,
+  "rows": [
+    {
+      "level": 1,
+      "h": 7.433175750007433e-07,
+      "steps": 79,
+      "omegaH": 0.07999742915836866,
+      "backwardEulerMaximumStateError": 0.22305288332964754,
+      "backwardEulerFinalEnergyLoss": 0.3958644356126835,
+      "implicitMidpointMaximumStateError": 0.003367108504697572,
+      "implicitMidpointExactLinearEnergyLoss": 0,
+      "midpointEnergyMeaning": "analytic exact-real modal invariant, not measured floating-point energy"
+    },
+    {
+      "level": 2,
+      "h": 3.7165878750037167e-07,
+      "steps": 158,
+      "omegaH": 0.03999871457918433,
+      "backwardEulerMaximumStateError": 0.1186836613437055,
+      "backwardEulerFinalEnergyLoss": 0.2232072956361244,
+      "implicitMidpointMaximumStateError": 0.0008423832560206063,
+      "implicitMidpointExactLinearEnergyLoss": 0,
+      "midpointEnergyMeaning": "analytic exact-real modal invariant, not measured floating-point energy"
+    },
+    {
+      "level": 4,
+      "h": 1.8582939375018583e-07,
+      "steps": 316,
+      "omegaH": 0.019999357289592165,
+      "backwardEulerMaximumStateError": 0.061234061521571403,
+      "backwardEulerFinalEnergyLoss": 0.11870829949953254,
+      "implicitMidpointMaximumStateError": 0.00021063372021472697,
+      "implicitMidpointExactLinearEnergyLoss": 0,
+      "midpointEnergyMeaning": "analytic exact-real modal invariant, not measured floating-point energy"
+    },
+    {
+      "level": 8,
+      "h": 9.291469687509292e-08,
+      "steps": 632,
+      "omegaH": 0.009999678644796083,
+      "backwardEulerMaximumStateError": 0.031103130520687288,
+      "backwardEulerFinalEnergyLoss": 0.061237517216029325,
+      "implicitMidpointMaximumStateError": 5.2660799552289015e-05,
+      "implicitMidpointExactLinearEnergyLoss": 0,
+      "midpointEnergyMeaning": "analytic exact-real modal invariant, not measured floating-point energy"
+    }
+  ],
+  "arithmetic": "native Python binary64 transcendental evaluation of exact linear formulas",
+  "scope": "post-capture analytical selected linear mode only; no nonlinear selected-law/native-C solve, force gate, World step, material/booklet/device or time-accuracy acceptance"
+}

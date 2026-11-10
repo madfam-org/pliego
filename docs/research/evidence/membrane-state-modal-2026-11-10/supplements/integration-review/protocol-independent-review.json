@@ -1,0 +1,61 @@
+{
+  "schema": "pliego-state-protocol-independent-review/1",
+  "acceptedCapture": false,
+  "reviewer": "state_matrix_design",
+  "status": "No material CLI/source/design mismatch blocking reproducibility found",
+  "files": [
+    {
+      "path": "docs/research/membrane-state-modal-protocol.md",
+      "bytes": 6783,
+      "sha256": "57ed5e59877045dd8056ee89fb560127b96f6ff82bf73fd02da5ee0d4e4fb374"
+    },
+    {
+      "path": "packages/engine/bench/membrane-state-modal-audit.mjs",
+      "bytes": 28112,
+      "sha256": "b6df492eed7783c1510596e8cdd42063b32d5ecb63758869981766f29fbddd6f"
+    },
+    {
+      "path": "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+      "bytes": 22914,
+      "sha256": "08cf2c5590aaff57699f85468c33cf63257a781206e3b990b69bed5b37060130"
+    },
+    {
+      "path": "packages/engine/bench/membrane-state-modal-output.mjs",
+      "bytes": 1434,
+      "sha256": "bfb932d179b7adbb7da6d29cd6d0fb680dba12cc456fa457cb993bc49a640ef2"
+    },
+    {
+      "path": "packages/engine/bench/membrane-state-modal-inputs.mjs",
+      "bytes": 7137,
+      "sha256": "8f26a4eb93e7bd10795462dcf889e687214cb2b57cb600b1d52db49bde58184c"
+    },
+    {
+      "path": "packages/engine/bench/membrane-state-precision.py",
+      "bytes": 23280,
+      "sha256": "ce1dbcd0203a6ab7ad5e06912dda6f198bf8e3a867a0cc286bb51ac26f394198"
+    }
+  ],
+  "designMemo": {
+    "path": "state-2026-11-10-recovery/next-matrix-design.md",
+    "sha256": "5b3f8ccf5c88744d34a35a0d7bcf7a366d10aa110954a5684161da63c5c2e83c"
+  },
+  "checks": [
+    "Fixed diagnostic/smoke cells2-forward-grain0/nu12=.293/A=.004 levels1/2/4/8 budgets1/4/16 both starts; S0=22422,N0=79,24 trajectories/7110 requested substeps/49770 declared Newton iterations align with immutable fixture and producer.",
+    "Four distinct CLI matrix commands are supported exactly: instrumented current absolute baseline, instrumented candidate, strict candidate repeat and no-solve-observer candidate; no full/dirty/window/budget override added.",
+    "Comparison CLI modes and positional ordering match parser. Legacy migration compares whole old payload except source/recordedAt and applies explicit source migration policy; strict repeat excludes recordedAt; plain/observed comparison excludes only enumerated observer fields in addition to recording timestamp.",
+    "Actual initial conversion, same native mass/reference/M/h/F0/tau, separate public/authority force gates, old public velocity/predictor flags diagnostic, initial/sleep/partial null certification and all14 initial binding policies match runtime/validator implementation.",
+    "All current states/6 raw force families and scalar decisions retained; selected full Newton records and complete boundary histories have explicit scope. Per-trajectory final-step restore is a separate control with actual attempted/completed counts and never silently increases judged trajectory budgets.",
+    "Adjacent refinement paired controls use exact coarse k/fine2k complete fields, and budget controls use every matched native step; no nearest-time alignment or original17checkpoint samples substituted for all-step controls.",
+    "Probe exporter CLI and unchanged Python digits80/100 stdin/stdout invocation are supported. Original19 LE/SHA plus separate reference binding and sampled endpoint-only scope agree with design; later proofs must actually compare complete parsed outputs excluding only declared precision metadata.",
+    "Declared unresolved selected-law/native-C integrator isolation, amplitude and time convergence, physical material calibration, finite rotations/bending/booklet/device/performance acceptance match source gates rather than being implied by captured data.",
+    "Output reservation uses persistent outside-checkout private0700 parent, exclusive0600 FD and terminal write. Source inventory guards source Git/status and all producers/helpers/oracles/tests/fixture dependencies; protocol is bound by commit plus clean-status requirement."
+  ],
+  "preCapturePrerequisite": {
+    "requirement": "Freeze independent selected-Newton realized-direction/real-Armijo reviewer and external orchestration before accepted capture; bind both source hashes in manifest.",
+    "status": "Parent confirms archive_recovery and recover_failure preparing external reviewer/runner and will bind both before start; this review does not claim their preparation or independent truth checks completed."
+  },
+  "pendingCoverageDiff": "Parent plans nonphysical coverage field rename allJudgedPoststeps to declaredRequestedPoststeps plus capturedCompletedPoststeps sum; inspect only that diff when notified.",
+  "noSourceEdits": true,
+  "noWorldOrOracleOrSolverCalls": true,
+  "noCaptureOrCommit": true
+}

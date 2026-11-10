@@ -1,0 +1,13 @@
+{
+  "schema": "pliego-state-matrix-publication-exclusions/1",
+  "files": [
+    {
+      "file": "web-precommit.log",
+      "bytes": 23898,
+      "sha256": "ef554364304f39c9b34a2b2273dc7e443622790d3aef8bc2f809265fae59902b",
+      "reason": "private absolute path in original test log; source bytes not sanitized or substituted",
+      "durableOriginalRetained": true
+    }
+  ],
+  "scope": "explicit publication selection; raw passing web test log remains durable outside public archive; precommit-checks.json receipt may separately report suite outcome"
+}

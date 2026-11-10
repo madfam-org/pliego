@@ -1,0 +1,38 @@
+{
+  "schema": "pliego-state-modal-local-checks/1",
+  "sourceCommit": "3d778abc179988e1c1a31b43d8048aa6a08d00b1",
+  "engineTests": 340,
+  "webTests": 123,
+  "focusedAfterFinalCoverageMetadataRename": 2,
+  "typecheckedSourceModules": 52,
+  "packageFiles": 108,
+  "engineSourceChanged": false,
+  "note": "Full engine suite completed before final probe coverage field rename; focused probe tests reran after that metadata-only change. Exact-head CI is separately required. No package publication.",
+  "files": [
+    {
+      "path": "engine-precommit.log",
+      "bytes": 135838,
+      "sha256": "33ffa5e2c79e5dcea849f240778967ba4819d90220d11b269f00ee93623bfb03"
+    },
+    {
+      "path": "web-precommit.log",
+      "bytes": 23898,
+      "sha256": "ef554364304f39c9b34a2b2273dc7e443622790d3aef8bc2f809265fae59902b"
+    },
+    {
+      "path": "package-precommit.log",
+      "bytes": 95,
+      "sha256": "c5d6387e6129ce450fd83e647c4bfb41a74a5bcdba81c8f36c558bb2d527bd06"
+    },
+    {
+      "path": "typecheck-precommit.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "root-probe-coverage-closure.log",
+      "bytes": 970,
+      "sha256": "c92f800e896460548ebbc230822fbd3abb79fc878bc9fd39e9f0284445191c61"
+    }
+  ]
+}

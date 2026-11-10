@@ -1,0 +1,14 @@
+{
+  "schema": "pliego-selected-newton-wrapper-launch-observation/1",
+  "wrapper": "run-selected-newton-review.py",
+  "wrapperSHA256": "bd361be62f01af237c932f766939493afd8eda7b3d9dce0f73394b7adae069a4",
+  "returnCode": 1,
+  "reviewerProcessStarted": false,
+  "stderr": {
+    "file": "wrapper-v1-launch-observed.stderr.log",
+    "bytes": 473,
+    "sha256": "44bf993fde91ef9786b2cf2479ae3e2c2f4eb89a36846e208a289861cf1d114e"
+  },
+  "preservation": "stderr text faithfully transcribed from exec tool response after launch; original redirected stderr file never existed; this is not an original raw terminal stream",
+  "privacy": "transcribed stderr contains private path and remains excluded from publication"
+}

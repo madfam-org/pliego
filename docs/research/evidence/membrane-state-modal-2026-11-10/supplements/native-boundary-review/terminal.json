@@ -1,0 +1,35 @@
+{
+  "schema": "pliego-native-boundary-review-terminal/1",
+  "recordedAfterCompletionAt": "2026-11-10T18:44:31.363011+00:00",
+  "returnCode": 0,
+  "reviewerSource": {
+    "file": "review-captured-boundaries.py",
+    "bytes": 6766,
+    "sha256": "b3db1dbc9e938098564aa167cfe144cb282e8957734bd38e96c377ccb0cb90eb"
+  },
+  "argv": [
+    "python3",
+    "review-captured-boundaries.py",
+    "--repo",
+    "REPO",
+    "--run",
+    "RUN",
+    "--out",
+    "FRESH_PROOF"
+  ],
+  "outputDigest": {
+    "bytes": 4638,
+    "sha256": "cc43094604063ecdc290a1dce671d26b301dde41a64110a44c085d9f04f3da38"
+  },
+  "stdoutDigest": {
+    "bytes": 91,
+    "sha256": "2a808d80aaac0e2bf72d2f1ba84928e661d54b0460180113eefdaa41352b7ed8"
+  },
+  "stderrDigest": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sourceGuardsBeforeAndAfterPassed": true,
+  "reviewTiming": "post-capture native consistency analysis; no World/oracle calls, no selection or threshold change",
+  "scope": "every captured state/native association only; elastic gradients are captured inputs here, not independent material truth; no HP full-trajectory/time/material/booklet/device acceptance"
+}

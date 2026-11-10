@@ -3,7 +3,9 @@
 2026-11-10. Research/design prepared during the frozen `d739165` study and published
 after its captures and independent reviews finished. The separately named
 reference-displacement prototype is now implemented for a bounded first-witness
-experiment; the full 24-trajectory matrix has not yet been run for this state ABI. The
+experiment; the full24-trajectory matrix now has
+[separate authoritative/public results](membrane-state-modal-results.md), with
+2369/7076 respective failed steps out of7110 and unresolved time accuracy. The
 [reference-law results](membrane-uv-reference.md) improve frozen-pose component
 accuracy while retaining 6968/7110 force failures. Better force evaluation and a
 finer state/update representation are different hypotheses; those failures do

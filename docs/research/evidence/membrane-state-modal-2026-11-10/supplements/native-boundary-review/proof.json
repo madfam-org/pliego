@@ -1,0 +1,212 @@
+{
+  "schema": "pliego-state-matrix-native-boundary-review/1",
+  "nativeWordBindingsAndAssociationsVerified": true,
+  "states": 7134,
+  "poststeps": 7110,
+  "decodedFloat64Words": 4601430,
+  "trajectories": [
+    {
+      "level": 1,
+      "budget": 1,
+      "seed": false,
+      "steps": 79,
+      "publicFailures": 79,
+      "authoritativeFailures": 79
+    },
+    {
+      "level": 1,
+      "budget": 1,
+      "seed": true,
+      "steps": 79,
+      "publicFailures": 79,
+      "authoritativeFailures": 79
+    },
+    {
+      "level": 1,
+      "budget": 4,
+      "seed": false,
+      "steps": 79,
+      "publicFailures": 71,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 1,
+      "budget": 4,
+      "seed": true,
+      "steps": 79,
+      "publicFailures": 70,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 1,
+      "budget": 16,
+      "seed": false,
+      "steps": 79,
+      "publicFailures": 71,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 1,
+      "budget": 16,
+      "seed": true,
+      "steps": 79,
+      "publicFailures": 70,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 2,
+      "budget": 1,
+      "seed": false,
+      "steps": 158,
+      "publicFailures": 158,
+      "authoritativeFailures": 158
+    },
+    {
+      "level": 2,
+      "budget": 1,
+      "seed": true,
+      "steps": 158,
+      "publicFailures": 158,
+      "authoritativeFailures": 158
+    },
+    {
+      "level": 2,
+      "budget": 4,
+      "seed": false,
+      "steps": 158,
+      "publicFailures": 158,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 2,
+      "budget": 4,
+      "seed": true,
+      "steps": 158,
+      "publicFailures": 158,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 2,
+      "budget": 16,
+      "seed": false,
+      "steps": 158,
+      "publicFailures": 158,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 2,
+      "budget": 16,
+      "seed": true,
+      "steps": 158,
+      "publicFailures": 158,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 4,
+      "budget": 1,
+      "seed": false,
+      "steps": 316,
+      "publicFailures": 316,
+      "authoritativeFailures": 316
+    },
+    {
+      "level": 4,
+      "budget": 1,
+      "seed": true,
+      "steps": 316,
+      "publicFailures": 316,
+      "authoritativeFailures": 316
+    },
+    {
+      "level": 4,
+      "budget": 4,
+      "seed": false,
+      "steps": 316,
+      "publicFailures": 316,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 4,
+      "budget": 4,
+      "seed": true,
+      "steps": 316,
+      "publicFailures": 316,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 4,
+      "budget": 16,
+      "seed": false,
+      "steps": 316,
+      "publicFailures": 316,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 4,
+      "budget": 16,
+      "seed": true,
+      "steps": 316,
+      "publicFailures": 316,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 8,
+      "budget": 1,
+      "seed": false,
+      "steps": 632,
+      "publicFailures": 632,
+      "authoritativeFailures": 631
+    },
+    {
+      "level": 8,
+      "budget": 1,
+      "seed": true,
+      "steps": 632,
+      "publicFailures": 632,
+      "authoritativeFailures": 632
+    },
+    {
+      "level": 8,
+      "budget": 4,
+      "seed": false,
+      "steps": 632,
+      "publicFailures": 632,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 8,
+      "budget": 4,
+      "seed": true,
+      "steps": 632,
+      "publicFailures": 632,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 8,
+      "budget": 16,
+      "seed": false,
+      "steps": 632,
+      "publicFailures": 632,
+      "authoritativeFailures": 0
+    },
+    {
+      "level": 8,
+      "budget": 16,
+      "seed": true,
+      "steps": 632,
+      "publicFailures": 632,
+      "authoritativeFailures": 0
+    }
+  ],
+  "publicFailures": 7076,
+  "authoritativeFailures": 2369,
+  "scope": "every captured state/native association only; elastic gradients are captured inputs here, not independent material truth; no HP full-trajectory/time/material/booklet/device acceptance",
+  "input": {
+    "bytes": 279540463,
+    "sha256": "09d94972d9f7f815d6fae4033eac6417810242a238911b542573b53ccbfadb78"
+  },
+  "sourceGit": "3d778abc179988e1c1a31b43d8048aa6a08d00b1",
+  "sourceInventorySHA256": "95b32b34ae3161916d3cddc2e200427ab6173db8503ccb4a043c64e2703fbce2",
+  "reviewerSHA256": "b3db1dbc9e938098564aa167cfe144cb282e8957734bd38e96c377ccb0cb90eb",
+  "reviewTiming": "additional read-only consistency review authored after candidate capture; no solver/selection/threshold changes"
+}

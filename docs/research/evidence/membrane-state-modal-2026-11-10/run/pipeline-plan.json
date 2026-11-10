@@ -1,0 +1,199 @@
+{
+  "schema": "pliego-state-matrix-execution-plan/1",
+  "protocol": {
+    "trajectories": 24,
+    "judgedPoststepsPerCapture": 7110,
+    "declaredNewtonIterationsPerCapture": 49770,
+    "stateInitialAndJudgedRecordsPerCapture": 7134,
+    "stateRestorePublicCallsPerCapture": 24,
+    "stateRestoreDeclaredNewtonIterationsPerCapture": 168,
+    "captureOrder": [
+      "baseline",
+      "candidate",
+      "repeat",
+      "plain"
+    ],
+    "nodeMaximumOldSpaceMiB": 8192
+  },
+  "processes": [
+    {
+      "name": "baseline",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/membrane-state-modal-audit.mjs",
+        "--baseline-absolute",
+        "--out",
+        "{run}/baseline.json"
+      ],
+      "output": "baseline.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "candidate",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/membrane-state-modal-audit.mjs",
+        "--out",
+        "{run}/candidate.json"
+      ],
+      "output": "candidate.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "repeat",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/membrane-state-modal-audit.mjs",
+        "--out",
+        "{run}/repeat.json"
+      ],
+      "output": "repeat.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "plain",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/membrane-state-modal-audit.mjs",
+        "--no-solve-observer",
+        "--out",
+        "{run}/plain.json"
+      ],
+      "output": "plain.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "comparison-baseline-migration",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+        "--baseline-migration",
+        "docs/research/evidence/membrane-reference-2026-11-10/candidate.json.gz",
+        "{run}/baseline.json",
+        "--out",
+        "{run}/comparison-baseline-migration.json"
+      ],
+      "output": "comparison-baseline-migration.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "comparison-repeat",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+        "{run}/candidate.json",
+        "{run}/repeat.json",
+        "--out",
+        "{run}/comparison-repeat.json"
+      ],
+      "output": "comparison-repeat.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "comparison-parity",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+        "--observer-comparison",
+        "{run}/plain.json",
+        "{run}/candidate.json",
+        "--out",
+        "{run}/comparison-parity.json"
+      ],
+      "output": "comparison-parity.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "comparison-statechange",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+        "--state-comparison",
+        "{run}/baseline.json",
+        "{run}/candidate.json",
+        "--out",
+        "{run}/comparison-statechange.json"
+      ],
+      "output": "comparison-statechange.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "probes",
+      "argv": [
+        "{node}",
+        "--max-old-space-size=8192",
+        "packages/engine/bench/membrane-state-modal-probes.mjs",
+        "--input",
+        "{run}/candidate.json",
+        "--out",
+        "{run}/probes.json"
+      ],
+      "output": "probes.json",
+      "stdin": null,
+      "stdoutIsOutput": false
+    },
+    {
+      "name": "oracle-self-test",
+      "argv": [
+        "{python}",
+        "packages/engine/bench/membrane-state-precision.py",
+        "--self-test"
+      ],
+      "output": "oracle-self-test.json",
+      "stdin": null,
+      "stdoutIsOutput": true
+    },
+    {
+      "name": "oracle-80",
+      "argv": [
+        "{python}",
+        "packages/engine/bench/membrane-state-precision.py",
+        "--digits",
+        "80"
+      ],
+      "output": "oracle-80.json",
+      "stdin": "probes.json",
+      "stdoutIsOutput": true
+    },
+    {
+      "name": "oracle-100",
+      "argv": [
+        "{python}",
+        "packages/engine/bench/membrane-state-precision.py",
+        "--digits",
+        "100"
+      ],
+      "output": "oracle-100.json",
+      "stdin": "probes.json",
+      "stdoutIsOutput": true
+    }
+  ],
+  "derivedStages": [
+    "oracle-comparison",
+    "summary"
+  ],
+  "oracleComparisonExclusions": [
+    "cases[].decimalDigits"
+  ],
+  "predeclaredRepresentedErrorLimits": {
+    "energyNJ": 1e-12,
+    "gradientComponentMicroN": 1e-09
+  },
+  "scope": "untimed research; source/identity/coverage success is distinct from false force and unresolved time/material/booklet/device gates"
+}

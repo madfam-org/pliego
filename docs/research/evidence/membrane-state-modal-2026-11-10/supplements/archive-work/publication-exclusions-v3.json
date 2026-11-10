@@ -1,0 +1,28 @@
+{
+  "schema": "pliego-state-matrix-publication-exclusions/1",
+  "files": [
+    {
+      "file": "web-precommit.log",
+      "bytes": 23898,
+      "sha256": "ef554364304f39c9b34a2b2273dc7e443622790d3aef8bc2f809265fae59902b",
+      "reason": "private absolute path in original test log; source bytes not sanitized or substituted",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "wrapper-v1-launch-observed.stderr.log",
+      "bytes": 473,
+      "sha256": "44bf993fde91ef9786b2cf2479ae3e2c2f4eb89a36846e208a289861cf1d114e",
+      "reason": "transcribed observed wrapper preflight traceback contains private absolute path; original redirected stream never existed; public correction ledger records the narrow failure without pretending original stream preservation",
+      "durableOriginalRetained": false,
+      "durableTranscribedObservationRetained": true
+    },
+    {
+      "file": "next-candidates/newton-defect/diagnosis.terminal.json",
+      "bytes": 1147,
+      "sha256": "d952036582f6b0221665fef72888f0dc8d51ee62ee944d821d3c3d7bb8bd1330",
+      "reason": "original posthoc diagnosis command receipt contains private absolute paths; no sanitization or substitute original receipt",
+      "durableOriginalRetained": true
+    }
+  ],
+  "scope": "explicit publication selection; raw passing web test log remains durable outside public archive; precommit-checks.json receipt may separately report suite outcome"
+}

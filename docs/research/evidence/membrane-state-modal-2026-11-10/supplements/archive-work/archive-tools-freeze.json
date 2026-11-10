@@ -1,0 +1,32 @@
+{
+  "schema": "pliego-state-matrix-archive-tools-freeze/1",
+  "files": [
+    {
+      "file": "build-state-matrix-archive.py",
+      "bytes": 15163,
+      "sha256": "13b2617dc8bbfaa9c38cacef0b383da0293b28d621d546caecd55824ae070343"
+    },
+    {
+      "file": "restore-state-matrix-archive.py",
+      "bytes": 3390,
+      "sha256": "8885d0151301b134605a2b02b9b7c0e83ff8274852836fc74d0eacf65fabb814"
+    },
+    {
+      "file": "run-selected-newton-review.py",
+      "bytes": 6550,
+      "sha256": "bd361be62f01af237c932f766939493afd8eda7b3d9dce0f73394b7adae069a4"
+    },
+    {
+      "file": "archive-tools-smoke.json",
+      "bytes": 500,
+      "sha256": "b6fd68becf01637f32ee95362ed628f0d7b21f1370271d296b6fc33951ed687d"
+    },
+    {
+      "file": "publication-exclusions.json",
+      "bytes": 554,
+      "sha256": "88229b66c7f6aa60a54d853214e53039988a5d746329072368390a1857d2c9ba"
+    }
+  ],
+  "sourceGit": "3d778abc179988e1c1a31b43d8048aa6a08d00b1",
+  "scope": "portable archive/reviewer execution tools frozen before full matrix completion; no numerical source changes"
+}

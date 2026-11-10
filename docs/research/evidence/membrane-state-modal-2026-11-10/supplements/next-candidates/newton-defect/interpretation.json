@@ -1,0 +1,323 @@
+{
+  "schema": "pliego-first-accepted-defect-interpretation/1",
+  "postHocDiagnostic": true,
+  "acceptedCapture": false,
+  "inputSHA256": "f95e63c2591a09c65703bb9622d9147db3d5f14c165968232f2672b7733f93f6",
+  "scope": "same four unique selected event starts only; exact symmetric Hessian plus diagonalC dominance bound, no counterfactual nonlinear step or trajectory simulated",
+  "method": "min_i(H_exact[ii]+C_i-sum_j!=i abs(H_exact[ij])); positive bound sufficient for SPD for the exact symmetric assembled Hessian; native and realM coefficients remain separate",
+  "rows": [
+    {
+      "level": 1,
+      "h": 7.433175750007433e-07,
+      "tau": 8.81400646629321e-05,
+      "nativeCoefficient": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 9432983245.888988,
+          "exact": {
+            "numerator": "43269068038207852387418802138123838224488354882785175406520034408473458008374580072237247514305635400931744452377031",
+            "denominator": "4586997231980143023221641790604173881593129978336562247475177678773845752176969616140037106220251373109248"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 4.749278824609465e-09,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 1.799042411473004,
+          "nativeRoundedDifferenceLinearError": 4.7487404777359326e-09,
+          "nominalDirectionLinearError": 1.4028341128549786e-10,
+          "nonlinearTaylorRemainder": 0.01213944435026221,
+          "omittedGeometricCurvature": 1.8111818594989484,
+          "realizedLinearError": 4.7487404777359326e-09,
+          "recordedNominalResidualError": 1.1587697495340255e-10,
+          "recordedRealizedResidualError": 9.212760465854014e-11
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 5.3883314503702716e-05,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 20411.17644232457,
+          "nativeRoundedDifferenceLinearError": 5.387720664712704e-05,
+          "nominalDirectionLinearError": 1.5915964189721656e-06,
+          "nonlinearTaylorRemainder": 137.72901570569798,
+          "omittedGeometricCurvature": 20548.905499733006,
+          "realizedLinearError": 5.387720664712704e-05,
+          "recordedNominalResidualError": 1.3146912859270385e-06,
+          "recordedRealizedResidualError": 1.0452409470183316e-06
+        }
+      },
+      "realMass": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 9432983245.888988,
+          "exact": {
+            "numerator": "133286366286737956990785647004930774264404005741840247058484291243358404835821308711909044739475328703474524650376119371242095509731604838527326439",
+            "denominator": "14129821161807514194544077935900282180845037291021402756690118637603348126099004171006333028561665858885146089437411279358919547071496192"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 4.749278824609465e-09,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 1.799042411448843,
+          "nativeRoundedDifferenceLinearError": 4.692742605534198e-09,
+          "nominalDirectionLinearError": 1.1492815418624044e-10,
+          "nonlinearTaylorRemainder": 0.01213944435026221,
+          "omittedGeometricCurvature": 1.8111818594989484,
+          "realizedLinearError": 4.692742605534198e-09,
+          "recordedNominalResidualError": 5.987910275166865e-11,
+          "recordedRealizedResidualError": 4.840652728588093e-11
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 5.3883314503702716e-05,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 20411.176442050448,
+          "nativeRoundedDifferenceLinearError": 5.324187840660574e-05,
+          "nominalDirectionLinearError": 1.3039263656743633e-06,
+          "nonlinearTaylorRemainder": 137.72901570569798,
+          "omittedGeometricCurvature": 20548.905499733006,
+          "realizedLinearError": 5.324187840660574e-05,
+          "recordedNominalResidualError": 6.793630454057429e-07,
+          "recordedRealizedResidualError": 5.49200042806851e-07
+        }
+      },
+      "nativeVersusRealMFinalGradientDifferenceInfinityMicroN": 5.5997872201734184e-11
+    },
+    {
+      "level": 2,
+      "h": 3.7165878750037167e-07,
+      "tau": 8.81400646629321e-05,
+      "nativeCoefficient": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 38391157684.28899,
+          "exact": {
+            "numerator": "176100134030346774600048368098021594626776749525917204338272911317020789479831211995742733961475992881263221305964999",
+            "denominator": "4586997231980143023221641790604173881593129978336562247475177678773845752176969616140037106220251373109248"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 4.618860743387407e-08,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 0.4542009339762186,
+          "nativeRoundedDifferenceLinearError": 4.622912845614171e-08,
+          "nominalDirectionLinearError": 1.310352436958827e-10,
+          "nonlinearTaylorRemainder": 0.0007660115312028616,
+          "omittedGeometricCurvature": 0.45496694351468997,
+          "realizedLinearError": 4.622912845614171e-08,
+          "recordedNominalResidualError": 7.156591309542362e-11,
+          "recordedRealizedResidualError": 6.229949845521546e-11
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 0.0005240364595886098,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 5153.1722345926055,
+          "nativeRoundedDifferenceLinearError": 0.0005244961940172445,
+          "nominalDirectionLinearError": 1.4866706099773313e-06,
+          "nonlinearTaylorRemainder": 8.690843762507617,
+          "omittedGeometricCurvature": 5161.863055746422,
+          "realizedLinearError": 0.0005244961940172445,
+          "recordedNominalResidualError": 8.119566665750489e-07,
+          "recordedRealizedResidualError": 7.068238342400029e-07
+        }
+      },
+      "realMass": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 38391157684.28899,
+          "exact": {
+            "numerator": "542460192273755677078718106481005040289059162040106855209133804803351046946282254803464001414090278006341486885121287383450364960170476997008742631",
+            "denominator": "14129821161807514194544077935900282180845037291021402756690118637603348126099004171006333028561665858885146089437411279358919547071496192"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 4.618860743387407e-08,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 0.45420093395194144,
+          "nativeRoundedDifferenceLinearError": 4.6285394671619816e-08,
+          "nominalDirectionLinearError": 1.2637522504537922e-10,
+          "nonlinearTaylorRemainder": 0.0007660115312028616,
+          "omittedGeometricCurvature": 0.45496694351468997,
+          "realizedLinearError": 4.6285394671619816e-08,
+          "recordedNominalResidualError": 9.678723774574699e-11,
+          "recordedRealizedResidualError": 7.140938376088766e-11
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 0.0005240364595886098,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 5153.172234317168,
+          "nativeRoundedDifferenceLinearError": 0.0005251345667674039,
+          "nominalDirectionLinearError": 1.4338000037629557e-06,
+          "nonlinearTaylorRemainder": 8.690843762507617,
+          "omittedGeometricCurvature": 5161.863055746422,
+          "realizedLinearError": 0.0005251345667674039,
+          "recordedNominalResidualError": 1.0981071787941575e-06,
+          "recordedRealizedResidualError": 8.101807507627045e-07
+        }
+      },
+      "nativeVersusRealMFinalGradientDifferenceInfinityMicroN": 5.626621547810242e-11
+    },
+    {
+      "level": 4,
+      "h": 1.8582939375018583e-07,
+      "tau": 8.81400646629321e-05,
+      "nativeCoefficient": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 154223855437.88898,
+          "exact": {
+            "numerator": "707424397998902463450566631937612620235930328098445320065284418951210115365657739689764679750157422802589128720316871",
+            "denominator": "4586997231980143023221641790604173881593129978336562247475177678773845752176969616140037106220251373109248"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 8.038882920760163e-08,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 0.11383032788490144,
+          "nativeRoundedDifferenceLinearError": 8.052988031366993e-08,
+          "nominalDirectionLinearError": 2.3619668320141124e-10,
+          "nonlinearTaylorRemainder": 4.79907544344479e-05,
+          "omittedGeometricCurvature": 0.1138782698127697,
+          "realizedLinearError": 8.052988031366993e-08,
+          "recordedNominalResidualError": 3.575214725911368e-11,
+          "recordedRealizedResidualError": 8.689293125796521e-11
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 0.0009120577516595547,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 1291.4708914750042,
+          "nativeRoundedDifferenceLinearError": 0.0009136580580197521,
+          "nominalDirectionLinearError": 2.6797879500620035e-06,
+          "nonlinearTaylorRemainder": 0.5444828593894908,
+          "omittedGeometricCurvature": 1292.0148203687668,
+          "realizedLinearError": 0.0009136580580197521,
+          "recordedNominalResidualError": 4.0562878409311496e-07,
+          "recordedRealizedResidualError": 9.858505503741547e-07
+        }
+      },
+      "realMass": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 154223855437.88898,
+          "exact": {
+            "numerator": "2179155496221826557430447944385302104387679787233173287811731859043321615388126039169683828112550075217809335824101959432283442761925965630934407399",
+            "denominator": "14129821161807514194544077935900282180845037291021402756690118637603348126099004171006333028561665858885146089437411279358919547071496192"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 8.038882920760162e-08,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 0.11383032786059513,
+          "nativeRoundedDifferenceLinearError": 8.047354661004449e-08,
+          "nominalDirectionLinearError": 2.1068944719857246e-10,
+          "nonlinearTaylorRemainder": 4.79907544344479e-05,
+          "omittedGeometricCurvature": 0.1138782698127697,
+          "realizedLinearError": 8.047354661004449e-08,
+          "recordedNominalResidualError": 6.126747389027076e-11,
+          "recordedRealizedResidualError": 4.9456949055020945e-11
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 0.0009120577516595547,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 1291.470891199235,
+          "nativeRoundedDifferenceLinearError": 0.0009130189195775365,
+          "nominalDirectionLinearError": 2.3903936082222925e-06,
+          "nonlinearTaylorRemainder": 0.5444828593894908,
+          "omittedGeometricCurvature": 1292.0148203687668,
+          "realizedLinearError": 0.0009130189195775365,
+          "recordedNominalResidualError": 6.951149187894481e-07,
+          "recordedRealizedResidualError": 5.611176851770611e-07
+        }
+      },
+      "nativeVersusRealMFinalGradientDifferenceInfinityMicroN": 5.63337036254393e-11
+    },
+    {
+      "level": 8,
+      "h": 9.291469687509292e-08,
+      "tau": 8.81400646629321e-05,
+      "nativeCoefficient": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 617554646452.289,
+          "exact": {
+            "numerator": "2832721453873125218852639687295976722672544642388557782973330449487967418908963850465852462904883142487892758377724359",
+            "denominator": "4586997231980143023221641790604173881593129978336562247475177678773845752176969616140037106220251373109248"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 3.6914046126537925e-07,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 0.028474875374280825,
+          "nativeRoundedDifferenceLinearError": 3.6911037598841655e-07,
+          "nominalDirectionLinearError": 1.8117962895792479e-10,
+          "nonlinearTaylorRemainder": 3.001223610593037e-06,
+          "omittedGeometricCurvature": 0.028478113663637457,
+          "realizedLinearError": 3.6911037598841655e-07,
+          "recordedNominalResidualError": 6.476430713098999e-11,
+          "recordedRealizedResidualError": 1.301492431667704e-10
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 0.004188111986042412,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 323.06392652620923,
+          "nativeRoundedDifferenceLinearError": 0.004187770651178662,
+          "nominalDirectionLinearError": 2.0555876564284064e-06,
+          "nonlinearTaylorRemainder": 0.03405061729952669,
+          "omittedGeometricCurvature": 323.10066679147917,
+          "realizedLinearError": 0.004187770651178662,
+          "recordedNominalResidualError": 7.347885139256886e-07,
+          "recordedRealizedResidualError": 1.476618421650711e-06
+        }
+      },
+      "realMass": {
+        "gershgorinSymmetricExactHessianPlusCLowerBound": {
+          "approximate": 617554646452.289,
+          "exact": {
+            "numerator": "8725936712014110078837367296002490360782162288005439018222124076003203889155501176634563134906389264063680731580024647627615753968947920166637066471",
+            "denominator": "14129821161807514194544077935900282180845037291021402756690118637603348126099004171006333028561665858885146089437411279358919547071496192"
+          }
+        },
+        "strictPositiveDefinitenessCertifiedByDiagonalDominance": true,
+        "infinityNorms": {
+          "capturedGradient0Error": 3.7810871362905346e-11,
+          "endpointAdditionRoundingContribution": 3.6914046126537925e-07,
+          "fullGradient0": 848380.7811917505,
+          "fullGradient1": 0.028474875349967205,
+          "nativeRoundedDifferenceLinearError": 3.6913589087121685e-07,
+          "nominalDirectionLinearError": 2.3753022992409563e-10,
+          "nonlinearTaylorRemainder": 3.001223610593037e-06,
+          "omittedGeometricCurvature": 0.028478113663637457,
+          "realizedLinearError": 3.6913589087121685e-07,
+          "recordedNominalResidualError": 1.211149080971608e-10,
+          "recordedRealizedResidualError": 7.379864220060365e-11
+        },
+        "tauRatios": {
+          "capturedGradient0Error": 4.289861994939852e-07,
+          "endpointAdditionRoundingContribution": 0.004188111986042412,
+          "fullGradient0": 9625370533.095861,
+          "fullGradient1": 323.0639262503571,
+          "nativeRoundedDifferenceLinearError": 0.004188060132277841,
+          "nominalDirectionLinearError": 2.6949178087452726e-06,
+          "nonlinearTaylorRemainder": 0.03405061729952669,
+          "omittedGeometricCurvature": 323.10066679147917,
+          "realizedLinearError": 0.004188060132277841,
+          "recordedNominalResidualError": 1.3741186662425547e-06,
+          "recordedRealizedResidualError": 8.372882693338909e-07
+        }
+      },
+      "nativeVersusRealMFinalGradientDifferenceInfinityMicroN": 5.6350600966166764e-11
+    }
+  ],
+  "exactElasticHessianSymmetryVerified": true
+}

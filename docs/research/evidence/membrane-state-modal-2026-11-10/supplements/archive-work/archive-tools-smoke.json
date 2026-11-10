@@ -1,0 +1,14 @@
+{
+  "schema": "pliego-state-matrix-archive-tools-smoke/1",
+  "passed": true,
+  "restore": {
+    "schema": "pliego-state-matrix-archive-restore/1",
+    "verified": true,
+    "files": 1,
+    "decodedBytes": 73,
+    "manifestSHA256": "d537a4757ce5696b580591aa6d28f1979c1564c4984a7caa9528eb02252afe4c",
+    "restored": true,
+    "scope": "byte preservation only; no numerical or interaction acceptance"
+  },
+  "scope": "ordinary one-payload gzip byte roundtrip only, not an accepted numerical capture"
+}

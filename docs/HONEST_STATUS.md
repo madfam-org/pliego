@@ -210,7 +210,18 @@ both; the accepted-update-with-unchanged-whole-public-pose gate remains false.
 Fresh captures retain all 32 events and new independent proofs. Missing original
 temporary records, exact recovered pre-fix source and new failure reproductions
 are distinguished explicitly in the recovery ledger.
-The 24-trajectory state matrix remains unrun. Reader and historical defaults remain unchanged.
+The [complete 24-trajectory state matrix](research/membrane-state-modal-results.md)
+now retains 2369/7110 native authoritative failures, all at Newton budget1;
+budgets4/16 pass throughout all16 corresponding trajectories. Public failures
+worsen from6968 to7076 (16 gains,124 losses); no trajectory passes that gate
+throughout. Exact repeat, observer parity and full historical numerical replay
+pass. All459 retained endpoint proofs match at80/100 digits and meet the
+sampled arithmetic limits;58 sampled accepted Newton updates satisfy independent
+real Armijo. Continuous-state discrepancy still reaches22.3%, and whole force/time,
+physical stock, new-model booklet/device and8 ms acceptance remain open.
+The [lossless archive](research/evidence/membrane-state-modal-2026-11-10/README.md)
+retains every judged step and explicit private-artifact exclusions. Reader and
+historical defaults remain unchanged; research and implementation are not exhausted.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

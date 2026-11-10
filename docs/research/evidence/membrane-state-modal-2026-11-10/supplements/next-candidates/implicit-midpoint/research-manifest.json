@@ -1,0 +1,41 @@
+{
+  "schema": "pliego-midpoint-research-freeze/1",
+  "recordedAt": "2026-11-10T18:49:57.614902+00:00",
+  "files": [
+    {
+      "file": "modal-methods.py",
+      "bytes": 2122,
+      "sha256": "dff972d748b9a9ee59e26018e5722500ccbab402bb71e52c8c646f8268797589"
+    },
+    {
+      "file": "modal-methods.json",
+      "bytes": 2466,
+      "sha256": "f673bb064286cf2f3f0e9e1a3a92d86e13bfa8740328e25b55a8bd7a305e44e3"
+    },
+    {
+      "file": "research-memo.md",
+      "bytes": 4405,
+      "sha256": "c493fda71d277a2b5626c0ffe932a9b5fbdd8045adcba1f733157ca3f64147d9"
+    }
+  ],
+  "primaryRead": [
+    {
+      "url": "https://www.mathematics.pitt.edu/sites/default/files/midpoint3_technicalreport.pdf",
+      "authors": "John Burkardt and Catalin Trenchea",
+      "scope": "sections1\u20132, BEFE equivalence and dissipativity assumption in B-stability proof; no wholepaper claim"
+    },
+    {
+      "url": "https://unige.ch/~hairer/poly_geoint/week2.pdf",
+      "scope": "2010Lecture2 section1/Theorem3 and section2/Theorem5"
+    },
+    {
+      "url": "https://doi.org/10.1016/0045-7825(92)90115-Z",
+      "scope": "publisher abstract only; fullpaper inaccessible through DOI redirect"
+    },
+    {
+      "url": "https://doi.org/10.1002/nme.1620371503",
+      "scope": "publisher abstract only; no shellalgorithm implementation/reproduction"
+    }
+  ],
+  "scope": "post-capture analytical modal time-method study and own mechanical reduction; no World/materialoracle calls, no currentcapturedgate change or timeacceptance"
+}

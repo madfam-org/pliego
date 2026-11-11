@@ -1,8 +1,8 @@
 # Next implementation: the accurate path with bending (catalogue bar G1, step 1)
 
 2026-11-10. Designed from a read-only inspection of engine source at `1542265`;
-milestone 1 (engine and unit tests) is now implemented, see
-[Implementation status](#implementation-status). This is the first step of gate G1 in the
+milestone 1 (engine and unit tests) and milestone 1b (step-scaled angle change) are now
+implemented, see [Implementation status](#implementation-status). This is the first step of gate G1 in the
 [catalogue acceptance bar](catalogue-paper-acceptance.md): run the accurate membrane path
 on paper that bends out of plane. The spine crease, contact and the hand drive are later
 steps, each with its own frozen audit.
@@ -118,10 +118,8 @@ discrete panel law is kept, and the fixture will use a small transverse amplitud
   the bending remainder `k(θ0−θ̄)(Δθ − ∇θ·d) + ½kΔθ²`, and the trial record reports the
   bending difference, linear part, remainder and magnitude. An invalid hinge makes the
   trial invalid, so it backtracks.
-- **Deviation from this design.** Δθ is a wrapped binary64 difference of the two latent
-  angles, not the cancellation-safe form from normalized normal pairs. Its rounding is
-  included in the reported magnitude, not bounded. The stable form stays a named next
-  step, needed before small-amplitude captures rely on the remainder.
+- **Deviation from this design (resolved in milestone 1b).** Milestone 1 formed Δθ as a
+  wrapped binary64 difference of the two latent angles.
 - **Tests** (`test/reference-bending.test.js`):
   - The latent angle and gradient equal the public dihedral bit for bit on exact sums.
     On rounded sums they equal an integer-arithmetic oracle of the once-rounded
@@ -132,6 +130,37 @@ discrete panel law is kept, and the fixture will use a small transverse amplitud
     (2.3e-8 microN) is below tau, while omitting bending would leave 2.9e3 microN.
   - Rest-angle, drive and bending-damping refusals happen before any write.
   - Snapshots continue bit for bit, and cross-identity restores are refused.
+
+**Milestone 1b, step-scaled angle change (2026-11-11).** The identity is now
+`latent-panel-bending` version 2 (`angleChange: 'two-word-step-expansion-atan2'`).
+
+- **Why the design's form was not enough.** One atan2 of the two poses' angle pairs
+  (normal pairs) still rounds each pose's geometry on its own, which leaves an absolute
+  floor near 1e-31 rad. Newton steps near convergence change angles by 1e-40 or less.
+- **Form used.** With E = p1−p0, U = w0−p0, W = w1−p0, the dihedral's normals give
+  N0·N1 = (E·W)(U·E) − (E·E)(U·W) =: D and E·(N1×N0) = |E|²·det[W,E,U], so θ = atan2(|E|·T, D)
+  with T = det[W,E,U]. The pose is formed exactly and rounded once to two words; the step
+  (after − before) is formed exactly. ΔD, ΔT and Δ|E| are expanded so every term carries
+  a step factor, and Δθ is the angle between the two (D, |E|·T) pairs. Two-word
+  arithmetic throughout; outside the two-word product domain it throws, like the planar
+  two-word path.
+- **Accuracy.** Against an exact oracle (integer geometry, the dihedral's original
+  normal-vector formula, fixed-point arctangent to 2^-320): within 0.98 ulp relative for
+  |Δθ| from 1.5e-45 to 0.19 rad, including one-ulp steps and 1e-40 steps on zero
+  coordinates. Subtracting two rounded angles was off by 4× at the smallest steps and by
+  1e-2 at one-ulp steps.
+- **Limit that stays.** The remainder `k(θ0−θ̄)(Δθ − ∇θ·d)` is still computed in binary64
+  from an accurate Δθ, so its error is about eps × the bending first-order term. That is
+  the same class as the slope, whose gradient is rounded to binary64. Trials closer than
+  that are precision-limited for the planar terms too; the search's `heuristicScale`
+  flags them.
+- **Effect on the search** (the 0.25 mm bump, 8 substeps, 16 Newton iterations each).
+  Main accepted 109 steps, 44 of them at α ≤ 2^-10 after 855 backtracks, and its latent
+  residual sat between 2.6e-6 and 3.3e-5 on substeps 2–6. With this form, 59 of 74
+  accepts are full steps, none tiny, after 50 backtracks, and the residual stays at or
+  below 2.1e-8 on every substep. The final lift agrees to 1.7e-13 mm. An exact-remainder
+  audit of every accepted trial in both runs found no accept that misses Armijo by more
+  than the reported `heuristicScale`.
 
 **Not done yet:**
 

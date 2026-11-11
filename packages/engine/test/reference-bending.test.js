@@ -5,7 +5,7 @@ import { makePatch } from '../bench/membrane-patch.mjs';
 import { gradient } from '../src/xpbd/implicit.js';
 import { dihedral } from '../src/xpbd/dihedral.js';
 import { REFERENCE_STATE_IDENTITY } from '../src/xpbd/reference-state.js';
-import { REFERENCE_BENDING_IDENTITY, latentHingeAngle, addBendingGradient, bendingIncrement, angleChange } from '../src/xpbd/reference-bending.js';
+import { REFERENCE_BENDING_IDENTITY, latentHingeAngle, latentAngleChange, addBendingGradient, bendingIncrement } from '../src/xpbd/reference-bending.js';
 
 const research = { damping: 0, bendDamping: 0, membraneReference: 'uv-displacement', membraneArithmetic: 'double-double',
   lineSearchArithmetic: 'membrane-inertia-increment', stateCoordinates: 'reference-displacement' };
@@ -100,8 +100,61 @@ test('bending energy, gradient and search increment agree with finite difference
     assert.ok(Math.abs(r.linear - eps * slope) <= 1e-9 * Math.abs(eps * slope), `linear ${r.linear} vs ${eps * slope}`); // summation order only
     assert.ok(Math.abs(r.difference - (energy(after) - e0)) <= 1e-9 * Math.abs(eps * slope) + 1e-14 * e0, `eps ${eps}: ${r.difference} vs ${energy(after) - e0}`);
   }
-  assert.ok(Math.abs(angleChange(Math.PI - 0.1, -Math.PI + 0.1) + 0.2) < 1e-12);
   console.log(`bending-derivatives: central-difference errors ${errors.map(e => e.toExponential(1)).join(' > ')} (slope ${slope.toExponential(3)}); engine gradient hinge part and search increment agree`);
+});
+
+/** Integer square root (floor) by Newton's method. @param {bigint} n */
+function isqrt(n) { if (n < 2n) return n; let x = 1n << BigInt((n.toString(2).length >> 1) + 1); for (;;) { const y = (x + n / x) >> 1n; if (y >= x) return x; x = y; } }
+const P = 300n, Q = 320n;
+/** Exact integer (X, Y) ∝ (cos θ, sin θ) of hinge h: the engine's pair with every product exact and |E| to 2^-(200+P). */
+function exactAnglePair(w, u, h) {
+  const H = w.mesh.hinges, a = 3 * H[4 * h];
+  const vector = i => [0, 1, 2].map(c => { const v = 3 * H[4 * h + i] + c; return SCALED(w.X0[v]) + SCALED(u[v]) - SCALED(w.X0[a + c]) - SCALED(u[a + c]); });
+  const cross = (A, B) => [A[1] * B[2] - A[2] * B[1], A[2] * B[0] - A[0] * B[2], A[0] * B[1] - A[1] * B[0]];
+  const dot = (A, B) => A[0] * B[0] + A[1] * B[1] + A[2] * B[2];
+  const E = vector(1), N0 = cross(E, vector(2)), N1 = cross(vector(3), E);
+  return [isqrt(dot(E, E) << (2n * P)) * dot(N0, N1), dot(E, cross(N1, N0)) << P];
+}
+/** θ(after) − θ(before) to about 2^-300: exact cross and dot, then the arctangent series in fixed point. */
+function oracleAngleChange(w, before, after, h) {
+  const [x0, y0] = exactAnglePair(w, before, h), [x1, y1] = exactAnglePair(w, after, h);
+  const s = y1 * x0 - x1 * y0, c = x1 * x0 + y1 * y0, negative = s < 0n, m = negative ? -s : s;
+  assert.ok(c > 0n && 2n * m < c, 'oracle range: |Δθ| < atan(1/2)');
+  const t = (m << Q) / c, t2 = (t * t) >> Q;
+  let sum = 0n, term = t;
+  for (let k = 0n; term !== 0n; k++) { sum += (k % 2n ? -term : term) / (2n * k + 1n); term = (term * t2) >> Q; }
+  return (negative ? -1 : 1) * Number(sum) / 2 ** Number(Q);
+}
+
+test('stable angle change: error scales with the step, against an exact oracle', () => {
+  const w = world(bending);
+  // Nonplanar, non-dyadic base pose (every hinge bent), with the in-plane components of a few vertices exactly zero.
+  const zeroed = new Set([0, 2, 6, 8, 12, 14]);
+  const u0 = Float64Array.from(w.X0, (_, i) => zeroed.has(i) ? 0 : (i % 3 === 1 ? 0.1 : 1e-3) * Math.sin(0.9 * i + 0.4) / 3);
+  const d = Float64Array.from(u0, (_, i) => Math.sin(1.3 * i + 0.7));
+  const cases = [1e-14, 1e-10, 1e-6, 1e-2, 1e-1, 1].map(alpha => ({ label: `alpha ${alpha}`, after: u0.map((x, i) => x + alpha * d[i]) }));
+  // The smallest realizable steps: one ulp on every nonzero coordinate, and ~1e-40 mm on the exact zeros.
+  cases.unshift({ label: 'one ulp', after: u0.map((x, i) => x === 0 ? 0 : x + Math.sign(d[i]) * Math.abs(x) * Number.EPSILON) },
+    { label: 'zeros 1e-40', after: u0.map((x, i) => zeroed.has(i) ? 1e-40 * d[i] : x) });
+  const rows = [];
+  for (const { label, after } of cases) {
+    let worst = 0, worstSubtraction = 0, largest = 0, smallest = Infinity;
+    for (const h of hinges(w)) {
+      const exact = oracleAngleChange(w, u0, after, h), stable = latentAngleChange(w, u0, after, h);
+      assert.ok(Math.abs(stable - exact) <= 4 * Number.EPSILON * Math.abs(exact), `${label} hinge ${h}: ${stable} vs ${exact}`);
+      if (exact === 0) continue;
+      let subtraction = latentHingeAngle(w, after, h, null) - latentHingeAngle(w, u0, h, null);
+      subtraction -= 2 * Math.PI * Math.round(subtraction / (2 * Math.PI));
+      worst = Math.max(worst, Math.abs(stable - exact) / Math.abs(exact));
+      worstSubtraction = Math.max(worstSubtraction, Math.abs(subtraction - exact) / Math.abs(exact));
+      largest = Math.max(largest, Math.abs(exact)); smallest = Math.min(smallest, Math.abs(exact));
+    }
+    rows.push({ label, largest, smallest, worst, worstSubtraction });
+  }
+  // Control: the oracle separates the forms; subtracting two rounded angles loses the small steps entirely.
+  for (const r of rows.slice(0, 3)) assert.ok(r.worstSubtraction > 1e-3, `${r.label}: subtraction relative error ${r.worstSubtraction}`);
+  const span = [Math.min(...rows.map(r => r.smallest)), Math.max(...rows.map(r => r.largest))];
+  console.log(`bending-angle-change: |Δθ| ${span[0].toExponential(1)}..${span[1].toExponential(1)} rad on ${w.mesh.nH} hinges (${rows.length} steps); step-expanded form within ${(Math.max(...rows.map(r => r.worst)) / Number.EPSILON).toFixed(2)} eps relative of the exact oracle; rounded-angle subtraction off by ${rows.map(r => r.worstSubtraction.toExponential(0)).join(' / ')} relative`);
 });
 
 test('nonplanar stepping: bending joins the Armijo change and the authoritative force balance', () => {

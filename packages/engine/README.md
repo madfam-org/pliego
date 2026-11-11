@@ -178,8 +178,9 @@ that state leave the plane and adds panel bending with a flat rest angle. Each h
 evaluated on the latent sum X0+u: wing and edge differences are formed exactly and rounded
 once, then the unchanged dihedral formula runs on them. The panel law
 (`k = C_B·D(φ)·L²/A`) and its Gauss–Newton operator are unchanged. The increment search
-adds the bending remainder to its Armijo change and reports it, and the authoritative
-residuals include the bending force. Creases, drives, nonzero rest angles, bending damping
+adds the bending remainder to its Armijo change and reports it; the angle change in that
+remainder is formed from the exact step in two-word arithmetic, so its error scales with
+the step. The authoritative residuals include the bending force. Creases, drives, nonzero rest angles, bending damping
 and contact stay refused. Snapshots bind the bending identity, and planar and bending
 snapshots refuse each other. Omission keeps the planar domain byte for byte. Engine and
 tests only: no capture or acceptance yet. See

@@ -54,8 +54,9 @@ independent check where one exists. No gate may be waived because another is clo
 ## Order of work
 
 1. Done: exact curvature and the force-tolerance PCG stop in the planar domain.
-2. G1 in steps, each with its own frozen audit: nonplanar states, then panel bending,
-   then the spine crease, then contact, then the hand drive.
+2. G1 in steps, each with its own frozen audit: nonplanar states with panel bending
+   ([design](bending-domain-next-implementation.md)), then the spine crease, then contact,
+   then the hand drive.
 3. G2 and G3 on a catalogue page-turn fixture once G1 exists.
 4. G6 performance work in parallel with step 2, measured on devices once rulings name them.
 5. G4 needs a physical test campaign; it cannot be done in software.

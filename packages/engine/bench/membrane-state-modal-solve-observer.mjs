@@ -5,6 +5,7 @@ import { EnergySearch } from '../src/xpbd/energy-search.js';
 import { hessianTimes } from '../src/xpbd/pcg.js';
 import { World } from '../src/index.js';
 import { REFERENCE_STATE_IDENTITY, validateReferenceBinding } from '../src/xpbd/reference-state.js';
+import { REFERENCE_BENDING_IDENTITY } from '../src/xpbd/reference-bending.js';
 import { validateIncrementDomain, INCREMENT_SEARCH_IDENTITY } from '../src/xpbd/increment-search.js';
 import * as K from '../src/constants.js';
 
@@ -37,7 +38,9 @@ function bindings(fields) {
 function domain(w, context, policy, candidate = false) {
   const errors = [];
   try {
-    demand(w.opts.stateCoordinates === MODE && JSON.stringify(w._referenceIdentity) === JSON.stringify(REFERENCE_STATE_IDENTITY), 'reference state identity changed');
+    // Panel bending Worlds carry the bending identity; every other World keeps the planar one byte for byte.
+    const expected = w.opts.referenceBending === 'panel-hinges' ? { ...REFERENCE_STATE_IDENTITY, bending: REFERENCE_BENDING_IDENTITY } : REFERENCE_STATE_IDENTITY;
+    demand(w.opts.stateCoordinates === MODE && JSON.stringify(w._referenceIdentity) === JSON.stringify(expected), 'reference state identity changed');
     validateReferenceBinding(w); validateIncrementDomain(w, w.x);
     demand(w.energySearch instanceof EnergySearch && w.energySearch.increment, 'actual increment EnergySearch required');
     demand(w.sys.freeIdx.every((k, i) => k === i) && w.sys.nFree === w.mesh.nV, 'unexpected native free-index ordering');

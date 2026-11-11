@@ -162,10 +162,23 @@ discrete panel law is kept, and the fixture will use a small transverse amplitud
   audit of every accepted trial in both runs found no accept that misses Armijo by more
   than the reported `heuristicScale`.
 
+**Milestone 2, capture tooling (2026-11-11).** The fixed-24 bending capture is specified in
+the [bending capture protocol](bending-capture-protocol.md):
+
+- A transverse-mode fixture: the lowest discrete bending mode of the cells2 patch from an
+  independent stdlib reference (`bench/bending-modal-reference.py`), which rebuilds the
+  flat-state stiffness exactly from plate kinematics and the documented law.
+- A bending runtime, validator, linear comparator, 24-row runner and comparison tool
+  (`bench/bending-state-*.mjs`, `bench/compare-bending-state-audit.mjs`). The planar tools
+  are unchanged except the Newton observer's identity check.
+- An oracle bending term: `bench/bending-state-precision.py` reuses the planar membrane
+  oracle and adds bending energy and gradient at 80/100 digits from exact latent geometry.
+
 **Not done yet:**
 
-- The bench and capture tools still require the planar identity, and so refuse bending
-  Worlds.
-- There is no transverse-mode fixture, no oracle bending term and no linear comparator.
-- There is no frozen capture, so no force, time, material, booklet or device acceptance
-  follows.
+- The frozen capture itself, its independent Newton review, results and archive.
+- No force, time, material, booklet or device acceptance follows from any of this.
+- Known engine behaviours recorded by the tooling, not changed: `setInitialReferencePose`
+  leaves the hinge angle memory at the constructor's flat angles, and the memory that
+  continues latent angles is updated from the public pose. Both are harmless at this
+  amplitude; a large initial fold would need the first fixed before relying on it.

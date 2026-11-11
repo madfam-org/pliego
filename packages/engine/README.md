@@ -173,6 +173,18 @@ relative rule. With exact curvature, half the force tolerance removed 1013 laten
 failures in the [fixed-24 comparison](../../docs/research/pcg-force-stop-results.md); no
 acceptance follows.
 
+`referenceBending: 'panel-hinges'` (only with the reference-displacement state above) lets
+that state leave the plane and adds panel bending with a flat rest angle. Each hinge is
+evaluated on the latent sum X0+u: wing and edge differences are formed exactly and rounded
+once, then the unchanged dihedral formula runs on them. The panel law
+(`k = C_B·D(φ)·L²/A`) and its Gauss–Newton operator are unchanged. The increment search
+adds the bending remainder to its Armijo change and reports it, and the authoritative
+residuals include the bending force. Creases, drives, nonzero rest angles, bending damping
+and contact stay refused. Snapshots bind the bending identity, and planar and bending
+snapshots refuse each other. Omission keeps the planar domain byte for byte. Engine and
+tests only: no capture or acceptance yet. See
+[the design and its status](../../docs/research/bending-domain-next-implementation.md).
+
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
 `previousPoseStart` changes the legacy initial guess; `continuousContact` adds a

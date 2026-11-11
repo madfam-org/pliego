@@ -7,6 +7,7 @@ import { unwrap, termResidual, termProjector, TERM_STRING } from './implicit.js'
 import { hypot3 } from '../fastmath.js';
 import { projectReference, solverTarget } from './reference-state.js';
 import { beginIncrementSearch, finishIncrementSearch, initialiseIncrementSearch } from './increment-search.js';
+import { bendingSelected, latentHingeAngle } from './reference-bending.js';
 
 /** The actual per-substep implicit objective, in nJ. @param {any} w @param {Float64Array} x */
 export function implicitEnergy(w, x, coordinates = 'absolute-position') {
@@ -26,9 +27,11 @@ export function implicitEnergy(w, x, coordinates = 'absolute-position') {
     const d = hypot3(x[b] - x[a], x[b + 1] - x[a + 1], x[b + 2] - x[a + 2]) - mesh.edgeLen[e];
     energy += 0.5 * (d < 0 ? w.kCompFactor : 1) * w.kMem[e] * d * d;
   }
+  const latentBending = coordinates === 'reference-displacement' && bendingSelected(w);
   for (let h = 0; h < mesh.nH; h++) {
     const o = 4 * h;
-    const angle = unwrap(w.theta[h], dihedral(pose, mesh.hinges[o], mesh.hinges[o + 1], mesh.hinges[o + 2], mesh.hinges[o + 3], null));
+    const raw = latentBending ? latentHingeAngle(w, x, h, null) : dihedral(pose, mesh.hinges[o], mesh.hinges[o + 1], mesh.hinges[o + 2], mesh.hinges[o + 3], null);
+    const angle = unwrap(w.theta[h], raw);
     energy += 0.5 * w.hingeK[h] * ((angle - w.restTheta[h]) ** 2 + w.bendDamp * (angle - w.theta[h]) ** 2);
     if (w.driveOn[h]) energy += 0.5 * w.driveK[h] * w.handScale * (angle - w.driveTarget[h]) ** 2;
   }

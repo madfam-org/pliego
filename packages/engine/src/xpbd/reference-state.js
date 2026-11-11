@@ -5,11 +5,17 @@
 import { twoSum } from './double-double.js';
 import { assembleAndFactor } from './implicit.js';
 import { validateIncrementDomain } from './increment-search.js';
+import { REFERENCE_BENDING_IDENTITY, bendingSelected, admissibleComponent, addBendingGradient } from './reference-bending.js';
 
 export const REFERENCE_STATE_IDENTITY = Object.freeze({ mode: 'reference-displacement', version: 1,
   representation: 'binary64', origin: 'actual-X0', predictor: 'displacement-first',
   projection: 'round-X0-plus-u', preconditioner: 'rounded-public-pose' });
 
+/** The identity a World must carry: the planar identity, plus the bending version when selected.
+ * @param {any} w */
+export function expectedReferenceIdentity(w) {
+  return bendingSelected(w) ? { ...REFERENCE_STATE_IDENTITY, bending: { ...REFERENCE_BENDING_IDENTITY } } : REFERENCE_STATE_IDENTITY;
+}
 /** @param {any} w */
 export function stateCoordinates(w) { return w.opts.stateCoordinates ?? 'absolute-position'; }
 /** @param {any} w */
@@ -29,11 +35,11 @@ function same(a, b) { return a?.length === b?.length && Array.from(a).every((v, 
 /** Require exact real conversion AND the same public bytes, including zero signs.
  * -0 origin/-0 position uses -0 displacement; +0 origin/-0 position is refused.
  * @param {ArrayLike<number>} x @param {ArrayLike<number>} origin */
-function exactDisplacement(x, origin) {
+function exactDisplacement(x, origin, bending = false) {
   if (x.length !== origin.length) throw new Error('Reference state: invalid pose dimensions');
   const u = new Float64Array(x.length);
   for (let i = 0; i < x.length; i++) {
-    if (!Number.isFinite(x[i]) || (i % 3 === 1 && x[i] !== 0)) throw new Error('Reference state: finite exact Y=0 pose required');
+    if (!Number.isFinite(x[i]) || (!bending && i % 3 === 1 && x[i] !== 0)) throw new Error(bending ? 'Reference state: finite pose required' : 'Reference state: finite exact Y=0 pose required');
     const [hi, lo] = twoSum(x[i], -origin[i]);
     if (lo !== 0) throw new Error('Reference state: initial displacement needs more than one binary64 word');
     u[i] = Object.is(x[i], -0) && Object.is(origin[i], -0) ? -0 : hi;
@@ -54,12 +60,13 @@ function observationMembrane(w) {
 /** @param {any} w */
 export function initialiseReferenceState(w) {
   if (stateCoordinates(w) !== 'reference-displacement') return;
-  w._referenceIdentity = Object.freeze({ ...REFERENCE_STATE_IDENTITY });
+  w._referenceIdentity = Object.freeze(structuredClone(expectedReferenceIdentity(w)));
   w._referenceOrigin = w.X0.slice(); w._referenceCoefficients = coefficients(w); w._referenceMass = w.mass.slice(); w._referenceH = w.dt;
   w._referenceHingeK = w.hingeK.slice(); w._referenceDriveK = w.driveK.slice();
-  w._u = exactDisplacement(w.x, w.X0);
+  const bending = bendingSelected(w);
+  w._u = exactDisplacement(w.x, w.X0, bending);
   // Preserve the actual constructor's zero xs/xt buffers, not invented targets.
-  w._us = exactDisplacement(w.xs, w.X0); w._ut = exactDisplacement(w.xt, w.X0);
+  w._us = exactDisplacement(w.xs, w.X0, bending); w._ut = exactDisplacement(w.xt, w.X0, bending);
   w._referenceTargetValid = false; w._referenceStepActive = false; w._referenceNewtonActive = false;
   w._referenceInitialX = w.x.slice(); w._referenceInitialU = w._u.slice(); w._referenceInitialV = w.v.slice();
   validateReferenceState(w);
@@ -70,7 +77,7 @@ export function validateReferenceBinding(w) {
   const selected = stateCoordinates(w) === 'reference-displacement';
   if (!['absolute-position', 'reference-displacement'].includes(stateCoordinates(w)) || selected !== !!w._referenceIdentity) throw new Error('Reference state: coordinate identity changed');
   if (!selected) return;
-  if (JSON.stringify(w._referenceIdentity) !== JSON.stringify(REFERENCE_STATE_IDENTITY) ||
+  if (JSON.stringify(w._referenceIdentity) !== JSON.stringify(expectedReferenceIdentity(w)) ||
       w.opts.membraneReference !== 'uv-displacement' || w.opts.membraneArithmetic !== 'double-double' ||
       w.opts.lineSearchArithmetic !== 'membrane-inertia-increment') throw new Error('Reference state: model identity changed');
   if (!same(w.X0, w._referenceOrigin) || !same(w.mesh.X0, w._referenceOrigin) || !same(w.mass, w._referenceMass) || !same(coefficients(w), w._referenceCoefficients) || !same(w.hingeK, w._referenceHingeK) || !same(w.driveK, w._referenceDriveK) || !Object.is(w.dt, w._referenceH)) throw new Error('Reference state: immutable origin/mass/timestep changed');
@@ -80,7 +87,7 @@ export function validateReferenceState(w, projections = true) {
   validateReferenceBinding(w);
   if (!w._referenceIdentity) return;
   for (const a of [w._u, w._us, w._ut, w.v]) {
-    if (!(a instanceof Float64Array) || a.length !== w.X0.length || !a.every((v, i) => Number.isFinite(v) && (i % 3 !== 1 || v === 0))) throw new Error('Reference state: invalid planar authoritative arrays');
+    if (!(a instanceof Float64Array) || a.length !== w.X0.length || !a.every((v, i) => admissibleComponent(w, v, i))) throw new Error(bendingSelected(w) ? 'Reference state: invalid authoritative arrays' : 'Reference state: invalid planar authoritative arrays');
   }
   if (typeof w._referenceTargetValid !== 'boolean' || (!w._referenceStepActive && w._referenceTargetValid !== (w.substepsRun > 0))) throw new Error('Reference state: invalid target validity');
   if (projections && (!same(w.x, projectReference(w, w._u)) || !same(w.xs, projectReference(w, w._us)) || !same(w.xt, projectReference(w, w._ut)))) throw new Error('Reference state: unsynchronized public projection edit');
@@ -96,8 +103,8 @@ export function setInitialReferencePose(w, x, velocity = new Float64Array(x.leng
   validateReferenceState(w); boundary(w);
   if (!w._referenceIdentity) throw new Error('Reference state: select reference-displacement first');
   if (w.substepsRun !== 0 || w.framesRun !== 0 || w.time !== 0 || w._acc !== 0 || w.factorCount !== 0 || w.energySearch?._incrementObjective || w.energySearch?.increment.last !== null) throw new Error('Reference state: initial pose requires a pristine World');
-  const u = exactDisplacement(x, w.X0), v = Float64Array.from(velocity);
-  if (v.length !== x.length || !v.every((n, i) => Number.isFinite(n) && (i % 3 !== 1 || n === 0))) throw new Error('Reference state: invalid initial velocity');
+  const u = exactDisplacement(x, w.X0, bendingSelected(w)), v = Float64Array.from(velocity);
+  if (v.length !== x.length || !v.every((n, i) => admissibleComponent(w, n, i))) throw new Error('Reference state: invalid initial velocity');
   if (!observationMembrane(w).diagnostics(u, 'reference-displacement').finite) throw new Error('Reference state: invalid initial membrane metric');
   w._u.set(u); w.x.set(x); w.v.set(v);
   w._referenceInitialX = w.x.slice(); w._referenceInitialU = u.slice(); w._referenceInitialV = v.slice();
@@ -130,7 +137,7 @@ export function referenceStateSnapshot(w) {
   validateReferenceState(w);
   if (!w._referenceIdentity) return undefined;
   boundary(w);
-  return { identity: { ...w._referenceIdentity }, u: w._u.slice(), us: w._us.slice(), ut: w._ut.slice(),
+  return { identity: structuredClone(w._referenceIdentity), u: w._u.slice(), us: w._us.slice(), ut: w._ut.slice(),
     x: w.x.slice(), xs: w.xs.slice(), xt: w.xt.slice(), v: w.v.slice(), x0: w._referenceOrigin.slice(),
     coefficients: w._referenceCoefficients.slice(), mass: w._referenceMass.slice(), h: w._referenceH, targetValid: w._referenceTargetValid,
     initialX: w._referenceInitialX.slice(), initialU: w._referenceInitialU.slice(), initialV: w._referenceInitialV.slice() };
@@ -161,10 +168,10 @@ export function prepareReferenceRestore(w, s) {
   if (!s.membrane || !['factorCount', 'pcgIterations'].every(name => Number.isSafeInteger(s.membrane[name]) && s.membrane[name] >= 0)) throw new Error('Reference state: invalid snapshot solver counters');
   if (JSON.stringify(r.identity) !== JSON.stringify(w._referenceIdentity) || !same(r.x0, w._referenceOrigin) || !same(r.mass, w._referenceMass) || !same(r.coefficients, w._referenceCoefficients) || !Object.is(r.h, w.dt)) throw new Error('Reference state: snapshot binding mismatch');
   const fields = ['u', 'us', 'ut', 'x', 'xs', 'xt', 'v', 'initialX', 'initialU', 'initialV'];
-  for (const name of fields) if (!(r[name] instanceof Float64Array) || r[name].length !== w.x.length || !r[name].every((n, i) => Number.isFinite(n) && (i % 3 !== 1 || n === 0))) throw new Error('Reference state: invalid snapshot arrays');
+  for (const name of fields) if (!(r[name] instanceof Float64Array) || r[name].length !== w.x.length || !r[name].every((n, i) => admissibleComponent(w, n, i))) throw new Error('Reference state: invalid snapshot arrays');
   if (!same(r.x, s.x) || !same(r.v, s.v) || !same(r.x, projectReference(w, r.u)) || !same(r.xs, projectReference(w, r.us)) || !same(r.xt, projectReference(w, r.ut)) ||
-      !same(r.initialX, projectReference(w, r.initialU)) || !same(r.initialU, exactDisplacement(r.initialX, w.X0)) || typeof r.targetValid !== 'boolean') throw new Error('Reference state: inconsistent snapshot projection');
-  if (s.factor && (s.factor.coordinates !== 'reference-displacement' || !(s.factor.x instanceof Float64Array) || s.factor.x.length !== w.x.length || !s.factor.x.every((n, i) => Number.isFinite(n) && (i % 3 !== 1 || n === 0)) || !observationMembrane(w).diagnostics(s.factor.x, 'reference-displacement').finite)) throw new Error('Reference state: invalid snapshot factor coordinates');
+      !same(r.initialX, projectReference(w, r.initialU)) || !same(r.initialU, exactDisplacement(r.initialX, w.X0, bendingSelected(w))) || typeof r.targetValid !== 'boolean') throw new Error('Reference state: inconsistent snapshot projection');
+  if (s.factor && (s.factor.coordinates !== 'reference-displacement' || !(s.factor.x instanceof Float64Array) || s.factor.x.length !== w.x.length || !s.factor.x.every((n, i) => admissibleComponent(w, n, i)) || !observationMembrane(w).diagnostics(s.factor.x, 'reference-displacement').finite)) throw new Error('Reference state: invalid snapshot factor coordinates');
   if (!observationMembrane(w).diagnostics(r.u, 'reference-displacement').finite) throw new Error('Reference state: invalid snapshot current metric');
   if (s.factor) {
     const f = s.factor;
@@ -206,6 +213,8 @@ export function referenceResiduals(w, forceTolerance) {
   const evaluate = (x, target, coordinates) => {
     const elasticGradient = new Float64Array(x.length), inertiaGradient = new Float64Array(x.length), residual = new Float64Array(x.length);
     model.addGradient(x, elasticGradient, coordinates);
+    // Bending joins the elastic force only under its identity; the planar path is unchanged.
+    const bendingEnergy = bendingSelected(w) ? addBendingGradient(w, x, elasticGradient, coordinates) : undefined;
     let residualInfinity = 0;
     for (let i = 0; i < x.length; i++) {
       const c = w.mass[Math.floor(i / 3)] * idt2;
@@ -213,7 +222,8 @@ export function referenceResiduals(w, forceTolerance) {
       residual[i] = elasticGradient[i] + inertiaGradient[i];
       residualInfinity = Math.max(residualInfinity, Math.abs(residual[i]));
     }
-    return { energy: model.energy(x, coordinates), elasticGradient, inertiaGradient, residual, residualInfinity };
+    const membraneEnergy = model.energy(x, coordinates);
+    return { energy: bendingEnergy === undefined ? membraneEnergy : membraneEnergy + bendingEnergy, ...(bendingEnergy === undefined ? {} : { bendingEnergy }), elasticGradient, inertiaGradient, residual, residualInfinity };
   };
   const authoritative = evaluate(w._u, w._ut, 'reference-displacement'), publicState = evaluate(w.x, w.xt, 'absolute-position');
   return { forceTolerance, targetValid: w._referenceTargetValid,
@@ -228,6 +238,7 @@ export function referenceDiagnostics(w) {
   if (!w._referenceIdentity) return undefined;
   validateReferenceState(w); boundary(w);
   const m = observationMembrane(w);
-  return { identity: { ...w._referenceIdentity }, existingStatsCoordinates: 'rounded-public-position',
-    authoritative: { energyNJ: m.energy(w._u, 'reference-displacement'), membrane: m.diagnostics(w._u, 'reference-displacement') } };
+  return { identity: structuredClone(w._referenceIdentity), existingStatsCoordinates: 'rounded-public-position',
+    authoritative: { energyNJ: m.energy(w._u, 'reference-displacement'), membrane: m.diagnostics(w._u, 'reference-displacement'),
+      ...(bendingSelected(w) ? { bendingEnergyNJ: addBendingGradient(w, w._u, new Float64Array(w._u.length), 'reference-displacement') } : {}) } };
 }

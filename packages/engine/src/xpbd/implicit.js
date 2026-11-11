@@ -20,6 +20,7 @@ import { dihedral } from './dihedral.js';
 import { hypot3 } from '../fastmath.js';
 import { projectReference } from './reference-state.js';
 import { selectCurvature } from './membrane-curvature.js';
+import { bendingSelected, latentHingeAngle } from './reference-bending.js';
 
 /** Strain below which an edge switches to the compression model (hysteresis, see gradient()). */
 const MODEL_COMP_ENTER = 1e-4;
@@ -156,11 +157,12 @@ export function assembleElastic(w, x, ch, currentOperator = false, coordinates =
     if (ch === S.ch) { w.factorDir[3 * e] = u[0]; w.factorDir[3 * e + 1] = u[1]; w.factorDir[3 * e + 2] = u[2]; }
     void dx; void dy; void dz;
   }
-  const Hg = w.mesh.hinges;
+  const Hg = w.mesh.hinges, latentBending = coordinates === 'reference-displacement' && bendingSelected(w);
   for (let h = 0; h < w.mesh.nH; h++) {
     const k = w.hingeK[h] * (1 + w.bendDamp) + (w.driveOn[h] ? w.driveK[h] * w.handScale : 0);
     if (k === 0) continue;
-    dihedral(pose, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
+    if (latentBending) latentHingeAngle(w, x, h, G12);
+    else dihedral(pose, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
     for (let i = 0; i < 4; i++) addOuter(ch, S.diagSlot[Hg[4 * h + i]], k, G12, 3 * i, G12, 3 * i);
     let q = 0;
     for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) addOuter(ch, S.hingeSlot[6 * h + q++], k, G12, 3 * i, G12, 3 * j);
@@ -243,9 +245,9 @@ export function gradient(w, x, g, coordinates = 'absolute-position') {
     g[a] -= f * dx; g[a + 1] -= f * dy; g[a + 2] -= f * dz;
     g[b] += f * dx; g[b + 1] += f * dy; g[b + 2] += f * dz;
   }
-  const Hg = w.mesh.hinges;
+  const Hg = w.mesh.hinges, latentBending = coordinates === 'reference-displacement' && bendingSelected(w);
   for (let h = 0; h < w.mesh.nH; h++) {
-    const raw = dihedral(pose, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
+    const raw = latentBending ? latentHingeAngle(w, x, h, G12) : dihedral(pose, Hg[4 * h], Hg[4 * h + 1], Hg[4 * h + 2], Hg[4 * h + 3], G12);
     const th = unwrap(w.theta[h], raw);
     w.thetaPred[h] = th;
     HG.set(G12, 12 * h);

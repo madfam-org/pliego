@@ -1,7 +1,8 @@
 # Next implementation: the accurate path with bending (catalogue bar G1, step 1)
 
-2026-11-10. Design only, not implemented. Read-only inspection of engine source at
-`1542265`. This is the first step of gate G1 in the
+2026-11-10. Designed from a read-only inspection of engine source at `1542265`;
+milestone 1 (engine and unit tests) is now implemented, see
+[Implementation status](#implementation-status). This is the first step of gate G1 in the
 [catalogue acceptance bar](catalogue-paper-acceptance.md): run the accurate membrane path
 on paper that bends out of plane. The spine crease, contact and the hand drive are later
 steps, each with its own frozen audit.
@@ -96,4 +97,46 @@ is mostly bending. The current domain blocks it in three places:
 2. The transverse amplitude for the fixture (recommended: matching the membrane study's
    small-strain regime, so the linear comparator applies).
 
-No implementation, capture or acceptance is claimed by this memo.
+## Implementation status
+
+**Milestone 1, engine and unit tests (2026-11-10).** Decisions taken as recommended: Pliego's
+discrete panel law is kept, and the fixture will use a small transverse amplitude.
+
+- **Option and identity.** `referenceBending: 'panel-hinges'`, admitted only with
+  `stateCoordinates: 'reference-displacement'`. The World's state identity becomes the
+  planar identity plus `bending: REFERENCE_BENDING_IDENTITY` (`latent-panel-bending`
+  version 1). Snapshots carry a copy; planar and bending snapshots refuse each other.
+  Omitting the option keeps the planar identity, checks and trajectories byte for byte.
+- **Admission.** Nonzero Y is admitted in states, targets, velocities, snapshots and
+  saved factors. Panel hinges may carry energy with a flat rest angle. Creases, drives,
+  nonzero rest angles, bending damping, contact and the other refusals are unchanged.
+- **Latent geometry** (`reference-bending.js`). The gradient, the assembly, the search
+  objective and the authoritative residuals evaluate hinges on X0+u, as designed. PCG
+  products reuse the hinge gradients cached by that gradient. `_hingeUpdate`, `stats()`
+  and the public residual keep using the rounded public pose.
+- **Search term.** The slope already contains the bending gradient. The trial change adds
+  the bending remainder `k(θ0−θ̄)(Δθ − ∇θ·d) + ½kΔθ²`, and the trial record reports the
+  bending difference, linear part, remainder and magnitude. An invalid hinge makes the
+  trial invalid, so it backtracks.
+- **Deviation from this design.** Δθ is a wrapped binary64 difference of the two latent
+  angles, not the cancellation-safe form from normalized normal pairs. Its rounding is
+  included in the reported magnitude, not bounded. The stable form stays a named next
+  step, needed before small-amplitude captures rely on the remainder.
+- **Tests** (`test/reference-bending.test.js`):
+  - The latent angle and gradient equal the public dihedral bit for bit on exact sums.
+    On rounded sums they equal an integer-arithmetic oracle of the once-rounded
+    differences; the public angle differs on 4 of 8 hinges.
+  - Central differences converge as ε², and the engine gradient's hinge part matches.
+  - The search's bending change matches the energy difference.
+  - Nonplanar stepping: the bump relaxes, Armijo accepts, and the latent residual
+    (2.3e-8 microN) is below tau, while omitting bending would leave 2.9e3 microN.
+  - Rest-angle, drive and bending-damping refusals happen before any write.
+  - Snapshots continue bit for bit, and cross-identity restores are refused.
+
+**Not done yet:**
+
+- The bench and capture tools still require the planar identity, and so refuse bending
+  Worlds.
+- There is no transverse-mode fixture, no oracle bending term and no linear comparator.
+- There is no frozen capture, so no force, time, material, booklet or device acceptance
+  follows.

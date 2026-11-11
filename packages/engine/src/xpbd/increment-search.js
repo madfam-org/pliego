@@ -2,6 +2,8 @@
 /** Opt-in planar membrane/inertia globalization. This is approximate binary64
  * arithmetic, not an interval bound, equilibrium certificate or material calibration.
  * Actual rounded trial displacements and a strict Armijo rule have no energy floor.
+ * Under `referenceBending: 'panel-hinges'` states may leave the plane and the panel
+ * bending remainder (reference-bending.js) joins the trial change.
  */
 import { dihedral } from './dihedral.js';
 import { unwrap } from './implicit.js';
@@ -12,6 +14,7 @@ import { accurateTrialTerms } from './accurate-membrane.js';
 import { UV_REFERENCE_IDENTITY, describeUVReference } from './uv-reference.js';
 import { stateCoordinates, solverPositions, solverTarget, projectReference, projectCurrentReference, validateReferenceBinding } from './reference-state.js';
 import { validateCurvatureIdentity } from './membrane-curvature.js';
+import { bendingSelected, admissibleComponent, bendingIncrement } from './reference-bending.js';
 
 export const INCREMENT_SEARCH_IDENTITY = Object.freeze({ name: 'membrane-inertia-increment', version: 1, armijo: 1e-4, maxBacktracks: 20 });
 
@@ -58,10 +61,12 @@ export function validateIncrementDomain(w, x) {
   for (let i = 0; i < w.mesh.nV; i++) {
     if (w.fixed[i] || !(w.mass[i] > 0 && Number.isFinite(w.mass[i]) && w.invMass[i] > 0 && Number.isFinite(w.invMass[i])) || w.invMass[i] !== 1 / w.mass[i]) fail('all native vertices must be free with positive coherent mass');
   }
+  const bending = bendingSelected(w);
+  if (bending && (o.referenceBending !== 'panel-hinges' || stateCoordinates(w) !== 'reference-displacement')) fail('panel bending is admitted only in reference-displacement coordinates');
   for (const a of [x, w.xs, w.xt, w.v]) {
     if (a.length !== 3 * w.mesh.nV) fail('state dimensions changed');
     for (let i = 0; i < a.length; i++) {
-      if (!Number.isFinite(a[i]) || (i % 3 === 1 && a[i] !== 0)) fail('only finite exact Y=0 planar states are supported');
+      if (!admissibleComponent(w, a[i], i)) fail(bending ? 'only finite states are supported' : 'only finite exact Y=0 planar states are supported');
     }
   }
   for (const a of [w.userForce, w.fext]) for (const f of a) if (f !== 0) fail('external forces are unsupported');
@@ -70,8 +75,9 @@ export function validateIncrementDomain(w, x) {
     if (w.driveOn[h]) fail('active hinge drives are unsupported');
     const angle = unwrap(w.theta[h], dihedral(x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], null));
     const k = w.hingeK[h], d = angle - w.restTheta[h];
-    if (!Number.isFinite(k) || k < 0 || !Number.isFinite(angle) || !Number.isFinite(w.theta[h]) || w.restTheta[h] !== 0 ||
-        0.5 * k * d * d !== 0 || k * d !== 0) fail('nonzero or invalid omitted hinge energy/force');
+    if (!Number.isFinite(k) || k < 0 || !Number.isFinite(angle) || !Number.isFinite(w.theta[h]) || w.restTheta[h] !== 0) fail('invalid hinge state or nonflat rest angle');
+    // Without the bending identity, hinge energy is omitted work and must be exactly zero.
+    if (!bending && (0.5 * k * d * d !== 0 || k * d !== 0)) fail('nonzero or invalid omitted hinge energy/force');
   }
 }
 
@@ -121,7 +127,7 @@ export function finishIncrementSearch(search, w, gradient) {
       if (valid) {
         // Check structural physics even for collapsed triangles; dihedral needs
         // a valid metric, so use the start only for this preliminary check.
-        for (let i = 1; i < x.length; i += 3) if (x[i] !== 0) throw new Error('membrane-inertia-increment domain: nonplanar trial');
+        if (!bendingSelected(w)) for (let i = 1; i < x.length; i += 3) if (x[i] !== 0) throw new Error('membrane-inertia-increment domain: nonplanar trial');
         valid = w.orthotropicMembrane.diagnostics(x, coordinates).finite;
         if (valid) validateIncrementDomain(w, coordinates === 'reference-displacement' ? projectReference(w, x) : x);
       }
@@ -137,18 +143,23 @@ export function finishIncrementSearch(search, w, gradient) {
         inertiaL.add(coefficient * (old[i] - target[i]) * d);
       }
       const details = valid ? w.orthotropicMembrane.energyDifferenceDetails(old, x, coordinates) : null;
+      // Bending: its linear part is already in the slope (the gradient includes hinges); the remainder joins the change.
+      const bend = valid && bendingSelected(w) ? bendingIncrement(w, old, x) : null;
+      if (bend && !bend.valid) valid = false;
       const dd = valid && w.opts.membraneArithmetic === 'double-double' ? accurateTrialTerms(w, old, x, gradient, target) : null;
       const s = dd?.slope ?? slope.value(), mr = details?.remainder ?? NaN, ir = dd?.inertiaRemainder ?? inertiaR.value(), il = dd?.inertiaLinear ?? inertiaL.value();
-      const sum = accumulator(); sum.add(s); sum.add(mr); sum.add(ir);
-      const deltaWords = dd && details?.valid ? addDD(addDD(dd.slopeWords, details.remainderWords), dd.inertiaWords) : null;
+      const sum = accumulator(); sum.add(s); sum.add(mr); sum.add(ir); if (bend) sum.add(bend.remainder);
+      const planarWords = dd && details?.valid ? addDD(addDD(dd.slopeWords, details.remainderWords), dd.inertiaWords) : null;
+      const deltaWords = planarWords && bend ? addDD(planarWords, [bend.remainder, 0]) : planarWords;
       const delta = deltaWords ? roundedDD(deltaWords) : sum.value(), raw = valid ? implicitEnergy(w, x, coordinates) - search.energy : NaN;
       const finite = value => Number.isFinite(value) ? value : null;
       last = { decision: 'rejected', reason: valid ? 'non-descent' : 'invalid-trial', trials: trial + 1, alpha,
         slope: finite(s), delta: finite(delta), rawDifference: finite(raw), membraneDifference: finite(details?.difference),
         membraneRemainder: finite(mr), inertiaRemainder: finite(ir), membraneLinear: finite(details?.linear), inertiaLinear: finite(il),
         armijoRhs: finite(INCREMENT_SEARCH_IDENTITY.armijo * s),
-        gradientDiscrepancy: finite((details?.linear ?? NaN) + il - s),
-        heuristicScale: finite(64 * Number.EPSILON * ((dd?.slopeMagnitude ?? slope.magnitude()) + (details?.absoluteRemainderTermSum ?? 0) + (dd?.inertiaMagnitude ?? inertiaR.magnitude()))),
+        gradientDiscrepancy: finite(bend ? (details?.linear ?? NaN) + il + bend.linear - s : (details?.linear ?? NaN) + il - s),
+        heuristicScale: finite(64 * Number.EPSILON * ((dd?.slopeMagnitude ?? slope.magnitude()) + (details?.absoluteRemainderTermSum ?? 0) + (dd?.inertiaMagnitude ?? inertiaR.magnitude()) + (bend ? bend.magnitude : 0))),
+        ...(bend ? { bendingDifference: finite(bend.difference), bendingLinear: finite(bend.linear), bendingRemainder: finite(bend.remainder), bendingMagnitude: finite(bend.magnitude) } : {}),
         ...(w.opts.membraneArithmetic === 'double-double' ? { displacementArithmetic: 'two-diff',
           slopeHi: dd?.slopeWords[0] ?? null, slopeLo: dd?.slopeWords[1] ?? null,
           membraneRemainderHi: details?.remainderWords?.[0] ?? null, membraneRemainderLo: details?.remainderWords?.[1] ?? null,

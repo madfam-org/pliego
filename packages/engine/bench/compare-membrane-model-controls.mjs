@@ -27,11 +27,11 @@ assert.deepEqual(fresh.source.engineFiles,files,'current runtime fingerprint req
 assert.equal(fresh.source.helperSHA256,sha(readFileSync(new URL('membrane-patch.mjs',import.meta.url))));
 assert.equal(composite.source.patchHelperSHA256,fresh.source.helperSHA256);
 const mutable=new Set(['xpbd/world.js','xpbd/implicit.js','xpbd/pcg.js','xpbd/energy-search.js','xpbd/state.js','linalg/blockchol.js']);
-const additions=new Set(['xpbd/orthotropic-membrane.js','xpbd/increment-search.js','xpbd/double-double.js','xpbd/accurate-membrane.js','xpbd/uv-reference.js','xpbd/newton.js','xpbd/reference-state.js','xpbd/membrane-curvature.js','xpbd/exact-newton.js']);
+const additions=new Set(['xpbd/orthotropic-membrane.js','xpbd/increment-search.js','xpbd/double-double.js','xpbd/accurate-membrane.js','xpbd/uv-reference.js','xpbd/newton.js','xpbd/reference-state.js','xpbd/membrane-curvature.js','xpbd/exact-newton.js','xpbd/reference-bending.js']);
 const previous=new Map(old.source.engineFiles.map(f=>[f.path,f.sha256]));
 for(const f of files)if(!mutable.has(f.path)&&!additions.has(f.path))assert.equal(f.sha256,previous.get(f.path),'unreviewed runtime change: '+f.path);
 assert.equal(files.length,old.source.engineFiles.length+additions.size);
-for(const path of additions)assert.ok(files.some(f=>f.path===path)&&!previous.has(path),'only the nine named reviewed modules may be added');
+for(const path of additions)assert.ok(files.some(f=>f.path===path)&&!previous.has(path),'only the ten named reviewed modules may be added');
 for(const f of old.source.engineFiles)assert.ok(files.some(g=>g.path===f.path),'old runtime path removed');
 const comparable=r=>{
   const c=structuredClone(r);delete c.recordedAt;

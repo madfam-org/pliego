@@ -8,8 +8,11 @@
 > `src/xpbd/exact-newton.js` (policy loop), exact blocks/products in `orthotropic-membrane.js` and
 > `accurate-membrane.js`, explicit selectors in `implicit.js`/`pcg.js`, identifiable pivots in `blockchol.js`.
 > Checks: `test/exact-curvature-operators.test.js` and `test/exact-curvature-world.test.js`; Gauss–Newton and legacy
-> trajectories were compared byte for byte against the previous engine. Not done (milestone 2): binding the
-> research Newton observer to the effective operator, and the frozen same-24 accepted comparison below.
+> trajectories were compared byte for byte against the previous engine.
+>
+> **Status (milestone 2, 2026-11-10): done.** The observer binds the effective operator, and the frozen same-24
+> comparison ran at `af870bf`: [results](exact-curvature-results.md). The first-update defect falls 149×–10,600×, but
+> latent failures move only 2369→2359 and public 7076→7078; at budget 1 the PCG stopping rule now dominates.
 
 Read-only preparation at clean engine source `3d778abc`.
 No source edits, World steps, oracle calls or counterfactual exact solves ran.

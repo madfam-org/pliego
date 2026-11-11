@@ -1,0 +1,83 @@
+{
+  "schema": "pliego-state-matrix-publication-exclusions/1",
+  "files": [
+    {
+      "file": "precommit/api-openapi.log",
+      "bytes": 106,
+      "sha256": "cb24c85b333287f532f8c08755eabb579e7269970763c00026e41270c51a8294",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/api-pytest.log",
+      "bytes": 352,
+      "sha256": "7625f548696ebc38e6350f62a2edc1f92fa2f9ffcc59778fe4d00b6810c17778",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/compliance.log",
+      "bytes": 106,
+      "sha256": "b2e0c75ace3af9489d77dcbb2cee4fdd519c9ff5e925341a708889d90643b62a",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/engine-package.log",
+      "bytes": 95,
+      "sha256": "bf6a7721aaba98f57ee6d904a8ae643b2db3202b19d58b291172051f2f2fd6f9",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/engine-tap.txt",
+      "bytes": 147796,
+      "sha256": "b76bcf2a5e41bce8d1455a1785eeb5f176c6b391f51894ebf569a541fba6743a",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/engine-typecheck.log",
+      "bytes": 15,
+      "sha256": "547eae88d3a32517368f24657095253d507df12257f016f771c210cc0792b6ed",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/guards-tests.log",
+      "bytes": 794,
+      "sha256": "41fc682dbdc6b95af751a546a3f9941494a75690b23353b0e57a580f35329537",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/kernel-pytest.log",
+      "bytes": 981,
+      "sha256": "f08e3d3220a20b5209a57c0118294ff1020b11c84b67cdfa514536f139031ddb",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/stock-cards.log",
+      "bytes": 24,
+      "sha256": "dfda8fd20f35586fd719008a9508bf3875ea0995ceb1b923e702a27b04dc0fe7",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/summary.txt",
+      "bytes": 366,
+      "sha256": "ff86bf9d82f00b80ed23899a89830547e22e855950087cb0784c3a54d6f7cce0",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    },
+    {
+      "file": "precommit/web-tap.txt",
+      "bytes": 25736,
+      "sha256": "68763bec5ec5ddc08475a0b114c69915f81d8de3e42a3cd9d6c8e1f7fc5f9714",
+      "reason": "raw clean-source suite log; the passing engine TAP contains benchmark output lines the full-history secret scan flags, and logs may carry local paths; precommit-checks.json publishes the counts and these hashes",
+      "durableOriginalRetained": true
+    }
+  ],
+  "scope": "explicit publication selection; development-row scripts used before freezing hold local absolute paths and were not retained as evidence (their observations are stated in the protocol)"
+}

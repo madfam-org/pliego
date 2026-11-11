@@ -1,0 +1,218 @@
+{
+ "derivedStages": [
+  "oracle-comparison",
+  "summary"
+ ],
+ "experiment": {
+  "comparisons": {
+   "comparison-baseline-migration": "state-replay: new GN baseline vs closed 3d778abc run/candidate.json under reviewed source migration",
+   "comparison-statechange": "curvature-comparison: same-source GN baseline vs exact candidate; public and latent changes separate"
+  },
+  "name": "exact-membrane-curvature-fixed24",
+  "protocol": "docs/research/exact-curvature-capture-protocol.md",
+  "roles": {
+   "baseline": "Gauss-Newton state matrix, new source, instrumented",
+   "candidate": "membraneCurvature exact-hessian, instrumented",
+   "plain": "candidate without Newton observer",
+   "repeat": "candidate strict repeat"
+  }
+ },
+ "oracleComparisonExclusions": [
+  "cases[].decimalDigits"
+ ],
+ "predeclaredRepresentedErrorLimits": {
+  "energyNJ": 1e-12,
+  "gradientComponentMicroN": 1e-09
+ },
+ "processes": [
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--out",
+    "{run}/baseline.json"
+   ],
+   "name": "baseline",
+   "output": "baseline.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--out",
+    "{run}/candidate.json"
+   ],
+   "name": "candidate",
+   "output": "candidate.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--out",
+    "{run}/repeat.json"
+   ],
+   "name": "repeat",
+   "output": "repeat.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--no-solve-observer",
+    "--out",
+    "{run}/plain.json"
+   ],
+   "name": "plain",
+   "output": "plain.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "--state-replay",
+    "docs/research/evidence/membrane-state-modal-2026-11-10/run/candidate.json.gz",
+    "{run}/baseline.json",
+    "--out",
+    "{run}/comparison-baseline-migration.json"
+   ],
+   "name": "comparison-baseline-migration",
+   "output": "comparison-baseline-migration.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "{run}/candidate.json",
+    "{run}/repeat.json",
+    "--out",
+    "{run}/comparison-repeat.json"
+   ],
+   "name": "comparison-repeat",
+   "output": "comparison-repeat.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "--observer-comparison",
+    "{run}/plain.json",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/comparison-parity.json"
+   ],
+   "name": "comparison-parity",
+   "output": "comparison-parity.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "--curvature-comparison",
+    "{run}/baseline.json",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/comparison-statechange.json"
+   ],
+   "name": "comparison-statechange",
+   "output": "comparison-statechange.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-probes.mjs",
+    "--input",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/probes.json"
+   ],
+   "name": "probes",
+   "output": "probes.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--self-test"
+   ],
+   "name": "oracle-self-test",
+   "output": "oracle-self-test.json",
+   "stdin": null,
+   "stdoutIsOutput": true
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--digits",
+    "80"
+   ],
+   "name": "oracle-80",
+   "output": "oracle-80.json",
+   "stdin": "probes.json",
+   "stdoutIsOutput": true
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--digits",
+    "100"
+   ],
+   "name": "oracle-100",
+   "output": "oracle-100.json",
+   "stdin": "probes.json",
+   "stdoutIsOutput": true
+  }
+ ],
+ "protocol": {
+  "captureOrder": [
+   "baseline",
+   "candidate",
+   "repeat",
+   "plain"
+  ],
+  "declaredNewtonIterationsPerCapture": 49770,
+  "judgedPoststepsPerCapture": 7110,
+  "nodeMaximumOldSpaceMiB": 8192,
+  "stateInitialAndJudgedRecordsPerCapture": 7134,
+  "stateRestoreDeclaredNewtonIterationsPerCapture": 168,
+  "stateRestorePublicCallsPerCapture": 24,
+  "trajectories": 24
+ },
+ "schema": "pliego-state-matrix-execution-plan/1",
+ "scope": "untimed research; source/identity/coverage success is distinct from false force and unresolved time/material/booklet/device gates; exact-curvature ablation reuses the closed runner bytes; only the plan roles/arguments differ"
+}

@@ -1,0 +1,43 @@
+{
+  "schema": "pliego-selected-newton-review-tests/1",
+  "passed": true,
+  "tests": [
+    "ordinary two-start small fixture independently evaluated; selected roles deduplicated; both inertia laws",
+    "corrupted raw binding rejected",
+    "conflicting roles for same actual iteration rejected",
+    "synthetic accepted label on an actual zero step remains numerical Armijo failure under both laws"
+  ],
+  "ordinaryFixtureSHA256": "4a4a463e19f377182608a307b38c1b3287ccc1ff121abf4b2e139fc02a780a94",
+  "reviewerSHA256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0",
+  "ordinaryProofSummary": {
+    "checks": 1105,
+    "decodedFloat64Words": 4912,
+    "selection": {
+      "roleReferences": 10,
+      "uniqueEvents": 8,
+      "allScalarEventsRetained": 24,
+      "deduplication": "trajectory+substepsRun+iteration; all roles preserved; identical full bytes/values required"
+    },
+    "decisions": {
+      "accepted": 5,
+      "precision-limited-zero-step": 3
+    },
+    "counts": {
+      "nativeCoefficient": {
+        "acceptedEvaluated": 5,
+        "wrongAcceptedExactGradientArmijo": 0,
+        "wrongAcceptedCapturedGradientArmijo": 0,
+        "positiveAcceptedPotential": 0,
+        "selectedTrialsEvaluated": 8
+      },
+      "realMass": {
+        "acceptedEvaluated": 5,
+        "wrongAcceptedExactGradientArmijo": 0,
+        "wrongAcceptedCapturedGradientArmijo": 0,
+        "positiveAcceptedPotential": 0,
+        "selectedTrialsEvaluated": 8
+      }
+    }
+  },
+  "scope": "bounded reviewer development checks only; no accepted24matrix, no new solver execution by tests"
+}

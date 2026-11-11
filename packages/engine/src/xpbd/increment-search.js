@@ -14,7 +14,7 @@ import { accurateTrialTerms } from './accurate-membrane.js';
 import { UV_REFERENCE_IDENTITY, describeUVReference } from './uv-reference.js';
 import { stateCoordinates, solverPositions, solverTarget, projectReference, projectCurrentReference, validateReferenceBinding } from './reference-state.js';
 import { validateCurvatureIdentity } from './membrane-curvature.js';
-import { bendingSelected, admissibleComponent, bendingIncrement } from './reference-bending.js';
+import { bendingSelected, creaseSelected, admittedHingeKind, creaseBeyondFoldLimit, admissibleComponent, bendingIncrement } from './reference-bending.js';
 
 export const INCREMENT_SEARCH_IDENTITY = Object.freeze({ name: 'membrane-inertia-increment', version: 1, armijo: 1e-4, maxBacktracks: 20 });
 
@@ -56,13 +56,13 @@ export function validateIncrementDomain(w, x) {
   if (!(w.dt > 0 && Number.isFinite(w.dt) && Number.isFinite(1 / (w.dt * w.dt)))) fail('invalid timestep');
   if (D.wind !== 0 || D.program || D.kin || D.seq || D.groups.length || D.leaves.length || D.controls.size || D.mech.size || D.value.size || D.goal.size) fail('wind, drivers and kinematics are unsupported');
   if (w.doc.joins.length || w.doc.controls.length || w.doc.mechanisms.length || w.mesh.perfPairs.length ||
-      w.doc.sheets.some(s => s.kinematic) || w.mesh.hingeKind.some(k => k !== HINGE_PANEL)) fail('authored terms are unsupported');
+      w.doc.sheets.some(s => s.kinematic) || w.mesh.hingeKind.some(k => !admittedHingeKind(w, k))) fail('authored terms are unsupported');
   for (let t = 0; t < w.terms.count; t++) if (w.terms.active[t]) fail('active terms are unsupported');
   for (let i = 0; i < w.mesh.nV; i++) {
     if (w.fixed[i] || !(w.mass[i] > 0 && Number.isFinite(w.mass[i]) && w.invMass[i] > 0 && Number.isFinite(w.invMass[i])) || w.invMass[i] !== 1 / w.mass[i]) fail('all native vertices must be free with positive coherent mass');
   }
   const bending = bendingSelected(w);
-  if (bending && (o.referenceBending !== 'panel-hinges' || stateCoordinates(w) !== 'reference-displacement')) fail('panel bending is admitted only in reference-displacement coordinates');
+  if (bending && stateCoordinates(w) !== 'reference-displacement') fail('panel bending is admitted only in reference-displacement coordinates');
   for (const a of [x, w.xs, w.xt, w.v]) {
     if (a.length !== 3 * w.mesh.nV) fail('state dimensions changed');
     for (let i = 0; i < a.length; i++) {
@@ -75,7 +75,10 @@ export function validateIncrementDomain(w, x) {
     if (w.driveOn[h]) fail('active hinge drives are unsupported');
     const angle = unwrap(w.theta[h], dihedral(x, H[4 * h], H[4 * h + 1], H[4 * h + 2], H[4 * h + 3], null));
     const k = w.hingeK[h], d = angle - w.restTheta[h];
-    if (!Number.isFinite(k) || k < 0 || !Number.isFinite(angle) || !Number.isFinite(w.theta[h]) || w.restTheta[h] !== 0) fail('invalid hinge state or nonflat rest angle');
+    const panel = w.mesh.hingeKind[h] === HINGE_PANEL;
+    if (!Number.isFinite(k) || k < 0 || !Number.isFinite(angle) || !Number.isFinite(w.theta[h]) || (panel && w.restTheta[h] !== 0)) fail('invalid hinge state or nonflat rest angle');
+    // Crease law: an authored rest angle strictly inside the fold limit (contact is not admitted).
+    if (!panel && !(Number.isFinite(w.restTheta[h]) && Math.abs(w.restTheta[h]) < w.foldLimit[h])) fail('crease rest angle outside its fold limit');
     // Without the bending identity, hinge energy is omitted work and must be exactly zero.
     if (!bending && (0.5 * k * d * d !== 0 || k * d !== 0)) fail('nonzero or invalid omitted hinge energy/force');
   }
@@ -114,6 +117,8 @@ export function finishIncrementSearch(search, w, gradient) {
     for (let i = 0; i < target.length; i++) if (!Object.is(target[i], objective.target[i])) throw new Error('membrane-inertia-increment: target changed during search');
     if (gradient.length !== x.length || !gradient.every(Number.isFinite)) throw new Error('membrane-inertia-increment: invalid starting gradient');
     validateIncrementDomain(w, coordinates === 'reference-displacement' ? projectReference(w, old) : old);
+    // A start already past a crease's fold limit (for example the predictor) needs contact: refuse visibly.
+    if (creaseSelected(w) && creaseBeyondFoldLimit(w, old) >= 0) throw new Error('membrane-inertia-increment domain: crease beyond its fold limit; contact is not admitted');
     for (let i = 0; i < x.length; i++) proposal[i] = x[i] - old[i];
     let last = null;
     for (let trial = 0; trial <= INCREMENT_SEARCH_IDENTITY.maxBacktracks; trial++) {
@@ -129,6 +134,8 @@ export function finishIncrementSearch(search, w, gradient) {
         // a valid metric, so use the start only for this preliminary check.
         if (!bendingSelected(w)) for (let i = 1; i < x.length; i += 3) if (x[i] !== 0) throw new Error('membrane-inertia-increment domain: nonplanar trial');
         valid = w.orthotropicMembrane.diagnostics(x, coordinates).finite;
+        // A crease past its fold limit would need contact: the trial is invalid and the search backtracks.
+        if (valid && creaseSelected(w) && creaseBeyondFoldLimit(w, x) >= 0) valid = false;
         if (valid) validateIncrementDomain(w, coordinates === 'reference-displacement' ? projectReference(w, x) : x);
       }
       const slope = accumulator(), inertiaR = accumulator(), inertiaL = accumulator();

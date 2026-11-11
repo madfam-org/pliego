@@ -182,8 +182,10 @@ adds the bending remainder to its Armijo change and reports it; the angle change
 remainder is formed from the exact step in two-word arithmetic, so its error scales with
 the step. The authoritative residuals include the bending force. Creases, drives, nonzero rest angles, bending damping
 and contact stay refused. Snapshots bind the bending identity, and planar and bending
-snapshots refuse each other. Omission keeps the planar domain byte for byte. Engine and
-tests only: no capture or acceptance yet. See
+snapshots refuse each other. Omission keeps the planar domain byte for byte.
+`referenceBending: 'panel-and-crease-hinges'` additionally admits crease hinges with authored
+rest angles inside their fold limits; crossing a fold limit is refused (contact is not
+admitted). See [the crease design](../../docs/research/crease-domain-next-implementation.md). See
 [the design and its status](../../docs/research/bending-domain-next-implementation.md).
 
 Further opt-in research options are documented in the

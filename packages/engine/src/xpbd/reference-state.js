@@ -5,7 +5,7 @@
 import { twoSum } from './double-double.js';
 import { assembleAndFactor } from './implicit.js';
 import { validateIncrementDomain } from './increment-search.js';
-import { REFERENCE_BENDING_IDENTITY, bendingSelected, admissibleComponent, addBendingGradient } from './reference-bending.js';
+import { bendingIdentity, bendingSelected, creaseSelected, setLatentAngleMemory, creaseBeyondFoldLimit, admissibleComponent, addBendingGradient } from './reference-bending.js';
 
 export const REFERENCE_STATE_IDENTITY = Object.freeze({ mode: 'reference-displacement', version: 1,
   representation: 'binary64', origin: 'actual-X0', predictor: 'displacement-first',
@@ -14,7 +14,7 @@ export const REFERENCE_STATE_IDENTITY = Object.freeze({ mode: 'reference-displac
 /** The identity a World must carry: the planar identity, plus the bending version when selected.
  * @param {any} w */
 export function expectedReferenceIdentity(w) {
-  return bendingSelected(w) ? { ...REFERENCE_STATE_IDENTITY, bending: { ...REFERENCE_BENDING_IDENTITY } } : REFERENCE_STATE_IDENTITY;
+  return bendingSelected(w) ? { ...REFERENCE_STATE_IDENTITY, bending: { ...bendingIdentity(w) } } : REFERENCE_STATE_IDENTITY;
 }
 /** @param {any} w */
 export function stateCoordinates(w) { return w.opts.stateCoordinates ?? 'absolute-position'; }
@@ -106,7 +106,15 @@ export function setInitialReferencePose(w, x, velocity = new Float64Array(x.leng
   const u = exactDisplacement(x, w.X0, bendingSelected(w)), v = Float64Array.from(velocity);
   if (v.length !== x.length || !v.every((n, i) => admissibleComponent(w, n, i))) throw new Error('Reference state: invalid initial velocity');
   if (!observationMembrane(w).diagnostics(u, 'reference-displacement').finite) throw new Error('Reference state: invalid initial membrane metric');
-  w._u.set(u); w.x.set(x); w.v.set(v);
+  // Crease law: the angle memory starts from the latent initial pose on each rest branch, and the pose must lie inside every fold limit.
+  const memory = creaseSelected(w) ? w.theta.slice() : null;
+  w._u.set(u);
+  if (memory) {
+    setLatentAngleMemory(w);
+    const h = creaseBeyondFoldLimit(w, u);
+    if (h >= 0) { w.theta.set(memory); w._u.fill(0); throw new Error(`Reference state: crease hinge ${h} starts beyond its fold limit; contact is not admitted`); }
+  }
+  w.x.set(x); w.v.set(v);
   w._referenceInitialX = w.x.slice(); w._referenceInitialU = u.slice(); w._referenceInitialV = v.slice();
   w.dirty = true; w.poseVersion++; w.wake();
 }

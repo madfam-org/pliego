@@ -14,13 +14,28 @@
  */
 import { dihedral } from './dihedral.js';
 import { twoSum, twoProduct, add as addDD, sub as subDD, mul as mulDD, rounded } from './double-double.js';
+import { HINGE_PANEL, HINGE_CREASE } from '../mesh.js';
 
 export const REFERENCE_BENDING_IDENTITY = Object.freeze({ name: 'latent-panel-bending', version: 2,
   hinges: 'panel-only', restAngle: 'flat', geometry: 'latent-sum-exact-differences-rounded-once',
   curvature: 'gauss-newton', angleChange: 'two-word-step-expansion-atan2', damping: 'none' });
 
+/** The panel identity plus crease hinges with fixed authored rest angles (G1 step 2). The fold limit
+ * is a domain boundary (no projection, no contact) and the angle memory starts from the latent
+ * initial pose on each hinge's rest branch. Everything else is the panel identity's. */
+export const REFERENCE_CREASE_BENDING_IDENTITY = Object.freeze({ name: 'latent-panel-crease-bending', version: 1,
+  hinges: 'panel-and-crease', restAngle: 'flat-panels-authored-creases', foldLimit: 'domain-boundary', initialAngleMemory: 'latent-rest-branch',
+  geometry: 'latent-sum-exact-differences-rounded-once', curvature: 'gauss-newton', angleChange: 'two-word-step-expansion-atan2', damping: 'none' });
+const LAWS = new Set(['panel-hinges', 'panel-and-crease-hinges']);
+
 /** @param {any} w */
-export function bendingSelected(w) { return w.opts.referenceBending === 'panel-hinges'; }
+export function bendingSelected(w) { return LAWS.has(w.opts.referenceBending); }
+/** @param {any} w */
+export function creaseSelected(w) { return w.opts.referenceBending === 'panel-and-crease-hinges'; }
+/** The bending identity a World selects. @param {any} w */
+export function bendingIdentity(w) { return creaseSelected(w) ? REFERENCE_CREASE_BENDING_IDENTITY : REFERENCE_BENDING_IDENTITY; }
+/** Hinge kinds the selected law admits. @param {any} w @param {number} kind */
+export function admittedHingeKind(w, kind) { return kind === HINGE_PANEL || (creaseSelected(w) && kind === HINGE_CREASE); }
 
 /** Coordinate admissibility of one state component: Y must stay exactly 0 unless bending is selected.
  * @param {any} w @param {number} value @param {number} i */
@@ -49,6 +64,21 @@ export function latentHingeAngle(w, u, h, g) {
 /** Same continuation as implicit.js `unwrap` (kept local: importing it would form a cycle).
  * @param {number} prev @param {number} raw */
 export function unwrapAngle(prev, raw) { let d = raw - prev; d -= 2 * Math.PI * Math.round(d / (2 * Math.PI)); return prev + d; }
+
+/** First crease hinge whose latent angle (continued from the memory) is beyond its fold limit, or -1.
+ * Without contact, the fold limit bounds the admitted domain.
+ * @param {any} w @param {ArrayLike<number>} u */
+export function creaseBeyondFoldLimit(w, u) {
+  for (let h = 0; h < w.mesh.nH; h++) {
+    if (w.mesh.hingeKind[h] !== HINGE_CREASE) continue;
+    if (!(Math.abs(unwrapAngle(w.theta[h], latentHingeAngle(w, u, h, null))) <= w.foldLimit[h])) return h;
+  }
+  return -1;
+}
+/** Angle memory from the latent pose, on each hinge's rest branch (initial pose only). @param {any} w */
+export function setLatentAngleMemory(w) {
+  for (let h = 0; h < w.mesh.nH; h++) w.theta[h] = unwrapAngle(w.restTheta[h], latentHingeAngle(w, w._u, h, null));
+}
 
 /** @typedef {import('./double-double.js').DD} DD */
 /** @param {DD[]} a @param {DD[]} b @returns {DD[]} */

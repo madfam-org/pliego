@@ -110,5 +110,6 @@ function copyFactor(f) {
     x: Float64Array.from(f.x), ...(f.coordinates ? { coordinates: f.coordinates } : {}), driveOn: Uint8Array.from(f.driveOn), edgeComp: Uint8Array.from(f.edgeComp), active: Uint8Array.from(f.active),
     k: Float64Array.from(f.k), mode: Uint8Array.from(f.mode), verts: Int32Array.from(f.verts), c: Float64Array.from(f.c), dir: Float64Array.from(f.dir), len: Float64Array.from(f.len),
     ...(f.curvature ? { curvature: f.curvature } : {}),
+    ...(f.anchorHi ? { anchorHi: Float64Array.from(f.anchorHi), anchorLo: Float64Array.from(f.anchorLo) } : {}),
   };
 }

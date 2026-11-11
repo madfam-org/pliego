@@ -35,7 +35,7 @@ export function accurateKinematics(e, x, ids, k, coordinates = 'absolute-positio
   validateMembraneCoordinates(coordinates, !!e.reference, 'double-double');
   k.arithmeticError = '';
   try {
-    const reference = e.reference ? referenceKinematics(e.reference, x, ids, coordinates) : null;
+    const reference = e.reference ? referenceKinematics(e.reference, x, ids, coordinates, coordinates === 'reference-displacement' ? k.referenceAnchor : undefined) : null;
     const { a, b } = reference ?? tangents(e, x, ids), aa = dot(a, a), bb = dot(b, b), ab = dot(a, b);
     const strain = reference ? reference.strain : [D.scale(D.sub(aa, [1, 0]), 0.5), D.scale(D.sub(bb, [1, 0]), 0.5), ab];
     const q = e.Q, stress = [D.add(D.scale(strain[0], q[0]), D.scale(strain[1], q[2])),

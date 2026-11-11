@@ -77,7 +77,8 @@ were accepted), and
 the latent residual settles near 1.1e-6 microN instead of reaching tau = 1e-7. The flat bending
 capture never met this (u about 0.004 mm). Page turns swing u to hundreds of millimetres, so the
 G2 force gate needs either a two-word displacement state or an origin anchored near the current
-pose. That is the next engine step before a crease capture can pass a force gate.
+pose. That is the next engine step before a crease capture can pass a force gate; see the
+[two-word state design](two-word-state-next-implementation.md).
 
 **Not done yet:** the state-precision fix above, the folded-card capture (milestone 2), contact
 and the hand drive.

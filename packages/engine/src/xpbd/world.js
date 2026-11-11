@@ -48,7 +48,7 @@ export class World {
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
    *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
-   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton'|'exact-hessian',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement',pcgAbsoluteTolerance?:number,referenceBending?:'panel-hinges'|'panel-and-crease-hinges'}} [opts]
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton'|'exact-hessian',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement',pcgAbsoluteTolerance?:number,referenceBending?:'panel-hinges'|'panel-and-crease-hinges',stateRepresentation?:'binary64'|'double-double'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -57,6 +57,7 @@ export class World {
     if (!['absolute-position', 'reference-displacement'].includes(opts.stateCoordinates ?? 'absolute-position')) throw new RangeError('World: invalid stateCoordinates');
     if (opts.stateCoordinates === 'reference-displacement' && opts.membraneReference !== 'uv-displacement') throw new Error('World: reference-displacement stateCoordinates requires uv-displacement membraneReference');
     if (opts.pcgAbsoluteTolerance !== undefined && (opts.stateCoordinates !== 'reference-displacement' || !(Number.isFinite(opts.pcgAbsoluteTolerance) && opts.pcgAbsoluteTolerance > 0))) throw new Error('World: pcgAbsoluteTolerance is a positive finite microN stop admitted only with reference-displacement stateCoordinates');
+    if (opts.stateRepresentation !== undefined && (!['binary64', 'double-double'].includes(opts.stateRepresentation) || opts.stateCoordinates !== 'reference-displacement')) throw new Error("World: stateRepresentation 'double-double' is admitted only with reference-displacement stateCoordinates");
     if (opts.referenceBending !== undefined && (!['panel-hinges', 'panel-and-crease-hinges'].includes(opts.referenceBending) || opts.stateCoordinates !== 'reference-displacement')) throw new Error("World: referenceBending 'panel-hinges' or 'panel-and-crease-hinges' is admitted only with reference-displacement stateCoordinates");
     if (!['material-coefficients', 'uv-displacement'].includes(opts.membraneReference ?? 'material-coefficients')) throw new RangeError('World: invalid membraneReference');
     if (opts.membraneReference === 'uv-displacement' && (!orthotropic || opts.membraneArithmetic !== 'double-double' || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: uv-displacement membraneReference requires orthotropic-stvk, double-double and membrane-inertia-increment search');
@@ -81,6 +82,7 @@ export class World {
       ...(opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchArithmetic: opts.lineSearchArithmetic } : {}),
       ...(opts.pcgAbsoluteTolerance !== undefined ? { pcgAbsoluteTolerance: opts.pcgAbsoluteTolerance } : {}),
       ...(opts.referenceBending !== undefined ? { referenceBending: opts.referenceBending } : {}),
+      ...(opts.stateRepresentation === 'double-double' ? { stateRepresentation: opts.stateRepresentation } : {}),
       continuousContact: opts.continuousContact ?? false,
       barrierContact: opts.barrierContact ?? false,
       previousPoseStart: opts.previousPoseStart ?? false,
@@ -583,16 +585,19 @@ export class World {
    * reused from one factorisation to the next (snapshots copy them). @param {Float64Array} x
    */
   _saveFactorState(x, coordinates = 'absolute-position') {
-    const T = this.terms, f = this._factorState;
+    const T = this.terms, f = this._factorState, anchor = /** @type {any} */ (this)._anchorHi ? { hi: /** @type {any} */ (this)._anchorHi, lo: /** @type {any} */ (this)._anchorLo } : null;
     if (!f) {
       this._factorState = {
-        x: Float64Array.from(x), ...(coordinates === 'reference-displacement' ? { coordinates } : {}), driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
+        x: Float64Array.from(x), ...(coordinates === 'reference-displacement' ? { coordinates } : {}),
+        // Two-word state: the latent offset is relative to the anchor at factor time.
+        ...(coordinates === 'reference-displacement' && anchor ? { anchorHi: anchor.hi.slice(), anchorLo: anchor.lo.slice() } : {}),
+        driveOn: Uint8Array.from(this.driveOn), edgeComp: Uint8Array.from(this.edgeComp),
         active: Uint8Array.from(T.active), k: Float64Array.from(T.k), mode: Uint8Array.from(T.mode),
         verts: Int32Array.from(T.verts), c: Float64Array.from(T.c), dir: Float64Array.from(T.dir), len: Float64Array.from(T.len),
       };
       return;
     }
-    f.x.set(x); f.driveOn.set(this.driveOn); f.edgeComp.set(this.edgeComp); f.active.set(T.active); f.k.set(T.k); f.mode.set(T.mode);
+    f.x.set(x); if (f.anchorHi && anchor) { f.anchorHi.set(anchor.hi); f.anchorLo.set(anchor.lo); } f.driveOn.set(this.driveOn); f.edgeComp.set(this.edgeComp); f.active.set(T.active); f.k.set(T.k); f.mode.set(T.mode);
     f.verts.set(T.verts); f.c.set(T.c); f.dir.set(T.dir); f.len.set(T.len);
   }
 

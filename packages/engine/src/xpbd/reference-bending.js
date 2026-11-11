@@ -44,18 +44,24 @@ export function admissibleComponent(w, value, i) { return Number.isFinite(value)
 const LOCAL = new Float64Array(12);
 /** Difference (X0[b]+u[b]) − (X0[a]+u[a]) as two words: both TwoSums are exact.
  * @param {ArrayLike<number>} X0 @param {ArrayLike<number>} u @param {number} b @param {number} a */
-function differenceWords(X0, u, b, a) { return addDD(twoSum(X0[b], -X0[a]), twoSum(u[b], -u[a])); }
-/** The same difference rounded once. @param {ArrayLike<number>} X0 @param {ArrayLike<number>} u @param {number} b @param {number} a */
-function difference(X0, u, b, a) { return rounded(differenceWords(X0, u, b, a)); }
+function differenceWords(X0, u, b, a, anchor = null) {
+  if (!anchor) return addDD(twoSum(X0[b], -X0[a]), twoSum(u[b], -u[a]));
+  // Two-word state: (X0 + A + u)[b] - (X0 + A + u)[a], every pairwise difference exact before the sums.
+  return addDD(addDD(twoSum(X0[b], -X0[a]), addDD(twoSum(anchor.hi[b], -anchor.hi[a]), twoSum(anchor.lo[b], -anchor.lo[a]))), twoSum(u[b], -u[a]));
+}
+/** The same difference rounded once. @param {ArrayLike<number>} X0 @param {ArrayLike<number>} u @param {number} b @param {number} a @param {any} [anchor] */
+function difference(X0, u, b, a, anchor = null) { return rounded(differenceWords(X0, u, b, a, anchor)); }
+/** @param {any} w */
+const anchorOf = w => w._anchorHi ? { hi: w._anchorHi, lo: w._anchorLo } : null;
 
 /** Signed dihedral angle (and optional 12-gradient) of hinge h on the latent sum.
  * The gradient w.r.t. u equals the gradient w.r.t. positions (X0 is fixed).
  * @param {any} w @param {ArrayLike<number>} u @param {number} h @param {Float64Array|null} g */
 export function latentHingeAngle(w, u, h, g) {
-  const H = w.mesh.hinges, X0 = w._referenceOrigin ?? w.X0, a = 3 * H[4 * h];
+  const H = w.mesh.hinges, X0 = w._referenceOrigin ?? w.X0, a = 3 * H[4 * h], anchor = anchorOf(w);
   for (let i = 1; i < 4; i++) {
     const v = 3 * H[4 * h + i];
-    for (let c = 0; c < 3; c++) LOCAL[3 * i + c] = difference(X0, u, v + c, a + c);
+    for (let c = 0; c < 3; c++) LOCAL[3 * i + c] = difference(X0, u, v + c, a + c, anchor);
   }
   LOCAL[0] = 0; LOCAL[1] = 0; LOCAL[2] = 0;
   return dihedral(LOCAL, 0, 1, 2, 3, g);
@@ -116,7 +122,7 @@ const twice = x => [2 * x[0], 2 * x[1]];
 export function latentAngleChange(w, before, after, h) {
   const H = w.mesh.hinges, X0 = w._referenceOrigin ?? w.X0, a = 3 * H[4 * h];
   /** @param {number} i */
-  const pose = i => { const v = 3 * H[4 * h + i]; return [0, 1, 2].map(c => differenceWords(X0, before, v + c, a + c)); };
+  const anchor = anchorOf(w), pose = i => { const v = 3 * H[4 * h + i]; return [0, 1, 2].map(c => differenceWords(X0, before, v + c, a + c, anchor)); };
   /** @param {number} i */
   const step = i => { const v = 3 * H[4 * h + i]; return [0, 1, 2].map(c => subDD(twoSum(after[v + c], -before[v + c]), twoSum(after[a + c], -before[a + c]))); };
   const E = pose(1), U = pose(2), W = pose(3), e = step(1), u = step(2), v = step(3);

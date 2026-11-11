@@ -24,9 +24,11 @@ and [a named planar implicit-midpoint stage](implicit-midpoint-next-implementati
 kept as separate ablations on the same 24-trajectory gates. Exact curvature is now
 an opt-in World option, and its [frozen 24-trajectory comparison](exact-curvature-results.md)
 confirms the first-update mechanism but moves whole-trajectory outcomes only
-slightly (latent failures 2369→2359, public 7076→7078). At budget 1 the PCG
-stopping rule is now the binding limit. No acceptance follows. The midpoint stage
-remains design only. Force/time, material, booklet and device
+slightly (latent failures 2369→2359, public 7076→7078). Adding a
+[force-tolerance PCG stop](pcg-force-stop-results.md) then removes 1013 latent failures
+with no losses (2359→1346); the remainder is one Newton step's nonlinear error. The
+[catalogue acceptance bar](catalogue-paper-acceptance.md) states what the catalogue page
+turn still needs. No acceptance follows. The midpoint stage remains design only. Force/time, material, booklet and device
 acceptance remain open; research and implementation are not exhausted.
 
 ## What would count as exhausted

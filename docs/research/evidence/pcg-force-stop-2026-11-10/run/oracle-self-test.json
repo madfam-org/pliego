@@ -1,0 +1,1 @@
+{"schema":"pliego-membrane-state-self-test/1","passed":true,"testCases":3,"checks":["analytical finite Piola/energy","exact rational scalar FD halving","compressed exact curvature versus GN"]}

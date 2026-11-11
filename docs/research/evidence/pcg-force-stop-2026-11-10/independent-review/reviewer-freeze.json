@@ -1,0 +1,57 @@
+{
+  "schema": "pliego-selected-newton-reviewer-freeze/1",
+  "sourceGitAtFreeze": "3d778abc179988e1c1a31b43d8048aa6a08d00b1",
+  "files": [
+    {
+      "file": "review-selected-newton.py",
+      "bytes": 18999,
+      "sha256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0"
+    },
+    {
+      "file": "make-selected-newton-test-fixture.mjs",
+      "bytes": 1522,
+      "sha256": "dc4c2fdfb30cc75e2dc2f4c715d3c45f0eae276a50944ca23f66939c7dd839a7"
+    },
+    {
+      "file": "test-selected-newton-review.py",
+      "bytes": 3973,
+      "sha256": "9ae0f12c018a1328725242e11998cc84e621ad1fc49053b15be7f395998ea6a1"
+    },
+    {
+      "file": "selected-newton-small-fixture.json",
+      "bytes": 1137116,
+      "sha256": "4a4a463e19f377182608a307b38c1b3287ccc1ff121abf4b2e139fc02a780a94"
+    },
+    {
+      "file": "selected-newton-small-proof.json",
+      "bytes": 74693,
+      "sha256": "f26d77d26aec3f4299dcb8f28e6c1583a4166ffb50ea208c466270ad1ca64a90"
+    },
+    {
+      "file": "selected-newton-test-proof.json",
+      "bytes": 1603,
+      "sha256": "79d386d8c6cc5888b250fe85a7241d41ae79c70bcfc62d28ec0b64aa3562b742"
+    },
+    {
+      "file": "reviewer-sources.json",
+      "bytes": 33385,
+      "sha256": "0644fdc579c6a969cf871157d278b0e114c124f064debc96160ce0d6d33fabed"
+    }
+  ],
+  "ready": true,
+  "command": [
+    "python3",
+    "review-selected-newton.py",
+    "--repo",
+    "REPO",
+    "--input",
+    "CANDIDATE_JSON",
+    "--out",
+    "FRESH_DURABLE_PROOF_JSON"
+  ],
+  "captureReady": "reviewer frozen before accepted full matrix; ordinary small fixture is not an accepted matrix capture",
+  "scope": "selected last evaluated trial endpoints only; both native rounded C and exact represented real M/h\u00b2; exact captured-gradient and independent-gradient Armijo classified separately; all roles retained; no all49770, force/time/material/booklet or interaction acceptance",
+  "inputsForLaterCapture": "candidate.json from clean fixed24 observed run; reviewer verifies every captured source file against supplied repo",
+  "developmentTests": 4,
+  "numericalDevelopmentFixture": "2starts/3judgedsteps/4Newtoniterations;6judgedcalls/24decisions plus2separately recorded snapshot restore controls; no accepted fullcapture"
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "pliego-state-matrix-launch-preflight/1",
+  "at": "2026-11-11T03:14:58.312129+00:00",
+  "sourceGit": "15422657ed909c5242ca9dadf6427cbec8853c9e",
+  "sourceClean": true,
+  "acceptedProcessesStarted": 0,
+  "runnerFilesSHA256": {
+    "run-state-matrix.py": "ea29776d32c1533e9b298ac530e54b23c7fef5db3fe846cb39bcccba0ba7ccd4",
+    "pipeline-manifest.json": "d35e41c219f8cbf504011296f0f217b042f01d8411639f876b1164e2fcd33871",
+    "pipeline-plan.json": "604c9f144afdd6e86044e1d16402143d16653490dbf76a6c95398a1f41c01641"
+  },
+  "preparedSHA256": "fd6ce32d1ede9d644bd9fac2ead620adda99b2c7f46c62bd6611c85ec7051d8b",
+  "selectedNewtonReviewerSHA256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0",
+  "scope": "All source/reviewer/driver preparation bindings verified before first accepted process. Force-tolerance PCG stop fixed24 ablation; no physics acceptance implied."
+}

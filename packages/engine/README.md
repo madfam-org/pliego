@@ -164,6 +164,15 @@ curvature identity and rebuild the saved effective factor. Omission or explicit
 Its [fixed-24 comparison](../../docs/research/exact-curvature-results.md) fixes the first
 update but changes whole-trajectory force outcomes only slightly; no acceptance follows.
 
+`pcgAbsoluteTolerance` (microN, only with the reference-displacement state above) replaces
+PCG's relative stop with an absolute one: a solve converges only when the free linear
+residual's infinity norm is at most this value. The iteration cap, stagnation stop,
+refactor and hold constants and the exact-curvature checks are unchanged, and a solve that
+does not converge writes nothing and falls through to the direct factor. Omission keeps the
+relative rule. With exact curvature, half the force tolerance removed 1013 latent force
+failures in the [fixed-24 comparison](../../docs/research/pcg-force-stop-results.md); no
+acceptance follows.
+
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):
 `previousPoseStart` changes the legacy initial guess; `continuousContact` adds a

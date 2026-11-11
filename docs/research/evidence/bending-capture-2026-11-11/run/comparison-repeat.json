@@ -1,0 +1,559 @@
+{
+  "schema": "pliego-bending-state-comparison/1",
+  "recordedAt": "2026-11-11T09:20:54.339Z",
+  "mode": "strict-repeat",
+  "comparison": {
+    "leavesCompared": 9031868,
+    "excludedFields": [
+      "recordedAt"
+    ]
+  },
+  "forceOutcomes": [
+    {
+      "judgedSteps": 7200,
+      "publicFailed": 7200,
+      "authoritativeFailed": 2299,
+      "forceTolerance": 1e-7,
+      "perRow": [
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": false,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 80,
+          "worstPublicResidual": 0.007663066268206731,
+          "worstAuthoritativeResidual": 0.007662529484839614,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": true,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 80,
+          "worstPublicResidual": 1.084379881647958,
+          "worstAuthoritativeResidual": 1.0843795594753052,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": false,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002861255163300325,
+          "worstAuthoritativeResidual": 1.0410425668218315e-11,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": true,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002861255388191984,
+          "worstAuthoritativeResidual": 3.2558396300189085e-11,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": false,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000028612549886253803,
+          "worstAuthoritativeResidual": 1.2967404927621828e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": true,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002861255008304768,
+          "worstAuthoritativeResidual": 1.3145040611561853e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": false,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 159,
+          "worstPublicResidual": 0.0004949253308755841,
+          "worstAuthoritativeResidual": 0.0004948903830032103,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": true,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 160,
+          "worstPublicResidual": 0.28838450922667513,
+          "worstAuthoritativeResidual": 0.2883839813503437,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": false,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000029231825927952595,
+          "worstAuthoritativeResidual": 1.1701627947863225e-11,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": true,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002923186220710353,
+          "worstAuthoritativeResidual": 7.04575482159131e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": false,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000029231843438495443,
+          "worstAuthoritativeResidual": 5.204725539442734e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": true,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000029231842286705394,
+          "worstAuthoritativeResidual": 5.240252676230739e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": false,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 308,
+          "worstPublicResidual": 0.000049589307421271656,
+          "worstAuthoritativeResidual": 0.00004958926318288093,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": true,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 320,
+          "worstPublicResidual": 0.0743594556182738,
+          "worstAuthoritativeResidual": 0.0743579957158599,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": false,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003217895695804513,
+          "worstAuthoritativeResidual": 2.9807267765136203e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": true,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000032178956352814408,
+          "worstAuthoritativeResidual": 3.0071572402340374e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": false,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003217895619749872,
+          "worstAuthoritativeResidual": 2.0765611452588928e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": true,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003217895615292622,
+          "worstAuthoritativeResidual": 2.071232074740692e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": false,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 552,
+          "worstPublicResidual": 0.000017509157093087424,
+          "worstAuthoritativeResidual": 0.000016633795638654192,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": true,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 640,
+          "worstPublicResidual": 0.018880842048067715,
+          "worstAuthoritativeResidual": 0.01888069063870663,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": false,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000030053424718780143,
+          "worstAuthoritativeResidual": 8.282263763703668e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": true,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003005343735960142,
+          "worstAuthoritativeResidual": 8.262723838470265e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": false,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000030053441128179752,
+          "worstAuthoritativeResidual": 8.282263763703668e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": true,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000030053423923173886,
+          "worstAuthoritativeResidual": 8.282263763703668e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        }
+      ]
+    },
+    {
+      "judgedSteps": 7200,
+      "publicFailed": 7200,
+      "authoritativeFailed": 2299,
+      "forceTolerance": 1e-7,
+      "perRow": [
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": false,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 80,
+          "worstPublicResidual": 0.007663066268206731,
+          "worstAuthoritativeResidual": 0.007662529484839614,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 1,
+          "seed": true,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 80,
+          "worstPublicResidual": 1.084379881647958,
+          "worstAuthoritativeResidual": 1.0843795594753052,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": false,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002861255163300325,
+          "worstAuthoritativeResidual": 1.0410425668218315e-11,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 4,
+          "seed": true,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002861255388191984,
+          "worstAuthoritativeResidual": 3.2558396300189085e-11,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": false,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000028612549886253803,
+          "worstAuthoritativeResidual": 1.2967404927621828e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 1,
+          "budget": 16,
+          "seed": true,
+          "steps": 80,
+          "publicFailed": 80,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002861255008304768,
+          "worstAuthoritativeResidual": 1.3145040611561853e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": false,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 159,
+          "worstPublicResidual": 0.0004949253308755841,
+          "worstAuthoritativeResidual": 0.0004948903830032103,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 1,
+          "seed": true,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 160,
+          "worstPublicResidual": 0.28838450922667513,
+          "worstAuthoritativeResidual": 0.2883839813503437,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": false,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000029231825927952595,
+          "worstAuthoritativeResidual": 1.1701627947863225e-11,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 4,
+          "seed": true,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000002923186220710353,
+          "worstAuthoritativeResidual": 7.04575482159131e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": false,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000029231843438495443,
+          "worstAuthoritativeResidual": 5.204725539442734e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 2,
+          "budget": 16,
+          "seed": true,
+          "steps": 160,
+          "publicFailed": 160,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000029231842286705394,
+          "worstAuthoritativeResidual": 5.240252676230739e-13,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": false,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 308,
+          "worstPublicResidual": 0.000049589307421271656,
+          "worstAuthoritativeResidual": 0.00004958926318288093,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 1,
+          "seed": true,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 320,
+          "worstPublicResidual": 0.0743594556182738,
+          "worstAuthoritativeResidual": 0.0743579957158599,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": false,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003217895695804513,
+          "worstAuthoritativeResidual": 2.9807267765136203e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 4,
+          "seed": true,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000032178956352814408,
+          "worstAuthoritativeResidual": 3.0071572402340374e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": false,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003217895619749872,
+          "worstAuthoritativeResidual": 2.0765611452588928e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 4,
+          "budget": 16,
+          "seed": true,
+          "steps": 320,
+          "publicFailed": 320,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003217895615292622,
+          "worstAuthoritativeResidual": 2.071232074740692e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": false,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 552,
+          "worstPublicResidual": 0.000017509157093087424,
+          "worstAuthoritativeResidual": 0.000016633795638654192,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 1,
+          "seed": true,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 640,
+          "worstPublicResidual": 0.018880842048067715,
+          "worstAuthoritativeResidual": 0.01888069063870663,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": false,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000030053424718780143,
+          "worstAuthoritativeResidual": 8.282263763703668e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 4,
+          "seed": true,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.000003005343735960142,
+          "worstAuthoritativeResidual": 8.262723838470265e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": false,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000030053441128179752,
+          "worstAuthoritativeResidual": 8.282263763703668e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        },
+        {
+          "level": 8,
+          "budget": 16,
+          "seed": true,
+          "steps": 640,
+          "publicFailed": 640,
+          "authoritativeFailed": 0,
+          "worstPublicResidual": 0.0000030053423923173886,
+          "worstAuthoritativeResidual": 8.282263763703668e-12,
+          "classification": "public-incremental-force-nonconvergence"
+        }
+      ]
+    }
+  ],
+  "comparatorSHA256": "1dfdaa57d61b1b5be645963c29f97bf16f733d2c4f39d99ca80be76b33126af3",
+  "scope": "complete 24-row identity and recorded force comparison only; failed gates and the literal tolerance preserved; no time, material, booklet or device acceptance"
+}

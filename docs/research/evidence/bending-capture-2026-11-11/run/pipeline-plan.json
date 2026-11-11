@@ -1,0 +1,164 @@
+{
+ "derivedStages": [
+  "oracle-comparison",
+  "summary"
+ ],
+ "experiment": {
+  "comparisons": {
+   "comparison-parity": "observer parity: every leaf except the named observer fields",
+   "comparison-repeat": "strict repeat: every leaf except recordedAt"
+  },
+  "name": "panel-bending-fixed24",
+  "protocol": "docs/research/bending-capture-protocol.md",
+  "roles": {
+   "candidate": "exact membrane curvature, half-force-tolerance absolute PCG stop, Gauss-Newton bending, instrumented",
+   "plain": "candidate without Newton observer",
+   "repeat": "candidate strict repeat"
+  }
+ },
+ "oracleComparisonExclusions": [
+  "cases[].decimalDigits"
+ ],
+ "predeclaredRepresentedErrorLimits": {
+  "bendingEnergyErrorNJ": 1e-12,
+  "bendingImpliedGradientComponentErrorMicroN": 1e-09,
+  "elasticGradientComponentErrorMicroN": 1e-09,
+  "membraneImpliedEnergyErrorNJ": 1e-12,
+  "nativeCoefficientResidualComponentErrorMicroN": 1e-09
+ },
+ "processes": [
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/bending-state-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--pcg-stop",
+    "half-force-tolerance",
+    "--out",
+    "{run}/candidate.json"
+   ],
+   "name": "candidate",
+   "output": "candidate.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/bending-state-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--pcg-stop",
+    "half-force-tolerance",
+    "--out",
+    "{run}/repeat.json"
+   ],
+   "name": "repeat",
+   "output": "repeat.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/bending-state-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--pcg-stop",
+    "half-force-tolerance",
+    "--no-solve-observer",
+    "--out",
+    "{run}/plain.json"
+   ],
+   "name": "plain",
+   "output": "plain.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-bending-state-audit.mjs",
+    "{run}/candidate.json",
+    "{run}/repeat.json",
+    "--out",
+    "{run}/comparison-repeat.json"
+   ],
+   "name": "comparison-repeat",
+   "output": "comparison-repeat.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-bending-state-audit.mjs",
+    "--observer-comparison",
+    "{run}/plain.json",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/comparison-parity.json"
+   ],
+   "name": "comparison-parity",
+   "output": "comparison-parity.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/bending-state-probes.mjs",
+    "--input",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/probes.json"
+   ],
+   "name": "probes",
+   "output": "probes.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/bending-state-precision.py",
+    "--self-test"
+   ],
+   "name": "oracle-self-test",
+   "output": "oracle-self-test.json",
+   "stdin": null,
+   "stdoutIsOutput": true
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/bending-state-precision.py",
+    "--digits",
+    "80"
+   ],
+   "name": "oracle-80",
+   "output": "oracle-80.json",
+   "stdin": "probes.json",
+   "stdoutIsOutput": true
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/bending-state-precision.py",
+    "--digits",
+    "100"
+   ],
+   "name": "oracle-100",
+   "output": "oracle-100.json",
+   "stdin": "probes.json",
+   "stdoutIsOutput": true
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+{"schema":"pliego-bending-state-self-test/1","passed":true,"testCases":4,"checks":["Machin pi and atan2 quadrants","atan2 versus libm to 2 ulp","analytical valley-positive fold 2atan(t)","rational central-difference convergence and translation invariance"]}

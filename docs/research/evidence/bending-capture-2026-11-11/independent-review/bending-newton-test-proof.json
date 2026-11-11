@@ -1,0 +1,70 @@
+{
+  "schema": "pliego-selected-newton-bending-review-tests/1",
+  "passed": true,
+  "tests": [
+    "ordinary 4-row bending fixture: 14 selected records, both inertia laws, exact membrane+inertia, high-precision bending, 80/100 agreement, engine bending terms within 1e-12 of their magnitude, no wrong accept",
+    "corrupted raw binding rejected",
+    "conflicting roles for same actual iteration rejected",
+    "edited continuation angles rejected (JSON view, then consistently re-bound words against the pose-history hash)",
+    "continuation entry not tied to the record us rejected even with a recomputed pose-history hash",
+    "changed bending identity rejected",
+    "synthetic accepted label on an actual non-descent trial remains a certain Armijo failure under all three slopes and both inertia laws",
+    "frozen planar reviewer byte-identical and SHA-pinned"
+  ],
+  "ordinaryFixtureSHA256": "b6b93fc55e27819f458aad926a112a5f19086ffbf4af82a9a3fc951cd48354d0",
+  "reviewerSHA256": "b8732b9eaad76aa0a7be06be0999105a5e77b5f19094e0adeea194fb12bd9dcd",
+  "planarReviewerSHA256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0",
+  "ordinaryProofSummary": {
+    "checks": 2202,
+    "decodedFloat64Words": 8932,
+    "selection": {
+      "roleReferences": 14,
+      "uniqueEvents": 14,
+      "allScalarEventsRetained": 160,
+      "deduplication": "trajectory+substepsRun+iteration; all roles preserved; identical full bytes/values required"
+    },
+    "decisions": {
+      "accepted": 12,
+      "rejected": 2
+    },
+    "counts": {
+      "nativeCoefficient": {
+        "selectedTrialsEvaluated": 14,
+        "acceptedEvaluated": 12,
+        "wrongAcceptedRecordedSlopeArmijo": 0,
+        "wrongAcceptedCapturedGradientSlopeArmijo": 0,
+        "wrongAcceptedExactGradientSlopeArmijo": 0,
+        "rejectedNonzeroPassingRecordedSlopeArmijo": 0,
+        "positiveAcceptedPotential": 0,
+        "uncertainVerdicts": 0,
+        "bendingDecisiveForRecordedSlopeVerdict": 3
+      },
+      "realMass": {
+        "selectedTrialsEvaluated": 14,
+        "acceptedEvaluated": 12,
+        "wrongAcceptedRecordedSlopeArmijo": 0,
+        "wrongAcceptedCapturedGradientSlopeArmijo": 0,
+        "wrongAcceptedExactGradientSlopeArmijo": 0,
+        "rejectedNonzeroPassingRecordedSlopeArmijo": 0,
+        "positiveAcceptedPotential": 0,
+        "uncertainVerdicts": 0,
+        "bendingDecisiveForRecordedSlopeVerdict": 3
+      }
+    },
+    "bendingTermErrors": {
+      "maximumAbsoluteNJ": {
+        "bendingDifference": 6.822459071502003e-19,
+        "bendingLinear": 6.581993828610577e-19,
+        "bendingRemainder": 8.298167441976965e-20
+      },
+      "maximumOverEngineMagnitude": {
+        "bendingDifference": 6.218217831764517e-16,
+        "bendingLinear": 6.058146140390461e-16,
+        "bendingRemainder": 4.0336612428977156e-16
+      },
+      "evaluated": 14
+    }
+  },
+  "maximumSecondsPerRecord": 0.21830150699679507,
+  "scope": "bounded reviewer development checks only; no accepted 24-row matrix, no new solver execution by tests"
+}

@@ -1,0 +1,100 @@
+{
+  "schema": "pliego-selected-newton-bending-reviewer-freeze/1",
+  "sourceGitAtFreeze": "6d55f8c85416ae69014d060cdfdefdf3eccd4598",
+  "repoDirtyAtFreeze": false,
+  "uncommittedImportedSources": [],
+  "files": [
+    {
+      "file": "review-selected-newton-bending.py",
+      "bytes": 23631,
+      "sha256": "b8732b9eaad76aa0a7be06be0999105a5e77b5f19094e0adeea194fb12bd9dcd"
+    },
+    {
+      "file": "make-bending-newton-test-fixture.mjs",
+      "bytes": 2432,
+      "sha256": "cbaebc3b82cb8f596cf6591c87dc2a3b54eac3c2d91777de764c8ba185fbc29f"
+    },
+    {
+      "file": "test-bending-newton-review.py",
+      "bytes": 7176,
+      "sha256": "8befa37ff220c145d20022fafd5668671afbe76017f3a3c534b9da7539d8a310"
+    },
+    {
+      "file": "bending-newton-small-fixture.json",
+      "bytes": 2677181,
+      "sha256": "b6b93fc55e27819f458aad926a112a5f19086ffbf4af82a9a3fc951cd48354d0"
+    },
+    {
+      "file": "bending-newton-small-proof.json",
+      "bytes": 299030,
+      "sha256": "0cc926a1573619861afd7574e57f2677a54ab286bbc5d0c7da42ce9698190d19"
+    },
+    {
+      "file": "bending-newton-test-proof.json",
+      "bytes": 3049,
+      "sha256": "4d9d6232dc4864470f4e8a9ae1a57097b0bc861002ae62265bcb5a0f10b7e031"
+    },
+    {
+      "file": "reviewer-sources.json",
+      "bytes": 235742,
+      "sha256": "69f7caa216705d36475a8b56a0f08e97158484d0c66afe0e6d1442b39cdf7240"
+    },
+    {
+      "file": "../../state-matrix-pcg-force-stop-2026-11-10/independent-review/review-selected-newton.py",
+      "bytes": 18999,
+      "sha256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0"
+    },
+    {
+      "file": "packages/engine/bench/bending-state-precision.py",
+      "bytes": 20679,
+      "sha256": "7d5fa25098f0717db1556d61b70aecd918cc2a3fd733e413fcb071868a02a09d"
+    },
+    {
+      "file": "packages/engine/bench/membrane-state-precision.py",
+      "bytes": 23280,
+      "sha256": "ce1dbcd0203a6ab7ad5e06912dda6f198bf8e3a867a0cc286bb51ac26f394198"
+    },
+    {
+      "file": "packages/engine/bench/membrane-reference-precision.py",
+      "bytes": 24514,
+      "sha256": "db521a2a473d8038c4f9abec4c0f14a6242e74937e003269a0ebff8e6d98529f"
+    },
+    {
+      "file": "packages/engine/bench/membrane-reference-binding.py",
+      "bytes": 3477,
+      "sha256": "b3a7fa6260ea4aacdce7dcb9e73c3ff5d5ba5e9f7148425ef52142f6bd76816a"
+    },
+    {
+      "file": "packages/engine/bench/membrane-gradient-precision.py",
+      "bytes": 17735,
+      "sha256": "fdaa1a27a3983cc2251bdb340774279e8bd8902eb8baba8a47528652ad5878cd"
+    },
+    {
+      "file": "packages/engine/bench/membrane-increment-precision.py",
+      "bytes": 20132,
+      "sha256": "81c888351c3af60f5ab2b32433bee45e71ceb27a3d690e2e034bca7feb9c9122"
+    },
+    {
+      "file": "packages/engine/bench/plane-stress-precision.py",
+      "bytes": 12031,
+      "sha256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec"
+    }
+  ],
+  "ready": true,
+  "command": [
+    "python3",
+    "-I",
+    "review-selected-newton-bending.py",
+    "--repo",
+    "REPO",
+    "--input",
+    "CANDIDATE_JSON",
+    "--out",
+    "FRESH_DURABLE_PROOF_JSON"
+  ],
+  "captureReady": "reviewer frozen before an accepted bending matrix; the ordinary small fixture is not an accepted matrix capture; imported lane sources must be committed and the capture must list them before a matrix review",
+  "scope": "selected last evaluated trial endpoints only; exact membrane+inertia (native rounded C and real M/h^2), high-precision bending with a declared error bound and 80/100 agreement; recorded, captured-gradient and exact-gradient Armijo classified separately; engine bending terms compared to truth; all roles retained; no all-Newton-event, force/time/material/booklet or interaction acceptance",
+  "inputsForLaterCapture": "candidate.json from a clean fixed 24-row bending observed run (pliego-bending-state-audit/1, instrument true); reviewer verifies every captured source file against the supplied repo",
+  "developmentTests": 8,
+  "numericalDevelopmentFixture": "level 1, budgets 4 and 16, both starts, 4 judged steps each: 16 judged calls/160 Newton decisions/14 selected records plus 4 separately recorded restore controls; exact-hessian membrane curvature, half-tau PCG stop; no accepted full capture"
+}

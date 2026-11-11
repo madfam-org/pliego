@@ -1,0 +1,64 @@
+{
+ "schema": "pliego-state-matrix-runner-manifest/1",
+ "runnerVersion": 1,
+ "preparedForSourceGit": "15422657ed909c5242ca9dadf6427cbec8853c9e",
+ "files": [
+  {
+   "file": "run-state-matrix.py",
+   "bytes": 20827,
+   "sha256": "ea29776d32c1533e9b298ac530e54b23c7fef5db3fe846cb39bcccba0ba7ccd4"
+  },
+  {
+   "file": "pipeline-plan.json",
+   "bytes": 5723,
+   "sha256": "604c9f144afdd6e86044e1d16402143d16653490dbf76a6c95398a1f41c01641"
+  }
+ ],
+ "auxiliaryFrozenFiles": [
+  {
+   "path": "../independent-review/review-selected-newton.py",
+   "bytes": 18999,
+   "sha256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0"
+  },
+  {
+   "path": "../independent-review/reviewer-freeze.json",
+   "bytes": 2251,
+   "sha256": "4fc2d3068e3b5577bd3fed22a1f4d647d04a9f45727fbf79f390c3d605195b35"
+  },
+  {
+   "path": "../independent-review/reviewer-sources.json",
+   "bytes": 33385,
+   "sha256": "0644fdc579c6a969cf871157d278b0e114c124f064debc96160ce0d6d33fabed"
+  }
+ ],
+ "unchangedOracleBaselineGit": "3517e50490d79a76d8179d85089a70e4f40b39f1",
+ "unchangedOracleFiles": [
+  {
+   "path": "packages/engine/bench/membrane-state-precision.py",
+   "sha256": "ce1dbcd0203a6ab7ad5e06912dda6f198bf8e3a867a0cc286bb51ac26f394198"
+  },
+  {
+   "path": "packages/engine/bench/membrane-reference-precision.py",
+   "sha256": "db521a2a473d8038c4f9abec4c0f14a6242e74937e003269a0ebff8e6d98529f"
+  },
+  {
+   "path": "packages/engine/bench/membrane-reference-binding.py",
+   "sha256": "b3a7fa6260ea4aacdce7dcb9e73c3ff5d5ba5e9f7148425ef52142f6bd76816a"
+  },
+  {
+   "path": "packages/engine/bench/membrane-gradient-precision.py",
+   "sha256": "fdaa1a27a3983cc2251bdb340774279e8bd8902eb8baba8a47528652ad5878cd"
+  },
+  {
+   "path": "packages/engine/bench/membrane-increment-precision.py",
+   "sha256": "81c888351c3af60f5ab2b32433bee45e71ceb27a3d690e2e034bca7feb9c9122"
+  },
+  {
+   "path": "packages/engine/bench/plane-stress-precision.py",
+   "sha256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec"
+  }
+ ],
+ "externalReviewerScope": "selected Newton review runs separately against candidate; frozen before any accepted capture; no duplication or all49770 claim",
+ "executionAuthorized": false,
+ "scope": "force-tolerance PCG stop fixed24 preparation manifest; runner and reviewer bytes identical to the closed captures; execution waits for the clean-source suite"
+}

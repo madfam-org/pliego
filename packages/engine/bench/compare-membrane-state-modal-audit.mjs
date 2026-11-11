@@ -9,7 +9,7 @@ import {loadStateModalInputs,STATE_MODAL_ARCHIVE_GIT} from './membrane-state-mod
 import {reserveStateModalOutput} from './membrane-state-modal-output.mjs';
 
 const sha=b=>createHash('sha256').update(b).digest('hex');
-const MODES=['strict-repeat','transparent-solve-observer','baseline-migration','state-comparison','state-replay','curvature-comparison'];
+const MODES=['strict-repeat','transparent-solve-observer','baseline-migration','state-comparison','state-replay','curvature-comparison','stopping-comparison'];
 /** The closed fixed24 Gauss–Newton state capture (3d778abc run/candidate.json, decoded bytes). */
 export const STATE_REPLAY_ARCHIVE_GIT='3d778abc179988e1c1a31b43d8048aa6a08d00b1';
 export const STATE_REPLAY_ARCHIVE_RAW_SHA256='09d94972d9f7f815d6fae4033eac6417810242a238911b542573b53ccbfadb78';
@@ -23,7 +23,20 @@ export const STATE_REPLAY_REVIEWED_CHANGES=Object.freeze(['packages/engine/bench
   'packages/engine/src/xpbd/reference-state.js','packages/engine/src/xpbd/state.js','packages/engine/src/xpbd/world.js']);
 export const STATE_REPLAY_REVIEWED_ADDITIONS=Object.freeze(['packages/engine/src/xpbd/exact-newton.js','packages/engine/src/xpbd/membrane-curvature.js',
   'packages/engine/test/exact-curvature-capture.test.js','packages/engine/test/exact-curvature-operators.test.js','packages/engine/test/exact-curvature-world.test.js']);
-const CURVATURE_ONLY=new Set(['membraneCurvature']);
+/** Closed exact-curvature capture (af870bf run/candidate.json) and its reviewed migration to the PCG-stop capture source. */
+export const EXACT_REPLAY_ARCHIVE_GIT='af870bf776023b01f6e205a420fa493cccd549c5';
+export const EXACT_REPLAY_ARCHIVE_RAW_SHA256='d07ab0e04bc54bdfb4a924529ffd87f04829f0ba10bdcbcca48308e2445ef25a';
+// Engine: the opt-in absolute PCG stop (pcg.js, newton.js, exact-newton.js, world.js). Bench: the named stop candidate,
+// its validation and receipts, and this replay registry/stopping comparison. Every other inventory path must be byte-identical.
+export const EXACT_REPLAY_REVIEWED_CHANGES=Object.freeze(['packages/engine/bench/compare-membrane-state-modal-audit.mjs','packages/engine/bench/membrane-state-modal-audit.mjs',
+  'packages/engine/bench/membrane-state-modal-runtime.mjs','packages/engine/bench/membrane-state-modal-validation.mjs','packages/engine/src/xpbd/exact-newton.js',
+  'packages/engine/src/xpbd/newton.js','packages/engine/src/xpbd/pcg.js','packages/engine/src/xpbd/world.js']);
+export const EXACT_REPLAY_REVIEWED_ADDITIONS=Object.freeze(['packages/engine/test/pcg-absolute-stop.test.js']);
+/** Replay targets by decoded raw SHA256. Each list is reviewed for the source that replays it. */
+export const STATE_REPLAY_ARCHIVES=Object.freeze({
+  [STATE_REPLAY_ARCHIVE_RAW_SHA256]:Object.freeze({git:STATE_REPLAY_ARCHIVE_GIT,membraneCurvature:'gauss-newton',changes:STATE_REPLAY_REVIEWED_CHANGES,additions:STATE_REPLAY_REVIEWED_ADDITIONS,reviewedFor:'capture source af870bf'}),
+  [EXACT_REPLAY_ARCHIVE_RAW_SHA256]:Object.freeze({git:EXACT_REPLAY_ARCHIVE_GIT,membraneCurvature:'exact-hessian',changes:EXACT_REPLAY_REVIEWED_CHANGES,additions:EXACT_REPLAY_REVIEWED_ADDITIONS,reviewedFor:'the PCG-stop capture source'})});
+const CURVATURE_ONLY=new Set(['membraneCurvature']),STOP_ONLY=new Set(['pcgAbsoluteTolerance']);
 const OBSERVER_ONLY=['protocol.instrument','protocol.perNewtonLinearDiagnostics','gates.perNewtonLinearDiagnostics',
   'results[].trajectories[].solveObservation','results[].trajectories[].gates.perNewtonLinearDiagnostics'];
 const key=t=>[t.level,t.budget,t.seed].join(':');
@@ -169,32 +182,45 @@ function stateChanges(b,c){
   }assert.equal(gains+losses+unchanged,7110);return {publicGains:gains,publicLosses:losses,publicUnchanged:unchanged,trajectories,scope:'latent passes are separately counted and never public gains; public velocity may differ after initialization'};
 }
 /** Every inventory path is either byte-identical or on the reviewed change/addition lists; nothing removed. */
-export function stateReplayMigration(old,fresh,{changes=STATE_REPLAY_REVIEWED_CHANGES,additions=STATE_REPLAY_REVIEWED_ADDITIONS}={}){
-  assert.equal(old.git,STATE_REPLAY_ARCHIVE_GIT,'closed capture source required');assert.equal(old.dirty,false);assert.equal(fresh.dirty,false);
+export function stateReplayMigration(old,fresh,{changes=STATE_REPLAY_REVIEWED_CHANGES,additions=STATE_REPLAY_REVIEWED_ADDITIONS,git=STATE_REPLAY_ARCHIVE_GIT}={}){
+  assert.equal(old.git,git,'closed capture source required');assert.equal(old.dirty,false);assert.equal(fresh.dirty,false);
   const before=new Map(old.files.map(f=>[f.path,f.sha256])),after=new Map(fresh.files.map(f=>[f.path,f.sha256]));
   const changed=[...after].filter(([p,h])=>before.has(p)&&before.get(p)!==h).map(([p])=>p).sort(),added=[...after.keys()].filter(p=>!before.has(p)).sort(),removed=[...before.keys()].filter(p=>!after.has(p));
   assert.deepEqual(removed,[],'historical source removed');
   assert.deepEqual(changed,[...changes].sort(),'unreviewed source change');assert.deepEqual(added,[...additions].sort(),'unreviewed source addition');
   return {historicalFiles:before.size,currentFiles:after.size,reviewedChanged:changed,reviewedAdded:added,allOtherFilesByteIdentical:true};
 }
-const withoutCurvature=o=>Object.fromEntries(Object.entries(o).filter(([k])=>!CURVATURE_ONLY.has(k)));
+const without=(o,varying)=>Object.fromEntries(Object.entries(o).filter(([k])=>!varying.has(k)));
 export function commonCurvatureInputs(b,c){
-  assert.deepEqual(b.source,c.source,'same frozen source required for the curvature ablation');
   assert.equal(Object.hasOwn(b.protocol,'membraneCurvature'),false,'Gauss–Newton baseline must omit the curvature request');
-  assert.equal(c.protocol.membraneCurvature,'exact-hessian','named exact-curvature candidate required');assert.equal(b.protocol.instrument,c.protocol.instrument);
+  assert.equal(c.protocol.membraneCurvature,'exact-hessian','named exact-curvature candidate required');
+  commonAblationInputs(b,c,CURVATURE_ONLY);
+  for(const t of c.results[0].trajectories){assert.equal(t.options.membraneCurvature,'exact-hessian');const a=b.results[0].trajectories.find(x=>key(x)===key(t));assert.equal(Object.hasOwn(a.options,'membraneCurvature')?a.options.membraneCurvature:'gauss-newton','gauss-newton');}
+}
+/** Same-curvature stop ablation: only the named absolute PCG stop may differ. */
+export function commonStoppingInputs(b,c){
+  assert.equal(Object.hasOwn(b.protocol,'pcgStop'),false,'relative-stop baseline must omit the PCG stop request');
+  assert.equal(c.protocol.pcgStop?.rule,'absolute-residual-infinity-norm','named absolute PCG stop candidate required');
+  assert.equal(b.protocol.membraneCurvature,c.protocol.membraneCurvature,'same curvature request required');
+  commonAblationInputs(b,c,STOP_ONLY);
+  for(const t of c.results[0].trajectories){const a=b.results[0].trajectories.find(x=>key(x)===key(t));
+    assert.equal(Object.hasOwn(a.options,'pcgAbsoluteTolerance'),false);assert.ok(Object.is(t.options.pcgAbsoluteTolerance,c.protocol.pcgStop.factorOfForceTolerance*t.forceTolerance),'declared absolute stop value');}
+}
+function commonAblationInputs(b,c,varying){
+  assert.deepEqual(b.source,c.source,'same frozen source required for the ablation');assert.equal(b.protocol.instrument,c.protocol.instrument);
   const old=b.results[0],candidate=c.results[0];
   for(const name of ['geometry','vertices','triangles','material','mesh','fixtureSHA256','meshSHA256','referenceCoefficients','reference','scalarResponseProof','plan'])assert.deepEqual(old[name],candidate[name],'physical reference/input differs: '+name);
   const rows=new Map(old.trajectories.map(t=>[key(t),t]));
   for(const t of candidate.trajectories){const a=rows.get(key(t));assert.ok(a);
     for(const name of ['level','budget','seed','amplitude','substeps','steps','h','fixedForceScale','forceTolerance','modalMass'])assert.equal(a[name],t[name]);
-    assert.equal(t.options.membraneCurvature,'exact-hessian');assert.equal(Object.hasOwn(a.options,'membraneCurvature')?a.options.membraneCurvature:'gauss-newton','gauss-newton');
-    assert.deepEqual(withoutCurvature(a.options),withoutCurvature(t.options));assert.deepEqual(withoutCurvature(a.runtime.parameters),withoutCurvature(t.runtime.parameters));assert.deepEqual(withoutCurvature(a.runtime.options),withoutCurvature(t.runtime.options));
+    assert.deepEqual(without(a.options,varying),without(t.options,varying));assert.deepEqual(without(a.runtime.parameters,varying),without(t.runtime.parameters,varying));assert.deepEqual(without(a.runtime.options,varying),without(t.runtime.options,varying));
     assert.deepEqual(a.runtime.massProof,t.runtime.massProof);assert.deepEqual(a.referenceWords,t.referenceWords,'native reference words differ');
     for(const name of ['x','xs','xt','v','u','us','ut','x0','mass','h','initialX','initialU','initialV','reference'])if(a.history[0].stateFloat64LE[name]!==undefined)assert.equal(a.history[0].stateFloat64LE[name],t.history[0].stateFloat64LE[name],'actual native initial bytes changed: '+name);
   }
 }
 const quantiles=a=>{const s=a.filter(numeric).sort((x,y)=>x-y);return s.length?{minimum:s[0],median:s[Math.floor(s.length/2)],maximum:s.at(-1)}:null;};
-export function curvatureChanges(b,c){
+export function curvatureChanges(b,c,{labels=['gaussNewton','exactCurvature'],scope='public and latent gate changes are counted separately against the same-source Gauss–Newton baseline; residual quantiles are descriptive; no exact-Newton endpoint is imagined'}={}){
+  const [baseLabel,candidateLabel]=labels,baselineEvents={};
   const rows=new Map(b.results[0].trajectories.map(t=>[key(t),t])),totals={public:{gains:0,losses:0,unchanged:0},authoritative:{gains:0,losses:0,unchanged:0}},trajectories=[];
   const events={exactFactorAttempts:0,exactFactors:0,finiteNonpositivePivots:0,gnFallbackFactors:0,nonfiniteFailures:0,pcgAttempts:0,pcgConverged:0,zeroRhs:0,pcgNonpositiveCurvature:0,pcgNonfiniteProduct:0,pcgStagnation:0,pcgIterationLimit:0,pcgNonDescent:0,pcgNonfiniteDirection:0,iterations:0};
   for(const t of c.results[0].trajectories){const a=rows.get(key(t)),row={level:t.level,budget:t.budget,seed:t.seed,public:{gains:0,losses:0,unchanged:0},authoritative:{gains:0,losses:0,unchanged:0},changedSteps:[]};
@@ -208,13 +234,13 @@ export function curvatureChanges(b,c){
     for(const k of Object.keys(events)){assert.ok(Number.isSafeInteger(counters[k]),'counter '+k);events[k]+=counters[k];}
     assert.equal(counters.iterations,t.steps*t.budget,'one completed exact iteration per declared Newton iteration');
     row.curvatureEvents=counters;
-    row.authoritativeResidual={gaussNewton:quantiles(a.trace.slice(1).map(o=>o.authoritativeResidualInfinity)),exactCurvature:quantiles(t.trace.slice(1).map(o=>o.authoritativeResidualInfinity))};
-    row.publicResidual={gaussNewton:quantiles(a.trace.slice(1).map(o=>o.residualInfinity)),exactCurvature:quantiles(t.trace.slice(1).map(o=>o.residualInfinity))};
-    row.firstStepAuthoritativeResidual={gaussNewton:a.trace[1].authoritativeResidualInfinity,exactCurvature:t.trace[1].authoritativeResidualInfinity};
+    const base=a.trace.at(-1).solver.membraneCurvatureCounters;if(base){row.baselineCurvatureEvents=base;for(const k of Object.keys(events))baselineEvents[k]=(baselineEvents[k]??0)+base[k];}
+    row.authoritativeResidual={[baseLabel]:quantiles(a.trace.slice(1).map(o=>o.authoritativeResidualInfinity)),[candidateLabel]:quantiles(t.trace.slice(1).map(o=>o.authoritativeResidualInfinity))};
+    row.publicResidual={[baseLabel]:quantiles(a.trace.slice(1).map(o=>o.residualInfinity)),[candidateLabel]:quantiles(t.trace.slice(1).map(o=>o.residualInfinity))};
+    row.firstStepAuthoritativeResidual={[baseLabel]:a.trace[1].authoritativeResidualInfinity,[candidateLabel]:t.trace[1].authoritativeResidualInfinity};
     trajectories.push(row);
   }
-  return {...totals,curvatureEvents:events,trajectories,
-    scope:'public and latent gate changes are counted separately against the same-source Gauss–Newton baseline; residual quantiles are descriptive; no exact-Newton endpoint is imagined'};
+  return {...totals,curvatureEvents:events,...(Object.keys(baselineEvents).length?{baselineCurvatureEvents:baselineEvents}:{}),trajectories,scope};
 }
 export function compareStateModalReports(a,b,{mode='strict-repeat',oldRawSHA256=null}={}){
   assert.ok(MODES.includes(mode),'unknown named comparison');let comparison,forceOutcomes,changes,sourcePolicy;
@@ -222,13 +248,20 @@ export function compareStateModalReports(a,b,{mode='strict-repeat',oldRawSHA256=
     assert.equal(oldRawSHA256,'796a80bbe6b47c784eea03a9f3545b24780743f9180002a8c7172879d98307de','exact immutable old report required');legacyRows(a);baseline(b);
     sourcePolicy=sourceMigration(a.source,b.legacy.source,b.source);comparison=assertLegacyNumericalReplay(a,b.legacy);
   }else if(mode==='state-replay'){
-    assert.equal(oldRawSHA256,STATE_REPLAY_ARCHIVE_RAW_SHA256,'exact closed fixed24 state capture required');
-    forceOutcomes=[stateModalForceOutcomes(a),stateModalForceOutcomes(b)];assert.equal(Object.hasOwn(b.protocol,'membraneCurvature'),false,'replay is the Gauss–Newton path');
-    sourcePolicy=stateReplayMigration(a.source,b.source);comparison=assertStateModalPayloadEqual(a,b,{legacy:true});
+    const archive=STATE_REPLAY_ARCHIVES[oldRawSHA256];assert.ok(archive,'exact closed fixed24 state capture required');
+    forceOutcomes=[stateModalForceOutcomes(a),stateModalForceOutcomes(b)];
+    assert.equal(b.protocol.membraneCurvature??'gauss-newton',archive.membraneCurvature,'replay uses the closed capture\'s curvature');assert.equal(Object.hasOwn(b.protocol,'pcgStop'),false,'replay uses the relative PCG stop');
+    sourcePolicy={...stateReplayMigration(a.source,b.source,archive),closedCaptureRawSHA256:oldRawSHA256};comparison=assertStateModalPayloadEqual(a,b,{legacy:true});
   }else if(mode==='curvature-comparison'){
     const baselineOutcomes=stateModalForceOutcomes(a);forceOutcomes=stateModalForceOutcomes(b);commonCurvatureInputs(a,b);changes={...curvatureChanges(a,b),baselineFailures:{public:baselineOutcomes.publicFailed,authoritative:baselineOutcomes.authoritativeFailed}};
     for(const kind of ['public','authoritative'])assert.equal(changes[kind].gains+changes[kind].losses+changes[kind].unchanged,7110,'every judged step classified: '+kind);
     comparison={commonActualInputsExactlyEqual:true,excludedInputIdentity:['membraneCurvature'],physicalCSTReferenceUnchanged:true};
+  }else if(mode==='stopping-comparison'){
+    const baselineOutcomes=stateModalForceOutcomes(a);forceOutcomes=stateModalForceOutcomes(b);commonStoppingInputs(a,b);
+    changes={...curvatureChanges(a,b,{labels:['relativeStop','absoluteStop'],scope:'public and latent gate changes counted separately against the same-source, same-curvature relative-stop baseline; residual quantiles are descriptive'}),
+      baselineFailures:{public:baselineOutcomes.publicFailed,authoritative:baselineOutcomes.authoritativeFailed}};
+    for(const kind of ['public','authoritative'])assert.equal(changes[kind].gains+changes[kind].losses+changes[kind].unchanged,7110,'every judged step classified: '+kind);
+    comparison={commonActualInputsExactlyEqual:true,excludedInputIdentity:['pcgAbsoluteTolerance'],physicalCSTReferenceUnchanged:true};
   }else if(mode==='state-comparison'){
     baseline(a);forceOutcomes=stateModalForceOutcomes(b);commonStateInputs(a,b);changes=stateChanges(a,b);comparison={commonActualInputsExactlyEqual:true,excludedInputIdentity:['stateCoordinates'],physicalCSTReferenceUnchanged:true};
   }else{
@@ -244,7 +277,7 @@ export function reserveStateModalComparison(output){return reserveStateModalOutp
 export function writeStateModalComparison(output,value){const sink=reserveStateModalComparison(output);try{sink.write(value);}finally{sink.close();}}
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  const args=process.argv.slice(2),flags={'--observer-comparison':'transparent-solve-observer','--baseline-migration':'baseline-migration','--state-comparison':'state-comparison','--state-replay':'state-replay','--curvature-comparison':'curvature-comparison'},selected=args.filter(a=>Object.hasOwn(flags,a)),oi=args.indexOf('--out');
+  const args=process.argv.slice(2),flags={'--observer-comparison':'transparent-solve-observer','--baseline-migration':'baseline-migration','--state-comparison':'state-comparison','--state-replay':'state-replay','--curvature-comparison':'curvature-comparison','--stopping-comparison':'stopping-comparison'},selected=args.filter(a=>Object.hasOwn(flags,a)),oi=args.indexOf('--out');
   assert.ok(selected.length<=1&&oi>=0&&args[oi+1],'one named comparison and --out fresh durable output required');
   const paths=args.filter((a,i)=>!Object.hasOwn(flags,a)&&i!==oi&&i!==oi+1);assert.equal(paths.length,2);assert.ok(paths.every(p=>!p.startsWith('--')),'unknown argument');
   const sink=reserveStateModalComparison(args[oi+1]);try{

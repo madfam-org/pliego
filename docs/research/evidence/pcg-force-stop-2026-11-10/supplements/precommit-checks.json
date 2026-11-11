@@ -1,0 +1,168 @@
+{
+  "schema": "pliego-pcg-stop-precommit-checks/1",
+  "sourceGit": "15422657ed909c5242ca9dadf6427cbec8853c9e",
+  "sourceClean": true,
+  "runtimes": {
+    "node": "v22.19.0 (CI parity)",
+    "python": "3.12 via uv, pinned ruff 0.17.0 / pytest 8.4.2 / typescript 5.9.3"
+  },
+  "suites": [
+    {
+      "name": "guards-ruff",
+      "result": "PASS",
+      "seconds": 1
+    },
+    {
+      "name": "guards-tests",
+      "result": "PASS",
+      "seconds": 14
+    },
+    {
+      "name": "guards-supply-chain",
+      "result": "PASS",
+      "seconds": 0
+    },
+    {
+      "name": "guards-deploy-paths",
+      "result": "PASS",
+      "seconds": 1
+    },
+    {
+      "name": "guards-canonical-host",
+      "result": "PASS",
+      "seconds": 0
+    },
+    {
+      "name": "commons-pin",
+      "result": "PASS",
+      "seconds": 0
+    },
+    {
+      "name": "compliance",
+      "result": "PASS",
+      "seconds": 3
+    },
+    {
+      "name": "kernel-ruff",
+      "result": "PASS",
+      "seconds": 0
+    },
+    {
+      "name": "kernel-pytest",
+      "result": "PASS",
+      "seconds": 25
+    },
+    {
+      "name": "stock-cards",
+      "result": "PASS",
+      "seconds": 0
+    },
+    {
+      "name": "engine-tests",
+      "result": "PASS",
+      "seconds": 132
+    },
+    {
+      "name": "engine-typecheck",
+      "result": "PASS",
+      "seconds": 3
+    },
+    {
+      "name": "engine-package",
+      "result": "PASS",
+      "seconds": 3
+    },
+    {
+      "name": "web-tests",
+      "result": "PASS",
+      "seconds": 28
+    },
+    {
+      "name": "api-pytest",
+      "result": "PASS",
+      "seconds": 22
+    },
+    {
+      "name": "api-openapi",
+      "result": "PASS",
+      "seconds": 0
+    }
+  ],
+  "engineTap": {
+    "tests": 358,
+    "pass": 358,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "webTap": {
+    "tests": 123,
+    "pass": 123,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "kernelPytest": "815 passed in 23.66s",
+  "apiPytest": "277 passed, 2 skipped in 20.33s",
+  "enginePackage": "engine-pack: @pliego/engine@0.1.0 files=112 src=54 types=54 unpacked=759456B packed=229596B OK",
+  "rawLogs": [
+    {
+      "file": "api-openapi.log",
+      "bytes": 106,
+      "sha256": "cb24c85b333287f532f8c08755eabb579e7269970763c00026e41270c51a8294"
+    },
+    {
+      "file": "api-pytest.log",
+      "bytes": 352,
+      "sha256": "947812332f5ea1ef1889ce1f69ad1ff0a59741a3a3ab2c8af41aa333cef19f22"
+    },
+    {
+      "file": "compliance.log",
+      "bytes": 106,
+      "sha256": "f48fc9c103991e52f63f0fa46251a96060aa7f0240db3c2373e07461f7a549c5"
+    },
+    {
+      "file": "engine-package.log",
+      "bytes": 95,
+      "sha256": "7d081a5586a787fbd5f2876cff27a1e92f55a287282c833ade40293629a7e6b5"
+    },
+    {
+      "file": "engine-tap.txt",
+      "bytes": 149034,
+      "sha256": "be355b67b26d903ddc9084f38bbf26c26061a4a280d3994b14d509bc763ea457"
+    },
+    {
+      "file": "engine-typecheck.log",
+      "bytes": 15,
+      "sha256": "547eae88d3a32517368f24657095253d507df12257f016f771c210cc0792b6ed"
+    },
+    {
+      "file": "guards-tests.log",
+      "bytes": 794,
+      "sha256": "3601404880a75f929ecb659ff1f0430ac4ecc2d0471f9748cb26dc8936238245"
+    },
+    {
+      "file": "kernel-pytest.log",
+      "bytes": 981,
+      "sha256": "d76df74a50e6e288ef3732a2f2c759a973ceda7d3d4a61aa7812431af09eae28"
+    },
+    {
+      "file": "stock-cards.log",
+      "bytes": 24,
+      "sha256": "dfda8fd20f35586fd719008a9508bf3875ea0995ceb1b923e702a27b04dc0fe7"
+    },
+    {
+      "file": "summary.txt",
+      "bytes": 365,
+      "sha256": "ea6df27f5ce4accdc54a475a0dad72d7ba04b28f2d05c96071c1155718d968a8"
+    },
+    {
+      "file": "web-tap.txt",
+      "bytes": 25726,
+      "sha256": "d933bc97967a5e4ce687cb8a59d4d6c3fe28f8d09ab1e6721bc3215e7eb52022"
+    }
+  ],
+  "scope": "clean-source CI-equivalent suite on the exact capture commit before the accepted capture; raw logs retained privately (the passing engine log contains benchmark lines the full-history secret scan flags); no physics acceptance"
+}

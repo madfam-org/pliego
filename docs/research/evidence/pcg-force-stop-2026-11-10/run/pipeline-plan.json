@@ -1,0 +1,226 @@
+{
+ "derivedStages": [
+  "oracle-comparison",
+  "summary"
+ ],
+ "experiment": {
+  "comparisons": {
+   "comparison-baseline-migration": "state-replay: new exact relative-stop baseline vs closed af870bf run/candidate.json under reviewed source migration",
+   "comparison-statechange": "stopping-comparison: same-source same-curvature relative vs absolute stop; public and latent changes separate"
+  },
+  "name": "force-tolerance-pcg-stop-fixed24",
+  "protocol": "docs/research/pcg-force-stop-protocol.md",
+  "roles": {
+   "baseline": "exact curvature, relative PCG stop, new source, instrumented",
+   "candidate": "exact curvature, half-force-tolerance absolute PCG stop, instrumented",
+   "plain": "candidate without Newton observer",
+   "repeat": "candidate strict repeat"
+  }
+ },
+ "oracleComparisonExclusions": [
+  "cases[].decimalDigits"
+ ],
+ "predeclaredRepresentedErrorLimits": {
+  "energyNJ": 1e-12,
+  "gradientComponentMicroN": 1e-09
+ },
+ "processes": [
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--out",
+    "{run}/baseline.json"
+   ],
+   "name": "baseline",
+   "output": "baseline.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--pcg-stop",
+    "half-force-tolerance",
+    "--out",
+    "{run}/candidate.json"
+   ],
+   "name": "candidate",
+   "output": "candidate.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--pcg-stop",
+    "half-force-tolerance",
+    "--out",
+    "{run}/repeat.json"
+   ],
+   "name": "repeat",
+   "output": "repeat.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-audit.mjs",
+    "--membrane-curvature",
+    "exact-hessian",
+    "--pcg-stop",
+    "half-force-tolerance",
+    "--no-solve-observer",
+    "--out",
+    "{run}/plain.json"
+   ],
+   "name": "plain",
+   "output": "plain.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "--state-replay",
+    "docs/research/evidence/exact-curvature-2026-11-10/run/candidate.json.gz",
+    "{run}/baseline.json",
+    "--out",
+    "{run}/comparison-baseline-migration.json"
+   ],
+   "name": "comparison-baseline-migration",
+   "output": "comparison-baseline-migration.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "{run}/candidate.json",
+    "{run}/repeat.json",
+    "--out",
+    "{run}/comparison-repeat.json"
+   ],
+   "name": "comparison-repeat",
+   "output": "comparison-repeat.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "--observer-comparison",
+    "{run}/plain.json",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/comparison-parity.json"
+   ],
+   "name": "comparison-parity",
+   "output": "comparison-parity.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/compare-membrane-state-modal-audit.mjs",
+    "--stopping-comparison",
+    "{run}/baseline.json",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/comparison-statechange.json"
+   ],
+   "name": "comparison-statechange",
+   "output": "comparison-statechange.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{node}",
+    "--max-old-space-size=8192",
+    "packages/engine/bench/membrane-state-modal-probes.mjs",
+    "--input",
+    "{run}/candidate.json",
+    "--out",
+    "{run}/probes.json"
+   ],
+   "name": "probes",
+   "output": "probes.json",
+   "stdin": null,
+   "stdoutIsOutput": false
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--self-test"
+   ],
+   "name": "oracle-self-test",
+   "output": "oracle-self-test.json",
+   "stdin": null,
+   "stdoutIsOutput": true
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--digits",
+    "80"
+   ],
+   "name": "oracle-80",
+   "output": "oracle-80.json",
+   "stdin": "probes.json",
+   "stdoutIsOutput": true
+  },
+  {
+   "argv": [
+    "{python}",
+    "packages/engine/bench/membrane-state-precision.py",
+    "--digits",
+    "100"
+   ],
+   "name": "oracle-100",
+   "output": "oracle-100.json",
+   "stdin": "probes.json",
+   "stdoutIsOutput": true
+  }
+ ],
+ "protocol": {
+  "captureOrder": [
+   "baseline",
+   "candidate",
+   "repeat",
+   "plain"
+  ],
+  "declaredNewtonIterationsPerCapture": 49770,
+  "judgedPoststepsPerCapture": 7110,
+  "nodeMaximumOldSpaceMiB": 8192,
+  "stateInitialAndJudgedRecordsPerCapture": 7134,
+  "stateRestoreDeclaredNewtonIterationsPerCapture": 168,
+  "stateRestorePublicCallsPerCapture": 24,
+  "trajectories": 24
+ },
+ "schema": "pliego-state-matrix-execution-plan/1",
+ "scope": "untimed research; source/identity/coverage success is distinct from false force and unresolved time/material/booklet/device gates; force-tolerance PCG stop ablation reuses the closed runner bytes; only the plan roles/arguments differ"
+}

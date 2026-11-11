@@ -1,0 +1,7277 @@
+{
+  "schema": "pliego-membrane-state-modal-comparison/1",
+  "recordedAt": "2026-11-11T03:43:51.267Z",
+  "mode": "stopping-comparison",
+  "comparison": {
+    "commonActualInputsExactlyEqual": true,
+    "excludedInputIdentity": [
+      "pcgAbsoluteTolerance"
+    ],
+    "physicalCSTReferenceUnchanged": true
+  },
+  "forceOutcomes": {
+    "poststeps": 7110,
+    "declaredNewtonEvents": 49770,
+    "trajectories": [
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 79,
+        "publicFailed": 77,
+        "authoritativeFailed": 74,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 79,
+        "publicFailed": 79,
+        "authoritativeFailed": 79,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 121,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 157,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 309,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 2
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 606,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 6
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      }
+    ],
+    "publicFailed": 7076,
+    "authoritativeFailed": 1346
+  },
+  "changes": {
+    "public": {
+      "gains": 2,
+      "losses": 0,
+      "unchanged": 7108
+    },
+    "authoritative": {
+      "gains": 1013,
+      "losses": 0,
+      "unchanged": 6097
+    },
+    "curvatureEvents": {
+      "exactFactorAttempts": 37346,
+      "exactFactors": 37346,
+      "finiteNonpositivePivots": 0,
+      "gnFallbackFactors": 0,
+      "nonfiniteFailures": 0,
+      "pcgAttempts": 12424,
+      "pcgConverged": 12424,
+      "zeroRhs": 0,
+      "pcgNonpositiveCurvature": 0,
+      "pcgNonfiniteProduct": 0,
+      "pcgStagnation": 0,
+      "pcgIterationLimit": 0,
+      "pcgNonDescent": 0,
+      "pcgNonfiniteDirection": 0,
+      "iterations": 49770
+    },
+    "baselineCurvatureEvents": {
+      "exactFactorAttempts": 37345,
+      "exactFactors": 37345,
+      "finiteNonpositivePivots": 0,
+      "gnFallbackFactors": 0,
+      "nonfiniteFailures": 0,
+      "pcgAttempts": 12425,
+      "pcgConverged": 12425,
+      "zeroRhs": 0,
+      "pcgNonpositiveCurvature": 0,
+      "pcgNonfiniteProduct": 0,
+      "pcgStagnation": 0,
+      "pcgIterationLimit": 0,
+      "pcgNonDescent": 0,
+      "pcgNonfiniteDirection": 0,
+      "iterations": 49770
+    },
+    "trajectories": [
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 2,
+          "losses": 0,
+          "unchanged": 77
+        },
+        "authoritative": {
+          "gains": 5,
+          "losses": 0,
+          "unchanged": 74
+        },
+        "changedSteps": [
+          {
+            "step": 19,
+            "kind": "public",
+            "change": "gain"
+          },
+          {
+            "step": 19,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 20,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 58,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 59,
+            "kind": "public",
+            "change": "gain"
+          },
+          {
+            "step": 59,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 60,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 79,
+          "pcgAttempts": 78,
+          "pcgConverged": 78,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 79,
+          "pcgAttempts": 78,
+          "pcgConverged": 78,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.008858282209757817,
+            "median": 0.9325882043340243,
+            "maximum": 6.39109058358008
+          },
+          "absoluteStop": {
+            "minimum": 6.342065717035439e-8,
+            "median": 0.004671031842008233,
+            "maximum": 0.012139399710576981
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.008857868225163656,
+            "median": 0.93261596528464,
+            "maximum": 6.390982540615369
+          },
+          "absoluteStop": {
+            "minimum": 0.0000650359697829117,
+            "median": 0.0046700148086529225,
+            "maximum": 0.012221648532431573
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.012139399710576981,
+          "absoluteStop": 0.012139399710576981
+        }
+      },
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 79,
+          "pcgAttempts": 78,
+          "pcgConverged": 78,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 79,
+          "pcgAttempts": 78,
+          "pcgConverged": 78,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.012139399710576981,
+            "median": 26.74225014494732,
+            "maximum": 54.63229235657491
+          },
+          "absoluteStop": {
+            "minimum": 0.0006306543946266174,
+            "median": 0.7317152754985727,
+            "maximum": 1.6955697814119048
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.012221648532431573,
+            "median": 26.74237000924768,
+            "maximum": 54.632334298308706
+          },
+          "absoluteStop": {
+            "minimum": 0.000616063887719065,
+            "median": 0.7317145851557143,
+            "maximum": 1.6955703493513283
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.012139399710576981,
+          "absoluteStop": 0.012139399710576981
+        }
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 178,
+          "pcgConverged": 178,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 138,
+          "exactFactors": 138,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 178,
+          "pcgConverged": 178,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 138,
+          "exactFactors": 138,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 2.5011104298755527e-11,
+            "median": 3.259629011154175e-9,
+            "maximum": 1.2456439435482025e-8
+          },
+          "absoluteStop": {
+            "minimum": 2.5011104298755527e-11,
+            "median": 3.259629011154175e-9,
+            "maximum": 1.2456439435482025e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          },
+          "absoluteStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.344635039567947e-9,
+          "absoluteStop": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 239,
+          "pcgConverged": 239,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 77,
+          "exactFactors": 77,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 238,
+          "pcgConverged": 238,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 78,
+          "exactFactors": 78,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 2.432898327242583e-11,
+            "median": 3.3178366720676422e-9,
+            "maximum": 1.2689270079135895e-8
+          },
+          "absoluteStop": {
+            "minimum": 2.432898327242583e-11,
+            "median": 3.3178366720676422e-9,
+            "maximum": 1.2689270079135895e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          },
+          "absoluteStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.344635039567947e-9,
+          "absoluteStop": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 178,
+          "pcgConverged": 178,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1086,
+          "exactFactors": 1086,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 178,
+          "pcgConverged": 178,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1086,
+          "exactFactors": 1086,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 2.5011104298755527e-11,
+            "median": 3.259629011154175e-9,
+            "maximum": 1.2456439435482025e-8
+          },
+          "absoluteStop": {
+            "minimum": 2.5011104298755527e-11,
+            "median": 3.259629011154175e-9,
+            "maximum": 1.2456439435482025e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          },
+          "absoluteStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.344635039567947e-9,
+          "absoluteStop": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 237,
+          "pcgConverged": 237,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1027,
+          "exactFactors": 1027,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 237,
+          "pcgConverged": 237,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1027,
+          "exactFactors": 1027,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 2.432898327242583e-11,
+            "median": 3.3178366720676422e-9,
+            "maximum": 1.2689270079135895e-8
+          },
+          "absoluteStop": {
+            "minimum": 2.432898327242583e-11,
+            "median": 3.3178366720676422e-9,
+            "maximum": 1.2689270079135895e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          },
+          "absoluteStop": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.344635039567947e-9,
+          "absoluteStop": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 37,
+          "losses": 0,
+          "unchanged": 121
+        },
+        "changedSteps": [
+          {
+            "step": 31,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 32,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 33,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 34,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 35,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 36,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 37,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 38,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 39,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 40,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 41,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 42,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 43,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 44,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 45,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 46,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 47,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 48,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 109,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 110,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 111,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 112,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 113,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 114,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 115,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 116,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 117,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 118,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 119,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 120,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 121,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 122,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 123,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 124,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 125,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 126,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 127,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 158,
+          "pcgAttempts": 157,
+          "pcgConverged": 157,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 158,
+          "pcgAttempts": 157,
+          "pcgConverged": 157,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.0007659948314540088,
+            "median": 0.2336997478560079,
+            "maximum": 1.7495411884738132
+          },
+          "absoluteStop": {
+            "minimum": 1.6517788026249036e-8,
+            "median": 0.0003440016589593142,
+            "maximum": 0.0007659948314540088
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0007653736392967403,
+            "median": 0.2338119053747505,
+            "maximum": 1.749358941335231
+          },
+          "absoluteStop": {
+            "minimum": 0.00021405633742688224,
+            "median": 0.0006205668905749917,
+            "maximum": 0.001349139551166445
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.0007659948314540088,
+          "absoluteStop": 0.0007659948314540088
+        }
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 1,
+          "losses": 0,
+          "unchanged": 157
+        },
+        "changedSteps": [
+          {
+            "step": 157,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 158,
+          "pcgAttempts": 157,
+          "pcgConverged": 157,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 158,
+          "pcgAttempts": 157,
+          "pcgConverged": 157,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.0007659948314540088,
+            "median": 14.386171763471793,
+            "maximum": 29.162569996376988
+          },
+          "absoluteStop": {
+            "minimum": 0.000017812708392739296,
+            "median": 0.21658656978979707,
+            "maximum": 0.45086518919742957
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0007653736392967403,
+            "median": 14.386564218788408,
+            "maximum": 29.162116986321053
+          },
+          "absoluteStop": {
+            "minimum": 0.00037646444980055094,
+            "median": 0.2164078063215129,
+            "maximum": 0.4508647350530737
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.0007659948314540088,
+          "absoluteStop": 0.0007659948314540088
+        }
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 320,
+          "pcgConverged": 320,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 312,
+          "exactFactors": 312,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 321,
+          "pcgConverged": 321,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 311,
+          "exactFactors": 311,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "absoluteStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          },
+          "absoluteStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 4.738103598356247e-8,
+          "absoluteStop": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 437,
+          "pcgConverged": 437,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 195,
+          "exactFactors": 195,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 437,
+          "pcgConverged": 437,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 195,
+          "exactFactors": 195,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "absoluteStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          },
+          "absoluteStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 4.738103598356247e-8,
+          "absoluteStop": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 332,
+          "pcgConverged": 332,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 2196,
+          "exactFactors": 2196,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 333,
+          "pcgConverged": 333,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 2195,
+          "exactFactors": 2195,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "absoluteStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          },
+          "absoluteStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 4.738103598356247e-8,
+          "absoluteStop": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 449,
+          "pcgConverged": 449,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 2079,
+          "exactFactors": 2079,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 449,
+          "pcgConverged": 449,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 2079,
+          "exactFactors": 2079,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "absoluteStop": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          },
+          "absoluteStop": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 4.738103598356247e-8,
+          "absoluteStop": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 315,
+          "losses": 0,
+          "unchanged": 1
+        },
+        "changedSteps": [
+          {
+            "step": 2,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 3,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 4,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 5,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 6,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 7,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 8,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 9,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 10,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 11,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 12,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 13,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 14,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 15,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 16,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 17,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 18,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 19,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 20,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 21,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 22,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 23,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 24,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 25,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 26,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 27,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 28,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 29,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 30,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 31,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 32,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 33,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 34,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 35,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 36,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 37,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 38,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 39,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 40,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 41,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 42,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 43,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 44,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 45,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 46,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 47,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 48,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 49,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 50,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 51,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 52,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 53,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 54,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 55,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 56,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 57,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 58,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 59,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 60,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 61,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 62,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 63,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 64,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 65,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 66,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 67,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 68,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 69,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 70,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 71,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 72,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 73,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 74,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 75,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 76,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 77,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 78,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 79,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 80,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 81,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 82,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 83,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 84,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 85,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 86,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 87,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 88,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 89,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 90,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 91,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 92,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 93,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 94,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 95,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 96,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 97,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 98,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 99,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 100,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 101,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 102,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 103,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 104,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 105,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 106,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 107,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 108,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 109,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 110,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 111,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 112,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 113,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 114,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 115,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 116,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 117,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 118,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 119,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 120,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 121,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 122,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 123,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 124,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 125,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 126,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 127,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 128,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 129,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 130,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 131,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 132,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 133,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 134,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 135,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 136,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 137,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 138,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 139,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 140,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 141,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 142,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 143,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 144,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 145,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 146,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 147,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 148,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 149,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 150,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 151,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 152,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 153,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 154,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 155,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 156,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 157,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 158,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 159,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 160,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 161,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 162,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 163,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 164,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 165,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 166,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 167,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 168,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 169,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 170,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 171,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 172,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 173,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 174,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 175,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 176,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 177,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 178,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 179,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 180,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 181,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 182,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 183,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 184,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 185,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 186,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 187,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 188,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 189,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 190,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 191,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 192,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 193,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 194,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 195,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 196,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 197,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 198,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 199,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 200,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 201,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 202,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 203,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 204,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 205,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 206,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 207,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 208,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 209,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 210,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 211,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 212,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 213,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 214,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 215,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 216,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 217,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 218,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 219,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 220,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 221,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 222,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 223,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 224,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 225,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 226,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 227,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 228,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 229,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 230,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 231,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 232,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 233,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 234,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 235,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 236,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 237,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 238,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 239,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 240,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 241,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 242,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 243,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 244,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 245,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 246,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 247,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 248,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 249,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 250,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 251,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 252,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 253,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 254,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 255,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 256,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 257,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 258,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 259,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 260,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 261,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 262,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 263,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 264,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 265,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 266,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 267,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 268,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 269,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 270,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 271,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 272,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 273,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 274,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 275,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 276,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 277,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 278,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 279,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 280,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 281,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 282,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 283,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 284,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 285,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 286,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 287,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 288,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 289,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 290,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 291,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 292,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 293,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 294,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 295,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 296,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 297,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 298,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 299,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 300,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 301,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 302,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 303,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 304,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 305,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 306,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 307,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 308,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 309,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 310,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 311,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 312,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 313,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 314,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 315,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 316,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 315,
+          "pcgConverged": 315,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 315,
+          "pcgConverged": 315,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.00004797999281436205,
+            "median": 0.05819980299565941,
+            "maximum": 0.4580689486465417
+          },
+          "absoluteStop": {
+            "minimum": 1.952685124706477e-9,
+            "median": 0.000022952823201194406,
+            "maximum": 0.00004797999281436205
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0009705649572424591,
+            "median": 0.05846465901413467,
+            "maximum": 0.45842839969554916
+          },
+          "absoluteStop": {
+            "minimum": 0.0006223252566996962,
+            "median": 0.001993595971725881,
+            "maximum": 0.003204079817805905
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.00004797999281436205,
+          "absoluteStop": 0.00004797999281436205
+        }
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 6,
+          "losses": 0,
+          "unchanged": 310
+        },
+        "changedSteps": [
+          {
+            "step": 156,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 157,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 158,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 313,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 314,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 315,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 315,
+          "pcgConverged": 315,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 315,
+          "pcgConverged": 315,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.00004797999281436205,
+            "median": 7.359216307522729,
+            "maximum": 15.07246707714512
+          },
+          "absoluteStop": {
+            "minimum": 5.735200829803944e-7,
+            "median": 0.05609892925713211,
+            "maximum": 0.11628573451343982
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0009705649572424591,
+            "median": 7.35921610542573,
+            "maximum": 15.072547843854409
+          },
+          "absoluteStop": {
+            "minimum": 0.0009705649572424591,
+            "median": 0.05683545544161461,
+            "maximum": 0.11762449562957045
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.00004797999281436205,
+          "absoluteStop": 0.00004797999281436205
+        }
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 634,
+          "pcgConverged": 634,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 630,
+          "exactFactors": 630,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 634,
+          "pcgConverged": 634,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 630,
+          "exactFactors": 630,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "absoluteStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "absoluteStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 1.5937257558107376e-7,
+          "absoluteStop": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 684,
+          "pcgConverged": 684,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 580,
+          "exactFactors": 580,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 684,
+          "pcgConverged": 684,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 580,
+          "exactFactors": 580,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "absoluteStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "absoluteStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 1.5937257558107376e-7,
+          "absoluteStop": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 5056,
+          "pcgAttempts": 634,
+          "pcgConverged": 634,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 4422,
+          "exactFactors": 4422,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 5056,
+          "pcgAttempts": 634,
+          "pcgConverged": 634,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 4422,
+          "exactFactors": 4422,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "absoluteStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "absoluteStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 1.5937257558107376e-7,
+          "absoluteStop": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 5056,
+          "pcgAttempts": 684,
+          "pcgConverged": 684,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 4372,
+          "exactFactors": 4372,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 5056,
+          "pcgAttempts": 684,
+          "pcgConverged": 684,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 4372,
+          "exactFactors": 4372,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "absoluteStop": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "absoluteStop": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 1.5937257558107376e-7,
+          "absoluteStop": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 626,
+          "losses": 0,
+          "unchanged": 6
+        },
+        "changedSteps": [
+          {
+            "step": 6,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 7,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 8,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 9,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 10,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 11,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 12,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 13,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 14,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 15,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 16,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 17,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 18,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 19,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 20,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 21,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 22,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 23,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 24,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 25,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 26,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 27,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 28,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 29,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 30,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 31,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 32,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 33,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 34,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 35,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 36,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 37,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 38,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 39,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 40,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 41,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 42,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 43,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 44,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 45,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 46,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 47,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 48,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 49,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 50,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 51,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 52,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 53,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 54,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 55,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 56,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 57,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 58,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 59,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 60,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 61,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 62,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 63,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 64,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 65,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 66,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 67,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 68,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 69,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 70,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 71,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 72,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 73,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 74,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 75,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 76,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 77,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 78,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 79,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 80,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 81,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 82,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 83,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 84,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 85,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 86,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 87,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 88,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 89,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 90,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 91,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 92,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 93,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 94,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 95,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 96,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 97,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 98,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 99,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 100,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 101,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 102,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 103,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 104,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 105,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 106,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 107,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 108,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 109,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 110,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 111,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 112,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 113,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 114,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 115,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 116,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 117,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 118,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 119,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 120,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 121,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 122,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 123,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 124,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 125,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 126,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 127,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 128,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 129,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 130,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 131,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 132,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 133,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 134,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 135,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 136,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 137,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 138,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 139,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 140,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 141,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 142,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 143,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 144,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 145,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 146,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 147,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 148,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 149,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 150,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 151,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 152,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 153,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 154,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 155,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 156,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 158,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 159,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 160,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 161,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 162,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 163,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 164,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 165,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 166,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 167,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 168,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 169,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 170,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 171,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 172,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 173,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 174,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 175,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 176,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 177,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 178,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 179,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 180,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 181,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 182,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 183,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 184,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 185,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 186,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 187,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 188,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 189,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 190,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 191,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 192,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 193,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 194,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 195,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 196,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 197,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 198,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 199,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 200,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 201,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 202,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 203,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 204,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 205,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 206,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 207,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 208,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 209,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 210,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 211,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 212,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 213,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 214,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 215,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 216,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 217,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 218,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 219,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 220,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 221,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 222,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 223,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 224,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 225,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 226,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 227,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 228,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 229,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 230,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 231,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 232,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 233,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 234,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 235,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 236,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 237,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 238,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 239,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 240,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 241,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 242,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 243,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 244,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 245,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 246,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 247,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 248,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 249,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 250,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 251,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 252,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 253,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 254,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 255,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 256,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 257,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 258,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 259,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 260,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 261,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 262,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 263,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 264,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 265,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 266,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 267,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 268,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 269,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 270,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 271,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 272,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 273,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 274,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 275,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 276,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 277,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 278,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 279,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 280,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 281,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 282,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 283,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 284,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 285,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 286,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 287,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 288,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 289,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 290,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 291,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 292,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 293,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 294,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 295,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 296,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 297,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 298,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 299,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 300,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 301,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 302,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 303,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 304,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 305,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 306,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 307,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 308,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 309,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 310,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 311,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 312,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 313,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 314,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 315,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 316,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 317,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 318,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 319,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 320,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 321,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 322,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 323,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 324,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 325,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 326,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 327,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 328,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 329,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 330,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 331,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 332,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 333,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 334,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 335,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 336,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 337,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 338,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 339,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 340,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 341,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 342,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 343,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 344,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 345,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 346,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 347,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 348,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 349,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 350,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 351,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 352,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 353,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 354,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 355,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 356,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 357,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 358,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 359,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 360,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 361,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 362,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 363,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 364,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 365,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 366,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 367,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 368,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 369,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 370,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 371,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 372,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 373,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 374,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 375,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 376,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 377,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 378,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 379,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 380,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 381,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 382,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 383,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 384,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 385,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 386,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 387,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 388,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 389,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 390,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 391,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 392,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 393,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 394,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 395,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 396,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 397,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 398,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 399,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 400,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 401,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 402,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 403,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 404,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 405,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 406,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 407,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 408,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 409,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 410,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 411,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 412,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 413,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 414,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 415,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 416,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 417,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 418,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 419,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 420,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 421,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 422,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 423,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 424,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 425,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 426,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 427,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 428,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 429,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 430,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 431,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 432,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 433,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 434,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 435,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 436,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 437,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 438,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 439,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 440,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 441,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 442,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 443,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 444,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 445,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 446,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 447,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 448,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 449,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 450,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 451,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 452,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 453,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 454,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 455,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 456,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 457,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 458,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 459,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 460,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 461,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 462,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 463,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 464,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 465,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 466,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 467,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 468,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 469,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 470,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 471,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 472,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 473,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 474,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 475,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 476,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 477,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 478,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 479,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 480,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 481,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 482,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 483,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 484,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 485,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 486,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 487,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 488,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 489,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 490,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 491,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 492,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 493,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 494,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 495,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 496,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 497,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 498,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 499,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 500,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 501,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 502,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 503,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 504,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 505,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 506,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 507,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 508,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 509,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 510,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 511,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 512,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 513,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 514,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 515,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 516,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 517,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 518,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 519,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 520,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 521,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 522,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 523,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 524,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 525,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 526,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 527,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 528,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 529,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 530,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 531,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 532,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 533,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 534,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 535,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 536,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 537,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 538,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 539,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 540,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 541,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 542,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 543,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 544,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 545,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 546,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 547,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 548,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 549,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 550,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 551,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 552,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 553,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 554,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 555,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 556,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 557,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 558,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 559,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 560,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 561,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 562,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 563,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 564,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 565,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 566,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 567,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 568,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 569,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 570,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 571,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 572,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 573,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 574,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 575,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 576,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 577,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 578,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 579,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 580,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 581,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 582,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 583,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 584,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 585,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 586,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 587,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 588,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 589,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 590,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 591,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 592,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 593,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 594,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 595,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 596,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 597,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 598,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 599,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 600,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 601,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 602,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 603,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 604,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 605,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 606,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 607,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 608,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 609,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 610,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 611,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 612,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 613,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 614,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 615,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 616,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 617,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 618,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 619,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 620,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 621,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 622,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 623,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 624,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 625,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 626,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 627,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 628,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 629,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 630,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 631,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 632,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 631,
+          "pcgConverged": 631,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 631,
+          "pcgConverged": 631,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.000002698390744626522,
+            "median": 0.014541610580636188,
+            "maximum": 0.11722736211959273
+          },
+          "absoluteStop": {
+            "minimum": 9.168843462248333e-10,
+            "median": 0.0000015464902389794588,
+            "maximum": 0.00003984878242491163
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.004402409424073994,
+            "median": 0.01664462679764256,
+            "maximum": 0.12575724197085947
+          },
+          "absoluteStop": {
+            "minimum": 0.0035195190575905144,
+            "median": 0.007992085913429037,
+            "maximum": 0.01290269786841236
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.000002698390744626522,
+          "absoluteStop": 0.000002698390744626522
+        }
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 23,
+          "losses": 0,
+          "unchanged": 609
+        },
+        "changedSteps": [
+          {
+            "step": 4,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 5,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 309,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 310,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 311,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 312,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 313,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 314,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 315,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 316,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 317,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 318,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 319,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 623,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 624,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 625,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 626,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 627,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 628,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 629,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 630,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 631,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 632,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 631,
+          "pcgConverged": 631,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 631,
+          "pcgConverged": 631,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 0.000002698390744626522,
+            "median": 3.725914980415837,
+            "maximum": 7.663736750895623
+          },
+          "absoluteStop": {
+            "minimum": 3.8265716284513474e-7,
+            "median": 0.014432741445489228,
+            "maximum": 0.029529313425996406
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.004497725982218981,
+            "median": 3.7259142482216703,
+            "maximum": 7.668341383629013
+          },
+          "absoluteStop": {
+            "minimum": 0.0033240144257433712,
+            "median": 0.016908308578422293,
+            "maximum": 0.03919606772979023
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 0.000002698390744626522,
+          "absoluteStop": 0.000002698390744626522
+        }
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 1260,
+          "pcgConverged": 1260,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1268,
+          "exactFactors": 1268,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 1260,
+          "pcgConverged": 1260,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1268,
+          "exactFactors": 1268,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "absoluteStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "absoluteStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.976770237088203e-7,
+          "absoluteStop": 6.976770237088203e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 1268,
+          "pcgConverged": 1268,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1260,
+          "exactFactors": 1260,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 1268,
+          "pcgConverged": 1268,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1260,
+          "exactFactors": 1260,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "absoluteStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "absoluteStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.976770237088203e-7,
+          "absoluteStop": 6.976770237088203e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 10112,
+          "pcgAttempts": 1260,
+          "pcgConverged": 1260,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 8852,
+          "exactFactors": 8852,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 10112,
+          "pcgAttempts": 1260,
+          "pcgConverged": 1260,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 8852,
+          "exactFactors": 8852,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "absoluteStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "absoluteStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.976770237088203e-7,
+          "absoluteStop": 6.976770237088203e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 10112,
+          "pcgAttempts": 1268,
+          "pcgConverged": 1268,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 8844,
+          "exactFactors": 8844,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "baselineCurvatureEvents": {
+          "iterations": 10112,
+          "pcgAttempts": 1268,
+          "pcgConverged": 1268,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 8844,
+          "exactFactors": 8844,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "relativeStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "absoluteStop": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "relativeStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "absoluteStop": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "relativeStop": 6.976770237088203e-7,
+          "absoluteStop": 6.976770237088203e-7
+        }
+      }
+    ],
+    "scope": "public and latent gate changes counted separately against the same-source, same-curvature relative-stop baseline; residual quantiles are descriptive",
+    "baselineFailures": {
+      "public": 7078,
+      "authoritative": 2359
+    }
+  },
+  "comparatorSHA256": "27589a04ace23cccf5171f6645f9ee30d159220dcce95cacee9cb2c67d0824f3",
+  "scope": "complete24data identity/recorded force comparison only; preserves failed gates and literal tolerance; no independent HP full-trajectory/real-Armijo/time/material/booklet/device acceptance",
+  "inputSHA256": [
+    "a0562fc1091006e3390f8398eaade1b8780095783212273bfa9eb99c64032639",
+    "c572ef4fb411bbf0f1853bfe16c5c287285153448f4890b5948671d4b61078b0"
+  ],
+  "inputRawSHA256": [
+    "a0562fc1091006e3390f8398eaade1b8780095783212273bfa9eb99c64032639",
+    "c572ef4fb411bbf0f1853bfe16c5c287285153448f4890b5948671d4b61078b0"
+  ]
+}

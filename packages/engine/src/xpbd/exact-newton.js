@@ -67,7 +67,7 @@ export function exactNewtonStep(w) {
         fallbackReason: /** @type {string|null} */ (null), slope: /** @type {number|null} */ (null), descent: /** @type {boolean|null} */ (null) };
       if (!w.dirty && !(w._pcgFail > 0)) {
         state.counters.pcgAttempts++;
-        const r = pcgStep(w, x, g, K.PCG_MAX_ITER, K.PCG_RTOL, null, true, coordinates, 'exact-hessian');
+        const r = pcgStep(w, x, g, K.PCG_MAX_ITER, K.PCG_RTOL, null, true, coordinates, 'exact-hessian', w.opts.pcgAbsoluteTolerance ?? null);
         w.pcgIterations = r.iterations;
         countPcgReason(state, /** @type {string} */ (r.reason));
         receipt.pcg = { iterations: r.iterations, reason: r.reason, slope: r.slope ?? null };

@@ -234,7 +234,14 @@ acceptance. The [frozen 24-trajectory comparison](research/exact-curvature-resul
 (milestone 2) shrinks the first-step latent residual 149× to about 10,600×, but
 latent failures move only from 2369 to 2359 and public failures from 7076 to 7078.
 At Newton budget 1 the PCG stopping rule now dominates. Gauss–Newton replays the
-closed capture exactly. No force/time, material, booklet or device result follows.
+closed capture exactly. The next ablation, an opt-in
+[force-tolerance PCG stop](research/pcg-force-stop-results.md) with exact curvature,
+removes 1013 latent failures with no losses (2359 → 1346), and budget-1 rows at levels 4
+and 8 from the predictor start now pass the latent gate throughout, at no measurable
+extra cost. The remaining failures are the nonlinear remainder of one Newton step, and
+public failures are unchanged. A [catalogue acceptance bar](research/catalogue-paper-acceptance.md)
+lists what "close-to-real paper" in the catalogue would require; none of it is met yet.
+No force/time, material, booklet or device result follows.
 
 The [actual-World transient audit](research/membrane-transient-audit.md) now has
 [clean 93f6653 captures, strict repeat and transparent-observer parity](research/evidence/membrane-transient-2026-11-10/README.md).

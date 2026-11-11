@@ -10,7 +10,7 @@
  */
 import { termProjector, TERM_STRING } from './implicit.js';
 import { hypot4 } from '../fastmath.js';
-import { projectReference } from './reference-state.js';
+import { projectReference, factorPose } from './reference-state.js';
 import { selectCurvature } from './membrane-curvature.js';
 
 /**
@@ -155,7 +155,7 @@ export function pcgStep(w, x, g, maxIter, rtol, extraHessian = null, stopOnStagn
   for (let i = 0; i < n3; i++) r0 += r[i] * r[i];
   r0 = Math.sqrt(r0);
   if (r0 === 0) return exact ? { iterations: 0, converged: true, reason: 'zero-rhs', slope: 0 } : { iterations: 0, converged: true };
-  const R = w._factorState ? bestRotation(coordinates === 'reference-displacement' ? projectReference(w, w._factorState.x) : w._factorState.x, coordinates === 'reference-displacement' ? projectReference(w, x) : x, fi) : null;
+  const R = w._factorState ? bestRotation(coordinates === 'reference-displacement' ? factorPose(w, w._factorState) : w._factorState.x, coordinates === 'reference-displacement' ? projectReference(w, x) : x, fi) : null;
   z.set(r); precond(ch, z, R);
   p.set(z);
   let rz = 0;

@@ -2,7 +2,7 @@
 /** Experimental state ABI. Physical q is the real sum X0+u; public x is its
  * binary64 projection. No rebasing, rounding feedback or external forces.
  */
-import { twoSum } from './double-double.js';
+import { twoSum, add as addDD, rounded } from './double-double.js';
 import { assembleAndFactor } from './implicit.js';
 import { validateIncrementDomain } from './increment-search.js';
 import { bendingIdentity, bendingSelected, creaseSelected, setLatentAngleMemory, creaseBeyondFoldLimit, admissibleComponent, addBendingGradient } from './reference-bending.js';
@@ -11,10 +11,21 @@ export const REFERENCE_STATE_IDENTITY = Object.freeze({ mode: 'reference-displac
   representation: 'binary64', origin: 'actual-X0', predictor: 'displacement-first',
   projection: 'round-X0-plus-u', preconditioner: 'rounded-public-pose' });
 
+/** Opt-in two-word state (`stateRepresentation: 'double-double'`): the latent displacement is
+ * A + u, where A is a two-word anchor set to the exact latent state at the start of each substep
+ * and u is the binary64 offset the solvers update. Corrections below ulp(|A + u|) survive in u.
+ * Re-anchoring rounds A + u to two words (relative 2^-106). */
+export const REFERENCE_STATE_IDENTITY_TWO_WORD = Object.freeze({ ...REFERENCE_STATE_IDENTITY, version: 2,
+  representation: 'two-word-substep-anchor', projection: 'round-X0-plus-anchor-plus-u', anchor: 'exact-state-at-substep-start' });
+/** @param {any} w */
+export function twoWordState(w) { return w.opts.stateRepresentation === 'double-double'; }
+/** The live anchor, or null for the single-word state. @param {any} w */
+export function stateAnchor(w) { return w._anchorHi ? { hi: w._anchorHi, lo: w._anchorLo } : null; }
 /** The identity a World must carry: the planar identity, plus the bending version when selected.
  * @param {any} w */
 export function expectedReferenceIdentity(w) {
-  return bendingSelected(w) ? { ...REFERENCE_STATE_IDENTITY, bending: { ...bendingIdentity(w) } } : REFERENCE_STATE_IDENTITY;
+  const state = twoWordState(w) ? REFERENCE_STATE_IDENTITY_TWO_WORD : REFERENCE_STATE_IDENTITY;
+  return bendingSelected(w) ? { ...state, bending: { ...bendingIdentity(w) } } : state;
 }
 /** @param {any} w */
 export function stateCoordinates(w) { return w.opts.stateCoordinates ?? 'absolute-position'; }
@@ -25,11 +36,15 @@ export function solverTarget(w) { return stateCoordinates(w) === 'reference-disp
 /** Explicit rounded geometry for the old hinge/preconditioner diagnostics only.
  * Elasticity, inertia and the realized solver update must use u directly.
  * @param {any} w @param {ArrayLike<number>} u @returns {Float64Array} */
-export function projectReference(w, u) {
-  const x = new Float64Array(u.length);
-  for (let i = 0; i < u.length; i++) x[i] = (w._referenceOrigin ?? w.X0)[i] + u[i];
+export function projectReference(w, u, anchor = stateAnchor(w)) {
+  const x = new Float64Array(u.length), origin = w._referenceOrigin ?? w.X0;
+  if (!anchor) { for (let i = 0; i < u.length; i++) x[i] = origin[i] + u[i]; return x; }
+  // X0 + A + u: exact two-word sums, rounded once.
+  for (let i = 0; i < u.length; i++) x[i] = rounded(addDD(addDD(twoSum(origin[i], anchor.hi[i]), [anchor.lo[i], 0]), [u[i], 0]));
   return x;
 }
+/** The pose a saved factor was built at: its latent offset with its own anchor. @param {any} w @param {any} f */
+export function factorPose(w, f) { return projectReference(w, f.x, f.anchorHi ? { hi: f.anchorHi, lo: f.anchorLo } : null); }
 /** @param {ArrayLike<number>} a @param {ArrayLike<number>} b */
 function same(a, b) { return a?.length === b?.length && Array.from(a).every((v, i) => Object.is(v, b[i])); }
 /** Require exact real conversion AND the same public bytes, including zero signs.
@@ -53,9 +68,11 @@ function coefficients(w) {
   return Float64Array.from(w.orthotropicMembrane.elements.flatMap(e => [...e.reference.u, ...e.reference.v, ...e.reference.x0, e.reference.c, e.reference.s, ...e.Q, e.volume]));
 }
 /** Observation/preflight scratch is never the live solver cache. @param {any} w */
-function observationMembrane(w) {
+function observationMembrane(w, anchor) {
   const m = Object.assign(Object.create(Object.getPrototypeOf(w.orthotropicMembrane)), w.orthotropicMembrane);
-  m.work = structuredClone(m.work); m.block = m.block.slice(); return m;
+  m.work = structuredClone(m.work); m.block = m.block.slice();
+  if (anchor !== undefined) m.work.referenceAnchor = anchor ?? undefined;
+  return m;
 }
 /** @param {any} w */
 export function initialiseReferenceState(w) {
@@ -64,6 +81,10 @@ export function initialiseReferenceState(w) {
   w._referenceOrigin = w.X0.slice(); w._referenceCoefficients = coefficients(w); w._referenceMass = w.mass.slice(); w._referenceH = w.dt;
   w._referenceHingeK = w.hingeK.slice(); w._referenceDriveK = w.driveK.slice();
   const bending = bendingSelected(w);
+  if (twoWordState(w)) {
+    w._anchorHi = new Float64Array(w.X0.length); w._anchorLo = new Float64Array(w.X0.length);
+    w.orthotropicMembrane.work.referenceAnchor = { hi: w._anchorHi, lo: w._anchorLo };
+  }
   w._u = exactDisplacement(w.x, w.X0, bending);
   // Preserve the actual constructor's zero xs/xt buffers, not invented targets.
   w._us = exactDisplacement(w.xs, w.X0, bending); w._ut = exactDisplacement(w.xt, w.X0, bending);
@@ -89,6 +110,8 @@ export function validateReferenceState(w, projections = true) {
   for (const a of [w._u, w._us, w._ut, w.v]) {
     if (!(a instanceof Float64Array) || a.length !== w.X0.length || !a.every((v, i) => admissibleComponent(w, v, i))) throw new Error(bendingSelected(w) ? 'Reference state: invalid authoritative arrays' : 'Reference state: invalid planar authoritative arrays');
   }
+  if (twoWordState(w) !== !!w._anchorHi || (w._anchorHi && (![w._anchorHi, w._anchorLo].every(a => a instanceof Float64Array && a.length === w.X0.length && a.every(Number.isFinite)) ||
+      w.orthotropicMembrane.work.referenceAnchor?.hi !== w._anchorHi || w.orthotropicMembrane.work.referenceAnchor?.lo !== w._anchorLo))) throw new Error('Reference state: invalid two-word anchor');
   if (typeof w._referenceTargetValid !== 'boolean' || (!w._referenceStepActive && w._referenceTargetValid !== (w.substepsRun > 0))) throw new Error('Reference state: invalid target validity');
   if (projections && (!same(w.x, projectReference(w, w._u)) || !same(w.xs, projectReference(w, w._us)) || !same(w.xt, projectReference(w, w._ut)))) throw new Error('Reference state: unsynchronized public projection edit');
   validateIncrementDomain(w, w.x);
@@ -128,6 +151,11 @@ export function stepReferenceState(w) {
   boundary(w); w._referenceStepActive = true;
   try {
   const dt = w.dt, u = w._u, us = w._us, ut = w._ut, v = w.v;
+  if (w._anchorHi) {
+    // Re-anchor: A <- A + u in two words, u <- 0; the public pose is re-projected from the new anchor.
+    for (let i = 0; i < u.length; i++) { const a = addDD([w._anchorHi[i], w._anchorLo[i]], [u[i], 0]); w._anchorHi[i] = a[0]; w._anchorLo[i] = a[1]; u[i] = 0; }
+    projectCurrentReference(w);
+  }
   us.set(u); w.xs.set(w.x);
   for (let i = 0; i < u.length; i++) u[i] += dt * v[i];
   ut.set(u); w.xt.set(projectReference(w, ut)); w._referenceTargetValid = true;
@@ -145,7 +173,7 @@ export function referenceStateSnapshot(w) {
   validateReferenceState(w);
   if (!w._referenceIdentity) return undefined;
   boundary(w);
-  return { identity: structuredClone(w._referenceIdentity), u: w._u.slice(), us: w._us.slice(), ut: w._ut.slice(),
+  return { identity: structuredClone(w._referenceIdentity), ...(w._anchorHi ? { anchorHi: w._anchorHi.slice(), anchorLo: w._anchorLo.slice() } : {}), u: w._u.slice(), us: w._us.slice(), ut: w._ut.slice(),
     x: w.x.slice(), xs: w.xs.slice(), xt: w.xt.slice(), v: w.v.slice(), x0: w._referenceOrigin.slice(),
     coefficients: w._referenceCoefficients.slice(), mass: w._referenceMass.slice(), h: w._referenceH, targetValid: w._referenceTargetValid,
     initialX: w._referenceInitialX.slice(), initialU: w._referenceInitialU.slice(), initialV: w._referenceInitialV.slice() };
@@ -175,20 +203,26 @@ export function prepareReferenceRestore(w, s) {
   if (!s.drivers || !['value', 'goal', 'entry'].every(name => Array.isArray(s.drivers[name]) && s.drivers[name].length === 0) || s.drivers.program !== null || s.drivers.kin !== null || s.drivers.wind !== 0) throw new Error('Reference state: invalid snapshot drivers');
   if (!s.membrane || !['factorCount', 'pcgIterations'].every(name => Number.isSafeInteger(s.membrane[name]) && s.membrane[name] >= 0)) throw new Error('Reference state: invalid snapshot solver counters');
   if (JSON.stringify(r.identity) !== JSON.stringify(w._referenceIdentity) || !same(r.x0, w._referenceOrigin) || !same(r.mass, w._referenceMass) || !same(r.coefficients, w._referenceCoefficients) || !Object.is(r.h, w.dt)) throw new Error('Reference state: snapshot binding mismatch');
+  const anchor = w._anchorHi ? { hi: r.anchorHi, lo: r.anchorLo } : null;
+  if (anchor && ![anchor.hi, anchor.lo].every(a => a instanceof Float64Array && a.length === w.x.length && a.every(Number.isFinite))) throw new Error('Reference state: invalid snapshot anchor');
+  if (!anchor && (r.anchorHi !== undefined || r.anchorLo !== undefined)) throw new Error('Reference state: snapshot binding mismatch');
+  const zero = anchor ? { hi: new Float64Array(w.x.length), lo: new Float64Array(w.x.length) } : null;
   const fields = ['u', 'us', 'ut', 'x', 'xs', 'xt', 'v', 'initialX', 'initialU', 'initialV'];
   for (const name of fields) if (!(r[name] instanceof Float64Array) || r[name].length !== w.x.length || !r[name].every((n, i) => admissibleComponent(w, n, i))) throw new Error('Reference state: invalid snapshot arrays');
-  if (!same(r.x, s.x) || !same(r.v, s.v) || !same(r.x, projectReference(w, r.u)) || !same(r.xs, projectReference(w, r.us)) || !same(r.xt, projectReference(w, r.ut)) ||
-      !same(r.initialX, projectReference(w, r.initialU)) || !same(r.initialU, exactDisplacement(r.initialX, w.X0, bendingSelected(w))) || typeof r.targetValid !== 'boolean') throw new Error('Reference state: inconsistent snapshot projection');
-  if (s.factor && (s.factor.coordinates !== 'reference-displacement' || !(s.factor.x instanceof Float64Array) || s.factor.x.length !== w.x.length || !s.factor.x.every((n, i) => admissibleComponent(w, n, i)) || !observationMembrane(w).diagnostics(s.factor.x, 'reference-displacement').finite)) throw new Error('Reference state: invalid snapshot factor coordinates');
-  if (!observationMembrane(w).diagnostics(r.u, 'reference-displacement').finite) throw new Error('Reference state: invalid snapshot current metric');
+  if (!same(r.x, s.x) || !same(r.v, s.v) || !same(r.x, projectReference(w, r.u, anchor)) || !same(r.xs, projectReference(w, r.us, anchor)) || !same(r.xt, projectReference(w, r.ut, anchor)) ||
+      !same(r.initialX, projectReference(w, r.initialU, zero)) || !same(r.initialU, exactDisplacement(r.initialX, w.X0, bendingSelected(w))) || typeof r.targetValid !== 'boolean') throw new Error('Reference state: inconsistent snapshot projection');
+  if (s.factor && (s.factor.coordinates !== 'reference-displacement' || !(s.factor.x instanceof Float64Array) || s.factor.x.length !== w.x.length || !s.factor.x.every((n, i) => admissibleComponent(w, n, i)) || !observationMembrane(w, s.factor.anchorHi ? { hi: s.factor.anchorHi, lo: s.factor.anchorLo } : null).diagnostics(s.factor.x, 'reference-displacement').finite)) throw new Error('Reference state: invalid snapshot factor coordinates');
+  if (s.factor && anchor && ![s.factor.anchorHi, s.factor.anchorLo].every(a => a instanceof Float64Array && a.length === w.x.length && a.every(Number.isFinite))) throw new Error('Reference state: invalid snapshot factor anchor');
+  if (!observationMembrane(w, anchor).diagnostics(r.u, 'reference-displacement').finite) throw new Error('Reference state: invalid snapshot current metric');
   if (s.factor) {
     const f = s.factor;
     const factorArrays = { driveOn: w.driveOn, edgeComp: w.edgeComp, active: w.terms.active, k: w.terms.k,
       mode: w.terms.mode, verts: w.terms.verts, c: w.terms.c, dir: w.terms.dir, len: w.terms.len };
     for (const [name, expected] of Object.entries(factorArrays)) if (!check(f[name], expected)) throw new Error('Reference state: invalid snapshot factor array');
-    const factorWorld = Object.assign(Object.create(w), { x: projectReference(w, f.x), xs: r.xs, xt: r.xt, v: s.v,
+    const factorAnchor = f.anchorHi ? { hi: f.anchorHi, lo: f.anchorLo } : null;
+    const factorWorld = Object.assign(Object.create(w), { x: factorPose(w, f), xs: r.xs, xt: r.xt, v: s.v, ...(factorAnchor ? { _anchorHi: factorAnchor.hi, _anchorLo: factorAnchor.lo } : {}),
       driveOn: f.driveOn, terms: { ...w.terms, active: f.active, k: f.k, mode: f.mode, verts: f.verts, c: f.c, dir: f.dir, len: f.len }, restTheta: s.restTheta, theta: s.theta, hingeK: s.hingeK,
-      orthotropicMembrane: observationMembrane(w), factorDir: w.factorDir.slice(),
+      orthotropicMembrane: observationMembrane(w, factorAnchor), factorDir: w.factorDir.slice(),
       sys: { ...w.sys, ch: Object.assign(Object.create(Object.getPrototypeOf(w.sys.ch)), structuredClone(w.sys.ch)) } });
     validateIncrementDomain(factorWorld, factorWorld.x);
     try { assembleAndFactor(factorWorld, f.x, 'reference-displacement', f.curvature ?? 'gauss-newton'); }
@@ -207,6 +241,7 @@ export function restoreReferenceState(w, r) {
   w._u.set(r.u); w._us.set(r.us); w._ut.set(r.ut); w.xs.set(r.xs); w.xt.set(r.xt);
   w._referenceInitialX = r.initialX.slice(); w._referenceInitialU = r.initialU.slice(); w._referenceInitialV = r.initialV.slice();
   w._referenceTargetValid = r.targetValid;
+  if (w._anchorHi) { w._anchorHi.set(r.anchorHi); w._anchorLo.set(r.anchorLo); }
 }
 
 /** Both native residuals, same caller-supplied frozen tau. Public fields retain

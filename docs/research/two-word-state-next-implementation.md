@@ -1,6 +1,6 @@
 # Next implementation: a two-word displacement state
 
-2026-11-11. Design only. Prerequisite for force gate G2 on folded states and page turns in the
+2026-11-11. Milestone 1 implemented; see [Implementation status](#implementation-status). Prerequisite for force gate G2 on folded states and page turns in the
 [catalogue acceptance bar](catalogue-paper-acceptance.md); found while admitting creases
 ([crease design](crease-domain-next-implementation.md), PR #77).
 
@@ -71,3 +71,34 @@ bookkeeping.
 Many call sites with bit-exact invariants; review each against the planar replay. Two-word
 trials add arithmetic per Newton trial (the membrane is already two-word, so the increase is
 modest; measure it). Snapshot format changes are guarded by the identity version.
+
+## Implementation status
+
+**Milestone 1, engine and tests (2026-11-11).** Implemented as a two-word anchor rather than
+low-word arrays: the same representation, with far less plumbing.
+
+- **Representation.** With `stateRepresentation: 'double-double'` (state identity version 2,
+  `two-word-substep-anchor`) the latent displacement is A + u. A is a two-word anchor per
+  coordinate, set to the exact latent state at the start of every substep (A <- A + u, u <- 0,
+  rounded to two words, relative 2^-106); u is the binary64 offset that Newton, PCG and the line
+  search update, unchanged. Within a substep u is only that substep's motion, so its ulp is tiny.
+- **Where the anchor is read.** The UV membrane builds each displacement as A + u in two words
+  (`uv-reference.js`, via the membrane scratch); the bending pose differences add the anchor's
+  exact pairwise differences (`reference-bending.js`); the public pose is round(X0 + A + u)
+  (`projectReference`). Inertia, velocity, the Armijo increment and the bending step use
+  differences of offsets that share one anchor, so they are unchanged.
+- **Factors and snapshots.** A saved factor keeps the anchor it was built at (`_saveFactorState`,
+  `copyFactor`), used by PCG's preconditioner rotation and by restore's bit-exact rebuild.
+  Snapshots bind the state anchor; restore checks projections against it and refuses across
+  representations.
+- **Tests** (`test/two-word-state.test.js`): the folded card's latent residual falls from
+  2.5e-7 / 1.0e-6 / 6.2e-6 to 1.2e-10 / 1.4e-11 / 1.8e-12 microN at 10 / 40 / 160 mm; the two
+  representations agree on the public pose within 7.1e-15 mm after 8 substeps; the offset stays
+  one substep of motion (1.3e-3 mm against a 21.7 mm anchor); snapshots continue bit for bit and
+  refuse across representations.
+- **Unchanged without the option.** 21 planar scenarios and the bending capture's rows replay
+  with identical state and force hashes against main.
+
+**Not done yet:** milestone 2 (capture tooling binds the anchor; oracles sum X0 + A + u exactly)
+and the folded-card crease capture.
+

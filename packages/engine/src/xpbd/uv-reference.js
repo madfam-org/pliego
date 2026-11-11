@@ -84,10 +84,12 @@ export function referenceRotate(ref, values, transpose = false) {
 /** Recompute A=KX0; cached rounded A would define a different real polynomial.
  * Euv = sym(A^T H) + H^T H/2, H=K(x-X0), evaluated without subtracting metrics.
  * @param {UVReference} ref @param {ArrayLike<number>} x @param {ArrayLike<number>} ids @param {string} [coordinates] */
-export function referenceKinematics(ref, x, ids, coordinates = 'absolute-position') {
+export function referenceKinematics(ref, x, ids, coordinates = 'absolute-position', anchor = undefined) {
   validateMembraneCoordinates(coordinates, true, 'double-double');
   const base = referenceTangents(ref, ref.x0, [0, 1, 2]);
-  const delta = referenceApply(ref, Array.from(ids, (id, i) => [0, 1, 2].map(r => coordinates === 'reference-displacement' ? /** @type {D.DD} */ ([x[3 * id + r], 0]) : D.twoSum(x[3 * id + r], -ref.x0[3 * i + r]))));
+  // Two-word state: the displacement is anchor + offset, summed in two words.
+  const word = j => anchor ? D.add([anchor.hi[j], anchor.lo[j]], [x[j], 0]) : /** @type {D.DD} */ ([x[j], 0]);
+  const delta = referenceApply(ref, Array.from(ids, (id, i) => [0, 1, 2].map(r => coordinates === 'reference-displacement' ? word(3 * id + r) : D.twoSum(x[3 * id + r], -ref.x0[3 * i + r]))));
   const uvStrain = [D.add(referenceDot(base.a, delta.a), D.scale(referenceDot(delta.a, delta.a), .5)),
     D.add(referenceDot(base.b, delta.b), D.scale(referenceDot(delta.b, delta.b), .5)),
     D.sum([referenceDot(base.a, delta.b), referenceDot(base.b, delta.a), referenceDot(delta.a, delta.b)])];

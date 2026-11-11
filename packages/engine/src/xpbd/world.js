@@ -48,7 +48,7 @@ export class World {
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
    *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
-   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton'|'exact-hessian',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement',pcgAbsoluteTolerance?:number,referenceBending?:'panel-hinges'}} [opts]
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton'|'exact-hessian',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement',pcgAbsoluteTolerance?:number,referenceBending?:'panel-hinges'|'panel-and-crease-hinges'}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -57,7 +57,7 @@ export class World {
     if (!['absolute-position', 'reference-displacement'].includes(opts.stateCoordinates ?? 'absolute-position')) throw new RangeError('World: invalid stateCoordinates');
     if (opts.stateCoordinates === 'reference-displacement' && opts.membraneReference !== 'uv-displacement') throw new Error('World: reference-displacement stateCoordinates requires uv-displacement membraneReference');
     if (opts.pcgAbsoluteTolerance !== undefined && (opts.stateCoordinates !== 'reference-displacement' || !(Number.isFinite(opts.pcgAbsoluteTolerance) && opts.pcgAbsoluteTolerance > 0))) throw new Error('World: pcgAbsoluteTolerance is a positive finite microN stop admitted only with reference-displacement stateCoordinates');
-    if (opts.referenceBending !== undefined && (opts.referenceBending !== 'panel-hinges' || opts.stateCoordinates !== 'reference-displacement')) throw new Error("World: referenceBending 'panel-hinges' is admitted only with reference-displacement stateCoordinates");
+    if (opts.referenceBending !== undefined && (!['panel-hinges', 'panel-and-crease-hinges'].includes(opts.referenceBending) || opts.stateCoordinates !== 'reference-displacement')) throw new Error("World: referenceBending 'panel-hinges' or 'panel-and-crease-hinges' is admitted only with reference-displacement stateCoordinates");
     if (!['material-coefficients', 'uv-displacement'].includes(opts.membraneReference ?? 'material-coefficients')) throw new RangeError('World: invalid membraneReference');
     if (opts.membraneReference === 'uv-displacement' && (!orthotropic || opts.membraneArithmetic !== 'double-double' || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: uv-displacement membraneReference requires orthotropic-stvk, double-double and membrane-inertia-increment search');
     if (!['binary64', 'double-double'].includes(opts.membraneArithmetic ?? 'binary64')) throw new RangeError('World: invalid membraneArithmetic');
@@ -700,8 +700,12 @@ function validateMembraneExperiment(doc, opts, mesh) {
     throw new Error('Orthotropic membrane: explicitly require physicalMembrane:true, membraneCompression:1, nu12 convention, gauss-newton (or reference-domain exact-hessian) curvature, membraneProjection:none, lineSearch:true and plasticity:false');
   }
   if (opts.membraneCurvature === 'exact-hessian' && opts.stateCoordinates !== 'reference-displacement') throw new Error('Orthotropic membrane: exact-hessian curvature is admitted only in the free planar reference-displacement domain (uv-displacement, double-double, membrane-inertia-increment)');
+  // The crease law admits crease hinges and their authored rest angles; nothing else changes.
+  const creaseLaw = opts.referenceBending === 'panel-and-crease-hinges', creaseEdges = new Set();
+  if (creaseLaw) for (let h = 0; h < mesh.nH; h++) if (mesh.hingeKind[h] === HINGE_CREASE) creaseEdges.add(mesh.hingeDoc[h]);
   if (doc.joins.length || doc.controls.length || doc.mechanisms.length || doc.sheets.some(s => s.kinematic) ||
-      mesh.perfPairs.length || mesh.hingeKind.some(k => k !== HINGE_PANEL) || doc.restAngle.some(a => a !== 0)) throw new Error('Orthotropic membrane: joins, controls, mechanisms, kinematic sheets, creases, perforations and set angles are unsupported');
+      mesh.perfPairs.length || mesh.hingeKind.some(k => k !== HINGE_PANEL && !(creaseLaw && k === HINGE_CREASE)) ||
+      doc.restAngle.some((a, d) => a !== 0 && !creaseEdges.has(d))) throw new Error('Orthotropic membrane: joins, controls, mechanisms, kinematic sheets, creases, perforations and set angles are unsupported');
   if ((opts.contact !== false || opts.ground !== false) && opts.barrierContact !== true) throw new Error('Orthotropic membrane: positional contact/ground requires the coupled barrier path');
   if (opts.consistentMembraneCurvature !== undefined) throw new Error('Orthotropic membrane: edge consistentMembraneCurvature is inapplicable; use named gauss-newton membraneCurvature');
   const x = mesh.X0;

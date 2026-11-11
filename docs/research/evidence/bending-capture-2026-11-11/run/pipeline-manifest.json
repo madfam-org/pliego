@@ -1,0 +1,64 @@
+{
+ "auxiliaryFrozenFiles": [
+  {
+   "bytes": 23631,
+   "path": "../independent-review/review-selected-newton-bending.py",
+   "sha256": "b8732b9eaad76aa0a7be06be0999105a5e77b5f19094e0adeea194fb12bd9dcd"
+  },
+  {
+   "bytes": 4267,
+   "path": "../independent-review/reviewer-freeze.json",
+   "sha256": "f29147bfd7a72d2762d6e60bcfa0de3fd3eac4dcdd4b738634678acf0c858979"
+  },
+  {
+   "bytes": 235742,
+   "path": "../independent-review/reviewer-sources.json",
+   "sha256": "69f7caa216705d36475a8b56a0f08e97158484d0c66afe0e6d1442b39cdf7240"
+  }
+ ],
+ "executionAuthorized": "owner in chat, 2026-11-11 ('Yes, start it' for the bending fixture and frozen capture)",
+ "externalReviewerScope": "bending selected-Newton reviewer frozen before the accepted capture; run separately on the candidate after the pipeline",
+ "files": [
+  {
+   "bytes": 21199,
+   "file": "run-bending-matrix.py",
+   "sha256": "02dadfb7886cb3a49d63ffcf5f489aa58bd479d01e06db8684342a743478b676"
+  },
+  {
+   "bytes": 3776,
+   "file": "pipeline-plan.json",
+   "sha256": "6eb6667e58a9a104e4ed994a2ceb292b997fc2f044876e0aa790c7b0744ccb63"
+  }
+ ],
+ "preparedForSourceGit": "6d55f8c85416ae69014d060cdfdefdf3eccd4598",
+ "runnerVersion": 1,
+ "schema": "pliego-bending-matrix-runner-manifest/1",
+ "scope": "frozen bending fixed-24 driver; derived stages adapted from the planar driver; no physics in the driver",
+ "unchangedOracleBaselineGit": "3517e50490d79a76d8179d85089a70e4f40b39f1",
+ "unchangedOracleFiles": [
+  {
+   "path": "packages/engine/bench/membrane-state-precision.py",
+   "sha256": "ce1dbcd0203a6ab7ad5e06912dda6f198bf8e3a867a0cc286bb51ac26f394198"
+  },
+  {
+   "path": "packages/engine/bench/membrane-reference-precision.py",
+   "sha256": "db521a2a473d8038c4f9abec4c0f14a6242e74937e003269a0ebff8e6d98529f"
+  },
+  {
+   "path": "packages/engine/bench/membrane-reference-binding.py",
+   "sha256": "b3a7fa6260ea4aacdce7dcb9e73c3ff5d5ba5e9f7148425ef52142f6bd76816a"
+  },
+  {
+   "path": "packages/engine/bench/membrane-gradient-precision.py",
+   "sha256": "fdaa1a27a3983cc2251bdb340774279e8bd8902eb8baba8a47528652ad5878cd"
+  },
+  {
+   "path": "packages/engine/bench/membrane-increment-precision.py",
+   "sha256": "81c888351c3af60f5ab2b32433bee45e71ceb27a3d690e2e034bca7feb9c9122"
+  },
+  {
+   "path": "packages/engine/bench/plane-stress-precision.py",
+   "sha256": "40e278126223c5eba746399c3e93dbaafbbcc342e8278be6ed23a007e7413eec"
+  }
+ ]
+}

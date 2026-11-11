@@ -12,14 +12,19 @@ version behind what Tulana ships** (for the recorded release, the commit that ma
 recordings), on the **catalogue's own page-turn workload**, not on research fixtures
 alone. Until every gate passes, Tulana keeps its maturity label (madfam-org/tulana#122).
 
-## Where things stand (2026-11-10)
+## Where things stand (2026-11-11)
 
 - Tulana vendors Pliego at commit `1ffeba0` with the default edge-spring paper; two render
   files are patched. None of the accurate-membrane work is in it.
 - The accurate law (orthotropic StVK, UV reference, displacement state, two-word
-  arithmetic, exact curvature) is opt-in and admitted only for a flat, free sheet:
-  no bending energy, creases, contact or hand drive.
+  arithmetic, exact curvature) is opt-in and admitted for a free sheet with flat panel
+  bending; creases, contact and the hand drive are still refused.
   ([campaign](paper-physics-campaign.md), [exact-curvature results](exact-curvature-results.md))
+- 2026-11-11: the first G1 audit is captured. A free patch in its lowest bending mode
+  passes the latent force gate at every step with four or more Newton iterations, and its
+  out-of-plane motion follows backward Euler on the represented law within the comparator
+  limits; one Newton iteration and the public gate fail
+  ([bending capture results](bending-capture-results.md)).
 - In that domain, exact curvature plus a force-tolerance PCG stop makes one Newton
   step pass the latent force gate at the finer timesteps from the predictor start
   ([PCG-stop results](pcg-force-stop-results.md)); coarse steps, the previous-pose
@@ -35,7 +40,7 @@ Each gate lists the threshold, how it is measured, and its status. Values marked
 
 | # | Gate | Threshold | Measured how | Today |
 |---|---|---|---|---|
-| G1 | **Law in the real domain** | The deployed page turn runs the accurate membrane law with panel bending, the spine crease, paper contact and the hand drive in one solve. | Admission in the engine plus the G2–G5 audits running on that path. | Not met: admitted only for a flat free sheet. |
+| G1 | **Law in the real domain** | The deployed page turn runs the accurate membrane law with panel bending, the spine crease, paper contact and the hand drive in one solve. | Admission in the engine plus the G2–G5 audits running on that path. | Not met: panel bending captured on a free patch (step 1 of 4); crease, contact and hand drive not admitted. |
 | G2 | **Force** | Native latent force residual ≤ tau = max(1e-7, 1e-10·F0) at every judged step of the catalogue workload (forward, reverse, cancelled turns). Public residual always reported. **Ruling:** whether the public (rounded-position) gate must also pass, or only the latent gate with the public outcome disclosed. | Frozen fixed-trajectory audit like the state matrix, on catalogue page turns, every step retained. | Not met. |
 | G3 | **Time accuracy** | Adjacent timestep refinements (levels 1/2/4/8) converge at first order on the page-turn trajectory; differences at the finest pair within the existing limits (field and velocity 1%, energy 5%, phase 0.01 cycles). | Common-time refinement study, actual clock drift retained. | Not met for booklets; open even for the planar mode. |
 | G4 | **Material** | Every stock the catalogue uses is calibrated against measured sheets: bending stiffness along and across grain, tensile modulus, thickness, areal density, spine-crease stiffness. Held-out tests (cantilever deflection, page-turn sag) within **ruling: ±10%** of measurement. | Physical test protocol on real sheets, independent of the fitting data. | Not met: estimates only. Needs physical measurement. |

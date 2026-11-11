@@ -174,9 +174,13 @@ the [bending capture protocol](bending-capture-protocol.md):
 - An oracle bending term: `bench/bending-state-precision.py` reuses the planar membrane
   oracle and adds bending energy and gradient at 80/100 digits from exact latent geometry.
 
+**Milestone 3, frozen capture (2026-11-11).** Captured at `6d55f8c`; see the
+[bending capture results](bending-capture-results.md) and the lossless
+[evidence archive](evidence/bending-capture-2026-11-11/README.md).
+
 **Not done yet:**
 
-- The frozen capture itself, its independent Newton review, results and archive.
+- The spine crease, contact and the hand drive (the rest of G1).
 - No force, time, material, booklet or device acceptance follows from any of this.
 - Known engine behaviours recorded by the tooling, not changed: `setInitialReferencePose`
   leaves the hinge angle memory at the constructor's flat angles, and the memory that

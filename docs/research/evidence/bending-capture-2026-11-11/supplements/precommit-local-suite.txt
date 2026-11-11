@@ -1,0 +1,17 @@
+guards-ruff PASS 1s
+guards-tests PASS 14s
+guards-supply-chain PASS 0s
+guards-deploy-paths PASS 1s
+guards-canonical-host PASS 0s
+commons-pin PASS 0s
+compliance PASS 4s
+kernel-ruff PASS 0s
+kernel-pytest PASS 25s
+stock-cards PASS 0s
+engine-tests PASS 131s
+engine-typecheck PASS 3s
+engine-package PASS 4s
+web-tests PASS 30s
+api-pytest PASS 23s
+api-openapi PASS 1s
+DONE

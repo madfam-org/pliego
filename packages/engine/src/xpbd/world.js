@@ -48,7 +48,7 @@ export class World {
    *   bendDamping?:number, physicalMembrane?:boolean, lineSearch?:boolean, lineSearchArithmetic?:'total-energy'|'membrane-inertia-increment', continuousContact?:boolean, ccdIterations?:number,
    *   barrierContact?:boolean,barrierDistance?:number,barrierStiffness?:number,barrierIterations?:number,barrierCgIterations?:number,barrierTolerance?:number,previousPoseStart?:boolean,
    *   consistentMembraneCurvature?:boolean,barrierLinearSolver?:'pcg'|'direct-local'|'auto',contactBroadPhase?:'reference'|'bvh'|'wasm',edgeEdgeMollification?:'off'|'surface-guarded',
-   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton'|'exact-hessian',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement'}} [opts]
+   *   membraneModel?:'edge-springs'|'orthotropic-stvk',membranePoissonConvention?:'nu12',membraneNu12?:number[],membraneCurvature?:'gauss-newton'|'exact-hessian',membraneProjection?:'none',membraneArithmetic?:'binary64'|'double-double',membraneReference?:'material-coefficients'|'uv-displacement',stateCoordinates?:'absolute-position'|'reference-displacement',pcgAbsoluteTolerance?:number}} [opts]
    */
   constructor(docOrJson, opts = {}) {
     const doc = docOrJson && docOrJson.sheetIndex instanceof Map ? docOrJson : loadDocument(docOrJson);
@@ -56,6 +56,7 @@ export class World {
     const orthotropic = opts.membraneModel === 'orthotropic-stvk';
     if (!['absolute-position', 'reference-displacement'].includes(opts.stateCoordinates ?? 'absolute-position')) throw new RangeError('World: invalid stateCoordinates');
     if (opts.stateCoordinates === 'reference-displacement' && opts.membraneReference !== 'uv-displacement') throw new Error('World: reference-displacement stateCoordinates requires uv-displacement membraneReference');
+    if (opts.pcgAbsoluteTolerance !== undefined && (opts.stateCoordinates !== 'reference-displacement' || !(Number.isFinite(opts.pcgAbsoluteTolerance) && opts.pcgAbsoluteTolerance > 0))) throw new Error('World: pcgAbsoluteTolerance is a positive finite microN stop admitted only with reference-displacement stateCoordinates');
     if (!['material-coefficients', 'uv-displacement'].includes(opts.membraneReference ?? 'material-coefficients')) throw new RangeError('World: invalid membraneReference');
     if (opts.membraneReference === 'uv-displacement' && (!orthotropic || opts.membraneArithmetic !== 'double-double' || opts.lineSearchArithmetic !== 'membrane-inertia-increment')) throw new Error('World: uv-displacement membraneReference requires orthotropic-stvk, double-double and membrane-inertia-increment search');
     if (!['binary64', 'double-double'].includes(opts.membraneArithmetic ?? 'binary64')) throw new RangeError('World: invalid membraneArithmetic');
@@ -77,6 +78,7 @@ export class World {
       ...(opts.membraneReference === 'uv-displacement' ? { membraneReference: opts.membraneReference } : {}),
       ...(opts.stateCoordinates === 'reference-displacement' ? { stateCoordinates: opts.stateCoordinates } : {}),
       ...(opts.lineSearchArithmetic === 'membrane-inertia-increment' ? { lineSearchArithmetic: opts.lineSearchArithmetic } : {}),
+      ...(opts.pcgAbsoluteTolerance !== undefined ? { pcgAbsoluteTolerance: opts.pcgAbsoluteTolerance } : {}),
       continuousContact: opts.continuousContact ?? false,
       barrierContact: opts.barrierContact ?? false,
       previousPoseStart: opts.previousPoseStart ?? false,

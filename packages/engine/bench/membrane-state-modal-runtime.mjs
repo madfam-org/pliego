@@ -45,23 +45,26 @@ function currentStateBinding(w){
 /** First preserve the actual historical native initialization, then convert once.
  * The extra absolute context is unstepped and supplies no predictor/oracle state.
  */
-export function createStateModalWorld(patch,{stateCoordinates=MODE,membraneCurvature='gauss-newton',...parameters}={}){
+export function createStateModalWorld(patch,{stateCoordinates=MODE,membraneCurvature='gauss-newton',pcgAbsoluteTolerance,...parameters}={}){
   demand(stateCoordinates===MODE,'only explicitly named reference-displacement state supported');
   demand(['gauss-newton','exact-hessian'].includes(membraneCurvature),'named membraneCurvature required');
   // Exact curvature is a named candidate operator only; omission keeps the historical options/parameters bytes.
-  const exact=membraneCurvature==='exact-hessian';
+  const exact=membraneCurvature==='exact-hessian',absolute=pcgAbsoluteTolerance!==undefined;
+  demand(!absolute||(Number.isFinite(pcgAbsoluteTolerance)&&pcgAbsoluteTolerance>0),'named absolute PCG stop must be positive and finite');
+  // Both are named candidates only; omission keeps the historical option/parameter bytes.
+  const named={...(exact?{membraneCurvature}:{}),...(absolute?{pcgAbsoluteTolerance}:{})};
   const required={lineSearchArithmetic:INC,membraneArithmetic:DD,membraneReference:UV};
   for(const [key,value]of Object.entries(required))demand(parameters[key]===undefined||parameters[key]===value,'incompatible '+key);
   const old=createModalWorld(patch,{...parameters,...required}),actualX=old.world.x.slice(),actualV=old.world.v.slice();
   const originalXs=old.world.xs.slice(),originalXt=old.world.xt.slice();
-  const options={...old.options,stateCoordinates:MODE,...(exact?{membraneCurvature}:{})},world=new World(patch.doc,options);
+  const options={...old.options,stateCoordinates:MODE,...named},world=new World(patch.doc,options);
   world.setInitialReferencePose(actualX,actualV);
   demand(same(world.x,actualX)&&same(world.v,actualV)&&same(world.xs,originalXs)&&same(world.xt,originalXt),'conversion changed actual initialization/constructor buffers');
   demand(same(world.mass,old.world.mass)&&same(world.X0,old.world.X0)&&world.dt===old.world.dt,'native reference/mass/timestep changed');
   const a=world.authoritativeState(),words=referenceWords(world);
   demand(same(a.coefficients,words),'actual native reference words changed');
   const binding=encodeStateModalVectors({x:world.x,xs:world.xs,xt:world.xt,v:world.v,u:a.u,us:a.us,ut:a.ut,x0:a.x0,mass:world.mass,h:[world.dt],initialX:a.initialX,initialU:a.initialU,initialV:a.initialV,reference:words});
-  return {...old,world,options,parameters:{...old.parameters,stateCoordinates:MODE,...(exact?{membraneCurvature}:{})},stateCoordinates:MODE,...(exact?{membraneCurvature}:{}),
+  return {...old,world,options,parameters:{...old.parameters,stateCoordinates:MODE,...named},stateCoordinates:MODE,...named,
     referenceCoefficients:captureModalReference({world}),referenceWords:words,initialBinding:binding,
     initialization:{unsteppedHistoricalContextConstructed:true,physicalSolvesExecuted:0,
       actualInitialX:arr(actualX),actualInitialV:arr(actualV),constructorXs:arr(originalXs),constructorXt:arr(originalXt),
@@ -190,7 +193,8 @@ export function observeStateModalWorld(context,{step=0,initial=step===0,executio
     rawSHA256:Object.fromEntries(['x','xs','xt','v'].map(k=>[k,binding.stateSHA256[k]])),
     asleep:w.asleep,framesRun:w.framesRun,substepsRun:w.substepsRun,execution,
     solver:{newtonIterations:w.opts.newtonIterations,substeps:w.opts.substeps,previousPoseStart:w.opts.previousPoseStart,
-      factorizations:w.factorCount,lastPublicPcgIterations:w.pcgIterations,pcgMaxIterations:K.PCG_MAX_ITER,pcgRelativeTolerance:K.PCG_RTOL,lineSearchBacktracks:w.energySearch.backtracks,lineSearchRejected:w.energySearch.rejected,
+      factorizations:w.factorCount,lastPublicPcgIterations:w.pcgIterations,pcgMaxIterations:K.PCG_MAX_ITER,pcgRelativeTolerance:K.PCG_RTOL,
+      ...(w.opts.pcgAbsoluteTolerance!==undefined?{pcgAbsoluteTolerance:w.opts.pcgAbsoluteTolerance}:{}),lineSearchBacktracks:w.energySearch.backtracks,lineSearchRejected:w.energySearch.rejected,
       lineSearchArithmetic:w.opts.lineSearchArithmetic,membraneArithmetic:w.opts.membraneArithmetic,membraneReference:w.opts.membraneReference,
       stateCoordinates:MODE,membraneArithmeticIdentity:structuredClone(w.orthotropicMembrane.configuration.arithmetic),membraneReferenceIdentity:structuredClone(w.orthotropicMembrane.configuration.reference),stateIdentity:structuredClone(w._referenceIdentity),linearDirectionResiduals:null,acceptedAlphaHistory:null,
       // Exact-only receipts: requested operator, effective factor operator and every counted event.

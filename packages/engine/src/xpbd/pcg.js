@@ -138,11 +138,14 @@ export function hessianTimes(w, x, p, out, coordinates = 'absolute-position', cu
  * @param {((p:Float64Array,out:Float64Array)=>void)|null} [extraHessian] additive PSD operator
  * @param {boolean} [stopOnStagnation] legacy elastic refactor heuristic
  * @param {string} [coordinates] @param {'gauss-newton'|'exact-hessian'} [curvature] current membrane operator
+ * @param {number|null} [absoluteTolerance] opt-in stop: converged only when the free linear residual's
+ *   infinity norm is at most this (microN); replaces the relative test, every other constant unchanged
  * @returns {{iterations:number, converged:boolean, reason?:string, slope?:number|null}} exact curvature adds an
  *   observable stop reason and the g·δ descent slope; a nonfinite or non-descent direction is never added
  */
-export function pcgStep(w, x, g, maxIter, rtol, extraHessian = null, stopOnStagnation = true, coordinates = 'absolute-position', curvature = 'gauss-newton') {
+export function pcgStep(w, x, g, maxIter, rtol, extraHessian = null, stopOnStagnation = true, coordinates = 'absolute-position', curvature = 'gauss-newton', absoluteTolerance = null) {
   const exact = selectCurvature(curvature, w.orthotropicMembrane);
+  if (absoluteTolerance !== null && !(Number.isFinite(absoluteTolerance) && absoluteTolerance > 0)) throw new RangeError('PCG: absolute tolerance must be positive and finite');
   const S = w.sys, ch = S.ch, fi = S.freeIdx, nV = w.mesh.nV, n3 = 3 * S.nFree;
   const W = w._pcg !== null ? w._pcg : (w._pcg = { r: new Float64Array(n3), z: new Float64Array(n3), p: new Float64Array(n3), d: new Float64Array(n3), pv: new Float64Array(3 * nV), Ap: new Float64Array(3 * nV) });
   const { r, z, p, d, pv, Ap } = W;
@@ -167,12 +170,12 @@ export function pcgStep(w, x, g, maxIter, rtol, extraHessian = null, stopOnStagn
     for (let i = 0; i < nV; i++) { const k = fi[i]; if (k < 0) continue; pAp += p[3 * k] * Ap[3 * i] + p[3 * k + 1] * Ap[3 * i + 1] + p[3 * k + 2] * Ap[3 * i + 2]; }
     if (!(pAp > 0)) { reason = Number.isFinite(pAp) ? 'nonpositive-curvature' : 'nonfinite-product'; break; }
     const alpha = rz / pAp;
-    let rn = 0;
+    let rn = 0, rInf = 0;
     for (let i = 0; i < nV; i++) {
       const k = fi[i]; if (k < 0) continue;
-      for (let c = 0; c < 3; c++) { d[3 * k + c] += alpha * p[3 * k + c]; r[3 * k + c] -= alpha * Ap[3 * i + c]; rn += r[3 * k + c] ** 2; }
+      for (let c = 0; c < 3; c++) { d[3 * k + c] += alpha * p[3 * k + c]; r[3 * k + c] -= alpha * Ap[3 * i + c]; rn += r[3 * k + c] ** 2; rInf = Math.max(rInf, Math.abs(r[3 * k + c])); }
     }
-    if (Math.sqrt(rn) <= rtol * r0) { converged = true; reason = 'converged'; it++; break; }
+    if (absoluteTolerance === null ? Math.sqrt(rn) <= rtol * r0 : rInf <= absoluteTolerance) { converged = true; reason = 'converged'; it++; break; }
     if (stopOnStagnation && it === 3 && Math.sqrt(rn) > 0.1 * r0) { reason = 'stagnation'; it++; break; } // stagnating: refactor instead
     z.set(r); precond(ch, z, R);
     let rzn = 0;

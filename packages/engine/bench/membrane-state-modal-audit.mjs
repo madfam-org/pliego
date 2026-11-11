@@ -79,9 +79,14 @@ function updateMaximum(maximum,m,o,steps,phase){
 }
 
 /** Small tests may call this helper; accepted matrices require the enclosing clean-source guard. */
-export function runStateModalTrajectory(patch,reference,row,{instrument=true,restoreContinuation=true,membraneCurvature='gauss-newton'}={}){
+/** Named PCG stop candidates; omission is the historical relative rule. */
+export const STATE_MODAL_PCG_STOPS=Object.freeze({'half-force-tolerance':Object.freeze({rule:'absolute-residual-infinity-norm',factorOfForceTolerance:.5,
+  scope:'PCG converges only when the free linear residual infinity norm is at most half the fixed force tolerance; every other PCG constant unchanged'})});
+export function runStateModalTrajectory(patch,reference,row,{instrument=true,restoreContinuation=true,membraneCurvature='gauss-newton',pcgStop}={}){
+  assert.ok(pcgStop===undefined||Object.hasOwn(STATE_MODAL_PCG_STOPS,pcgStop),'unknown named PCG stop');
+  const stop=pcgStop===undefined?{}:{pcgAbsoluteTolerance:STATE_MODAL_PCG_STOPS[pcgStop].factorOfForceTolerance*row.forceTolerance};
   const context=createStateModalWorld(patch,{phi:reference.mode.phi,omega:reference.mode.omega,amplitude:row.amplitude,
-    substeps:row.substeps,newtonIterations:row.budget,previousPoseStart:row.seed,...(membraneCurvature==='exact-hessian'?{membraneCurvature}:{})}),w=context.world;
+    substeps:row.substeps,newtonIterations:row.budget,previousPoseStart:row.seed,...(membraneCurvature==='exact-hessian'?{membraneCurvature}:{}),...stop}),w=context.world;
   const expected=row.initial?.observation;
   if(expected){for(const key of ['x','xs','xt','v'])equalWords(w[key],decode(row.initial.stateFloat64LE[key],expected.rawSHA256[key]),'actual archived initial '+key+' differs');
     equalWords(w.mass,row.runtime.massProof.native,'actual archived mass differs');assert.equal(context.forceScale,row.fixedForceScale);assert.equal(context.forceTolerance,row.forceTolerance);assert.equal(context.modalMass,row.modalMass);
@@ -186,13 +191,14 @@ export function stateModalPairedControls(rows,config){
   return {budget:budgets,commonTimeLevels:levels,amplitude:{measured:false,reason:'only declared A=.004; no finite-strain/amplitude isolation'},scope:'full-state diagnostics cannot waive either force gate or establish selected-native-C/time/material/booklet acceptance'};
 }
 
-export function runStateModalAudit({instrument=true,membraneCurvature='gauss-newton',...unknown}={}){
+export function runStateModalAudit({instrument=true,membraneCurvature='gauss-newton',pcgStop,...unknown}={}){
   assert.equal(Object.keys(unknown).length,0,'unknown state audit options; no dirty/full/window override');assert.equal(typeof instrument,'boolean');
   assert.ok(['gauss-newton','exact-hessian'].includes(membraneCurvature),'named membraneCurvature required');const exact=membraneCurvature==='exact-hessian';
+  assert.ok(pcgStop===undefined||Object.hasOwn(STATE_MODAL_PCG_STOPS,pcgStop),'unknown named PCG stop');
   const before=stateModalSource();assert.equal(before.status,'','clean source required; no accepted dirty override');
   const baseline=loadStateModalPlan(),patch=makePatch({...baseline.geometry,membraneModel:'orthotropic-stvk',membraneNu12:.293});
   assert.deepEqual(patch.material,baseline.material);assert.equal(patch.fixtureSHA256,baseline.fixtureSHA256);assert.equal(patch.meshSHA256,baseline.meshSHA256);
-  const rows=[];for(const row of baseline.rows){const result=runStateModalTrajectory(patch,baseline.reference,row,{instrument,membraneCurvature});
+  const rows=[];for(const row of baseline.rows){const result=runStateModalTrajectory(patch,baseline.reference,row,{instrument,membraneCurvature,...(pcgStop===undefined?{}:{pcgStop})});
     equalWords(decode(result.referenceWords.stateFloat64LE.reference,result.referenceWords.stateSHA256.reference),baseline.referenceWords,'selected reference words changed');rows.push(result);
     console.error('state-modal-progress: level='+row.level+' I='+row.budget+' previous='+row.seed+' public='+result.failedSteps+'/'+row.steps+' authoritative='+result.authoritativeFailedSteps+'/'+row.steps);
   }
@@ -201,6 +207,7 @@ export function runStateModalAudit({instrument=true,membraneCurvature='gauss-new
   return {schema:'pliego-membrane-state-modal-audit/1',recordedAt:new Date().toISOString(),source:{...before,status:undefined,dirty:false},
     runtime:{node:process.version,arch:process.arch,platform:process.platform},protocol:{...STATE_MODAL_PROTOCOL,instrument,stateCoordinates:'reference-displacement',membraneReference:'uv-displacement',membraneArithmetic:'double-double',lineSearchArithmetic:'membrane-inertia-increment',limits:STATE_MODAL_LIMITS,
       ...(exact?{membraneCurvature,membraneCurvatureIdentity:{...EXACT_CURVATURE_IDENTITY},membraneCurvatureScope:'named exact-curvature candidate; Gauss–Newton baseline is the same protocol with this field omitted'}:{}),
+      ...(pcgStop===undefined?{}:{pcgStop:{name:pcgStop,...STATE_MODAL_PCG_STOPS[pcgStop]}}),
       initialization:'actual old native x/v converted once; constructor zero buffers retained; extra unstepped context explicitly recorded; no targets supplied by oracle',
       referenceMeaning:'immutable independent exact-UV physical CST continuous/BE spectrum with real M/h²; not exact selected-law/native-C propagation',
       perNewtonLinearDiagnostics:instrument?'transparent copied streaming callback; all changing decision scalars and selected full endpoints':'not measured',
@@ -228,13 +235,16 @@ export function runStateModalAbsoluteBaseline(){
 export function writeStateModalReport(output,report){const sink=reserveStateModalOutput(output);try{sink.write(report);}finally{sink.close();}}
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  const args=process.argv.slice(2),baseline=args.includes('--baseline-absolute'),plain=args.includes('--no-solve-observer'),oi=args.indexOf('--out'),ci=args.indexOf('--membrane-curvature');
+  const args=process.argv.slice(2),baseline=args.includes('--baseline-absolute'),plain=args.includes('--no-solve-observer'),oi=args.indexOf('--out'),ci=args.indexOf('--membrane-curvature'),si=args.indexOf('--pcg-stop');
   assert.ok(oi>=0&&args[oi+1]&&!args[oi+1].startsWith('--'),'--out fresh durable path required');
   assert.ok(ci<0||args[ci+1]==='exact-hessian','--membrane-curvature names only the exact-hessian candidate; omission is Gauss–Newton');
-  assert.ok(args.every((a,i)=>['--out','--baseline-absolute','--no-solve-observer','--membrane-curvature'].includes(a)||i===oi+1||(ci>=0&&i===ci+1)),'unknown option; fixed24scope only');
-  for(const flag of ['--out','--baseline-absolute','--no-solve-observer','--membrane-curvature'])assert.ok(args.filter(a=>a===flag).length<=1,'duplicate option: '+flag);
+  assert.ok(si<0||Object.hasOwn(STATE_MODAL_PCG_STOPS,args[si+1]),'--pcg-stop names one declared candidate stop; omission is the historical relative rule');
+  assert.ok(args.every((a,i)=>['--out','--baseline-absolute','--no-solve-observer','--membrane-curvature','--pcg-stop'].includes(a)||i===oi+1||(ci>=0&&i===ci+1)||(si>=0&&i===si+1)),'unknown option; fixed24scope only');
+  for(const flag of ['--out','--baseline-absolute','--no-solve-observer','--membrane-curvature','--pcg-stop'])assert.ok(args.filter(a=>a===flag).length<=1,'duplicate option: '+flag);
+  assert.ok(!baseline||si<0,'absolute baseline has no PCG stop candidate');
   assert.ok(!baseline||!plain,'absolute baseline must retain original instrumentation protocol');assert.ok(!baseline||ci<0,'absolute baseline has no curvature candidate');
   const membraneCurvature=ci>=0?'exact-hessian':'gauss-newton';
-  const sink=reserveStateModalOutput(args[oi+1]);try{const report=baseline?runStateModalAbsoluteBaseline():runStateModalAudit({instrument:!plain,membraneCurvature});sink.write(report);}finally{sink.close();}
+  const pcgStop=si>=0?{pcgStop:args[si+1]}:{};
+  const sink=reserveStateModalOutput(args[oi+1]);try{const report=baseline?runStateModalAbsoluteBaseline():runStateModalAudit({instrument:!plain,membraneCurvature,...pcgStop});sink.write(report);}finally{sink.close();}
   console.error('state-modal-audit: '+(baseline?'current absolute baseline':'state '+membraneCurvature)+' fixed24; raw failed outcomes retained; untimed research');
 }

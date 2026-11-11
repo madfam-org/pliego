@@ -22,7 +22,8 @@ export function newtonStep(w) {
       gradient(w, x, g, coordinates);
       if (it > 0 || w.opts.previousPoseStart || w.opts.lineSearchArithmetic === 'membrane-inertia-increment') for (let i = 0; i < nV; i++) { const m = w.mass[i] * idt2; for (let c = 0; c < 3; c++) g[3 * i + c] += m * (x[3 * i + c] - target[3 * i + c]); }
       if (!w.dirty && !(w._pcgFail > 0)) {
-        const r = pcgStep(w, x, g, K.PCG_MAX_ITER, K.PCG_RTOL, null, true, coordinates);
+        const r = w.opts.pcgAbsoluteTolerance === undefined ? pcgStep(w, x, g, K.PCG_MAX_ITER, K.PCG_RTOL, null, true, coordinates)
+          : pcgStep(w, x, g, K.PCG_MAX_ITER, K.PCG_RTOL, null, true, coordinates, 'gauss-newton', w.opts.pcgAbsoluteTolerance);
         w.pcgIterations = r.iterations;
         if (r.converged) { if (r.iterations > K.PCG_REFACTOR_ITER) w.dirty = true; w.energySearch?.finish(w, g); continue; }
         w._pcgFail = K.PCG_FAIL_HOLD; // the sheet is moving fast: factor directly for a few substeps

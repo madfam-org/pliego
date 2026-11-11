@@ -230,6 +230,10 @@ export function validateStateObservation(observation, { context, previous = null
     check(o.solver?.substeps === opts.substeps && o.solver?.newtonIterations === opts.newtonIterations && o.solver?.previousPoseStart === opts.previousPoseStart, 'reported solver configuration changed');
     check(o.solver?.stateCoordinates === MODE && equalIdentity(o.solver?.stateIdentity) && o.solver?.lineSearchArithmetic === 'membrane-inertia-increment' && o.solver?.membraneArithmetic === 'double-double' && o.solver?.membraneReference === 'uv-displacement' && equalObject(o.solver?.membraneArithmeticIdentity, DOUBLE_DOUBLE_IDENTITY) && equalObject(o.solver?.membraneReferenceIdentity, UV_REFERENCE_IDENTITY), 'reported state/model/arithmetic identity differs');
     check(o.solver?.pcgMaxIterations === K.PCG_MAX_ITER && o.solver?.pcgRelativeTolerance === K.PCG_RTOL, 'native PCG policy changed');
+    // The absolute PCG stop is a named candidate only: context, options and the reported policy must agree.
+    const stop = context?.pcgAbsoluteTolerance;
+    check(stop === undefined ? !Object.hasOwn(opts ?? {}, 'pcgAbsoluteTolerance') && !Object.hasOwn(o.solver ?? {}, 'pcgAbsoluteTolerance')
+      : Number.isFinite(stop) && stop > 0 && Object.is(opts?.pcgAbsoluteTolerance, stop) && Object.is(o.solver?.pcgAbsoluteTolerance, stop), 'named absolute PCG stop differs');
     for (const key of ['factorizations', 'lastPublicPcgIterations', 'lineSearchBacktracks', 'lineSearchRejected']) check(integer(o.solver?.[key]), 'invalid solver counter: ' + key);
     const curvatureFields = ['membraneCurvature', 'membraneCurvatureIdentity', 'factorCurvature', 'membraneCurvatureCounters', 'lastCurvatureReceipt'];
     if (!exactCurvature) check(curvatureFields.every(key => !Object.hasOwn(o.solver ?? {}, key)), 'unexpected curvature receipts on the Gauss–Newton path');
@@ -288,6 +292,7 @@ export function validateStateObservation(observation, { context, previous = null
       check(Object.is(world.dt, 1 / (60 * world.opts.substeps)), 'live timestep/substeps association differs');
       check(world.opts.stateCoordinates === MODE && world.opts.membraneArithmetic === 'double-double' && world.opts.membraneReference === 'uv-displacement' && world.opts.lineSearchArithmetic === 'membrane-inertia-increment', 'live arithmetic/state mode differs');
       for (const [key, value] of Object.entries({ factorizations: world.factorCount, lastPublicPcgIterations: world.pcgIterations, lineSearchBacktracks: world.energySearch.backtracks, lineSearchRejected: world.energySearch.rejected })) check(o.solver?.[key] === value, 'counter differs from live World: ' + key);
+      check(Object.is(world.opts.pcgAbsoluteTolerance, context?.pcgAbsoluteTolerance), 'live absolute PCG stop differs');
       check(Object.is(world.opts.membraneCurvature, curvature) && (exactCurvature ? JSON.stringify(o.solver?.membraneCurvatureCounters) === JSON.stringify(world._exactCurvature?.counters) &&
         JSON.stringify(o.solver?.lastCurvatureReceipt) === JSON.stringify(world._exactCurvature?.last) && o.solver?.factorCurvature === (world._factorState?.curvature ?? null) : !world._exactCurvature), 'curvature receipts differ from live World');
       const shadow = scratchCopy(world), selected = shadow.orthotropicMembrane;

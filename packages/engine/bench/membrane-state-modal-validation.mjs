@@ -8,6 +8,7 @@ import { REFERENCE_STATE_IDENTITY, validateReferenceState } from '../src/xpbd/re
 import * as K from '../src/constants.js';
 import { DOUBLE_DOUBLE_IDENTITY } from '../src/xpbd/double-double.js';
 import { UV_REFERENCE_IDENTITY } from '../src/xpbd/uv-reference.js';
+import { EXACT_CURVATURE_IDENTITY } from '../src/xpbd/membrane-curvature.js';
 
 const MODE = 'reference-displacement', ABS = 'absolute-position', ATOL = 1e-7, RTOL = 1e-10;
 const finite = x => typeof x === 'number' && Number.isFinite(x);
@@ -144,8 +145,11 @@ export function validateStateObservation(observation, { context, previous = null
     check(integer(opts?.substeps) && opts.substeps > 0 && integer(opts?.newtonIterations) && opts.newtonIterations > 0 && typeof opts.previousPoseStart === 'boolean', 'invalid solver options');
     check(finite(context?.omega) && context.omega > 0 && finite(context?.amplitude) && context.amplitude >= 0, 'invalid fixed modal parameters');
     check(o?.schema === 'pliego-membrane-state-modal-observation/1' && a && equalIdentity(a.identity), 'missing or changed authoritative identity/schema');
+    // Gauss–Newton is the default; exact curvature is admitted only as an explicitly named context request.
+    const curvature = context?.membraneCurvature ?? 'gauss-newton', exactCurvature = curvature === 'exact-hessian';
+    check(['gauss-newton', 'exact-hessian'].includes(curvature) && (exactCurvature ? opts?.membraneCurvature === curvature : !Object.hasOwn(context ?? {}, 'membraneCurvature')), 'invalid named membrane curvature request');
     for (const [key, value] of Object.entries({ membraneModel: 'orthotropic-stvk', membranePoissonConvention: 'nu12',
-      membraneCurvature: 'gauss-newton', membraneProjection: 'none', membraneArithmetic: 'double-double', membraneReference: 'uv-displacement',
+      membraneCurvature: curvature, membraneProjection: 'none', membraneArithmetic: 'double-double', membraneReference: 'uv-displacement',
       lineSearchArithmetic: 'membrane-inertia-increment', lineSearch: true, physicalMembrane: true, membraneCompression: 1,
       damping: 0, bendDamping: 0, gravity: false, ground: false, contact: false, plasticity: false })) check(Object.is(opts?.[key], value), 'controlled option changed: ' + key);
     if (world) check(world instanceof World, 'actual engine World required for live certification');
@@ -227,6 +231,14 @@ export function validateStateObservation(observation, { context, previous = null
     check(o.solver?.stateCoordinates === MODE && equalIdentity(o.solver?.stateIdentity) && o.solver?.lineSearchArithmetic === 'membrane-inertia-increment' && o.solver?.membraneArithmetic === 'double-double' && o.solver?.membraneReference === 'uv-displacement' && equalObject(o.solver?.membraneArithmeticIdentity, DOUBLE_DOUBLE_IDENTITY) && equalObject(o.solver?.membraneReferenceIdentity, UV_REFERENCE_IDENTITY), 'reported state/model/arithmetic identity differs');
     check(o.solver?.pcgMaxIterations === K.PCG_MAX_ITER && o.solver?.pcgRelativeTolerance === K.PCG_RTOL, 'native PCG policy changed');
     for (const key of ['factorizations', 'lastPublicPcgIterations', 'lineSearchBacktracks', 'lineSearchRejected']) check(integer(o.solver?.[key]), 'invalid solver counter: ' + key);
+    const curvatureFields = ['membraneCurvature', 'membraneCurvatureIdentity', 'factorCurvature', 'membraneCurvatureCounters', 'lastCurvatureReceipt'];
+    if (!exactCurvature) check(curvatureFields.every(key => !Object.hasOwn(o.solver ?? {}, key)), 'unexpected curvature receipts on the Gauss–Newton path');
+    else {
+      const counters = o.solver?.membraneCurvatureCounters;
+      check(o.solver?.membraneCurvature === 'exact-hessian' && equalObject(o.solver?.membraneCurvatureIdentity, EXACT_CURVATURE_IDENTITY), 'reported curvature identity differs');
+      check(counters && Object.values(counters).every(integer) && o.solver.factorizations === counters.exactFactors + counters.gnFallbackFactors, 'reported curvature counters inconsistent with successful factors');
+      check([null, 'exact-hessian', 'gauss-newton'].includes(o.solver?.factorCurvature), 'invalid reported factor curvature');
+    }
     const physics = {};
     for (const [label, reported, point, target] of [['public', o, state.x, state.xt], ['authoritative', a, state.u, state.ut]]) {
       check(vector(reported.elasticGradient, size) && reported.elasticGradient.every((v, i) => i % 3 !== 1 || v === 0), label + ' invalid elastic gradient');
@@ -276,6 +288,8 @@ export function validateStateObservation(observation, { context, previous = null
       check(Object.is(world.dt, 1 / (60 * world.opts.substeps)), 'live timestep/substeps association differs');
       check(world.opts.stateCoordinates === MODE && world.opts.membraneArithmetic === 'double-double' && world.opts.membraneReference === 'uv-displacement' && world.opts.lineSearchArithmetic === 'membrane-inertia-increment', 'live arithmetic/state mode differs');
       for (const [key, value] of Object.entries({ factorizations: world.factorCount, lastPublicPcgIterations: world.pcgIterations, lineSearchBacktracks: world.energySearch.backtracks, lineSearchRejected: world.energySearch.rejected })) check(o.solver?.[key] === value, 'counter differs from live World: ' + key);
+      check(Object.is(world.opts.membraneCurvature, curvature) && (exactCurvature ? JSON.stringify(o.solver?.membraneCurvatureCounters) === JSON.stringify(world._exactCurvature?.counters) &&
+        JSON.stringify(o.solver?.lastCurvatureReceipt) === JSON.stringify(world._exactCurvature?.last) && o.solver?.factorCurvature === (world._factorState?.curvature ?? null) : !world._exactCurvature), 'curvature receipts differ from live World');
       const shadow = scratchCopy(world), selected = shadow.orthotropicMembrane;
       for (const [label, coordinates] of [['public', ABS], ['authoritative', MODE]]) {
         const { point, reported } = physics[label] ?? {};

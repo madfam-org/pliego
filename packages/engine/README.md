@@ -160,8 +160,9 @@ fallback; a nonfinite pivot is refused. `stats().membraneCurvature` separates th
 requested, last-direction and factor operators and counts each event. Snapshots bind the
 curvature identity and rebuild the saved effective factor. Omission or explicit
 `'gauss-newton'` keeps every existing operator, metadata byte and trajectory. See
-[the design and its status](../../docs/research/exact-curvature-next-implementation.md);
-no accepted force/time comparison exists yet.
+[the design and its status](../../docs/research/exact-curvature-next-implementation.md).
+Its [fixed-24 comparison](../../docs/research/exact-curvature-results.md) fixes the first
+update but changes whole-trajectory force outcomes only slightly; no acceptance follows.
 
 Further opt-in research options are documented in the
 [coupled-contact experiment](../../docs/research/coupled-contact-experiment.md):

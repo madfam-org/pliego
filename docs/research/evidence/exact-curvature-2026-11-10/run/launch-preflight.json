@@ -1,0 +1,15 @@
+{
+  "schema": "pliego-state-matrix-launch-preflight/1",
+  "at": "2026-11-10T23:13:11.602424+00:00",
+  "sourceGit": "af870bf776023b01f6e205a420fa493cccd549c5",
+  "sourceClean": true,
+  "acceptedProcessesStarted": 0,
+  "runnerFilesSHA256": {
+    "run-state-matrix.py": "ea29776d32c1533e9b298ac530e54b23c7fef5db3fe846cb39bcccba0ba7ccd4",
+    "pipeline-manifest.json": "10a9f291275ea595e8193faee2fb01269f97083905f1cb2719500cc26803180e",
+    "pipeline-plan.json": "748877d7b0f373e2291b9f5560728857d3d8ed5aac5f9970d6d009f14439bb29"
+  },
+  "preparedSHA256": "621f77a4af13eb970762cf315449ccfb4b344e6429f73c5191dc7369eb150a46",
+  "selectedNewtonReviewerSHA256": "aaec559930f911fc6747ef707d8bc539a092cc640e6fd58fe2f1ae73adcc16c0",
+  "scope": "All source/reviewer/driver preparation bindings verified before first accepted process. Exact-curvature fixed24 ablation; no physics acceptance implied."
+}

@@ -1,0 +1,1836 @@
+{
+  "schema": "pliego-membrane-state-modal-comparison/1",
+  "recordedAt": "2026-11-10T23:48:35.316Z",
+  "mode": "curvature-comparison",
+  "comparison": {
+    "commonActualInputsExactlyEqual": true,
+    "excludedInputIdentity": [
+      "membraneCurvature"
+    ],
+    "physicalCSTReferenceUnchanged": true
+  },
+  "forceOutcomes": {
+    "poststeps": 7110,
+    "declaredNewtonEvents": 49770,
+    "trajectories": [
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 79,
+        "publicFailed": 79,
+        "authoritativeFailed": 79,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 79,
+        "publicFailed": 79,
+        "authoritativeFailed": 79,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 79,
+        "publicFailed": 71,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 2,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 158,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 158,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 1
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 158,
+        "publicFailed": 158,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 315,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 2
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 315,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 2
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 316,
+        "publicFailed": 316,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": false,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 626,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 6
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": true,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 629,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": 4
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": false,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": true,
+        "poststeps": 632,
+        "publicFailed": 632,
+        "authoritativeFailed": 0,
+        "firstPublicFailure": 1,
+        "firstAuthoritativeFailure": null
+      }
+    ],
+    "publicFailed": 7078,
+    "authoritativeFailed": 2359
+  },
+  "changes": {
+    "public": {
+      "gains": 0,
+      "losses": 2,
+      "unchanged": 7108
+    },
+    "authoritative": {
+      "gains": 10,
+      "losses": 0,
+      "unchanged": 7100
+    },
+    "curvatureEvents": {
+      "exactFactorAttempts": 37345,
+      "exactFactors": 37345,
+      "finiteNonpositivePivots": 0,
+      "gnFallbackFactors": 0,
+      "nonfiniteFailures": 0,
+      "pcgAttempts": 12425,
+      "pcgConverged": 12425,
+      "zeroRhs": 0,
+      "pcgNonpositiveCurvature": 0,
+      "pcgNonfiniteProduct": 0,
+      "pcgStagnation": 0,
+      "pcgIterationLimit": 0,
+      "pcgNonDescent": 0,
+      "pcgNonfiniteDirection": 0,
+      "iterations": 49770
+    },
+    "trajectories": [
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 79,
+          "pcgAttempts": 78,
+          "pcgConverged": 78,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.0048970757434290135,
+            "median": 0.7807628429145552,
+            "maximum": 4.782248654635623
+          },
+          "exactCurvature": {
+            "minimum": 0.008858282209757817,
+            "median": 0.9325882043340243,
+            "maximum": 6.39109058358008
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.004896994589444148,
+            "median": 0.7808324554353021,
+            "maximum": 4.782253256358672
+          },
+          "exactCurvature": {
+            "minimum": 0.008857868225163656,
+            "median": 0.93261596528464,
+            "maximum": 6.390982540615369
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 1.799042411497794,
+          "exactCurvature": 0.012139399710576981
+        }
+      },
+      {
+        "level": 1,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 79,
+          "pcgAttempts": 78,
+          "pcgConverged": 78,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.22062684647971764,
+            "median": 13.798930876044324,
+            "maximum": 36.76478382200003
+          },
+          "exactCurvature": {
+            "minimum": 0.012139399710576981,
+            "median": 26.74225014494732,
+            "maximum": 54.63229235657491
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.22069784201448783,
+            "median": 13.798938454841846,
+            "maximum": 36.76473931630608
+          },
+          "exactCurvature": {
+            "minimum": 0.012221648532431573,
+            "median": 26.74237000924768,
+            "maximum": 54.632334298308706
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 1.799042411497794,
+          "exactCurvature": 0.012139399710576981
+        }
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 178,
+          "pcgConverged": 178,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 138,
+          "exactFactors": 138,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 1.2278178473934531e-11,
+            "median": 3.2014213502407074e-9,
+            "maximum": 1.2456439435482025e-8
+          },
+          "exactCurvature": {
+            "minimum": 2.5011104298755527e-11,
+            "median": 3.259629011154175e-9,
+            "maximum": 1.2456439435482025e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810904834419489,
+            "maximum": 0.0001940321089932695
+          },
+          "exactCurvature": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.344635039567947e-9,
+          "exactCurvature": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 1,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 1,
+          "unchanged": 78
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [
+          {
+            "step": 79,
+            "kind": "public",
+            "change": "loss"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 238,
+          "pcgConverged": 238,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 78,
+          "exactFactors": 78,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 2.1600499167107046e-11,
+            "median": 3.3760443329811096e-9,
+            "maximum": 1.2456439435482025e-8
+          },
+          "exactCurvature": {
+            "minimum": 2.432898327242583e-11,
+            "median": 3.3178366720676422e-9,
+            "maximum": 1.2689270079135895e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810904834419489,
+            "maximum": 0.0001940321089932695
+          },
+          "exactCurvature": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.344635039567947e-9,
+          "exactCurvature": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 178,
+          "pcgConverged": 178,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1086,
+          "exactFactors": 1086,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 1.2278178473934531e-11,
+            "median": 3.2014213502407074e-9,
+            "maximum": 1.2456439435482025e-8
+          },
+          "exactCurvature": {
+            "minimum": 2.5011104298755527e-11,
+            "median": 3.259629011154175e-9,
+            "maximum": 1.2456439435482025e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810904834419489,
+            "maximum": 0.0001940321089932695
+          },
+          "exactCurvature": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.344635039567947e-9,
+          "exactCurvature": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 1,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 1,
+          "unchanged": 78
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 79
+        },
+        "changedSteps": [
+          {
+            "step": 79,
+            "kind": "public",
+            "change": "loss"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 237,
+          "pcgConverged": 237,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1027,
+          "exactFactors": 1027,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 2.1600499167107046e-11,
+            "median": 3.3760443329811096e-9,
+            "maximum": 1.2456439435482025e-8
+          },
+          "exactCurvature": {
+            "minimum": 2.432898327242583e-11,
+            "median": 3.3178366720676422e-9,
+            "maximum": 1.2689270079135895e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810904834419489,
+            "maximum": 0.0001940321089932695
+          },
+          "exactCurvature": {
+            "minimum": 0.00006355250502565468,
+            "median": 0.00011810899013653398,
+            "maximum": 0.0001940321089932695
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.344635039567947e-9,
+          "exactCurvature": 6.344635039567947e-9
+        }
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 158,
+          "pcgAttempts": 157,
+          "pcgConverged": 157,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.0024919521795254695,
+            "median": 0.28472114040050656,
+            "maximum": 1.3215010929852724
+          },
+          "exactCurvature": {
+            "minimum": 0.0007659948314540088,
+            "median": 0.2336997478560079,
+            "maximum": 1.7495411884738132
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0022767613952510146,
+            "median": 0.2851073023630306,
+            "maximum": 1.322119213116821
+          },
+          "exactCurvature": {
+            "minimum": 0.0007653736392967403,
+            "median": 0.2338119053747505,
+            "maximum": 1.749358941335231
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 0.4542009339784272,
+          "exactCurvature": 0.0007659948314540088
+        }
+      },
+      {
+        "level": 2,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 158,
+          "pcgAttempts": 157,
+          "pcgConverged": 157,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.05246443790383637,
+            "median": 7.222149848472327,
+            "maximum": 19.9259730851918
+          },
+          "exactCurvature": {
+            "minimum": 0.0007659948314540088,
+            "median": 14.386171763471793,
+            "maximum": 29.162569996376988
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.05246375623391941,
+            "median": 7.2216611602925695,
+            "maximum": 19.926242714573164
+          },
+          "exactCurvature": {
+            "minimum": 0.0007653736392967403,
+            "median": 14.386564218788408,
+            "maximum": 29.162116986321053
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 0.4542009339784272,
+          "exactCurvature": 0.0007659948314540088
+        }
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 321,
+          "pcgConverged": 321,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 311,
+          "exactFactors": 311,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "exactCurvature": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          },
+          "exactCurvature": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 4.738103598356247e-8,
+          "exactCurvature": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 2,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 437,
+          "pcgConverged": 437,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 195,
+          "exactFactors": 195,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 1.000444171950221e-10,
+            "median": 1.2456439435482025e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "exactCurvature": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.0005014915950596333,
+            "maximum": 0.0007898538606241345
+          },
+          "exactCurvature": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 4.738103598356247e-8,
+          "exactCurvature": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 333,
+          "pcgConverged": 333,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 2195,
+          "exactFactors": 2195,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "exactCurvature": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          },
+          "exactCurvature": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 4.738103598356247e-8,
+          "exactCurvature": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 2,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 158
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 449,
+          "pcgConverged": 449,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 2079,
+          "exactFactors": 2079,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 1.000444171950221e-10,
+            "median": 1.2456439435482025e-8,
+            "maximum": 4.9476511776447296e-8
+          },
+          "exactCurvature": {
+            "minimum": 6.730260793119669e-11,
+            "median": 1.234002411365509e-8,
+            "maximum": 4.9476511776447296e-8
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.0005014915950596333,
+            "maximum": 0.0007898538606241345
+          },
+          "exactCurvature": {
+            "minimum": 0.0001908355188788846,
+            "median": 0.000501491129398346,
+            "maximum": 0.0007898538606241345
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 4.738103598356247e-8,
+          "exactCurvature": 4.738103598356247e-8
+        }
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 1,
+          "losses": 0,
+          "unchanged": 315
+        },
+        "changedSteps": [
+          {
+            "step": 1,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 315,
+          "pcgConverged": 315,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.0008861908934250096,
+            "median": 0.08008538489229977,
+            "maximum": 0.34766131098149344
+          },
+          "exactCurvature": {
+            "minimum": 0.00004797999281436205,
+            "median": 0.05819980299565941,
+            "maximum": 0.4580689486465417
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0015312796363105008,
+            "median": 0.0800849772640504,
+            "maximum": 0.34895729407435283
+          },
+          "exactCurvature": {
+            "minimum": 0.0009705649572424591,
+            "median": 0.05846465901413467,
+            "maximum": 0.45842839969554916
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 0.11383032787125558,
+          "exactCurvature": 0.00004797999281436205
+        }
+      },
+      {
+        "level": 4,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 1,
+          "losses": 0,
+          "unchanged": 315
+        },
+        "changedSteps": [
+          {
+            "step": 1,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 316,
+          "pcgAttempts": 315,
+          "pcgConverged": 315,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.020677885215263814,
+            "median": 3.6919227536418475,
+            "maximum": 10.374872872431297
+          },
+          "exactCurvature": {
+            "minimum": 0.00004797999281436205,
+            "median": 7.359216307522729,
+            "maximum": 15.07246707714512
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.020678985281847417,
+            "median": 3.693389358522836,
+            "maximum": 10.375606216257438
+          },
+          "exactCurvature": {
+            "minimum": 0.0009705649572424591,
+            "median": 7.35921610542573,
+            "maximum": 15.072547843854409
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 0.11383032787125558,
+          "exactCurvature": 0.00004797999281436205
+        }
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 634,
+          "pcgConverged": 634,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 630,
+          "exactFactors": 630,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "exactCurvature": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "exactCurvature": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 1.5937257558107376e-7,
+          "exactCurvature": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 4,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 1264,
+          "pcgAttempts": 684,
+          "pcgConverged": 684,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 580,
+          "exactFactors": 580,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "exactCurvature": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "exactCurvature": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 1.5937257558107376e-7,
+          "exactCurvature": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 5056,
+          "pcgAttempts": 634,
+          "pcgConverged": 634,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 4422,
+          "exactFactors": 4422,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "exactCurvature": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "exactCurvature": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 1.5937257558107376e-7,
+          "exactCurvature": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 4,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 316
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 5056,
+          "pcgAttempts": 684,
+          "pcgConverged": 684,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 4372,
+          "exactFactors": 4372,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          },
+          "exactCurvature": {
+            "minimum": 3.647073754109442e-10,
+            "median": 5.1513779908418655e-8,
+            "maximum": 1.9837170839309692e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          },
+          "exactCurvature": {
+            "minimum": 0.0009307590080425143,
+            "median": 0.0020094867213629186,
+            "maximum": 0.003204712142178323
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 1.5937257558107376e-7,
+          "exactCurvature": 1.5937257558107376e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 5,
+          "losses": 0,
+          "unchanged": 627
+        },
+        "changedSteps": [
+          {
+            "step": 1,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 2,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 3,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 4,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 5,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 631,
+          "pcgConverged": 631,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.00002405624680790197,
+            "median": 0.02101735182804987,
+            "maximum": 0.08918801153777167
+          },
+          "exactCurvature": {
+            "minimum": 0.000002698390744626522,
+            "median": 0.014541610580636188,
+            "maximum": 0.11722736211959273
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.005251645750831813,
+            "median": 0.023375967517495155,
+            "maximum": 0.09740087372483686
+          },
+          "exactCurvature": {
+            "minimum": 0.004402409424073994,
+            "median": 0.01664462679764256,
+            "maximum": 0.12575724197085947
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 0.028474875376559794,
+          "exactCurvature": 0.000002698390744626522
+        }
+      },
+      {
+        "level": 8,
+        "budget": 1,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 3,
+          "losses": 0,
+          "unchanged": 629
+        },
+        "changedSteps": [
+          {
+            "step": 1,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 2,
+            "kind": "authoritative",
+            "change": "gain"
+          },
+          {
+            "step": 3,
+            "kind": "authoritative",
+            "change": "gain"
+          }
+        ],
+        "curvatureEvents": {
+          "iterations": 632,
+          "pcgAttempts": 631,
+          "pcgConverged": 631,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1,
+          "exactFactors": 1,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 0.009810680930968374,
+            "median": 1.8489615417202003,
+            "maximum": 5.29409730838961
+          },
+          "exactCurvature": {
+            "minimum": 0.000002698390744626522,
+            "median": 3.725914980415837,
+            "maximum": 7.663736750895623
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.009809195238631219,
+            "median": 1.8549276235607977,
+            "maximum": 5.301714741188334
+          },
+          "exactCurvature": {
+            "minimum": 0.004497725982218981,
+            "median": 3.7259142482216703,
+            "maximum": 7.668341383629013
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 0.028474875376559794,
+          "exactCurvature": 0.000002698390744626522
+        }
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 1260,
+          "pcgConverged": 1260,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1268,
+          "exactFactors": 1268,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "exactCurvature": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "exactCurvature": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.976770237088203e-7,
+          "exactCurvature": 6.976770237088203e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 4,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 2528,
+          "pcgAttempts": 1268,
+          "pcgConverged": 1268,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 1260,
+          "exactFactors": 1260,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "exactCurvature": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "exactCurvature": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.976770237088203e-7,
+          "exactCurvature": 6.976770237088203e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": false,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 10112,
+          "pcgAttempts": 1260,
+          "pcgConverged": 1260,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 8852,
+          "exactFactors": 8852,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "exactCurvature": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "exactCurvature": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.976770237088203e-7,
+          "exactCurvature": 6.976770237088203e-7
+        }
+      },
+      {
+        "level": 8,
+        "budget": 16,
+        "seed": true,
+        "public": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "authoritative": {
+          "gains": 0,
+          "losses": 0,
+          "unchanged": 632
+        },
+        "changedSteps": [],
+        "curvatureEvents": {
+          "iterations": 10112,
+          "pcgAttempts": 1268,
+          "pcgConverged": 1268,
+          "zeroRhs": 0,
+          "pcgNonpositiveCurvature": 0,
+          "pcgNonfiniteProduct": 0,
+          "pcgStagnation": 0,
+          "pcgIterationLimit": 0,
+          "pcgNonDescent": 0,
+          "pcgNonfiniteDirection": 0,
+          "exactFactorAttempts": 8844,
+          "exactFactors": 8844,
+          "finiteNonpositivePivots": 0,
+          "gnFallbackFactors": 0,
+          "nonfiniteFailures": 0
+        },
+        "authoritativeResidual": {
+          "gaussNewton": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          },
+          "exactCurvature": {
+            "minimum": 6.448317435570061e-10,
+            "median": 2.377200871706009e-7,
+            "maximum": 7.969792932271957e-7
+          }
+        },
+        "publicResidual": {
+          "gaussNewton": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          },
+          "exactCurvature": {
+            "minimum": 0.002931052993517369,
+            "median": 0.007801706960890442,
+            "maximum": 0.012819073162972927
+          }
+        },
+        "firstStepAuthoritativeResidual": {
+          "gaussNewton": 6.976770237088203e-7,
+          "exactCurvature": 6.976770237088203e-7
+        }
+      }
+    ],
+    "scope": "public and latent gate changes are counted separately against the same-source Gauss–Newton baseline; residual quantiles are descriptive; no exact-Newton endpoint is imagined",
+    "baselineFailures": {
+      "public": 7076,
+      "authoritative": 2369
+    }
+  },
+  "comparatorSHA256": "17385abbc5a11da522d1f2f369244ec7429875ae1bfeba64ed1e42d3e623c3a1",
+  "scope": "complete24data identity/recorded force comparison only; preserves failed gates and literal tolerance; no independent HP full-trajectory/real-Armijo/time/material/booklet/device acceptance",
+  "inputSHA256": [
+    "63b6d0b661fff7b821b682a8738ecbb4df0ecbf85be4b8a23e6b3f69bd401a9f",
+    "d07ab0e04bc54bdfb4a924529ffd87f04829f0ba10bdcbcca48308e2445ef25a"
+  ],
+  "inputRawSHA256": [
+    "63b6d0b661fff7b821b682a8738ecbb4df0ecbf85be4b8a23e6b3f69bd401a9f",
+    "d07ab0e04bc54bdfb4a924529ffd87f04829f0ba10bdcbcca48308e2445ef25a"
+  ]
+}

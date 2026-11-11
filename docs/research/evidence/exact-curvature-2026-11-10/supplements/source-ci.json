@@ -1,0 +1,90 @@
+{
+  "schema": "pliego-exact-curvature-source-ci/1",
+  "repository": "madfam-org/pliego",
+  "pullRequest": 71,
+  "headSHA": "af870bf776023b01f6e205a420fa493cccd549c5",
+  "checks": [
+    {
+      "name": "API (pytest, OpenAPI drift)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717458"
+    },
+    {
+      "name": "Agent docs and boundary markers",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717209"
+    },
+    {
+      "name": "Analyze (javascript-typescript)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241385/job/130199873314"
+    },
+    {
+      "name": "Analyze (python)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241385/job/130199873301"
+    },
+    {
+      "name": "CodeQL",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/runs/130200453389"
+    },
+    {
+      "name": "Detect languages",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241385/job/130199716033"
+    },
+    {
+      "name": "Docker image (build, no push) and in-container smoke",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241462/job/130199716237"
+    },
+    {
+      "name": "Doctrine compliance (AST level, commons manifests)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717435"
+    },
+    {
+      "name": "Engine (node --test, JSDoc type check)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717296"
+    },
+    {
+      "name": "Kernel (ruff, pytest)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717145"
+    },
+    {
+      "name": "Org quality gates (byte and file-size)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717673"
+    },
+    {
+      "name": "Production manifests (kustomize render, schema validation)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717613"
+    },
+    {
+      "name": "Repository guards and their tests",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199716818"
+    },
+    {
+      "name": "Secret scan (full history)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717384"
+    },
+    {
+      "name": "Stock cards (derived physics up to date)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717253"
+    },
+    {
+      "name": "Web (node --test)",
+      "state": "SUCCESS",
+      "link": "https://github.com/madfam-org/pliego/actions/runs/42922241409/job/130199717638"
+    }
+  ],
+  "allPassed": true,
+  "scope": "GitHub CI on the exact capture-source commit; no physics acceptance"
+}

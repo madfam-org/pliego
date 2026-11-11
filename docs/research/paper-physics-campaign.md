@@ -22,9 +22,11 @@ World implementation is claimed. Two next steps define the smallest
 testable change for each: [exact membrane curvature with visible GN fallback](exact-curvature-next-implementation.md)
 and [a named planar implicit-midpoint stage](implicit-midpoint-next-implementation.md),
 kept as separate ablations on the same 24-trajectory gates. Exact curvature is now
-implemented as an opt-in World option with operator, fallback and replay tests
-(milestone 1); its frozen 24-trajectory comparison has not run, so no force,
-time or acceptance result is claimed. The midpoint stage remains design only. Force/time, material, booklet and device
+an opt-in World option, and its [frozen 24-trajectory comparison](exact-curvature-results.md)
+confirms the first-update mechanism but moves whole-trajectory outcomes only
+slightly (latent failures 2369→2359, public 7076→7078). At budget 1 the PCG
+stopping rule is now the binding limit. No acceptance follows. The midpoint stage
+remains design only. Force/time, material, booklet and device
 acceptance remain open; research and implementation are not exhausted.
 
 ## What would count as exhausted

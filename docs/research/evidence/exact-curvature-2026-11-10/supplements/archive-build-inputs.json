@@ -1,0 +1,29 @@
+{
+  "schema": "pliego-state-matrix-archive-build-inputs/1",
+  "runDirectory": "accepted-run-af870bf",
+  "frozenReviewDirectory": "independent-review",
+  "selectedProof": "full-newton-review/selected-newton-review.json",
+  "reviewTerminal": "full-newton-review/selected-newton-review.terminal.json",
+  "supplements": [
+    {
+      "publicIdentity": "precommit-checks.json",
+      "durableRelativeToPhase": "precommit/precommit-checks.json"
+    },
+    {
+      "publicIdentity": "source-ci.json",
+      "durableRelativeToPhase": "source-ci.json"
+    },
+    {
+      "publicIdentity": "archive-work/publication-exclusions.json",
+      "durableRelativeToPhase": "archive-work/publication-exclusions.json"
+    },
+    {
+      "publicIdentity": "archive-build-inputs.json",
+      "durableRelativeToPhase": "archive-work/archive-build-inputs.json"
+    }
+  ],
+  "output": "archive-work/stage-v1",
+  "sourceMapping": "all paths here relative to CLI phase root; manifest original identity prefixes supplements/ for these selections; run/ maps to runDirectory; frozen independent-review files map to frozenReviewDirectory; selected proof/terminal and execution/* map to full-newton-review; tools/ maps to archive-work",
+  "excludedOriginals": "archive-work/publication-exclusions.json",
+  "scope": "exact-curvature fixed24 capture af870bf; builder/restorer/reviewer bytes identical to the closed 3d778abc capture; explicit selections only; no source or physics rerun"
+}

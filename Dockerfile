@@ -12,7 +12,7 @@
 #   empty directory, so the build FAILS CLOSED when projects/ holds no cartridge, unless
 #   PLIEGO_REQUIRE_COMMONS=0 is passed for a local build. Either way it prints what it counted.
 
-FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS build
+FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 AS build
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -56,7 +56,7 @@ RUN cd /app && /opt/venv/bin/python -m apps.api.prerender build --out /app/build
 RUN /opt/venv/bin/python -m compileall -q /app/apps /opt/venv/lib
 
 
-FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS runtime
+FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 AS runtime
 
 LABEL org.opencontainers.image.source="https://github.com/madfam-org/pliego" \
       org.opencontainers.image.licenses="AGPL-3.0-only" \

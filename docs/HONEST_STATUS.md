@@ -1,7 +1,19 @@
 # Honest status
 
-> Last Updated: 2026-11-10 (paper-physics research checkpoint; other dated evidence retained)
+> Last Updated: 2026-11-11 (paper-physics checkpoint and first catalogue adoption; other dated evidence retained)
 > Boundary: public. The single truth for what works today. Keep it true when you change behaviour.
+
+Checkpoint, 2026-11-11: `main` (c36e046) adds a stable step-scaled latent bending
+angle change (#75), the latent-panel bending fixture with a frozen fixed-24 capture
+(#76, catalogue gate G1 step 1), crease hinges whose fold limit bounds the domain
+(#77), and an opt-in two-word substep-anchor displacement state that removes the
+single-word displacement floor (#79). The catalogue acceptance bar records ruling R0:
+the first catalogue release plays back page turns computed offline
+([acceptance bar](research/catalogue-paper-acceptance.md)). MADFAM's offering
+catalogue vendors this commit, and its drag-to-turn reader is live. That reader is the
+explicit fixed-booklet model described below, not a calibrated simulation. Still open:
+contact (G1 step 3), hand drive, the page-turn fixture, the recorder and player,
+physical calibration and the 8 ms target.
 
 Local source addition, 2026-11-09: the studio supports an explicit fixed-camera
 `interaction=paper` mode for one native leaf and an independent 2–32-leaf native
